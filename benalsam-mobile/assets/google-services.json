@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "714467547018",
+    "firebase_url": "https://benalsam-2025-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "benalsam-2025",
+    "storage_bucket": "benalsam-2025.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:714467547018:android:08a010b9c487094d5d5a73",
+        "android_client_info": {
+          "package_name": "com.angachebenalsam"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOJc_Yzk0WH8rMCTKgrOQS15lody-ST-A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

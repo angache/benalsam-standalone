@@ -1,0 +1,85 @@
+{
+  "category": "OyunEğlence>MasaOyunları>PartiOyunları",
+  "pathKey": "OyunEğlence>MasaOyunları>PartiOyunları",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Oyun Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "partiOyunTuru",
+      "label": "Parti Oyun Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Kelime Oyunu",
+        "Bilmece",
+        "Dans Oyunu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "oyuncuSayisi",
+      "label": "Oyuncu Sayısı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "2-4",
+        "4-8",
+        "8-12",
+        "12+",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "3+",
+        "6+",
+        "8+",
+        "12+",
+        "18+",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sure",
+      "label": "Oyun Süresi (dk)",
+      "type": "number",
+      "required": false,
+      "min": 5,
+      "max": 120
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

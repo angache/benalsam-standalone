@@ -1,0 +1,167 @@
+{
+  "category": "Elektronik > Giyilebilir Teknoloji > Akıllı Saat",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Apple",
+        "Samsung",
+        "Huawei",
+        "Xiaomi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "screen_size",
+      "label": "Ekran Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "40mm",
+        "44mm",
+        "42mm",
+        "46mm"
+      ]
+    },
+    {
+      "key": "screen_technology",
+      "label": "Ekran Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "OLED",
+        "AMOLED",
+        "Retina"
+      ]
+    },
+    {
+      "key": "resolution",
+      "label": "Çözünürlük",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "operating_system",
+      "label": "İşletim Sistemi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "watchOS",
+        "Wear OS",
+        "Tizen"
+      ]
+    },
+    {
+      "key": "water_resistance",
+      "label": "Su Geçirmezlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IP68",
+        "5ATM",
+        "10ATM"
+      ]
+    },
+    {
+      "key": "gps",
+      "label": "GPS",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "heart_rate",
+      "label": "Kalp Atış Hızı",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "kanOksijeni",
+      "label": "Kan Oksijeni",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "ekg",
+      "label": "ECG",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "battery_life",
+      "label": "Pil Ömrü (Gün)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "charging_technology",
+      "label": "Şarj Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kablosuz",
+        "Manyetik"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

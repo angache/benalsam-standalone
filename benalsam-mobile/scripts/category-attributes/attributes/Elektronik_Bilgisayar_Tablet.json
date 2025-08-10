@@ -1,0 +1,266 @@
+{
+  "category": "Elektronik > Bilgisayar > Tablet",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Apple",
+        "Samsung",
+        "Huawei",
+        "Xiaomi",
+        "Lenovo",
+        "ASUS",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "processor_brand",
+      "label": "İşlemci Markası",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Apple Silicon",
+        "Snapdragon",
+        "MediaTek",
+        "Intel"
+      ]
+    },
+    {
+      "key": "processor_model",
+      "label": "İşlemci Modeli",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "ram",
+      "label": "RAM",
+      "type": "string",
+      "required": true,
+      "options": [
+        "2 GB",
+        "3 GB",
+        "4 GB",
+        "6 GB",
+        "8 GB",
+        "16 GB"
+      ]
+    },
+    {
+      "key": "storage",
+      "label": "Depolama",
+      "type": "string",
+      "required": true,
+      "options": [
+        "32 GB",
+        "64 GB",
+        "128 GB",
+        "256 GB",
+        "512 GB",
+        "1 TB"
+      ]
+    },
+    {
+      "key": "screen_size",
+      "label": "Ekran Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "7\"",
+        "8\"",
+        "9.7\"",
+        "10.1\"",
+        "10.9\"",
+        "11\"",
+        "12.9\"",
+        "14.6\""
+      ]
+    },
+    {
+      "key": "screen_resolution",
+      "label": "Ekran Çözünürlüğü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "HD",
+        "FHD",
+        "QHD",
+        "4K"
+      ]
+    },
+    {
+      "key": "screen_technology",
+      "label": "Ekran Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IPS LCD",
+        "AMOLED",
+        "Mini LED",
+        "OLED"
+      ]
+    },
+    {
+      "key": "refresh_rate",
+      "label": "Yenileme Hızı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "60 Hz",
+        "90 Hz",
+        "120 Hz"
+      ]
+    },
+    {
+      "key": "main_camera",
+      "label": "Ana Kamera (MP)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "8 MP",
+        "12 MP",
+        "13 MP",
+        "50 MP"
+      ]
+    },
+    {
+      "key": "front_camera",
+      "label": "Ön Kamera (MP)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "2 MP",
+        "5 MP",
+        "8 MP",
+        "12 MP"
+      ]
+    },
+    {
+      "key": "battery_capacity",
+      "label": "Batarya Kapasitesi (mAh)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "4000 mAh",
+        "5000 mAh",
+        "6000 mAh",
+        "8000 mAh",
+        "10000 mAh"
+      ]
+    },
+    {
+      "key": "charging_technology",
+      "label": "Şarj Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "10W",
+        "18W",
+        "25W",
+        "45W",
+        "Kablosuz"
+      ]
+    },
+    {
+      "key": "operating_system",
+      "label": "İşletim Sistemi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "iPadOS",
+        "Android",
+        "Windows"
+      ]
+    },
+    {
+      "key": "simKart",
+      "label": "SIM Kart",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "hücresel",
+      "label": "4G/5G",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "wifi",
+      "label": "WiFi",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "bluetooth",
+      "label": "Bluetooth",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "gps",
+      "label": "GPS",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

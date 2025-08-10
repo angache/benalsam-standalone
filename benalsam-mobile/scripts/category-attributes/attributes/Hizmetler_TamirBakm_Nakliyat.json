@@ -1,0 +1,134 @@
+{
+  "category": "Hizmetler>TamirBakım>Nakliyat",
+  "pathKey": "Hizmetler>TamirBakım>Nakliyat",
+  "attributes": [
+    {
+      "key": "hizmetTuru",
+      "label": "Hizmet Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Evden Eve Nakliyat",
+        "Ofis Nakliyatı",
+        "Şehirler Arası Nakliyat",
+        "Uluslararası Nakliyat",
+        "Eşya Taşıma",
+        "Paket Taşıma",
+        "Kargo",
+        "Express Teslimat",
+        "Özel Nakliyat",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "aracTuru",
+      "label": "Araç Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kamyon",
+        "Kamyonet",
+        "Tır",
+        "Minibüs",
+        "Pickup",
+        "Konteyner",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kapasite",
+      "label": "Kapasite",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1-5 ton",
+        "5-10 ton",
+        "10-20 ton",
+        "20+ ton",
+        "Küçük Paket",
+        "Orta Boy",
+        "Büyük Boy",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "mesafe",
+      "label": "Mesafe",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Şehir İçi",
+        "Şehirler Arası",
+        "Bölgeler Arası",
+        "Uluslararası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sigorta",
+      "label": "Sigorta",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Kısmi",
+        "Tam"
+      ]
+    },
+    {
+      "key": "paketleme",
+      "label": "Paketleme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Kısmi",
+        "Tam"
+      ]
+    },
+    {
+      "key": "montaj",
+      "label": "Montaj/Demontaj",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Kısmi",
+        "Tam"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aktif",
+        "Pasif",
+        "Tamamlandı",
+        "İptal Edildi"
+      ]
+    },
+    {
+      "key": "baslangic_tarihi",
+      "label": "Başlangıç Tarihi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "bitis_tarihi",
+      "label": "Bitiş Tarihi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

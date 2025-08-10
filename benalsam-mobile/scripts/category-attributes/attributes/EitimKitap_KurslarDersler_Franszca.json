@@ -1,0 +1,86 @@
+{
+  "category": "EğitimKitap>KurslarDersler>Fransızca",
+  "pathKey": "EğitimKitap>KurslarDersler>Fransızca",
+  "attributes": [
+    {
+      "key": "hizmet_tipi",
+      "label": "Hizmet Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Birebir Ders",
+        "Grup Dersi",
+        "Online Ders",
+        "Hibrit Ders",
+        "Konuşma Pratiği",
+        "Sınav Hazırlık",
+        "İş Fransızcası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": true,
+      "options": [
+        "A1 (Başlangıç)",
+        "A2 (Temel)",
+        "B1 (Orta)",
+        "B2 (İyi)",
+        "C1 (İleri)",
+        "C2 (Mükemmel)",
+        "Tüm Seviyeler"
+      ]
+    },
+    {
+      "key": "deneyim_yili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "egitim_durumu",
+      "label": "Eğitim Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Fransızca Öğretmenliği",
+        "Fransız Dili ve Edebiyatı",
+        "Çevirmenlik",
+        "Yabancı Dil",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ders_yeri",
+      "label": "Ders Yeri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğrenci Evi",
+        "Öğretmen Evi",
+        "Kütüphane",
+        "Kurs Merkezi",
+        "Online",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "saat_ucreti",
+      "label": "Saat Ücreti (TL)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

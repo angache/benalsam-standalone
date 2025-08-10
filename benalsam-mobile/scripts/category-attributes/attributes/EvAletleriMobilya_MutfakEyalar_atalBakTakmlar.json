@@ -1,0 +1,95 @@
+{
+  "category": "EvAletleriMobilya>MutfakEşyaları>ÇatalBıçakTakımları",
+  "pathKey": "EvAletleriMobilya>MutfakEşyaları>ÇatalBıçakTakımları",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "takimTuru",
+      "label": "Takım Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Çatal Bıçak Takımı",
+        "Çay Takımı",
+        "Kahvaltı Takımı",
+        "Yemek Takımı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Paslanmaz Çelik",
+        "Gümüş",
+        "Altın",
+        "Plastik",
+        "Ahşap",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "parcaSayisi",
+      "label": "Parça Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 100
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Gümüş",
+        "Altın",
+        "Siyah",
+        "Beyaz",
+        "Kahverengi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

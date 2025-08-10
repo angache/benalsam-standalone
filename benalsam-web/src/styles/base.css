@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background-light: 200 16% 96%;
+  --foreground-light: 240 5% 10%;
+  --card-light: 0 0% 100%;
+  --card-foreground-light: 240 5% 10%;
+  --popover-light: 0 0% 100%;
+  --popover-foreground-light: 240 5% 10%;
+  --primary-light: 36 100% 50%;
+  --primary-foreground-light: 240 5% 10%;
+  --secondary-light: 207 90% 54%;
+  --secondary-foreground-light: 0 0% 100%;
+  --muted-light: 210 15% 90%;
+  --muted-foreground-light: 210 10% 45%;
+  --accent-light: 200 16% 92%;
+  --accent-foreground-light: 240 5% 10%;
+  --destructive-light: 0 72% 51%;
+  --destructive-foreground-light: 0 0% 100%;
+  --border-light: 210 14% 83%;
+  --input-light: 0 0% 100%;
+  --ring-light: 36 100% 55%;
+
+  --background-dark: 220 13% 10%;
+  --foreground-dark: 210 17% 95%;
+  --card-dark: 220 13% 15%;
+  --card-foreground-dark: 210 17% 95%;
+  --popover-dark: 220 13% 12%;
+  --popover-foreground-dark: 210 17% 95%;
+  --primary-dark: 195 85% 55%;
+  --primary-foreground-dark: 220 13% 5%;
+  --secondary-dark: 220 10% 25%;
+  --secondary-foreground-dark: 210 17% 95%;
+  --muted-dark: 220 10% 20%;
+  --muted-foreground-dark: 210 10% 60%;
+  --accent-dark: 220 10% 25%;
+  --accent-foreground-dark: 210 17% 95%;
+  --destructive-dark: 0 70% 60%;
+  --destructive-foreground-dark: 0 0% 100%;
+  --border-dark: 220 10% 20%;
+  --input-dark: 220 13% 18%;
+  --ring-dark: 195 85% 60%;
+  
+  --radius: 0.375rem;
+}
+
+[data-theme="light"] {
+  --background: var(--background-light);
+  --foreground: var(--foreground-light);
+  --card: var(--card-light);
+  --card-foreground: var(--card-foreground-light);
+  --popover: var(--popover-light);
+  --popover-foreground: var(--popover-foreground-light);
+  --primary: var(--primary-light);
+  --primary-foreground: var(--primary-foreground-light);
+  --secondary: var(--secondary-light);
+  --secondary-foreground: var(--secondary-foreground-light);
+  --muted: var(--muted-light);
+  --muted-foreground: var(--muted-foreground-light);
+  --accent: var(--accent-light);
+  --accent-foreground: var(--accent-foreground-light);
+  --destructive: var(--destructive-light);
+  --destructive-foreground: var(--destructive-foreground-light);
+  --border: var(--border-light);
+  --input: var(--input-light);
+  --ring: var(--ring-light);
+}
+
+[data-theme="dark"] {
+  --background: var(--background-dark);
+  --foreground: var(--foreground-dark);
+  --card: var(--card-dark);
+  --card-foreground: var(--card-foreground-dark);
+  --popover: var(--popover-dark);
+  --popover-foreground: var(--popover-foreground-dark);
+  --primary: var(--primary-dark);
+  --primary-foreground: var(--primary-foreground-dark);
+  --secondary: var(--secondary-dark);
+  --secondary-foreground: var(--secondary-foreground-dark);
+  --muted: var(--muted-dark);
+  --muted-foreground: var(--muted-foreground-dark);
+  --accent: var(--accent-dark);
+  --accent-foreground: var(--accent-foreground-dark);
+  --destructive: var(--destructive-dark);
+  --destructive-foreground: var(--destructive-foreground-dark);
+  --border: var(--border-dark);
+  --input: var(--input-dark);
+  --ring: var(--ring-dark);
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-feature-settings: "rlig" 1, "calt" 1;
+  min-height: 100vh;
+  transition: background 0.2s ease, color 0.2s ease;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (min-width: 640px) {
+  body {
+    font-size: 16px;
+  }
+}

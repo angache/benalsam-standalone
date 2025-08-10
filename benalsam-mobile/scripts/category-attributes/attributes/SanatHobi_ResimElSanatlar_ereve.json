@@ -1,0 +1,117 @@
+{
+  "category": "Sanat & Hobi > Resim & El Sanatları > Çerçeve",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "IKEA",
+        "Jysk",
+        "Kare Design",
+        "Artisan",
+        "Gallery",
+        "Custom Made",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "cerceveTipi",
+      "label": "Çerçeve Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ahşap",
+        "Metal",
+        "Plastik",
+        "Cam",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "A4",
+        "A3",
+        "A2",
+        "A1",
+        "A0",
+        "Özel Boyut",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

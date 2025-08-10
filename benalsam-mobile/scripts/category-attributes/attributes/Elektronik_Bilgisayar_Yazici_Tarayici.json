@@ -1,0 +1,159 @@
+{
+  "category": "Elektronik > Bilgisayar > Yazıcı & Tarayıcı",
+  "attributes": [
+    {
+      "key": "cihazTipi",
+      "label": "Cihaz Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yazıcı",
+        "Tarayıcı",
+        "Çok Fonksiyonlu"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "HP",
+        "Canon",
+        "Epson",
+        "Brother",
+        "Samsung",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "yazdirmaTeknolojisi",
+      "label": "Yazdırma Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Lazer",
+        "Mürekkep Püskürtmeli",
+        "Termal"
+      ]
+    },
+    {
+      "key": "renkliYazdirma",
+      "label": "Renkli Yazdırma",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "resolution",
+      "label": "Çözünürlük",
+      "type": "string",
+      "required": false,
+      "options": [
+        "300 dpi",
+        "600 dpi",
+        "1200 dpi",
+        "2400 dpi"
+      ]
+    },
+    {
+      "key": "yazdirmaHizi",
+      "label": "Yazdırma Hızı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "kagitBoyutu",
+      "label": "Kağıt Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "A4",
+        "A3",
+        "A5",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "connection",
+      "label": "Bağlantı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "USB",
+        "WiFi",
+        "Bluetooth",
+        "Ethernet"
+      ]
+    },
+    {
+      "key": "tarayici",
+      "label": "Tarayıcı Özelliği",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "fotokopi",
+      "label": "Kopyalama Özelliği",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "faks",
+      "label": "Faks Özelliği",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

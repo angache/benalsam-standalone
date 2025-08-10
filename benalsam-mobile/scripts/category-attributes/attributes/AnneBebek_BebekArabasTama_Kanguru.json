@@ -1,0 +1,186 @@
+{
+  "category": "Anne & Bebek > Bebek Arabası & Taşıma > Kanguru",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "BabyBjörn",
+        "Ergobaby",
+        "Tula",
+        "Lillebaby",
+        "Boba",
+        "Moby",
+        "Solly Baby",
+        "Sakura Bloom",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "carrier_type",
+      "label": "Kanguru Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Klasik Kanguru",
+        "Ergonomic",
+        "Ring Sling",
+        "Mei Tai",
+        "Soft Structured",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "weight_limit",
+      "label": "Ağırlık Limiti",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-9 kg",
+        "0-13 kg",
+        "0-18 kg",
+        "0-25 kg",
+        "3-18 kg",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "age_range",
+      "label": "Yaş Aralığı",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-6 ay",
+        "0-12 ay",
+        "0-18 ay",
+        "0-24 ay",
+        "0-36 ay",
+        "3-36 ay",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "carrying_positions",
+      "label": "Taşıma Pozisyonları",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ön",
+        "Arka",
+        "Yan",
+        "Çoklu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Kumaş Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Polyester",
+        "Organik Pamuk",
+        "Bambu",
+        "Karma",
+        "Suede",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "washable",
+      "label": "Yıkanabilir",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "hood",
+      "label": "Kapüşon",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "pocket",
+      "label": "Cep",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Pembe",
+        "Yeşil",
+        "Sarı",
+        "Kırmızı",
+        "Mor",
+        "Kahverengi",
+        "Bej",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "manual",
+      "label": "Kullanım Kılavuzu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "category": "ModaGiyim>KadınGiyim>Gelinlik",
+  "pathKey": "ModaGiyim>KadınGiyim>Gelinlik",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "gelinlikTuru",
+      "label": "Gelinlik Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Klasik",
+        "Modern",
+        "Vintage",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Fildişi",
+        "Krem",
+        "Pembe",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "İpek",
+        "Saten",
+        "Tül",
+        "Kadife",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "beden",
+      "label": "Beden",
+      "type": "string",
+      "required": false,
+      "options": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

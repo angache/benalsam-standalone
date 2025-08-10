@@ -1,0 +1,78 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>DergiKoleksiyonu",
+  "pathKey": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>DergiKoleksiyonu",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Yayınevi",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Dergi Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "dergiTuru",
+      "label": "Dergi Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bilim",
+        "Sanat",
+        "Spor",
+        "Moda",
+        "Tarih",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "basimYili",
+      "label": "Basım Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1900,
+      "max": 2024
+    },
+    {
+      "key": "sayi",
+      "label": "Sayı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "dil",
+      "label": "Dil",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Türkçe",
+        "İngilizce",
+        "Fransızca",
+        "Almanca",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

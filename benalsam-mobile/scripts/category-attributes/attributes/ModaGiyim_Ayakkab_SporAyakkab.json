@@ -1,0 +1,86 @@
+{
+  "category": "ModaGiyim>Ayakkabı>SporAyakkabı",
+  "pathKey": "ModaGiyim>Ayakkabı>SporAyakkabı",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "sporTuru",
+      "label": "Spor Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Koşu",
+        "Fitness",
+        "Basketbol",
+        "Futbol",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Mavi",
+        "Kırmızı",
+        "Gri",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Deri",
+        "Suni Deri",
+        "Kumaş",
+        "Mesh",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "numara",
+      "label": "Numara",
+      "type": "number",
+      "required": false,
+      "min": 35,
+      "max": 50
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

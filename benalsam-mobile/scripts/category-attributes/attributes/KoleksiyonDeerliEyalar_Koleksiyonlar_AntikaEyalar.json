@@ -1,0 +1,79 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>AntikaEşyalar",
+  "pathKey": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>AntikaEşyalar",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Üretici/Sanatçı",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Eşya Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "esyaTuru",
+      "label": "Eşya Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mobilya",
+        "Saat",
+        "Porselen",
+        "Gümüş Eşya",
+        "Kitap",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1500,
+      "max": 1950
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ahşap",
+        "Metal",
+        "Porselen",
+        "Cam",
+        "Kumaş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

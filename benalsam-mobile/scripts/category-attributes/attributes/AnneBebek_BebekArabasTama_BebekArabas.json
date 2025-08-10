@@ -1,0 +1,254 @@
+{
+  "category": "Anne & Bebek > Bebek Arabası & Taşıma > Bebek Arabası",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bugaboo",
+        "Stokke",
+        "Joolz",
+        "UPPAbaby",
+        "Cybex",
+        "Britax",
+        "Chicco",
+        "Graco",
+        "Peg Perego",
+        "Maxi-Cosi",
+        "Silver Cross",
+        "Mamas & Papas",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "stroller_type",
+      "label": "Bebek Arabası Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tekli",
+        "İkili",
+        "Üçlü",
+        "Travel System",
+        "Jogger",
+        "Umbrella",
+        "Twin",
+        "Side by Side",
+        "Tandem"
+      ]
+    },
+    {
+      "key": "weight_limit",
+      "label": "Ağırlık Limiti",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-15 kg",
+        "0-22 kg",
+        "0-25 kg",
+        "0-30 kg",
+        "3-25 kg",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "age_range",
+      "label": "Yaş Aralığı",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-6 ay",
+        "0-12 ay",
+        "0-24 ay",
+        "0-36 ay",
+        "0-48 ay",
+        "6-36 ay",
+        "Tüm Yaşlar"
+      ]
+    },
+    {
+      "key": "wheel_count",
+      "label": "Tekerlek Sayısı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "3 Tekerlek",
+        "4 Tekerlek",
+        "6 Tekerlek",
+        "8 Tekerlek"
+      ]
+    },
+    {
+      "key": "wheel_type",
+      "label": "Tekerlek Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Şişirilebilir",
+        "Katı",
+        "Hibrit",
+        "Jant"
+      ]
+    },
+    {
+      "key": "fold_type",
+      "label": "Katlanma Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tek Elle",
+        "Çift Elle",
+        "Otomatik",
+        "Manuel",
+        "Katlanmaz"
+      ]
+    },
+    {
+      "key": "basket_capacity",
+      "label": "Sepet Kapasitesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "5 kg",
+        "10 kg",
+        "15 kg",
+        "20 kg",
+        "25 kg",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "canopy",
+      "label": "Güneşlik",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "rain_cover",
+      "label": "Yağmurluk",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "foot_muff",
+      "label": "Ayak Koruyucu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "harness",
+      "label": "Emniyet Kemeri",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "brake_system",
+      "label": "Fren Sistemi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ayak Freni",
+        "El Freni",
+        "Çift Fren",
+        "Yok"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Kumaş Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Polyester",
+        "Organik Pamuk",
+        "Bambu",
+        "Karma",
+        "Suede"
+      ]
+    },
+    {
+      "key": "washable",
+      "label": "Yıkanabilir",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Pembe",
+        "Yeşil",
+        "Sarı",
+        "Kırmızı",
+        "Mor",
+        "Kahverengi",
+        "Bej",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "manual",
+      "label": "Kullanım Kılavuzu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

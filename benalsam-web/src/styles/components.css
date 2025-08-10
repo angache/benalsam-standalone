@@ -1,0 +1,70 @@
+.gradient-orange {
+  background: linear-gradient(135deg, hsl(36 100% 50%) 0%, color-mix(in srgb, hsl(36 100% 50%) 80%, #f0c14b) 100%);
+}
+
+.gradient-orange-light {
+   background: linear-gradient(to bottom, #f8e3ad, #EEBA37);
+   color: hsl(var(--primary-foreground-light));
+   border-color: #a88734 #9c7e31 #846a29;
+   border-style: solid;
+   border-width: 1px;
+}
+.gradient-orange-light:hover {
+  background: linear-gradient(to bottom, #f7dfa5, #eeba37);
+}
+
+[data-theme="dark"] .btn-primary-dark {
+  background: hsl(var(--primary-dark));
+  color: hsl(var(--primary-foreground-dark));
+  border: 1px solid hsl(var(--primary-dark));
+}
+[data-theme="dark"] .btn-primary-dark:hover {
+  background: color-mix(in srgb, hsl(var(--primary-dark)) 90%, black 10%);
+}
+
+[data-theme="dark"] .btn-secondary-dark {
+  background: hsl(var(--secondary-dark));
+  color: hsl(var(--secondary-foreground-dark));
+  border: 1px solid hsl(var(--secondary-dark));
+}
+[data-theme="dark"] .btn-secondary-dark:hover {
+  background: color-mix(in srgb, hsl(var(--secondary-dark)) 90%, black 10%);
+}
+
+.glass-effect {
+  background: color-mix(in srgb, hsl(var(--card)) 95%, transparent 5%);
+  backdrop-filter: blur(5px);
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05); 
+}
+
+[data-theme="dark"] .glass-effect {
+  background: color-mix(in srgb, hsl(var(--card-dark)) 90%, transparent 10%);
+  border: 1px solid hsl(var(--border-dark));
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
+}
+
+.glow-orange {
+  box-shadow: 0 0 15px color-mix(in srgb, hsl(var(--primary)) 20%, transparent 80%);
+}
+
+.text-gradient { 
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, color-mix(in srgb, hsl(var(--primary)) 80%, #f0c14b) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+[data-theme="light"] .header-logo-text {
+  color: hsl(var(--foreground-light)); 
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+}
+[data-theme="dark"] .header-logo-text {
+  color: hsl(var(--foreground-dark));
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+}

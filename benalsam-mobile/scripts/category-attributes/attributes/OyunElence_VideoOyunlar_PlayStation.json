@@ -1,0 +1,196 @@
+{
+  "category": "OyunEğlence>VideoOyunları>PlayStation",
+  "pathKey": "OyunEğlence>VideoOyunları>PlayStation",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sony",
+        "PlayStation",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "konsolTuru",
+      "label": "Konsol Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "PlayStation 1",
+        "PlayStation 2",
+        "PlayStation 3",
+        "PlayStation 4",
+        "PlayStation 5",
+        "PlayStation Portable",
+        "PlayStation Vita",
+        "PlayStation VR",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "kapasite",
+      "label": "Kapasite",
+      "type": "string",
+      "required": false,
+      "options": [
+        "500GB",
+        "1TB",
+        "2TB",
+        "4TB",
+        "8TB",
+        "16GB",
+        "32GB",
+        "64GB",
+        "128GB",
+        "256GB",
+        "512GB",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "firmwareSurumu",
+      "label": "Firmware Sürümü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "En Güncel",
+        "Güncel",
+        "Eski",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "calisma_durumu",
+      "label": "Çalışma Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Sorunlu",
+        "Çalışmıyor"
+      ]
+    },
+    {
+      "key": "fiziksel_durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Çizikli",
+        "Kırık"
+      ]
+    },
+    {
+      "key": "orijinallik",
+      "label": "Orijinallik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Orijinal",
+        "Modifiye",
+        "Jailbreak",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "bolgeKodu",
+      "label": "Bölge Kodu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "NTSC-J (Japonya)",
+        "NTSC-U (ABD)",
+        "PAL (Avrupa)",
+        "NTSC-C (Çin)",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "oyunSayisi",
+      "label": "Oyun Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 1000
+    },
+    {
+      "key": "aksesuar",
+      "label": "Aksesuar",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kontrolcü",
+        "Kablosuz Kontrolcü",
+        "Kulaklık",
+        "Kamera",
+        "Move Kontrolcü",
+        "VR Gözlük",
+        "Yok",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1994,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

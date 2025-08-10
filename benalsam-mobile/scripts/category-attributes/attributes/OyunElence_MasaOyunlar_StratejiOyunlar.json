@@ -1,0 +1,84 @@
+{
+  "category": "OyunEğlence>MasaOyunları>StratejiOyunları",
+  "pathKey": "OyunEğlence>MasaOyunları>StratejiOyunları",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Oyun Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "stratejiOyunTuru",
+      "label": "Strateji Oyun Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Savaş Oyunu",
+        "Ekonomi Oyunu",
+        "Puzzle",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "oyuncuSayisi",
+      "label": "Oyuncu Sayısı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1-2",
+        "2-4",
+        "4-6",
+        "6+",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "8+",
+        "12+",
+        "14+",
+        "18+",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sure",
+      "label": "Oyun Süresi (dk)",
+      "type": "number",
+      "required": false,
+      "min": 15,
+      "max": 300
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

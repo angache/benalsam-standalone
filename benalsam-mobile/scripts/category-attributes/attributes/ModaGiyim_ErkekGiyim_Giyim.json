@@ -1,0 +1,93 @@
+{
+  "category": "Moda Giyim > Erkek Giyim > Giyim",
+  "pathKey": "ModaGiyim>ErkekGiyim>Giyim",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "giyimTuru",
+      "label": "Giyim Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Gömlek",
+        "Pantolon",
+        "T-Shirt",
+        "Ceket",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Mavi",
+        "Gri",
+        "Kahverengi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Polyester",
+        "Yün",
+        "Keten",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "beden",
+      "label": "Beden",
+      "type": "string",
+      "required": false,
+      "options": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

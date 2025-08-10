@@ -1,0 +1,122 @@
+{
+  "category": "SanatHobi>ResimElSanatları>Fırça",
+  "pathKey": "SanatHobi>ResimElSanatları>Fırça",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fircaTuru",
+      "label": "Fırça Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yuvarlak Fırça",
+        "Düz Fırça",
+        "Fırça Seti",
+        "Detay Fırçası",
+        "Fan Fırça",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "000",
+        "00",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "8",
+        "10",
+        "12",
+        "14",
+        "16",
+        "20",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kullanimAlani",
+      "label": "Kullanım Alanı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yağlı Boya",
+        "Sulu Boya",
+        "Akrilik",
+        "Gouache",
+        "Tempera",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Doğal Kıl",
+        "Sentetik",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğrenci",
+        "Profesyonel",
+        "Sanatçı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

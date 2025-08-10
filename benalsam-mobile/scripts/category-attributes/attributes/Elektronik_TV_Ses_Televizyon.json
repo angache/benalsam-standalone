@@ -1,0 +1,217 @@
+{
+  "category": "Elektronik > TV & Ses > Televizyon",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Samsung",
+        "LG",
+        "Sony",
+        "Philips",
+        "Panasonic",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "screen_size",
+      "label": "Ekran Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "32\"",
+        "40\"",
+        "43\"",
+        "50\"",
+        "55\"",
+        "65\"",
+        "75\"",
+        "85\""
+      ]
+    },
+    {
+      "key": "screen_resolution",
+      "label": "Ekran Çözünürlüğü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "HD",
+        "FHD",
+        "4K",
+        "8K"
+      ]
+    },
+    {
+      "key": "screen_technology",
+      "label": "Ekran Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "LED",
+        "OLED",
+        "QLED",
+        "Mini LED"
+      ]
+    },
+    {
+      "key": "refresh_rate",
+      "label": "Yenileme Hızı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "50 Hz",
+        "60 Hz",
+        "100 Hz",
+        "120 Hz"
+      ]
+    },
+    {
+      "key": "akilliTv",
+      "label": "Smart TV",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "operating_system",
+      "label": "İşletim Sistemi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tizen",
+        "WebOS",
+        "Android TV",
+        "Roku"
+      ]
+    },
+    {
+      "key": "sesGucu",
+      "label": "Ses Gücü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "10W",
+        "20W",
+        "30W",
+        "40W"
+      ]
+    },
+    {
+      "key": "audio_technology",
+      "label": "Ses Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Dolby Atmos",
+        "DTS",
+        "Stereo"
+      ]
+    },
+    {
+      "key": "hdmiPortlari",
+      "label": "HDMI Port Sayısı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "2",
+        "3",
+        "4",
+        "5"
+      ]
+    },
+    {
+      "key": "usbPortlari",
+      "label": "USB Port Sayısı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "key": "wifi",
+      "label": "WiFi",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "bluetooth",
+      "label": "Bluetooth",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "3d",
+      "label": "3D",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "egri",
+      "label": "Curved",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "category": "Anne & Bebek > Bebek Maması & Beslenme > Beslenme Aksesuarları",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Philips Avent",
+        "Dr. Brown's",
+        "Tommee Tippee",
+        "NUK",
+        "MAM",
+        "Chicco",
+        "Medela",
+        "Lansinoh",
+        "Pigeon",
+        "Comotomo",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "accessory_type",
+      "label": "Aksesuar Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Emzik",
+        "Mama Kaşığı",
+        "Mama Kabı",
+        "Isıtıcı",
+        "Sterilizatör",
+        "Kurutucu",
+        "Saklama Kabı",
+        "Çanta",
+        "Önlük",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "age_range",
+      "label": "Yaş Aralığı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "0-6 ay",
+        "6-12 ay",
+        "12+ ay",
+        "0-12 ay",
+        "Tüm Yaşlar",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Silicone",
+        "Plastik",
+        "Cam",
+        "Stainless Steel",
+        "Kumaş",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "dishwasher_safe",
+      "label": "Bulaşık Makinesi Güvenli",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "microwave_safe",
+      "label": "Mikrodalga Güvenli",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "sterilizer_safe",
+      "label": "Sterilizatör Güvenli",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "bpa_free",
+      "label": "BPA İçermez",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Şeffaf",
+        "Beyaz",
+        "Mavi",
+        "Pembe",
+        "Yeşil",
+        "Sarı",
+        "Mor",
+        "Turuncu",
+        "Kırmızı",
+        "Gri",
+        "Kahverengi",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

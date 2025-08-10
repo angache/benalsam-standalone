@@ -1,0 +1,134 @@
+{
+  "category": "SağlıkGüzellik>GüzellikKozmetik>CiltBakımı",
+  "pathKey": "SağlıkGüzellik>GüzellikKozmetik>CiltBakımı",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "La Roche-Posay",
+        "CeraVe",
+        "Neutrogena",
+        "The Ordinary",
+        "Clinique",
+        "L'Oreal",
+        "Garnier",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTipi",
+      "label": "Ürün Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Temizleyici",
+        "Tonik",
+        "Serum",
+        "Nemlendirici",
+        "Güneş Kremi",
+        "Maske",
+        "Peeling",
+        "Göz Kremi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ciltTipi",
+      "label": "Cilt Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Karma",
+        "Yağlı",
+        "Kuru",
+        "Hassas",
+        "Normal",
+        "Olgun",
+        "Akneli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "hacim",
+      "label": "Hacim (ml)",
+      "type": "number",
+      "required": false,
+      "min": 5,
+      "max": 500
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Şeffaf",
+        "Beyaz",
+        "Krem",
+        "Pembe",
+        "Mavi",
+        "Yeşil",
+        "Sarı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2018,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

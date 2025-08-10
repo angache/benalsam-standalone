@@ -1,0 +1,138 @@
+{
+  "category": "SağlıkGüzellik>SağlıkBakım>Demir",
+  "pathKey": "SağlıkGüzellik>SağlıkBakım>Demir",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Solgar",
+        "Nature Made",
+        "Centrum",
+        "GNC",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTipi",
+      "label": "Ürün Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Demir Tableti",
+        "Demir Şurubu",
+        "Demir Kapsülü",
+        "Demir Tozu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "demirMiktari",
+      "label": "Demir Miktarı (mg)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 100
+    },
+    {
+      "key": "form",
+      "label": "Form",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tablet",
+        "Kapsül",
+        "Şurup",
+        "Toz",
+        "Sıvı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kahverengi",
+        "Siyah",
+        "Kırmızı",
+        "Turuncu",
+        "Sarı",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Yeşil",
+        "Pembe",
+        "Mor",
+        "Şeffaf",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2018,
+      "max": 2024
+    },
+    {
+      "key": "hacim",
+      "label": "Hacim (tablet/kapsül)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 500
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

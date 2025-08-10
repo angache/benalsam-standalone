@@ -1,0 +1,206 @@
+{
+  "category": "EvAletleriMobilya>Dekorasyon>PerdeStor",
+  "pathKey": "EvAletleriMobilya>Dekorasyon>PerdeStor",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTuru",
+      "label": "Ürün Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Perde",
+        "Stor",
+        "Jaluzi",
+        "Tül",
+        "Rulo Perde",
+        "Zebra Perde",
+        "Pleat Perde",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kumaş",
+        "Plastik",
+        "Alüminyum",
+        "Ahşap",
+        "Bambu",
+        "Polyester",
+        "Pamuk",
+        "İpek",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyutlar",
+      "label": "Boyutlar (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "genislik",
+      "label": "Genişlik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 50,
+      "max": 500
+    },
+    {
+      "key": "yukseklik",
+      "label": "Yükseklik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 100,
+      "max": 400
+    },
+    {
+      "key": "kullanimAlani",
+      "label": "Kullanım Alanı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Salon",
+        "Yatak Odası",
+        "Mutfak",
+        "Banyo",
+        "Çalışma Odası",
+        "Çocuk Odası",
+        "Balkon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "islevsellik",
+      "label": "İşlevsellik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Güneş Koruması",
+        "Gizlilik",
+        "Dekoratif",
+        "Ses Yalıtımı",
+        "Isı Yalıtımı",
+        "Çok Amaçlı"
+      ]
+    },
+    {
+      "key": "kontrolTipi",
+      "label": "Kontrol Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Manuel",
+        "Uzaktan Kumanda",
+        "Otomatik",
+        "İp ile",
+        "Zincir ile",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Gri",
+        "Siyah",
+        "Kahverengi",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Bej",
+        "Krem",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "desen",
+      "label": "Desen",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Düz",
+        "Çizgili",
+        "Kareli",
+        "Çiçekli",
+        "Geometrik",
+        "Soyut",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "temizlikDurumu",
+      "label": "Temizlik Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Lekeli",
+        "Kirli"
+      ]
+    },
+    {
+      "key": "montajDurumu",
+      "label": "Montaj Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Montajlı",
+        "Montajsız",
+        "Kısmi Montaj"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

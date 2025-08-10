@@ -1,0 +1,245 @@
+{
+  "category": "Elektronik > Bilgisayar > Dizüstü Bilgisayar",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Apple",
+        "Dell",
+        "HP",
+        "Lenovo",
+        "ASUS",
+        "Acer",
+        "MSI",
+        "Razer",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "processor_brand",
+      "label": "İşlemci Markası",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Intel",
+        "AMD",
+        "Apple Silicon"
+      ]
+    },
+    {
+      "key": "processor_model",
+      "label": "İşlemci Modeli",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "ram",
+      "label": "RAM",
+      "type": "string",
+      "required": true,
+      "options": [
+        "4 GB",
+        "8 GB",
+        "16 GB",
+        "32 GB",
+        "64 GB"
+      ]
+    },
+    {
+      "key": "storage",
+      "label": "Depolama",
+      "type": "string",
+      "required": true,
+      "options": [
+        "128 GB",
+        "256 GB",
+        "512 GB",
+        "1 TB",
+        "2 TB",
+        "4 TB"
+      ]
+    },
+    {
+      "key": "storage_type",
+      "label": "Depolama Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "SSD",
+        "HDD",
+        "NVMe",
+        "Karma"
+      ]
+    },
+    {
+      "key": "screen_size",
+      "label": "Ekran Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "13\"",
+        "14\"",
+        "15.6\"",
+        "16\"",
+        "17\"",
+        "18\""
+      ]
+    },
+    {
+      "key": "screen_resolution",
+      "label": "Ekran Çözünürlüğü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "HD",
+        "FHD",
+        "QHD",
+        "4K",
+        "5K"
+      ]
+    },
+    {
+      "key": "screen_technology",
+      "label": "Ekran Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IPS",
+        "OLED",
+        "Mini LED",
+        "TN",
+        "VA"
+      ]
+    },
+    {
+      "key": "refresh_rate",
+      "label": "Yenileme Hızı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "60 Hz",
+        "120 Hz",
+        "144 Hz",
+        "240 Hz",
+        "300 Hz"
+      ]
+    },
+    {
+      "key": "gpuMarka",
+      "label": "GPU Markası",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Entegre",
+        "NVIDIA",
+        "AMD",
+        "Apple"
+      ]
+    },
+    {
+      "key": "gpuModel",
+      "label": "GPU Modeli",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "battery_capacity",
+      "label": "Batarya Kapasitesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "40 Wh",
+        "50 Wh",
+        "60 Wh",
+        "80 Wh",
+        "100 Wh"
+      ]
+    },
+    {
+      "key": "operating_system",
+      "label": "İşletim Sistemi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Windows",
+        "macOS",
+        "Linux",
+        "Chrome OS"
+      ]
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 kg",
+        "1.5 kg",
+        "2 kg",
+        "2.5 kg",
+        "3 kg"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

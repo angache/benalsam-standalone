@@ -1,0 +1,129 @@
+{
+  "category": "İşEndüstri>İşMakineleri>Ekskavatör",
+  "pathKey": "İşEndüstri>İşMakineleri>Ekskavatör",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Caterpillar",
+        "Komatsu",
+        "Hitachi",
+        "Volvo",
+        "Liebherr",
+        "JCB",
+        "Doosan",
+        "Hyundai",
+        "Kobelco",
+        "Sumitomo",
+        "Terex",
+        "Case",
+        "New Holland",
+        "John Deere",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "tip",
+      "label": "Ekskavatör Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mini Ekskavatör",
+        "Hidrolik Ekskavatör",
+        "Paletli Ekskavatör",
+        "Tekerlekli Ekskavatör",
+        "Uzun Bomlu Ekskavatör",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık (ton)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "motorGucu",
+      "label": "Motor Gücü (HP)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "kepceKapasitesi",
+      "label": "Kepçe Kapasitesi (m³)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "yakıtTuru",
+      "label": "Yakıt Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Dizel",
+        "Benzin",
+        "Elektrik",
+        "Hibrit",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kullanımSuresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 yıldan az",
+        "1-3 yıl",
+        "3-5 yıl",
+        "5-10 yıl",
+        "10 yıldan fazla"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

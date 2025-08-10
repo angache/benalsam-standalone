@@ -1,0 +1,713 @@
+[
+  {
+    "table_name": "advertisements",
+    "columns": [
+      "clicks integer NULL DEFAULT 0",
+      "created_at timestamp with time zone NULL DEFAULT CURRENT_TIMESTAMP",
+      "end_date timestamp with time zone NULL",
+      "id integer NOT NULL DEFAULT nextval('advertisements_id_seq'::regclass)",
+      "image_url text NOT NULL",
+      "is_active boolean NULL DEFAULT true",
+      "link_url text NOT NULL",
+      "placement text NOT NULL",
+      "start_date timestamp with time zone NULL",
+      "title text NOT NULL",
+      "views integer NULL DEFAULT 0"
+    ],
+    "constraints": [
+      "2200_34825_1_not_null (CHECK)",
+      "2200_34825_2_not_null (CHECK)",
+      "2200_34825_3_not_null (CHECK)",
+      "2200_34825_4_not_null (CHECK)",
+      "2200_34825_5_not_null (CHECK)",
+      "advertisements_pkey (PRIMARY KEY)"
+    ]
+  },
+  {
+    "table_name": "categories",
+    "columns": [
+      "color text NULL",
+      "created_at timestamp with time zone NULL DEFAULT now()",
+      "description text NULL",
+      "icon text NULL",
+      "id bigint NOT NULL",
+      "listings_count integer NULL DEFAULT 0",
+      "name text NOT NULL"
+    ],
+    "constraints": [
+      "2200_27979_1_not_null (CHECK)",
+      "2200_27979_2_not_null (CHECK)",
+      "categories_name_key (UNIQUE)",
+      "categories_pkey (PRIMARY KEY)"
+    ]
+  },
+  {
+    "table_name": "conversation_participants",
+    "columns": [
+      "conversation_id uuid NOT NULL",
+      "created_at timestamp with time zone NOT NULL DEFAULT now()",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "last_read_at timestamp with time zone NULL",
+      "user_id uuid NOT NULL"
+    ],
+    "constraints": [
+      "2200_17393_1_not_null (CHECK)",
+      "2200_17393_2_not_null (CHECK)",
+      "2200_17393_3_not_null (CHECK)",
+      "2200_17393_4_not_null (CHECK)",
+      "conversation_participants_conversation_id_fkey (FOREIGN KEY)",
+      "conversation_participants_pkey (PRIMARY KEY)",
+      "conversation_participants_user_id_fkey (FOREIGN KEY)",
+      "uq_conversation_user (UNIQUE)"
+    ]
+  },
+  {
+    "table_name": "conversations",
+    "columns": [
+      "created_at timestamp with time zone NOT NULL DEFAULT now()",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "last_message_at timestamp with time zone NULL",
+      "listing_id uuid NULL",
+      "offer_id uuid NULL",
+      "updated_at timestamp with time zone NOT NULL DEFAULT now()",
+      "user1_id uuid NULL",
+      "user2_id uuid NULL"
+    ],
+    "constraints": [
+      "2200_17375_1_not_null (CHECK)",
+      "2200_17375_5_not_null (CHECK)",
+      "2200_17375_6_not_null (CHECK)",
+      "conversations_listing_id_fkey (FOREIGN KEY)",
+      "conversations_offer_id_fkey (FOREIGN KEY)",
+      "conversations_pkey (PRIMARY KEY)",
+      "conversations_user1_id_fkey (FOREIGN KEY)",
+      "conversations_user2_id_fkey (FOREIGN KEY)"
+    ]
+  },
+  {
+    "table_name": "inventory_items",
+    "columns": [
+      "additional_image_urls ARRAY NULL",
+      "category text NOT NULL",
+      "created_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now())",
+      "description text NULL",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "image_url text NULL",
+      "main_image_url text NULL",
+      "name text NOT NULL",
+      "updated_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now())",
+      "user_id uuid NOT NULL"
+    ],
+    "constraints": [
+      "2200_17283_1_not_null (CHECK)",
+      "2200_17283_2_not_null (CHECK)",
+      "2200_17283_3_not_null (CHECK)",
+      "2200_17283_4_not_null (CHECK)",
+      "2200_17283_7_not_null (CHECK)",
+      "2200_17283_8_not_null (CHECK)",
+      "inventory_items_pkey (PRIMARY KEY)",
+      "inventory_items_user_id_fkey (FOREIGN KEY)"
+    ]
+  },
+  {
+    "table_name": "listing_reports",
+    "columns": [
+      "created_at timestamp with time zone NOT NULL DEFAULT now()",
+      "details text NULL",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "listing_id uuid NOT NULL",
+      "reason text NOT NULL",
+      "reporter_id uuid NOT NULL",
+      "status text NOT NULL DEFAULT 'pending'::text",
+      "updated_at timestamp with time zone NOT NULL DEFAULT now()"
+    ],
+    "constraints": [
+      "2200_23023_1_not_null (CHECK)",
+      "2200_23023_2_not_null (CHECK)",
+      "2200_23023_3_not_null (CHECK)",
+      "2200_23023_4_not_null (CHECK)",
+      "2200_23023_6_not_null (CHECK)",
+      "2200_23023_7_not_null (CHECK)",
+      "2200_23023_8_not_null (CHECK)",
+      "listing_reports_listing_id_fkey (FOREIGN KEY)",
+      "listing_reports_pkey (PRIMARY KEY)",
+      "listing_reports_reporter_id_fkey (FOREIGN KEY)",
+      "listing_reports_status_check (CHECK)"
+    ]
+  },
+  {
+    "table_name": "listing_views",
+    "columns": [
+      "created_at timestamp with time zone NULL DEFAULT now()",
+      "id bigint NOT NULL DEFAULT nextval('listing_views_id_seq'::regclass)",
+      "listing_id uuid NULL"
+    ],
+    "constraints": [
+      "2200_34861_1_not_null (CHECK)",
+      "listing_views_listing_id_fkey (FOREIGN KEY)",
+      "listing_views_pkey (PRIMARY KEY)"
+    ]
+  },
+  {
+    "table_name": "listings",
+    "columns": [
+      "accept_terms boolean NULL DEFAULT true",
+      "accepted_offer_id uuid NULL",
+      "additional_image_urls ARRAY NULL",
+      "auto_republish boolean NOT NULL DEFAULT false",
+      "budget numeric NOT NULL",
+      "category text NOT NULL",
+      "contact_preference text NOT NULL DEFAULT 'site_message'::text",
+      "created_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now())",
+      "deactivation_reason text NULL",
+      "description text NOT NULL",
+      "expires_at timestamp with time zone NULL",
+      "favorites_count integer NOT NULL DEFAULT 0",
+      "featured_expires_at timestamp with time zone NULL",
+      "fts tsvector NULL",
+      "geolocation USER-DEFINED NULL",
+      "has_bold_border boolean NULL DEFAULT false",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "image_url text NULL",
+      "is_featured boolean NULL DEFAULT false",
+      "is_showcase boolean NULL DEFAULT false",
+      "is_urgent_premium boolean NULL DEFAULT false",
+      "last_bumped_at timestamp with time zone NULL",
+      "latitude numeric NULL",
+      "location text NOT NULL",
+      "longitude numeric NULL",
+      "main_image_url text NULL",
+      "neighborhood text NULL",
+      "offer_accepted_at timestamp without time zone NULL",
+      "offers_count integer NOT NULL DEFAULT 0",
+      "popularity_score integer NULL DEFAULT 0",
+      "premium_expires_at timestamp with time zone NULL",
+      "rejection_reason text NULL",
+      "reviewed_at timestamp with time zone NULL",
+      "reviewed_by uuid NULL",
+      "showcase_expires_at timestamp with time zone NULL",
+      "status text NOT NULL DEFAULT 'pending_approval'::text",
+      "tags ARRAY NULL",
+      "title text NOT NULL",
+      "up_to_date boolean NULL DEFAULT false",
+      "updated_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now())",
+      "upped_at timestamp with time zone NULL",
+      "urgency text NOT NULL",
+      "urgent_expires_at timestamp with time zone NULL",
+      "user_id uuid NOT NULL",
+      "views_count integer NOT NULL DEFAULT 0",
+      "condition text[] NULL DEFAULT ARRAY['İkinci El']"
+    ],
+    "constraints": [
+      "2200_17262_10_not_null (CHECK)",
+      "2200_17262_11_not_null (CHECK)",
+      "2200_17262_12_not_null (CHECK)",
+      "2200_17262_13_not_null (CHECK)",
+      "2200_17262_17_not_null (CHECK)",
+      "2200_17262_18_not_null (CHECK)",
+      "2200_17262_1_not_null (CHECK)",
+      "2200_17262_21_not_null (CHECK)",
+      "2200_17262_22_not_null (CHECK)",
+      "2200_17262_2_not_null (CHECK)",
+      "2200_17262_3_not_null (CHECK)",
+      "2200_17262_4_not_null (CHECK)",
+      "2200_17262_5_not_null (CHECK)",
+      "2200_17262_6_not_null (CHECK)",
+      "2200_17262_7_not_null (CHECK)",
+      "2200_17262_8_not_null (CHECK)",
+      "listings_pkey (PRIMARY KEY)",
+      "listings_reviewed_by_fkey (FOREIGN KEY)",
+      "listings_status_check (CHECK)",
+      "listings_user_id_fkey (FOREIGN KEY)"
+    ]
+  },
+  {
+    "table_name": "messages",
+    "columns": [
+      "content text NOT NULL",
+      "conversation_id uuid NOT NULL",
+      "created_at timestamp with time zone NOT NULL DEFAULT now()",
+      "event text NULL",
+      "extension text NOT NULL",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "inserted_at timestamp without time zone NOT NULL DEFAULT now()",
+      "is_read boolean NOT NULL DEFAULT false",
+      "message_type text NOT NULL DEFAULT 'text'::text",
+      "payload jsonb NULL",
+      "private boolean NULL DEFAULT false",
+      "read_at timestamp with time zone NULL",
+      "sender_id uuid NOT NULL",
+      "status text NOT NULL DEFAULT 'sent'::text",
+      "topic text NOT NULL",
+      "updated_at timestamp without time zone NOT NULL DEFAULT now()"
+    ],
+    "constraints": [
+      "16592_17228_10_not_null (CHECK)",
+      "16592_17228_3_not_null (CHECK)",
+      "16592_17228_4_not_null (CHECK)",
+      "16592_17228_8_not_null (CHECK)",
+      "16592_17228_9_not_null (CHECK)",
+      "2200_17412_11_not_null (CHECK)",
+      "2200_17412_12_not_null (CHECK)",
+      "2200_17412_1_not_null (CHECK)",
+      "2200_17412_2_not_null (CHECK)",
+      "2200_17412_3_not_null (CHECK)",
+      "2200_17412_4_not_null (CHECK)",
+      "2200_17412_6_not_null (CHECK)",
+      "2200_17412_7_not_null (CHECK)",
+      "messages_conversation_id_fkey (FOREIGN KEY)",
+      "messages_pkey (PRIMARY KEY)",
+      "messages_sender_id_fkey (FOREIGN KEY)",
+      "messages_status_check (CHECK)"
+    ]
+  },
+  {
+    "table_name": "monthly_usage_stats",
+    "columns": [
+      "created_at timestamp with time zone NULL DEFAULT now()",
+      "featured_offers_count integer NULL DEFAULT 0",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "listings_count integer NULL DEFAULT 0",
+      "messages_count integer NULL DEFAULT 0",
+      "month_year text NOT NULL",
+      "offers_count integer NULL DEFAULT 0",
+      "updated_at timestamp with time zone NULL DEFAULT now()",
+      "user_id uuid NOT NULL"
+    ],
+    "constraints": [
+      "2200_37029_1_not_null (CHECK)",
+      "2200_37029_2_not_null (CHECK)",
+      "2200_37029_3_not_null (CHECK)",
+      "monthly_usage_stats_pkey (PRIMARY KEY)",
+      "monthly_usage_stats_user_id_fkey (FOREIGN KEY)",
+      "monthly_usage_stats_user_id_month_year_key (UNIQUE)"
+    ]
+  },
+  {
+    "table_name": "notifications",
+    "columns": [
+      "created_at timestamp with time zone NOT NULL DEFAULT now()",
+      "data jsonb NULL",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "is_read boolean NOT NULL DEFAULT false",
+      "recipient_user_id uuid NOT NULL",
+      "type text NOT NULL"
+    ],
+    "constraints": [
+      "2200_26242_1_not_null (CHECK)",
+      "2200_26242_2_not_null (CHECK)",
+      "2200_26242_3_not_null (CHECK)",
+      "2200_26242_4_not_null (CHECK)",
+      "2200_26242_6_not_null (CHECK)",
+      "notifications_pkey (PRIMARY KEY)",
+      "notifications_recipient_user_id_fkey (FOREIGN KEY)"
+    ]
+  },
+  {
+    "table_name": "offer_attachments",
+    "columns": [
+      "created_at timestamp with time zone NULL DEFAULT now()",
+      "file_name text NOT NULL",
+      "file_size bigint NULL",
+      "file_type text NULL",
+      "file_url text NOT NULL",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "offer_id uuid NOT NULL",
+      "uploaded_by uuid NULL"
+    ],
+    "constraints": [
+      "2200_37246_1_not_null (CHECK)",
+      "2200_37246_2_not_null (CHECK)",
+      "2200_37246_3_not_null (CHECK)",
+      "2200_37246_4_not_null (CHECK)",
+      "offer_attachments_pkey (PRIMARY KEY)",
+      "offer_attachments_uploaded_by_fkey (FOREIGN KEY)"
+    ]
+  },
+  {
+    "table_name": "offers",
+    "columns": [
+      "ai_suggestion text NULL",
+      "attachments jsonb NULL",
+      "conversation_id uuid NULL",
+      "created_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now())",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "is_featured boolean NULL DEFAULT false",
+      "is_highlighted boolean NULL DEFAULT false",
+      "listing_id uuid NOT NULL",
+      "message text NOT NULL",
+      "offered_item_id uuid NULL",
+      "offered_price numeric NULL",
+      "offering_user_id uuid NOT NULL",
+      "status text NULL DEFAULT 'pending'::text",
+      "updated_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now())"
+    ],
+    "constraints": [
+      "2200_17302_1_not_null (CHECK)",
+      "2200_17302_2_not_null (CHECK)",
+      "2200_17302_3_not_null (CHECK)",
+      "2200_17302_4_not_null (CHECK)",
+      "2200_17302_6_not_null (CHECK)",
+      "2200_17302_7_not_null (CHECK)",
+      "offers_conversation_id_fkey (FOREIGN KEY)",
+      "offers_listing_id_fkey (FOREIGN KEY)",
+      "offers_offered_item_id_fkey (FOREIGN KEY)",
+      "offers_offering_user_id_fkey (FOREIGN KEY)",
+      "offers_pkey (PRIMARY KEY)"
+    ]
+  },
+  {
+    "table_name": "premium_subscriptions",
+    "columns": [
+      "created_at timestamp with time zone NULL DEFAULT now()",
+      "expires_at timestamp with time zone NOT NULL",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "payment_method text NULL DEFAULT 'stripe'::text",
+      "plan_id uuid NOT NULL",
+      "status text NOT NULL DEFAULT 'active'::text",
+      "updated_at timestamp with time zone NULL DEFAULT now()",
+      "user_id uuid NOT NULL"
+    ],
+    "constraints": [
+      "2200_37055_1_not_null (CHECK)",
+      "2200_37055_2_not_null (CHECK)",
+      "2200_37055_3_not_null (CHECK)",
+      "2200_37055_4_not_null (CHECK)",
+      "2200_37055_5_not_null (CHECK)",
+      "premium_subscriptions_pkey (PRIMARY KEY)",
+      "premium_subscriptions_plan_id_fkey (FOREIGN KEY)",
+      "premium_subscriptions_status_check (CHECK)",
+      "premium_subscriptions_user_id_fkey (FOREIGN KEY)"
+    ]
+  },
+  {
+    "table_name": "profiles",
+    "columns": [
+      "avatar_url text NULL",
+      "bio text NULL",
+      "birth_date date NULL",
+      "chat_preferences jsonb NULL DEFAULT '{\"read_receipts\": true, \"show_last_seen\": true, \"auto_scroll_messages\": true}'::jsonb",
+      "created_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now())",
+      "daily_messages_count integer NULL DEFAULT 0",
+      "district text NULL",
+      "first_name text NULL",
+      "followed_categories_count integer NOT NULL DEFAULT 0",
+      "followers_count integer NOT NULL DEFAULT 0",
+      "following_count integer NOT NULL DEFAULT 0",
+      "gender text NULL",
+      "id uuid NOT NULL",
+      "is_2fa_enabled boolean NULL DEFAULT false",
+      "is_premium boolean NULL DEFAULT false",
+      "last_login timestamp with time zone NULL",
+      "last_name text NULL",
+      "last_reset_date date NULL DEFAULT CURRENT_DATE",
+      "listings_count integer NOT NULL DEFAULT 0",
+      "monthly_listings_count integer NULL DEFAULT 0",
+      "monthly_offers_count integer NULL DEFAULT 0",
+      "name text NOT NULL",
+      "neighborhood text NULL",
+      "notification_preferences jsonb NULL DEFAULT '{\"new_offer_push\": true, \"summary_emails\": \"weekly\", \"new_offer_email\": true, \"new_message_push\": true, \"new_message_email\": true, \"review_notifications_push\": true, \"review_notifications_email\": true}'::jsonb",
+      "phone_number text NULL",
+      "phone_verified boolean NULL DEFAULT false",
+      "platform_preferences jsonb NULL DEFAULT '{\"currency\": \"TRY\", \"language\": \"tr\", \"default_category\": null, \"default_location_district\": null, \"default_location_province\": null}'::jsonb",
+      "premium_expires_at timestamp with time zone NULL",
+      "profile_views integer NOT NULL DEFAULT 0",
+      "province text NULL",
+      "rating numeric NULL DEFAULT 5.0",
+      "rating_sum integer NOT NULL DEFAULT 0",
+      "role text NOT NULL DEFAULT 'user'::text",
+      "social_links jsonb NULL",
+      "status text NOT NULL DEFAULT 'active'::text",
+      "total_ratings integer NOT NULL DEFAULT 0",
+      "trust_score integer NULL DEFAULT 0",
+      "trust_score_breakdown jsonb NULL",
+      "updated_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now())",
+      "username text NULL"
+    ],
+    "constraints": [
+      "2200_17244_10_not_null (CHECK)",
+      "2200_17244_1_not_null (CHECK)",
+      "2200_17244_25_not_null (CHECK)",
+      "2200_17244_26_not_null (CHECK)",
+      "2200_17244_27_not_null (CHECK)",
+      "2200_17244_28_not_null (CHECK)",
+      "2200_17244_29_not_null (CHECK)",
+      "2200_17244_2_not_null (CHECK)",
+      "2200_17244_31_not_null (CHECK)",
+      "2200_17244_40_not_null (CHECK)",
+      "2200_17244_7_not_null (CHECK)",
+      "2200_17244_8_not_null (CHECK)",
+      "2200_17244_9_not_null (CHECK)",
+      "profiles_id_fkey (FOREIGN KEY)",
+      "profiles_pkey (PRIMARY KEY)",
+      "profiles_username_key (UNIQUE)"
+    ]
+  },
+  {
+    "table_name": "real_offers",
+    "columns": [
+      "count bigint NULL"
+    ],
+    "constraints": [
+      null
+    ]
+  },
+  {
+    "table_name": "settings",
+    "columns": [
+      "data jsonb NULL",
+      "id integer NOT NULL DEFAULT 1"
+    ],
+    "constraints": [
+      "2200_27995_1_not_null (CHECK)",
+      "settings_pkey (PRIMARY KEY)",
+      "single_row_check (CHECK)"
+    ]
+  },
+  {
+    "table_name": "spatial_ref_sys",
+    "columns": [
+      "auth_name character varying(256) NULL",
+      "auth_srid integer NULL",
+      "proj4text character varying(2048) NULL",
+      "srid integer NOT NULL",
+      "srtext character varying(2048) NULL"
+    ],
+    "constraints": [
+      "2200_31256_1_not_null (CHECK)",
+      "spatial_ref_sys_pkey (PRIMARY KEY)",
+      "spatial_ref_sys_srid_check (CHECK)"
+    ]
+  },
+  {
+    "table_name": "subscription_plans",
+    "columns": [
+      "created_at timestamp with time zone NULL DEFAULT now()",
+      "description text NULL",
+      "features jsonb NOT NULL DEFAULT '{}'::jsonb",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "is_active boolean NULL DEFAULT true",
+      "limits jsonb NOT NULL DEFAULT '{}'::jsonb",
+      "name text NOT NULL",
+      "price_monthly numeric NOT NULL DEFAULT 0",
+      "price_yearly numeric NULL",
+      "slug text NOT NULL",
+      "updated_at timestamp with time zone NULL DEFAULT now()"
+    ],
+    "constraints": [
+      "2200_37010_1_not_null (CHECK)",
+      "2200_37010_2_not_null (CHECK)",
+      "2200_37010_3_not_null (CHECK)",
+      "2200_37010_5_not_null (CHECK)",
+      "2200_37010_7_not_null (CHECK)",
+      "2200_37010_8_not_null (CHECK)",
+      "subscription_plans_pkey (PRIMARY KEY)",
+      "subscription_plans_slug_key (UNIQUE)"
+    ]
+  },
+  {
+    "table_name": "user_activities",
+    "columns": [
+      "activity_description text NULL",
+      "activity_title text NOT NULL",
+      "activity_type text NOT NULL",
+      "created_at timestamp with time zone NULL DEFAULT now()",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "metadata jsonb NULL DEFAULT '{}'::jsonb",
+      "related_id uuid NULL",
+      "user_id uuid NOT NULL"
+    ],
+    "constraints": [
+      "2200_37114_1_not_null (CHECK)",
+      "2200_37114_2_not_null (CHECK)",
+      "2200_37114_3_not_null (CHECK)",
+      "2200_37114_4_not_null (CHECK)",
+      "user_activities_activity_type_check (CHECK)",
+      "user_activities_pkey (PRIMARY KEY)",
+      "user_activities_user_id_fkey (FOREIGN KEY)"
+    ]
+  },
+  {
+    "table_name": "user_category_stats",
+    "columns": [
+      "category text NOT NULL",
+      "created_at timestamp with time zone NULL DEFAULT now()",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "offer_count integer NULL DEFAULT 0",
+      "success_count integer NULL DEFAULT 0",
+      "total_value numeric NULL DEFAULT 0",
+      "updated_at timestamp with time zone NULL DEFAULT now()",
+      "user_id uuid NOT NULL"
+    ],
+    "constraints": [
+      "2200_37130_1_not_null (CHECK)",
+      "2200_37130_2_not_null (CHECK)",
+      "2200_37130_3_not_null (CHECK)",
+      "user_category_stats_pkey (PRIMARY KEY)",
+      "user_category_stats_user_id_category_key (UNIQUE)",
+      "user_category_stats_user_id_fkey (FOREIGN KEY)"
+    ]
+  },
+  {
+    "table_name": "user_events",
+    "columns": [
+      "created_at timestamp with time zone NULL DEFAULT now()",
+      "event_data jsonb NULL",
+      "event_type text NOT NULL",
+      "id bigint NOT NULL DEFAULT nextval('user_events_id_seq'::regclass)",
+      "session_id text NULL",
+      "user_id uuid NULL"
+    ],
+    "constraints": [
+      "2200_35097_1_not_null (CHECK)",
+      "2200_35097_4_not_null (CHECK)",
+      "user_events_pkey (PRIMARY KEY)",
+      "user_events_user_id_fkey (FOREIGN KEY)"
+    ]
+  },
+  {
+    "table_name": "user_favorites",
+    "columns": [
+      "created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "listing_id uuid NOT NULL",
+      "user_id uuid NOT NULL"
+    ],
+    "constraints": [
+      "2200_25936_1_not_null (CHECK)",
+      "2200_25936_2_not_null (CHECK)",
+      "2200_25936_3_not_null (CHECK)",
+      "2200_25936_4_not_null (CHECK)",
+      "user_favorites_listing_id_fkey (FOREIGN KEY)",
+      "user_favorites_pkey (PRIMARY KEY)",
+      "user_favorites_user_id_fkey (FOREIGN KEY)",
+      "user_favorites_user_listing_unique (UNIQUE)"
+    ]
+  },
+  {
+    "table_name": "user_feedback",
+    "columns": [
+      "created_at timestamp with time zone NULL DEFAULT now()",
+      "feedback_type text NOT NULL",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "message text NOT NULL",
+      "screenshot_url text NULL",
+      "status text NULL DEFAULT 'pending'::text",
+      "user_id uuid NULL"
+    ],
+    "constraints": [
+      "2200_24184_1_not_null (CHECK)",
+      "2200_24184_3_not_null (CHECK)",
+      "2200_24184_4_not_null (CHECK)",
+      "user_feedback_pkey (PRIMARY KEY)",
+      "user_feedback_user_id_fkey (FOREIGN KEY)"
+    ]
+  },
+  {
+    "table_name": "user_followed_categories",
+    "columns": [
+      "category_name text NOT NULL",
+      "created_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now())",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "user_id uuid NOT NULL"
+    ],
+    "constraints": [
+      "2200_26120_1_not_null (CHECK)",
+      "2200_26120_2_not_null (CHECK)",
+      "2200_26120_3_not_null (CHECK)",
+      "2200_26120_4_not_null (CHECK)",
+      "user_followed_categories_pkey (PRIMARY KEY)",
+      "user_followed_categories_unique_follow (UNIQUE)",
+      "user_followed_categories_user_id_fkey (FOREIGN KEY)"
+    ]
+  },
+  {
+    "table_name": "user_follows",
+    "columns": [
+      "created_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now())",
+      "follower_id uuid NOT NULL",
+      "following_id uuid NOT NULL",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()"
+    ],
+    "constraints": [
+      "2200_26080_1_not_null (CHECK)",
+      "2200_26080_2_not_null (CHECK)",
+      "2200_26080_3_not_null (CHECK)",
+      "2200_26080_4_not_null (CHECK)",
+      "user_follows_follower_id_fkey (FOREIGN KEY)",
+      "user_follows_following_id_fkey (FOREIGN KEY)",
+      "user_follows_pkey (PRIMARY KEY)",
+      "user_follows_unique_follow (UNIQUE)"
+    ]
+  },
+  {
+    "table_name": "user_reviews",
+    "columns": [
+      "comment text NULL",
+      "created_at timestamp with time zone NOT NULL DEFAULT now()",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "offer_id uuid NOT NULL",
+      "rating integer NOT NULL",
+      "reviewee_id uuid NOT NULL",
+      "reviewer_id uuid NOT NULL"
+    ],
+    "constraints": [
+      "2200_22996_1_not_null (CHECK)",
+      "2200_22996_2_not_null (CHECK)",
+      "2200_22996_3_not_null (CHECK)",
+      "2200_22996_4_not_null (CHECK)",
+      "2200_22996_5_not_null (CHECK)",
+      "2200_22996_7_not_null (CHECK)",
+      "unique_review_per_offer_reviewer (UNIQUE)",
+      "user_reviews_offer_id_fkey (FOREIGN KEY)",
+      "user_reviews_pkey (PRIMARY KEY)",
+      "user_reviews_rating_check (CHECK)",
+      "user_reviews_reviewee_id_fkey (FOREIGN KEY)",
+      "user_reviews_reviewer_id_fkey (FOREIGN KEY)"
+    ]
+  },
+  {
+    "table_name": "user_statistics",
+    "columns": [
+      "accepted_offers integer NULL DEFAULT 0",
+      "avg_response_time_hours numeric NULL DEFAULT 0",
+      "created_at timestamp with time zone NULL DEFAULT now()",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "pending_offers integer NULL DEFAULT 0",
+      "rejected_offers integer NULL DEFAULT 0",
+      "success_rate numeric NULL DEFAULT 0",
+      "total_messages_received integer NULL DEFAULT 0",
+      "total_messages_sent integer NULL DEFAULT 0",
+      "total_offers integer NULL DEFAULT 0",
+      "total_views integer NULL DEFAULT 0",
+      "updated_at timestamp with time zone NULL DEFAULT now()",
+      "user_id uuid NOT NULL"
+    ],
+    "constraints": [
+      "2200_37090_1_not_null (CHECK)",
+      "2200_37090_2_not_null (CHECK)",
+      "user_statistics_pkey (PRIMARY KEY)",
+      "user_statistics_user_id_fkey (FOREIGN KEY)",
+      "user_statistics_user_id_key (UNIQUE)"
+    ]
+  },
+  {
+    "table_name": "user_usage_stats",
+    "columns": [
+      "created_at timestamp with time zone NULL DEFAULT now()",
+      "id uuid NOT NULL DEFAULT gen_random_uuid()",
+      "last_reset_date date NULL DEFAULT CURRENT_DATE",
+      "monthly_listings_count integer NULL DEFAULT 0",
+      "monthly_messages_count integer NULL DEFAULT 0",
+      "monthly_offers_count integer NULL DEFAULT 0",
+      "updated_at timestamp with time zone NULL DEFAULT now()",
+      "user_id uuid NULL"
+    ],
+    "constraints": [
+      "2200_35494_1_not_null (CHECK)",
+      "user_usage_stats_pkey (PRIMARY KEY)",
+      "user_usage_stats_user_id_fkey (FOREIGN KEY)",
+      "user_usage_stats_user_id_key (UNIQUE)"
+    ]
+  }
+]

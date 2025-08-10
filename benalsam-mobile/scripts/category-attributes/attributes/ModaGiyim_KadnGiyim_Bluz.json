@@ -1,0 +1,92 @@
+{
+  "category": "ModaGiyim>KadınGiyim>Bluz",
+  "pathKey": "ModaGiyim>KadınGiyim>Bluz",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "bluzTuru",
+      "label": "Bluz Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Gömlek",
+        "Tunik",
+        "Top",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Siyah",
+        "Mavi",
+        "Pembe",
+        "Gri",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "İpek",
+        "Polyester",
+        "Keten",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "beden",
+      "label": "Beden",
+      "type": "string",
+      "required": false,
+      "options": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

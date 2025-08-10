@@ -1,0 +1,146 @@
+{
+  "category": "SağlıkGüzellik>SağlıkBakım>TansiyonAleti",
+  "pathKey": "SağlıkGüzellik>SağlıkBakım>TansiyonAleti",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "tansiyonAletiTuru",
+      "label": "Tansiyon Aleti Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Manuel",
+        "Otomatik",
+        "Yarı Otomatik",
+        "Bilek Tipi",
+        "Kol Tipi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "olcumAraligi",
+      "label": "Ölçüm Aralığı (mmHg)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "0-300",
+        "0-400",
+        "0-500",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "dogruluk",
+      "label": "Doğruluk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "±2 mmHg",
+        "±3 mmHg",
+        "±5 mmHg",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "gucKaynagi",
+      "label": "Güç Kaynağı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pil",
+        "Şarj Edilebilir",
+        "USB",
+        "Manuel",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ekranTipi",
+      "label": "Ekran Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "LCD",
+        "LED",
+        "Dijital",
+        "Analog",
+        "Yok"
+      ]
+    },
+    {
+      "key": "kullanimYeri",
+      "label": "Kullanım Yeri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ev",
+        "Hastane",
+        "Klinik",
+        "Seyahat",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kalibrasyonDurumu",
+      "label": "Kalibrasyon Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kalibre Edilmiş",
+        "Kalibrasyon Gerekli",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "pilDurumu",
+      "label": "Pil Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yeni",
+        "İyi",
+        "Zayıf",
+        "Değişim Gerekli"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

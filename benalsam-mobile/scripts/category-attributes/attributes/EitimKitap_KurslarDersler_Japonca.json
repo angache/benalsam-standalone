@@ -1,0 +1,85 @@
+{
+  "category": "EğitimKitap>KurslarDersler>Japonca",
+  "pathKey": "EğitimKitap>KurslarDersler>Japonca",
+  "attributes": [
+    {
+      "key": "hizmet_tipi",
+      "label": "Hizmet Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Birebir Ders",
+        "Grup Dersi",
+        "Online Ders",
+        "Hibrit Ders",
+        "Konuşma Pratiği",
+        "Sınav Hazırlık",
+        "İş Japoncası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": true,
+      "options": [
+        "N5 (Başlangıç)",
+        "N4 (Temel)",
+        "N3 (Orta)",
+        "N2 (İyi)",
+        "N1 (İleri)",
+        "Tüm Seviyeler"
+      ]
+    },
+    {
+      "key": "deneyim_yili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "egitim_durumu",
+      "label": "Eğitim Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Japonca Öğretmenliği",
+        "Japon Dili ve Edebiyatı",
+        "Çevirmenlik",
+        "Yabancı Dil",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ders_yeri",
+      "label": "Ders Yeri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğrenci Evi",
+        "Öğretmen Evi",
+        "Kütüphane",
+        "Kurs Merkezi",
+        "Online",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "saat_ucreti",
+      "label": "Saat Ücreti (TL)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

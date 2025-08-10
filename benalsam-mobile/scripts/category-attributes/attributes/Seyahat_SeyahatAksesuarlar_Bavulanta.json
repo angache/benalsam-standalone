@@ -1,0 +1,145 @@
+{
+  "category": "Seyahat>SeyahatAksesuarları>BavulÇanta",
+  "pathKey": "Seyahat>SeyahatAksesuarları>BavulÇanta",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Samsonite",
+        "American Tourister",
+        "Delsey",
+        "Rimowa",
+        "Tumi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTipi",
+      "label": "Ürün Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bavul",
+        "Sırt Çantası",
+        "El Çantası",
+        "Laptop Çantası",
+        "Seyahat Çantası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük",
+        "Orta",
+        "Büyük",
+        "Çok Büyük"
+      ]
+    },
+    {
+      "key": "kapasite",
+      "label": "Kapasite (L)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 200
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Turuncu",
+        "Pembe",
+        "Mor",
+        "Kahverengi",
+        "Beyaz",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Polyester",
+        "Naylon",
+        "Deri",
+        "Canvas",
+        "Alüminyum",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

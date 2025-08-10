@@ -1,0 +1,95 @@
+{
+  "category": "EğitimKitap>KurslarDersler>KPSSHazırlık",
+  "pathKey": "EğitimKitap>KurslarDersler>KPSSHazırlık",
+  "attributes": [
+    {
+      "key": "hizmet_tipi",
+      "label": "Hizmet Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Birebir Ders",
+        "Grup Dersi",
+        "Online Ders",
+        "Hibrit Ders",
+        "Paket Program",
+        "Deneme Sınavı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ders_konulari",
+      "label": "Ders Konuları",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Genel Yetenek",
+        "Genel Kültür",
+        "Eğitim Bilimleri",
+        "ÖABT",
+        "Tüm Konular",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Tüm Seviyeler"
+      ]
+    },
+    {
+      "key": "deneyim_yili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "egitim_durumu",
+      "label": "Eğitim Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğretmenlik",
+        "Eğitim Bilimleri",
+        "Sınav Koçu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ders_yeri",
+      "label": "Ders Yeri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğrenci Evi",
+        "Öğretmen Evi",
+        "Kütüphane",
+        "Kurs Merkezi",
+        "Online",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "saat_ucreti",
+      "label": "Saat Ücreti (TL)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

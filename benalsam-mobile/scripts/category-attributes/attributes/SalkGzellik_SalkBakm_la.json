@@ -1,0 +1,86 @@
+{
+  "category": "SağlıkGüzellik>SağlıkBakım>İlaç",
+  "pathKey": "SağlıkGüzellik>SağlıkBakım>İlaç",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "ilacAdi",
+      "label": "İlaç Adı",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "etkenMadde",
+      "label": "Etken Madde",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "doz",
+      "label": "Doz (mg/ml)",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "kullanimSekli",
+      "label": "Kullanım Şekli",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Ağızdan",
+        "Enjeksiyon",
+        "Topikal",
+        "İnhalasyon",
+        "Göz",
+        "Burun",
+        "Kulak",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "formu",
+      "label": "Formu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tablet",
+        "Kapsül",
+        "Şurup",
+        "Damlalık",
+        "Krem",
+        "Jel",
+        "Sprey",
+        "Ampul",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kutuIcerigi",
+      "label": "Kutu İçeriği",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "sonKullanimTarihi",
+      "label": "Son Kullanım Tarihi",
+      "type": "date",
+      "required": true
+    },
+    {
+      "key": "receteDurumu",
+      "label": "Reçete Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Reçeteli",
+        "Reçetesiz"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

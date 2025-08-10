@@ -1,0 +1,158 @@
+{
+  "category": "SanatHobi>Koleksiyon>OyuncakKoleksiyonu",
+  "pathKey": "SanatHobi>Koleksiyon>OyuncakKoleksiyonu",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "LEGO",
+        "Hot Wheels",
+        "Matchbox",
+        "Barbie",
+        "Transformers",
+        "Star Wars",
+        "Marvel",
+        "Disney",
+        "Playmobil",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "oyuncakTipi",
+      "label": "Oyuncak Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Araba",
+        "Bebek",
+        "Figür",
+        "Yapı Seti",
+        "Peluş Oyuncak",
+        "Puzzle",
+        "Kart Oyunu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "0-2 yaş",
+        "3-5 yaş",
+        "6-8 yaş",
+        "9-12 yaş",
+        "13+ yaş",
+        "Koleksiyon"
+      ]
+    },
+    {
+      "key": "seri",
+      "label": "Seri",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "parcaSayisi",
+      "label": "Parça Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 10000
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Plastik",
+        "Ahşap",
+        "Metal",
+        "Kumaş",
+        "Karton",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

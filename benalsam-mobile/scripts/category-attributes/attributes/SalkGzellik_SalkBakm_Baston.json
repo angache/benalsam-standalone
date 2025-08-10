@@ -1,0 +1,124 @@
+{
+  "category": "SağlıkGüzellik>SağlıkBakım>Baston",
+  "pathKey": "SağlıkGüzellik>SağlıkBakım>Baston",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Drive Medical",
+        "Medline",
+        "Invacare",
+        "Nova",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "bastonTipi",
+      "label": "Baston Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Standart Baston",
+        "Tekerlekli Baston",
+        "Katlanabilir Baston",
+        "Ayarlanabilir Baston",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük",
+        "Orta",
+        "Büyük",
+        "Ayarlanabilir",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık (kg)",
+      "type": "number",
+      "required": false,
+      "min": 0.1,
+      "max": 5
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Kahverengi",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Beyaz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2015,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

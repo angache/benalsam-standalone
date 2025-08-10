@@ -1,0 +1,133 @@
+{
+  "category": "SporOutdoor>OutdoorKamp>Avcılık",
+  "pathKey": "SporOutdoor>OutdoorKamp>Avcılık",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Browning",
+        "Remington",
+        "Winchester",
+        "Beretta",
+        "Benelli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTipi",
+      "label": "Ürün Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tüfek",
+        "Av Tüfeği",
+        "Mermi",
+        "Av Çantası",
+        "Av Giyimi",
+        "Av Aksesuarları",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kahverengi",
+        "Siyah",
+        "Yeşil",
+        "Gri",
+        "Kamuflaj",
+        "Mavi",
+        "Kırmızı",
+        "Beyaz",
+        "Sarı",
+        "Turuncu",
+        "Mor",
+        "Pembe",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "kalibre",
+      "label": "Kalibre",
+      "type": "string",
+      "required": false,
+      "options": [
+        "12 Gauge",
+        "20 Gauge",
+        "16 Gauge",
+        "28 Gauge",
+        "410",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık (kg)",
+      "type": "number",
+      "required": false,
+      "min": 0.1,
+      "max": 50
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

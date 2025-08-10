@@ -1,0 +1,193 @@
+{
+  "category": "Araç & Vasıta > Hava Araçları",
+  "attributes": [
+    {
+      "key": "vehicle_type",
+      "label": "Araç Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Helikopter",
+        "Uçak",
+        "Drone",
+        "Paramotor",
+        "Yamaç Paraşütü",
+        "Planör",
+        "Gyrocopter",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Robinson",
+        "Bell",
+        "Airbus",
+        "Boeing",
+        "Cessna",
+        "Piper",
+        "DJI",
+        "Parrot",
+        "Yuneec",
+        "Autel",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1950,
+      "max": 2024
+    },
+    {
+      "key": "engine_count",
+      "label": "Motor Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 8
+    },
+    {
+      "key": "engine_size",
+      "label": "Motor Hacmi (cc)",
+      "type": "number",
+      "required": false,
+      "min": 50,
+      "max": 50000
+    },
+    {
+      "key": "engine_power",
+      "label": "Motor Gücü (HP)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 50000
+    },
+    {
+      "key": "fuel_type",
+      "label": "Yakıt Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Benzin",
+        "Jet Fuel",
+        "Elektrik",
+        "Hibrit",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "fuel_capacity",
+      "label": "Yakıt Kapasitesi (Litre)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 100000
+    },
+    {
+      "key": "passenger_capacity",
+      "label": "Yolcu Kapasitesi",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 500
+    },
+    {
+      "key": "max_speed",
+      "label": "Maksimum Hız (km/h)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 3000
+    },
+    {
+      "key": "range",
+      "label": "Menzil (km)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 20000
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Siyah",
+        "Kahverengi",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "registration",
+      "label": "Ruhsat",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "insurance",
+      "label": "Sigorta",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "maintenance_log",
+      "label": "Bakım Kayıtları",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

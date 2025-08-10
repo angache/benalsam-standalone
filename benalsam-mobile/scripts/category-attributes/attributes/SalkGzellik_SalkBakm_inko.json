@@ -1,0 +1,159 @@
+{
+  "category": "SağlıkGüzellik>SağlıkBakım>Çinko",
+  "pathKey": "SağlıkGüzellik>SağlıkBakım>Çinko",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Solgar",
+        "Now Foods",
+        "Nature's Bounty",
+        "Centrum",
+        "GNC",
+        "Vitabiotics",
+        "Holland & Barrett",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTuru",
+      "label": "Ürün Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tablet",
+        "Kapsül",
+        "Şurup",
+        "Toz",
+        "Sprey",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "miktar",
+      "label": "Miktar (mg)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 1000
+    },
+    {
+      "key": "dozaj",
+      "label": "Dozaj",
+      "type": "string",
+      "required": false,
+      "options": [
+        "5 mg",
+        "10 mg",
+        "15 mg",
+        "20 mg",
+        "25 mg",
+        "30 mg",
+        "50 mg",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sonKullanmaTarihi",
+      "label": "Son Kullanma Tarihi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fiziksel_durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Lekeli",
+        "Açılmış"
+      ]
+    },
+    {
+      "key": "orijinallik",
+      "label": "Orijinallik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Orijinal",
+        "Taklit",
+        "Reprodüksiyon",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "kullanım_suresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 yıldan az",
+        "1-3 yıl",
+        "3-5 yıl",
+        "5-10 yıl",
+        "10 yıldan fazla"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "name": "benalsam-shared-types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types and services for Benalsam mobile and web applications",
+  "main": "dist/index.js",
+  "module": "dist-esm/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    "import": "./dist-esm/index.js",
+    "require": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "dist-esm"
+  ],
+  "scripts": {
+    "build": "npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc -p tsconfig.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "dev": "npm run build && npm run dev:watch",
+    "dev:watch": "tsc --watch -p tsconfig.json",
+    "clean": "rm -rf dist dist-esm",
+    "prebuild": "npm run clean",
+    "postinstall": "echo 'Skipping build for now'",
+    "prepare": "echo 'Skipping prepare for Docker build'",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "typescript",
+    "types",
+    "benalsam",
+    "shared"
+  ],
+  "author": "Benalsam Team",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.50.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "@types/node": "^20.8.3"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-native": ">=0.72.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+} 

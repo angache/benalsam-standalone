@@ -1,0 +1,189 @@
+{
+  "category": "Anne & Bebek > Oyuncaklar > Müzikli Oyuncaklar",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Fisher-Price",
+        "VTech",
+        "LeapFrog",
+        "Baby Einstein",
+        "Tiny Love",
+        "Manhattan Toy",
+        "Sassy",
+        "Lamaze",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "instrument_type",
+      "label": "Enstrüman Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Çıngırak",
+        "Marakas",
+        "Drum",
+        "Piyano",
+        "Gitar",
+        "Flüt",
+        "Ksilofon",
+        "Zil",
+        "Müzik Kutusu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "age_range",
+      "label": "Yaş Aralığı",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-6 ay",
+        "6-12 ay",
+        "12-24 ay",
+        "2-4 yaş",
+        "4-6 yaş",
+        "6+ yaş",
+        "Tüm Yaşlar",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sound_type",
+      "label": "Ses Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çıngırak Sesi",
+        "Müzik",
+        "Hayvan Sesleri",
+        "Doğa Sesleri",
+        "Melodi",
+        "Ritim",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "volume_control",
+      "label": "Ses Kontrolü",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "light_effects",
+      "label": "Işık Efektleri",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "battery_required",
+      "label": "Pil Gerekli",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "battery_type",
+      "label": "Pil Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "AA",
+        "AAA",
+        "C",
+        "D",
+        "9V",
+        "CR2032",
+        "Pil Gerekmez",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Plastik",
+        "Ahşap",
+        "Kumaş",
+        "Silicone",
+        "Metal",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Siyah",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Mor",
+        "Turuncu",
+        "Kahverengi",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

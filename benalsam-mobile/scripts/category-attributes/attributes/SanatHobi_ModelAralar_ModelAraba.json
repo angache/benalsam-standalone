@@ -1,0 +1,144 @@
+{
+  "category": "SanatHobi>ModelAraçlar>ModelAraba",
+  "pathKey": "SanatHobi>ModelAraçlar>ModelAraba",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "olcek",
+      "label": "Ölçek",
+      "type": "string",
+      "required": true,
+      "options": [
+        "1:18",
+        "1:24",
+        "1:32",
+        "1:43",
+        "1:64",
+        "1:87",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Metal",
+        "Plastik",
+        "Reçine",
+        "Ahşap",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1950,
+      "max": 2024
+    },
+    {
+      "key": "uretimYeri",
+      "label": "Üretim Yeri",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "kutuDurumu",
+      "label": "Kutu Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Orijinal Kutulu",
+        "Kutusuz",
+        "Kutu Hasarlı",
+        "Kutu Açılmış",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Gümüş",
+        "Altın",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Koleksiyonluk (Açılmamış)",
+        "Çok İyi",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Restorasyonluk"
+      ]
+    },
+    {
+      "key": "ozellikler",
+      "label": "Özellikler",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Açılır Kapı",
+        "Açılır Kaput",
+        "Açılır Bagaj",
+        "Direksiyon Hareketli",
+        "Süspansiyonlu",
+        "Işıklı",
+        "Sesli",
+        "Motor Detaylı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sertifika",
+      "label": "Sertifika/Belge",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

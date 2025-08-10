@@ -1,0 +1,92 @@
+{
+  "category": "ModaGiyim>KadınGiyim>Abiye",
+  "pathKey": "ModaGiyim>KadınGiyim>Abiye",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "abiyeTuru",
+      "label": "Abiye Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Gece Elbisesi",
+        "Kokteyl Elbisesi",
+        "Düğün Elbisesi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Kırmızı",
+        "Mavi",
+        "Pembe",
+        "Altın",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "İpek",
+        "Saten",
+        "Tül",
+        "Kadife",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "beden",
+      "label": "Beden",
+      "type": "string",
+      "required": false,
+      "options": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

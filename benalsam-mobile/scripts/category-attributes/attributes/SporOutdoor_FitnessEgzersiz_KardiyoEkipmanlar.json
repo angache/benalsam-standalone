@@ -1,0 +1,120 @@
+{
+  "category": "SporOutdoor>FitnessEgzersiz>KardiyoEkipmanları",
+  "pathKey": "SporOutdoor>FitnessEgzersiz>KardiyoEkipmanları",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Technogym",
+        "Life Fitness",
+        "Precor",
+        "Matrix",
+        "Cybex",
+        "Concept2",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "ekipmanTipi",
+      "label": "Ekipman Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Koşu Bandı",
+        "Bisiklet",
+        "Eliptik",
+        "Kürek Çekme",
+        "StairMaster",
+        "Cross Trainer",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık (kg)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 500
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Beyaz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

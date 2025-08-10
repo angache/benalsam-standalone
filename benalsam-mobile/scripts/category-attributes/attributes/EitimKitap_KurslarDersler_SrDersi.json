@@ -1,0 +1,96 @@
+{
+  "category": "EğitimKitap>KurslarDersler>SürüşDersi",
+  "pathKey": "EğitimKitap>KurslarDersler>SürüşDersi",
+  "attributes": [
+    {
+      "key": "hizmet_tipi",
+      "label": "Hizmet Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Birebir Ders",
+        "Paket Program",
+        "Sınav Hazırlık",
+        "Güvenli Sürüş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ehliyetTipi",
+      "label": "Ehliyet Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "B Sınıfı",
+        "A Sınıfı",
+        "C Sınıfı",
+        "D Sınıfı",
+        "E Sınıfı",
+        "F Sınıfı",
+        "G Sınıfı",
+        "H Sınıfı",
+        "Tüm Sınıflar",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Tüm Seviyeler"
+      ]
+    },
+    {
+      "key": "deneyim_yili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "egitim_durumu",
+      "label": "Eğitim Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Sürüş Eğitmeni",
+        "Trafik Eğitmeni",
+        "Güvenli Sürüş Eğitmeni",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ders_yeri",
+      "label": "Ders Yeri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Sürüş Okulu",
+        "Pratik Alanı",
+        "Şehir İçi",
+        "Otoyol",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "saat_ucreti",
+      "label": "Saat Ücreti (TL)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

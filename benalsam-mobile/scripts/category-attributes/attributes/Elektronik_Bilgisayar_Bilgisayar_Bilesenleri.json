@@ -1,0 +1,95 @@
+{
+  "category": "Elektronik > Bilgisayar > Bilgisayar Bileşenleri",
+  "attributes": [
+    {
+      "key": "bilesenTipi",
+      "label": "Bileşen Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "İşlemci",
+        "Anakart",
+        "RAM",
+        "GPU",
+        "Depolama",
+        "Güç Kaynağı",
+        "Kasa",
+        "Soğutucu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Intel",
+        "AMD",
+        "ASUS",
+        "MSI",
+        "Corsair",
+        "Samsung",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "compatibility",
+      "label": "Uyumluluk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

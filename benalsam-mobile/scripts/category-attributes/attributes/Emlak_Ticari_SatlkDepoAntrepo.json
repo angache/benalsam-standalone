@@ -1,0 +1,124 @@
+{
+  "category": "Emlak>Ticari>SatılıkDepoAntrepo",
+  "pathKey": "Emlak>Ticari>SatılıkDepoAntrepo",
+  "attributes": [
+    {
+      "key": "property_type",
+      "label": "Mülk Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Depo",
+        "Antrepo",
+        "Soğuk Hava Deposu",
+        "Açık Depo",
+        "Kapalı Depo",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "area",
+      "label": "Alan (m²)",
+      "type": "number",
+      "required": true,
+      "min": 50,
+      "max": 50000
+    },
+    {
+      "key": "yukseklik",
+      "label": "Yükseklik (m)",
+      "type": "number",
+      "required": false,
+      "min": 2,
+      "max": 20
+    },
+    {
+      "key": "floor",
+      "label": "Kat",
+      "type": "number",
+      "required": false,
+      "min": -5,
+      "max": 10
+    },
+    {
+      "key": "total_floors",
+      "label": "Toplam Kat",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "building_age",
+      "label": "Bina Yaşı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 100
+    },
+    {
+      "key": "heating_type",
+      "label": "Isıtma Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Doğalgaz",
+        "Kombi",
+        "Merkezi",
+        "Klima",
+        "Soba",
+        "Yok"
+      ]
+    },
+    {
+      "key": "road_condition",
+      "label": "Yol Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Asfalt",
+        "Stabilize",
+        "Toprak",
+        "Yok"
+      ]
+    },
+    {
+      "key": "electricity_status",
+      "label": "Elektrik Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Yakında"
+      ]
+    },
+    {
+      "key": "parking",
+      "label": "Otopark",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Ücretli"
+      ]
+    },
+    {
+      "key": "security",
+      "label": "Güvenlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

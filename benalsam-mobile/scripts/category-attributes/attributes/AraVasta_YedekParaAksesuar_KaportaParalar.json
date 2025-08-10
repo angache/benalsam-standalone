@@ -1,0 +1,150 @@
+{
+  "category": "AraçVasıta>YedekParçaAksesuar>KaportaParçaları",
+  "pathKey": "AraçVasıta>YedekParçaAksesuar>KaportaParçaları",
+  "attributes": [
+    {
+      "key": "kaportaTipi",
+      "label": "Kaporta Parça Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Ön Tampon",
+        "Arka Tampon",
+        "Kapı",
+        "Çamurluk",
+        "Motor Kaputu",
+        "Bagaj Kapağı",
+        "Çatı",
+        "Ayna",
+        "Cam",
+        "Far",
+        "Stop Lambası",
+        "Sinyal Lambası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "arac_tipi",
+      "label": "Araç Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Otomobil",
+        "SUV/Jip",
+        "Ticari Araç",
+        "Motosiklet",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Toyota",
+        "Honda",
+        "Ford",
+        "Volkswagen",
+        "BMW",
+        "Mercedes",
+        "Audi",
+        "Hyundai",
+        "Kia",
+        "Renault",
+        "Peugeot",
+        "Fiat",
+        "Opel",
+        "Citroen",
+        "Nissan",
+        "Mazda",
+        "Subaru",
+        "Mitsubishi",
+        "Skoda",
+        "Seat",
+        "OEM",
+        "Universal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "yil",
+      "label": "Model Yılı",
+      "type": "number",
+      "required": true,
+      "min": 1950,
+      "max": 2024
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Siyah",
+        "Gri",
+        "Gümüş",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Kahverengi",
+        "Turuncu",
+        "Mor",
+        "Pembe",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "materyal",
+      "label": "Materyal",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çelik",
+        "Alüminyum",
+        "Plastik",
+        "Kompozit",
+        "Cam",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

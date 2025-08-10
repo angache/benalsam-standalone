@@ -1,0 +1,139 @@
+{
+  "category": "KriptoFinans>FinansalHizmetler>Kredi",
+  "pathKey": "KriptoFinans>FinansalHizmetler>Kredi",
+  "attributes": [
+    {
+      "key": "krediTuru",
+      "label": "Kredi Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "İhtiyaç Kredisi",
+        "Konut Kredisi",
+        "Taşıt Kredisi",
+        "Ticari Kredi",
+        "Öğrenci Kredisi",
+        "KOBİ Kredisi",
+        "Tatil Kredisi",
+        "Evlilik Kredisi",
+        "Sağlık Kredisi",
+        "Eğitim Kredisi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "banka",
+      "label": "Banka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Ziraat Bankası",
+        "İş Bankası",
+        "Garanti BBVA",
+        "Akbank",
+        "Yapı Kredi",
+        "VakıfBank",
+        "Halkbank",
+        "Denizbank",
+        "QNB Finansbank",
+        "ING Bank",
+        "HSBC",
+        "TEB",
+        "Şekerbank",
+        "Türk Ekonomi Bankası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sube",
+      "label": "Şube",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "krediLimiti",
+      "label": "Kredi Limiti (TL)",
+      "type": "number",
+      "required": false,
+      "min": 1000,
+      "max": 10000000
+    },
+    {
+      "key": "vade",
+      "label": "Vade (Ay)",
+      "type": "number",
+      "required": false,
+      "min": 3,
+      "max": 120
+    },
+    {
+      "key": "faizOrani",
+      "label": "Faiz Oranı (%)",
+      "type": "number",
+      "required": false,
+      "min": 0.1,
+      "max": 50
+    },
+    {
+      "key": "odemeSekli",
+      "label": "Ödeme Şekli",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Aylık Eşit Taksit",
+        "Azalan Taksit",
+        "Balon Ödeme",
+        "Esnek Ödeme",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kullanimAmaci",
+      "label": "Kullanım Amacı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ev Alımı",
+        "Araç Alımı",
+        "Eğitim",
+        "Sağlık",
+        "Tatil",
+        "Evlilik",
+        "İş Kurma",
+        "Borç Konsolidasyonu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aktif",
+        "Pasif",
+        "Ödenmiş",
+        "Gecikmeli",
+        "Yeniden Yapılandırılmış"
+      ]
+    },
+    {
+      "key": "basvuruTarihi",
+      "label": "Başvuru Tarihi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "onayTarihi",
+      "label": "Onay Tarihi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "category": "Emlak>ArsaTarla>BağBahçe",
+  "pathKey": "Emlak>ArsaTarla>BağBahçe",
+  "attributes": [
+    {
+      "key": "mulk_tipi",
+      "label": "Mülk Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bağ",
+        "Bahçe",
+        "Bağ & Bahçe"
+      ]
+    },
+    {
+      "key": "alan",
+      "label": "Alan (m²)",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 1000000
+    },
+    {
+      "key": "imar_durumu",
+      "label": "İmar Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "İmarlı",
+        "İmarsız",
+        "İmar Planında"
+      ]
+    },
+    {
+      "key": "kullanim_amaci",
+      "label": "Kullanım Amacı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tarım",
+        "Bağcılık",
+        "Bahçıvanlık",
+        "Meyve Üretimi",
+        "Sebze Üretimi",
+        "Çiçekçilik",
+        "Fidanlık",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "toprak_tipi",
+      "label": "Toprak Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Killi",
+        "Kumlu",
+        "Tınlı",
+        "Humuslu",
+        "Kireçli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sulama_durumu",
+      "label": "Sulama Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Kuyu",
+        "Göl",
+        "Dere",
+        "Baraj"
+      ]
+    },
+    {
+      "key": "yol_durumu",
+      "label": "Yol Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Asfalt",
+        "Stabilize",
+        "Toprak",
+        "Yok"
+      ]
+    },
+    {
+      "key": "elektrik_durumu",
+      "label": "Elektrik Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Yakında"
+      ]
+    },
+    {
+      "key": "mevcutAgac",
+      "label": "Mevcut Ağaç",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Az",
+        "Çok"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

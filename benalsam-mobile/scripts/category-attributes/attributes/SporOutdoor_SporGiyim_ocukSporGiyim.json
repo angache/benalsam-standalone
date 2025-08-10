@@ -1,0 +1,149 @@
+{
+  "category": "SporOutdoor>SporGiyim>ÇocukSporGiyim",
+  "pathKey": "SporOutdoor>SporGiyim>ÇocukSporGiyim",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "giyimTuru",
+      "label": "Giyim Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Spor T-Shirt",
+        "Spor Şort",
+        "Spor Pantolon",
+        "Spor Etek",
+        "Spor Takım",
+        "Spor Mont",
+        "Spor Ayakkabı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "2-4 Yaş",
+        "5-7 Yaş",
+        "8-10 Yaş",
+        "11-13 Yaş",
+        "14-16 Yaş"
+      ]
+    },
+    {
+      "key": "beden",
+      "label": "Beden",
+      "type": "string",
+      "required": false,
+      "options": [
+        "2Y",
+        "3Y",
+        "4Y",
+        "5Y",
+        "6Y",
+        "7Y",
+        "8Y",
+        "9Y",
+        "10Y",
+        "11Y",
+        "12Y",
+        "13Y",
+        "14Y",
+        "15Y",
+        "16Y",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Polyester",
+        "Naylon",
+        "Spandeks",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Lacivert",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "desen",
+      "label": "Desen",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Düz",
+        "Çizgili",
+        "Kareli",
+        "Çiçekli",
+        "Geometrik",
+        "Hayvan Deseni",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

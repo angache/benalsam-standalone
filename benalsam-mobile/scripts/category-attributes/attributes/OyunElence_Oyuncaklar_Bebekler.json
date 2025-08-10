@@ -1,0 +1,131 @@
+{
+  "category": "Oyun & Eğlence > Oyuncaklar > Bebekler",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Barbie",
+        "Bratz",
+        "Baby Alive",
+        "American Girl",
+        "LOL Surprise",
+        "Disney Princess",
+        "Mattel",
+        "Hasbro",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "bebekTipi",
+      "label": "Bebek Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Barbie Bebek",
+        "Bebek Bebek",
+        "Prenses Bebek",
+        "Aksiyon Figürü",
+        "Koleksiyon Bebeği",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "age_range",
+      "label": "Yaş Aralığı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "0-3 yaş",
+        "3-6 yaş",
+        "6-12 yaş",
+        "12+ yaş",
+        "Koleksiyon"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Plastik",
+        "Vinil",
+        "Kumaş",
+        "Ahşap",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "category": "SağlıkGüzellik>BebekÇocukBakımı>BebekMaması",
+  "pathKey": "SağlıkGüzellik>BebekÇocukBakımı>BebekMaması",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aptamil",
+        "Bebelac",
+        "Hipp",
+        "Nestle",
+        "Similac",
+        "Enfamil",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "mamaTipi",
+      "label": "Mama Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Başlangıç Maması",
+        "Devam Maması",
+        "Büyüme Maması",
+        "Özel Mama",
+        "Organik Mama",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "0-6 Ay",
+        "6-12 Ay",
+        "12+ Ay",
+        "1-3 Yaş",
+        "3+ Yaş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık (gr)",
+      "type": "number",
+      "required": false,
+      "min": 100,
+      "max": 2000
+    },
+    {
+      "key": "adet",
+      "label": "Adet (Paket)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 50
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2020,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

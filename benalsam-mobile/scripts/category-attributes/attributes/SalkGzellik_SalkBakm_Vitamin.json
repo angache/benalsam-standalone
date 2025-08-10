@@ -1,0 +1,115 @@
+{
+  "category": "SağlıkGüzellik>SağlıkBakım>Vitamin",
+  "pathKey": "SağlıkGüzellik>SağlıkBakım>Vitamin",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Solgar",
+        "Nature Made",
+        "Now Foods",
+        "GNC",
+        "Centrum",
+        "Supradyn",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "vitaminTipi",
+      "label": "Vitamin Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Multivitamin",
+        "C Vitamini",
+        "D Vitamini",
+        "B Vitamini",
+        "A Vitamini",
+        "E Vitamini",
+        "K Vitamini",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "form",
+      "label": "Form",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tablet",
+        "Kapsül",
+        "Sıvı",
+        "Sprey",
+        "Sakız",
+        "Toz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "adet",
+      "label": "Adet (Paket)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 500
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2018,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

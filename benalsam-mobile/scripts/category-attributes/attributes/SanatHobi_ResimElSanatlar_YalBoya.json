@@ -1,0 +1,133 @@
+{
+  "category": "SanatHobi>ResimElSanatları>YağlıBoya",
+  "pathKey": "SanatHobi>ResimElSanatları>YağlıBoya",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Winsor & Newton",
+        "Daler Rowney",
+        "Royal Talens",
+        "Liquitex",
+        "Golden",
+        "Pebeo",
+        "Marabu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "boyaTipi",
+      "label": "Boya Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yağlı Boya",
+        "Akrilik",
+        "Suluboya",
+        "Guaş",
+        "Tempera",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Siyah",
+        "Kırmızı",
+        "Mavi",
+        "Sarı",
+        "Yeşil",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Pembe",
+        "Gri",
+        "Altın",
+        "Gümüş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "hacim",
+      "label": "Hacim (ml)",
+      "type": "number",
+      "required": false,
+      "min": 5,
+      "max": 500
+    },
+    {
+      "key": "kalite",
+      "label": "Kalite",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğrenci",
+        "Profesyonel",
+        "Artist",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

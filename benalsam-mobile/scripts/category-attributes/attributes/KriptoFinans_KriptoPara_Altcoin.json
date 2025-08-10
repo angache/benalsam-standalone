@@ -1,0 +1,167 @@
+{
+  "category": "KriptoFinans>KriptoPara>Altcoin",
+  "pathKey": "KriptoFinans>KriptoPara>Altcoin",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "islemTuru",
+      "label": "İşlem Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Alım",
+        "Satım",
+        "Takas",
+        "Transfer",
+        "Mining",
+        "Staking",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "altcoinTuru",
+      "label": "Altcoin Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Ethereum",
+        "Binance Coin",
+        "Cardano",
+        "Solana",
+        "Polkadot",
+        "Ripple",
+        "Dogecoin",
+        "Litecoin",
+        "Chainlink",
+        "Polygon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "blockchainAgi",
+      "label": "Blockchain Ağı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ethereum",
+        "Binance Smart Chain",
+        "Solana",
+        "Cardano",
+        "Polkadot",
+        "Polygon",
+        "Avalanche",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "tokenStandardi",
+      "label": "Token Standardı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "ERC-20",
+        "BEP-20",
+        "SPL",
+        "TRC-20",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "miktar",
+      "label": "Miktar",
+      "type": "number",
+      "required": true,
+      "min": 1e-8,
+      "max": 1000000
+    },
+    {
+      "key": "fiyat",
+      "label": "Fiyat (USD)",
+      "type": "number",
+      "required": false,
+      "min": 0.000001,
+      "max": 1000000
+    },
+    {
+      "key": "marketCap",
+      "label": "Market Cap (USD)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 1000000000000
+    },
+    {
+      "key": "platform",
+      "label": "Platform",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Binance",
+        "Coinbase",
+        "Kraken",
+        "Bitfinex",
+        "Huobi",
+        "OKX",
+        "Bybit",
+        "KuCoin",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "islemTarihi",
+      "label": "İşlem Tarihi",
+      "type": "date",
+      "required": true
+    },
+    {
+      "key": "komisyonOrani",
+      "label": "Komisyon Oranı (%)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10
+    },
+    {
+      "key": "riskSeviyesi",
+      "label": "Risk Seviyesi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Düşük",
+        "Orta",
+        "Yüksek",
+        "Çok Yüksek"
+      ]
+    },
+    {
+      "key": "likiditeDurumu",
+      "label": "Likidite Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yüksek",
+        "Orta",
+        "Düşük",
+        "Çok Düşük"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aktif",
+        "Pasif",
+        "Askıya Alındı",
+        "Tamamlandı"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

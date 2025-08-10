@@ -1,0 +1,118 @@
+{
+  "category": "Emlak>ArsaTarla>İmarlıArsa",
+  "pathKey": "Emlak>ArsaTarla>İmarlıArsa",
+  "attributes": [
+    {
+      "key": "mulk_tipi",
+      "label": "Mülk Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "İmarlı Arsa",
+        "Konut Arsa",
+        "Ticari Arsa",
+        "Karma Arsa"
+      ]
+    },
+    {
+      "key": "alan",
+      "label": "Alan (m²)",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 1000000
+    },
+    {
+      "key": "imar_durumu",
+      "label": "İmar Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "İmarlı",
+        "İmar Planında",
+        "İmar Değişikliği Bekleniyor"
+      ]
+    },
+    {
+      "key": "imarTipi",
+      "label": "İmar Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Konut",
+        "Ticari",
+        "Karma",
+        "Sanayi",
+        "Turizm",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "katAdedi",
+      "label": "Kat Adedi",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 50
+    },
+    {
+      "key": "kaks",
+      "label": "KAKS",
+      "type": "number",
+      "required": false,
+      "min": 0.1,
+      "max": 10
+    },
+    {
+      "key": "yol_durumu",
+      "label": "Yol Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Asfalt",
+        "Stabilize",
+        "Toprak",
+        "Yok"
+      ]
+    },
+    {
+      "key": "elektrik_durumu",
+      "label": "Elektrik Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Yakında"
+      ]
+    },
+    {
+      "key": "suDurumu",
+      "label": "Su Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Yakında"
+      ]
+    },
+    {
+      "key": "dogalgazDurumu",
+      "label": "Doğalgaz Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Yakında"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "expo": {
+    "name": "BenAlsamExpo",
+    "slug": "BenAlsamExpo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "owner": "angache",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a3f7e006-6962-4038-abc5-daabfe97ac5c"
+    },
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Konumunuzu almak için izin gerekiyor.",
+        "NSLocationAlwaysUsageDescription": "Konumunuzu almak için izin gerekiyor.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "googleServicesFile": "./assets/GoogleService-Info.plist",
+      "bundleIdentifier": "com.angachebenalsam"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "package": "com.angachebenalsam",
+      "softwareKeyboardLayoutMode": "pan",
+      "googleServicesFile": "./assets/google-services.json"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2188f2c5-e636-4606-8ca5-5927da790fa9"
+      }
+    },
+    "plugins": [
+      "expo-font",
+      "expo-navigation-bar",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#ffffff",
+          "sounds": [
+            "./assets/notification-sound.wav"
+          ]
+        }
+      ],
+      "expo-secure-store"
+    ]
+  }
+}

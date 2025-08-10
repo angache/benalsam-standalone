@@ -1,0 +1,132 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>DeğerliEşyalar>İmzalıEşya",
+  "pathKey": "KoleksiyonDeğerliEşyalar>DeğerliEşyalar>İmzalıEşya",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "imzaliEsyaTuru",
+      "label": "İmzalı Eşya Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Kitap",
+        "Poster",
+        "Fotoğraf",
+        "Kart",
+        "Plak",
+        "CD/DVD",
+        "Forma",
+        "Eşya",
+        "Sanat Eseri",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "imzalayanKisi",
+      "label": "İmzalayan Kişi",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "imzaTarihi",
+      "label": "İmza Tarihi",
+      "type": "date",
+      "required": false
+    },
+    {
+      "key": "imzaYeri",
+      "label": "İmza Yeri",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "sertifikaDurumu",
+      "label": "Sertifika Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Sertifikalı",
+        "Sertifikasız",
+        "Sertifika Mevcut",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "nadirlikSeviyesi",
+      "label": "Nadirlik Seviyesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çok Nadir",
+        "Nadir",
+        "Orta",
+        "Yaygın"
+      ]
+    },
+    {
+      "key": "degerAraligi",
+      "label": "Değer Aralığı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "100-500 TL",
+        "500-1000 TL",
+        "1000-5000 TL",
+        "5000-10000 TL",
+        "10000+ TL"
+      ]
+    },
+    {
+      "key": "korumaDurumu",
+      "label": "Koruma Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Restorasyon Gerekli"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Hasarlı"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1900,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

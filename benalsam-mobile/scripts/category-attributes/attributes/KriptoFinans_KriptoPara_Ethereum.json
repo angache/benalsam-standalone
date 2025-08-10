@@ -1,0 +1,64 @@
+{
+  "category": "KriptoFinans>KriptoPara>Ethereum",
+  "pathKey": "KriptoFinans>KriptoPara>Ethereum",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Platform/Borsa",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Token Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "tokenTuru",
+      "label": "Token Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "ERC-20",
+        "ERC-721",
+        "ERC-1155",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "miktar",
+      "label": "Miktar",
+      "type": "number",
+      "required": false,
+      "min": 0.000001,
+      "max": 1000000
+    },
+    {
+      "key": "fiyat",
+      "label": "Fiyat (USD)",
+      "type": "number",
+      "required": false,
+      "min": 0.000001,
+      "max": 100000
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aktif",
+        "Pasif",
+        "Kilitli"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,273 @@
+{
+  "category": "EvAletleriMobilya>EvAletleri>FırınOcak",
+  "pathKey": "EvAletleriMobilya>EvAletleri>FırınOcak",
+  "attributes": [
+    {
+      "key": "cihazTuru",
+      "label": "Cihaz Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Fırın",
+        "Ocak",
+        "Fırın-Ocak Kombi",
+        "Mikrodalga Fırın",
+        "Kombi Fırın"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Arçelik",
+        "Beko",
+        "Vestel",
+        "Samsung",
+        "LG",
+        "Bosch",
+        "Siemens",
+        "Whirlpool",
+        "Electrolux",
+        "Grundig",
+        "Profilo",
+        "Sharp",
+        "Hitachi",
+        "Panasonic",
+        "Miele",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "calisma_durumu",
+      "label": "Çalışma Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Sorunlu",
+        "Çalışmıyor"
+      ]
+    },
+    {
+      "key": "fiziksel_durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Çizikli",
+        "Kırık"
+      ]
+    },
+    {
+      "key": "bakim_gecmisi",
+      "label": "Bakım Geçmişi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Düzenli Bakım",
+        "Ara Sıra Bakım",
+        "Hiç Bakım Yapılmadı",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "montaj_durumu",
+      "label": "Montaj Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Montajlı",
+        "Montajsız",
+        "Kısmi Montaj",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "orijinallik",
+      "label": "Orijinallik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Orijinal",
+        "Taklit",
+        "Reprodüksiyon",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "enerji_sinifi",
+      "label": "Enerji Sınıfı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "A+++",
+        "A++",
+        "A+",
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ]
+    },
+    {
+      "key": "firinKapasitesi",
+      "label": "Fırın Kapasitesi (Litre)",
+      "type": "number",
+      "required": false,
+      "min": 20,
+      "max": 100
+    },
+    {
+      "key": "ocakTipi",
+      "label": "Ocak Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Gaz",
+        "Elektrik",
+        "İndüksiyon",
+        "Hibrit",
+        "Seramik"
+      ]
+    },
+    {
+      "key": "ocakGozSayisi",
+      "label": "Ocak Göz Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 2,
+      "max": 6
+    },
+    {
+      "key": "program_sayisi",
+      "label": "Program Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 3,
+      "max": 20
+    },
+    {
+      "key": "ozellikler",
+      "label": "Özellikler",
+      "type": "multiselect",
+      "required": false,
+      "options": [
+        "Dijital Ekran",
+        "LED Aydınlatma",
+        "Sessiz Çalışma",
+        "Hızlı Isınma",
+        "Eco Program",
+        "Buharlı Pişirme",
+        "Grill Fonksiyonu",
+        "Akıllı Kontrol",
+        "WiFi Bağlantısı",
+        "Kendi Kendini Temizleme",
+        "Çocuk Kilidi",
+        "Gecikme Başlatma",
+        "Sıcaklık Kontrolü",
+        "Zamanlayıcı",
+        "Turbo Pişirme",
+        "Alt Üst Pişirme",
+        "Konveksiyon",
+        "Izgara",
+        "Çoklu Pişirme",
+        "Dondurulmuş Gıda Programı"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kullanım_suresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 yıldan az",
+        "1-3 yıl",
+        "3-5 yıl",
+        "5-10 yıl",
+        "10 yıldan fazla"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "multiselect",
+      "required": false,
+      "options": [
+        "Kullanım Kılavuzu",
+        "Garanti Belgesi",
+        "Fatura",
+        "Fırın Tepsisi",
+        "Izgara Teli",
+        "Döner Şiş",
+        "Su Kabı",
+        "Termometre",
+        "Montaj Malzemeleri",
+        "Gaz Hortumu",
+        "Gaz Regülatörü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

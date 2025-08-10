@@ -1,0 +1,105 @@
+{
+  "category": "KriptoFinans>FinansalHizmetler>Sigorta",
+  "pathKey": "KriptoFinans>FinansalHizmetler>Sigorta",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Sigorta Şirketi",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Poliçe Numarası",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "sigortaTuru",
+      "label": "Sigorta Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Hayat Sigortası",
+        "Sağlık Sigortası",
+        "Araç Sigortası",
+        "Konut Sigortası",
+        "İşyeri Sigortası",
+        "Seyahat Sigortası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "policeDurumu",
+      "label": "Poliçe Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aktif",
+        "Pasif",
+        "İptal Edilmiş",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "baslangicTarihi",
+      "label": "Başlangıç Tarihi",
+      "type": "date",
+      "required": false
+    },
+    {
+      "key": "bitisTarihi",
+      "label": "Bitiş Tarihi",
+      "type": "date",
+      "required": false
+    },
+    {
+      "key": "primTutari",
+      "label": "Prim Tutarı (TL)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 100000
+    },
+    {
+      "key": "teminatTutari",
+      "label": "Teminat Tutarı (TL)",
+      "type": "number",
+      "required": false,
+      "min": 1000,
+      "max": 10000000
+    },
+    {
+      "key": "odemeSikligi",
+      "label": "Ödeme Sıklığı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Aylık",
+        "3 Aylık",
+        "6 Aylık",
+        "Yıllık",
+        "Tek Seferlik"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Devam Ediyor",
+        "Tamamlandı",
+        "İptal Edildi"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

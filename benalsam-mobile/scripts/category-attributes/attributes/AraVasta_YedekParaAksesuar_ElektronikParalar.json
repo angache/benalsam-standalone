@@ -1,0 +1,120 @@
+{
+  "category": "AraçVasıta>YedekParçaAksesuar>ElektronikParçalar",
+  "pathKey": "AraçVasıta>YedekParçaAksesuar>ElektronikParçalar",
+  "attributes": [
+    {
+      "key": "elektronikTipi",
+      "label": "Elektronik Parça Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Radyo/CD Çalar",
+        "Navigasyon",
+        "Geri Görüş Kamerası",
+        "Park Sensörü",
+        "Alarm Sistemi",
+        "HID/LED Far",
+        "Sinyal Lambası",
+        "Fren Lambası",
+        "Gösterge Paneli",
+        "Şarj Cihazı",
+        "Hoparlör",
+        "Amplifikatör",
+        "Subwoofer",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "arac_tipi",
+      "label": "Araç Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Otomobil",
+        "SUV/Jip",
+        "Ticari Araç",
+        "Motosiklet",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Pioneer",
+        "Kenwood",
+        "Alpine",
+        "JVC",
+        "Sony",
+        "Blaupunkt",
+        "Clarion",
+        "Garmin",
+        "TomTom",
+        "Bosch",
+        "Philips",
+        "Osram",
+        "OEM",
+        "Universal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "yil",
+      "label": "Model Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1950,
+      "max": 2024
+    },
+    {
+      "key": "voltaj",
+      "label": "Voltaj",
+      "type": "string",
+      "required": false,
+      "options": [
+        "12V",
+        "24V",
+        "220V",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

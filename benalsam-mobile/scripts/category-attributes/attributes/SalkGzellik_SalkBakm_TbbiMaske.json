@@ -1,0 +1,141 @@
+{
+  "category": "SağlıkGüzellik>SağlıkBakım>TıbbiMaske",
+  "pathKey": "SağlıkGüzellik>SağlıkBakım>TıbbiMaske",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "3M",
+        "B-good",
+        "Molfix",
+        "Medizer",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "maskeTipi",
+      "label": "Maske Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Cerrahi Maske",
+        "N95",
+        "FFP2",
+        "FFP3",
+        "Bez Maske",
+        "Çocuk Maskesi",
+        "Yıkanabilir Maske",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "katSayisi",
+      "label": "Kat Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 5
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Mavi",
+        "Siyah",
+        "Pembe",
+        "Yeşil",
+        "Gri",
+        "Mor",
+        "Turuncu",
+        "Kırmızı",
+        "Sarı",
+        "Kahverengi",
+        "Desenli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2018,
+      "max": 2024
+    },
+    {
+      "key": "adet",
+      "label": "Adet (Paket)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 1000
+    },
+    {
+      "key": "standart",
+      "label": "Standart",
+      "type": "string",
+      "required": false,
+      "options": [
+        "EN 14683",
+        "EN 149",
+        "ISO 9001",
+        "CE",
+        "FDA",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

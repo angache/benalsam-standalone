@@ -1,0 +1,84 @@
+{
+  "category": "Endüstri > Makineleri > Telekomünikasyon Ekipmanları",
+  "pathKey": "Endüstri>Makineleri>TelekomünikasyonEkipmanları",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "ekipmanTuru",
+      "label": "Ekipman Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Anten",
+        "Verici",
+        "Alıcı",
+        "Repeater",
+        "Switch",
+        "Router",
+        "Modem",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "frekans",
+      "label": "Frekans (MHz/GHz)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "guc",
+      "label": "Güç (W)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 10000
+    },
+    {
+      "key": "kapsamaAlani",
+      "label": "Kapsama Alanı (km)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 100
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

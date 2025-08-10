@@ -1,0 +1,198 @@
+{
+  "category": "SanatHobi>ResimElSanatları>Quilling",
+  "pathKey": "SanatHobi>ResimElSanatları>Quilling",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Quilled Creations",
+        "Paper Source",
+        "Martha Stewart",
+        "Craftsy",
+        "Amazon",
+        "Etsy",
+        "Türk Markası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Quilling Kağıdı",
+        "Quilling Aleti",
+        "Quilling Seti",
+        "Quilling Yapıştırıcısı",
+        "Quilling Şablonu",
+        "Quilling Çerçevesi",
+        "Quilling Kiti",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1/8 inch",
+        "1/4 inch",
+        "3/8 inch",
+        "1/2 inch",
+        "3/4 inch",
+        "1 inch",
+        "Küçük",
+        "Orta",
+        "Büyük",
+        "Set"
+      ]
+    },
+    {
+      "key": "kalite",
+      "label": "Kalite",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğrenci",
+        "Profesyonel",
+        "Premium",
+        "Lüks"
+      ]
+    },
+    {
+      "key": "kullanim_suresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Hiç Kullanılmadı",
+        "1-5 Kez",
+        "5-10 Kez",
+        "10-20 Kez",
+        "20+ Kez"
+      ]
+    },
+    {
+      "key": "eksik_parca",
+      "label": "Eksik Parça Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tam Set",
+        "Eksik Parça Var",
+        "Kısmen Eksik",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "yapistiriciDurumu",
+      "label": "Yapıştırıcı Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var ve Kullanılabilir",
+        "Var ama Kurumuş",
+        "Yok",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "sablonDurumu",
+      "label": "Şablon Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var ve Temiz",
+        "Var ama Yıpranmış",
+        "Yok",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "renkCesidi",
+      "label": "Renk Çeşidi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tek Renk",
+        "2-5 Renk",
+        "6-10 Renk",
+        "11-20 Renk",
+        "20+ Renk",
+        "Karışık"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Siyah",
+        "Kırmızı",
+        "Mavi",
+        "Sarı",
+        "Yeşil",
+        "Turuncu",
+        "Mor",
+        "Pembe",
+        "Kahverengi",
+        "Gri",
+        "Bej",
+        "Lacivert",
+        "Bordo",
+        "Altın",
+        "Gümüş",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kağıt",
+        "Karton",
+        "Metal",
+        "Plastik",
+        "Ahşap",
+        "Karışık"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

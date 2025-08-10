@@ -1,0 +1,208 @@
+{
+  "category": "ModaGiyim>KadınGiyim>Gömlek",
+  "pathKey": "ModaGiyim>KadınGiyim>Gömlek",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "gomlekTuru",
+      "label": "Gömlek Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Klasik Gömlek",
+        "Spor Gömlek",
+        "Bluz",
+        "Tunik",
+        "Crop Top",
+        "Uzun Kollu",
+        "Kısa Kollu",
+        "Kolsuz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Polyester",
+        "İpek",
+        "Keten",
+        "Viskon",
+        "Yün",
+        "Keten",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "beden",
+      "label": "Beden",
+      "type": "string",
+      "required": false,
+      "options": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "3XL",
+        "4XL",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boy",
+      "label": "Boy",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kısa",
+        "Normal",
+        "Uzun",
+        "Özel"
+      ]
+    },
+    {
+      "key": "yakalikTuru",
+      "label": "Yakalık Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Klasik",
+        "V",
+        "Yuvarlak",
+        "Kare",
+        "Asimetrik",
+        "Yok",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kollukTuru",
+      "label": "Kolluk Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Uzun Kollu",
+        "Kısa Kollu",
+        "Kolsuz",
+        "3/4 Kol",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ceketUyumlulugu",
+      "label": "Ceket Uyumluluğu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Evet",
+        "Hayır",
+        "Kısmen"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Bej",
+        "Lacivert",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "desen",
+      "label": "Desen",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Düz",
+        "Çizgili",
+        "Kareli",
+        "Çiçekli",
+        "Geometrik",
+        "Hayvan Deseni",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yikamaTalimatlari",
+      "label": "Yıkama Talimatları",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kuru Temizleme",
+        "Elde Yıkama",
+        "Makinede Yıkama",
+        "Yıkama Yok"
+      ]
+    },
+    {
+      "key": "orijinallik",
+      "label": "Orijinallik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Orijinal",
+        "Taklit",
+        "Reprodüksiyon",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

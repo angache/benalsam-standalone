@@ -1,0 +1,73 @@
+{
+  "category": "KriptoFinans>YatırımFırsatları>AltınGümüş",
+  "pathKey": "KriptoFinans>YatırımFırsatları>AltınGümüş",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Şirket/Dealer",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Ürün Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "metalTuru",
+      "label": "Metal Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Altın",
+        "Gümüş",
+        "Platin",
+        "Paladyum",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık (gram)",
+      "type": "number",
+      "required": false,
+      "min": 0.1,
+      "max": 10000
+    },
+    {
+      "key": "saflik",
+      "label": "Saflık (Karat)",
+      "type": "number",
+      "required": false,
+      "min": 8,
+      "max": 24
+    },
+    {
+      "key": "fiyat",
+      "label": "Fiyat (TL)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 1000000
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Satışta",
+        "Rezerve",
+        "Satıldı"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

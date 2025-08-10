@@ -1,0 +1,170 @@
+{
+  "category": "OyunEğlence>VideoOyunları>PCOyunları",
+  "pathKey": "OyunEğlence>VideoOyunları>PCOyunları",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "oyunTuru",
+      "label": "Oyun Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aksiyon",
+        "Macera",
+        "RPG",
+        "Strateji",
+        "Simülasyon",
+        "Spor",
+        "Yarış",
+        "Puzzle",
+        "FPS",
+        "MMO",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "platform",
+      "label": "Platform",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Steam",
+        "Epic Games",
+        "Origin",
+        "Uplay",
+        "GOG",
+        "Battle.net",
+        "Fiziksel",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "fizikselDijital",
+      "label": "Fiziksel/Dijital",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Fiziksel",
+        "Dijital",
+        "Her İkisi"
+      ]
+    },
+    {
+      "key": "sistemGereksinimleri",
+      "label": "Sistem Gereksinimleri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Minimum",
+        "Önerilen",
+        "Yüksek",
+        "Çok Yüksek"
+      ]
+    },
+    {
+      "key": "cokOyunculu",
+      "label": "Çok Oyunculu Desteği",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tek Oyunculu",
+        "Çok Oyunculu",
+        "Her İkisi",
+        "Yok"
+      ]
+    },
+    {
+      "key": "dlcDurumu",
+      "label": "DLC Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "DLC Var",
+        "DLC Yok",
+        "Sezon Pass Var",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "yasSiniri",
+      "label": "Yaş Sınırı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "3+",
+        "7+",
+        "12+",
+        "16+",
+        "18+",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "oyunDili",
+      "label": "Oyun Dili",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Türkçe",
+        "İngilizce",
+        "Almanca",
+        "Fransızca",
+        "İspanyolca",
+        "Çok Dilli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kullanımSuresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 yıldan az",
+        "1-3 yıl",
+        "3-5 yıl",
+        "5-10 yıl",
+        "10 yıldan fazla"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

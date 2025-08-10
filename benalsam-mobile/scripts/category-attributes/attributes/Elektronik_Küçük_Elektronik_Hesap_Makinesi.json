@@ -1,0 +1,151 @@
+{
+  "category": "Elektronik>KüçükElektronik>HesapMakinesi",
+  "pathKey": "Elektronik>KüçükElektronik>HesapMakinesi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Casio",
+        "Sharp",
+        "Canon",
+        "Texas Instruments",
+        "HP",
+        "Canon",
+        "Citizen",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "tip",
+      "label": "Hesap Makinesi Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bilimsel Hesap Makinesi",
+        "Grafik Hesap Makinesi",
+        "Basit Hesap Makinesi",
+        "Finansal Hesap Makinesi",
+        "Mühendislik Hesap Makinesi",
+        "Öğrenci Hesap Makinesi",
+        "Ofis Hesap Makinesi"
+      ]
+    },
+    {
+      "key": "ekran_tipi",
+      "label": "Ekran Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "LCD",
+        "LED",
+        "OLED",
+        "Dokunmatik"
+      ]
+    },
+    {
+      "key": "pil_tipi",
+      "label": "Pil Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "AAA",
+        "AA",
+        "CR2032",
+        "Güneş Enerjisi",
+        "Şarj Edilebilir",
+        "Kombinasyon"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "multiselect",
+      "required": false,
+      "options": [
+        "Kılıf",
+        "Kullanım Kılavuzu",
+        "Pil",
+        "Şarj Cihazı",
+        "USB Kablosu",
+        "Yedek Kalem"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

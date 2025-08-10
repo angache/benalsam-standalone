@@ -1,0 +1,31 @@
+.input-glow:focus, 
+input:focus, 
+textarea:focus, 
+select:focus {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px color-mix(in srgb, hsl(var(--primary)) 25%, transparent 75%), 0 0 0 0px rgba(0,0,0,0.05) inset;
+}
+input, textarea, select {
+  border-radius: calc(var(--radius) - 3px);
+  border-width: 1px;
+  border-color: hsl(var(--border));
+  background-color: hsl(var(--input));
+}
+[data-theme="light"] input, [data-theme="light"] textarea, [data-theme="light"] select {
+  border-color: hsl(var(--border-light)); 
+}
+[data-theme="dark"] input, [data-theme="dark"] textarea, [data-theme="dark"] select {
+  border-color: hsl(var(--border-dark)); 
+}
+
+.bg-input {
+  background-color: hsl(var(--input));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 3px);
+}
+.bg-input::placeholder { color: hsl(var(--muted-foreground)); }
+.bg-input:focus {
+   border-color: hsl(var(--primary));
+   box-shadow: 0 0 0 2px color-mix(in srgb, hsl(var(--primary)) 25%, transparent 75%);
+}

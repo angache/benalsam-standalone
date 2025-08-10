@@ -1,0 +1,140 @@
+{
+  "category": "KriptoFinans>YatırımFırsatları>HisseSenedi",
+  "pathKey": "KriptoFinans>YatırımFırsatları>HisseSenedi",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "hisseKodu",
+      "label": "Hisse Kodu",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "sirketAdi",
+      "label": "Şirket Adı",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "hisseTuru",
+      "label": "Hisse Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Adi Hisse",
+        "İmtiyazlı Hisse",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "borsa",
+      "label": "Borsa",
+      "type": "string",
+      "required": true,
+      "options": [
+        "BIST",
+        "NYSE",
+        "NASDAQ",
+        "LSE",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sektor",
+      "label": "Sektör",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Teknoloji",
+        "Finans",
+        "Sağlık",
+        "Enerji",
+        "İnşaat",
+        "Gıda",
+        "Otomotiv",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "islemTuru",
+      "label": "İşlem Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Alım",
+        "Satım",
+        "Transfer"
+      ]
+    },
+    {
+      "key": "miktar",
+      "label": "Miktar (Adet)",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 10000000
+    },
+    {
+      "key": "fiyat",
+      "label": "Fiyat (TL/USD)",
+      "type": "number",
+      "required": true,
+      "min": 0.01,
+      "max": 1000000
+    },
+    {
+      "key": "komisyon",
+      "label": "Komisyon (%)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10
+    },
+    {
+      "key": "islemTarihi",
+      "label": "İşlem Tarihi",
+      "type": "date",
+      "required": true
+    },
+    {
+      "key": "temettuDurumu",
+      "label": "Temettü Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Temettü Ödüyor",
+        "Temettü Ödemiyor",
+        "Belirsiz"
+      ]
+    },
+    {
+      "key": "riskSeviyesi",
+      "label": "Risk Seviyesi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Düşük",
+        "Orta",
+        "Yüksek",
+        "Çok Yüksek"
+      ]
+    },
+    {
+      "key": "islemDurumu",
+      "label": "İşlem Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Beklemede",
+        "Tamamlandı",
+        "İptal"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

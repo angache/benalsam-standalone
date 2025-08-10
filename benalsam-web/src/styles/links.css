@@ -1,0 +1,14 @@
+[data-theme="light"] a:not(.btn-primary):not(.btn-secondary-amazon):not([class*="hover:text-primary"]) {
+  color: hsl(var(--secondary-light));
+}
+[data-theme="light"] a:hover:not(.btn-primary):not(.btn-secondary-amazon):not([class*="hover:text-primary"]) {
+  color: hsl(var(--primary-light)); 
+  text-decoration: underline;
+}
+[data-theme="dark"] a:not([class*="btn-"]):not([class*="hover:text-"]) {
+  color: hsl(var(--primary-dark));
+}
+[data-theme="dark"] a:hover:not([class*="btn-"]):not([class*="hover:text-"]) {
+  color: color-mix(in srgb, hsl(var(--primary-dark)) 80%, white 20%);
+  text-decoration: underline;
+}

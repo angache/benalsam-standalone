@@ -1,0 +1,86 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>DeğerliEşyalar>Mücevher",
+  "pathKey": "KoleksiyonDeğerliEşyalar>DeğerliEşyalar>Mücevher",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka/Üretici",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Mücevher Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "mucevherTuru",
+      "label": "Mücevher Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yüzük",
+        "Kolye",
+        "Küpe",
+        "Bilezik",
+        "Broş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Altın",
+        "Gümüş",
+        "Platin",
+        "Palladyum",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ayar",
+      "label": "Ayar",
+      "type": "string",
+      "required": false,
+      "options": [
+        "24 Ayar",
+        "22 Ayar",
+        "18 Ayar",
+        "14 Ayar",
+        "925 Ayar",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1900,
+      "max": 2024
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

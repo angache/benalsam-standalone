@@ -1,0 +1,129 @@
+{
+  "category": "SağlıkGüzellik>BebekÇocukBakımı>BebekBakımı",
+  "pathKey": "SağlıkGüzellik>BebekÇocukBakımı>BebekBakımı",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Johnson's",
+        "Mustela",
+        "Aveeno",
+        "Cetaphil",
+        "Eucerin",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTipi",
+      "label": "Ürün Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bebek Şampuanı",
+        "Bebek Losyonu",
+        "Bebek Kremi",
+        "Bebek Yağı",
+        "Bebek Sabunu",
+        "Bebek Mendili",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "0-6 Ay",
+        "6-12 Ay",
+        "12-24 Ay",
+        "2-4 Yaş",
+        "4+ Yaş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "hacim",
+      "label": "Hacim (ml)",
+      "type": "number",
+      "required": false,
+      "min": 50,
+      "max": 1000
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Mavi",
+        "Pembe",
+        "Yeşil",
+        "Sarı",
+        "Turuncu",
+        "Mor",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2018,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

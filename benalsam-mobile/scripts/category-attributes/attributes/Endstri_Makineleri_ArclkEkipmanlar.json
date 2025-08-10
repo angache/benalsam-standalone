@@ -1,0 +1,126 @@
+{
+  "category": "İşEndüstri>İşMakineleri>ArıcılıkEkipmanları",
+  "pathKey": "İşEndüstri>İşMakineleri>ArıcılıkEkipmanları",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Dadant",
+        "Langstroth",
+        "Warre",
+        "Top Bar",
+        "Flow Hive",
+        "Mann Lake",
+        "Betterbee",
+        "Brushy Mountain",
+        "Walter T. Kelley",
+        "Miller",
+        "Türk Markası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "ekipmanTuru",
+      "label": "Ekipman Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Kovan",
+        "Çerçeve",
+        "Bal Süzme Makinesi",
+        "Arıcı Elbisesi",
+        "Maske",
+        "Eldiven",
+        "Duman Makinesi",
+        "Bal Mumu",
+        "Arı Besleme Kabı",
+        "Kovan Taşıma Arabası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ahşap",
+        "Plastik",
+        "Metal",
+        "Kumaş",
+        "Cam",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük",
+        "Orta",
+        "Büyük",
+        "Standart"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kullanımSuresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 yıldan az",
+        "1-3 yıl",
+        "3-5 yıl",
+        "5-10 yıl",
+        "10 yıldan fazla"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

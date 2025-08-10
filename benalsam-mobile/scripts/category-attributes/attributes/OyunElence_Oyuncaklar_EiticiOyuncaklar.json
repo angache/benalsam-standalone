@@ -1,0 +1,89 @@
+{
+  "category": "OyunEğlence>Oyuncaklar>EğiticiOyuncaklar",
+  "pathKey": "OyunEğlence>Oyuncaklar>EğiticiOyuncaklar",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Oyuncak Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "egiticiTuru",
+      "label": "Eğitici Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Matematik",
+        "Bilim",
+        "Dil",
+        "Sanat",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "0-2 Yaş",
+        "3-5 Yaş",
+        "6-8 Yaş",
+        "9-12 Yaş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ahşap",
+        "Plastik",
+        "Kumaş",
+        "Kağıt",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük",
+        "Orta",
+        "Büyük",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

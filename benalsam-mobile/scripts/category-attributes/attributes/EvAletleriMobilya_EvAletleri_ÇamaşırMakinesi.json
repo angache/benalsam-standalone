@@ -1,0 +1,115 @@
+{
+  "category": "Ev Aletleri & Mobilya > Ev Aletleri > Çamaşır Makinesi",
+  "pathKey": "EvAletleriMobilya>EvAletleri>ÇamaşırMakinesi",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "tip",
+      "label": "Tip",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Çamaşır Makinesi",
+        "Kurutmalı Çamaşır Makinesi",
+        "Çamaşır Kurutma Makinesi",
+        "Mini Çamaşır Makinesi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kapasite",
+      "label": "Kapasite (kg)",
+      "type": "number",
+      "required": true,
+      "min": 3,
+      "max": 20
+    },
+    {
+      "key": "enerjiSinifi",
+      "label": "Enerji Sınıfı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "A+++",
+        "A++",
+        "A+",
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ]
+    },
+    {
+      "key": "devirHizi",
+      "label": "Devir Hızı (rpm)",
+      "type": "number",
+      "required": false,
+      "min": 400,
+      "max": 2000
+    },
+    {
+      "key": "programSayisi",
+      "label": "Program Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Gri",
+        "Siyah",
+        "Mavi",
+        "Kırmızı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

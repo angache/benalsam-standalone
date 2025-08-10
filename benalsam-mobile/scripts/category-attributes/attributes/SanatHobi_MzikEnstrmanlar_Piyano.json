@@ -1,0 +1,174 @@
+{
+  "category": "SanatHobi>MüzikEnstrümanları>Piyano",
+  "pathKey": "SanatHobi>MüzikEnstrümanları>Piyano",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yamaha",
+        "Kawai",
+        "Steinway & Sons",
+        "Bösendorfer",
+        "Bechstein",
+        "Fazioli",
+        "Petrof",
+        "Schimmel",
+        "Blüthner",
+        "Grotrian",
+        "Roland",
+        "Casio",
+        "Korg",
+        "Nord",
+        "Türk Markası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "tur",
+      "label": "Piyano Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Akustik Piyano",
+        "Dijital Piyano",
+        "Elektronik Piyano",
+        "Konsol Piyano",
+        "Baby Grand",
+        "Grand Piyano",
+        "Upright Piyano",
+        "Spinet Piyano",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük",
+        "Orta",
+        "Büyük",
+        "Profesyonel",
+        "Konser"
+      ]
+    },
+    {
+      "key": "tusSayisi",
+      "label": "Tuş Sayısı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "61",
+        "76",
+        "88",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "pedalSayisi",
+      "label": "Pedal Sayısı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 Pedal",
+        "2 Pedal",
+        "3 Pedal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "akortDurumu",
+      "label": "Akort Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Akortlu",
+        "Akort Gerekli",
+        "Kısmen Akortlu",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "mekanikDurumu",
+      "label": "Mekanik Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Bakım Gerekli",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "sesKalitesi",
+      "label": "Ses Kalitesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "Çok İyi",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Garantili",
+        "Garantisiz",
+        "Kısmi Garanti",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ahşap",
+        "MDF",
+        "Plastik",
+        "Metal",
+        "Karışık"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1900,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

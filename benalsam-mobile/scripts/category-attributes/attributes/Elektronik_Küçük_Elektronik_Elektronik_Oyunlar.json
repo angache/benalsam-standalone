@@ -1,0 +1,171 @@
+{
+  "category": "Elektronik>KüçükElektronik>ElektronikOyunlar",
+  "pathKey": "Elektronik>KüçükElektronik>ElektronikOyunlar",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Nintendo",
+        "Tamagotchi",
+        "Bandai",
+        "Konami",
+        "Sega",
+        "Hasbro",
+        "Mattel",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "tip",
+      "label": "Oyun Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sanal Evcil Hayvan",
+        "Puzzle Oyunu",
+        "Eğitici Oyun",
+        "Spor Oyunu",
+        "Aksiyon Oyunu",
+        "Strateji Oyunu",
+        "RPG Oyunu",
+        "Simülasyon Oyunu",
+        "Arcade Oyunu"
+      ]
+    },
+    {
+      "key": "ekran_tipi",
+      "label": "Ekran Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "LCD",
+        "LED",
+        "OLED",
+        "Dokunmatik",
+        "Renkli",
+        "Siyah-Beyaz"
+      ]
+    },
+    {
+      "key": "pil_tipi",
+      "label": "Pil Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "AAA",
+        "AA",
+        "CR2032",
+        "Güneş Enerjisi",
+        "Şarj Edilebilir",
+        "Kombinasyon"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yas_grubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "3+",
+        "6+",
+        "12+",
+        "16+",
+        "18+",
+        "Tüm Yaşlar"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "multiselect",
+      "required": false,
+      "options": [
+        "Kılıf",
+        "Kullanım Kılavuzu",
+        "Pil",
+        "Şarj Cihazı",
+        "USB Kablosu",
+        "Yedek Kalem",
+        "Kulaklık",
+        "Hoparlör"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

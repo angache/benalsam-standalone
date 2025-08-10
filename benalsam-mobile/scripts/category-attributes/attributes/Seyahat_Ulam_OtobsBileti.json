@@ -1,0 +1,89 @@
+{
+  "category": "Seyahat>Ulaşım>OtobüsBileti",
+  "pathKey": "Seyahat>Ulaşım>OtobüsBileti",
+  "attributes": [
+    {
+      "key": "sirketAdi",
+      "label": "Şirket Adı",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Metro Turizm",
+        "Kamil Koç",
+        "Ulusoy",
+        "Pamukkale",
+        "Varan",
+        "Nevşehir",
+        "Efe Tur",
+        "Güven Turizm",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "guzergah",
+      "label": "Güzergah",
+      "type": "string",
+      "required": true,
+      "options": [
+        "İstanbul-Ankara",
+        "İstanbul-İzmir",
+        "İstanbul-Antalya",
+        "Ankara-İzmir",
+        "Ankara-Antalya",
+        "İzmir-Antalya",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "tarih",
+      "label": "Tarih",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "saat",
+      "label": "Saat",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "koltukTuru",
+      "label": "Koltuk Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Standart",
+        "Premium",
+        "VIP",
+        "Business",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "fiyat",
+      "label": "Fiyat (TL)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 1000
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Müsait",
+        "Rezerve",
+        "Satıldı",
+        "İptal"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

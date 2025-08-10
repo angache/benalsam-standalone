@@ -1,0 +1,81 @@
+{
+  "category": "Endüstri > Makineleri > Orman Ekipmanları",
+  "pathKey": "Endüstri>Makineleri>OrmanEkipmanları",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "ekipmanTuru",
+      "label": "Ekipman Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Oduncu Testeresi",
+        "Motorlu Testere",
+        "Odun Kırıcı",
+        "Odun Taşıyıcı",
+        "Orman Traktörü",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "guc",
+      "label": "Güç (HP/kW)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 500
+    },
+    {
+      "key": "kullanimAlani",
+      "label": "Kullanım Alanı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük Orman",
+        "Orta Orman",
+        "Büyük Orman",
+        "Ticari",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

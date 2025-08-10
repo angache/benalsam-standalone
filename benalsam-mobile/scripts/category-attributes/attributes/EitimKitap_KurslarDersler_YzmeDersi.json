@@ -1,0 +1,95 @@
+{
+  "category": "EğitimKitap>KurslarDersler>YüzmeDersi",
+  "pathKey": "EğitimKitap>KurslarDersler>YüzmeDersi",
+  "attributes": [
+    {
+      "key": "hizmet_tipi",
+      "label": "Hizmet Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Birebir Ders",
+        "Grup Dersi",
+        "Online Ders",
+        "Hibrit Ders",
+        "Özel Ders",
+        "Yüzme Kursu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Profesyonel",
+        "Tüm Seviyeler"
+      ]
+    },
+    {
+      "key": "yas_grubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çocuk (3-12)",
+        "Genç (13-17)",
+        "Yetişkin (18+)",
+        "Tüm Yaşlar"
+      ]
+    },
+    {
+      "key": "deneyim_yili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "egitim_durumu",
+      "label": "Eğitim Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yüzme Eğitmeni",
+        "Spor Akademisi",
+        "Beden Eğitimi",
+        "Profesyonel Yüzücü",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ders_yeri",
+      "label": "Ders Yeri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Havuz",
+        "Öğrenci Evi",
+        "Öğretmen Evi",
+        "Spor Salonu",
+        "Online",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "saat_ucreti",
+      "label": "Saat Ücreti (TL)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

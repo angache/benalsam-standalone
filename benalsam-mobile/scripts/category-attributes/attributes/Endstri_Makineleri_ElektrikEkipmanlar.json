@@ -1,0 +1,138 @@
+{
+  "category": "İşEndüstri>İşMakineleri>ElektrikEkipmanları",
+  "pathKey": "İşEndüstri>İşMakineleri>ElektrikEkipmanları",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Siemens",
+        "ABB",
+        "Schneider Electric",
+        "Eaton",
+        "Legrand",
+        "Hager",
+        "Bticino",
+        "Viko",
+        "Makel",
+        "Kale",
+        "Beko",
+        "Arçelik",
+        "Vestel",
+        "Bosch",
+        "Hitachi",
+        "Mitsubishi",
+        "Toshiba",
+        "Panasonic",
+        "LG",
+        "Samsung",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "ekipmanTuru",
+      "label": "Ekipman Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Jeneratör",
+        "Transformatör",
+        "Şalt",
+        "Kablo",
+        "Pano",
+        "Motor",
+        "Pompa",
+        "Kompresör",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "guc",
+      "label": "Güç (kW/HP)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "voltaj",
+      "label": "Voltaj",
+      "type": "string",
+      "required": false,
+      "options": [
+        "220V",
+        "380V",
+        "400V",
+        "600V",
+        "1000V",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "frekans",
+      "label": "Frekans (Hz)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "50Hz",
+        "60Hz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kullanımSuresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 yıldan az",
+        "1-3 yıl",
+        "3-5 yıl",
+        "5-10 yıl",
+        "10 yıldan fazla"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

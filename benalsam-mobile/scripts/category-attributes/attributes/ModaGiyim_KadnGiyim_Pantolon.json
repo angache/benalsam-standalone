@@ -1,0 +1,143 @@
+{
+  "category": "ModaGiyim>KadınGiyim>Pantolon",
+  "pathKey": "ModaGiyim>KadınGiyim>Pantolon",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "pantolonTuru",
+      "label": "Pantolon Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Kot Pantolon",
+        "Klasik Pantolon",
+        "Etek Pantolon",
+        "Şort",
+        "Tayt",
+        "Legging",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "beden",
+      "label": "Beden",
+      "type": "string",
+      "required": true,
+      "options": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "XXXL",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "belOlcusu",
+      "label": "Bel Ölçüsü (cm)",
+      "type": "number",
+      "required": false,
+      "min": 60,
+      "max": 120
+    },
+    {
+      "key": "bacakBoyu",
+      "label": "Bacak Boyu (cm)",
+      "type": "number",
+      "required": false,
+      "min": 70,
+      "max": 120
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Polyester",
+        "Keten",
+        "Yün",
+        "İpek",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Lacivert",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "desen",
+      "label": "Desen",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Düz",
+        "Çizgili",
+        "Kareli",
+        "Çiçekli",
+        "Geometrik",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,223 @@
+{
+  "category": "SanatHobi>ResimElSanatları>Suluboya",
+  "pathKey": "SanatHobi>ResimElSanatları>Suluboya",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Winsor & Newton",
+        "Schmincke",
+        "Daniel Smith",
+        "M. Graham",
+        "Holbein",
+        "Sennelier",
+        "Daler Rowney",
+        "Van Gogh",
+        "Rembrandt",
+        "Maimeri",
+        "Lukas",
+        "White Nights",
+        "St. Petersburg",
+        "Türk Markası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyaTuru",
+      "label": "Boya Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tek Renk",
+        "Set",
+        "Palet",
+        "Tüp",
+        "Pan",
+        "Stick",
+        "Sıvı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kalite",
+      "label": "Kalite",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Öğrenci",
+        "Profesyonel",
+        "Artist",
+        "Premium",
+        "Lüks"
+      ]
+    },
+    {
+      "key": "kullanim_suresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Hiç Kullanılmadı",
+        "1-5 Kez",
+        "5-10 Kez",
+        "10-20 Kez",
+        "20+ Kez"
+      ]
+    },
+    {
+      "key": "kurumaDurumu",
+      "label": "Kuruma Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Taze",
+        "Hafif Kurumuş",
+        "Orta Kurumuş",
+        "Çok Kurumuş",
+        "Kullanılamaz"
+      ]
+    },
+    {
+      "key": "pigmentYogunlugu",
+      "label": "Pigment Yoğunluğu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çok Yüksek",
+        "Yüksek",
+        "Orta",
+        "Düşük",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "isikHasligi",
+      "label": "Işık Haslığı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "A+ (Mükemmel)",
+        "A (Çok İyi)",
+        "B (İyi)",
+        "C (Orta)",
+        "D (Düşük)",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "5ml",
+        "10ml",
+        "15ml",
+        "20ml",
+        "24ml",
+        "36ml",
+        "48ml",
+        "Küçük Pan",
+        "Orta Pan",
+        "Büyük Pan",
+        "Half Pan",
+        "Full Pan"
+      ]
+    },
+    {
+      "key": "pigment",
+      "label": "Pigment Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Organik",
+        "İnorganik",
+        "Sentetik",
+        "Doğal",
+        "Metalik",
+        "Fluoresan",
+        "Neon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Siyah",
+        "Kırmızı",
+        "Mavi",
+        "Sarı",
+        "Yeşil",
+        "Turuncu",
+        "Mor",
+        "Pembe",
+        "Kahverengi",
+        "Gri",
+        "Bej",
+        "Lacivert",
+        "Bordo",
+        "Altın",
+        "Gümüş",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "opaklik",
+      "label": "Opaklık",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Şeffaf",
+        "Yarı Şeffaf",
+        "Opak",
+        "Yarı Opak"
+      ]
+    },
+    {
+      "key": "granulasyon",
+      "label": "Granülasyon",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Orta"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

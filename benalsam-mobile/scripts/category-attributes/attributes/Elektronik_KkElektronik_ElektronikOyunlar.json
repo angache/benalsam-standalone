@@ -1,0 +1,120 @@
+{
+  "category": "Elektronik>KüçükElektronik>ElektronikOyunlar",
+  "pathKey": "Elektronik>KüçükElektronik>ElektronikOyunlar",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Nintendo",
+        "Sony",
+        "Sega",
+        "Atari",
+        "Tiger Electronics",
+        "VTech",
+        "LeapFrog",
+        "Hasbro",
+        "Mattel",
+        "Bandai",
+        "Konami",
+        "Capcom",
+        "Namco",
+        "Universal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "tip",
+      "label": "Oyun Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Puzzle",
+        "Arcade",
+        "Eğitici",
+        "Spor",
+        "Aksiyon",
+        "Strateji",
+        "RPG",
+        "Simülasyon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

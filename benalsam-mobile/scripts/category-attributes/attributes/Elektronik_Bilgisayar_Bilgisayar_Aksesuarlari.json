@@ -1,0 +1,105 @@
+{
+  "category": "Elektronik > Bilgisayar > Bilgisayar Aksesuarları",
+  "attributes": [
+    {
+      "key": "accessory_type",
+      "label": "Aksesuar Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Klavye",
+        "Fare",
+        "Monitör",
+        "Hoparlör",
+        "Mikrofon",
+        "Webcam",
+        "Mousepad",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Logitech",
+        "Razer",
+        "Corsair",
+        "ASUS",
+        "Dell",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "compatibility",
+      "label": "Uyumluluk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "features",
+      "label": "Özellikler",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

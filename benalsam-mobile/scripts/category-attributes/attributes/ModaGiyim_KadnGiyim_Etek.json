@@ -1,0 +1,160 @@
+{
+  "category": "ModaGiyim>KadınGiyim>Etek",
+  "pathKey": "ModaGiyim>KadınGiyim>Etek",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "etekTuru",
+      "label": "Etek Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Klasik Etek",
+        "Mini Etek",
+        "Midi Etek",
+        "Maksi Etek",
+        "Kalem Etek",
+        "Daire Etek",
+        "Pileli Etek",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Polyester",
+        "Yün",
+        "İpek",
+        "Keten",
+        "Deri",
+        "Naylon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "beden",
+      "label": "Beden",
+      "type": "string",
+      "required": false,
+      "options": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "3XL",
+        "4XL",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boy",
+      "label": "Boy",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kısa",
+        "Normal",
+        "Uzun",
+        "Özel"
+      ]
+    },
+    {
+      "key": "belGenisligi",
+      "label": "Bel Genişliği (cm)",
+      "type": "number",
+      "required": false,
+      "min": 60,
+      "max": 120
+    },
+    {
+      "key": "etekBoyu",
+      "label": "Etek Boyu (cm)",
+      "type": "number",
+      "required": false,
+      "min": 20,
+      "max": 120
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Bej",
+        "Lacivert",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "desen",
+      "label": "Desen",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Düz",
+        "Çizgili",
+        "Kareli",
+        "Çiçekli",
+        "Geometrik",
+        "Hayvan Deseni",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

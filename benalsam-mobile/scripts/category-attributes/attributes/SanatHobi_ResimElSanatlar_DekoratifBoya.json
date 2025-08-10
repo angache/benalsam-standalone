@@ -1,0 +1,153 @@
+{
+  "category": "SanatHobi>ResimElSanatları>DekoratifBoya",
+  "pathKey": "SanatHobi>ResimElSanatları>DekoratifBoya",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Marshall",
+        "Dulux",
+        "Jotun",
+        "Beckers",
+        "Sigma",
+        "Tikkurila",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "boyaTipi",
+      "label": "Boya Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Su Bazlı",
+        "Yağ Bazlı",
+        "Lateks",
+        "Akrilik",
+        "Emülsiyon",
+        "Dekoratif Boya",
+        "Doku Boyası",
+        "Metalik Boya",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Krem",
+        "Bej",
+        "Kahverengi",
+        "Gri",
+        "Siyah",
+        "Mavi",
+        "Yeşil",
+        "Sarı",
+        "Kırmızı",
+        "Pembe",
+        "Mor",
+        "Turuncu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "hacim",
+      "label": "Hacim (L)",
+      "type": "number",
+      "required": false,
+      "min": 0.5,
+      "max": 20
+    },
+    {
+      "key": "kullanimAlani",
+      "label": "Kullanım Alanı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "İç Mekan",
+        "Dış Mekan",
+        "Hem İç Hem Dış",
+        "Tavan",
+        "Zemin",
+        "Mobilya",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yuzeyTipi",
+      "label": "Yüzey Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beton",
+        "Ahşap",
+        "Metal",
+        "Plastik",
+        "Cam",
+        "Kumaş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

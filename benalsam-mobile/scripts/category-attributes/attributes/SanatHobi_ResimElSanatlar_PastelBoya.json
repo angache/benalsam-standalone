@@ -1,0 +1,135 @@
+{
+  "category": "SanatHobi>ResimElSanatları>PastelBoya",
+  "pathKey": "SanatHobi>ResimElSanatları>PastelBoya",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Faber-Castell",
+        "Staedtler",
+        "Caran d'Ache",
+        "Sennelier",
+        "Rembrandt",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "pastelTipi",
+      "label": "Pastel Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yağlı Pastel",
+        "Kuru Pastel",
+        "Sulu Pastel",
+        "Pastel Kalem",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Siyah",
+        "Kırmızı",
+        "Mavi",
+        "Yeşil",
+        "Sarı",
+        "Turuncu",
+        "Pembe",
+        "Mor",
+        "Kahverengi",
+        "Gri",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "adet",
+      "label": "Adet",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 500
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğrenci",
+        "Profesyonel",
+        "Sanatçı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

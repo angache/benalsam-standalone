@@ -1,0 +1,126 @@
+{
+  "category": "SanatHobi>ResimElSanatları>Kağıt",
+  "pathKey": "SanatHobi>ResimElSanatları>Kağıt",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Canson",
+        "Fabriano",
+        "Arches",
+        "Strathmore",
+        "Clairefontaine",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "kagitTipi",
+      "label": "Kağıt Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Suluboya Kağıdı",
+        "Çizim Kağıdı",
+        "Pastel Kağıdı",
+        "Karton",
+        "Fotokopi Kağıdı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "gramaj",
+      "label": "Gramaj (g/m²)",
+      "type": "number",
+      "required": false,
+      "min": 50,
+      "max": 500
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "A4",
+        "A3",
+        "A2",
+        "A1",
+        "A0",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Krem",
+        "Bej",
+        "Gri",
+        "Siyah",
+        "Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

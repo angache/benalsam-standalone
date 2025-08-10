@@ -1,0 +1,106 @@
+{
+  "category": "SanatHobi>ResimElSanatları>Easel",
+  "pathKey": "SanatHobi>ResimElSanatları>Easel",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "easelTuru",
+      "label": "Easel Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "A Tipi Easel",
+        "H Tipi Easel",
+        "Kutu Easel",
+        "Katlanabilir Easel",
+        "Stüdyo Easel",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ahşap",
+        "Metal",
+        "Alüminyum",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yukseklik",
+      "label": "Yükseklik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 50,
+      "max": 300
+    },
+    {
+      "key": "kullanimAlani",
+      "label": "Kullanım Alanı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ev",
+        "Stüdyo",
+        "Sınıf",
+        "Seyahat",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Profesyonel"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "category": "SanatHobi>ResimElSanatları>Seramik",
+  "pathKey": "SanatHobi>ResimElSanatları>Seramik",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "seramikTuru",
+      "label": "Seramik Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Kil",
+        "Porselen",
+        "Fayans",
+        "Seramik Boya",
+        "Seramik Ekipmanları",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "urunKategorisi",
+      "label": "Ürün Kategorisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ham Kil",
+        "Hazır Kil",
+        "Seramik Boya",
+        "Seramik Fırını",
+        "Seramik Aletleri",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık (kg)",
+      "type": "number",
+      "required": false,
+      "min": 0.1,
+      "max": 100
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Profesyonel"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

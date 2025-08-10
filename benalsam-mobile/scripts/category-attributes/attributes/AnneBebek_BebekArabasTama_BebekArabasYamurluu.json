@@ -1,0 +1,160 @@
+{
+  "category": "Anne & Bebek > Bebek Arabası & Taşıma > Bebek Arabası Yağmurluğu",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bugaboo",
+        "Stokke",
+        "Joolz",
+        "UPPAbaby",
+        "Cybex",
+        "Britax",
+        "Chicco",
+        "Graco",
+        "Peg Perego",
+        "Maxi-Cosi",
+        "Silver Cross",
+        "Mamas & Papas",
+        "Universal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "rain_cover_type",
+      "label": "Yağmurluk Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tam Kapalı",
+        "Yarı Açık",
+        "Şeffaf",
+        "Katlanabilir",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "compatibility",
+      "label": "Uyumluluk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Universal",
+        "Marka Özel",
+        "Model Özel",
+        "Belirtilmemiş"
+      ]
+    },
+    {
+      "key": "compatible_brands",
+      "label": "Uyumlu Markalar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "PVC",
+        "Naylon",
+        "Polyester",
+        "Şeffaf Plastik",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "waterproof",
+      "label": "Su Geçirmez",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "windproof",
+      "label": "Rüzgar Geçirmez",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "ventilation",
+      "label": "Havalandırma",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Şeffaf",
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Pembe",
+        "Yeşil",
+        "Sarı",
+        "Kırmızı",
+        "Mor",
+        "Kahverengi",
+        "Bej",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+{
+  "category": "SporOutdoor>SporGiyim>KadınSporGiyim",
+  "pathKey": "SporOutdoor>SporGiyim>KadınSporGiyim",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Nike",
+        "Adidas",
+        "Under Armour",
+        "Reebok",
+        "Puma",
+        "New Balance",
+        "ASICS",
+        "Lululemon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTipi",
+      "label": "Ürün Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Spor T-Shirt",
+        "Spor Şort",
+        "Spor Pantolon",
+        "Spor Etek",
+        "Spor Tayt",
+        "Spor Sütyen",
+        "Spor Mont",
+        "Spor Ceket",
+        "Spor Çorap",
+        "Spor Ayakkabı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "XXXL"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Polyester",
+        "Naylon",
+        "Spandeks",
+        "Lycra",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sporTipi",
+      "label": "Spor Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Fitness",
+        "Yoga",
+        "Koşu",
+        "Bisiklet",
+        "Yüzme",
+        "Tenis",
+        "Futbol",
+        "Basketbol",
+        "Genel",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

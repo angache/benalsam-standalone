@@ -1,0 +1,98 @@
+{
+  "category": "EğitimKitap>KurslarDersler>GitarDersi",
+  "pathKey": "EğitimKitap>KurslarDersler>GitarDersi",
+  "attributes": [
+    {
+      "key": "hizmet_tipi",
+      "label": "Hizmet Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Birebir Ders",
+        "Grup Dersi",
+        "Online Ders",
+        "Hibrit Ders",
+        "Özel Ders",
+        "Müzik Kursu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "gitarTipi",
+      "label": "Gitar Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Klasik Gitar",
+        "Akustik Gitar",
+        "Elektrik Gitar",
+        "Bas Gitar",
+        "Flamenko Gitar",
+        "Tüm Tipler",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Profesyonel",
+        "Tüm Seviyeler"
+      ]
+    },
+    {
+      "key": "deneyim_yili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "egitim_durumu",
+      "label": "Eğitim Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Konservatuvar",
+        "Müzik Akademisi",
+        "Müzik Öğretmenliği",
+        "Profesyonel Müzisyen",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ders_yeri",
+      "label": "Ders Yeri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğrenci Evi",
+        "Öğretmen Evi",
+        "Müzik Stüdyosu",
+        "Konservatuvar",
+        "Online",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "saat_ucreti",
+      "label": "Saat Ücreti (TL)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

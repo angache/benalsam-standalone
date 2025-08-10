@@ -1,0 +1,184 @@
+{
+  "category": "Anne & Bebek > Oyuncaklar > Eğitici Oyuncaklar",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Fisher-Price",
+        "VTech",
+        "LeapFrog",
+        "Melissa & Doug",
+        "Hape",
+        "PlanToys",
+        "Janod",
+        "Brio",
+        "IKEA",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "educational_type",
+      "label": "Eğitim Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Matematik",
+        "Dil Gelişimi",
+        "Bilim",
+        "Sanat",
+        "Müzik",
+        "Motor Beceriler",
+        "Problem Çözme",
+        "Yaratıcılık",
+        "Sosyal Beceriler",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "age_range",
+      "label": "Yaş Aralığı",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-12 ay",
+        "12-24 ay",
+        "2-4 yaş",
+        "4-6 yaş",
+        "6-8 yaş",
+        "8+ yaş",
+        "Tüm Yaşlar",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "skill_development",
+      "label": "Geliştirilen Beceri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "İnce Motor",
+        "Kaba Motor",
+        "El-Göz Koordinasyonu",
+        "Hafıza",
+        "Mantık",
+        "Yaratıcılık",
+        "Sosyal",
+        "Dil",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Plastik",
+        "Ahşap",
+        "Kumaş",
+        "Silicone",
+        "Metal",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "interactive",
+      "label": "İnteraktif",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "electronic",
+      "label": "Elektronik",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "battery_required",
+      "label": "Pil Gerekli",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "piece_count",
+      "label": "Parça Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 1000
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Siyah",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Mor",
+        "Turuncu",
+        "Kahverengi",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

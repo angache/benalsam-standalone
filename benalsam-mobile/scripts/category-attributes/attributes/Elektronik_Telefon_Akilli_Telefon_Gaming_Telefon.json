@@ -1,0 +1,235 @@
+{
+  "category": "Elektronik > Telefon > Akıllı Telefon > Gaming Telefon",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "ASUS",
+        "Xiaomi",
+        "Lenovo",
+        "Nubia",
+        "Black Shark",
+        "RedMagic",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "ram",
+      "label": "RAM",
+      "type": "string",
+      "required": true,
+      "options": [
+        "8 GB",
+        "12 GB",
+        "16 GB",
+        "18 GB",
+        "24 GB"
+      ]
+    },
+    {
+      "key": "storage",
+      "label": "Dahili Depolama",
+      "type": "string",
+      "required": true,
+      "options": [
+        "128 GB",
+        "256 GB",
+        "512 GB",
+        "1 TB"
+      ]
+    },
+    {
+      "key": "screen_size",
+      "label": "Ekran Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "6.7\"",
+        "6.8\"",
+        "7.0\"",
+        "7.1\""
+      ]
+    },
+    {
+      "key": "screen_technology",
+      "label": "Ekran Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "AMOLED",
+        "OLED",
+        "Super AMOLED"
+      ]
+    },
+    {
+      "key": "resolution",
+      "label": "Çözünürlük",
+      "type": "string",
+      "required": false,
+      "options": [
+        "FHD+",
+        "QHD+"
+      ]
+    },
+    {
+      "key": "refresh_rate",
+      "label": "Yenileme Hızı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "120 Hz",
+        "144 Hz",
+        "165 Hz"
+      ]
+    },
+    {
+      "key": "processor",
+      "label": "İşlemci",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "gpu",
+      "label": "GPU",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "main_camera",
+      "label": "Ana Kamera (MP)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "50 MP",
+        "64 MP",
+        "108 MP",
+        "200 MP"
+      ]
+    },
+    {
+      "key": "front_camera",
+      "label": "Ön Kamera (MP)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "12 MP",
+        "16 MP",
+        "20 MP",
+        "32 MP"
+      ]
+    },
+    {
+      "key": "battery_capacity",
+      "label": "Batarya Kapasitesi (mAh)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "5000 mAh",
+        "6000 mAh",
+        "6500 mAh"
+      ]
+    },
+    {
+      "key": "charging_technology",
+      "label": "Şarj Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "65W",
+        "100W",
+        "120W",
+        "165W"
+      ]
+    },
+    {
+      "key": "sogutmaSistemi",
+      "label": "Soğutma Sistemi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Sıvı Soğutma",
+        "Fan",
+        "Pasif",
+        "Karma"
+      ]
+    },
+    {
+      "key": "rgbAydinlatma",
+      "label": "RGB Aydınlatma",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "water_resistance",
+      "label": "Su Geçirmezlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IP54",
+        "IP68",
+        "Yok"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

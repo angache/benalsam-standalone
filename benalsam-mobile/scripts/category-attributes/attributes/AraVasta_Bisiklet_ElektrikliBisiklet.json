@@ -1,0 +1,198 @@
+{
+  "category": "Araç & Vasıta > Bisiklet > Elektrikli Bisiklet",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Trek",
+        "Specialized",
+        "Giant",
+        "Cannondale",
+        "Scott",
+        "Merida",
+        "Cube",
+        "Kona",
+        "Gazelle",
+        "Batavus",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "yil",
+      "label": "Model Yılı",
+      "type": "number",
+      "required": true,
+      "min": 1950,
+      "max": 2024
+    },
+    {
+      "key": "frame_size",
+      "label": "Kadro Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "frame_material",
+      "label": "Kadro Malzemesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Alüminyum",
+        "Karbon",
+        "Çelik",
+        "Titanyum",
+        "Kompozit",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "suspension_type",
+      "label": "Süspansiyon Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Rijit",
+        "Ön Süspansiyon",
+        "Çift Süspansiyon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "wheel_size",
+      "label": "Tekerlek Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "26\"",
+        "27.5\"",
+        "28\"",
+        "29\"",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "gear_count",
+      "label": "Vites Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "brake_type",
+      "label": "Fren Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "V-Fren",
+        "Disk Fren (Mekanik)",
+        "Disk Fren (Hidrolik)",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "battery_capacity",
+      "label": "Batarya Kapasitesi (Wh)",
+      "type": "number",
+      "required": false,
+      "min": 100,
+      "max": 1000
+    },
+    {
+      "key": "motor_power",
+      "label": "Motor Gücü (W)",
+      "type": "number",
+      "required": false,
+      "min": 250,
+      "max": 1000
+    },
+    {
+      "key": "max_speed",
+      "label": "Maksimum Hız (km/h)",
+      "type": "number",
+      "required": false,
+      "min": 20,
+      "max": 50
+    },
+    {
+      "key": "range",
+      "label": "Menzil (km)",
+      "type": "number",
+      "required": false,
+      "min": 20,
+      "max": 200
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Siyah",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Kahverengi",
+        "Turuncu",
+        "Mor",
+        "Pembe",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

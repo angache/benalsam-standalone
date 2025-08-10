@@ -1,0 +1,182 @@
+{
+  "category": "EvAletleriMobilya>MutfakEşyaları>BardakTabak",
+  "pathKey": "EvAletleriMobilya>MutfakEşyaları>BardakTabak",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Villeroy & Boch",
+        "Rosenthal",
+        "Wedgwood",
+        "Royal Doulton",
+        "Spode",
+        "Lenox",
+        "Noritake",
+        "Corelle",
+        "Fiesta",
+        "Pfaltzgraff",
+        "IKEA",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTuru",
+      "label": "Ürün Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bardak",
+        "Tabak",
+        "Kase",
+        "Fincan",
+        "Çay Takımı",
+        "Kahve Takımı",
+        "Yemek Takımı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Porselen",
+        "Seramik",
+        "Cam",
+        "Kristal",
+        "Melamin",
+        "Paslanmaz Çelik",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "setDurumu",
+      "label": "Set Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tek Parça",
+        "Kısmi Set",
+        "Tam Set",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "fiziksel_durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Çizikli",
+        "Kırık"
+      ]
+    },
+    {
+      "key": "orijinallik",
+      "label": "Orijinallik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Orijinal",
+        "Taklit",
+        "Reprodüksiyon",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "kullanım_suresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 yıldan az",
+        "1-3 yıl",
+        "3-5 yıl",
+        "5-10 yıl",
+        "10 yıldan fazla"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Gri",
+        "Siyah",
+        "Kahverengi",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

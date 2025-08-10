@@ -1,0 +1,118 @@
+{
+  "category": "EvAletleriMobilya>MutfakEşyaları>TencereTava",
+  "pathKey": "EvAletleriMobilya>MutfakEşyaları>TencereTava",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "esyaTuru",
+      "label": "Eşya Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tencere",
+        "Tava",
+        "Sos Tavası",
+        "Çaydanlık",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Paslanmaz Çelik",
+        "Döküm",
+        "Alüminyum",
+        "Seramik",
+        "Teflon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "cap",
+      "label": "Çap (cm)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 50
+    },
+    {
+      "key": "yukseklik",
+      "label": "Yükseklik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 5,
+      "max": 30
+    },
+    {
+      "key": "kapasite",
+      "label": "Kapasite (L)",
+      "type": "number",
+      "required": false,
+      "min": 0.5,
+      "max": 20
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Gümüş",
+        "Siyah",
+        "Beyaz",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

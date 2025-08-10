@@ -1,0 +1,119 @@
+{
+  "category": "Emlak>ArsaTarla>İmarsızArsa",
+  "pathKey": "Emlak>ArsaTarla>İmarsızArsa",
+  "attributes": [
+    {
+      "key": "mulk_tipi",
+      "label": "Mülk Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "İmarsız Arsa",
+        "Tarla",
+        "Çayır",
+        "Mera"
+      ]
+    },
+    {
+      "key": "alan",
+      "label": "Alan (m²)",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 1000000
+    },
+    {
+      "key": "imar_durumu",
+      "label": "İmar Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "İmarsız",
+        "İmar Planında",
+        "İmar Değişikliği Bekleniyor"
+      ]
+    },
+    {
+      "key": "kullanim_amaci",
+      "label": "Kullanım Amacı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tarım",
+        "Hayvancılık",
+        "Yatırım",
+        "Gelecek İmar",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "toprak_tipi",
+      "label": "Toprak Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Killi",
+        "Kumlu",
+        "Tınlı",
+        "Humuslu",
+        "Kireçli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sulama_durumu",
+      "label": "Sulama Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Kuyu",
+        "Göl",
+        "Dere",
+        "Baraj"
+      ]
+    },
+    {
+      "key": "yol_durumu",
+      "label": "Yol Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Asfalt",
+        "Stabilize",
+        "Toprak",
+        "Yok"
+      ]
+    },
+    {
+      "key": "elektrik_durumu",
+      "label": "Elektrik Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Yakında"
+      ]
+    },
+    {
+      "key": "imarPotansiyeli",
+      "label": "İmar Potansiyeli",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yüksek",
+        "Orta",
+        "Düşük",
+        "Yok"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

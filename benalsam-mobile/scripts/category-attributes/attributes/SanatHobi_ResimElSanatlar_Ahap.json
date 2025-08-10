@@ -1,0 +1,119 @@
+{
+  "category": "SanatHobi>ResimElSanatları>Ahşap",
+  "pathKey": "SanatHobi>ResimElSanatları>Ahşap",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Balsa",
+        "Basswood",
+        "Pine",
+        "Oak",
+        "Maple",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "ahsapTipi",
+      "label": "Ahşap Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Balsa",
+        "Çam",
+        "Meşe",
+        "Akçaağaç",
+        "Ceviz",
+        "Kiraz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "kalinlik",
+      "label": "Kalınlık (mm)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 100
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kahverengi",
+        "Açık Kahverengi",
+        "Koyu Kahverengi",
+        "Sarı",
+        "Krem",
+        "Doğal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

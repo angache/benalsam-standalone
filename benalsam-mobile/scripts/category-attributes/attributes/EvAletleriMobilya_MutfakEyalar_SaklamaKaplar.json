@@ -1,0 +1,122 @@
+{
+  "category": "EvAletleriMobilya>MutfakEşyaları>SaklamaKapları",
+  "pathKey": "EvAletleriMobilya>MutfakEşyaları>SaklamaKapları",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "kapTuru",
+      "label": "Kap Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Saklama Kabı",
+        "Konserve Kabı",
+        "Dondurucu Kabı",
+        "Mikrodalga Kabı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Cam",
+        "Plastik",
+        "Seramik",
+        "Metal",
+        "Silicone",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kapasite",
+      "label": "Kapasite (L)",
+      "type": "number",
+      "required": false,
+      "min": 0.1,
+      "max": 10
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "cap",
+      "label": "Çap (cm)",
+      "type": "number",
+      "required": false,
+      "min": 5,
+      "max": 50
+    },
+    {
+      "key": "yukseklik",
+      "label": "Yükseklik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 2,
+      "max": 30
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Gri",
+        "Kahverengi",
+        "Siyah",
+        "Mavi",
+        "Yeşil",
+        "Kırmızı",
+        "Sarı",
+        "Turuncu",
+        "Pembe",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

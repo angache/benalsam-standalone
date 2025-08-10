@@ -1,0 +1,75 @@
+{
+  "category": "KriptoFinans>FinansalHizmetler>FinansalDanışmanlık",
+  "pathKey": "KriptoFinans>FinansalHizmetler>FinansalDanışmanlık",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Şirket Adı",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Hizmet Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "hizmetTuru",
+      "label": "Hizmet Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yatırım Danışmanlığı",
+        "Vergi Danışmanlığı",
+        "Risk Yönetimi",
+        "Portföy Yönetimi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "uzmanlikAlani",
+      "label": "Uzmanlık Alanı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kripto Para",
+        "Geleneksel Finans",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "deneyimYili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 50
+    },
+    {
+      "key": "sertifika",
+      "label": "Sertifikalar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "durum",
+      "label": "Hizmet Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aktif",
+        "Pasif",
+        "Geçici"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,232 @@
+{
+  "category": "ModaGiyim>ErkekGiyim>Gömlek",
+  "pathKey": "ModaGiyim>ErkekGiyim>Gömlek",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Zara",
+        "H&M",
+        "Mango",
+        "Massimo Dutti",
+        "COS",
+        "Uniqlo",
+        "Gap",
+        "Calvin Klein",
+        "Tommy Hilfiger",
+        "Ralph Lauren",
+        "Lacoste",
+        "Hugo Boss",
+        "Armani",
+        "Diesel",
+        "Nike",
+        "Adidas",
+        "Puma",
+        "Türk Markası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "beden",
+      "label": "Beden",
+      "type": "string",
+      "required": true,
+      "options": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "36",
+        "38",
+        "40",
+        "42",
+        "44",
+        "46",
+        "48",
+        "50"
+      ]
+    },
+    {
+      "key": "mevsim",
+      "label": "Mevsim",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yaz",
+        "Kış",
+        "Bahar",
+        "Sonbahar",
+        "Tüm Sezon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kullanim_suresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Hiç Giyilmedi",
+        "1-5 Kez",
+        "5-10 Kez",
+        "10-20 Kez",
+        "20+ Kez"
+      ]
+    },
+    {
+      "key": "yikamaTalimatlari",
+      "label": "Yıkama Talimatları",
+      "type": "string",
+      "required": false,
+      "options": [
+        "30°C",
+        "40°C",
+        "60°C",
+        "Kuru Temizleme",
+        "El Yıkama",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "boyaDurumu",
+      "label": "Boya Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Solmamış",
+        "Hafif Solmuş",
+        "Orta Solmuş",
+        "Çok Solmuş"
+      ]
+    },
+    {
+      "key": "etiketDurumu",
+      "label": "Etiket Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Kısmen Var"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Keten",
+        "İpek",
+        "Polyester",
+        "Viskon",
+        "Yün",
+        "Karışık",
+        "Oxford",
+        "Poplin",
+        "Twill",
+        "Chambray"
+      ]
+    },
+    {
+      "key": "stil",
+      "label": "Stil",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Klasik",
+        "Slim Fit",
+        "Regular Fit",
+        "Relaxed Fit",
+        "Oversize",
+        "Casual",
+        "Formal",
+        "Business",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yakalik",
+      "label": "Yakalık",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Klasik",
+        "İtalyan",
+        "Açık",
+        "Kapalı",
+        "Yuvarlak",
+        "V",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Mavi",
+        "Siyah",
+        "Gri",
+        "Pembe",
+        "Mor",
+        "Yeşil",
+        "Kırmızı",
+        "Sarı",
+        "Turuncu",
+        "Kahverengi",
+        "Bej",
+        "Lacivert",
+        "Bordo",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "cep",
+      "label": "Cep",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Cep Yok",
+        "Sol Cep",
+        "Sağ Cep",
+        "Çift Cep"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+{
+  "category": "Seyahat>TurPaketleri>YurtİçiTurlar",
+  "pathKey": "Seyahat>TurPaketleri>YurtİçiTurlar",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "turTuru",
+      "label": "Tur Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Kültür Turu",
+        "Doğa Turu",
+        "Tarih Turu",
+        "Spor Turu",
+        "Balayı Turu",
+        "Aile Turu",
+        "Grup Turu",
+        "Bireysel Tur",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "destinasyon",
+      "label": "Destinasyon",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "sure",
+      "label": "Süre (Gün)",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "konaklamaTuru",
+      "label": "Konaklama Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Otel",
+        "Pansiyon",
+        "Apart",
+        "Villa",
+        "Kamp",
+        "Konaklama Yok",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ulasimTuru",
+      "label": "Ulaşım Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Otobüs",
+        "Uçak",
+        "Tren",
+        "Gemi",
+        "Özel Araç",
+        "Ulaşım Yok",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "rehberlik",
+      "label": "Rehberlik Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Profesyonel Rehber",
+        "Yerel Rehber",
+        "Rehber Yok",
+        "Opsiyonel"
+      ]
+    },
+    {
+      "key": "yemekDahil",
+      "label": "Yemek Dahil mi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kahvaltı Dahil",
+        "Yarım Pansiyon",
+        "Tam Pansiyon",
+        "Her Şey Dahil",
+        "Yemek Yok"
+      ]
+    },
+    {
+      "key": "geziTarihi",
+      "label": "Gezi Tarihi",
+      "type": "date",
+      "required": true
+    },
+    {
+      "key": "kisiSayisi",
+      "label": "Kişi Sayısı",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 50
+    },
+    {
+      "key": "fiyat",
+      "label": "Fiyat (TL)",
+      "type": "number",
+      "required": true,
+      "min": 100,
+      "max": 100000
+    },
+    {
+      "key": "iptalPolitikasi",
+      "label": "İptal Politikası",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ücretsiz İptal",
+        "Kısmi İade",
+        "İade Yok",
+        "Koşullu İade"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aktif",
+        "Rezerve",
+        "Tamamlandı",
+        "İptal"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

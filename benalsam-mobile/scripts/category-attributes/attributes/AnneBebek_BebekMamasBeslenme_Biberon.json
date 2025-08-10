@@ -1,0 +1,181 @@
+{
+  "category": "Anne & Bebek > Bebek Maması & Beslenme > Biberon",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Philips Avent",
+        "Dr. Brown's",
+        "Tommee Tippee",
+        "NUK",
+        "MAM",
+        "Chicco",
+        "Medela",
+        "Lansinoh",
+        "Pigeon",
+        "Comotomo",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "bottle_size",
+      "label": "Biberon Boyutu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "50ml",
+        "80ml",
+        "120ml",
+        "150ml",
+        "180ml",
+        "240ml",
+        "260ml",
+        "330ml",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "bottle_material",
+      "label": "Biberon Malzemesi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Cam",
+        "Plastik",
+        "Silicone",
+        "Stainless Steel",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "nipple_type",
+      "label": "Emzik Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yuvarlak",
+        "Ortodontik",
+        "Yassı",
+        "Geniş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "nipple_flow",
+      "label": "Emzik Akış Hızı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "0+ Ay",
+        "1+ Ay",
+        "3+ Ay",
+        "6+ Ay",
+        "9+ Ay",
+        "12+ Ay",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "anti_colic",
+      "label": "Anti-Kolik",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "vent_system",
+      "label": "Havalandırma Sistemi",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "dishwasher_safe",
+      "label": "Bulaşık Makinesi Güvenli",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "microwave_safe",
+      "label": "Mikrodalga Güvenli",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "sterilizer_safe",
+      "label": "Sterilizatör Güvenli",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Şeffaf",
+        "Beyaz",
+        "Mavi",
+        "Pembe",
+        "Yeşil",
+        "Sarı",
+        "Mor",
+        "Turuncu",
+        "Kırmızı",
+        "Gri",
+        "Kahverengi",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

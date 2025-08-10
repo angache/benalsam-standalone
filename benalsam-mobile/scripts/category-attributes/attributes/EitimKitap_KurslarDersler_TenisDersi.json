@@ -1,0 +1,82 @@
+{
+  "category": "Eğitim & Kitap > Kurslar & Dersler > Tenis Dersi",
+  "attributes": [
+    {
+      "key": "service_type",
+      "label": "Hizmet Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Birebir Ders",
+        "Grup Dersi",
+        "Online Ders",
+        "Hibrit Ders",
+        "Özel Ders",
+        "Tenis Kursu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Profesyonel",
+        "Tüm Seviyeler"
+      ]
+    },
+    {
+      "key": "experience_years",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "education_status",
+      "label": "Eğitim Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tenis Akademisi",
+        "Spor Akademisi",
+        "Profesyonel Tenisçi",
+        "Tenis Eğitmeni",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "lesson_location",
+      "label": "Ders Yeri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tenis Kortu",
+        "Öğrenci Evi",
+        "Öğretmen Evi",
+        "Spor Salonu",
+        "Online",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "hourly_rate",
+      "label": "Saat Ücreti (TL)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

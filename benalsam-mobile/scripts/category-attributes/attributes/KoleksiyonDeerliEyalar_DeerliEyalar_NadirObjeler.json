@@ -1,0 +1,78 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>DeğerliEşyalar>NadirObjeler",
+  "pathKey": "KoleksiyonDeğerliEşyalar>DeğerliEşyalar>NadirObjeler",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Üretici/Sanatçı",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Obje Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "objeTuru",
+      "label": "Obje Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Antika Eşya",
+        "Sanat Eseri",
+        "Koleksiyon Parçası",
+        "Tarihi Obje",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1500,
+      "max": 2024
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ahşap",
+        "Metal",
+        "Cam",
+        "Seramik",
+        "Taş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

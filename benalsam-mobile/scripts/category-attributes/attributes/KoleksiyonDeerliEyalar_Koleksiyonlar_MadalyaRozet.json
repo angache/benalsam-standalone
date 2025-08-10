@@ -1,0 +1,76 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>MadalyaRozet",
+  "pathKey": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>MadalyaRozet",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Üretici/Kurum",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Madalya/Rozet Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "tur",
+      "label": "Tür",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Madalya",
+        "Rozet",
+        "Nişan",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1800,
+      "max": 2024
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Altın",
+        "Gümüş",
+        "Bronz",
+        "Pirinç",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

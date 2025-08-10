@@ -1,0 +1,142 @@
+{
+  "category": "SanatHobi>ResimElSanatları>Vitray",
+  "pathKey": "SanatHobi>ResimElSanatları>Vitray",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Pebeo",
+        "Marabu",
+        "Daler Rowney",
+        "Amsterdam",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "vitrayTipi",
+      "label": "Vitray Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Klasik Vitray",
+        "Modern Vitray",
+        "Tiffany",
+        "Füzyon",
+        "Boyama",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Şeffaf",
+        "Beyaz",
+        "Siyah",
+        "Kırmızı",
+        "Mavi",
+        "Yeşil",
+        "Sarı",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Gri",
+        "Pembe",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "camTipi",
+      "label": "Cam Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Düz Cam",
+        "Renkli Cam",
+        "Füzyon Cam",
+        "Desenli Cam",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "teknik",
+      "label": "Teknik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kurşunlu",
+        "Bakır Folyo",
+        "Boyama",
+        "Füzyon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

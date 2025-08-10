@@ -1,0 +1,145 @@
+{
+  "category": "Elektronik > Giyilebilir Teknoloji > Giyilebilir Kamera",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "GoPro",
+        "DJI",
+        "Insta360",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "resolution",
+      "label": "Çözünürlük",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1080p",
+        "4K",
+        "8K"
+      ]
+    },
+    {
+      "key": "fps",
+      "label": "FPS",
+      "type": "string",
+      "required": false,
+      "options": [
+        "30",
+        "60",
+        "120",
+        "240"
+      ]
+    },
+    {
+      "key": "water_resistance",
+      "label": "Su Geçirmezlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IPX8",
+        "10m",
+        "30m"
+      ]
+    },
+    {
+      "key": "stabilizasyon",
+      "label": "Stabilizasyon",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "gps",
+      "label": "GPS",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "wifi",
+      "label": "WiFi",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "bluetooth",
+      "label": "Bluetooth",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "battery_life",
+      "label": "Pil Ömrü (Saat)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "charging_technology",
+      "label": "Şarj Teknolojisi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

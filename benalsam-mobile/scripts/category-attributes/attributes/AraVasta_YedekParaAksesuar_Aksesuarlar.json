@@ -1,0 +1,133 @@
+{
+  "category": "AraçVasıta>YedekParçaAksesuar>Aksesuarlar",
+  "pathKey": "AraçVasıta>YedekParçaAksesuar>Aksesuarlar",
+  "attributes": [
+    {
+      "key": "aksesuarTipi",
+      "label": "Aksesuar Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Koltuk Kılıfı",
+        "Direksiyon Kılıfı",
+        "Pasmat",
+        "Çocuk Koltuğu",
+        "Bagaj Organizatörü",
+        "Telefon Tutucu",
+        "Güneşlik",
+        "Ayna",
+        "Kokulu",
+        "Temizlik Seti",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "arac_tipi",
+      "label": "Araç Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Otomobil",
+        "SUV/Jip",
+        "Ticari Araç",
+        "Motosiklet",
+        "Bisiklet",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "AutoArt",
+        "Covercraft",
+        "WeatherTech",
+        "Husky Liners",
+        "Lloyd Mats",
+        "Maxpider",
+        "3D MAXpider",
+        "TuxMat",
+        "OEM",
+        "Universal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Gri",
+        "Kahverengi",
+        "Bej",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Turuncu",
+        "Mor",
+        "Pembe",
+        "Beyaz",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "materyal",
+      "label": "Materyal",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Deri",
+        "Suni Deri",
+        "Kumaş",
+        "Sünger",
+        "Plastik",
+        "Metal",
+        "Ahşap",
+        "Silikon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

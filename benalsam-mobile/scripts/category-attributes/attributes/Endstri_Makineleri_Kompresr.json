@@ -1,0 +1,92 @@
+{
+  "category": "Endüstri > Makineleri > Kompresör",
+  "pathKey": "Endüstri>Makineleri>Kompresör",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "kompresorTuru",
+      "label": "Kompresör Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Pistonlu Kompresör",
+        "Vidalı Kompresör",
+        "Santrifüj Kompresör",
+        "Portatif Kompresör",
+        "Endüstriyel Kompresör",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "guc",
+      "label": "Güç (HP/kW)",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 1000
+    },
+    {
+      "key": "basinc",
+      "label": "Basınç (Bar)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 500
+    },
+    {
+      "key": "havaKapasitesi",
+      "label": "Hava Kapasitesi (L/dk)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 10000
+    },
+    {
+      "key": "tankKapasitesi",
+      "label": "Tank Kapasitesi (L)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 1000
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

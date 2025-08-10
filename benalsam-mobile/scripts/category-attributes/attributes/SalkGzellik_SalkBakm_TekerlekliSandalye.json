@@ -1,0 +1,93 @@
+{
+  "category": "SağlıkGüzellik>SağlıkBakım>TekerlekliSandalye",
+  "pathKey": "SağlıkGüzellik>SağlıkBakım>TekerlekliSandalye",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "sandalyeTuru",
+      "label": "Sandalye Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Manuel",
+        "Elektrikli",
+        "Katlanabilir",
+        "Sabit",
+        "Spor",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kullanimAlani",
+      "label": "Kullanım Alanı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ev",
+        "Hastane",
+        "Seyahat",
+        "Spor",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çocuk",
+        "Genç",
+        "Yetişkin",
+        "Yaşlı"
+      ]
+    },
+    {
+      "key": "agirlikKapasitesi",
+      "label": "Ağırlık Kapasitesi (kg)",
+      "type": "number",
+      "required": false,
+      "min": 50,
+      "max": 300
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

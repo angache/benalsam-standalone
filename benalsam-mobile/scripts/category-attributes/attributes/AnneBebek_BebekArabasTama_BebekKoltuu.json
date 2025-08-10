@@ -1,0 +1,194 @@
+{
+  "category": "Anne & Bebek > Bebek Arabası & Taşıma > Bebek Koltuğu",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Chicco",
+        "Peg Perego",
+        "Britax",
+        "Maxi-Cosi",
+        "Cybex",
+        "Bugaboo",
+        "Stokke",
+        "Joolz",
+        "UPPAbaby",
+        "Graco",
+        "Evenflo",
+        "Safety 1st",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "seat_type",
+      "label": "Koltuk Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-9 kg",
+        "0-13 kg",
+        "0-18 kg",
+        "0-25 kg",
+        "9-18 kg",
+        "15-36 kg",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "age_range",
+      "label": "Yaş Aralığı",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-6 ay",
+        "0-12 ay",
+        "0-18 ay",
+        "0-24 ay",
+        "0-36 ay",
+        "9-36 ay",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "installation_type",
+      "label": "Montaj Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "ISOFIX",
+        "Emniyet Kemeri",
+        "LATCH",
+        "Kombinasyon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "harness_type",
+      "label": "Emniyet Kemeri Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "3 Nokta",
+        "5 Nokta",
+        "Yok"
+      ]
+    },
+    {
+      "key": "rotating",
+      "label": "Döner",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "recline_positions",
+      "label": "Yatırma Pozisyonları",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 Pozisyon",
+        "2 Pozisyon",
+        "3 Pozisyon",
+        "4+ Pozisyon",
+        "Sınırsız"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Kumaş Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Polyester",
+        "Organik Pamuk",
+        "Bambu",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "washable",
+      "label": "Yıkanabilir",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Pembe",
+        "Yeşil",
+        "Sarı",
+        "Kırmızı",
+        "Mor",
+        "Kahverengi",
+        "Bej",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "manual",
+      "label": "Kullanım Kılavuzu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "category": "Anne & Bebek > Bebek Arabası & Taşıma > Bebek Arabası Kancası",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bugaboo",
+        "Stokke",
+        "Joolz",
+        "UPPAbaby",
+        "Cybex",
+        "Britax",
+        "Chicco",
+        "Graco",
+        "Peg Perego",
+        "Maxi-Cosi",
+        "Silver Cross",
+        "Mamas & Papas",
+        "Universal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "hook_type",
+      "label": "Kanca Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Çanta Kancası",
+        "Oyuncak Kancası",
+        "Aksesuar Kancası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "compatibility",
+      "label": "Uyumluluk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Universal",
+        "Marka Özel",
+        "Model Özel",
+        "Belirtilmemiş"
+      ]
+    },
+    {
+      "key": "compatible_brands",
+      "label": "Uyumlu Markalar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Metal",
+        "Plastik",
+        "Kompozit",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Kırmızı",
+        "Mavi",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Kahverengi",
+        "Bej",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

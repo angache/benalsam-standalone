@@ -1,0 +1,121 @@
+{
+  "category": "SanatHobi>ResimElSanatları>KömürKalem",
+  "pathKey": "SanatHobi>ResimElSanatları>KömürKalem",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Faber-Castell",
+        "Staedtler",
+        "Derwent",
+        "General's",
+        "Winsor & Newton",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "karbonTipi",
+      "label": "Kömür Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Doğal Kömür",
+        "Sıkıştırılmış Kömür",
+        "Kömür Kalem",
+        "Kömür Tozu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sertlik",
+      "label": "Sertlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yumuşak",
+        "Orta",
+        "Sert",
+        "Çok Sert",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "adet",
+      "label": "Adet (Paket)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 100
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Gri",
+        "Kahverengi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

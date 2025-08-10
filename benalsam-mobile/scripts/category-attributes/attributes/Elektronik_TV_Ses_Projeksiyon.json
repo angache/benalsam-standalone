@@ -1,0 +1,155 @@
+{
+  "category": "Elektronik > TV & Ses > Projeksiyon",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Epson",
+        "BenQ",
+        "Optoma",
+        "ViewSonic",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "resolution",
+      "label": "Çözünürlük",
+      "type": "string",
+      "required": false,
+      "options": [
+        "SVGA",
+        "XGA",
+        "WXGA",
+        "Full HD",
+        "4K"
+      ]
+    },
+    {
+      "key": "parlaklik",
+      "label": "Parlaklık (ANSI Lümen)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "kontrastOrani",
+      "label": "Kontrast Oranı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "projeksiyonTeknolojisi",
+      "label": "Projeksiyon Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "DLP",
+        "LCD",
+        "LED"
+      ]
+    },
+    {
+      "key": "screen_size",
+      "label": "Ekran Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "40\"",
+        "60\"",
+        "80\"",
+        "100\"",
+        "120\""
+      ]
+    },
+    {
+      "key": "baglantilar",
+      "label": "Bağlantılar",
+      "type": "string",
+      "required": false,
+      "options": [
+        "HDMI",
+        "VGA",
+        "USB",
+        "WiFi"
+      ]
+    },
+    {
+      "key": "sesCikisi",
+      "label": "Ses Çıkışı",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "3d",
+      "label": "3D",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "kisaMesafe",
+      "label": "Kısa Mesafe",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

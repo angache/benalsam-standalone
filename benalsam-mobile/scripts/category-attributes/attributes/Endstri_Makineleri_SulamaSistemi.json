@@ -1,0 +1,92 @@
+{
+  "category": "Endüstri > Makineleri > Sulama Sistemi",
+  "pathKey": "Endüstri>Makineleri>SulamaSistemi",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "sulamaTuru",
+      "label": "Sulama Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Damla Sulama",
+        "Yağmurlama Sulama",
+        "Pivot Sulama",
+        "Salma Sulama",
+        "Otomatik Sulama",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "alanKapasitesi",
+      "label": "Alan Kapasitesi (Dekar)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 10000
+    },
+    {
+      "key": "suKapasitesi",
+      "label": "Su Kapasitesi (L/saat)",
+      "type": "number",
+      "required": false,
+      "min": 100,
+      "max": 10000
+    },
+    {
+      "key": "basinc",
+      "label": "Basınç (Bar)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 20
+    },
+    {
+      "key": "guc",
+      "label": "Güç (HP/kW)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 200
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

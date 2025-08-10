@@ -1,0 +1,71 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>FosilMineral",
+  "pathKey": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>FosilMineral",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Koleksiyoncu/Üretici",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Fosil/Mineral Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "tur",
+      "label": "Tür",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Fosil",
+        "Mineral",
+        "Kaya",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yas",
+      "label": "Yaş (Milyon Yıl)",
+      "type": "number",
+      "required": false,
+      "min": 0.1,
+      "max": 4500
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık (gram)",
+      "type": "number",
+      "required": false,
+      "min": 0.1,
+      "max": 10000
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

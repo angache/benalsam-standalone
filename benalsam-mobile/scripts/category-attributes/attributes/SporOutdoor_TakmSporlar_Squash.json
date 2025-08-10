@@ -1,0 +1,156 @@
+{
+  "category": "SporOutdoor>TakımSporları>Squash",
+  "pathKey": "SporOutdoor>TakımSporları>Squash",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Wilson",
+        "Head",
+        "Dunlop",
+        "Prince",
+        "Babolat",
+        "Yonex",
+        "Technifibre",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTipi",
+      "label": "Ürün Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Squash Raketi",
+        "Squash Topu",
+        "Squash Ayakkabısı",
+        "Squash Gözlüğü",
+        "Squash Çantası",
+        "Squash Aksesuarları",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık (gram)",
+      "type": "number",
+      "required": false,
+      "min": 100,
+      "max": 300
+    },
+    {
+      "key": "dengeNoktasi",
+      "label": "Denge Noktası",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kafa Ağır",
+        "Dengeli",
+        "Sap Ağır"
+      ]
+    },
+    {
+      "key": "sapBoyutu",
+      "label": "Sap Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "G1 (4 1/8)",
+        "G2 (4 1/4)",
+        "G3 (4 3/8)",
+        "G4 (4 1/2)",
+        "G5 (4 5/8)"
+      ]
+    },
+    {
+      "key": "topSeviyesi",
+      "label": "Top Seviyesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Profesyonel"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

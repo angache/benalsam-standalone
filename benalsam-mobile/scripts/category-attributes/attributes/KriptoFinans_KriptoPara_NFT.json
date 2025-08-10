@@ -1,0 +1,63 @@
+{
+  "category": "KriptoFinans>KriptoPara>NFT",
+  "pathKey": "KriptoFinans>KriptoPara>NFT",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Platform/Koleksiyon",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "NFT Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "nftTuru",
+      "label": "NFT Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sanat",
+        "Müzik",
+        "Video",
+        "Oyun",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "tokenId",
+      "label": "Token ID",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fiyat",
+      "label": "Fiyat (ETH)",
+      "type": "number",
+      "required": false,
+      "min": 0.001,
+      "max": 1000
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Satışta",
+        "Satıldı",
+        "Kilitli"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

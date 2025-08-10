@@ -1,0 +1,83 @@
+{
+  "category": "ModaGiyim>Aksesuar>Saat",
+  "pathKey": "ModaGiyim>Aksesuar>Saat",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "saatTuru",
+      "label": "Saat Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mekanik",
+        "Quartz",
+        "Akıllı Saat",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Gümüş",
+        "Altın",
+        "Mavi",
+        "Beyaz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çelik",
+        "Altın",
+        "Gümüş",
+        "Titanyum",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (mm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

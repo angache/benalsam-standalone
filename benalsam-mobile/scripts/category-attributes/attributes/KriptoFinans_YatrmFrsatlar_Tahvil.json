@@ -1,0 +1,72 @@
+{
+  "category": "KriptoFinans>YatırımFırsatları>Tahvil",
+  "pathKey": "KriptoFinans>YatırımFırsatları>Tahvil",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Emitent/Şirket",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Tahvil Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "tahvilTuru",
+      "label": "Tahvil Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Devlet Tahvili",
+        "Kurumsal Tahvil",
+        "Eurobond",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "vade",
+      "label": "Vade (Yıl)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "faizOrani",
+      "label": "Faiz Oranı (%)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "nominalDeger",
+      "label": "Nominal Değer (TL)",
+      "type": "number",
+      "required": false,
+      "min": 100,
+      "max": 1000000
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Satışta",
+        "Rezerve",
+        "Satıldı"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

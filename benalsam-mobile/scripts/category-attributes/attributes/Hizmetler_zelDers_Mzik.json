@@ -1,0 +1,70 @@
+{
+  "category": "Hizmetler>ÖzelDers>Müzik",
+  "pathKey": "Hizmetler>ÖzelDers>Müzik",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Eğitmen/Öğretmen",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Ders Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "dersTuru",
+      "label": "Ders Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Piyano",
+        "Gitar",
+        "Keman",
+        "Saksafon",
+        "Vokal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "deneyimYili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 50
+    },
+    {
+      "key": "uzmanlikAlani",
+      "label": "Uzmanlık Alanı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "hizmetBolgesi",
+      "label": "Hizmet Bölgesi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "durum",
+      "label": "Hizmet Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aktif",
+        "Pasif",
+        "Geçici Olarak Kapalı"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

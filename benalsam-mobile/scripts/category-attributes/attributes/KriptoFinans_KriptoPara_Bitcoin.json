@@ -1,0 +1,85 @@
+{
+  "category": "KriptoFinans>KriptoPara>Bitcoin",
+  "pathKey": "KriptoFinans>KriptoPara>Bitcoin",
+  "attributes": [
+    {
+      "key": "islemTuru",
+      "label": "İşlem Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Alım",
+        "Satım",
+        "Takas",
+        "Transfer",
+        "Mining",
+        "Staking",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "miktar",
+      "label": "Miktar (BTC)",
+      "type": "number",
+      "required": true,
+      "min": 1e-8,
+      "max": 1000
+    },
+    {
+      "key": "fiyat",
+      "label": "Fiyat (USD)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 1000000
+    },
+    {
+      "key": "platform",
+      "label": "Platform",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Binance",
+        "Coinbase",
+        "Kraken",
+        "Bitfinex",
+        "Huobi",
+        "OKX",
+        "Bybit",
+        "KuCoin",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "islemDurumu",
+      "label": "İşlem Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Beklemede",
+        "Onaylandı",
+        "Tamamlandı",
+        "İptal Edildi",
+        "Başarısız"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aktif",
+        "Pasif",
+        "Askıya Alındı",
+        "Tamamlandı"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

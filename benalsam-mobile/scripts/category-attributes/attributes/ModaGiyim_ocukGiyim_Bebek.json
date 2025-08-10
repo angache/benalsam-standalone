@@ -1,0 +1,91 @@
+{
+  "category": "ModaGiyim>ÇocukGiyim>Bebek",
+  "pathKey": "ModaGiyim>ÇocukGiyim>Bebek",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "bebekGiyimTuru",
+      "label": "Bebek Giyim Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tulum",
+        "Body",
+        "Şort",
+        "Elbise",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pembe",
+        "Mavi",
+        "Beyaz",
+        "Sarı",
+        "Yeşil",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Organik Pamuk",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "beden",
+      "label": "Beden",
+      "type": "string",
+      "required": false,
+      "options": [
+        "0-3 Ay",
+        "3-6 Ay",
+        "6-9 Ay",
+        "9-12 Ay",
+        "12-18 Ay",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

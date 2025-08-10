@@ -1,0 +1,106 @@
+{
+  "category": "EvAletleriMobilya>EvAletleri>BulaşıkMakinesi",
+  "pathKey": "EvAletleriMobilya>EvAletleri>BulaşıkMakinesi",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "tip",
+      "label": "Tip",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tezgah Altı",
+        "Tezgah Üstü",
+        "Bağımsız",
+        "Entegre",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kapasite",
+      "label": "Kapasite (Kişi)",
+      "type": "number",
+      "required": false,
+      "min": 2,
+      "max": 16
+    },
+    {
+      "key": "enerjiSinifi",
+      "label": "Enerji Sınıfı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "A+++",
+        "A++",
+        "A+",
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ]
+    },
+    {
+      "key": "programSayisi",
+      "label": "Program Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 20
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Gri",
+        "Siyah",
+        "Paslanmaz Çelik",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+{
+  "category": "Anne & Bebek > Bebek Giyim > Bebek Pijaması",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Carter's",
+        "Gap",
+        "H&M",
+        "Zara",
+        "Next",
+        "Mothercare",
+        "Marks & Spencer",
+        "Uniqlo",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "age_range",
+      "label": "Yaş Aralığı",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-3 ay",
+        "3-6 ay",
+        "6-12 ay",
+        "12-18 ay",
+        "18-24 ay",
+        "2-4 yaş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Beden",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yenidoğan",
+        "0-3M",
+        "3-6M",
+        "6-12M",
+        "12-18M",
+        "18-24M",
+        "2T",
+        "3T",
+        "4T",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "%100 Pamuk",
+        "Pamuk-Polyester",
+        "Organik Pamuk",
+        "Bambu",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "season",
+      "label": "Sezon",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yaz",
+        "Kış",
+        "İlkbahar",
+        "Sonbahar",
+        "Tüm Sezonlar"
+      ]
+    },
+    {
+      "key": "pajama_type",
+      "label": "Pijama Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Takım",
+        "Tek Parça",
+        "Tulum",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sleeve_type",
+      "label": "Kol Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kısa Kol",
+        "Uzun Kol",
+        "Kolsuz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "closure_type",
+      "label": "Kapanma Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Düğme",
+        "Çıtçıt",
+        "Fermuar",
+        "Çekme",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "washable",
+      "label": "Yıkanabilir",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Siyah",
+        "Gri",
+        "Mavi",
+        "Pembe",
+        "Yeşil",
+        "Sarı",
+        "Kırmızı",
+        "Mor",
+        "Kahverengi",
+        "Bej",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

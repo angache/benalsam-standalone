@@ -1,0 +1,167 @@
+{
+  "category": "Elektronik > TV & Ses > Ses Sistemleri",
+  "attributes": [
+    {
+      "key": "sistemTipi",
+      "label": "Sistem Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Home Theater",
+        "Soundbar",
+        "Hi-Fi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bose",
+        "JBL",
+        "Sony",
+        "Samsung",
+        "LG",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "kanalSayisi",
+      "label": "Kanal Sayısı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "2.0",
+        "2.1",
+        "5.1",
+        "7.1",
+        "9.1"
+      ]
+    },
+    {
+      "key": "toplamGuc",
+      "label": "Toplam Güç",
+      "type": "string",
+      "required": false,
+      "options": [
+        "100W",
+        "200W",
+        "500W",
+        "1000W"
+      ]
+    },
+    {
+      "key": "audio_technology",
+      "label": "Ses Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Dolby Atmos",
+        "DTS",
+        "THX"
+      ]
+    },
+    {
+      "key": "bluetooth",
+      "label": "Bluetooth",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "wifi",
+      "label": "WiFi",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "hdmi",
+      "label": "HDMI",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "optik",
+      "label": "Optical",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "rca",
+      "label": "RCA",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "subwoofer",
+      "label": "Subwoofer",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "uzaktanKumanda",
+      "label": "Uzaktan Kumanda",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

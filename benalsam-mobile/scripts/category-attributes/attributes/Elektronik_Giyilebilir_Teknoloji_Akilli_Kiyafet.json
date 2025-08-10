@@ -1,0 +1,146 @@
+{
+  "category": "Elektronik > Giyilebilir Teknoloji > Akıllı Kıyafet",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Ralph Lauren",
+        "Tommy Hilfiger",
+        "Under Armour",
+        "Nike",
+        "Adidas",
+        "Samsung",
+        "Google",
+        "Apple",
+        "Fitbit",
+        "Garmin",
+        "Polar",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "giysiTipi",
+      "label": "Kıyafet Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "T-Shirt",
+        "Pantolon",
+        "Ayakkabı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sensors",
+      "label": "Sensörler",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kalp Atış Hızı",
+        "Aktivite",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "water_resistance",
+      "label": "Su Geçirmezlik",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "battery_life",
+      "label": "Pil Ömrü (Gün)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "charging_technology",
+      "label": "Şarj Teknolojisi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "connection",
+      "label": "Bağlantı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Bluetooth",
+        "WiFi"
+      ]
+    },
+    {
+      "key": "yikamaTalimatlari",
+      "label": "Yıkama Talimatları",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "boyut",
+      "label": "Beden",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

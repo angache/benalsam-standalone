@@ -1,0 +1,156 @@
+{
+  "category": "Anne & Bebek > Bebek Maması & Beslenme > Bebek Maması",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aptamil",
+        "Bebelac",
+        "Bebelak",
+        "Bebelove",
+        "Bebivita",
+        "Bebelac",
+        "Hipp",
+        "Humana",
+        "Milupa",
+        "Nestle",
+        "Nutricia",
+        "Similac",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "mama_type",
+      "label": "Mama Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Başlangıç Maması (0-6 ay)",
+        "Devam Maması (6-12 ay)",
+        "Büyüme Maması (12+ ay)",
+        "Özel Formül",
+        "Organik Mama",
+        "Hipoalerjenik",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "age_range",
+      "label": "Yaş Aralığı",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-6 ay",
+        "6-12 ay",
+        "12+ ay",
+        "0-12 ay",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık",
+      "type": "string",
+      "required": false,
+      "options": [
+        "400g",
+        "600g",
+        "800g",
+        "900g",
+        "1000g",
+        "1200g",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "flavor",
+      "label": "Aroma",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Sade",
+        "Vanilya",
+        "Muz",
+        "Elma",
+        "Armut",
+        "Çoklu Meyve",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "organic",
+      "label": "Organik",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "gluten_free",
+      "label": "Glutensiz",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "lactose_free",
+      "label": "Laktozsuz",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "expiry_date",
+      "label": "Son Kullanma Tarihi",
+      "type": "date",
+      "required": false
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2020,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

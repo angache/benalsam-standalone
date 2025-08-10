@@ -1,0 +1,246 @@
+{
+  "category": "Elektronik > Telefon > Cep Telefonu > Yaşlı Dostu Telefon",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Doro",
+        "Nokia",
+        "Samsung",
+        "Alcatel",
+        "Maxcom",
+        "Emporia",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "screen_size",
+      "label": "Ekran Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "2.4\"",
+        "2.8\"",
+        "3.0\"",
+        "6.5\"",
+        "6.7\""
+      ]
+    },
+    {
+      "key": "screen_technology",
+      "label": "Ekran Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "TFT LCD",
+        "IPS LCD",
+        "AMOLED"
+      ]
+    },
+    {
+      "key": "resolution",
+      "label": "Çözünürlük",
+      "type": "string",
+      "required": false,
+      "options": [
+        "240x320",
+        "320x240",
+        "720x1600",
+        "1080x2400"
+      ]
+    },
+    {
+      "key": "operating_system",
+      "label": "İşletim Sistemi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "KaiOS",
+        "Android",
+        "Özel",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "camera",
+      "label": "Ana Kamera (MP)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "2 MP",
+        "5 MP",
+        "13 MP",
+        "48 MP"
+      ]
+    },
+    {
+      "key": "front_camera",
+      "label": "Ön Kamera (MP)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "VGA",
+        "2 MP",
+        "5 MP",
+        "8 MP"
+      ]
+    },
+    {
+      "key": "battery_capacity",
+      "label": "Batarya Kapasitesi (mAh)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1500 mAh",
+        "2000 mAh",
+        "3000 mAh",
+        "5000 mAh"
+      ]
+    },
+    {
+      "key": "battery_type",
+      "label": "Batarya Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çıkarılabilir",
+        "Sabit"
+      ]
+    },
+    {
+      "key": "charging_port",
+      "label": "Şarj Portu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Micro USB",
+        "USB-C",
+        "Özel"
+      ]
+    },
+    {
+      "key": "sim_card_type",
+      "label": "SIM Kart Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mini SIM",
+        "Micro SIM",
+        "Nano SIM"
+      ]
+    },
+    {
+      "key": "dual_sim",
+      "label": "Çift SIM",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "fm_radio",
+      "label": "FM Radyo",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "mp3_player",
+      "label": "MP3 Çalar",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "acilDurumDugmesi",
+      "label": "Acil Durum Butonu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "buyukTuslar",
+      "label": "Büyük Tuşlar",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "buyukYazi",
+      "label": "Büyük Yazı",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "sesKomutu",
+      "label": "Sesli Komut",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "water_resistance",
+      "label": "Su Geçirmezlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IP54",
+        "Yok"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

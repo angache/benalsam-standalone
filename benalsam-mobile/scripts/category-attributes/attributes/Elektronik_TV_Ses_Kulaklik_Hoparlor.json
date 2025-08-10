@@ -1,0 +1,133 @@
+{
+  "category": "Elektronik > TV & Ses > Kulaklık & Hoparlör",
+  "attributes": [
+    {
+      "key": "cihazTipi",
+      "label": "Cihaz Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Kulaklık",
+        "Hoparlör",
+        "Kulak İçi"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sony",
+        "JBL",
+        "Bose",
+        "Sennheiser",
+        "Apple",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "baglantiTipi",
+      "label": "Bağlantı Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kablolu",
+        "Kablosuz",
+        "Bluetooth"
+      ]
+    },
+    {
+      "key": "audio_technology",
+      "label": "Ses Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Noise Cancelling",
+        "Bass Boost",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "battery_life",
+      "label": "Pil Ömrü (Saat)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "water_resistance",
+      "label": "Su Geçirmezlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IPX4",
+        "IPX7",
+        "Yok"
+      ]
+    },
+    {
+      "key": "mikrofon",
+      "label": "Mikrofon",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

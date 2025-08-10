@@ -1,0 +1,232 @@
+{
+  "category": "ModaGiyim>ÇocukGiyim>ErkekÇocuk",
+  "pathKey": "ModaGiyim>ÇocukGiyim>ErkekÇocuk",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Zara Kids",
+        "H&M Kids",
+        "Mango Kids",
+        "Gap Kids",
+        "Uniqlo Kids",
+        "C&A Kids",
+        "Koton Kids",
+        "LC Waikiki Kids",
+        "Defacto Kids",
+        "Nike Kids",
+        "Adidas Kids",
+        "Puma Kids",
+        "New Balance Kids",
+        "Türk Markası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yas_grubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-3 ay",
+        "3-6 ay",
+        "6-9 ay",
+        "9-12 ay",
+        "12-18 ay",
+        "18-24 ay",
+        "2-3 yaş",
+        "3-4 yaş",
+        "4-5 yaş",
+        "5-6 yaş",
+        "6-7 yaş",
+        "7-8 yaş",
+        "8-9 yaş",
+        "9-10 yaş",
+        "10-11 yaş",
+        "11-12 yaş",
+        "12-13 yaş",
+        "13-14 yaş"
+      ]
+    },
+    {
+      "key": "beden",
+      "label": "Beden",
+      "type": "string",
+      "required": true,
+      "options": [
+        "50",
+        "56",
+        "62",
+        "68",
+        "74",
+        "80",
+        "86",
+        "92",
+        "98",
+        "104",
+        "110",
+        "116",
+        "122",
+        "128",
+        "134",
+        "140",
+        "146",
+        "152",
+        "158",
+        "164"
+      ]
+    },
+    {
+      "key": "mevsim",
+      "label": "Mevsim",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yaz",
+        "Kış",
+        "Bahar",
+        "Sonbahar",
+        "Tüm Sezon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kullanim_suresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Hiç Giyilmedi",
+        "1-5 Kez",
+        "5-10 Kez",
+        "10-20 Kez",
+        "20+ Kez"
+      ]
+    },
+    {
+      "key": "yikamaTalimatlari",
+      "label": "Yıkama Talimatları",
+      "type": "string",
+      "required": false,
+      "options": [
+        "30°C",
+        "40°C",
+        "60°C",
+        "Kuru Temizleme",
+        "El Yıkama",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "boyaDurumu",
+      "label": "Boya Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Solmamış",
+        "Hafif Solmuş",
+        "Orta Solmuş",
+        "Çok Solmuş"
+      ]
+    },
+    {
+      "key": "etiketDurumu",
+      "label": "Etiket Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Kısmen Var"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Keten",
+        "Polyester",
+        "Viskon",
+        "Yün",
+        "Akrilik",
+        "Karışık",
+        "Organik Pamuk",
+        "Bambu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "stil",
+      "label": "Stil",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Casual",
+        "Spor",
+        "Formal",
+        "Parti",
+        "Okul",
+        "Ev",
+        "Dış Mekan",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Turuncu",
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Kahverengi",
+        "Lacivert",
+        "Bordo",
+        "Pembe",
+        "Mor",
+        "Bej",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

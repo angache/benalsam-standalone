@@ -1,0 +1,42 @@
+.category-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  transition: all 0.15s ease-out;
+}
+.category-card:hover {
+  border-color: hsl(var(--primary));
+  transform: translateY(-1px); 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+[data-theme="dark"] .category-card:hover {
+   box-shadow: 0 4px 8px color-mix(in srgb, hsl(var(--primary)) 10%, transparent 90%);
+}
+
+.hero-gradient { background: transparent; }
+
+.listing-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03); 
+  border-radius: calc(var(--radius) - 1px);
+}
+[data-theme="dark"] .listing-card {
+  background: hsl(var(--card-dark));
+  border: 1px solid hsl(var(--border-dark));
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.offer-badge { 
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, color-mix(in srgb, hsl(var(--primary)) 80%, #f0c14b) 100%);
+  animation: pulse 2s infinite;
+  color: hsl(var(--primary-foreground));
+}
+[data-theme="dark"] .offer-badge {
+  background: hsl(var(--primary-dark));
+  color: hsl(var(--primary-foreground-dark));
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.02); }
+}

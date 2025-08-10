@@ -1,0 +1,108 @@
+{
+  "category": "Endüstri > Makineleri > Jeneratör",
+  "pathKey": "Endüstri>Makineleri>Jeneratör",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "jeneratorTuru",
+      "label": "Jeneratör Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Dizel Jeneratör",
+        "Benzinli Jeneratör",
+        "Doğalgaz Jeneratörü",
+        "Hibrit Jeneratör",
+        "Portatif Jeneratör",
+        "Endüstriyel Jeneratör",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "guc",
+      "label": "Güç (kW)",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 5000
+    },
+    {
+      "key": "faz",
+      "label": "Faz",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tek Faz",
+        "Üç Faz"
+      ]
+    },
+    {
+      "key": "voltaj",
+      "label": "Voltaj (V)",
+      "type": "number",
+      "required": false,
+      "min": 110,
+      "max": 480
+    },
+    {
+      "key": "yakıtTuru",
+      "label": "Yakıt Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Dizel",
+        "Benzin",
+        "Doğalgaz",
+        "LPG",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yakitKapasitesi",
+      "label": "Yakıt Kapasitesi (L)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 1000
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>ParaKoleksiyonu",
+  "pathKey": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>ParaKoleksiyonu",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Ülke/Kurum",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Para Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "paraTuru",
+      "label": "Para Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Madeni Para",
+        "Kağıt Para",
+        "Jeton",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "basimYili",
+      "label": "Basım Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1800,
+      "max": 2024
+    },
+    {
+      "key": "deger",
+      "label": "Değer",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Altın",
+        "Gümüş",
+        "Bronz",
+        "Nikel",
+        "Kağıt",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "category": "Hizmetler > Özel Ders > İngilizce",
+  "attributes": [
+    {
+      "key": "service_type",
+      "label": "Hizmet Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Birebir Ders",
+        "Grup Dersi",
+        "Online Ders",
+        "Hibrit Ders",
+        "Konuşma Pratiği",
+        "Sınav Hazırlık",
+        "İş İngilizcesi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Profesyonel",
+        "Tüm Seviyeler"
+      ]
+    },
+    {
+      "key": "experience_years",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "education_status",
+      "label": "Eğitim Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "İngilizce Öğretmeni",
+        "İngiliz Dili ve Edebiyatı",
+        "Mütercim Tercüman",
+        "Yabancı Dil Eğitimi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "lesson_location",
+      "label": "Ders Yeri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğrenci Evi",
+        "Öğretmen Evi",
+        "Kütüphane",
+        "Kurs Merkezi",
+        "Online",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "hourly_rate",
+      "label": "Saat Ücreti (TL)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

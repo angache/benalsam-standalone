@@ -1,0 +1,86 @@
+{
+  "category": "ModaGiyim>Ayakkabı>ErkekAyakkabı",
+  "pathKey": "ModaGiyim>Ayakkabı>ErkekAyakkabı",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "ayakkabiTuru",
+      "label": "Ayakkabı Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Spor Ayakkabı",
+        "Günlük Ayakkabı",
+        "Resmi Ayakkabı",
+        "Bot",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Kahverengi",
+        "Beyaz",
+        "Mavi",
+        "Gri",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Deri",
+        "Suni Deri",
+        "Kumaş",
+        "Canvas",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "numara",
+      "label": "Numara",
+      "type": "number",
+      "required": false,
+      "min": 35,
+      "max": 50
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

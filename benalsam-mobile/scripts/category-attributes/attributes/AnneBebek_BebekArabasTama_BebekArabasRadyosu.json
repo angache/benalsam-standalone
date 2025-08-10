@@ -1,0 +1,143 @@
+{
+  "category": "AnneBebek>BebekArabasıTaşıma>BebekArabasıRadyosu",
+  "pathKey": "AnneBebek>BebekArabasıTaşıma>BebekArabasıRadyosu",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "VTech",
+        "Fisher-Price",
+        "LeapFrog",
+        "Baby Einstein",
+        "Tiny Love",
+        "Sassy",
+        "Manhattan Toy",
+        "Baby Gund",
+        "Lamaze",
+        "Infantino",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "tip",
+      "label": "Radyo Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Müzik Çalar",
+        "Sesli Kitap",
+        "Beyaz Gürültü",
+        "Ninni Çalar",
+        "Doğa Sesleri",
+        "Kombi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "pil_tipi",
+      "label": "Pil Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "AA",
+        "AAA",
+        "Şarj Edilebilir",
+        "USB Şarj",
+        "Adaptör",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ozellikler",
+      "label": "Özellikler",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Bluetooth",
+        "USB",
+        "SD Kart",
+        "Uzaktan Kumanda",
+        "Otomatik Kapanma",
+        "Ayar Düğmesi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

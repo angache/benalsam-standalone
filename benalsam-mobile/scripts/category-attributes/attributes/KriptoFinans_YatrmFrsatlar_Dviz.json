@@ -1,0 +1,139 @@
+{
+  "category": "KriptoFinans>YatırımFırsatları>Döviz",
+  "pathKey": "KriptoFinans>YatırımFırsatları>Döviz",
+  "attributes": [
+    {
+      "key": "dovizTuru",
+      "label": "Döviz Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "USD (Amerikan Doları)",
+        "EUR (Euro)",
+        "GBP (İngiliz Sterlini)",
+        "JPY (Japon Yeni)",
+        "CHF (İsviçre Frangı)",
+        "CAD (Kanada Doları)",
+        "AUD (Avustralya Doları)",
+        "CNY (Çin Yuanı)",
+        "RUB (Rus Rublesi)",
+        "TRY (Türk Lirası)",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "miktar",
+      "label": "Miktar",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 1000000
+    },
+    {
+      "key": "kur",
+      "label": "Kur (TL)",
+      "type": "number",
+      "required": false,
+      "min": 0.01,
+      "max": 1000
+    },
+    {
+      "key": "banka",
+      "label": "Banka",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ziraat Bankası",
+        "İş Bankası",
+        "Garanti BBVA",
+        "Akbank",
+        "Yapı Kredi",
+        "VakıfBank",
+        "Halkbank",
+        "Denizbank",
+        "QNB Finansbank",
+        "ING Bank",
+        "HSBC",
+        "TEB",
+        "Şekerbank",
+        "Türk Ekonomi Bankası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sube",
+      "label": "Şube",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "yatirimTuru",
+      "label": "Yatırım Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Döviz Hesabı",
+        "Döviz Tevdiat",
+        "Döviz Mevduat",
+        "Döviz Borsası",
+        "Forex",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "vade",
+      "label": "Vade",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Vadesiz",
+        "1 Ay",
+        "3 Ay",
+        "6 Ay",
+        "1 Yıl",
+        "2 Yıl",
+        "3 Yıl",
+        "5 Yıl",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "faizOrani",
+      "label": "Faiz Oranı (%)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aktif",
+        "Pasif",
+        "Vadesi Dolmuş",
+        "İptal Edilmiş"
+      ]
+    },
+    {
+      "key": "baslangic_tarihi",
+      "label": "Başlangıç Tarihi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "bitis_tarihi",
+      "label": "Bitiş Tarihi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

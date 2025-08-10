@@ -1,0 +1,192 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>PulKoleksiyonu",
+  "pathKey": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>PulKoleksiyonu",
+  "attributes": [
+    {
+      "key": "ulke",
+      "label": "Ülke",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Türkiye",
+        "ABD",
+        "İngiltere",
+        "Almanya",
+        "Fransa",
+        "İtalya",
+        "İspanya",
+        "Rusya",
+        "Çin",
+        "Japonya",
+        "Kanada",
+        "Avustralya",
+        "Hindistan",
+        "Brezilya",
+        "Arjantin",
+        "Mısır",
+        "Güney Afrika",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "donem",
+      "label": "Dönem/Yıl",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Osmanlı Dönemi (1863-1923)",
+        "Cumhuriyet Dönemi (1923-1950)",
+        "1950-1970",
+        "1970-1990",
+        "1990-2000",
+        "2000-2010",
+        "2010-2020",
+        "2020-Günümüz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Baskı Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1863,
+      "max": 2024
+    },
+    {
+      "key": "tema",
+      "label": "Tema",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tarih",
+        "Doğa",
+        "Hayvanlar",
+        "Bitkiler",
+        "Spor",
+        "Sanat",
+        "Bilim",
+        "Teknoloji",
+        "Ulaşım",
+        "Mimari",
+        "Portre",
+        "Bayrak",
+        "Armalar",
+        "Özel Günler",
+        "Festival",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "baskiTuru",
+      "label": "Baskı Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Normal Baskı",
+        "Özel Baskı",
+        "Anma Pulu",
+        "Blok",
+        "Miniatür Blok",
+        "Souvenir Sayfası",
+        "Özel Gün Pulu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kondisyon",
+      "label": "Kondisyon",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mint (MNH)",
+        "Mint (MH)",
+        "Used (Kullanılmış)",
+        "Fine Used",
+        "Very Fine",
+        "Good",
+        "Fair",
+        "Poor"
+      ]
+    },
+    {
+      "key": "katalogNumarasi",
+      "label": "Katalog Numarası",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "adet",
+      "label": "Adet",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 1000
+    },
+    {
+      "key": "nadirlik",
+      "label": "Nadirlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çok Nadir",
+        "Nadir",
+        "Az Bulunur",
+        "Orta Nadirlik",
+        "Yaygın",
+        "Çok Yaygın"
+      ]
+    },
+    {
+      "key": "sertifika",
+      "label": "Sertifika",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "PSAG",
+        "Scott",
+        "Michel",
+        "Yvert",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Kahverengi",
+        "Mor",
+        "Turuncu",
+        "Sarı",
+        "Gri",
+        "Pembe",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "category": "Endüstri > Makineleri > Mibzer",
+  "pathKey": "Endüstri>Makineleri>Mibzer",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "mibzerTuru",
+      "label": "Mibzer Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Pamuk Mibzeri",
+        "Buğday Mibzeri",
+        "Mısır Mibzeri",
+        "Ayçiçeği Mibzeri",
+        "Çoklu Ürün Mibzeri",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "satirSayisi",
+      "label": "Satır Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 50
+    },
+    {
+      "key": "calismaGenisligi",
+      "label": "Çalışma Genişliği (m)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 20
+    },
+    {
+      "key": "guc",
+      "label": "Güç (HP)",
+      "type": "number",
+      "required": false,
+      "min": 20,
+      "max": 500
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

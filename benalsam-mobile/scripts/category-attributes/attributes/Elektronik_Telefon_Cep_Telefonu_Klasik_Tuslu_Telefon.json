@@ -1,0 +1,215 @@
+{
+  "category": "Elektronik > Telefon > Cep Telefonu > Klasik Tuşlu Telefon",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Nokia",
+        "Samsung",
+        "Alcatel",
+        "Motorola",
+        "Philips",
+        "Maxcom",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "screen_size",
+      "label": "Ekran Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1.8\"",
+        "2.0\"",
+        "2.4\"",
+        "2.8\""
+      ]
+    },
+    {
+      "key": "screen_technology",
+      "label": "Ekran Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "TFT LCD",
+        "CSTN",
+        "OLED"
+      ]
+    },
+    {
+      "key": "resolution",
+      "label": "Çözünürlük",
+      "type": "string",
+      "required": false,
+      "options": [
+        "128x160",
+        "240x320",
+        "320x240",
+        "240x400"
+      ]
+    },
+    {
+      "key": "camera",
+      "label": "Kamera",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "0.3 MP",
+        "1.3 MP",
+        "2 MP"
+      ]
+    },
+    {
+      "key": "battery_capacity",
+      "label": "Batarya Kapasitesi (mAh)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "800 mAh",
+        "1000 mAh",
+        "1200 mAh",
+        "1500 mAh",
+        "2000 mAh"
+      ]
+    },
+    {
+      "key": "battery_type",
+      "label": "Batarya Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çıkarılabilir",
+        "Sabit"
+      ]
+    },
+    {
+      "key": "charging_port",
+      "label": "Şarj Portu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Micro USB",
+        "USB-C",
+        "Özel",
+        "Mini USB"
+      ]
+    },
+    {
+      "key": "sim_card_type",
+      "label": "SIM Kart Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mini SIM",
+        "Micro SIM",
+        "Nano SIM"
+      ]
+    },
+    {
+      "key": "dual_sim",
+      "label": "Çift SIM",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "fm_radio",
+      "label": "FM Radyo",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "mp3_player",
+      "label": "MP3 Çalar",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "fener",
+      "label": "El Feneri",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "water_resistance",
+      "label": "Su Geçirmezlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IP54",
+        "Yok"
+      ]
+    },
+    {
+      "key": "dayaniklilik",
+      "label": "Dayanıklılık",
+      "type": "string",
+      "required": false,
+      "options": [
+        "MIL-STD-810G",
+        "Yok"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

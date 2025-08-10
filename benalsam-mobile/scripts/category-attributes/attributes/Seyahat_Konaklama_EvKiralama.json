@@ -1,0 +1,135 @@
+{
+  "category": "Seyahat>Konaklama>EvKiralama",
+  "pathKey": "Seyahat>Konaklama>EvKiralama",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Airbnb",
+        "Booking.com",
+        "VRBO",
+        "HomeAway",
+        "TripAdvisor",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "konaklamaTipi",
+      "label": "Konaklama Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Ev",
+        "Daire",
+        "Villa",
+        "Cottage",
+        "Çiftlik Evi",
+        "Treehouse",
+        "Yat",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kisiSayisi",
+      "label": "Kişi Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 20
+    },
+    {
+      "key": "odaSayisi",
+      "label": "Oda Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "banyoSayisi",
+      "label": "Banyo Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 8
+    },
+    {
+      "key": "ozellikler",
+      "label": "Özellikler",
+      "type": "string",
+      "required": false,
+      "options": [
+        "WiFi",
+        "Klima",
+        "Mutfak",
+        "Çamaşır Makinesi",
+        "Bulaşık Makinesi",
+        "TV",
+        "Parking",
+        "Havuz",
+        "Bahçe",
+        "Teras",
+        "Şömine",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

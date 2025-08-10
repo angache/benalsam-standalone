@@ -1,0 +1,162 @@
+{
+  "category": "SanatHobi>Koleksiyon>KartKoleksiyonu",
+  "pathKey": "SanatHobi>Koleksiyon>KartKoleksiyonu",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Pokemon",
+        "Yu-Gi-Oh!",
+        "Magic: The Gathering",
+        "Dragon Ball",
+        "Naruto",
+        "One Piece",
+        "Marvel",
+        "DC Comics",
+        "Star Wars",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "kartTipi",
+      "label": "Kart Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Pokemon Kartı",
+        "Yu-Gi-Oh! Kartı",
+        "Magic Kartı",
+        "Trading Card",
+        "Collector Card",
+        "Limited Edition",
+        "Holographic",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çok Renkli",
+        "Holographic",
+        "Altın",
+        "Gümüş",
+        "Bronz",
+        "Siyah",
+        "Beyaz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "seri",
+      "label": "Seri",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "nadirlik",
+      "label": "Nadiriyet",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Common",
+        "Uncommon",
+        "Rare",
+        "Ultra Rare",
+        "Secret Rare",
+        "Legendary",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "edisyon",
+      "label": "Baskı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1. Baskı",
+        "2. Baskı",
+        "Limited Edition",
+        "Special Edition",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "degerlendirme",
+      "label": "Grading",
+      "type": "string",
+      "required": false,
+      "options": [
+        "PSA 10",
+        "PSA 9",
+        "PSA 8",
+        "PSA 7",
+        "PSA 6",
+        "PSA 5",
+        "Graded",
+        "Ungraded",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

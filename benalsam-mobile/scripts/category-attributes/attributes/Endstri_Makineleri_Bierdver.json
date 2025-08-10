@@ -1,0 +1,115 @@
+{
+  "category": "İşEndüstri>İşMakineleri>Biçerdöver",
+  "pathKey": "İşEndüstri>İşMakineleri>Biçerdöver",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "John Deere",
+        "Case IH",
+        "New Holland",
+        "Claas",
+        "Fendt",
+        "Massey Ferguson",
+        "Deutz-Fahr",
+        "Universal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "motor_gucu",
+      "label": "Motor Gücü (HP)",
+      "type": "string",
+      "required": true,
+      "options": [
+        "100-200",
+        "200-300",
+        "300-400",
+        "400-500",
+        "500+",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "calismaGenisligi",
+      "label": "Çalışma Genişliği (m)",
+      "type": "string",
+      "required": true,
+      "options": [
+        "3-5",
+        "5-7",
+        "7-9",
+        "9+",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yakitTipi",
+      "label": "Yakıt Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Dizel",
+        "Benzin",
+        "Elektrik",
+        "Hibrit",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "calisma_saati",
+      "label": "Çalışma Saati",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50000
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

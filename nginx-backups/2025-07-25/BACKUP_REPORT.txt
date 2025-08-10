@@ -1,0 +1,48 @@
+NGINX BACKUP RAPORU
+===================
+
+Tarih: Fri Jul 25 22:56:39 +03 2025
+Dosya: nginx-backup-20250725_225608.tar.gz
+Boyut: 
+
+YEDEKLENEN DOSYALAR:
+===================
+
+1. Nginx Site Konfigürasyonları:
+   - /etc/nginx/sites-available/admin.benalsam.com
+   - /etc/nginx/sites-available/benalsam.com
+   - /etc/nginx/sites-available/benalsam.com.backup
+   - /etc/nginx/sites-available/classibuy.com
+   - /etc/nginx/sites-available/default
+
+2. Nginx Sites-enabled Symlink'leri:
+   - admin.benalsam.com -> /etc/nginx/sites-available/admin.benalsam.com
+   - benalsam.com -> /etc/nginx/sites-available/benalsam.com
+
+3. SSL Sertifikaları:
+   - /etc/letsencrypt/live/admin.benalsam.com/
+   - /etc/letsencrypt/live/benalsam.com/
+   - /etc/letsencrypt/live/classibuy.com/
+   - /etc/letsencrypt/archive/ (tüm domain'ler)
+
+4. Nginx Ana Konfigürasyonu:
+   - /etc/nginx/nginx.conf
+
+RESTORE TALİMATLARI:
+===================
+
+1. Yedeklemeyi çıkar:
+   tar -xzf nginx-backup-20250725_225608.tar.gz
+
+2. Site konfigürasyonlarını geri yükle:
+   cp 20250725_225513/*.com /etc/nginx/sites-available/
+   cp 20250725_225513/nginx.conf /etc/nginx/
+
+3. SSL sertifikalarını geri yükle:
+   cp -r 20250725_225513/letsencrypt-live/* /etc/letsencrypt/live/
+   cp -r 20250725_225513/letsencrypt-archive/* /etc/letsencrypt/archive/
+
+4. Nginx'i yeniden başlat:
+   systemctl reload nginx
+
+NOT: SSL sertifikaları geri yüklenirken dosya izinlerine dikkat edin!

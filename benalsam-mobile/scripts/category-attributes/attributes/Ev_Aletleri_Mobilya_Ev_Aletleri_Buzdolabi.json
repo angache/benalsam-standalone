@@ -1,0 +1,127 @@
+{
+  "category": "Ev Aletleri & Mobilya > Ev Aletleri > Buzdolabı",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bosch",
+        "Siemens",
+        "Samsung",
+        "LG",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "energy_class",
+      "label": "Enerji Sınıfı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ]
+    },
+    {
+      "key": "kapasite",
+      "label": "Kapasite (L)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "dondurucuKapasitesi",
+      "label": "Dondurucu Kapasitesi (L)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "buzdolabiKapasitesi",
+      "label": "Soğutucu Kapasitesi (L)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "digital_display",
+      "label": "Dijital Ekran",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "wifi",
+      "label": "WiFi",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "noFrost",
+      "label": "No-Frost",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

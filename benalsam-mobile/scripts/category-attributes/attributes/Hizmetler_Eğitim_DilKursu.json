@@ -1,0 +1,106 @@
+{
+  "category": "Hizmetler > Eğitim > Dil Kursu",
+  "pathKey": "Hizmetler>Eğitim>DilKursu",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Kurs Adı/Şirket",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Kurs Paketi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "dil",
+      "label": "Dil",
+      "type": "string",
+      "required": true,
+      "options": [
+        "İngilizce",
+        "Almanca",
+        "Fransızca",
+        "İspanyolca",
+        "İtalyanca",
+        "Rusça",
+        "Arapça",
+        "Çince",
+        "Japonca",
+        "Korece",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Profesyonel"
+      ]
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çocuk (5-12)",
+        "Genç (13-17)",
+        "Yetişkin (18+)",
+        "Karma"
+      ]
+    },
+    {
+      "key": "egitimTuru",
+      "label": "Eğitim Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yüz Yüze",
+        "Online",
+        "Hibrit",
+        "Özel Ders",
+        "Grup Dersi"
+      ]
+    },
+    {
+      "key": "fiyatAraligi",
+      "label": "Fiyat Aralığı (TL)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "500-1000",
+        "1000-2500",
+        "2500-5000",
+        "5000-10000",
+        "10000+"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aktif",
+        "Pasif",
+        "Müsait",
+        "Dolu"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

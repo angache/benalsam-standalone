@@ -1,0 +1,156 @@
+{
+  "category": "Seyahat>Konaklama>KampAlanı",
+  "pathKey": "Seyahat>Konaklama>KampAlanı",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Coleman",
+        "The North Face",
+        "MSR",
+        "Big Agnes",
+        "REI",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTipi",
+      "label": "Ürün Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Çadır",
+        "Uyku Tulumu",
+        "Kamp Matı",
+        "Kamp Sandalyesi",
+        "Kamp Masası",
+        "Kamp Çantası",
+        "Kamp Feneri",
+        "Kamp Ocağı",
+        "Kamp Mutfak Eşyaları",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yeşil",
+        "Kahverengi",
+        "Gri",
+        "Mavi",
+        "Turuncu",
+        "Kırmızı",
+        "Sarı",
+        "Siyah",
+        "Beyaz",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "kisiSayisi",
+      "label": "Kişi Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "mevsim",
+      "label": "Mevsim",
+      "type": "string",
+      "required": false,
+      "options": [
+        "3 Mevsim",
+        "4 Mevsim",
+        "Yaz",
+        "Kış",
+        "Tüm Mevsimler"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Naylon",
+        "Polyester",
+        "Canvas",
+        "Alüminyum",
+        "Çelik",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık (kg)",
+      "type": "number",
+      "required": false,
+      "min": 0.1,
+      "max": 50
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

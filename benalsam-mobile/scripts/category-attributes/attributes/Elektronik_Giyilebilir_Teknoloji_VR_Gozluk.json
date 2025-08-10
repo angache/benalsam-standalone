@@ -1,0 +1,149 @@
+{
+  "category": "Elektronik > Giyilebilir Teknoloji > VR Gözlük",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Meta",
+        "HTC",
+        "Sony",
+        "Samsung",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "resolution",
+      "label": "Çözünürlük",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1080p",
+        "1440p",
+        "4K"
+      ]
+    },
+    {
+      "key": "refresh_rate",
+      "label": "Yenileme Hızı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "60 Hz",
+        "90 Hz",
+        "120 Hz"
+      ]
+    },
+    {
+      "key": "field_of_view",
+      "label": "Görüş Alanı (Derece)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "operating_system",
+      "label": "İşletim Sistemi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "connection",
+      "label": "Bağlantı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "USB-C",
+        "HDMI",
+        "Kablosuz"
+      ]
+    },
+    {
+      "key": "controller",
+      "label": "Kontrolcü",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "sensors",
+      "label": "Sensörler",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IMU",
+        "Kamera"
+      ]
+    },
+    {
+      "key": "battery_life",
+      "label": "Pil Ömrü (Saat)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "charging_technology",
+      "label": "Şarj Teknolojisi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

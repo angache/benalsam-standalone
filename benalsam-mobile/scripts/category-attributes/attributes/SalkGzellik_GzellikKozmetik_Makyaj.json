@@ -1,0 +1,136 @@
+{
+  "category": "SağlıkGüzellik>GüzellikKozmetik>Makyaj",
+  "pathKey": "SağlıkGüzellik>GüzellikKozmetik>Makyaj",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "makyajTuru",
+      "label": "Makyaj Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Göz Makyajı",
+        "Dudak Makyajı",
+        "Yüz Makyajı",
+        "Tırnak Makyajı",
+        "Makyaj Seti",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "urunKategorisi",
+      "label": "Ürün Kategorisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Fondöten",
+        "Kapatıcı",
+        "Pudra",
+        "Ruj",
+        "Göz Farı",
+        "Eyeliner",
+        "Maskara",
+        "Allık",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "ton",
+      "label": "Ton",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Açık",
+        "Orta",
+        "Koyu",
+        "Çok Açık",
+        "Çok Koyu"
+      ]
+    },
+    {
+      "key": "formul",
+      "label": "Formül",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mat",
+        "Parıltılı",
+        "Nemlendirici",
+        "Uzun Süreli",
+        "Su Geçirmez",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "hacim",
+      "label": "Hacim (ml/gr)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 500
+    },
+    {
+      "key": "sonKullanimTarihi",
+      "label": "Son Kullanım Tarihi",
+      "type": "date",
+      "required": false
+    },
+    {
+      "key": "kullanımSuresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "Yarı Dolu",
+        "Az Kaldı"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2020,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

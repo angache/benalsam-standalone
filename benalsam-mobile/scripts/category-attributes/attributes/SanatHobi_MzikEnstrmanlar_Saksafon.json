@@ -1,0 +1,181 @@
+{
+  "category": "SanatHobi>MüzikEnstrümanları>Saksafon",
+  "pathKey": "SanatHobi>MüzikEnstrümanları>Saksafon",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yamaha",
+        "Selmer",
+        "Yanagisawa",
+        "Keilwerth",
+        "P. Mauriat",
+        "Cannonball",
+        "Jupiter",
+        "Buescher",
+        "Conn",
+        "King",
+        "Bundy",
+        "Türk Markası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "tur",
+      "label": "Saksafon Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Soprano",
+        "Alto",
+        "Tenor",
+        "Bariton",
+        "Sopranino",
+        "Bass",
+        "C-Melody",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "akortDurumu",
+      "label": "Akort Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Akortlu",
+        "Akort Gerekli",
+        "Kısmen Akortlu",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "mekanikDurumu",
+      "label": "Mekanik Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Bakım Gerekli",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "sesKalitesi",
+      "label": "Ses Kalitesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "Çok İyi",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Garantili",
+        "Garantisiz",
+        "Kısmi Garanti",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "bakim_gecmisi",
+      "label": "Bakım Geçmişi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Düzenli Bakım",
+        "Ara Sıra Bakım",
+        "Hiç Bakım Yapılmadı",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pirinç",
+        "Bronz",
+        "Gümüş",
+        "Altın",
+        "Lak",
+        "Nikel",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük",
+        "Orta",
+        "Büyük",
+        "Profesyonel"
+      ]
+    },
+    {
+      "key": "agizlik",
+      "label": "Ağızlık",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Ayrı Satılır"
+      ]
+    },
+    {
+      "key": "kasa",
+      "label": "Kasa",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Ayrı Satılır"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

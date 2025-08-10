@@ -1,0 +1,135 @@
+{
+  "category": "Emlak > Konut > Kiralık Villa",
+  "attributes": [
+    {
+      "key": "property_type",
+      "label": "Mülk Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Villa",
+        "Lüks Villa",
+        "Deniz Manzaralı Villa",
+        "Dağ Manzaralı Villa",
+        "Bahçeli Villa",
+        "Havuzlu Villa",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "area",
+      "label": "Alan (m²)",
+      "type": "number",
+      "required": true,
+      "min": 100,
+      "max": 5000
+    },
+    {
+      "key": "room_count",
+      "label": "Oda Sayısı",
+      "type": "number",
+      "required": true,
+      "min": 2,
+      "max": 20
+    },
+    {
+      "key": "bathroom_count",
+      "label": "Banyo Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "floor_count",
+      "label": "Kat Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 5
+    },
+    {
+      "key": "building_age",
+      "label": "Bina Yaşı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "heating_type",
+      "label": "Isıtma Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Doğalgaz",
+        "Kombi",
+        "Merkezi",
+        "Klima",
+        "Şömine",
+        "Yerden Isıtma",
+        "Yok"
+      ]
+    },
+    {
+      "key": "furniture_status",
+      "label": "Eşya Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Eşyalı",
+        "Eşyasız",
+        "Yarı Eşyalı"
+      ]
+    },
+    {
+      "key": "garden_area",
+      "label": "Bahçe Alanı (m²)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "pool",
+      "label": "Havuz",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Özel Havuz",
+        "Ortak Havuz"
+      ]
+    },
+    {
+      "key": "parking",
+      "label": "Otopark",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Garaj",
+        "Ücretli"
+      ]
+    },
+    {
+      "key": "security",
+      "label": "Güvenlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "7/24 Güvenlik"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

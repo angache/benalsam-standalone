@@ -1,0 +1,122 @@
+{
+  "category": "Emlak > Konut > Kiralık Müstakil Ev",
+  "attributes": [
+    {
+      "key": "property_type",
+      "label": "Mülk Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Müstakil Ev",
+        "Tek Katlı Ev",
+        "İki Katlı Ev",
+        "Üç Katlı Ev",
+        "Çiftlik Evi",
+        "Köşk",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "area",
+      "label": "Alan (m²)",
+      "type": "number",
+      "required": true,
+      "min": 50,
+      "max": 2000
+    },
+    {
+      "key": "room_count",
+      "label": "Oda Sayısı",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 20
+    },
+    {
+      "key": "bathroom_count",
+      "label": "Banyo Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "floor_count",
+      "label": "Kat Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 5
+    },
+    {
+      "key": "building_age",
+      "label": "Bina Yaşı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 100
+    },
+    {
+      "key": "heating_type",
+      "label": "Isıtma Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Doğalgaz",
+        "Kombi",
+        "Merkezi",
+        "Klima",
+        "Soba",
+        "Şömine",
+        "Yok"
+      ]
+    },
+    {
+      "key": "furniture_status",
+      "label": "Eşya Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Eşyalı",
+        "Eşyasız",
+        "Yarı Eşyalı"
+      ]
+    },
+    {
+      "key": "garden_area",
+      "label": "Bahçe Alanı (m²)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "parking",
+      "label": "Otopark",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Garaj",
+        "Ücretli"
+      ]
+    },
+    {
+      "key": "security",
+      "label": "Güvenlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

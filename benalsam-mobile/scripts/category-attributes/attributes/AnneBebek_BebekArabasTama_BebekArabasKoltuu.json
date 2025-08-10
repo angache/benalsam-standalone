@@ -1,0 +1,151 @@
+{
+  "category": "AnneBebek>BebekArabasıTaşıma>BebekArabasıKoltuğu",
+  "pathKey": "AnneBebek>BebekArabasıTaşıma>BebekArabasıKoltuğu",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Chicco",
+        "Peg Perego",
+        "Britax",
+        "Maxi Cosi",
+        "Cybex",
+        "Joie",
+        "Graco",
+        "Safety 1st",
+        "Evenflo",
+        "Cosatto",
+        "Mamas & Papas",
+        "Bugaboo",
+        "Stokke",
+        "Türk Markası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yas_grubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-6 ay",
+        "0-9 ay",
+        "0-12 ay",
+        "0-18 ay",
+        "0-24 ay",
+        "0-36 ay",
+        "6-36 ay",
+        "9-36 ay",
+        "12-36 ay",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "agirlik_limiti",
+      "label": "Ağırlık Limiti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "0-9 kg",
+        "0-13 kg",
+        "0-18 kg",
+        "0-22 kg",
+        "0-25 kg",
+        "0-36 kg",
+        "9-18 kg",
+        "9-25 kg",
+        "9-36 kg",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "guvenlik_standardi",
+      "label": "Güvenlik Standardı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "ECE R44/04",
+        "ECE R129 (i-Size)",
+        "FMVSS 213",
+        "AS/NZS 1754",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "montaj_yonu",
+      "label": "Montaj Yönü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öne Dönük",
+        "Arkaya Dönük",
+        "Çift Yönlü",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Bej",
+        "Lacivert",
+        "Bordo",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

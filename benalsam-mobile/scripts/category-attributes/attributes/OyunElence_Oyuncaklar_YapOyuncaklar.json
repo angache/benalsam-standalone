@@ -1,0 +1,85 @@
+{
+  "category": "Oyun Eğlence > Oyuncaklar > Yap Oyuncaklar",
+  "pathKey": "OyunEğlence>Oyuncaklar>YapOyuncaklar",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Oyuncak Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "yapOyuncakTuru",
+      "label": "Yap Oyuncak Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Lego",
+        "Puzzle",
+        "Model",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "parcaSayisi",
+      "label": "Parça Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 10000
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "3+",
+        "6+",
+        "8+",
+        "12+",
+        "18+",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Plastik",
+        "Ahşap",
+        "Metal",
+        "Kağıt",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

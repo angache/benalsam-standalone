@@ -1,0 +1,168 @@
+{
+  "category": "Seyahat>SeyahatAksesuarları>SeyahatAdaptörü",
+  "pathKey": "Seyahat>SeyahatAksesuarları>SeyahatAdaptörü",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Anker",
+        "Belkin",
+        "Samsung",
+        "Apple",
+        "Sony",
+        "Philips",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "adaptorTipi",
+      "label": "Adaptör Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Evrensel Adaptör",
+        "USB-C Adaptör",
+        "USB-A Adaptör",
+        "Şarj Adaptörü",
+        "Dönüştürücü",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "girisTipi",
+      "label": "Giriş Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Type A (Amerikan)",
+        "Type B (Amerikan)",
+        "Type C (Avrupa)",
+        "Type D (İngiliz)",
+        "Type E (Fransız)",
+        "Type F (Alman)",
+        "Type G (İngiliz)",
+        "Type H (İsrail)",
+        "Type I (Avustralya)",
+        "Type J (İsviçre)",
+        "Type K (Danimarka)",
+        "Type L (İtalya)",
+        "Type M (Güney Afrika)",
+        "Type N (Brezilya)",
+        "Type O (Tayland)",
+        "Evrensel"
+      ]
+    },
+    {
+      "key": "cikisTipi",
+      "label": "Çıkış Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "USB-A",
+        "USB-C",
+        "Micro USB",
+        "Lightning",
+        "AC Çıkış",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "guc",
+      "label": "Güç (W)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 200
+    },
+    {
+      "key": "voltaj",
+      "label": "Voltaj",
+      "type": "string",
+      "required": false,
+      "options": [
+        "110V",
+        "220V",
+        "110-240V",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

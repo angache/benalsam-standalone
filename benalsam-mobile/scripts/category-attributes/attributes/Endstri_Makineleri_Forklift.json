@@ -1,0 +1,118 @@
+{
+  "category": "İşEndüstri>İşMakineleri>Forklift",
+  "pathKey": "İşEndüstri>İşMakineleri>Forklift",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Toyota",
+        "Hyster",
+        "Yale",
+        "Linde",
+        "Jungheinrich",
+        "Crown",
+        "Raymond",
+        "Clark",
+        "Universal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "kapasite",
+      "label": "Kaldırma Kapasitesi (ton)",
+      "type": "string",
+      "required": true,
+      "options": [
+        "1-2",
+        "2-3",
+        "3-5",
+        "5-8",
+        "8-10",
+        "10+",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "tip",
+      "label": "Forklift Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Elektrikli",
+        "Dizel",
+        "LPG",
+        "Benzin",
+        "Hibrit",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "motor_gucu",
+      "label": "Motor Gücü (HP)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "20-50",
+        "50-100",
+        "100-150",
+        "150+",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "calisma_saati",
+      "label": "Çalışma Saati",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50000
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

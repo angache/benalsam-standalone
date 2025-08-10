@@ -1,0 +1,193 @@
+{
+  "category": "Araç & Vasıta > Deniz Araçları",
+  "attributes": [
+    {
+      "key": "vehicle_type",
+      "label": "Araç Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tekne",
+        "Yat",
+        "Jet Ski",
+        "Sürat Teknesi",
+        "Balıkçı Teknesi",
+        "Yelkenli",
+        "Katamaran",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Azimut",
+        "Princess",
+        "Sunseeker",
+        "Ferretti",
+        "Pershing",
+        "Sea Ray",
+        "Bayliner",
+        "Yamaha",
+        "Kawasaki",
+        "Sea-Doo",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1950,
+      "max": 2024
+    },
+    {
+      "key": "uzunluk",
+      "label": "Uzunluk (metre)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 100
+    },
+    {
+      "key": "engine_count",
+      "label": "Motor Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "engine_size",
+      "label": "Motor Hacmi (cc)",
+      "type": "number",
+      "required": false,
+      "min": 50,
+      "max": 10000
+    },
+    {
+      "key": "engine_power",
+      "label": "Motor Gücü (HP)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 5000
+    },
+    {
+      "key": "fuel_type",
+      "label": "Yakıt Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Benzin",
+        "Dizel",
+        "Elektrik",
+        "Hibrit",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "fuel_capacity",
+      "label": "Yakıt Kapasitesi (Litre)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 10000
+    },
+    {
+      "key": "passenger_capacity",
+      "label": "Yolcu Kapasitesi",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 100
+    },
+    {
+      "key": "hull_material",
+      "label": "Gövde Malzemesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Fiberglas",
+        "Alüminyum",
+        "Çelik",
+        "Ahşap",
+        "Kompozit",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Mavi",
+        "Gri",
+        "Siyah",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Kahverengi",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "registration",
+      "label": "Ruhsat",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "insurance",
+      "label": "Sigorta",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

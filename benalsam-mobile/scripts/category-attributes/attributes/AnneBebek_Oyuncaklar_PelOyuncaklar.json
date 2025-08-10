@@ -1,0 +1,188 @@
+{
+  "category": "Anne & Bebek > Oyuncaklar > Pelüş Oyuncaklar",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Jellycat",
+        "Steiff",
+        "Gund",
+        "Manhattan Toy",
+        "Tiny Love",
+        "Lamaze",
+        "Sassy",
+        "Fisher-Price",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "animal_type",
+      "label": "Hayvan Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Ayı",
+        "Tavşan",
+        "Kedi",
+        "Köpek",
+        "Fil",
+        "Aslan",
+        "Kaplan",
+        "Panda",
+        "Penguen",
+        "Kuş",
+        "Balık",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "age_range",
+      "label": "Yaş Aralığı",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-6 ay",
+        "6-12 ay",
+        "12-24 ay",
+        "2-4 yaş",
+        "4-6 yaş",
+        "6+ yaş",
+        "Tüm Yaşlar",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük (10-20cm)",
+        "Orta (20-40cm)",
+        "Büyük (40-60cm)",
+        "Çok Büyük (60cm+)",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Polyester",
+        "Pamuk",
+        "Akrilik",
+        "Yün",
+        "Silicone",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "filling_type",
+      "label": "Dolgu Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Polyester Elyaf",
+        "Pamuk",
+        "Yün",
+        "Silikon",
+        "Su",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "washable",
+      "label": "Yıkanabilir",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "machine_washable",
+      "label": "Makinede Yıkanabilir",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "sound_effects",
+      "label": "Ses Efektleri",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Siyah",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Mor",
+        "Turuncu",
+        "Kahverengi",
+        "Bej",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

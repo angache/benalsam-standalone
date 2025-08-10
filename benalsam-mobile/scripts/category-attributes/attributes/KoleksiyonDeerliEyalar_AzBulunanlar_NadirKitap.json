@@ -1,0 +1,73 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>AzBulunanlar>NadirKitap",
+  "pathKey": "KoleksiyonDeğerliEşyalar>AzBulunanlar>NadirKitap",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Yazar/Yayınevi",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Kitap Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "kitapTuru",
+      "label": "Kitap Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Roman",
+        "Tarih",
+        "Bilim",
+        "Sanat",
+        "Din",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "basimYili",
+      "label": "Basım Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1500,
+      "max": 2024
+    },
+    {
+      "key": "dil",
+      "label": "Dil",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Türkçe",
+        "İngilizce",
+        "Fransızca",
+        "Almanca",
+        "Arapça",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

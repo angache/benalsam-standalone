@@ -1,0 +1,100 @@
+{
+  "category": "Anne & Bebek > Bebek Arabası & Taşıma > Ana Kucağı",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Chicco",
+        "Peg Perego",
+        "Britax",
+        "Maxi-Cosi",
+        "Cybex",
+        "Bugaboo",
+        "Stokke",
+        "Joolz",
+        "UPPAbaby",
+        "Graco",
+        "Evenflo",
+        "Safety 1st",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "weight_limit",
+      "label": "Ağırlık Limiti",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-9 kg",
+        "0-13 kg",
+        "0-18 kg",
+        "0-25 kg",
+        "3-18 kg",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "age_range",
+      "label": "Yaş Aralığı",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-6 ay",
+        "0-12 ay",
+        "0-18 ay",
+        "0-24 ay",
+        "0-36 ay",
+        "0-48 ay"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

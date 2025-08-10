@@ -1,0 +1,109 @@
+{
+  "category": "EğitimKitap>Kitaplar>ÇocukKitapları",
+  "pathKey": "EğitimKitap>Kitaplar>ÇocukKitapları",
+  "attributes": [
+    {
+      "key": "kitap_tipi",
+      "label": "Kitap Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Hikaye Kitabı",
+        "Masal Kitabı",
+        "Eğitici Kitap",
+        "Boyama Kitabı",
+        "Etkinlik Kitabı",
+        "Bilim Kitabı",
+        "Tarih Kitabı",
+        "Coğrafya Kitabı",
+        "Hayvan Kitabı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yas_grubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-2 Yaş",
+        "3-5 Yaş",
+        "6-8 Yaş",
+        "9-12 Yaş",
+        "13+ Yaş"
+      ]
+    },
+    {
+      "key": "yazar",
+      "label": "Yazar",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "yayinevi",
+      "label": "Yayınevi",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "basim_yili",
+      "label": "Basım Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1950,
+      "max": 2024
+    },
+    {
+      "key": "sayfa_sayisi",
+      "label": "Sayfa Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 500
+    },
+    {
+      "key": "cilt_durumu",
+      "label": "Cilt Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Ciltli",
+        "Karton Kapak",
+        "Bez Cilt",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "notlar",
+      "label": "Notlar/İşaretler",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Temiz",
+        "Hafif Notlar",
+        "Çok Notlu",
+        "İşaretli",
+        "Eksik Sayfalar"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

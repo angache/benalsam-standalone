@@ -1,0 +1,145 @@
+{
+  "category": "Elektronik > Giyilebilir Teknoloji > Fitness Takip Cihazı",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Fitbit",
+        "Garmin",
+        "Xiaomi",
+        "Huawei",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "screen_size",
+      "label": "Ekran Boyutu",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "screen_technology",
+      "label": "Ekran Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "OLED",
+        "LCD"
+      ]
+    },
+    {
+      "key": "water_resistance",
+      "label": "Su Geçirmezlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IP67",
+        "IP68",
+        "5ATM"
+      ]
+    },
+    {
+      "key": "gps",
+      "label": "GPS",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "heart_rate",
+      "label": "Kalp Atış Hızı",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "uykuTakibi",
+      "label": "Uyku Takibi",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "adimSayaci",
+      "label": "Adım Sayacı",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "kaloriTakibi",
+      "label": "Kalori Takibi",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "battery_life",
+      "label": "Pil Ömrü (Gün)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "charging_technology",
+      "label": "Şarj Teknolojisi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

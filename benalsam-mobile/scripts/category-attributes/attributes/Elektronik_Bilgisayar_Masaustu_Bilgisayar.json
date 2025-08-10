@@ -1,0 +1,220 @@
+{
+  "category": "Elektronik > Bilgisayar > Masaüstü Bilgisayar",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Apple",
+        "Dell",
+        "HP",
+        "Lenovo",
+        "ASUS",
+        "Acer",
+        "MSI",
+        "Corsair",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "processor_brand",
+      "label": "İşlemci Markası",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Intel",
+        "AMD"
+      ]
+    },
+    {
+      "key": "processor_model",
+      "label": "İşlemci Modeli",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "ram",
+      "label": "RAM",
+      "type": "string",
+      "required": true,
+      "options": [
+        "4 GB",
+        "8 GB",
+        "16 GB",
+        "32 GB",
+        "64 GB",
+        "128 GB"
+      ]
+    },
+    {
+      "key": "storage",
+      "label": "Depolama",
+      "type": "string",
+      "required": true,
+      "options": [
+        "128 GB",
+        "256 GB",
+        "512 GB",
+        "1 TB",
+        "2 TB",
+        "4 TB",
+        "8 TB"
+      ]
+    },
+    {
+      "key": "storage_type",
+      "label": "Depolama Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "SSD",
+        "HDD",
+        "NVMe",
+        "Karma"
+      ]
+    },
+    {
+      "key": "gpuMarka",
+      "label": "GPU Markası",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Entegre",
+        "NVIDIA",
+        "AMD"
+      ]
+    },
+    {
+      "key": "gpuModel",
+      "label": "GPU Modeli",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "anakart",
+      "label": "Anakart",
+      "type": "string",
+      "required": false,
+      "options": [
+        "ATX",
+        "Micro-ATX",
+        "Mini-ITX"
+      ]
+    },
+    {
+      "key": "gucKaynagi",
+      "label": "Güç Kaynağı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "300W",
+        "500W",
+        "650W",
+        "750W",
+        "850W",
+        "1000W",
+        "1200W"
+      ]
+    },
+    {
+      "key": "kasaBoyutu",
+      "label": "Kasa Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mini Tower",
+        "Mid Tower",
+        "Full Tower"
+      ]
+    },
+    {
+      "key": "operating_system",
+      "label": "İşletim Sistemi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Windows",
+        "macOS",
+        "Linux"
+      ]
+    },
+    {
+      "key": "monitorDahil",
+      "label": "Monitör Dahil",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "klavyeDahil",
+      "label": "Klavye Dahil",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "fareDahil",
+      "label": "Fare Dahil",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

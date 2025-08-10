@@ -1,0 +1,143 @@
+{
+  "category": "AraçVasıta>YedekParçaAksesuar>MotorParçaları",
+  "pathKey": "AraçVasıta>YedekParçaAksesuar>MotorParçaları",
+  "attributes": [
+    {
+      "key": "motorParcaTipi",
+      "label": "Motor Parça Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Piston",
+        "Segman",
+        "Subap",
+        "Eksantrik",
+        "Krank Mili",
+        "Yağ Pompası",
+        "Su Pompası",
+        "Radyatör",
+        "Termostat",
+        "Fren Balatası",
+        "Debriyaj",
+        "Şanzıman",
+        "Diferansiyel",
+        "Direksiyon",
+        "Süspansiyon",
+        "Fren Sistemi",
+        "Yakıt Sistemi",
+        "Elektrik Sistemi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "arac_tipi",
+      "label": "Araç Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Otomobil",
+        "SUV/Jip",
+        "Ticari Araç",
+        "Motosiklet",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Toyota",
+        "Honda",
+        "Ford",
+        "Volkswagen",
+        "BMW",
+        "Mercedes",
+        "Audi",
+        "Hyundai",
+        "Kia",
+        "Renault",
+        "Peugeot",
+        "Fiat",
+        "Opel",
+        "Citroen",
+        "Nissan",
+        "Mazda",
+        "Subaru",
+        "Mitsubishi",
+        "Skoda",
+        "Seat",
+        "OEM",
+        "Universal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "yil",
+      "label": "Model Yılı",
+      "type": "number",
+      "required": true,
+      "min": 1950,
+      "max": 2024
+    },
+    {
+      "key": "motorHacmi",
+      "label": "Motor Hacmi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1.0L",
+        "1.2L",
+        "1.4L",
+        "1.6L",
+        "1.8L",
+        "2.0L",
+        "2.2L",
+        "2.5L",
+        "3.0L",
+        "3.5L",
+        "4.0L",
+        "4.5L",
+        "5.0L",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

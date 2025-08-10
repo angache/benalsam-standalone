@@ -1,0 +1,129 @@
+{
+  "category": "Sanat & Hobi > Resim & El Sanatları > Sabun Yapımı",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bramble Berry",
+        "Nature's Garden",
+        "Wholesale Supplies Plus",
+        "Bulk Apothecary",
+        "Handmade",
+        "Custom Made",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "sabunTipi",
+      "label": "Sabun Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Katı Sabun",
+        "Sıvı Sabun",
+        "Şampuan Sabunu",
+        "Yüz Sabunu",
+        "Vücut Sabunu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzemeler",
+      "label": "İçerikler",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Zeytinyağı",
+        "Hindistan Cevizi Yağı",
+        "Shea Yağı",
+        "Esansiyel Yağlar",
+        "Doğal Renklendirici",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Krem",
+        "Pembe",
+        "Mavi",
+        "Yeşil",
+        "Sarı",
+        "Kahverengi",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "koku",
+      "label": "Koku",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Lavanta",
+        "Gül",
+        "Nane",
+        "Limon",
+        "Portakal",
+        "Vanilya",
+        "Kokusuz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "category": "Ev Aletleri & Mobilya > Ev Aletleri > Su Isıtıcı",
+  "pathKey": "EvAletleriMobilya>EvAletleri>SuIsıtıcı",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "tip",
+      "label": "Tip",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Elektrikli Su Isıtıcı",
+        "Gazlı Su Isıtıcı",
+        "Güneş Enerjili Su Isıtıcı",
+        "Anlık Su Isıtıcı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kapasite",
+      "label": "Kapasite (L)",
+      "type": "number",
+      "required": true,
+      "min": 30,
+      "max": 200
+    },
+    {
+      "key": "enerjiSinifi",
+      "label": "Enerji Sınıfı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "A+++",
+        "A++",
+        "A+",
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ]
+    },
+    {
+      "key": "guc",
+      "label": "Güç (W)",
+      "type": "number",
+      "required": false,
+      "min": 1000,
+      "max": 5000
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Gri",
+        "Siyah",
+        "Mavi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

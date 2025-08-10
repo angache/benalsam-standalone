@@ -1,0 +1,89 @@
+{
+  "category": "OyunEğlence>VideoOyunları>Nintendo",
+  "pathKey": "OyunEğlence>VideoOyunları>Nintendo",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Oyun Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "nintendoTuru",
+      "label": "Nintendo Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Switch",
+        "3DS",
+        "Wii",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "oyunTuru",
+      "label": "Oyun Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Aksiyon",
+        "Macera",
+        "Spor",
+        "Strateji",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "3+",
+        "6+",
+        "12+",
+        "16+",
+        "18+",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "dil",
+      "label": "Dil",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Türkçe",
+        "İngilizce",
+        "Japonca",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

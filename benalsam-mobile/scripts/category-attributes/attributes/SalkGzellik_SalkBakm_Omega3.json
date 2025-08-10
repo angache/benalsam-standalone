@@ -1,0 +1,138 @@
+{
+  "category": "SağlıkGüzellik>SağlıkBakım>Omega3",
+  "pathKey": "SağlıkGüzellik>SağlıkBakım>Omega3",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Solgar",
+        "Nature Made",
+        "Nordic Naturals",
+        "GNC",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTipi",
+      "label": "Ürün Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Omega 3 Kapsülü",
+        "Omega 3 Şurubu",
+        "Omega 3 Tableti",
+        "Omega 3 Tozu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "omega3Miktari",
+      "label": "Omega 3 Miktarı (mg)",
+      "type": "number",
+      "required": false,
+      "min": 100,
+      "max": 5000
+    },
+    {
+      "key": "form",
+      "label": "Form",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kapsül",
+        "Tablet",
+        "Şurup",
+        "Toz",
+        "Sıvı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Sarı",
+        "Turuncu",
+        "Kahverengi",
+        "Beyaz",
+        "Şeffaf",
+        "Siyah",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Pembe",
+        "Mor",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2018,
+      "max": 2024
+    },
+    {
+      "key": "hacim",
+      "label": "Hacim (kapsül/tablet)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 500
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

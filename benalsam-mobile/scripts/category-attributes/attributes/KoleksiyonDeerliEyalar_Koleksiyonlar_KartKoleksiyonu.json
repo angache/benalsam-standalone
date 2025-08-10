@@ -1,0 +1,64 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>KartKoleksiyonu",
+  "pathKey": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>KartKoleksiyonu",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Üretici/Şirket",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Kart Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "kartTuru",
+      "label": "Kart Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Futbol Kartı",
+        "Pokemon Kartı",
+        "Magic Kartı",
+        "Yu-Gi-Oh Kartı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "basimYili",
+      "label": "Basım Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1900,
+      "max": 2024
+    },
+    {
+      "key": "seri",
+      "label": "Seri",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

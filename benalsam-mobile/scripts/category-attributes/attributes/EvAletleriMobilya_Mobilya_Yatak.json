@@ -1,0 +1,112 @@
+{
+  "category": "Ev Aletleri & Mobilya > Mobilya > Yatak",
+  "pathKey": "EvAletleriMobilya>Mobilya>Yatak",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "yatakTuru",
+      "label": "Yatak Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tek Kişilik",
+        "Çift Kişilik",
+        "Queen Size",
+        "King Size",
+        "Çocuk Yatağı",
+        "Bebek Yatağı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "genislik",
+      "label": "Genişlik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 70,
+      "max": 200
+    },
+    {
+      "key": "uzunluk",
+      "label": "Uzunluk (cm)",
+      "type": "number",
+      "required": false,
+      "min": 120,
+      "max": 220
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ahşap",
+        "Metal",
+        "MDF",
+        "Suntalam",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Gri",
+        "Kahverengi",
+        "Siyah",
+        "Mavi",
+        "Yeşil",
+        "Doğal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

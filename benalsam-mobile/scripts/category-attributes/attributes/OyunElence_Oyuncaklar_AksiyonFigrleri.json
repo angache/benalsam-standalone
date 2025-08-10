@@ -1,0 +1,87 @@
+{
+  "category": "OyunEğlence>Oyuncaklar>AksiyonFigürleri",
+  "pathKey": "OyunEğlence>Oyuncaklar>AksiyonFigürleri",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Figür Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "figurTuru",
+      "label": "Figür Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Süper Kahraman",
+        "Film Karakteri",
+        "Çizgi Film",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük (5-10)",
+        "Orta (10-15)",
+        "Büyük (15-20)",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Plastik",
+        "Vinil",
+        "Metal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "3+",
+        "6+",
+        "8+",
+        "12+",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

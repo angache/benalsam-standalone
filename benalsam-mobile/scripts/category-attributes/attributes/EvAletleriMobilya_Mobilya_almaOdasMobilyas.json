@@ -1,0 +1,124 @@
+{
+  "category": "EvAletleriMobilya>Mobilya>ÇalışmaOdasıMobilyası",
+  "pathKey": "EvAletleriMobilya>Mobilya>ÇalışmaOdasıMobilyası",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "mobilyaTuru",
+      "label": "Mobilya Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Masa",
+        "Sandalye",
+        "Dolap",
+        "Raf",
+        "Kitaplık",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ahşap",
+        "MDF",
+        "Sunta",
+        "Metal",
+        "Plastik",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "genislik",
+      "label": "Genişlik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 50,
+      "max": 300
+    },
+    {
+      "key": "derinlik",
+      "label": "Derinlik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 30,
+      "max": 200
+    },
+    {
+      "key": "yukseklik",
+      "label": "Yükseklik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 30,
+      "max": 250
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Gri",
+        "Kahverengi",
+        "Siyah",
+        "Mavi",
+        "Yeşil",
+        "Kırmızı",
+        "Sarı",
+        "Turuncu",
+        "Pembe",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

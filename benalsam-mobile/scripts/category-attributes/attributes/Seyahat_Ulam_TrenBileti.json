@@ -1,0 +1,98 @@
+{
+  "category": "Seyahat>Ulaşım>TrenBileti",
+  "pathKey": "Seyahat>Ulaşım>TrenBileti",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "kalkisNoktasi",
+      "label": "Kalkış Noktası",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "varisNoktasi",
+      "label": "Varış Noktası",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "seferTarihi",
+      "label": "Sefer Tarihi",
+      "type": "date",
+      "required": true
+    },
+    {
+      "key": "seferSaati",
+      "label": "Sefer Saati",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "koltukSinifi",
+      "label": "Koltuk Sınıfı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ekonomi",
+        "Business",
+        "Yataklı",
+        "Özel",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "koltukNumarasi",
+      "label": "Koltuk Numarası",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "biletTipi",
+      "label": "Bilet Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tek Yön",
+        "Gidiş-Dönüş"
+      ]
+    },
+    {
+      "key": "yolcuTipi",
+      "label": "Yolcu Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yetişkin",
+        "Çocuk",
+        "Öğrenci",
+        "Yaşlı",
+        "Engelli"
+      ]
+    },
+    {
+      "key": "iptalIadeDurumu",
+      "label": "İptal/İade Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "İptal Edilebilir",
+        "İade Edilebilir",
+        "İptal/İade Yok"
+      ]
+    },
+    {
+      "key": "fiyat",
+      "label": "Fiyat (TL)",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 10000
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

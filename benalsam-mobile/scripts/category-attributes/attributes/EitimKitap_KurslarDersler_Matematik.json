@@ -1,0 +1,100 @@
+{
+  "category": "Eğitim & Kitap > Kurslar & Dersler > Matematik",
+  "attributes": [
+    {
+      "key": "service_type",
+      "label": "Hizmet Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Birebir Ders",
+        "Grup Dersi",
+        "Online Ders",
+        "Hibrit Ders",
+        "Sınav Hazırlık",
+        "Ödev Yardımı",
+        "Proje Yardımı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Sınıf Seviyesi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "İlkokul",
+        "Ortaokul",
+        "Lise",
+        "Üniversite",
+        "Tüm Seviyeler"
+      ]
+    },
+    {
+      "key": "dersler",
+      "label": "Konular",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Temel Matematik",
+        "Cebir",
+        "Geometri",
+        "Trigonometri",
+        "Analiz",
+        "İstatistik",
+        "Olasılık",
+        "Tüm Konular",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "experience_years",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "education_status",
+      "label": "Eğitim Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Matematik Öğretmeni",
+        "Matematik Bölümü",
+        "Mühendislik",
+        "İlköğretim Matematik",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "lesson_location",
+      "label": "Ders Yeri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğrenci Evi",
+        "Öğretmen Evi",
+        "Kütüphane",
+        "Kurs Merkezi",
+        "Online",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "hourly_rate",
+      "label": "Saat Ücreti (TL)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

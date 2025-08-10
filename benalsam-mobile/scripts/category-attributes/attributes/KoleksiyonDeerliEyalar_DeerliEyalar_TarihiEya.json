@@ -1,0 +1,186 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>DeğerliEşyalar>TarihiEşya",
+  "pathKey": "KoleksiyonDeğerliEşyalar>DeğerliEşyalar>TarihiEşya",
+  "attributes": [
+    {
+      "key": "esyaTuru",
+      "label": "Eşya Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mobilya",
+        "Saat",
+        "Mücevher",
+        "Tablo/Resim",
+        "Kitap",
+        "Para",
+        "Madeni Para",
+        "Porselen",
+        "Seramik",
+        "Cam",
+        "Gümüş",
+        "Altın",
+        "Bronz",
+        "Ahşap",
+        "Tekstil",
+        "Silah",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "donem",
+      "label": "Dönem",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Antik Dönem",
+        "Orta Çağ",
+        "Rönesans",
+        "Barok",
+        "Rokoko",
+        "Neoklasik",
+        "Art Nouveau",
+        "Art Deco",
+        "Osmanlı Dönemi",
+        "Cumhuriyet Dönemi",
+        "20. Yüzyıl",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Tahmini Yıl",
+      "type": "number",
+      "required": false,
+      "min": 1000,
+      "max": 1950
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Altın",
+        "Gümüş",
+        "Bronz",
+        "Pirinç",
+        "Bakır",
+        "Demir",
+        "Çelik",
+        "Ahşap",
+        "Mermer",
+        "Porselen",
+        "Seramik",
+        "Cam",
+        "İpek",
+        "Yün",
+        "Deri",
+        "Kağıt",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "koken",
+      "label": "Köken/Ülke",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Türkiye",
+        "İtalya",
+        "Fransa",
+        "İngiltere",
+        "Almanya",
+        "Avusturya",
+        "Rusya",
+        "Çin",
+        "Japonya",
+        "Mısır",
+        "Yunanistan",
+        "Roma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kondisyon",
+      "label": "Kondisyon",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "Çok İyi",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Hasarlı",
+        "Restore Edilmiş"
+      ]
+    },
+    {
+      "key": "boyutlar",
+      "label": "Boyutlar (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık (gram)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 100000
+    },
+    {
+      "key": "sertifika",
+      "label": "Sertifika",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Uzman Raporu",
+        "Müze Sertifikası",
+        "Auction House",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "provenance",
+      "label": "Provenance (Köken Geçmişi)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "restorasyon",
+      "label": "Restorasyon",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Minimal",
+        "Orta",
+        "Kapsamlı",
+        "Profesyonel"
+      ]
+    },
+    {
+      "key": "nadirlik",
+      "label": "Nadirlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çok Nadir",
+        "Nadir",
+        "Az Bulunur",
+        "Orta Nadirlik",
+        "Yaygın"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

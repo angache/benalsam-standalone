@@ -1,0 +1,208 @@
+{
+  "category": "Anne & Bebek > Bebek Arabası & Taşıma > Bebek Arabası Arıtıcısı",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bugaboo",
+        "Stokke",
+        "Joolz",
+        "UPPAbaby",
+        "Cybex",
+        "Britax",
+        "Chicco",
+        "Graco",
+        "Peg Perego",
+        "Maxi-Cosi",
+        "Silver Cross",
+        "Mamas & Papas",
+        "Universal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "purifier_type",
+      "label": "Arıtıcı Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "HEPA Filtreli",
+        "Karbon Filtreli",
+        "UV Işınlı",
+        "İyonizer",
+        "Kombinasyon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "coverage_area",
+      "label": "Kapsama Alanı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük (10-20m²)",
+        "Orta (20-40m²)",
+        "Büyük (40-60m²)",
+        "Çok Büyük (60m²+)",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "compatibility",
+      "label": "Uyumluluk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Universal",
+        "Marka Özel",
+        "Model Özel",
+        "Belirtilmemiş"
+      ]
+    },
+    {
+      "key": "compatible_brands",
+      "label": "Uyumlu Markalar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "noise_level",
+      "label": "Ses Seviyesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çok Sessiz (<30dB)",
+        "Sessiz (30-40dB)",
+        "Orta (40-50dB)",
+        "Yüksek (>50dB)"
+      ]
+    },
+    {
+      "key": "fan_speeds",
+      "label": "Fan Hızları",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 Hız",
+        "2 Hız",
+        "3 Hız",
+        "4+ Hız",
+        "Otomatik"
+      ]
+    },
+    {
+      "key": "filter_life",
+      "label": "Filtre Ömrü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "3-6 Ay",
+        "6-12 Ay",
+        "12+ Ay",
+        "Belirtilmemiş"
+      ]
+    },
+    {
+      "key": "replaceable_filter",
+      "label": "Değiştirilebilir Filtre",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "timer",
+      "label": "Zamanlayıcı",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "auto_mode",
+      "label": "Otomatik Mod",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "night_mode",
+      "label": "Gece Modu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Pembe",
+        "Yeşil",
+        "Sarı",
+        "Kırmızı",
+        "Mor",
+        "Kahverengi",
+        "Bej",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "manual",
+      "label": "Kullanım Kılavuzu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

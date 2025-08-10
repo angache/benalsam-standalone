@@ -1,0 +1,176 @@
+{
+  "category": "Anne & Bebek > Bebek Maması & Beslenme > Mama Sandalyesi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Stokke",
+        "IKEA",
+        "Chicco",
+        "Graco",
+        "Peg Perego",
+        "Maxi-Cosi",
+        "Fisher-Price",
+        "Joovy",
+        "Inglesina",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "chair_type",
+      "label": "Sandalye Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yüksek Sandalye",
+        "Booster",
+        "Katlanabilir",
+        "Ayarlanabilir",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "age_range",
+      "label": "Yaş Aralığı",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-6 ay",
+        "6-12 ay",
+        "6-36 ay",
+        "0-36 ay",
+        "6+ ay",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "weight_limit",
+      "label": "Ağırlık Limiti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "0-15 kg",
+        "0-20 kg",
+        "0-25 kg",
+        "0-30 kg",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ahşap",
+        "Plastik",
+        "Metal",
+        "Kumaş",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "foldable",
+      "label": "Katlanabilir",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "adjustable_height",
+      "label": "Ayarlanabilir Yükseklik",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "tray_included",
+      "label": "Tepsi Dahil",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "harness",
+      "label": "Emniyet Kemeri",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "wheels",
+      "label": "Tekerlek",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Ahşap",
+        "Gri",
+        "Mavi",
+        "Pembe",
+        "Yeşil",
+        "Sarı",
+        "Kırmızı",
+        "Mor",
+        "Kahverengi",
+        "Bej",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

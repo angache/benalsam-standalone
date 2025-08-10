@@ -1,0 +1,158 @@
+{
+  "category": "Araç & Vasıta > Motosiklet > Scooter",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yamaha",
+        "Honda",
+        "Kawasaki",
+        "Suzuki",
+        "Piaggio",
+        "Vespa",
+        "BMW",
+        "Kymco",
+        "SYM",
+        "Peugeot",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "yil",
+      "label": "Model Yılı",
+      "type": "number",
+      "required": true,
+      "min": 1950,
+      "max": 2024
+    },
+    {
+      "key": "kilometers",
+      "label": "Kilometre (km)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 500000
+    },
+    {
+      "key": "engine_size",
+      "label": "Motor Hacmi (cc)",
+      "type": "number",
+      "required": false,
+      "min": 50,
+      "max": 800
+    },
+    {
+      "key": "engine_power",
+      "label": "Motor Gücü (HP)",
+      "type": "number",
+      "required": false,
+      "min": 3,
+      "max": 80
+    },
+    {
+      "key": "fuel_type",
+      "label": "Yakıt Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Benzin",
+        "Elektrik",
+        "Hibrit",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "transmission",
+      "label": "Vites",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Otomatik",
+        "CVT",
+        "Manuel",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Siyah",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "registration",
+      "label": "Ruhsat",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "insurance",
+      "label": "Sigorta",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "maintenance_log",
+      "label": "Bakım Kayıtları",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

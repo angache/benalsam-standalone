@@ -1,0 +1,131 @@
+{
+  "category": "İşEndüstri>EndüstriyelEkipmanlar>GüvenlikEkipmanları",
+  "pathKey": "İşEndüstri>EndüstriyelEkipmanlar>GüvenlikEkipmanları",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "3M",
+        "Honeywell",
+        "MSA",
+        "Dräger",
+        "Scott Safety",
+        "Bullard",
+        "Mine Safety Appliances",
+        "Ansell",
+        "Showa",
+        "Kleenguard",
+        "Kimberly-Clark",
+        "DuPont",
+        "Lakeland",
+        "Türk Markası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "ekipmanTuru",
+      "label": "Ekipman Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Kask",
+        "Gözlük",
+        "Maske",
+        "Eldiven",
+        "İş Ayakkabısı",
+        "Yelek",
+        "Kemer",
+        "Kulak Koruyucu",
+        "Solunum Cihazı",
+        "Yangın Söndürücü",
+        "İlk Yardım Çantası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "Standart"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Turuncu",
+        "Sarı",
+        "Kırmızı",
+        "Mavi",
+        "Yeşil",
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "sertifika",
+      "label": "Sertifika",
+      "type": "string",
+      "required": false,
+      "options": [
+        "CE",
+        "ISO",
+        "TSE",
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "sonKullanmaTarihi",
+      "label": "Son Kullanma Tarihi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+{
+  "category": "SanatHobi>MüzikEnstrümanları>Gitar",
+  "pathKey": "SanatHobi>MüzikEnstrümanları>Gitar",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Fender",
+        "Gibson",
+        "Ibanez",
+        "Yamaha",
+        "Epiphone",
+        "Jackson",
+        "PRS",
+        "Schecter",
+        "ESP",
+        "Gretsch",
+        "Rickenbacker",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "gitarTipi",
+      "label": "Gitar Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Klasik Gitar",
+        "Akustik Gitar",
+        "Elektrik Gitar",
+        "Bas Gitar",
+        "12 Telli Gitar",
+        "Flamenko Gitarı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Doğal Ahşap",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "malzeme",
+      "label": "Gövde Malzemesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Maun",
+        "Çam",
+        "Akçaağaç",
+        "Gül Ağacı",
+        "Kiraz Ağacı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sapMalzemesi",
+      "label": "Sap Malzemesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Akçaağaç",
+        "Maun",
+        "Gül Ağacı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "telTipi",
+      "label": "Tel Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çelik",
+        "Naylon",
+        "Bronz",
+        "Fosfor Bronz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "manyetik",
+      "label": "Manyetik Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Humbucker",
+        "Single Coil",
+        "P90",
+        "Piezo",
+        "Yok",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

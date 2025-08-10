@@ -1,0 +1,143 @@
+{
+  "category": "Emlak>Projeler>TuristikProjeler",
+  "pathKey": "Emlak>Projeler>TuristikProjeler",
+  "attributes": [
+    {
+      "key": "property_type",
+      "label": "Mülk Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Turistik Proje",
+        "Otel Projesi",
+        "Resort Projesi",
+        "Tatil Köyü",
+        "Marina",
+        "Golf Sahası",
+        "Spa Merkezi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "area",
+      "label": "Alan (m²)",
+      "type": "number",
+      "required": true,
+      "min": 100,
+      "max": 100000
+    },
+    {
+      "key": "room_count",
+      "label": "Oda Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 1000
+    },
+    {
+      "key": "bathroom_count",
+      "label": "Banyo Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 500
+    },
+    {
+      "key": "floor",
+      "label": "Kat",
+      "type": "number",
+      "required": false,
+      "min": -5,
+      "max": 50
+    },
+    {
+      "key": "total_floors",
+      "label": "Toplam Kat",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 50
+    },
+    {
+      "key": "project_status",
+      "label": "Proje Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Proje Aşamasında",
+        "İnşaat Halinde",
+        "Teslime Hazır",
+        "Teslim Edildi"
+      ]
+    },
+    {
+      "key": "delivery_date",
+      "label": "Teslim Tarihi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "heating_type",
+      "label": "Isıtma Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Doğalgaz",
+        "Merkezi",
+        "Klima",
+        "Yerden Isıtma",
+        "Yok"
+      ]
+    },
+    {
+      "key": "elevator",
+      "label": "Asansör",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "parking",
+      "label": "Otopark",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Ücretli"
+      ]
+    },
+    {
+      "key": "pool",
+      "label": "Havuz",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Özel Havuz",
+        "Ortak Havuz"
+      ]
+    },
+    {
+      "key": "security",
+      "label": "Güvenlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "7/24 Güvenlik"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

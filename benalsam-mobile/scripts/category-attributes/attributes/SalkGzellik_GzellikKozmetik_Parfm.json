@@ -1,0 +1,173 @@
+{
+  "category": "SağlıkGüzellik>GüzellikKozmetik>Parfüm",
+  "pathKey": "SağlıkGüzellik>GüzellikKozmetik>Parfüm",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Chanel",
+        "Dior",
+        "Guerlain",
+        "Yves Saint Laurent",
+        "Giorgio Armani",
+        "Tom Ford",
+        "Jo Malone",
+        "Marc Jacobs",
+        "Viktor&Rolf",
+        "Paco Rabanne",
+        "Calvin Klein",
+        "Ralph Lauren",
+        "Versace",
+        "Dolce&Gabbana",
+        "Bvlgari",
+        "Cartier",
+        "Hermès",
+        "Türk Markası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "parfumTuru",
+      "label": "Parfüm Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Eau de Parfum",
+        "Eau de Toilette",
+        "Eau de Cologne",
+        "Parfum",
+        "Body Mist",
+        "Roll-on",
+        "Solid Parfüm",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (ml)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "5ml",
+        "10ml",
+        "15ml",
+        "30ml",
+        "50ml",
+        "75ml",
+        "100ml",
+        "125ml",
+        "150ml",
+        "200ml",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "konsantrasyon",
+      "label": "Konsantrasyon",
+      "type": "string",
+      "required": false,
+      "options": [
+        "%5-10",
+        "%10-15",
+        "%15-20",
+        "%20-30",
+        "%30+",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kokuAilesi",
+      "label": "Koku Ailesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çiçeksi",
+        "Orientals",
+        "Ahşap",
+        "Taze",
+        "Narenciye",
+        "Baharatlı",
+        "Musk",
+        "Vanilya",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "cinsiyet",
+      "label": "Cinsiyet",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kadın",
+        "Erkek",
+        "Unisex",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kullanim_suresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Hiç Açılmadı",
+        "1-6 Ay",
+        "6-12 Ay",
+        "1-2 Yıl",
+        "2+ Yıl"
+      ]
+    },
+    {
+      "key": "orijinallik",
+      "label": "Orijinallik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Orijinal",
+        "Taklit",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "testDurumu",
+      "label": "Test Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Test Edildi",
+        "Test Edilmedi",
+        "Kısmen Test Edildi"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

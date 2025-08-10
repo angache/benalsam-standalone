@@ -1,0 +1,128 @@
+{
+  "category": "AnneBebek>BebekArabasıTaşıma>BebekArabasıNemlendiricisi",
+  "pathKey": "AnneBebek>BebekArabasıTaşıma>BebekArabasıNemlendiricisi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Crane",
+        "Vicks",
+        "Honeywell",
+        "Dyson",
+        "Philips",
+        "Pure Enrichment",
+        "Levoit",
+        "TaoTronics",
+        "URPOWER",
+        "InnoGear",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "kapasite",
+      "label": "Kapasite",
+      "type": "string",
+      "required": true,
+      "options": [
+        "100ml",
+        "200ml",
+        "300ml",
+        "500ml",
+        "1L",
+        "2L",
+        "3L",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "tip",
+      "label": "Nemlendirici Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Ultrasonik",
+        "Buharlı",
+        "Soğuk Buhar",
+        "Kombi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

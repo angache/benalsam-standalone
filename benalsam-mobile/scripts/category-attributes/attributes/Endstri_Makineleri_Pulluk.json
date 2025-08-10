@@ -1,0 +1,96 @@
+{
+  "category": "Endüstri > Makineleri > Pulluk",
+  "pathKey": "Endüstri>Makineleri>Pulluk",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "pullukTuru",
+      "label": "Pulluk Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Diskli Pulluk",
+        "Kül Pulluk",
+        "Çizel Pulluk",
+        "Döner Pulluk",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "gucGereksinimi",
+      "label": "Güç Gereksinimi (HP)",
+      "type": "number",
+      "required": false,
+      "min": 20,
+      "max": 500
+    },
+    {
+      "key": "genislik",
+      "label": "Genişlik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 50,
+      "max": 500
+    },
+    {
+      "key": "derinlik",
+      "label": "Derinlik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 50
+    },
+    {
+      "key": "kullanimAlani",
+      "label": "Kullanım Alanı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük Çiftlik",
+        "Orta Çiftlik",
+        "Büyük Çiftlik",
+        "Ticari",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

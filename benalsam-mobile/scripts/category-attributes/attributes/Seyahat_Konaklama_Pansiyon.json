@@ -1,0 +1,109 @@
+{
+  "category": "Seyahat > Konaklama > Pansiyon",
+  "pathKey": "Seyahat > Konaklama > Pansiyon",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Booking.com",
+        "Hotels.com",
+        "Expedia",
+        "TripAdvisor",
+        "Agoda",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "pansiyonTipi",
+      "label": "Pansiyon Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yarım Pansiyon",
+        "Tam Pansiyon",
+        "Ultra Tam Pansiyon",
+        "Her Şey Dahil",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "odaTipi",
+      "label": "Oda Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tek Kişilik",
+        "Çift Kişilik",
+        "Üç Kişilik",
+        "Aile Odası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kisiSayisi",
+      "label": "Kişi Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2020,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "category": "EvAletleriMobilya>Dekorasyon>Aydınlatma",
+  "pathKey": "EvAletleriMobilya>Dekorasyon>Aydınlatma",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "aydinlatmaTuru",
+      "label": "Aydınlatma Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Avize",
+        "Lambader",
+        "Tavan Lambası",
+        "Duvar Lambası",
+        "Masa Lambası",
+        "Bahçe Lambası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "guc",
+      "label": "Güç (W)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 500
+    },
+    {
+      "key": "enerjiSinifi",
+      "label": "Enerji Sınıfı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "A+++",
+        "A++",
+        "A+",
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Gri",
+        "Kahverengi",
+        "Siyah",
+        "Mavi",
+        "Yeşil",
+        "Kırmızı",
+        "Sarı",
+        "Turuncu",
+        "Pembe",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

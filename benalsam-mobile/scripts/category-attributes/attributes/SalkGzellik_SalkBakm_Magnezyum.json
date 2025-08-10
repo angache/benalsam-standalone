@@ -1,0 +1,137 @@
+{
+  "category": "SağlıkGüzellik>SağlıkBakım>Magnezyum",
+  "pathKey": "SağlıkGüzellik>SağlıkBakım>Magnezyum",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "magnezyumTuru",
+      "label": "Magnezyum Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Magnezyum Sitrat",
+        "Magnezyum Oksit",
+        "Magnezyum Sülfat",
+        "Magnezyum Glisinat",
+        "Magnezyum Malat",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "doz",
+      "label": "Doz (mg)",
+      "type": "number",
+      "required": true,
+      "min": 50,
+      "max": 1000
+    },
+    {
+      "key": "form",
+      "label": "Form",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tablet",
+        "Kapsül",
+        "Toz",
+        "Sıvı",
+        "Çiğneme Tableti",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "emilimOrani",
+      "label": "Emilim Oranı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Düşük",
+        "Orta",
+        "Yüksek",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çocuk",
+        "Genç",
+        "Yetişkin",
+        "Yaşlı",
+        "Hamile/Emziren"
+      ]
+    },
+    {
+      "key": "kullanimSekli",
+      "label": "Kullanım Şekli",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ağızdan",
+        "Yemekle Birlikte",
+        "Aç Karnına",
+        "Günde 1 Kez",
+        "Günde 2 Kez",
+        "Günde 3 Kez"
+      ]
+    },
+    {
+      "key": "sonKullanimTarihi",
+      "label": "Son Kullanım Tarihi",
+      "type": "date",
+      "required": true
+    },
+    {
+      "key": "receteDurumu",
+      "label": "Reçete Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Reçeteli",
+        "Reçetesiz"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2020,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

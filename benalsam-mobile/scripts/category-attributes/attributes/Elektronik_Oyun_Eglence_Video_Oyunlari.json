@@ -1,0 +1,92 @@
+{
+  "category": "Elektronik > Oyun & Eğlence > Video Oyunları",
+  "attributes": [
+    {
+      "key": "oyunAdi",
+      "label": "Oyun Adı",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "platform",
+      "label": "Platform",
+      "type": "string",
+      "required": true,
+      "options": [
+        "PlayStation",
+        "Xbox",
+        "Nintendo",
+        "PC"
+      ]
+    },
+    {
+      "key": "tur",
+      "label": "Tür",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Aksiyon",
+        "Macera",
+        "Spor",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "dil",
+      "label": "Dil",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Türkçe",
+        "İngilizce",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

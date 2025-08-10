@@ -1,0 +1,175 @@
+{
+  "category": "Anne & Bebek > Oyuncaklar > Ahşap Oyuncaklar",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Melissa & Doug",
+        "Hape",
+        "PlanToys",
+        "Grimm's",
+        "Janod",
+        "Brio",
+        "IKEA",
+        "Fisher-Price",
+        "VTech",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "toy_type",
+      "label": "Oyuncak Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bloklar",
+        "Puzzle",
+        "Eğitici Set",
+        "Müzik Aleti",
+        "Araç",
+        "Hayvan Figürü",
+        "İnşaat Seti",
+        "Sıralama",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "age_range",
+      "label": "Yaş Aralığı",
+      "type": "string",
+      "required": true,
+      "options": [
+        "0-12 ay",
+        "12-24 ay",
+        "2-4 yaş",
+        "4-6 yaş",
+        "6+ yaş",
+        "Tüm Yaşlar",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "wood_type",
+      "label": "Ahşap Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kayın",
+        "Meşe",
+        "Çam",
+        "Huş",
+        "Kavak",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "finish_type",
+      "label": "Yüzey İşlemi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Doğal",
+        "Cilalı",
+        "Boyalı",
+        "Vernikli",
+        "Wax",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "educational_value",
+      "label": "Eğitici Değer",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Motor Beceriler",
+        "Problem Çözme",
+        "Yaratıcılık",
+        "Matematik",
+        "Dil Gelişimi",
+        "Sosyal Beceriler",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "piece_count",
+      "label": "Parça Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 1000
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Doğal Ahşap",
+        "Beyaz",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Mor",
+        "Turuncu",
+        "Kahverengi",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

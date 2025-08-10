@@ -1,0 +1,125 @@
+{
+  "category": "Elektronik > Giyilebilir Teknoloji > Akıllı Kulaklık",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Apple",
+        "Samsung",
+        "Sony",
+        "Bose",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "kulaklikTipi",
+      "label": "Kulaklık Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kablosuz",
+        "Kablolu",
+        "True Wireless"
+      ]
+    },
+    {
+      "key": "gurultuEngelleme",
+      "label": "Aktif Gürültü Engelleme",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "water_resistance",
+      "label": "Su Geçirmezlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IPX4",
+        "IPX7"
+      ]
+    },
+    {
+      "key": "battery_life",
+      "label": "Pil Ömrü (Saat)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "charging_technology",
+      "label": "Şarj Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kablosuz",
+        "USB-C"
+      ]
+    },
+    {
+      "key": "mikrofon",
+      "label": "Mikrofon",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

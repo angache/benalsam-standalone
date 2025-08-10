@@ -1,0 +1,146 @@
+{
+  "category": "SağlıkGüzellik>BebekÇocukBakımı>BezIslakMendil",
+  "pathKey": "SağlıkGüzellik>BebekÇocukBakımı>BezIslakMendil",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Prima",
+        "Sleepy",
+        "Molfix",
+        "Huggies",
+        "Canbebe",
+        "Bebem",
+        "Uni Baby",
+        "Dalın",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTipi",
+      "label": "Ürün Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bebek Bezi",
+        "Islak Mendil",
+        "Yetişkin Bezi",
+        "Çocuk Bezi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "beden",
+      "label": "Beden",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Prematüre",
+        "Yenidoğan",
+        "Mini (2-5 kg)",
+        "Midi (4-9 kg)",
+        "Maxi (7-18 kg)",
+        "Junior (11-25 kg)",
+        "XL (15+ kg)",
+        "Tek Beden",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "adet",
+      "label": "Adet (Paket)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 500
+    },
+    {
+      "key": "ozellik",
+      "label": "Özellik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Aloe Vera",
+        "Parfümsüz",
+        "Alkol İçermez",
+        "Ekstra Emici",
+        "Hipoalerjenik",
+        "Organik",
+        "Islaklık Göstergeli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Mavi",
+        "Pembe",
+        "Yeşil",
+        "Desenli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2018,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

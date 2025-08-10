@@ -1,0 +1,158 @@
+{
+  "category": "SanatHobi>ResimElSanatları>Dantel",
+  "pathKey": "SanatHobi>ResimElSanatları>Dantel",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "DMC",
+        "Anchor",
+        "Madeira",
+        "Gütermann",
+        "Coats",
+        "Elit",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "dantelTipi",
+      "label": "Dantel Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Makine Danteli",
+        "El Danteli",
+        "Tığ Danteli",
+        "Mekik Danteli",
+        "Frigo Danteli",
+        "Dantel İpi",
+        "Dantel Deseni",
+        "Dantel Aksesuarı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Krem",
+        "Pembe",
+        "Mavi",
+        "Yeşil",
+        "Sarı",
+        "Kırmızı",
+        "Mor",
+        "Siyah",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Polyester",
+        "İpek",
+        "Keten",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kalinlik",
+      "label": "Kalınlık",
+      "type": "string",
+      "required": false,
+      "options": [
+        "İnce",
+        "Orta",
+        "Kalın"
+      ]
+    },
+    {
+      "key": "desen",
+      "label": "Desen",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Geometrik",
+        "Çiçek",
+        "Bitkisel",
+        "Soyut",
+        "Klasik",
+        "Modern",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

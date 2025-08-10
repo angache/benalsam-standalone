@@ -1,0 +1,101 @@
+{
+  "category": "Hizmetler>Organizasyon>DüğünOrganizasyonu",
+  "pathKey": "Hizmetler>Organizasyon>DüğünOrganizasyonu",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Organizasyon Şirketi",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Paket Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "hizmetTuru",
+      "label": "Hizmet Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tam Organizasyon",
+        "Kısmi Organizasyon",
+        "Sadece Mekan",
+        "Sadece Yemek",
+        "Sadece Dekorasyon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "mekanKapasitesi",
+      "label": "Mekan Kapasitesi (Kişi)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 1000
+    },
+    {
+      "key": "hizmetSuresi",
+      "label": "Hizmet Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 Gün",
+        "2 Gün",
+        "3 Gün",
+        "1 Hafta",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "fiyatAraligi",
+      "label": "Fiyat Aralığı (TL)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1000-5000",
+        "5000-10000",
+        "10000-25000",
+        "25000-50000",
+        "50000+"
+      ]
+    },
+    {
+      "key": "dahilHizmetler",
+      "label": "Dahil Hizmetler",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mekan",
+        "Yemek",
+        "Dekorasyon",
+        "Müzik",
+        "Fotoğraf",
+        "Video",
+        "Çiçek",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Müsait",
+        "Rezerve",
+        "Dolu",
+        "İptal Edildi"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

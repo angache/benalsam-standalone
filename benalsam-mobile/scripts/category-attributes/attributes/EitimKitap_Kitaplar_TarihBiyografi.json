@@ -1,0 +1,110 @@
+{
+  "category": "EğitimKitap>Kitaplar>TarihBiyografi",
+  "pathKey": "EğitimKitap>Kitaplar>TarihBiyografi",
+  "attributes": [
+    {
+      "key": "kitap_tipi",
+      "label": "Kitap Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Tarih Kitabı",
+        "Biyografi",
+        "Otobiyografi",
+        "Anı Kitabı",
+        "Hatırat",
+        "Tarihi Roman",
+        "Arkeoloji",
+        "Antropoloji",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yazar",
+      "label": "Yazar",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "yayinevi",
+      "label": "Yayınevi",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "basim_yili",
+      "label": "Basım Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1950,
+      "max": 2024
+    },
+    {
+      "key": "sayfa_sayisi",
+      "label": "Sayfa Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 2000
+    },
+    {
+      "key": "dil",
+      "label": "Dil",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Türkçe",
+        "İngilizce",
+        "Almanca",
+        "Fransızca",
+        "İspanyolca",
+        "Rusça",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "cilt_durumu",
+      "label": "Cilt Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Ciltli",
+        "Karton Kapak",
+        "Spiral Cilt",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "notlar",
+      "label": "Notlar/İşaretler",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Temiz",
+        "Hafif Notlar",
+        "Çok Notlu",
+        "İşaretli",
+        "Eksik Sayfalar"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

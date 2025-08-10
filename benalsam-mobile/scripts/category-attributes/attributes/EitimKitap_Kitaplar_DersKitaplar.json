@@ -1,0 +1,124 @@
+{
+  "category": "EğitimKitap>Kitaplar>DersKitapları",
+  "pathKey": "EğitimKitap>Kitaplar>DersKitapları",
+  "attributes": [
+    {
+      "key": "dersAdi",
+      "label": "Ders Adı",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Matematik",
+        "Fizik",
+        "Kimya",
+        "Biyoloji",
+        "Türkçe",
+        "Tarih",
+        "Coğrafya",
+        "Felsefe",
+        "İngilizce",
+        "Almanca",
+        "Fransızca",
+        "Bilgisayar",
+        "Müzik",
+        "Resim",
+        "Beden Eğitimi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sinif_seviyesi",
+      "label": "Sınıf Seviyesi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "1. Sınıf",
+        "2. Sınıf",
+        "3. Sınıf",
+        "4. Sınıf",
+        "5. Sınıf",
+        "6. Sınıf",
+        "7. Sınıf",
+        "8. Sınıf",
+        "9. Sınıf",
+        "10. Sınıf",
+        "11. Sınıf",
+        "12. Sınıf",
+        "Üniversite",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yazar",
+      "label": "Yazar",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "yayinevi",
+      "label": "Yayınevi",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "basim_yili",
+      "label": "Basım Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1950,
+      "max": 2024
+    },
+    {
+      "key": "sayfa_sayisi",
+      "label": "Sayfa Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 2000
+    },
+    {
+      "key": "cilt_durumu",
+      "label": "Cilt Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Ciltli",
+        "Karton Kapak",
+        "Spiral Cilt",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "notlar",
+      "label": "Notlar/İşaretler",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Temiz",
+        "Hafif Notlar",
+        "Çok Notlu",
+        "İşaretli",
+        "Eksik Sayfalar"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

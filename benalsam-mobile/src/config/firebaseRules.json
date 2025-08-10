@@ -1,0 +1,24 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": true,
+    "test": {
+      ".read": true,
+      ".write": true
+    },
+    "category_features": {
+      ".read": true,
+      ".write": true
+    },
+    "ai_suggestions": {
+      ".read": true,
+      ".write": true
+    },
+    "user_features": {
+      "$uid": {
+        ".read": true,
+        ".write": true
+      }
+    }
+  }
+} 

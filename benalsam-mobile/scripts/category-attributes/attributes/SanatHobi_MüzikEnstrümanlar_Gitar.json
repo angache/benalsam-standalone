@@ -1,0 +1,124 @@
+{
+  "category": "SanatHobi>MüzikEnstrümanları>Gitar",
+  "pathKey": "SanatHobi>MüzikEnstrümanları>Gitar",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "gitarTuru",
+      "label": "Gitar Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Klasik Gitar",
+        "Akustik Gitar",
+        "Elektrik Gitar",
+        "Bas Gitar",
+        "12 Telli Gitar",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çocuk (5-12)",
+        "Genç (13-17)",
+        "Yetişkin (18+)",
+        "Profesyonel"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Profesyonel"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1/4",
+        "1/2",
+        "3/4",
+        "Tam Boy",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Doğal",
+        "Kahverengi",
+        "Siyah",
+        "Beyaz",
+        "Mavi",
+        "Kırmızı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kullanımSuresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 Yıldan Az",
+        "1-3 Yıl",
+        "3-5 Yıl",
+        "5+ Yıl"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

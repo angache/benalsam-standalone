@@ -1,0 +1,114 @@
+{
+  "category": "SanatHobi>ResimElSanatları>Tuval",
+  "pathKey": "SanatHobi>ResimElSanatları>Tuval",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "tuvalTuru",
+      "label": "Tuval Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Ahşap Çerçeveli",
+        "Çerçevesiz",
+        "Katlanabilir",
+        "Tuval Paneli",
+        "Tuval Seti",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "genislik",
+      "label": "Genişlik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 200
+    },
+    {
+      "key": "yukseklik",
+      "label": "Yükseklik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 200
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Keten",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "gramaj",
+      "label": "Gramaj (gr/m²)",
+      "type": "number",
+      "required": false,
+      "min": 200,
+      "max": 500
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğrenci",
+        "Profesyonel",
+        "Sanatçı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

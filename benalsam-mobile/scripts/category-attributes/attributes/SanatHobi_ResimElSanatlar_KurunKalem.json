@@ -1,0 +1,119 @@
+{
+  "category": "SanatHobi>ResimElSanatları>KurşunKalem",
+  "pathKey": "SanatHobi>ResimElSanatları>KurşunKalem",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "kalemTuru",
+      "label": "Kalem Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Standart Kurşun Kalem",
+        "Sanatçı Kalemi",
+        "Teknik Çizim Kalemi",
+        "Renkli Kurşun Kalem",
+        "Koleksiyon Kalemi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sertlikDerecesi",
+      "label": "Sertlik Derecesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "2B",
+        "4B",
+        "6B",
+        "8B",
+        "H",
+        "2H",
+        "4H",
+        "6H",
+        "HB",
+        "F",
+        "B",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "adet",
+      "label": "Adet (Paket/Set)",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 100
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ahşap",
+        "Plastik",
+        "Metal",
+        "Kompozit",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1950,
+      "max": 2024
+    },
+    {
+      "key": "kutuDurumu",
+      "label": "Kutu Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Orijinal Kutulu",
+        "Kutusuz",
+        "Kutu Hasarlı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

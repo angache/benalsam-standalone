@@ -1,0 +1,197 @@
+{
+  "category": "SanatHobi>MüzikEnstrümanları>Davul",
+  "pathKey": "SanatHobi>MüzikEnstrümanları>Davul",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "davulTuru",
+      "label": "Davul Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Akustik Davul",
+        "Elektronik Davul",
+        "Darbuka",
+        "Bendir",
+        "Tef",
+        "Bongo",
+        "Conga",
+        "Timpani",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Ahşap",
+        "Metal",
+        "Plastik",
+        "Deri",
+        "Karbon Fiber",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük",
+        "Orta",
+        "Büyük",
+        "Çok Büyük",
+        "Özel Boyut"
+      ]
+    },
+    {
+      "key": "cap",
+      "label": "Çap (inch)",
+      "type": "number",
+      "required": false,
+      "min": 6,
+      "max": 30
+    },
+    {
+      "key": "derinlik",
+      "label": "Derinlik (inch)",
+      "type": "number",
+      "required": false,
+      "min": 3,
+      "max": 20
+    },
+    {
+      "key": "sesKalitesi",
+      "label": "Ses Kalitesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Ses Yok"
+      ]
+    },
+    {
+      "key": "akortDurumu",
+      "label": "Akort Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Akort Yok"
+      ]
+    },
+    {
+      "key": "zimbaDurumu",
+      "label": "Zımba Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Eksik"
+      ]
+    },
+    {
+      "key": "calmaDurumu",
+      "label": "Çalma Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Sorunlu",
+        "Çalışmıyor"
+      ]
+    },
+    {
+      "key": "orijinallik",
+      "label": "Orijinallik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Orijinal",
+        "Taklit",
+        "Reprodüksiyon",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "fizikselDurum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Çizikli",
+        "Kırık"
+      ]
+    },
+    {
+      "key": "kullanımSuresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 yıldan az",
+        "1-3 yıl",
+        "3-5 yıl",
+        "5-10 yıl",
+        "10 yıldan fazla"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

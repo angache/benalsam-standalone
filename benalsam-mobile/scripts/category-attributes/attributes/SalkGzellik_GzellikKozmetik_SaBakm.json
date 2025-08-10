@@ -1,0 +1,163 @@
+{
+  "category": "SağlıkGüzellik>GüzellikKozmetik>SaçBakımı",
+  "pathKey": "SağlıkGüzellik>GüzellikKozmetik>SaçBakımı",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "L'Oréal",
+        "Pantene",
+        "Head & Shoulders",
+        "Dove",
+        "Garnier",
+        "Tresemmé",
+        "Herbal Essences",
+        "Schwarzkopf",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTipi",
+      "label": "Ürün Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Şampuan",
+        "Saç Kremi",
+        "Saç Maskesi",
+        "Saç Spreyi",
+        "Saç Jeli",
+        "Saç Yağı",
+        "Saç Boyası",
+        "Saç Fırçası",
+        "Saç Kurutma Makinesi",
+        "Saç Düzleştirici",
+        "Saç Maşası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Şeffaf",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "hacim",
+      "label": "Hacim (ml)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 2000
+    },
+    {
+      "key": "sacTipi",
+      "label": "Saç Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kuru",
+        "Yağlı",
+        "Karma",
+        "Normal",
+        "Hassas",
+        "Kepekli",
+        "Boyalı",
+        "Kıvırcık",
+        "Düz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ozellik",
+      "label": "Özellik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Nemlendirici",
+        "Besleyici",
+        "Onarıcı",
+        "Koruyucu",
+        "Volüm Artırıcı",
+        "Düzleştirici",
+        "Kıvırcık",
+        "Parfümlü",
+        "Organik",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

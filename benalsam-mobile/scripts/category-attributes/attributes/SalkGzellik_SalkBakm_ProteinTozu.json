@@ -1,0 +1,120 @@
+{
+  "category": "SağlıkGüzellik>SağlıkBakım>ProteinTozu",
+  "pathKey": "SağlıkGüzellik>SağlıkBakım>ProteinTozu",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Optimum Nutrition",
+        "MyProtein",
+        "BSN",
+        "MuscleTech",
+        "Dymatize",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "proteinTipi",
+      "label": "Protein Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Whey Protein",
+        "Casein Protein",
+        "Soya Protein",
+        "Pisil Protein",
+        "Karma Protein",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık (gr)",
+      "type": "number",
+      "required": false,
+      "min": 100,
+      "max": 5000
+    },
+    {
+      "key": "proteinOrani",
+      "label": "Protein Oranı (%)",
+      "type": "number",
+      "required": false,
+      "min": 20,
+      "max": 100
+    },
+    {
+      "key": "tat",
+      "label": "Tat",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çikolata",
+        "Vanilya",
+        "Muz",
+        "Çilek",
+        "Karamel",
+        "Tatsız",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2020,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "category": "Emlak > Konut > Satılık Yazlık",
+  "attributes": [
+    {
+      "key": "property_type",
+      "label": "Mülk Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yazlık",
+        "Deniz Manzaralı Yazlık",
+        "Bahçeli Yazlık",
+        "Havuzlu Yazlık",
+        "Site İçi Yazlık",
+        "Müstakil Yazlık",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "area",
+      "label": "Alan (m²)",
+      "type": "number",
+      "required": true,
+      "min": 30,
+      "max": 1000
+    },
+    {
+      "key": "room_count",
+      "label": "Oda Sayısı",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "bathroom_count",
+      "label": "Banyo Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 5
+    },
+    {
+      "key": "floor_count",
+      "label": "Kat Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 3
+    },
+    {
+      "key": "building_age",
+      "label": "Bina Yaşı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "heating_type",
+      "label": "Isıtma Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Doğalgaz",
+        "Kombi",
+        "Klima",
+        "Soba",
+        "Yok"
+      ]
+    },
+    {
+      "key": "furniture_status",
+      "label": "Eşya Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Eşyalı",
+        "Eşyasız",
+        "Yarı Eşyalı"
+      ]
+    },
+    {
+      "key": "denizMesafesi",
+      "label": "Denize Uzaklık (m)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "garden_area",
+      "label": "Bahçe Alanı (m²)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 5000
+    },
+    {
+      "key": "pool",
+      "label": "Havuz",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Özel Havuz",
+        "Ortak Havuz"
+      ]
+    },
+    {
+      "key": "parking",
+      "label": "Otopark",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Ücretli"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

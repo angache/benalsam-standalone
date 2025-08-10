@@ -1,0 +1,103 @@
+{
+  "category": "Elektronik > Oyun & Eğlence > Oyun Konsolu",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sony",
+        "Microsoft",
+        "Nintendo"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true,
+      "options": [
+        "PlayStation 5",
+        "PlayStation 4",
+        "Xbox Series X",
+        "Xbox Series S",
+        "Nintendo Switch",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "storage",
+      "label": "Depolama",
+      "type": "string",
+      "required": false,
+      "options": [
+        "500GB",
+        "1TB",
+        "2TB"
+      ]
+    },
+    {
+      "key": "storage_type",
+      "label": "Depolama Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "SSD",
+        "HDD"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

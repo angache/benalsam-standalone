@@ -1,0 +1,121 @@
+{
+  "category": "EğitimKitap>Kırtasiye>ÇantaDosya",
+  "pathKey": "EğitimKitap>Kırtasiye>ÇantaDosya",
+  "attributes": [
+    {
+      "key": "urun_tipi",
+      "label": "Ürün Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Okul Çantası",
+        "Sırt Çantası",
+        "El Çantası",
+        "Dosya Çantası",
+        "Laptop Çantası",
+        "Kalem Kutusu",
+        "Dosya",
+        "Klasör",
+        "Zarf",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Nike",
+        "Adidas",
+        "Puma",
+        "Under Armour",
+        "Jansport",
+        "Eastpak",
+        "Samsonite",
+        "Targus",
+        "SwissGear",
+        "Herschel",
+        "Fjallraven",
+        "The North Face",
+        "Columbia",
+        "Kipling",
+        "Universal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Mor",
+        "Turuncu",
+        "Kahverengi",
+        "Gri",
+        "Beyaz",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "materyal",
+      "label": "Materyal",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kumaş",
+        "Deri",
+        "Suni Deri",
+        "Plastik",
+        "Karton",
+        "Metal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük",
+        "Orta",
+        "Büyük",
+        "Çok Büyük"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

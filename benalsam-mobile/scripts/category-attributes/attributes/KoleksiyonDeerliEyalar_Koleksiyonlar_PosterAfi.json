@@ -1,0 +1,114 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>PosterAfiş",
+  "pathKey": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>PosterAfiş",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka/Üretici",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "urunTuru",
+      "label": "Ürün Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Film Posteri",
+        "Konser Afişi",
+        "Spor Afişi",
+        "Sanat Posteri",
+        "Reklam Afişi",
+        "Politik Afiş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "genislik",
+      "label": "Genişlik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 20,
+      "max": 200
+    },
+    {
+      "key": "yukseklik",
+      "label": "Yükseklik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 20,
+      "max": 300
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1900,
+      "max": 2024
+    },
+    {
+      "key": "uretimYeri",
+      "label": "Üretim Yeri",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "nadirlikSeviyesi",
+      "label": "Nadirlik Seviyesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çok Nadir",
+        "Nadir",
+        "Orta",
+        "Yaygın"
+      ]
+    },
+    {
+      "key": "degerAraligi",
+      "label": "Değer Aralığı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "100-500 TL",
+        "500-1000 TL",
+        "1000-5000 TL",
+        "5000-10000 TL",
+        "10000+ TL"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Hasarlı"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

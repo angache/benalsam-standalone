@@ -1,0 +1,91 @@
+{
+  "category": "ModaGiyim>ÇocukGiyim>KızÇocuk",
+  "pathKey": "ModaGiyim>ÇocukGiyim>KızÇocuk",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "kizGiyimTuru",
+      "label": "Kız Giyim Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Elbise",
+        "T-Shirt",
+        "Pantolon",
+        "Etek",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pembe",
+        "Mavi",
+        "Beyaz",
+        "Kırmızı",
+        "Mor",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Pamuk",
+        "Polyester",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "beden",
+      "label": "Beden",
+      "type": "string",
+      "required": false,
+      "options": [
+        "2-3 Yaş",
+        "4-5 Yaş",
+        "6-7 Yaş",
+        "8-9 Yaş",
+        "10-11 Yaş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

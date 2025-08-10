@@ -1,0 +1,113 @@
+{
+  "category": "Hizmetler>Organizasyon>KurumsalOrganizasyon",
+  "pathKey": "Hizmetler>Organizasyon>KurumsalOrganizasyon",
+  "attributes": [
+    {
+      "key": "hizmetTuru",
+      "label": "Hizmet Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Konferans",
+        "Seminer",
+        "Workshop",
+        "Toplantı",
+        "Eğitim",
+        "Lansman",
+        "Açılış",
+        "Kapanış",
+        "Ödül Töreni",
+        "Yemek Organizasyonu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kapasite",
+      "label": "Kapasite",
+      "type": "string",
+      "required": false,
+      "options": [
+        "10-50 kişi",
+        "50-100 kişi",
+        "100-200 kişi",
+        "200-500 kişi",
+        "500+ kişi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sure",
+      "label": "Süre",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yarım Gün",
+        "Tam Gün",
+        "2-3 Gün",
+        "1 Hafta",
+        "Özel",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "lokasyon",
+      "label": "Lokasyon",
+      "type": "string",
+      "required": false,
+      "options": [
+        "İç Mekan",
+        "Dış Mekan",
+        "Hibrit",
+        "Online",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "hizmetler",
+      "label": "Hizmetler",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Catering",
+        "Ses Sistemi",
+        "Projeksiyon",
+        "Dekorasyon",
+        "Fotoğraf/Video",
+        "Çeviri",
+        "Ulaşım",
+        "Konaklama",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Planlanıyor",
+        "Aktif",
+        "Tamamlandı",
+        "İptal Edildi"
+      ]
+    },
+    {
+      "key": "baslangic_tarihi",
+      "label": "Başlangıç Tarihi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "bitis_tarihi",
+      "label": "Bitiş Tarihi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

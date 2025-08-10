@@ -1,0 +1,137 @@
+{
+  "category": "SanatHobi>Koleksiyon>ParaKoleksiyonu",
+  "pathKey": "SanatHobi>Koleksiyon>ParaKoleksiyonu",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Türkiye Cumhuriyeti",
+        "Amerika Birleşik Devletleri",
+        "Avrupa Birliği",
+        "İngiltere",
+        "Japonya",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "paraTipi",
+      "label": "Para Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Kağıt Para",
+        "Madeni Para",
+        "Hatıra Parası",
+        "Antika Para",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "deger",
+      "label": "Değer",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "yil",
+      "label": "Basım Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1900,
+      "max": 2024
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kahverengi",
+        "Yeşil",
+        "Mavi",
+        "Kırmızı",
+        "Sarı",
+        "Gri",
+        "Siyah",
+        "Beyaz",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "degerlendirme",
+      "label": "Grading",
+      "type": "string",
+      "required": false,
+      "options": [
+        "MS-70",
+        "MS-69",
+        "MS-68",
+        "MS-67",
+        "MS-66",
+        "MS-65",
+        "AU-58",
+        "AU-55",
+        "XF-45",
+        "VF-30",
+        "F-12",
+        "VG-8",
+        "G-4",
+        "AG-3",
+        "Graded",
+        "Ungraded",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

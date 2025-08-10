@@ -1,0 +1,120 @@
+{
+  "category": "Emlak>TuristikTesis>KiralıkPansiyon",
+  "pathKey": "Emlak>TuristikTesis>KiralıkPansiyon",
+  "attributes": [
+    {
+      "key": "property_type",
+      "label": "Mülk Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Pansiyon",
+        "Misafirhane",
+        "Butik Pansiyon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "area",
+      "label": "Alan (m²)",
+      "type": "number",
+      "required": true,
+      "min": 50,
+      "max": 2000
+    },
+    {
+      "key": "room_count",
+      "label": "Oda Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 50
+    },
+    {
+      "key": "bathroom_count",
+      "label": "Banyo Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 20
+    },
+    {
+      "key": "floor_count",
+      "label": "Kat Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "building_age",
+      "label": "Bina Yaşı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 100
+    },
+    {
+      "key": "heating_type",
+      "label": "Isıtma Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Doğalgaz",
+        "Kombi",
+        "Merkezi",
+        "Klima",
+        "Soba",
+        "Yok"
+      ]
+    },
+    {
+      "key": "furniture_status",
+      "label": "Eşya Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Eşyalı",
+        "Eşyasız",
+        "Yarı Eşyalı"
+      ]
+    },
+    {
+      "key": "kahvalti",
+      "label": "Kahvaltı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "parking",
+      "label": "Otopark",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Ücretli"
+      ]
+    },
+    {
+      "key": "security",
+      "label": "Güvenlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

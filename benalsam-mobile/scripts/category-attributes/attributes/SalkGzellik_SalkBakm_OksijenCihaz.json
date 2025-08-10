@@ -1,0 +1,91 @@
+{
+  "category": "Sağlık & Güzellik > Sağlık & Bakım > Oksijen Cihazı",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Philips",
+        "Invacare",
+        "Devilbiss",
+        "Yuwell",
+        "Longfian",
+        "ResMed",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "oksijenAkisi",
+      "label": "Oksijen Akış Hızı (L/dk)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "gucTipi",
+      "label": "Güç Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Elektrikli",
+        "Bataryalı",
+        "Her ikisi"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2000,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

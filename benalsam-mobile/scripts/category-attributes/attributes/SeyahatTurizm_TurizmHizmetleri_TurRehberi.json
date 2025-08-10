@@ -1,0 +1,104 @@
+{
+  "category": "Seyahat & Turizm > Turizm Hizmetleri > Tur Rehberi",
+  "pathKey": "SeyahatTurizm>TurizmHizmetleri>TurRehberi",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Rehber Adı/Şirket",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Hizmet Paketi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "hizmetTuru",
+      "label": "Hizmet Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Şehir Turu",
+        "Müze Turu",
+        "Doğa Turu",
+        "Tarihi Tur",
+        "Gastronomi Turu",
+        "Özel Tur",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "uzmanlikAlani",
+      "label": "Uzmanlık Alanı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tarih",
+        "Sanat",
+        "Doğa",
+        "Gastronomi",
+        "Mimari",
+        "Kültür",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "dil",
+      "label": "Konuştuğu Diller",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Türkçe",
+        "İngilizce",
+        "Almanca",
+        "Fransızca",
+        "İspanyolca",
+        "Rusça",
+        "Arapça",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "deneyimYili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 50
+    },
+    {
+      "key": "fiyatAraligi",
+      "label": "Fiyat Aralığı (TL)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "100-500",
+        "500-1000",
+        "1000-2500",
+        "2500-5000",
+        "5000+"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Müsait",
+        "Dolu",
+        "Aktif",
+        "Pasif"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>AzBulunanlar>NadirElektronik",
+  "pathKey": "KoleksiyonDeğerliEşyalar>AzBulunanlar>NadirElektronik",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Apple",
+        "Sony",
+        "Panasonic",
+        "Sharp",
+        "Toshiba",
+        "Hitachi",
+        "JVC",
+        "Pioneer",
+        "Kenwood",
+        "Sanyo",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "elektronikTuru",
+      "label": "Elektronik Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bilgisayar",
+        "Telefon",
+        "Televizyon",
+        "Radyo",
+        "Kamera",
+        "Video",
+        "Müzik Çalar",
+        "Oyun Konsolu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "nadirOlmaDerecesi",
+      "label": "Nadir Olma Derecesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çok Nadir",
+        "Nadir",
+        "Az Bulunan",
+        "Orta Nadir",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "calisma_durumu",
+      "label": "Çalışma Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Sorunlu",
+        "Çalışmıyor"
+      ]
+    },
+    {
+      "key": "fiziksel_durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Çizikli",
+        "Kırık"
+      ]
+    },
+    {
+      "key": "orijinallik",
+      "label": "Orijinallik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Orijinal",
+        "Taklit",
+        "Reprodüksiyon",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "kullanım_suresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 yıldan az",
+        "1-3 yıl",
+        "3-5 yıl",
+        "5-10 yıl",
+        "10 yıldan fazla"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1950,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

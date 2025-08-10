@@ -1,0 +1,97 @@
+{
+  "category": "Seyahat>TurPaketleri>ÖzelTurlar",
+  "pathKey": "Seyahat>TurPaketleri>ÖzelTurlar",
+  "attributes": [
+    {
+      "key": "turTuru",
+      "label": "Tur Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Kültür Turu",
+        "Doğa Turu",
+        "Macera Turu",
+        "Gastronomi Turu",
+        "Tarih Turu",
+        "Balayı Turu",
+        "Aile Turu",
+        "Grup Turu",
+        "Bireysel Tur",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "destinasyon",
+      "label": "Destinasyon",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Kapadokya",
+        "Pamukkale",
+        "Efes",
+        "Truva",
+        "Safranbolu",
+        "Amasra",
+        "Ayder",
+        "Uzungöl",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sure",
+      "label": "Süre",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 gün",
+        "2 gün",
+        "3 gün",
+        "1 hafta",
+        "2 hafta",
+        "1 ay",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "fiyat",
+      "label": "Fiyat (TL)",
+      "type": "number",
+      "required": false,
+      "min": 100,
+      "max": 50000
+    },
+    {
+      "key": "turOperatoru",
+      "label": "Tur Operatörü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Türk Hava Yolları",
+        "Pegasus",
+        "SunExpress",
+        "Corendon",
+        "TUI",
+        "Thomas Cook",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Müsait",
+        "Rezerve",
+        "Dolu",
+        "İptal"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

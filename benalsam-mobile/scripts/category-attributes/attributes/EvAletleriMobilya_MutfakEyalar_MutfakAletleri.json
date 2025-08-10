@@ -1,0 +1,111 @@
+{
+  "category": "Ev Aletleri & Mobilya > Mutfak Eşyaları > Mutfak Aletleri",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Philips",
+        "Tefal",
+        "Bosch",
+        "Siemens",
+        "Braun",
+        "KitchenAid",
+        "Cuisinart",
+        "Kenwood",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "aletTipi",
+      "label": "Alet Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Blender",
+        "Mikser",
+        "Kahve Makinesi",
+        "Tost Makinesi",
+        "Su Isıtıcısı",
+        "Mutfak Robotu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "guc",
+      "label": "Güç (W)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Gri",
+        "Siyah",
+        "Kahverengi",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,205 @@
+{
+  "category": "Elektronik > Telefon > Akıllı Telefon > Orta Segment Akıllı Telefon",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Samsung",
+        "Xiaomi",
+        "Oppo",
+        "Vivo",
+        "Realme",
+        "Motorola",
+        "OnePlus",
+        "Huawei",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "ram",
+      "label": "RAM",
+      "type": "string",
+      "required": true,
+      "options": [
+        "4 GB",
+        "6 GB",
+        "8 GB",
+        "12 GB"
+      ]
+    },
+    {
+      "key": "storage",
+      "label": "Dahili Depolama",
+      "type": "string",
+      "required": true,
+      "options": [
+        "64 GB",
+        "128 GB",
+        "256 GB"
+      ]
+    },
+    {
+      "key": "screen_size",
+      "label": "Ekran Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "6.1\"",
+        "6.4\"",
+        "6.6\"",
+        "6.7\"",
+        "6.8\""
+      ]
+    },
+    {
+      "key": "screen_technology",
+      "label": "Ekran Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "AMOLED",
+        "IPS LCD",
+        "OLED",
+        "Super AMOLED"
+      ]
+    },
+    {
+      "key": "resolution",
+      "label": "Çözünürlük",
+      "type": "string",
+      "required": false,
+      "options": [
+        "HD+",
+        "FHD+",
+        "QHD+"
+      ]
+    },
+    {
+      "key": "processor",
+      "label": "İşlemci",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "main_camera",
+      "label": "Ana Kamera (MP)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "48 MP",
+        "50 MP",
+        "64 MP",
+        "108 MP"
+      ]
+    },
+    {
+      "key": "front_camera",
+      "label": "Ön Kamera (MP)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "8 MP",
+        "13 MP",
+        "16 MP",
+        "32 MP"
+      ]
+    },
+    {
+      "key": "battery_capacity",
+      "label": "Batarya Kapasitesi (mAh)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "4000 mAh",
+        "4500 mAh",
+        "5000 mAh",
+        "6000 mAh"
+      ]
+    },
+    {
+      "key": "charging_technology",
+      "label": "Şarj Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "18W",
+        "25W",
+        "33W",
+        "67W",
+        "Kablosuz 15W"
+      ]
+    },
+    {
+      "key": "water_resistance",
+      "label": "Su Geçirmezlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IP54",
+        "IP67",
+        "Yok"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

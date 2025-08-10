@@ -1,0 +1,72 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>PlakKaset",
+  "pathKey": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>PlakKaset",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Sanatçı/Şirket",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Albüm Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "medyaTuru",
+      "label": "Medya Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Vinyl LP",
+        "Vinyl EP",
+        "Vinyl Single",
+        "Kaset",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "basimYili",
+      "label": "Basım Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1900,
+      "max": 2024
+    },
+    {
+      "key": "muzikTuru",
+      "label": "Müzik Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Rock",
+        "Jazz",
+        "Klasik",
+        "Pop",
+        "Folk",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

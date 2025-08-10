@@ -1,0 +1,125 @@
+{
+  "category": "Emlak>ArsaTarla>MeyveBahçesi",
+  "pathKey": "Emlak>ArsaTarla>MeyveBahçesi",
+  "attributes": [
+    {
+      "key": "mulk_tipi",
+      "label": "Mülk Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Meyve Bahçesi",
+        "Elma Bahçesi",
+        "Armut Bahçesi",
+        "Kiraz Bahçesi",
+        "Vişne Bahçesi",
+        "Şeftali Bahçesi",
+        "Kayısı Bahçesi",
+        "Üzüm Bağı",
+        "Zeytinlik",
+        "Cevizlik",
+        "Fındıklık",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "alan",
+      "label": "Alan (m²)",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 1000000
+    },
+    {
+      "key": "imar_durumu",
+      "label": "İmar Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "İmarlı",
+        "İmarsız",
+        "İmar Planında"
+      ]
+    },
+    {
+      "key": "meyveTipi",
+      "label": "Meyve Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Elma",
+        "Armut",
+        "Kiraz",
+        "Vişne",
+        "Şeftali",
+        "Kayısı",
+        "Üzüm",
+        "Zeytin",
+        "Ceviz",
+        "Fındık",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "agacYasi",
+      "label": "Ağaç Yaşı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 100
+    },
+    {
+      "key": "agacAdedi",
+      "label": "Ağaç Adedi",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 10000
+    },
+    {
+      "key": "sulama_durumu",
+      "label": "Sulama Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Kuyu",
+        "Göl",
+        "Dere",
+        "Baraj",
+        "Damla Sulama"
+      ]
+    },
+    {
+      "key": "yol_durumu",
+      "label": "Yol Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Asfalt",
+        "Stabilize",
+        "Toprak",
+        "Yok"
+      ]
+    },
+    {
+      "key": "elektrik_durumu",
+      "label": "Elektrik Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Yakında"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

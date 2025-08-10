@@ -1,0 +1,98 @@
+{
+  "category": "EğitimKitap>KurslarDersler>Türkçe",
+  "pathKey": "EğitimKitap>KurslarDersler>Türkçe",
+  "attributes": [
+    {
+      "key": "hizmet_tipi",
+      "label": "Hizmet Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Birebir Ders",
+        "Grup Dersi",
+        "Online Ders",
+        "Hibrit Ders",
+        "Sınav Hazırlık",
+        "Ödev Yardımı",
+        "Yazma Dersi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sinif_seviyesi",
+      "label": "Sınıf Seviyesi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "İlkokul",
+        "Ortaokul",
+        "Lise",
+        "Üniversite",
+        "Tüm Seviyeler"
+      ]
+    },
+    {
+      "key": "konular",
+      "label": "Konular",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Dil Bilgisi",
+        "Yazım Kuralları",
+        "Noktalama",
+        "Kompozisyon",
+        "Edebiyat",
+        "Tüm Konular",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "deneyim_yili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "egitim_durumu",
+      "label": "Eğitim Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Türkçe Öğretmeni",
+        "Türk Dili ve Edebiyatı",
+        "İlköğretim Türkçe",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ders_yeri",
+      "label": "Ders Yeri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğrenci Evi",
+        "Öğretmen Evi",
+        "Kütüphane",
+        "Kurs Merkezi",
+        "Online",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "saat_ucreti",
+      "label": "Saat Ücreti (TL)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

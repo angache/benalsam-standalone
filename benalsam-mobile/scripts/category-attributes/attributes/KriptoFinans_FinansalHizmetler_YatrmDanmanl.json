@@ -1,0 +1,87 @@
+{
+  "category": "KriptoFinans>FinansalHizmetler>YatırımDanışmanlığı",
+  "pathKey": "KriptoFinans>FinansalHizmetler>YatırımDanışmanlığı",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Danışmanlık Şirketi",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Hizmet Paketi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "hizmetTuru",
+      "label": "Hizmet Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Portföy Yönetimi",
+        "Yatırım Danışmanlığı",
+        "Risk Analizi",
+        "Piyasa Analizi",
+        "Emeklilik Planlaması",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "uzmanlikAlani",
+      "label": "Uzmanlık Alanı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Hisse Senedi",
+        "Tahvil",
+        "Döviz",
+        "Altın",
+        "Kripto Para",
+        "Gayrimenkul",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "deneyimYili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 50
+    },
+    {
+      "key": "fiyatAraligi",
+      "label": "Fiyat Aralığı (TL)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1000-5000",
+        "5000-10000",
+        "10000-25000",
+        "25000-50000",
+        "50000+"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aktif",
+        "Pasif",
+        "Müsait",
+        "Dolu"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

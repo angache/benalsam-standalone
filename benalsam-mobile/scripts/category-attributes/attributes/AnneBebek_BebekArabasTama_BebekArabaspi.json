@@ -1,0 +1,128 @@
+{
+  "category": "AnneBebek>BebekArabasıTaşıma>BebekArabasıİpi",
+  "pathKey": "AnneBebek>BebekArabasıTaşıma>BebekArabasıİpi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Chicco",
+        "Peg Perego",
+        "Britax",
+        "Maxi-Cosi",
+        "Cybex",
+        "Stokke",
+        "Bugaboo",
+        "UPPAbaby",
+        "Graco",
+        "Evenflo",
+        "Joie",
+        "Silver Cross",
+        "Mamas & Papas",
+        "Quinny",
+        "Joolz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "uzunluk",
+      "label": "İp Uzunluğu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "50cm",
+        "75cm",
+        "100cm",
+        "125cm",
+        "150cm",
+        "175cm",
+        "200cm",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "tip",
+      "label": "İp Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Kayış",
+        "Zincir",
+        "Kordon",
+        "Deri Kayış",
+        "Naylon Kayış",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Deri",
+        "Naylon",
+        "Pamuk",
+        "Polyester",
+        "Kauçuk",
+        "Metal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

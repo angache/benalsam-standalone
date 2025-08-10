@@ -1,0 +1,79 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>DeğerliEşyalar>SanatEseri",
+  "pathKey": "KoleksiyonDeğerliEşyalar>DeğerliEşyalar>SanatEseri",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Sanatçı",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Eser Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "eserTuru",
+      "label": "Eser Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Resim",
+        "Heykel",
+        "Fotoğraf",
+        "Gravür",
+        "Seramik",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1500,
+      "max": 2024
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yağlı Boya",
+        "Suluboya",
+        "Akrilik",
+        "Mermer",
+        "Bronz",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

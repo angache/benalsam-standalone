@@ -1,0 +1,113 @@
+{
+  "category": "Emlak>Konut>KiralıkPrefabrikEv",
+  "pathKey": "Emlak>Konut>KiralıkPrefabrikEv",
+  "attributes": [
+    {
+      "key": "mulk_tipi",
+      "label": "Mülk Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Prefabrik Ev",
+        "Mobil Ev",
+        "Konteyner Ev",
+        "Ahşap Ev",
+        "Çelik Ev",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "alan",
+      "label": "Alan (m²)",
+      "type": "number",
+      "required": true,
+      "min": 20,
+      "max": 500
+    },
+    {
+      "key": "odaSayisi",
+      "label": "Oda Sayısı",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "banyoSayisi",
+      "label": "Banyo Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 3
+    },
+    {
+      "key": "katSayisi",
+      "label": "Kat Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 3
+    },
+    {
+      "key": "binaYasi",
+      "label": "Bina Yaşı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "isitmaTipi",
+      "label": "Isıtma Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Doğalgaz",
+        "Kombi",
+        "Klima",
+        "Soba",
+        "Elektrik",
+        "Yok"
+      ]
+    },
+    {
+      "key": "esyaDurumu",
+      "label": "Eşya Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Eşyalı",
+        "Eşyasız",
+        "Yarı Eşyalı"
+      ]
+    },
+    {
+      "key": "tasimaDurumu",
+      "label": "Taşıma Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Taşınabilir",
+        "Sabit",
+        "Yarı Sabit"
+      ]
+    },
+    {
+      "key": "otopark",
+      "label": "Otopark",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Ücretli"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

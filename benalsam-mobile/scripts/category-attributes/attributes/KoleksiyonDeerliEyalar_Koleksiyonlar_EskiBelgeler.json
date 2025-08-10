@@ -1,0 +1,171 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>EskiBelgeler",
+  "pathKey": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>EskiBelgeler",
+  "attributes": [
+    {
+      "key": "belgeTuru",
+      "label": "Belge Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Pasaport",
+        "Kimlik",
+        "Sertifika",
+        "Diploma",
+        "Sözleşme",
+        "Tapu",
+        "Vekaletname",
+        "Fatura",
+        "Makbuz",
+        "Mektup",
+        "Gazete",
+        "Dergi",
+        "Kitap",
+        "Harita",
+        "Fotoğraf",
+        "Kart",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "donem",
+      "label": "Dönem",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Osmanlı Dönemi",
+        "Cumhuriyet Dönemi",
+        "1920'ler",
+        "1930'lar",
+        "1940'lar",
+        "1950'ler",
+        "1960'lar",
+        "1970'ler",
+        "1980'ler",
+        "1990'lar",
+        "2000'ler",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Tarih",
+      "type": "number",
+      "required": false,
+      "min": 1800,
+      "max": 2000
+    },
+    {
+      "key": "ulke",
+      "label": "Ülke",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Türkiye",
+        "Osmanlı İmparatorluğu",
+        "ABD",
+        "İngiltere",
+        "Almanya",
+        "Fransa",
+        "İtalya",
+        "Rusya",
+        "Avusturya",
+        "Macaristan",
+        "Yunanistan",
+        "Bulgaristan",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "dil",
+      "label": "Dil",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Türkçe",
+        "Osmanlıca",
+        "İngilizce",
+        "Almanca",
+        "Fransızca",
+        "İtalyanca",
+        "Rusça",
+        "Arapça",
+        "Farsça",
+        "Yunanca",
+        "Latince",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kondisyon",
+      "label": "Kondisyon",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "Çok İyi",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Hasarlı",
+        "Restore Edilmiş"
+      ]
+    },
+    {
+      "key": "boyutlar",
+      "label": "Boyutlar (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kağıt",
+        "Pergament",
+        "Karton",
+        "Kumaş",
+        "Deri",
+        "Metal",
+        "Cam",
+        "Plastik",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sertifika",
+      "label": "Sertifika",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Uzman Raporu",
+        "Müze Sertifikası",
+        "Auction House",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "nadirlik",
+      "label": "Nadirlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çok Nadir",
+        "Nadir",
+        "Az Bulunur",
+        "Orta Nadirlik",
+        "Yaygın"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

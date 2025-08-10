@@ -1,0 +1,18 @@
+[
+  {
+    "timestamp": "2025-07-29T10:00:00Z",
+    "cpu_usage": 45.2,
+    "memory_usage": 67.8,
+    "api_response_time": 120,
+    "error_rate": 0.01,
+    "endpoint": "/api/v1/listings"
+  },
+  {
+    "timestamp": "2025-07-29T11:00:00Z",
+    "cpu_usage": 52.1,
+    "memory_usage": 71.3,
+    "api_response_time": 95,
+    "error_rate": 0.005,
+    "endpoint": "/api/v1/categories"
+  }
+]

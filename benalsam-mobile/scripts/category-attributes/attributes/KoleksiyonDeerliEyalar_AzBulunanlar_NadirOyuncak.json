@@ -1,0 +1,175 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>AzBulunanlar>NadirOyuncak",
+  "pathKey": "KoleksiyonDeğerliEşyalar>AzBulunanlar>NadirOyuncak",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "LEGO",
+        "Mattel",
+        "Hasbro",
+        "Playmobil",
+        "Fisher-Price",
+        "Hot Wheels",
+        "Matchbox",
+        "Barbie",
+        "G.I. Joe",
+        "Transformers",
+        "Star Wars",
+        "Disney",
+        "McDonald's",
+        "Kinder",
+        "Türk Markası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "oyuncakTuru",
+      "label": "Oyuncak Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Araba",
+        "Bebek",
+        "Figür",
+        "Puzzle",
+        "Kart",
+        "Maket",
+        "Robot",
+        "Hayvan",
+        "Uçak",
+        "Gemi",
+        "Tren",
+        "Blok",
+        "Oyun Seti",
+        "Koleksiyon",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "koleksiyonDegeri",
+      "label": "Koleksiyon Değeri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çok Yüksek",
+        "Yüksek",
+        "Orta",
+        "Düşük",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "nadirDerecesi",
+      "label": "Nadir Olma Derecesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çok Nadir",
+        "Nadir",
+        "Az Bulunur",
+        "Orta",
+        "Yaygın"
+      ]
+    },
+    {
+      "key": "kutuDurumu",
+      "label": "Kutu Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Yok"
+      ]
+    },
+    {
+      "key": "eksik_parca",
+      "label": "Eksik Parça Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tam Set",
+        "Eksik Parça Var",
+        "Kısmen Eksik",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "orijinallik",
+      "label": "Orijinallik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Orijinal",
+        "Taklit",
+        "Reprodüksiyon",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "donem",
+      "label": "Dönem",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1980'ler",
+        "1990'lar",
+        "2000'ler",
+        "2010'lar",
+        "2020'ler",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Plastik",
+        "Metal",
+        "Karton",
+        "Kumaş",
+        "Ahşap",
+        "Cam",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kondisyon",
+      "label": "Kondisyon",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "sertifika",
+      "label": "Sertifika",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

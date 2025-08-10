@@ -1,0 +1,98 @@
+{
+  "category": "AnneBebek>BebekArabasıTaşıma>BebekArabasıLastiği",
+  "pathKey": "AnneBebek>BebekArabasıTaşıma>BebekArabasıLastiği",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Michelin",
+        "Continental",
+        "Pirelli",
+        "Bridgestone",
+        "Goodyear",
+        "Dunlop",
+        "Yokohama",
+        "Hankook",
+        "Kumho",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "boyut",
+      "label": "Lastik Boyutu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "12\"",
+        "14\"",
+        "16\"",
+        "18\"",
+        "20\"",
+        "22\"",
+        "24\"",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "tip",
+      "label": "Lastik Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yaz Lastiği",
+        "Kış Lastiği",
+        "Dört Mevsim",
+        "All-Terrain"
+      ]
+    },
+    {
+      "key": "desen",
+      "label": "Lastik Deseni",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Düz",
+        "Çizgili",
+        "Blok",
+        "Asimetrik",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

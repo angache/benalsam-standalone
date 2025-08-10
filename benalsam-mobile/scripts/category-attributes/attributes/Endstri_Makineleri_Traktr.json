@@ -1,0 +1,103 @@
+{
+  "category": "Endüstri > Makineleri > Traktör",
+  "pathKey": "Endüstri>Makineleri>Traktör",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "traktorTuru",
+      "label": "Traktör Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Küçük Traktör",
+        "Orta Traktör",
+        "Büyük Traktör",
+        "Bahçe Traktörü",
+        "Endüstriyel Traktör",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "guc",
+      "label": "Güç (HP)",
+      "type": "number",
+      "required": true,
+      "min": 10,
+      "max": 500
+    },
+    {
+      "key": "yakitTuru",
+      "label": "Yakıt Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Dizel",
+        "Benzin",
+        "Elektrik",
+        "Hibrit",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "vites",
+      "label": "Vites",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Manuel",
+        "Otomatik",
+        "Yarı Otomatik"
+      ]
+    },
+    {
+      "key": "cekis",
+      "label": "Çekiş",
+      "type": "string",
+      "required": false,
+      "options": [
+        "2x4",
+        "4x4",
+        "4x2"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

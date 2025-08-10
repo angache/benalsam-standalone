@@ -1,0 +1,111 @@
+{
+  "category": "EğitimKitap>KurslarDersler>DansDersi",
+  "pathKey": "EğitimKitap>KurslarDersler>DansDersi",
+  "attributes": [
+    {
+      "key": "hizmet_tipi",
+      "label": "Hizmet Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Birebir Ders",
+        "Grup Dersi",
+        "Online Ders",
+        "Hibrit Ders",
+        "Özel Ders",
+        "Dans Kursu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "dansTipi",
+      "label": "Dans Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Latin Dansları",
+        "Salsa",
+        "Bachata",
+        "Merengue",
+        "Cha Cha",
+        "Rumba",
+        "Samba",
+        "Jive",
+        "Paso Doble",
+        "Vals",
+        "Tango",
+        "Foxtrot",
+        "Quickstep",
+        "Hip Hop",
+        "Jazz",
+        "Ballet",
+        "Modern Dans",
+        "Halk Dansları",
+        "Oryantal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Profesyonel",
+        "Tüm Seviyeler"
+      ]
+    },
+    {
+      "key": "deneyim_yili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "egitim_durumu",
+      "label": "Eğitim Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Dans Akademisi",
+        "Konservatuvar",
+        "Dans Öğretmenliği",
+        "Profesyonel Dansçı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ders_yeri",
+      "label": "Ders Yeri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğrenci Evi",
+        "Öğretmen Evi",
+        "Dans Stüdyosu",
+        "Spor Salonu",
+        "Online",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "saat_ucreti",
+      "label": "Saat Ücreti (TL)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

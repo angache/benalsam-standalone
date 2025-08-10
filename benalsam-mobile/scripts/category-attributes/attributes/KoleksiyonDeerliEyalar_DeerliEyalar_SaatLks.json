@@ -1,0 +1,133 @@
+{
+  "category": "Koleksiyon & Değerli Eşyalar > Değerli Eşyalar > Saat & Lüks",
+  "pathKey": "KoleksiyonDeğerliEşyalar>DeğerliEşyalar>SaatLüks",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTuru",
+      "label": "Ürün Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Saat",
+        "Çanta",
+        "Cüzdan",
+        "Kolye",
+        "Yüzük",
+        "Küpe",
+        "Bilezik",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Altın",
+        "Gümüş",
+        "Platin",
+        "Çelik",
+        "Deri",
+        "Kumaş",
+        "Pırlanta",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "koleksiyonSerisi",
+      "label": "Koleksiyon Serisi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1900,
+      "max": 2024
+    },
+    {
+      "key": "uretimYeri",
+      "label": "Üretim Yeri",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "seriNumarasi",
+      "label": "Seri Numarası",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "kutuDurumu",
+      "label": "Kutu Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Orijinal Kutulu",
+        "Kutusuz",
+        "Kutu Hasarlı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "sertifikaDurumu",
+      "label": "Sertifika Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Sertifikalı",
+        "Sertifikasız",
+        "Sertifika Mevcut",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "degerAraligi",
+      "label": "Değer Aralığı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1000-5000 TL",
+        "5000-10000 TL",
+        "10000-50000 TL",
+        "50000-100000 TL",
+        "100000+ TL"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü",
+        "Restorasyon Gerekli"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

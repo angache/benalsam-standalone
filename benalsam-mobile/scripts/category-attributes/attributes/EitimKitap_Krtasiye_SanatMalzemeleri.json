@@ -1,0 +1,109 @@
+{
+  "category": "EğitimKitap>Kırtasiye>SanatMalzemeleri",
+  "pathKey": "EğitimKitap>Kırtasiye>SanatMalzemeleri",
+  "attributes": [
+    {
+      "key": "urun_tipi",
+      "label": "Ürün Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Fırça",
+        "Boya",
+        "Palet",
+        "Tuval",
+        "Kağıt",
+        "Karton",
+        "Kil",
+        "Çamur",
+        "Makas",
+        "Cetvel",
+        "Pergel",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Faber-Castell",
+        "Winsor & Newton",
+        "Daler-Rowney",
+        "Liquitex",
+        "Golden",
+        "Grumbacher",
+        "Royal & Langnickel",
+        "Princeton",
+        "Da Vinci",
+        "Raphael",
+        "Canson",
+        "Strathmore",
+        "Arches",
+        "Talens",
+        "Van Gogh",
+        "Universal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Mor",
+        "Turuncu",
+        "Kahverengi",
+        "Gri",
+        "Beyaz",
+        "Çok Renkli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük",
+        "Orta",
+        "Büyük",
+        "Çok Büyük"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

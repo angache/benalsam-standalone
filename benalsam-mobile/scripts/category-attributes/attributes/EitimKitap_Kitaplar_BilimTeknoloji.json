@@ -1,0 +1,100 @@
+{
+  "category": "EğitimKitap>Kitaplar>BilimTeknoloji",
+  "pathKey": "EğitimKitap>Kitaplar>BilimTeknoloji",
+  "attributes": [
+    {
+      "key": "kitap_tipi",
+      "label": "Kitap Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bilim Kitabı",
+        "Teknoloji Kitabı",
+        "Mühendislik Kitabı",
+        "Araştırma Kitabı",
+        "Ders Kitabı",
+        "Popüler Bilim",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yazar",
+      "label": "Yazar",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "yayinevi",
+      "label": "Yayınevi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "basim_yili",
+      "label": "Basım Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1900,
+      "max": 2024
+    },
+    {
+      "key": "sayfa_sayisi",
+      "label": "Sayfa Sayısı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 5000
+    },
+    {
+      "key": "dil",
+      "label": "Dil",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Türkçe",
+        "İngilizce",
+        "Almanca",
+        "Fransızca",
+        "İspanyolca",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "cilt_durumu",
+      "label": "Cilt Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Sert Kapak",
+        "Yumuşak Kapak",
+        "Ciltli",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "notlar",
+      "label": "Notlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+.dropdown-content {
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+  border-radius: calc(var(--radius) - 2px); 
+}
+[data-theme="dark"] .dropdown-content {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+.dropdown-separator { background-color: hsl(var(--border)); }

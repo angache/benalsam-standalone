@@ -1,0 +1,122 @@
+{
+  "category": "İşEndüstri>EndüstriyelEkipmanlar>EndüstriyelAletler",
+  "pathKey": "İşEndüstri>EndüstriyelEkipmanlar>EndüstriyelAletler",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Bosch",
+        "Makita",
+        "DeWalt",
+        "Milwaukee",
+        "Hitachi",
+        "Hilti",
+        "Metabo",
+        "Festool",
+        "Ryobi",
+        "Black & Decker",
+        "Stanley",
+        "Craftsman",
+        "Porter-Cable",
+        "Ridgid",
+        "Kobalt",
+        "Universal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "aletTuru",
+      "label": "Alet Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Matkap",
+        "Tornavida",
+        "Çekiç",
+        "Testere",
+        "Zımpara Makinesi",
+        "Kaynak Makinesi",
+        "Kompresör",
+        "Vinc",
+        "Forklift",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "guc",
+      "label": "Güç (Watt/HP)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "voltaj",
+      "label": "Voltaj",
+      "type": "string",
+      "required": false,
+      "options": [
+        "110V",
+        "220V",
+        "380V",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Kullanılmış",
+        "Arızalı"
+      ]
+    },
+    {
+      "key": "kullanımSuresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 yıldan az",
+        "1-3 yıl",
+        "3-5 yıl",
+        "5-10 yıl",
+        "10 yıldan fazla"
+      ]
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Süresi Dolmuş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

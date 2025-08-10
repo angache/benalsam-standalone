@@ -1,0 +1,137 @@
+{
+  "category": "SanatHobi>ResimElSanatları>Örgü",
+  "pathKey": "SanatHobi>ResimElSanatları>Örgü",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "orguTuru",
+      "label": "Örgü Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yün",
+        "İplik",
+        "Şiş",
+        "Tığ",
+        "Örgü Seti",
+        "Örgü Aksesuarları",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "urunKategorisi",
+      "label": "Ürün Kategorisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yün İplik",
+        "Akrilik İplik",
+        "Şiş",
+        "Tığ",
+        "Örgü Deseni",
+        "Örgü Kitabı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "kalinlik",
+      "label": "Kalınlık",
+      "type": "string",
+      "required": false,
+      "options": [
+        "İnce",
+        "Orta",
+        "Kalın",
+        "Çok Kalın"
+      ]
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık (gr)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 1000
+    },
+    {
+      "key": "uzunluk",
+      "label": "Uzunluk (m)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 1000
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yün",
+        "Akrilik",
+        "Pamuk",
+        "İpek",
+        "Alpaka",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Profesyonel"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

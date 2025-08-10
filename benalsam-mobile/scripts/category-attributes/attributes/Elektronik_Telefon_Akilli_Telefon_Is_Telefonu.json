@@ -1,0 +1,247 @@
+{
+  "category": "Elektronik > Telefon > Akıllı Telefon > İş Telefonu",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Samsung",
+        "BlackBerry",
+        "CAT",
+        "Sonim",
+        "Kyocera",
+        "Zebra",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "ram",
+      "label": "RAM",
+      "type": "string",
+      "required": true,
+      "options": [
+        "4 GB",
+        "6 GB",
+        "8 GB"
+      ]
+    },
+    {
+      "key": "storage",
+      "label": "Dahili Depolama",
+      "type": "string",
+      "required": true,
+      "options": [
+        "64 GB",
+        "128 GB",
+        "256 GB"
+      ]
+    },
+    {
+      "key": "screen_size",
+      "label": "Ekran Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "5.5\"",
+        "6.1\"",
+        "6.3\"",
+        "6.6\""
+      ]
+    },
+    {
+      "key": "screen_technology",
+      "label": "Ekran Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IPS LCD",
+        "TFT LCD",
+        "AMOLED"
+      ]
+    },
+    {
+      "key": "resolution",
+      "label": "Çözünürlük",
+      "type": "string",
+      "required": false,
+      "options": [
+        "HD+",
+        "FHD+"
+      ]
+    },
+    {
+      "key": "processor",
+      "label": "İşlemci",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "main_camera",
+      "label": "Ana Kamera (MP)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "13 MP",
+        "48 MP",
+        "50 MP",
+        "64 MP"
+      ]
+    },
+    {
+      "key": "front_camera",
+      "label": "Ön Kamera (MP)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "5 MP",
+        "8 MP",
+        "13 MP"
+      ]
+    },
+    {
+      "key": "battery_capacity",
+      "label": "Batarya Kapasitesi (mAh)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "4000 mAh",
+        "5000 mAh",
+        "6000 mAh"
+      ]
+    },
+    {
+      "key": "charging_technology",
+      "label": "Şarj Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "15W",
+        "25W",
+        "45W"
+      ]
+    },
+    {
+      "key": "dayaniklilik",
+      "label": "Dayanıklılık",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IP68",
+        "IP69",
+        "MIL-STD-810H",
+        "Yok"
+      ]
+    },
+    {
+      "key": "tozDirenci",
+      "label": "Toz Geçirmezlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IP6X",
+        "Yok"
+      ]
+    },
+    {
+      "key": "dusmeDirenci",
+      "label": "Düşme Dayanımı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1.8m",
+        "2m",
+        "3m",
+        "Yok"
+      ]
+    },
+    {
+      "key": "sicaklikAraligi",
+      "label": "Sıcaklık Dayanımı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "-20°C ile +60°C",
+        "-30°C ile +70°C",
+        "Standart"
+      ]
+    },
+    {
+      "key": "fizikselKlavye",
+      "label": "Fiziksel Klavye",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "barkodTarayici",
+      "label": "Barkod Okuyucu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "nfc",
+      "label": "NFC",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

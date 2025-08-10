@@ -1,0 +1,101 @@
+{
+  "category": "EğitimKitap>KurslarDersler>ResimDersi",
+  "pathKey": "EğitimKitap>KurslarDersler>ResimDersi",
+  "attributes": [
+    {
+      "key": "hizmet_tipi",
+      "label": "Hizmet Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Birebir Ders",
+        "Grup Dersi",
+        "Online Ders",
+        "Hibrit Ders",
+        "Özel Ders",
+        "Resim Kursu",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "resimTipi",
+      "label": "Resim Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Karakalem",
+        "Suluboya",
+        "Yağlı Boya",
+        "Akrilik",
+        "Pastel",
+        "Kuru Boya",
+        "Mürekkep",
+        "Dijital Resim",
+        "Tüm Tipler",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Profesyonel",
+        "Tüm Seviyeler"
+      ]
+    },
+    {
+      "key": "deneyim_yili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "egitim_durumu",
+      "label": "Eğitim Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Güzel Sanatlar",
+        "Resim Öğretmenliği",
+        "Sanat Akademisi",
+        "Profesyonel Sanatçı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "ders_yeri",
+      "label": "Ders Yeri",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Öğrenci Evi",
+        "Öğretmen Evi",
+        "Sanat Atölyesi",
+        "Galeri",
+        "Online",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "saat_ucreti",
+      "label": "Saat Ücreti (TL)",
+      "type": "number",
+      "required": false,
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

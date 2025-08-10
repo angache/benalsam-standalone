@@ -1,0 +1,114 @@
+{
+  "category": "Hizmetler > Eğitim > Özel Ders",
+  "pathKey": "Hizmetler>Eğitim>ÖzelDers",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Öğretmen Adı/Şirket",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Ders Paketi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "dersTuru",
+      "label": "Ders Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Matematik",
+        "Fizik",
+        "Kimya",
+        "Biyoloji",
+        "Türkçe",
+        "İngilizce",
+        "Tarih",
+        "Coğrafya",
+        "Müzik",
+        "Resim",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": false,
+      "options": [
+        "İlkokul",
+        "Ortaokul",
+        "Lise",
+        "Üniversite",
+        "Yetişkin"
+      ]
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "6-10 Yaş",
+        "11-14 Yaş",
+        "15-18 Yaş",
+        "19-25 Yaş",
+        "25+ Yaş"
+      ]
+    },
+    {
+      "key": "egitimTuru",
+      "label": "Eğitim Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yüz Yüze",
+        "Online",
+        "Hibrit"
+      ]
+    },
+    {
+      "key": "deneyimYili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 50
+    },
+    {
+      "key": "fiyatAraligi",
+      "label": "Fiyat Aralığı (TL/Saat)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "50-100",
+        "100-200",
+        "200-300",
+        "300-500",
+        "500+"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Müsait",
+        "Dolu",
+        "Aktif",
+        "Pasif"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

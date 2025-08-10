@@ -1,0 +1,77 @@
+{
+  "category": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>OyuncakKoleksiyonu",
+  "pathKey": "KoleksiyonDeğerliEşyalar>Koleksiyonlar>OyuncakKoleksiyonu",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka/Üretici",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Oyuncak Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "oyuncakTuru",
+      "label": "Oyuncak Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Araba",
+        "Bebek",
+        "Peluş",
+        "Lego",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1900,
+      "max": 2024
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Plastik",
+        "Ahşap",
+        "Metal",
+        "Kumaş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mükemmel",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

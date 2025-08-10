@@ -1,0 +1,292 @@
+{
+  "category": "Elektronik > Telefon > Cep Telefonu > Dayanıklı Telefon",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "CAT",
+        "Sonim",
+        "Samsung",
+        "Kyocera",
+        "Zebra",
+        "Blackview",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "screen_size",
+      "label": "Ekran Boyutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "5.0\"",
+        "5.5\"",
+        "6.1\"",
+        "6.6\"",
+        "6.8\""
+      ]
+    },
+    {
+      "key": "screen_technology",
+      "label": "Ekran Teknolojisi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IPS LCD",
+        "TFT LCD",
+        "AMOLED"
+      ]
+    },
+    {
+      "key": "resolution",
+      "label": "Çözünürlük",
+      "type": "string",
+      "required": false,
+      "options": [
+        "HD+",
+        "FHD+",
+        "QHD+"
+      ]
+    },
+    {
+      "key": "operating_system",
+      "label": "İşletim Sistemi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Android",
+        "Özel",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "camera",
+      "label": "Ana Kamera (MP)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "13 MP",
+        "48 MP",
+        "50 MP",
+        "64 MP",
+        "108 MP"
+      ]
+    },
+    {
+      "key": "front_camera",
+      "label": "Ön Kamera (MP)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "5 MP",
+        "8 MP",
+        "13 MP",
+        "16 MP"
+      ]
+    },
+    {
+      "key": "battery_capacity",
+      "label": "Batarya Kapasitesi (mAh)",
+      "type": "string",
+      "required": false,
+      "options": [
+        "4000 mAh",
+        "5000 mAh",
+        "6000 mAh",
+        "8000 mAh"
+      ]
+    },
+    {
+      "key": "battery_type",
+      "label": "Batarya Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çıkarılabilir",
+        "Sabit"
+      ]
+    },
+    {
+      "key": "charging_port",
+      "label": "Şarj Portu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Micro USB",
+        "USB-C",
+        "Özel"
+      ]
+    },
+    {
+      "key": "sim_card_type",
+      "label": "SIM Kart Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Mini SIM",
+        "Micro SIM",
+        "Nano SIM"
+      ]
+    },
+    {
+      "key": "dual_sim",
+      "label": "Çift SIM",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "fm_radio",
+      "label": "FM Radyo",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "mp3_player",
+      "label": "MP3 Çalar",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "water_resistance",
+      "label": "Su Geçirmezlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IP68",
+        "IP69",
+        "IPX8",
+        "Yok"
+      ]
+    },
+    {
+      "key": "tozDirenci",
+      "label": "Toz Geçirmezlik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "IP6X",
+        "Yok"
+      ]
+    },
+    {
+      "key": "dusmeDirenci",
+      "label": "Düşme Dayanımı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1.8m",
+        "2m",
+        "3m",
+        "4m",
+        "Yok"
+      ]
+    },
+    {
+      "key": "sicaklikAraligi",
+      "label": "Sıcaklık Dayanımı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "-20°C ile +60°C",
+        "-30°C ile +70°C",
+        "Standart"
+      ]
+    },
+    {
+      "key": "basincDirenci",
+      "label": "Basınç Dayanımı",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "sokDirenci",
+      "label": "Şok Dayanımı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "MIL-STD-810H",
+        "MIL-STD-810G",
+        "Yok"
+      ]
+    },
+    {
+      "key": "gps",
+      "label": "GPS",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "nfc",
+      "label": "NFC",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "barkodTarayici",
+      "label": "Barkod Okuyucu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "garanti",
+      "label": "Garanti Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yok",
+        "Var (Devam Ediyor)",
+        "Var (Bitti)"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Sıfır",
+        "İkinci El",
+        "Yenilenmiş"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aksesuarlar",
+      "label": "Aksesuarlar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "fatura",
+      "label": "Fatura",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "key": "aciklama",
+      "label": "Ek Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

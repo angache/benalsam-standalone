@@ -1,0 +1,140 @@
+{
+  "passed": 16,
+  "failed": 0,
+  "warnings": 3,
+  "checks": [
+    {
+      "name": "Sensitive Data Check",
+      "status": "pass",
+      "message": "No sensitive data found in source code",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:03.058Z"
+    },
+    {
+      "name": "Dependency Vulnerabilities",
+      "status": "pass",
+      "message": "No vulnerabilities found in dependencies",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.800Z"
+    },
+    {
+      "name": "Environment File",
+      "status": "warning",
+      "message": "No .env file found",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.801Z"
+    },
+    {
+      "name": "Environment Example",
+      "status": "warning",
+      "message": "No .env.example file found",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.801Z"
+    },
+    {
+      "name": "CORS Configuration",
+      "status": "warning",
+      "message": "No CORS configuration found",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.809Z"
+    },
+    {
+      "name": "Input Validation",
+      "status": "pass",
+      "message": "Input validation found in src/components/CreateListingPage/useCreateListingForm.js",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.814Z"
+    },
+    {
+      "name": "Input Validation",
+      "status": "pass",
+      "message": "Input validation found in src/components/InventoryFormPage/useInventoryForm.js",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.815Z"
+    },
+    {
+      "name": "Input Validation",
+      "status": "pass",
+      "message": "Input validation found in src/hooks/useEditListingForm.js",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.815Z"
+    },
+    {
+      "name": "Input Validation",
+      "status": "pass",
+      "message": "Input validation found in src/hooks/useImageOptimization.js",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.816Z"
+    },
+    {
+      "name": "Input Validation",
+      "status": "pass",
+      "message": "Input validation found in src/lib/cacheManager.ts",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.816Z"
+    },
+    {
+      "name": "Input Validation",
+      "status": "pass",
+      "message": "Input validation found in src/lib/errorHandler.ts",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.816Z"
+    },
+    {
+      "name": "Input Validation",
+      "status": "pass",
+      "message": "Input validation found in src/services/categoryFollowService.ts",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.817Z"
+    },
+    {
+      "name": "Input Validation",
+      "status": "pass",
+      "message": "Input validation found in src/services/conversationService.ts",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.818Z"
+    },
+    {
+      "name": "Input Validation",
+      "status": "pass",
+      "message": "Input validation found in src/services/favoriteService.ts",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.818Z"
+    },
+    {
+      "name": "Input Validation",
+      "status": "pass",
+      "message": "Input validation found in src/services/inventoryService.ts",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.819Z"
+    },
+    {
+      "name": "Input Validation",
+      "status": "pass",
+      "message": "Input validation found in src/services/offerService.ts",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.819Z"
+    },
+    {
+      "name": "Input Validation",
+      "status": "pass",
+      "message": "Input validation found in src/services/profileService.ts",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.820Z"
+    },
+    {
+      "name": "Input Validation",
+      "status": "pass",
+      "message": "Input validation found in src/services/reviewService.ts",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.820Z"
+    },
+    {
+      "name": "HTTPS Usage",
+      "status": "pass",
+      "message": "No HTTP URLs found in production code",
+      "details": null,
+      "timestamp": "2025-07-21T19:56:04.828Z"
+    }
+  ]
+}

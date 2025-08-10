@@ -1,0 +1,168 @@
+{
+  "category": "SporOutdoor>TakımSporları>Beyzbol",
+  "pathKey": "SporOutdoor>TakımSporları>Beyzbol",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "urunTuru",
+      "label": "Ürün Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Beyzbol Topu",
+        "Beyzbol Sopası",
+        "Beyzbol Eldiveni",
+        "Beyzbol Kaskı",
+        "Beyzbol Forması",
+        "Beyzbol Pantolonu",
+        "Beyzbol Ayakkabısı",
+        "Beyzbol Çorabı",
+        "Beyzbol Aksesuarları",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yasGrubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çocuk (5-12)",
+        "Genç (13-17)",
+        "Yetişkin (18+)",
+        "Profesyonel"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "Özel"
+      ]
+    },
+    {
+      "key": "malzemeTuru",
+      "label": "Malzeme Türü",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Deri",
+        "Sentetik",
+        "Metal",
+        "Ahşap",
+        "Kompozit",
+        "Plastik",
+        "Kumaş",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "agirlik",
+      "label": "Ağırlık (gram)",
+      "type": "number",
+      "required": false,
+      "min": 50,
+      "max": 2000
+    },
+    {
+      "key": "uzunluk",
+      "label": "Uzunluk (cm)",
+      "type": "number",
+      "required": false,
+      "min": 20,
+      "max": 150
+    },
+    {
+      "key": "seviye",
+      "label": "Seviye",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Başlangıç",
+        "Orta",
+        "İleri",
+        "Profesyonel"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Beyaz",
+        "Gri",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Turuncu",
+        "Mor",
+        "Kahverengi",
+        "Lacivert",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kullanımSuresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "1 Yıldan Az",
+        "1-3 Yıl",
+        "3-5 Yıl",
+        "5+ Yıl"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

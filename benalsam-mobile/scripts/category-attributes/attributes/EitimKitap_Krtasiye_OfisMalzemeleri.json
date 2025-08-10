@@ -1,0 +1,112 @@
+{
+  "category": "EğitimKitap>Kırtasiye>OfisMalzemeleri",
+  "pathKey": "EğitimKitap>Kırtasiye>OfisMalzemeleri",
+  "attributes": [
+    {
+      "key": "urun_tipi",
+      "label": "Ürün Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yapıştırıcı",
+        "Makas",
+        "Cetvel",
+        "Pergel",
+        "Silgi",
+        "Açacak",
+        "Zımba",
+        "Zımba Teli",
+        "Bant",
+        "Post-it",
+        "Dosya",
+        "Klasör",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true,
+      "options": [
+        "3M",
+        "Scotch",
+        "UHU",
+        "Pritt",
+        "Tesa",
+        "Bostik",
+        "Elmer's",
+        "Avery",
+        "Fellowes",
+        "Swingline",
+        "Max",
+        "Pilot",
+        "Bic",
+        "Faber-Castell",
+        "Staedtler",
+        "Pentel",
+        "Zebra",
+        "Universal",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Siyah",
+        "Mavi",
+        "Kırmızı",
+        "Yeşil",
+        "Sarı",
+        "Pembe",
+        "Mor",
+        "Turuncu",
+        "Kahverengi",
+        "Gri",
+        "Beyaz",
+        "Şeffaf",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Küçük",
+        "Orta",
+        "Büyük",
+        "Çok Büyük"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

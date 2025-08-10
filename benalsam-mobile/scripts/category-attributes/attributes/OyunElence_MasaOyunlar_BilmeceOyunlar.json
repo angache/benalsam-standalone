@@ -1,0 +1,214 @@
+{
+  "category": "OyunEğlence>MasaOyunları>BilmeceOyunları",
+  "pathKey": "OyunEğlence>MasaOyunları>BilmeceOyunları",
+  "attributes": [
+    {
+      "key": "oyunTuru",
+      "label": "Oyun Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Kelime Bulmaca",
+        "Sayı Bulmaca",
+        "Mantık Bulmaca",
+        "Görsel Bulmaca",
+        "Hafıza Oyunu",
+        "Strateji Bulmaca",
+        "Matematik Bulmaca",
+        "Coğrafya Bulmaca",
+        "Tarih Bulmaca",
+        "Bilim Bulmaca",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "yas_grubu",
+      "label": "Yaş Grubu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "3-6 yaş",
+        "7-12 yaş",
+        "13-17 yaş",
+        "18+ yaş",
+        "Aile Oyunu",
+        "Her Yaş"
+      ]
+    },
+    {
+      "key": "oyuncuSayisi",
+      "label": "Oyuncu Sayısı",
+      "type": "string",
+      "required": true,
+      "options": [
+        "1 kişi",
+        "2 kişi",
+        "2-4 kişi",
+        "2-6 kişi",
+        "3-8 kişi",
+        "4+ kişi",
+        "Takım Oyunu"
+      ]
+    },
+    {
+      "key": "kullanim_suresi",
+      "label": "Kullanım Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Hiç Oynanmadı",
+        "1-5 Kez",
+        "5-10 Kez",
+        "10-20 Kez",
+        "20+ Kez"
+      ]
+    },
+    {
+      "key": "eksikParcaDetay",
+      "label": "Eksik Parça Detayı",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Kartlar Eksik",
+        "Zar Eksik",
+        "Pul Eksik",
+        "Figür Eksik",
+        "Küçük Parçalar Eksik",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "talimatDurumu",
+      "label": "Talimat Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var ve Temiz",
+        "Var ama Yıpranmış",
+        "Yok",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "orijinallik",
+      "label": "Orijinallik",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Orijinal",
+        "Taklit",
+        "Reprodüksiyon",
+        "Bilinmiyor"
+      ]
+    },
+    {
+      "key": "sure",
+      "label": "Oyun Süresi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "5-15 dakika",
+        "15-30 dakika",
+        "30-60 dakika",
+        "1-2 saat",
+        "2+ saat",
+        "Sınırsız"
+      ]
+    },
+    {
+      "key": "zorlukSeviyesi",
+      "label": "Zorluk Seviyesi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Çok Kolay",
+        "Kolay",
+        "Orta",
+        "Zor",
+        "Çok Zor",
+        "Uzman"
+      ]
+    },
+    {
+      "key": "dil",
+      "label": "Dil",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Türkçe",
+        "İngilizce",
+        "Almanca",
+        "Fransızca",
+        "İspanyolca",
+        "Çok Dilli",
+        "Dilsiz"
+      ]
+    },
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Hasbro",
+        "Mattel",
+        "Ravensburger",
+        "Asmodee",
+        "Days of Wonder",
+        "Fantasy Flight",
+        "Kosmos",
+        "Haba",
+        "Türk Markası",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "kutu",
+      "label": "Kutu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok"
+      ]
+    },
+    {
+      "key": "parcalar",
+      "label": "Parçalar Tam mı?",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Tam",
+        "Eksik",
+        "Belirtilmemiş"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1980,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

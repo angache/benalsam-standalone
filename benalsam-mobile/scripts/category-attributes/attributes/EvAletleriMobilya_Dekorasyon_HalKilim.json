@@ -1,0 +1,115 @@
+{
+  "category": "EvAletleriMobilya>Dekorasyon>HalıKilim",
+  "pathKey": "EvAletleriMobilya>Dekorasyon>HalıKilim",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "haliTuru",
+      "label": "Halı Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Halı",
+        "Kilim",
+        "Paspas",
+        "Banyo Halısı",
+        "Bahçe Halısı",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "boyut",
+      "label": "Boyut (cm)",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "genislik",
+      "label": "Genişlik (cm)",
+      "type": "number",
+      "required": false,
+      "min": 50,
+      "max": 500
+    },
+    {
+      "key": "uzunluk",
+      "label": "Uzunluk (cm)",
+      "type": "number",
+      "required": false,
+      "min": 50,
+      "max": 800
+    },
+    {
+      "key": "malzeme",
+      "label": "Malzeme",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Yün",
+        "Pamuk",
+        "İpek",
+        "Suni",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "renk",
+      "label": "Renk",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Beyaz",
+        "Gri",
+        "Kahverengi",
+        "Siyah",
+        "Mavi",
+        "Yeşil",
+        "Kırmızı",
+        "Sarı",
+        "Turuncu",
+        "Pembe",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 2010,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

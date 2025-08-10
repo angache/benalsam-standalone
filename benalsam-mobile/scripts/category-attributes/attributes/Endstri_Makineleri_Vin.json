@@ -1,0 +1,92 @@
+{
+  "category": "Endüstri > Makineleri > Vinç",
+  "pathKey": "Endüstri>Makineleri>Vinç",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Marka",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Model",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "vincTuru",
+      "label": "Vinç Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Mobil Vinç",
+        "Kule Vinç",
+        "Köprülü Vinç",
+        "Portal Vinç",
+        "Kabineli Vinç",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "kapasite",
+      "label": "Kapasite (Ton)",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 1000
+    },
+    {
+      "key": "yukseklik",
+      "label": "Yükseklik (m)",
+      "type": "number",
+      "required": false,
+      "min": 5,
+      "max": 200
+    },
+    {
+      "key": "uzunluk",
+      "label": "Uzunluk (m)",
+      "type": "number",
+      "required": false,
+      "min": 5,
+      "max": 100
+    },
+    {
+      "key": "guc",
+      "label": "Güç (HP/kW)",
+      "type": "number",
+      "required": false,
+      "min": 10,
+      "max": 1000
+    },
+    {
+      "key": "durum",
+      "label": "Fiziksel Durum",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Yeni",
+        "Az Kullanılmış",
+        "İyi",
+        "Orta",
+        "Kötü"
+      ]
+    },
+    {
+      "key": "yil",
+      "label": "Üretim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1990,
+      "max": 2024
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

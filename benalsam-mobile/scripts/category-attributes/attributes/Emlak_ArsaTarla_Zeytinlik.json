@@ -1,0 +1,110 @@
+{
+  "category": "Emlak>ArsaTarla>Zeytinlik",
+  "pathKey": "Emlak>ArsaTarla>Zeytinlik",
+  "attributes": [
+    {
+      "key": "mulk_tipi",
+      "label": "Mülk Tipi",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Zeytinlik",
+        "Zeytin Bahçesi"
+      ]
+    },
+    {
+      "key": "alan",
+      "label": "Alan (m²)",
+      "type": "number",
+      "required": true,
+      "min": 1,
+      "max": 1000000
+    },
+    {
+      "key": "imar_durumu",
+      "label": "İmar Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "İmarlı",
+        "İmarsız",
+        "İmar Planında"
+      ]
+    },
+    {
+      "key": "zeytinTipi",
+      "label": "Zeytin Tipi",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Gemlik",
+        "Ayvalık",
+        "Memecik",
+        "Domat",
+        "Uslu",
+        "Karma",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "agacYasi",
+      "label": "Ağaç Yaşı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 100
+    },
+    {
+      "key": "agacAdedi",
+      "label": "Ağaç Adedi",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 10000
+    },
+    {
+      "key": "sulama_durumu",
+      "label": "Sulama Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Kuyu",
+        "Göl",
+        "Dere",
+        "Baraj",
+        "Damla Sulama"
+      ]
+    },
+    {
+      "key": "yol_durumu",
+      "label": "Yol Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Asfalt",
+        "Stabilize",
+        "Toprak",
+        "Yok"
+      ]
+    },
+    {
+      "key": "elektrik_durumu",
+      "label": "Elektrik Durumu",
+      "type": "string",
+      "required": false,
+      "options": [
+        "Var",
+        "Yok",
+        "Yakında"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

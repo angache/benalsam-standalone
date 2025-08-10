@@ -1,0 +1,70 @@
+{
+  "category": "Hizmetler>Danışmanlık>HukukiDanışmanlık",
+  "pathKey": "Hizmetler>Danışmanlık>HukukiDanışmanlık",
+  "duzenlemeDurumu": "Düzenlendi",
+  "attributes": [
+    {
+      "key": "marka",
+      "label": "Firma/Şirket",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "model",
+      "label": "Hizmet Adı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "danismanlikTuru",
+      "label": "Danışmanlık Türü",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aile Hukuku",
+        "İş Hukuku",
+        "Ticaret Hukuku",
+        "Gayrimenkul Hukuku",
+        "Ceza Hukuku",
+        "Diğer"
+      ]
+    },
+    {
+      "key": "deneyimYili",
+      "label": "Deneyim Yılı",
+      "type": "number",
+      "required": false,
+      "min": 1,
+      "max": 50
+    },
+    {
+      "key": "uzmanlikAlani",
+      "label": "Uzmanlık Alanı",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "hizmetBolgesi",
+      "label": "Hizmet Bölgesi",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "durum",
+      "label": "Hizmet Durumu",
+      "type": "string",
+      "required": true,
+      "options": [
+        "Aktif",
+        "Pasif",
+        "Geçici Olarak Kapalı"
+      ]
+    },
+    {
+      "key": "aciklama",
+      "label": "Açıklama",
+      "type": "string",
+      "required": false
+    }
+  ]
+}
