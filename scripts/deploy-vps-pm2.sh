@@ -84,7 +84,7 @@ deploy_admin_ui() {
     
     # Install dependencies
     log_info "Dependencies yükleniyor..."
-    npm install --production
+    npm install --production --legacy-peer-deps
     
     # Build project
     log_info "Proje build ediliyor..."
@@ -112,7 +112,7 @@ deploy_web_app() {
     
     # Install dependencies (shared-types npm'den gelecek)
     log_info "Dependencies yükleniyor..."
-    npm install --production
+    npm install --production --legacy-peer-deps
     
     # Build project
     log_info "Proje build ediliyor..."
