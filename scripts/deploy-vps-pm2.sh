@@ -110,7 +110,7 @@ deploy_web_app() {
     
     cd "$WEB_APP_DIR"
     
-    # Install dependencies
+    # Install dependencies (shared-types npm'den gelecek)
     log_info "Dependencies yükleniyor..."
     npm install --production
     
