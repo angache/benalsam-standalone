@@ -118,15 +118,23 @@ Benalsam/
 - **JWT**: Token-based authentication
 - **Nodemon**: Development server
 - **Winston**: Logging
+- **Sentry**: Error tracking ve monitoring
+- **Performance Monitoring**: API response time tracking
 
 #### 🏗️ Proje Yapısı
 ```
 admin-backend/
 ├── src/
 │   ├── config/           # Konfigürasyon dosyaları
+│   │   └── sentry.ts     # Sentry konfigürasyonu
 │   ├── controllers/      # API controller'ları
 │   ├── middleware/       # Express middleware
+│   │   ├── errorHandler.ts
+│   │   └── performanceMonitor.ts
 │   ├── routes/          # API route'ları
+│   │   ├── sentry.ts     # Sentry API endpoints
+│   │   ├── sentry-test.ts # Sentry test endpoints
+│   │   └── performance.ts # Performance monitoring
 │   ├── types/           # TypeScript tipleri
 │   └── utils/           # Utility fonksiyonları
 ├── prisma/              # Database schema
@@ -148,6 +156,15 @@ admin-backend/
 - `PUT /api/v1/listings/:id/reject` - İlan reddet
 - `DELETE /api/v1/listings/:id` - İlan sil
 
+#### 🔍 Sentry & Performance Endpoints
+- `GET /api/v1/sentry/metrics` - Sentry metrics
+- `GET /api/v1/sentry/errors` - Sentry errors
+- `GET /api/v1/sentry/performance` - Sentry performance
+- `GET /api/v1/sentry/releases` - Sentry releases
+- `GET /api/v1/performance/stats` - Performance statistics
+- `GET /api/v1/performance/endpoint/:endpoint` - Endpoint-specific stats
+- `POST /api/v1/sentry-test/generate-error` - Test error generation
+
 ### 🎨 Admin UI (React + Material-UI + Zustand)
 
 #### 📦 Teknoloji Stack
@@ -157,13 +174,15 @@ admin-backend/
 - **Zustand**: State management
 - **Axios**: HTTP client
 - **React Router**: Client-side routing
+- **React Query**: Data fetching ve caching
 
 #### 🏗️ Proje Yapısı
 ```
 admin-ui/
 ├── src/
 │   ├── components/
-│   │   └── Layout/      # Layout component'leri
+│   │   ├── Layout/      # Layout component'leri
+│   │   └── Sentry/      # Sentry Dashboard component'leri
 │   ├── pages/           # Sayfa component'leri
 │   ├── services/        # API servisleri
 │   ├── stores/          # Zustand store'ları
@@ -179,6 +198,7 @@ admin-ui/
 - **İlan Yönetimi**: DataGrid ile CRUD operasyonları
 - **Authentication**: Login/logout sistemi
 - **Real-time Updates**: Gerçek zamanlı güncellemeler
+- **Sentry Dashboard**: Kapsamlı error tracking ve monitoring
 
 #### 📊 Sayfalar
 - **Login Page**: Admin girişi
@@ -188,6 +208,117 @@ admin-ui/
   - Aktif İlanlar
   - Reddedilen İlanlar
   - Tüm İlanlar
+- **Sentry Dashboard**: Error tracking ve monitoring
+  - Live Error Stream
+  - Error Trends
+  - Custom Alert Rules
+  - Stack Trace Viewer
+  - Team Collaboration
+  - Error Analytics
+
+---
+
+## 🔍 Sentry Dashboard - Error Tracking & Monitoring
+
+### 🎯 Sentry Dashboard Özellikleri
+
+#### 📊 Phase 1: Core Features
+1. **Live Error Stream**
+   - Canlı hata akışı
+   - Real-time error tracking
+   - Connection status monitoring
+   - Error level classification
+   - User impact tracking
+
+2. **Error Trends**
+   - Hata trendleri ve grafikleri
+   - Daily error count visualization
+   - Error type breakdown
+   - Trend analysis (up/down/stable)
+   - Time-based filtering
+
+3. **Custom Alert Rules**
+   - Özel uyarı kuralları yönetimi
+   - Metric-based alerting (error_rate, error_count, performance, user_impact)
+   - Condition management (gt, lt, gte, lte, eq)
+   - Priority levels (low, medium, high, critical)
+   - Time window configuration
+
+#### 🚀 Phase 2: Advanced Features
+4. **Stack Trace Viewer**
+   - Detaylı stack trace görüntüleyici
+   - Code context lines (öncesi/sonrası)
+   - CPU registers display
+   - App code highlighting
+   - Copy functionality
+   - Frame expansion/collapse
+
+5. **Team Collaboration**
+   - Takım işbirliği ve atama sistemi
+   - Team member management
+   - Error assignment system
+   - Comment system
+   - Priority management
+   - Due date tracking
+
+6. **Error Analytics**
+   - Kapsamlı hata analizi
+   - Key metrics dashboard
+   - Top error types analysis
+   - Affected endpoints breakdown
+   - Browser/device breakdown
+   - Geographic distribution
+   - User impact analysis
+
+### 🔧 Backend Integration
+
+#### 📦 Sentry SDK Integration
+- **@sentry/node**: Core Sentry functionality
+- **@sentry/profiling-node**: Performance profiling
+- **@sentry/integrations**: Additional integrations
+- **Error capture**: Automatic error tracking
+- **Performance monitoring**: API response time tracking
+
+#### 🏗️ Performance Monitoring
+- **Response time tracking**: API endpoint performance
+- **Error rate monitoring**: Real-time error rates
+- **Slow query detection**: Performance bottlenecks
+- **User impact analysis**: Affected user tracking
+- **Trend analysis**: Performance over time
+
+#### 🔍 API Endpoints
+- **Sentry Metrics**: `/api/v1/sentry/metrics`
+- **Sentry Errors**: `/api/v1/sentry/errors`
+- **Sentry Performance**: `/api/v1/sentry/performance`
+- **Sentry Releases**: `/api/v1/sentry/releases`
+- **Performance Stats**: `/api/v1/performance/stats`
+- **Test Error Generation**: `/api/v1/sentry-test/generate-error`
+
+### 🎨 Frontend Components
+
+#### 📱 Sentry Dashboard Components
+- **LiveErrorStream**: Real-time error display
+- **ErrorTrends**: Trend visualization
+- **CustomAlertRules**: Alert management
+- **StackTraceViewer**: Stack trace analysis
+- **TeamCollaboration**: Team management
+- **ErrorAnalytics**: Comprehensive analytics
+
+#### 🔧 Technical Features
+- **Real-time updates**: Live data streaming
+- **Mock data cleanup**: Production-ready data only
+- **Type safety**: Full TypeScript integration
+- **Responsive design**: Mobile-friendly interface
+- **Material-UI**: Professional UI components
+- **React Query**: Efficient data fetching
+
+### 📊 Data Flow
+1. **Error Generation**: Backend captures errors via Sentry SDK
+2. **Performance Tracking**: API response times monitored
+3. **Data Aggregation**: Metrics collected and processed
+4. **Frontend Display**: Real-time dashboard updates
+5. **Team Collaboration**: Error assignment and commenting
+6. **Analytics**: Comprehensive error analysis
 
 ---
 
@@ -449,6 +580,11 @@ JWT_SECRET=your_jwt_secret
 - Advanced reporting
 - Multi-language support
 - Local Supabase integration
+- Sentry Dashboard enhancements
+  - Real Sentry API integration
+  - Advanced alerting rules
+  - Team collaboration features
+  - Performance optimization
 
 ### 🐳 Local Development
 - CI/CD pipeline for local testing
@@ -472,10 +608,12 @@ JWT_SECRET=your_jwt_secret
 - **Mobil Uygulama**: ✅ Production Ready
 - **Web Uygulaması**: ✅ Production Ready
 - **Admin Sistemi**: ✅ Production Ready
+- **Sentry Dashboard**: ✅ Complete Implementation
 - **Local Development**: ✅ Complete Setup
 - **Edge Functions**: ✅ All 8 Functions Local
 - **Migration Management**: ✅ Clean & Synced
 - **Test Coverage**: ✅ 71 Test Başarılı
+- **Error Tracking**: ✅ Sentry Integration Complete
 
 ---
 
