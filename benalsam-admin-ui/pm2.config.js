@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   name: 'benalsam-admin-ui',
   script: 'dist/index.js',
   instances: 1,
