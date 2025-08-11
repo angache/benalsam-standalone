@@ -78,7 +78,7 @@ Bu doküman, Benalsam projesine Elasticsearch entegrasyonunun nasıl implement e
 
 ### **1.1 Shared Types Package**
 
-**Dosya:** `packages/shared-types/src/services/elasticsearchService.ts`
+**Dosya:** `benalsam-shared-types/src/services/elasticsearchService.ts`
 
 **Amaç:** Tüm projelerde kullanılabilecek base Elasticsearch service
 
@@ -153,7 +153,7 @@ class ElasticsearchService {
 
 ### **1.2 Elasticsearch Types**
 
-**Dosya:** `packages/shared-types/src/types/search.ts`
+**Dosya:** `benalsam-shared-types/src/types/search.ts`
 
 **Interface'ler:**
 ```typescript
@@ -183,7 +183,7 @@ interface SearchFilters {
 
 ### **1.3 Package Configuration**
 
-**Dosya:** `packages/shared-types/package.json`
+**Dosya:** `benalsam-shared-types/package.json`
 
 **Özellikler:**
 - Dual build (CommonJS/ESM) yapılandırması
@@ -197,7 +197,7 @@ interface SearchFilters {
 
 ### **2.1 Admin Elasticsearch Service**
 
-**Dosya:** `packages/admin-backend/src/services/elasticsearchService.ts`
+**Dosya:** `benalsam-admin-backend/src/services/elasticsearchService.ts`
 
 **Amaç:** Admin-specific Elasticsearch operations
 
@@ -227,7 +227,7 @@ class AdminElasticsearchService extends ElasticsearchService {
 
 ### **2.2 Queue Processor Service**
 
-**Dosya:** `packages/admin-backend/src/services/queueProcessorService.ts`
+**Dosya:** `benalsam-admin-backend/src/services/queueProcessorService.ts`
 
 **Amaç:** PostgreSQL-based queue processing for Elasticsearch sync
 

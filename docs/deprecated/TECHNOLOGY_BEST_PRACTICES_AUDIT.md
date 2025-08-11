@@ -60,9 +60,9 @@
 // ✅ Mükemmel: Merkezi script yönetimi
 {
   "scripts": {
-    "dev:web": "npm run dev --workspace=packages/web",
-    "dev:mobile": "npm run dev --workspace=packages/mobile",
-    "build:shared": "npm run build --workspace=packages/shared-types"
+    "dev:web": "npm run dev --workspace=benalsam-web",
+    "dev:mobile": "npm run dev --workspace=benalsam-mobile",
+    "build:shared": "npm run build --workspace=benalsam-shared-types"
   }
 }
 ```
@@ -878,7 +878,7 @@ version: '3.8'
 services:
   admin-backend:
     build: 
-      context: ./packages/admin-backend
+      context: ./benalsam-admin-backend
       dockerfile: Dockerfile
     ports:
       - "3002:3002"

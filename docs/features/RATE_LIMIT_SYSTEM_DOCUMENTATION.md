@@ -275,13 +275,13 @@ expect(result.message).toBe('Network error - allowing request');
 
 ```bash
 # Admin-Backend testleri
-cd packages/admin-backend && npm test
+cd benalsam-admin-backend && npm test
 
 # Web testleri  
-cd packages/web && npm test
+cd benalsam-web && npm test
 
 # Mobile testleri
-cd packages/mobile && npm test
+cd benalsam-mobile && npm test
 ```
 
 ## 🔧 Troubleshooting

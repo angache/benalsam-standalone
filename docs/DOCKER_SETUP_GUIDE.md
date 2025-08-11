@@ -191,21 +191,21 @@ services:
   admin-backend:
     build:
       context: .
-      dockerfile: ./packages/admin-backend/Dockerfile
+      dockerfile: ./benalsam-admin-backend/Dockerfile
       target: development
     ports: ["3002:3002"]
     
   admin-ui:
     build:
       context: .
-      dockerfile: ./packages/admin-ui/Dockerfile
+      dockerfile: ./benalsam-admin-ui/Dockerfile
       target: development
     ports: ["3003:3003"]
     
   web:
     build:
       context: .
-      dockerfile: ./packages/web/Dockerfile
+      dockerfile: ./benalsam-web/Dockerfile
       target: development
     ports: ["5173:5173"]
 ```
@@ -226,21 +226,21 @@ services:
   admin-backend:
     build:
       context: .
-      dockerfile: ./packages/admin-backend/Dockerfile
+      dockerfile: ./benalsam-admin-backend/Dockerfile
       target: production
     restart: unless-stopped
     
   admin-ui:
     build:
       context: .
-      dockerfile: ./packages/admin-ui/Dockerfile
+      dockerfile: ./benalsam-admin-ui/Dockerfile
       target: production
     ports: ["3003:80"]
     
   web:
     build:
       context: .
-      dockerfile: ./packages/web/Dockerfile
+      dockerfile: ./benalsam-web/Dockerfile
       target: production
     ports: ["5173:80"]
     
@@ -256,32 +256,32 @@ services:
 ### **Development Builds**
 ```bash
 # Admin Backend development build
-docker build -f packages/admin-backend/Dockerfile --target development .
+docker build -f benalsam-admin-backend/Dockerfile --target development .
 
 # Admin UI development build
-docker build -f packages/admin-ui/Dockerfile --target development .
+docker build -f benalsam-admin-ui/Dockerfile --target development .
 
 # Web development build
-docker build -f packages/web/Dockerfile --target development .
+docker build -f benalsam-web/Dockerfile --target development .
 ```
 
 ### **Production Builds**
 ```bash
 # Admin Backend production build
-docker build -f packages/admin-backend/Dockerfile --target production .
+docker build -f benalsam-admin-backend/Dockerfile --target production .
 
 # Admin UI production build
-docker build -f packages/admin-ui/Dockerfile --target production .
+docker build -f benalsam-admin-ui/Dockerfile --target production .
 
 # Web production build
-docker build -f packages/web/Dockerfile --target production .
+docker build -f benalsam-web/Dockerfile --target production .
 ```
 
 ### **Multi-Stage Builds**
 ```bash
 # All stages build
-docker build -f packages/admin-backend/Dockerfile --target builder .
-docker build -f packages/admin-backend/Dockerfile --target production .
+docker build -f benalsam-admin-backend/Dockerfile --target builder .
+docker build -f benalsam-admin-backend/Dockerfile --target production .
 ```
 
 ---
@@ -345,7 +345,7 @@ docker-compose -f docker-compose.dev.yml exec admin-backend curl localhost:3002/
 ### **Performance Monitoring**
 ```bash
 # Build time measurement
-time docker build -f packages/admin-backend/Dockerfile --target production .
+time docker build -f benalsam-admin-backend/Dockerfile --target production .
 
 # Image size analysis
 docker images

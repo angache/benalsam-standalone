@@ -109,8 +109,8 @@ sudo crontab -e
 #### **Repository Setup**
 ```bash
 # Clone repository
-git clone https://github.com/your-username/benalsam-monorepo.git
-cd benalsam-monorepo
+git clone https://github.com/angache/benalsam-standalone.git
+cd benalsam-standalone
 
 # Create production branch
 git checkout -b production
@@ -440,7 +440,7 @@ sudo certbot renew
 ```bash
 # Database backup
 docker-compose -f docker-compose.prod.yml exec redis redis-cli BGSAVE
-docker cp benalsam-monorepo_redis_1:/data/dump.rdb /backup/redis-$(date +%Y%m%d).rdb
+docker cp benalsam-infrastructure_redis_1:/data/dump.rdb /backup/redis-$(date +%Y%m%d).rdb
 
 # Application backup
 tar -czf /backup/app-$(date +%Y%m%d).tar.gz /opt/benalsam

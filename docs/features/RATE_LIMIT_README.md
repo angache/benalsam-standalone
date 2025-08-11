@@ -44,13 +44,13 @@ ADMIN_BACKEND_URL=http://192.168.1.100:3002
 ### 2. Test Çalıştırma
 ```bash
 # Admin-Backend
-cd packages/admin-backend && npm test
+cd benalsam-admin-backend && npm test
 
 # Web
-cd packages/web && npm test
+cd benalsam-web && npm test
 
 # Mobile
-cd packages/mobile && npm test
+cd benalsam-mobile && npm test
 ```
 
 ## 🎯 Kullanım

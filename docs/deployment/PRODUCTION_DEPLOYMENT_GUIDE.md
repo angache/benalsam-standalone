@@ -82,12 +82,12 @@ sudo mkdir -p /opt/benalsam-admin
 cd /opt/benalsam-admin
 
 # Repository'yi clone et
-sudo git clone https://github.com/angache/Benalsam-Monorepo.git benalsam-monorepo
-cd benalsam-monorepo
+sudo git clone https://github.com/angache/benalsam-standalone.git benalsam-standalone
+cd benalsam-standalone
 
 # Environment dosyası oluştur
-sudo cp packages/admin-backend/.env.example packages/admin-backend/.env.production
-sudo nano packages/admin-backend/.env.production
+sudo cp benalsam-admin-backend/.env.example benalsam-admin-backend/.env.production
+sudo nano benalsam-admin-backend/.env.production
 ```
 
 ### **4. Environment Variables**

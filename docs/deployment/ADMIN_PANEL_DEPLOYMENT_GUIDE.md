@@ -6,15 +6,15 @@ Bu dokümantasyon, Benalsam Admin Panel'inin teknik altyapısını, VPS deployme
 
 ## 🏗️ Teknik Altyapı
 
-### Monorepo Yapısı
+### Standalone Project Structure
 ```
-benalsam-monorepo/
-├── packages/
-│   ├── admin-backend/     # Node.js + Express + TypeScript
-│   ├── admin-ui/         # React + Vite + TypeScript + Material-UI
-│   ├── mobile/           # React Native + Expo
-│   ├── web/              # React + Vite
-│   └── shared-types/     # TypeScript tip tanımları
+benalsam-standalone/
+├── benalsam-admin-backend/     # Node.js + Express + TypeScript
+├── benalsam-admin-ui/         # React + Vite + TypeScript + Material-UI
+├── benalsam-mobile/           # React Native + Expo
+├── benalsam-web/              # React + Vite
+├── benalsam-shared-types/     # NPM Package
+└── benalsam-infrastructure/   # Docker Services
 ```
 
 ### Backend Teknolojileri
@@ -190,8 +190,8 @@ ssh -p 22 root@209.227.228.96
 ### 2. Proje Dosyalarını Kopyalama
 ```bash
 # Local'den VPS'e dosya kopyalama
-scp -P 22 -r benalsam-monorepo/packages/admin-backend root@209.227.228.96:/root/
-scp -P 22 -r benalsam-monorepo/packages/admin-ui root@209.227.228.96:/root/
+scp -P 22 -r benalsam-standalone/benalsam-admin-backend root@209.227.228.96:/root/
+scp -P 22 -r benalsam-standalone/benalsam-admin-ui root@209.227.228.96:/root/
 ```
 
 ### 3. Environment Dosyalarını Hazırlama
@@ -260,7 +260,7 @@ http {
 
 ### Backend Başlatma
 ```bash
-cd /Users/alituna/Documents/projects/Benalsam/benalsam-monorepo/packages/admin-backend
+cd /Users/alituna/Documents/projects/Benalsam/benalsam-standalone/benalsam-admin-backend
 
 # Dependencies yükleme
 npm install
@@ -274,7 +274,7 @@ npm run dev
 
 ### Frontend Başlatma
 ```bash
-cd /Users/alituna/Documents/projects/Benalsam/benalsam-monorepo/packages/admin-ui
+cd /Users/alituna/Documents/projects/Benalsam/benalsam-standalone/benalsam-admin-ui
 
 # Dependencies yükleme
 npm install
@@ -518,8 +518,8 @@ app.get('/health', (req, res) => {
 3. **VPS Deployment**
    ```bash
    # VPS'e dosyaları kopyala
-   scp -P 22 -r packages/admin-backend root@209.227.228.96:/root/
-   scp -P 22 -r packages/admin-ui root@209.227.228.96:/root/
+   scp -P 22 -r benalsam-admin-backend root@209.227.228.96:/root/
+   scp -P 22 -r benalsam-admin-ui root@209.227.228.96:/root/
    
    # Container'ları yeniden build et
    ssh -p 22 root@209.227.228.96 "cd /root/admin-backend && docker-compose -f docker-compose.prod.yml up --build -d"
@@ -579,7 +579,7 @@ app.get('/health', (req, res) => {
 ## 📞 İletişim & Destek
 
 - **Technical Lead**: Ali Tuna
-- **Repository**: github.com:angache/BenalsamMobil-2025.git
+- **Repository**: github.com:angache/benalsam-standalone.git
 - **VPS Access**: root@209.227.228.96
 - **Admin Panel**: http://209.227.228.96:3000
 

@@ -28,7 +28,7 @@ Bu doküman, Benalsam projesine Elasticsearch entegrasyonu için yapılacak işl
 ## ✅ **FAZ 1: Shared Types & Elasticsearch Service**
 
 ### ✅ **1.1 Shared Types Package**
-- [x] `packages/shared-types/src/services/elasticsearchService.ts` oluştur
+- [x] `benalsam-shared-types/src/services/elasticsearchService.ts` oluştur
 - [x] Base Elasticsearch service class
 - [x] Connection management
 - [x] Index operations (create, delete, update)
@@ -38,7 +38,7 @@ Bu doküman, Benalsam projesine Elasticsearch entegrasyonu için yapılacak işl
 - [x] Error handling ve retry logic
 
 ### ✅ **1.2 Elasticsearch Types**
-- [x] `packages/shared-types/src/types/elasticsearch.ts` oluştur
+- [x] `benalsam-shared-types/src/types/elasticsearch.ts` oluştur
 - [x] Search parameters interface
 - [x] Search result interface
 - [x] Index mapping types
@@ -46,7 +46,7 @@ Bu doküman, Benalsam projesine Elasticsearch entegrasyonu için yapılacak işl
 - [x] Error types
 
 ### ✅ **1.3 Package Configuration**
-- [x] `packages/shared-types/package.json` güncelle
+- [x] `benalsam-shared-types/package.json` güncelle
 - [x] Dual build (CommonJS/ESM) yapılandırması
 - [x] TypeScript exports
 - [x] Dependencies ekle (@elastic/elasticsearch)
@@ -56,7 +56,7 @@ Bu doküman, Benalsam projesine Elasticsearch entegrasyonu için yapılacak işl
 ## ✅ **FAZ 2: Admin Backend Integration**
 
 ### ✅ **2.1 Admin Elasticsearch Service**
-- [x] `packages/admin-backend/src/services/elasticsearchService.ts` oluştur
+- [x] `benalsam-admin-backend/src/services/elasticsearchService.ts` oluştur
 - [x] AdminElasticsearchService class (shared-types'den extend)
 - [x] Admin-specific operations
 - [x] Reindex functionality
@@ -71,12 +71,12 @@ Bu doküman, Benalsam projesine Elasticsearch entegrasyonu için yapılacak işl
 - [x] ELASTICSEARCH_PASSWORD
 
 ### ✅ **2.3 Controller & Routes**
-- [x] `packages/admin-backend/src/controllers/elasticsearchController.ts` oluştur
+- [x] `benalsam-admin-backend/src/controllers/elasticsearchController.ts` oluştur
 - [x] Health check endpoint
 - [x] Search endpoint
 - [x] Index management endpoints
 - [x] Reindex endpoint
-- [x] `packages/admin-backend/src/routes/elasticsearch.ts` oluştur
+- [x] `benalsam-admin-backend/src/routes/elasticsearch.ts` oluştur
 - [x] Route'ları ana router'a ekle
 
 ### ✅ **2.4 Dependencies**
@@ -89,7 +89,7 @@ Bu doküman, Benalsam projesine Elasticsearch entegrasyonu için yapılacak işl
 ## ✅ **FAZ 3: PostgreSQL Triggers & Queue System**
 
 ### ✅ **3.1 PostgreSQL Triggers**
-- [x] `packages/admin-backend/src/database/triggers/elasticsearch_sync.sql` oluştur
+- [x] `benalsam-admin-backend/src/database/triggers/elasticsearch_sync.sql` oluştur
 - [x] `listings` tablosu için trigger
 - [x] `profiles` tablosu için trigger
 - [x] `categories` tablosu için trigger
@@ -97,7 +97,7 @@ Bu doküman, Benalsam projesine Elasticsearch entegrasyonu için yapılacak işl
 - [x] Queue'ya mesaj gönderme
 
 ### ✅ **3.2 Redis Message Queue**
-- [x] `packages/admin-backend/src/services/messageQueueService.ts` oluştur
+- [x] `benalsam-admin-backend/src/services/messageQueueService.ts` oluştur
 - [x] Redis connection management
 - [x] Job queue implementation
 - [x] Job states (pending, processing, completed, failed)
@@ -105,14 +105,14 @@ Bu doküman, Benalsam projesine Elasticsearch entegrasyonu için yapılacak işl
 - [x] Error handling
 
 ### ✅ **3.3 Indexer Service**
-- [x] `packages/admin-backend/src/services/indexerService.ts` oluştur
+- [x] `benalsam-admin-backend/src/services/indexerService.ts` oluştur
 - [x] Queue'dan mesaj okuma
 - [x] Elasticsearch'e data yazma
 - [x] Batch processing
 - [x] Conflict resolution
 
 ### ✅ **3.4 Sync Management**
-- [x] `packages/admin-backend/src/services/syncService.ts` oluştur
+- [x] `benalsam-admin-backend/src/services/syncService.ts` oluştur
 - [x] Initial data migration
 - [x] Incremental sync
 - [x] Sync status monitoring
@@ -123,7 +123,7 @@ Bu doküman, Benalsam projesine Elasticsearch entegrasyonu için yapılacak işl
 ## ✅ **FAZ 4: Admin UI Integration**
 
 ### ✅ **4.1 Elasticsearch Dashboard**
-- [x] `packages/admin-ui/src/pages/ElasticsearchDashboardPage.tsx` oluştur
+- [x] `benalsam-admin-ui/src/pages/ElasticsearchDashboardPage.tsx` oluştur
 - [x] Health status monitoring
 - [x] Sync progress tracking
 - [x] Queue statistics

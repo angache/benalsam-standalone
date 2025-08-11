@@ -153,7 +153,7 @@ module.exports = {
   apps: [
     {
       name: 'admin-backend',
-      cwd: '/var/www/benalsam/packages/admin-backend',
+      cwd: '/var/www/benalsam/benalsam-admin-backend',
       script: 'npm',
       args: 'start', // production build
       env: {
@@ -174,7 +174,7 @@ module.exports = {
     },
     {
       name: 'admin-ui',
-      cwd: '/var/www/benalsam/packages/admin-ui',
+      cwd: '/var/www/benalsam/benalsam-admin-ui',
       script: 'npm',
       args: 'start', // production build
       env: {
@@ -191,7 +191,7 @@ module.exports = {
     },
     {
       name: 'web',
-      cwd: '/var/www/benalsam/packages/web',
+      cwd: '/var/www/benalsam/benalsam-web',
       script: 'npm',
       args: 'start', // production build
       env: {
@@ -213,7 +213,7 @@ module.exports = {
       user: 'deploy',
       host: '209.227.228.96',
       ref: 'origin/main',
-      repo: 'git@github.com:angache/Benalsam-Monorepo.git',
+      repo: 'git@github.com:angache/benalsam-standalone.git',
       path: '/var/www/benalsam',
       'pre-deploy-local': '',
       'post-deploy': 'npm install && npm run build && pm2 reload ecosystem.config.js --env production',
@@ -306,7 +306,7 @@ pm2 set pm2-logrotate:compress true
 ### **1. Repository Clone:**
 ```bash
 cd /var/www
-git clone https://github.com/angache/Benalsam-Monorepo.git benalsam
+git clone https://github.com/angache/benalsam-standalone.git benalsam
 cd benalsam
 ```
 

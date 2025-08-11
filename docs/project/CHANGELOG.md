@@ -91,13 +91,13 @@ Bu sürüm, Benalsam projesine kapsamlı Elasticsearch entegrasyonu, Turkish sea
 
 #### Yeni Dosyalar
 - `docs/ELASTICSEARCH_TURKISH_SEARCH_INTEGRATION.md`: Kapsamlı Turkish search rehberi
-- `packages/admin-backend/src/services/queueProcessorService.ts`: Queue processor service
-- `packages/admin-backend/src/database/migrations/001_create_elasticsearch_queue.sql`: Queue table migration
+- `benalsam-admin-backend/src/services/queueProcessorService.ts`: Queue processor service
+- `benalsam-admin-backend/src/database/migrations/001_create_elasticsearch_queue.sql`: Queue table migration
 
 #### Güncellenen Dosyalar
 - `docs/ELASTICSEARCH_IMPLEMENTATION_GUIDE.md`: Turkish search ve queue sistemi eklendi
-- `packages/shared-types/src/services/elasticsearchService.ts`: Turkish analyzer config
-- `packages/admin-backend/src/controllers/elasticsearchController.ts`: QueueProcessorService entegrasyonu
+- `benalsam-shared-types/src/services/elasticsearchService.ts`: Turkish analyzer config
+- `benalsam-admin-backend/src/controllers/elasticsearchController.ts`: QueueProcessorService entegrasyonu
 - `docker-compose.dev.yml`: Elasticsearch, Redis ve Supabase config
 
 ### 🚀 Deployment
@@ -196,7 +196,7 @@ curl -s http://localhost:3002/api/v1/elasticsearch/queue/stats | jq .
 
 ### 📞 Support
 
-- **Repository**: github.com:angache/BenalsamMobil-2025.git
+- **Repository**: github.com:angache/benalsam-standalone.git
 - **Admin Panel**: http://localhost:3003
 - **Elasticsearch**: http://localhost:9200
 - **Documentation**: `docs/ELASTICSEARCH_TURKISH_SEARCH_INTEGRATION.md`
@@ -380,7 +380,7 @@ Bu sürüm, Benalsam Admin Panel'inin production-ready deployment'ını ve kapsa
 ### 📞 Support
 
 - **VPS Access**: root@209.227.228.96
-- **Repository**: github.com:angache/BenalsamMobil-2025.git
+- **Repository**: github.com:angache/benalsam-standalone.git
 - **Admin Panel**: http://209.227.228.96:3000
 - **Documentation**: `docs/ADMIN_PANEL_DEPLOYMENT_GUIDE.md`
 

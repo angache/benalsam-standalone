@@ -74,9 +74,9 @@ sudo apt install -y certbot python3-certbot-nginx
 ### 1. Repository Clone
 ```bash
 cd /opt
-sudo git clone https://github.com/angache/BenalsamMobil-2025.git benalsam
+sudo git clone https://github.com/angache/benalsam-standalone.git benalsam
 sudo chown -R $USER:$USER benalsam
-cd benalsam/benalsam-monorepo/packages
+cd benalsam/benalsam-standalone
 ```
 
 ### 2. Environment Dosyaları Hazırlama
@@ -217,7 +217,7 @@ sudo systemctl restart redis-server
 
 ### 1. Docker Compose ile Başlatma
 ```bash
-cd /opt/benalsam/benalsam-monorepo/packages/admin-ui
+cd /opt/benalsam/benalsam-standalone/benalsam-admin-ui
 docker-compose -f docker-compose.prod.yml up -d
 ```
 

@@ -48,8 +48,8 @@ echo -e "${YELLOW}📁 Upload dosyaları yedekleniyor...${NC}"
 if [ -d "/opt/benalsam/uploads" ]; then
     tar -czf $BACKUP_DIR/uploads_backup.tar.gz -C /opt/benalsam uploads
     echo -e "${GREEN}✅ Upload dosyaları backup tamamlandı${NC}"
-elif [ -d "/opt/benalsam/benalsam-monorepo/packages/admin-backend/uploads" ]; then
-    tar -czf $BACKUP_DIR/uploads_backup.tar.gz -C /opt/benalsam/benalsam-monorepo/packages/admin-backend uploads
+elif [ -d "/opt/benalsam/benalsam-standalone/benalsam-admin-backend/uploads" ]; then
+    tar -czf $BACKUP_DIR/uploads_backup.tar.gz -C /opt/benalsam/benalsam-standalone/benalsam-admin-backend uploads
     echo -e "${GREEN}✅ Upload dosyaları backup tamamlandı${NC}"
 else
     echo -e "${YELLOW}⚠️ Upload dizini bulunamadı${NC}"
@@ -57,13 +57,13 @@ fi
 
 # 4. Environment dosyaları yedekleme
 echo -e "${YELLOW}⚙️ Environment dosyaları yedekleniyor...${NC}"
-if [ -f "/opt/benalsam/benalsam-monorepo/packages/admin-backend/.env.production" ]; then
-    cp /opt/benalsam/benalsam-monorepo/packages/admin-backend/.env.production $BACKUP_DIR/backend_env.production
+if [ -f "/opt/benalsam/benalsam-standalone/benalsam-admin-backend/.env.production" ]; then
+    cp /opt/benalsam/benalsam-standalone/benalsam-admin-backend/.env.production $BACKUP_DIR/backend_env.production
     echo -e "${GREEN}✅ Backend environment backup tamamlandı${NC}"
 fi
 
-if [ -f "/opt/benalsam/benalsam-monorepo/packages/admin-ui/.env.production" ]; then
-    cp /opt/benalsam/benalsam-monorepo/packages/admin-ui/.env.production $BACKUP_DIR/frontend_env.production
+if [ -f "/opt/benalsam/benalsam-standalone/benalsam-admin-ui/.env.production" ]; then
+    cp /opt/benalsam/benalsam-standalone/benalsam-admin-ui/.env.production $BACKUP_DIR/frontend_env.production
     echo -e "${GREEN}✅ Frontend environment backup tamamlandı${NC}"
 fi
 

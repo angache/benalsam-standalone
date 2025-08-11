@@ -31,7 +31,7 @@ Web admin panelini admin-backend (a-b) ile tam entegre hale getirmek, modern web
 
 ### Proje Yapısı
 ```
-packages/web/
+benalsam-web/
 ├── src/
 │   ├── components/          # React bileşenleri
 │   ├── services/           # API servisleri
@@ -84,7 +84,7 @@ packages/web/
 ### Kurulum
 ```bash
 # Monorepo root'unda
-cd benalsam-monorepo/packages/web
+cd benalsam-standalone/benalsam-web
 
 # Bağımlılıkları yükle
 npm install

@@ -4,19 +4,19 @@
 
 ### 1. Migration Çalıştır
 ```bash
-cd packages/mobile
+cd benalsam-mobile
 npx supabase db push --include-all
 ```
 
 ### 2. Backend Başlat
 ```bash
-cd packages/admin-backend
+cd benalsam-admin-backend
 npm run dev
 ```
 
 ### 3. Frontend Başlat
 ```bash
-cd packages/admin-ui
+cd benalsam-admin-ui
 npm run dev
 ```
 

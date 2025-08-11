@@ -86,8 +86,8 @@ sudo crontab -e
 #### **Repository Klonlama**
 ```bash
 # Projeyi klonlama
-git clone https://github.com/your-username/benalsam-monorepo.git
-cd benalsam-monorepo
+git clone https://github.com/angache/benalsam-standalone.git
+cd benalsam-standalone
 
 # Production branch oluşturma
 git checkout -b production
@@ -250,7 +250,7 @@ BACKUP_DIR="/backup"
 
 # Redis backup
 docker-compose -f /opt/benalsam/docker-compose.prod.yml exec redis redis-cli BGSAVE
-docker cp benalsam-monorepo_redis_1:/data/dump.rdb $BACKUP_DIR/redis-$DATE.rdb
+docker cp benalsam-infrastructure_redis_1:/data/dump.rdb $BACKUP_DIR/redis-$DATE.rdb
 
 # Application backup
 tar -czf $BACKUP_DIR/app-$DATE.tar.gz /opt/benalsam

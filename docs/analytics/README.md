@@ -187,15 +187,15 @@ curl -X GET "http://localhost:3002/api/v1/analytics-alerts/summary" \
 ## 🔧 **Geliştirme**
 
 ### **Yeni Özellik Ekleme**
-1. Service dosyasını oluştur (`packages/admin-backend/src/services/`)
-2. Route dosyasını oluştur (`packages/admin-backend/src/routes/`)
-3. API service'i güncelle (`packages/admin-ui/src/services/api.ts`)
+1. Service dosyasını oluştur (`benalsam-admin-backend/src/services/`)
+2. Route dosyasını oluştur (`benalsam-admin-backend/src/routes/`)
+3. API service'i güncelle (`benalsam-admin-ui/src/services/api.ts`)
 4. Test et ve dokümantasyonu güncelle
 
 ### **Deployment**
 ```bash
 # Build
-cd packages/admin-backend && pnpm build
+cd benalsam-admin-backend && pnpm build
 
 # Restart
 pm2 restart ecosystem.config.js --only admin-backend

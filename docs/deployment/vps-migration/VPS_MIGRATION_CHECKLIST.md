@@ -183,7 +183,7 @@ systemctl restart redis-server
 - **Log Dosyaları**: `/var/log/nginx/`, `/opt/benalsam/logs/`
 - **Monitoring**: `/opt/monitor-benalsam.sh`
 - **Backup**: `/opt/backup-benalsam.sh`
-- **Docker Compose**: `/opt/benalsam/benalsam-monorepo/packages/admin-ui/docker-compose.prod.yml`
+- **Docker Compose**: `/opt/benalsam/benalsam-standalone/benalsam-admin-ui/docker-compose.prod.yml`
 
 ### ✅ Geçiş Tamamlandı
 

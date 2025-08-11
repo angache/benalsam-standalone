@@ -17,7 +17,7 @@ Bu dokümantasyon, Benalsam Analytics sisteminin teknik implementasyonunu ve API
 
 ### **Servis Yapısı:**
 ```
-📁 packages/admin-backend/src/
+📁 benalsam-admin-backend/src/
 ├── 📁 services/
 │   ├── 📄 performanceMonitoringService.ts
 │   ├── 📄 userJourneyService.ts
@@ -455,7 +455,7 @@ SMTP_PASS=your_app_password
 
 ### **Admin UI Integration**
 ```typescript
-// packages/admin-ui/src/services/api.ts
+// benalsam-admin-ui/src/services/api.ts
 export const apiService = {
   // Performance Monitoring
   async getPerformanceDashboard(): Promise<any> {
@@ -522,7 +522,7 @@ curl -X POST "http://localhost:3002/api/v1/analytics-alerts/test-notification" \
 ### **Useful Commands:**
 ```bash
 # Build admin-backend
-cd packages/admin-backend && pnpm build
+cd benalsam-admin-backend && pnpm build
 
 # Restart services
 pm2 restart ecosystem.config.js --only admin-backend

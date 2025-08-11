@@ -391,7 +391,7 @@ pnpm add -D @types/crypto-js
 ### 2. Database Setup
 ```sql
 -- Run migration
-\i packages/mobile/supabase/migrations/20250125_add_2fa_fields.sql
+\i benalsam-mobile/supabase/migrations/20250125_add_2fa_fields.sql
 ```
 
 ### 3. Navigation Setup

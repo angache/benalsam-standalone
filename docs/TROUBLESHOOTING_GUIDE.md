@@ -56,7 +56,7 @@ docker system df
 
 # Network status
 docker network ls
-docker network inspect benalsam-monorepo_benalsam-network
+docker network inspect benalsam-infrastructure_benalsam-network
 ```
 
 ### **Service Health Check**
@@ -178,7 +178,7 @@ sudo systemctl restart docker
 ```bash
 # Check network
 docker network ls
-docker network inspect benalsam-monorepo_benalsam-network
+docker network inspect benalsam-infrastructure_benalsam-network
 
 # Recreate network
 docker-compose -f docker-compose.dev.yml down
@@ -208,13 +208,13 @@ docker-compose -f docker-compose.dev.yml up -d
 ```bash
 # Check volumes
 docker volume ls
-docker volume inspect benalsam-monorepo_redis_data
+docker volume inspect benalsam-infrastructure_redis_data
 
 # Backup data
-docker run --rm -v benalsam-monorepo_redis_data:/data -v $(pwd):/backup alpine tar czf /backup/redis-backup.tar.gz -C /data .
+docker run --rm -v benalsam-infrastructure_redis_data:/data -v $(pwd):/backup alpine tar czf /backup/redis-backup.tar.gz -C /data .
 
 # Restore data
-docker run --rm -v benalsam-monorepo_redis_data:/data -v $(pwd):/backup alpine tar xzf /backup/redis-backup.tar.gz -C /data
+docker run --rm -v benalsam-infrastructure_redis_data:/data -v $(pwd):/backup alpine tar xzf /backup/redis-backup.tar.gz -C /data
 ```
 
 #### **Problem: Elasticsearch Issues**
@@ -230,7 +230,7 @@ docker-compose -f docker-compose.dev.yml logs elasticsearch
 
 # Reset Elasticsearch
 docker-compose -f docker-compose.dev.yml down
-docker volume rm benalsam-monorepo_elasticsearch_data
+docker volume rm benalsam-infrastructure_elasticsearch_data
 docker-compose -f docker-compose.dev.yml up -d
 ```
 
@@ -381,7 +381,7 @@ docker system df
 
 # Monitor network
 docker network ls
-docker network inspect benalsam-monorepo_benalsam-network
+docker network inspect benalsam-infrastructure_benalsam-network
 ```
 
 ---
@@ -408,10 +408,10 @@ docker-compose -f docker-compose.dev.yml up -d
 ```bash
 # Backup current state
 docker-compose -f docker-compose.dev.yml exec redis redis-cli BGSAVE
-docker cp benalsam-monorepo_redis_1:/data/dump.rdb ./backup/
+docker cp benalsam-infrastructure_redis_1:/data/dump.rdb ./backup/
 
 # Restore from backup
-docker cp ./backup/dump.rdb benalsam-monorepo_redis_1:/data/
+docker cp ./backup/dump.rdb benalsam-infrastructure_redis_1:/data/
 docker-compose -f docker-compose.dev.yml restart redis
 ```
 

@@ -308,7 +308,7 @@ pm2 restart admin-backend
 pm2 flush
 
 # Log dizinini kontrol et
-ls -la packages/admin-backend/logs/
+ls -la benalsam-admin-backend/logs/
 ```
 
 #### **4. Environment Variables:**
@@ -317,7 +317,7 @@ ls -la packages/admin-backend/logs/
 pm2 show admin-backend
 
 # .env dosyasını kontrol et
-cat packages/admin-backend/.env
+cat benalsam-admin-backend/.env
 ```
 
 ### **Debug Komutları:**

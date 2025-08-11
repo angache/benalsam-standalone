@@ -132,8 +132,8 @@ xcode-select --install
 ### Proje Kurulumu
 ```bash
 # Repository'yi clone et
-git clone https://github.com/angache/BenalsamMobil-2025.git
-cd BenalsamMobil-2025
+git clone https://github.com/angache/benalsam-standalone.git
+cd benalsam-standalone/benalsam-mobile
 
 # Dependencies'leri yükle
 pnpm install

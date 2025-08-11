@@ -72,8 +72,8 @@ cd /opt/benalsam
 
 # Repository clone
 echo -e "${YELLOW}📥 Repository klonlanıyor...${NC}"
-git clone https://github.com/angache/BenalsamMobil-2025.git .
-cd benalsam-monorepo/packages
+git clone https://github.com/angache/benalsam-standalone.git .
+cd benalsam-standalone
 
 # Environment dosyaları oluşturma
 echo -e "${YELLOW}⚙️ Environment dosyaları oluşturuluyor...${NC}"
@@ -174,7 +174,7 @@ sudo ufw --force enable
 
 # Docker Compose ile başlatma
 echo -e "${YELLOW}🐳 Docker container'ları başlatılıyor...${NC}"
-cd /opt/benalsam/benalsam-monorepo/packages/admin-ui
+cd /opt/benalsam/benalsam-standalone/benalsam-admin-ui
 docker-compose -f docker-compose.prod.yml up -d
 
 # SSL sertifikası alma

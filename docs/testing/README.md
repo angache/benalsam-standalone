@@ -21,7 +21,7 @@ Bu klasör, Benalsam monorepo'su için testing rehberleri ve best practices içe
 ### **Web Admin Testing**
 ```bash
 # Web paketinde test çalıştırma
-cd packages/web
+cd benalsam-web
 npm run test:run        # Tüm testleri çalıştır
 npm run test:coverage   # Coverage raporu
 npm run test:ui         # Test UI
@@ -30,7 +30,7 @@ npm run test:ui         # Test UI
 ### **Admin Backend Testing**
 ```bash
 # Admin backend testleri
-cd packages/admin-backend
+cd benalsam-admin-backend
 npm test               # Unit tests
 npm run test:e2e       # E2E tests
 ```
@@ -38,7 +38,7 @@ npm run test:e2e       # E2E tests
 ### **Shared-Types Testing**
 ```bash
 # Shared-types testleri
-cd packages/shared-types
+cd benalsam-shared-types
 npm test               # Type checking
 npm run test:build     # Build test
 ```

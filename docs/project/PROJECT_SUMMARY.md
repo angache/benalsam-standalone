@@ -10,19 +10,19 @@ Bu proje, React Native/Expo mobil uygulaması ve React/Vite web uygulamasından 
 
 ```
 Benalsam/
-├── BenalsamMobil-2025/          # React Native/Expo Mobil Uygulaması (Ayrı Git Repo)
-├── benalsam-admin-backend/      # Admin Backend API (Standalone)
-├── benalsam-admin-ui/          # Admin Dashboard UI (Standalone)
-├── benalsam-web/               # Web Uygulaması (Standalone)
-├── benalsam-shared-types/      # Ortak TypeScript Tipleri (NPM Package)
-└── benalsam-infrastructure/    # VPS Infrastructure (Redis + Elasticsearch)
+├── benalsam-mobile/              # React Native/Expo Mobil Uygulaması (Local)
+├── benalsam-admin-backend/      # Admin Backend API (VPS - Port 3002)
+├── benalsam-admin-ui/          # Admin Dashboard UI (Local - Port 3003)
+├── benalsam-web/               # Web Uygulaması (VPS - Port 5173)
+├── benalsam-shared-types/      # NPM Package (benalsam-shared-types)
+└── benalsam-infrastructure/    # Docker Services (VPS)
 ```
 
 ### 📦 Repository Yapısı (Güncellenmiş)
-- **BenalsamMobil-2025**: Bağımsız mobil uygulama repository'si
-- **benalsam-admin-backend**: Standalone admin backend API
-- **benalsam-admin-ui**: Standalone admin dashboard UI
-- **benalsam-web**: Standalone web uygulaması
+- **benalsam-mobile**: Local'de çalışan mobil uygulama
+- **benalsam-admin-backend**: VPS'de çalışan admin backend API
+- **benalsam-admin-ui**: Local'de çalışan admin dashboard UI
+- **benalsam-web**: VPS'de çalışan web uygulaması
 - **benalsam-shared-types**: NPM package olarak yayınlanan ortak tipler
 - **benalsam-infrastructure**: VPS'de çalışan Redis ve Elasticsearch
 
@@ -34,7 +34,7 @@ Benalsam/
 
 ---
 
-## 📱 Mobil Uygulama (BenalsamMobil-2025)
+## 📱 Mobil Uygulama (benalsam-mobile)
 
 ### 🎯 Temel Özellikler
 - **Çoklu Ekran İlan Oluşturma Akışı**: Kategori, detaylar, görseller, konum, onay
@@ -75,7 +75,7 @@ Benalsam/
 
 ---
 
-## 🌐 Web Uygulaması (BenalsamWeb-2025)
+## 🌐 Web Uygulaması (benalsam-web)
 
 ### 🎯 Temel Özellikler
 - **Modern UI/UX**: Tailwind CSS ile responsive tasarım
@@ -249,7 +249,7 @@ admin-ui/
 - **Platform**: Expo
 - **Status**: Production-ready ✅
 - **Tests**: 71 test başarılı ✅
-- **Repository**: github.com:angache/BenalsamMobil-2025.git
+- **Repository**: github.com:angache/benalsam-standalone.git
 
 ### 🌐 Web Uygulaması
 - **Platform**: Vite
@@ -409,9 +409,9 @@ JWT_SECRET=your_jwt_secret
 ## 📚 Dokümantasyon
 
 ### 📖 README Dosyaları
-- **BenalsamMobil-2025/README.md**: Mobil uygulama dokümantasyonu
-- **BenalsamWeb-2025/README.md**: Web uygulaması dokümantasyonu
-- **benalsam-monorepo/README.md**: Monorepo dokümantasyonu
+- **benalsam-mobile/README.md**: Mobil uygulama dokümantasyonu
+- **benalsam-web/README.md**: Web uygulaması dokümantasyonu
+- **benalsam-standalone/README.md**: Monorepo dokümantasyonu
 
 ### 🐳 Local Development Documentation
 - **LOCAL_SUPABASE_HOWTO.md**: Comprehensive local development guide
@@ -462,8 +462,8 @@ JWT_SECRET=your_jwt_secret
 ## 📞 İletişim ve Destek
 
 ### 👨‍💻 Geliştirici
-- **Mobil Repository**: github.com:angache/BenalsamMobil-2025.git
-- **Monorepo Repository**: benalsam-monorepo (local)
+- **Mobil Repository**: github.com:angache/benalsam-standalone.git
+- **Standalone Repository**: benalsam-standalone (local)
 - **Commit**: db0bd9a65 (Latest: Local Supabase Setup)
 - **Status**: PRODUCTION HAZIR ✅
 - **Local Development**: ✅ Complete Setup

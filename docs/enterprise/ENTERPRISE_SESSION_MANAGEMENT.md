@@ -309,7 +309,7 @@ Deno.serve(async (req) => {
 ### Web App (React/Vite)
 
 ```typescript
-// packages/web/src/stores/authStore.ts
+// benalsam-web/src/stores/authStore.ts
 
 // Enterprise Session Logger Service
 const sessionLoggerService = {
@@ -370,7 +370,7 @@ signOut: async () => {
 ### Mobile App (React Native/Expo)
 
 ```typescript
-// packages/mobile/src/stores/authStore.ts
+// benalsam-mobile/src/stores/authStore.ts
 
 // Enterprise Session Logger Service
 const sessionLoggerService = {

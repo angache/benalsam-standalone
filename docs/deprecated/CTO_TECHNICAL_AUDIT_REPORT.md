@@ -33,7 +33,7 @@
 
 #### **Monorepo Yapısı** ⭐⭐⭐⭐⭐
 ```bash
-benalsam-monorepo/
+benalsam-standalone/
 ├── packages/
 │   ├── admin-backend/     # Node.js/Express API
 │   ├── admin-ui/         # React/Vite Admin Panel

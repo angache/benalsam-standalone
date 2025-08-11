@@ -9,11 +9,11 @@
 ssh -p 22 root@209.227.228.96
 
 # 2. Backend'i başlat
-cd /root/benalsam-monorepo/packages/admin-backend
+cd /root/benalsam-standalone/benalsam-admin-backend
 docker-compose -f docker-compose.prod.yml up --build -d
 
 # 3. Frontend'i başlat
-cd /root/benalsam-monorepo/packages/admin-ui
+cd /root/benalsam-standalone/benalsam-admin-ui
 docker-compose -f docker-compose.prod.yml up --build -d
 
 # 4. Test et
@@ -25,12 +25,12 @@ curl http://localhost:3000
 
 ```bash
 # Backend
-cd /Users/alituna/Documents/projects/Benalsam/benalsam-monorepo/packages/admin-backend
+cd /Users/alituna/Documents/projects/Benalsam/benalsam-standalone/benalsam-admin-backend
 npm install
 npm run dev
 
 # Frontend (yeni terminal)
-cd /Users/alituna/Documents/projects/Benalsam/benalsam-monorepo/packages/admin-ui
+cd /Users/alituna/Documents/projects/Benalsam/benalsam-standalone/benalsam-admin-ui
 npm install
 npm run dev
 ```
@@ -61,11 +61,11 @@ docker logs benalsam-admin-backend-prod
 docker logs benalsam-admin-ui-prod
 
 # Dosya kopyalama (local → VPS)
-scp -P 22 -r benalsam-monorepo/packages/admin-backend root@209.227.228.96:/root/benalsam-monorepo/packages/
+scp -P 22 -r benalsam-standalone/benalsam-admin-backend root@209.227.228.96:/root/benalsam-standalone/
 ```
 
 ## 📞 Acil Durum
 
 - **VPS Access**: root@209.227.228.96
-- **Repository**: github.com:angache/BenalsamMobil-2025.git
+- **Repository**: github.com:angache/benalsam-standalone.git
 - **Detaylı Dokümantasyon**: `docs/ADMIN_PANEL_DEPLOYMENT_GUIDE.md` 

@@ -16,7 +16,7 @@
 
 ### 1. Search Service (Admin Backend)
 ```typescript
-// packages/admin-backend/src/services/searchService.ts
+// benalsam-admin-backend/src/services/searchService.ts
 export class SearchService {
   // Elasticsearch primary, Supabase fallback
   async searchListings(params: SearchParams): Promise<SearchResult> {
@@ -35,7 +35,7 @@ export class SearchService {
 
 ### 2. API Endpoints
 ```typescript
-// packages/admin-backend/src/routes/search/
+// benalsam-admin-backend/src/routes/search/
 POST /api/search/listings
 GET  /api/search/suggestions
 GET  /api/search/analytics
@@ -44,7 +44,7 @@ POST /api/search/reindex
 
 ### 3. Frontend Service Updates
 ```typescript
-// packages/mobile/src/services/searchService.ts
+// benalsam-mobile/src/services/searchService.ts
 export const searchListings = async (params) => {
   const response = await fetch('/api/search/listings', {
     method: 'POST',
@@ -75,7 +75,7 @@ Supabase Trigger → Admin Backend → Elasticsearch Index
 
 ### Rate Limiting
 ```typescript
-// packages/admin-backend/src/middleware/rateLimit.ts
+// benalsam-admin-backend/src/middleware/rateLimit.ts
 export const searchRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 dakika
   max: 100, // IP başına max 100 istek

@@ -62,7 +62,7 @@ services:
   admin-backend:
     build: 
       context: .
-      dockerfile: ./packages/admin-backend/Dockerfile
+      dockerfile: ./benalsam-admin-backend/Dockerfile
     ports:
       - "3002:3002"
     environment:
@@ -72,7 +72,7 @@ services:
   admin-ui:
     build:
       context: .
-      dockerfile: ./packages/admin-ui/Dockerfile
+      dockerfile: ./benalsam-admin-ui/Dockerfile
     ports:
       - "3003:3003"
     environment:
@@ -82,7 +82,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: ./packages/web/Dockerfile
+      dockerfile: ./benalsam-web/Dockerfile
     ports:
       - "5173:5173"
     environment:
@@ -173,7 +173,7 @@ mkdir ~/benalsam-docker
 cd ~/benalsam-docker
 
 # Dosyaları kopyala (local'den)
-scp -r benalsam-monorepo/* angache@209.227.228.96:~/benalsam-docker/
+scp -r benalsam-standalone/* angache@209.227.228.96:~/benalsam-docker/
 
 # Docker build ve başlat
 docker-compose up --build -d
