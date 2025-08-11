@@ -37,6 +37,13 @@ const SettingsPage2 = () => {
   const navigate = useNavigate();
   const { preferences, platformPreferences } = useUserPreferences();
   const { triggerHaptic } = useHapticFeedback();
+  
+  // Loading state for hydration
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  React.useEffect(() => {
+    setIsLoaded(true);
+  }, []);
 
   const handleNavigation = (path) => {
     console.log('🔍 [SettingsPage2] handleNavigation called with path:', path);
@@ -74,7 +81,7 @@ const SettingsPage2 = () => {
     {
       id: 'currency',
       title: 'Para Birimi',
-      subtitle: platformPreferences.currency || 'TRY',
+      subtitle: platformPreferences?.currency || 'TRY',
       icon: DollarSign,
       path: '/ayarlar2/para-birimi'
     },
@@ -237,6 +244,22 @@ const SettingsPage2 = () => {
       </motion.div>
     );
   };
+
+  // Show loading state during hydration
+  if (!isLoaded) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-20 bg-gray-200 rounded-lg mb-6"></div>
+          <div className="space-y-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-16 bg-gray-200 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -32,12 +32,12 @@ Projedeki environment configuration sorunlarını çözmek ve standart bir yapı
   - [x] Supabase config'leri ekle
   - [x] CORS origin'leri ekle
 
-### **Phase 2: VPS Production Düzeltmeleri**
-- [ ] **2.1** VPS `.env` dosyasını düzelt
-  - [ ] `scripts/env.production.template` güncelle
-  - [ ] `benalsam.com` domain'ini CORS'a ekle
-  - [ ] `SERVER_IP` variable'ını düzgün tanımla
-  - [ ] Supabase config'leri kontrol et
+### **Phase 2: VPS Production Düzeltmeleri** ✅
+- [x] **2.1** VPS `.env` dosyasını düzelt
+  - [x] `scripts/env.production.template` güncelle
+  - [x] `benalsam.com` domain'ini CORS'a ekle
+  - [x] `SERVER_IP` variable'ını düzgün tanımla
+  - [x] Supabase config'leri kontrol et
 
 - [ ] **2.2** Docker compose düzeltmeleri
   - [ ] `${SERVER_IP}` variable'ını düzgün kullan
@@ -86,10 +86,10 @@ Projedeki environment configuration sorunlarını çözmek ve standart bir yapı
 ## 📊 **İlerleme**
 
 - **Toplam Görev:** 12
-- **Tamamlanan:** 8
+- **Tamamlanan:** 9
 - **Devam Eden:** 0
-- **Bekleyen:** 4
-- **İlerleme:** 67%
+- **Bekleyen:** 3
+- **İlerleme:** 75%
 
 ## 🔄 **Sonraki Adımlar**
 
