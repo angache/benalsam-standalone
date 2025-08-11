@@ -80,7 +80,6 @@ export interface AuthenticatedRequest extends Request {
     role: AdminRole;
     permissions?: AdminPermission[];
   };
-  body?: any; // Add body property for request body
 }
 
 // Database configuration
