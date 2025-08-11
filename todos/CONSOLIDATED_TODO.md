@@ -1,0 +1,1179 @@
+# 🎯 CONSOLIDATED TODO - Benalsam Projesi
+
+## 📋 **Genel Bakış**
+
+Bu dosya, 1037 TODO task'ının konsolide edilmiş halidir. 
+73 duplicate task tespit edilmiştir.
+
+---
+
+## 📊 **Özet İstatistikler**
+
+### Production için kritik - hemen yapılmalı
+- **Task Sayısı**: 98
+- **Öncelik**: 1/5
+
+### Gelir ve kullanıcı artışı odaklı
+- **Task Sayısı**: 66
+- **Öncelik**: 2/5
+
+### Kod kalitesi ve teknik iyileştirmeler
+- **Task Sayısı**: 128
+- **Öncelik**: 3/5
+
+### İyi olur ama kritik değil
+- **Task Sayısı**: 744
+- **Öncelik**: 4/5
+
+### Gelecek planlaması ve araştırma
+- **Task Sayısı**: 1
+- **Öncelik**: 5/5
+
+### Duplicate Tasks
+- **Tespit Edilen**: 73
+- **Önerilen**: Duplicate'ları temizle ve tek task'a birleştir
+
+---
+
+## 🎯 **KATEGORİLERE GÖRE TASK'LAR**
+
+### Production için kritik - hemen yapılmalı (98 task)
+
+- [ ] Error handling *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] Performance trends *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] Performance monitoring *(Kaynak: ANALYTICS_REPORT_PLAN.md)*
+- [ ] **Network error handling** *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **App-level security** measures *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Error tracking** enhancement *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Performance monitoring** *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Error Handling Enhancement: 0% *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Security Enhancements: 0% *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Performance Optimization: 0% *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] SecurityService test coverage *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Error handling testing *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Security guidelines *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Error handling guide *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Security features guide *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Security audit completed *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Performance benchmarks met *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Error handling verified *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Monitoring setup *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Performance monitoring *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Error rate < 2% *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Security incident rate = 0 *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] User usage tracking performance *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Performance tuning *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Production Critical (5 task) *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **API Performance Baseline** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Database query performance analizi *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Frontend Performance** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Mobile App Performance** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] React Query performance *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Infrastructure Performance** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Elasticsearch query performance *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Nginx performance *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Error Tracking Setup** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Performance Monitoring** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Uptime Monitoring** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Uptime monitoring service *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Security Audit** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Code security review *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Dependency security scan *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Security Monitoring** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Security event logging *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Security incident response *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Payment security *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Post-launch monitoring *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Monitoring & Alerting** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Data quality monitoring *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Gün 1-2: API performance baseline *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Gün 3-4: Frontend performance *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Gün 5: Mobile app performance *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Gün 1-2: Error tracking setup *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Gün 3-4: Performance monitoring *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Performance ve scalability optimizasyonu *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Query performance %50 iyileşme *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Task 1.2:** RLS (Row Level Security) policies oluştur *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Error handling improvements *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Error handling *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Performance tests *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Task 4.3:** Performance monitoring *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Query performance monitoring *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Storage cost monitoring *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Error rate monitoring *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Performance Risk:** Yeni mimarinin performans sorunları *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Performance baseline established *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Performance validation passed *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Monitoring alerts configured *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Health check monitoring *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Error tracking ve alerting *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Security hardening *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Error-free operation *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Search Performance *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Performance Dashboard *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] `securityConfig.corsOrigin` kontrol et *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] SecuritySettings.jsx (mevcut) *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Performance optimizasyonu *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Modal Performance** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Performance metrics *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Error tracking *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Security review *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Performance review *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Production server setup *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Monitoring Setup** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Application monitoring *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Server monitoring *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Performance Optimization *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Error handling improvement *(Kaynak: TODO.md)*
+- [ ] Performance tests *(Kaynak: TODO.md)*
+- [ ] Security tests *(Kaynak: TODO.md)*
+- [ ] Application performance monitoring *(Kaynak: TODO.md)*
+- [ ] Error tracking enhancement *(Kaynak: TODO.md)*
+- [ ] Server monitoring *(Kaynak: TODO.md)*
+- [ ] Basic error handling *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Performance optimization *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Error handling tüm durumları kapsıyor *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Performance < 2s load time *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] **Error loglarını temizle** *(Kaynak: TODO_YARIN.md)*
+- [ ] **Elasticsearch query performance** *(Kaynak: TODO_YARIN.md)*
+- [ ] **Error rate** %1'in altında *(Kaynak: TODO_YARIN.md)*
+
+### Gelir ve kullanıcı artışı odaklı (66 task)
+
+- [ ] Predictive analytics *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] **Premium servisi**: Gerçek premium kontrolü *(Kaynak: AI_USAGE_SYSTEM_CHANGES.md)*
+- [ ] **Analytics**: Kullanım raporları *(Kaynak: AI_USAGE_SYSTEM_CHANGES.md)*
+- [ ] **Gelişmiş analytics**: Kullanıcı davranışları *(Kaynak: AI_USAGE_SYSTEM_CHANGES.md)*
+- [ ] Basic revenue tracking *(Kaynak: ANALYTICS_REPORT_PLAN.md)*
+- [ ] Revenue forecasting *(Kaynak: ANALYTICS_REPORT_PLAN.md)*
+- [ ] **Auth analytics** implementation *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **User behavior** analytics *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Analytics & Monitoring: 0% *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Analytics tracking *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Cache analytics *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] **Cache Analytics** - Detaylı cache raporları *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Premium status validation *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Premium upgrade flow *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Analytics dashboard *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Business Growth (8 task) *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Business Metrics Dashboard** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Revenue metrics *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Subscription Management** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Payment gateway integration *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Subscription plans design *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Premium Analytics** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Advanced user analytics *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Business intelligence dashboard *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Premium User Features** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Premium support *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **SEO Optimization** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Technical SEO audit *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Marketing Integration** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Google Analytics setup *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Email marketing setup *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Business Metrics Dashboard** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Revenue tracking *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Behavioral analytics *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Predictive Analytics** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Revenue forecasting *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Marketing campaign *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] User acquisition plan *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Real-time Analytics** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Stream analytics *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Gün 5: Business metrics dashboard *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Business logic ve analytics data separation *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Analytics Cache Partition** (`analytics:*`) *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Cache Analytics *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Analytics test sayfası kaldırılacak *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **AnalyticsDashboard.jsx** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Analytics test sayfası kaldırılacak *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **AnalyticsDashboard** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Admin paneli (Moderation, Analytics) *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Basic Analytics** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Business logic *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Advanced Analytics** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Business metrics *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Performance analytics *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Monitoring & Analytics *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Mobile-specific analytics *(Kaynak: TODO.md)*
+- [ ] User analytics *(Kaynak: TODO.md)*
+- [ ] Revenue chart *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Analytics service *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] **Mobile app'te analytics tracking test et** *(Kaynak: TODO_YARIN.md)*
+- [ ] `analyticsService.ts` - user profile mapping doğru mu? *(Kaynak: TODO_YARIN.md)*
+- [ ] **Yeni kullanıcı kaydı** → Analytics tracking *(Kaynak: TODO_YARIN.md)*
+- [ ] **Arama yapma** → Search analytics *(Kaynak: TODO_YARIN.md)*
+- [ ] `/analytics/track-behavior` endpoint çalışıyor mu? *(Kaynak: TODO_YARIN.md)*
+- [ ] **Mobile app analytics latency** *(Kaynak: TODO_YARIN.md)*
+- [ ] **Mobile app** analytics gönderiyor *(Kaynak: TODO_YARIN.md)*
+
+### Kod kalitesi ve teknik iyileştirmeler (128 task)
+
+- [ ] Cache key management interface *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] Detailed cache inspection *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] Cache pattern analysis *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] Custom cache rules *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] Cache optimization suggestions *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] Cost optimization *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] Cache configuration *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] Cache invalidation *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] Cache migration *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] **Sunucu cache**: Redis entegrasyonu *(Kaynak: AI_USAGE_SYSTEM_CHANGES.md)*
+- [ ] **Hibrit cache**: Cihaz + sunucu *(Kaynak: AI_USAGE_SYSTEM_CHANGES.md)*
+- [ ] **ML optimizasyonu**: Cache prediction *(Kaynak: AI_USAGE_SYSTEM_CHANGES.md)*
+- [ ] **A/B testing**: Farklı limitler *(Kaynak: AI_USAGE_SYSTEM_CHANGES.md)*
+- [ ] A/B testing framework *(Kaynak: ANALYTICS_REPORT_PLAN.md)*
+- [ ] **Memory optimization** *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Authentication flow testing *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Session management testing *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Offline functionality testing *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Cihaz Depolama Cache** - AsyncStorage ile kalıcı cache *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] **Sunucu Cache** - Redis ile merkezi cache *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] **Hibrit Cache** - Hem cihaz hem sunucu cache *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache API endpoint'leri oluştur *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache key namespace sistemi (`benalsam:ai:cache:`) *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache TTL (Time To Live) ayarları *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache eviction policy (LRU) *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache clustering (Redis Cluster) *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache monitoring (Redis INFO) *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache backup sistemi *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache migration tools *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Global cache sharing *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] User-specific cache *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Session-based cache *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache performance metrics *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache health monitoring *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache strategy pattern *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache synchronization *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Offline cache support *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache conflict resolution *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache versioning *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache migration tools *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] **Cache Warming** - Popüler istekleri önceden cache'le *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] **Cache Prediction** - ML ile cache hit tahmini *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] **Cache Optimization** - Otomatik cache temizleme *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] **Cache A/B Testing** - Farklı cache stratejileri test *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] **Cache Performance** - Cache performans optimizasyonu *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache hit rate grafikleri *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache size trendleri *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache performance metrics *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] User cache behavior *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache cost analysis *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Redis Commander (cache management) *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Redis Insight (cache monitoring) *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache testing tools *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache migration scripts *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache save/load functions *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache expiry logic *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache size limits *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache compression *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache statistics *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache with AI services *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache with network failures *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache with storage limits *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache with concurrent access *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache load testing *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache stress testing *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache memory usage *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache response time *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] API endpoint optimization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Load time optimization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Image optimization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Memory usage optimization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Network request optimization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Redis cache hit ratio *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Penetration testing *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Content optimization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Meta tags optimization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] A/B testing framework *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] iOS app store optimization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Android play store optimization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] App store listing optimization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Beta Testing** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Static asset optimization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Image optimization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Cache invalidation strategy *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Cache warming strategies *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Cache Management** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Cache monitoring *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Cache hit ratio optimization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Cache size management *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Cache eviction policies *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **CI/CD Pipeline** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Automated testing *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Docker orchestration *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] `AlertService` refactor *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Task 3.3:** Testing ve validation *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Index optimization *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Query cost optimization > 40% *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Elasticsearch Optimization** *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Index optimization *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Query optimization *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] **Application Optimization** *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Database query optimization *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Frontend optimization *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] **Search Cache Partition** (`search:results:*`) *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] **API Cache Partition** (`api:*`) *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] **User Cache Partition** (`user:*`) *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Memory Cache Service *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Redis Cache Service *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Cache Partitioning *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Elasticsearch Cache *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Query Optimization *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] API Response Cache *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Database Query Cache *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] **2.2** Docker compose düzeltmeleri *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] **API Optimization** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Mobile optimization *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Tablet optimization *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Desktop optimization *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **CI/CD Pipeline** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Automated testing *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Testing** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Load testing *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] User acceptance testing *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Testing *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Bundle size optimization *(Kaynak: TODO.md)*
+- [ ] Image optimization *(Kaynak: TODO.md)*
+- [ ] Shared types optimization *(Kaynak: TODO.md)*
+- [ ] Database optimization *(Kaynak: TODO.md)*
+
+### İyi olur ama kritik değil (744 task)
+
+- [ ] Web'de 2FA setup sayfası *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] Mobile'da 2FA setup sayfası *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] QR kod oluşturma ve gösterimi *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] TOTP doğrulama sistemi *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] Backup codes sistemi *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] 2FA enable/disable yönetimi *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] TOTP secret encryption *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] Backup codes encryption *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] Rate limiting *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] Session management *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] Audit logging *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] Device tracking *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] 2FA setup flow *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] TOTP verification *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] Backup codes usage *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] Recovery process *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] Rate limiting *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] Historical data charts *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] Usage patterns *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] TTL management *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] Backup/restore *(Kaynak: ADMIN_UI_CACHE_DASHBOARD_TODO.md)*
+- [ ] **Supabase entegrasyonu**: Veritabanı bağlantısı *(Kaynak: AI_USAGE_SYSTEM_CHANGES.md)*
+- [ ] **Auth sistemi**: Gerçek kullanıcı ID'leri *(Kaynak: AI_USAGE_SYSTEM_CHANGES.md)*
+- [ ] **AI model eğitimi**: Özel model *(Kaynak: AI_USAGE_SYSTEM_CHANGES.md)*
+- [ ] **Çoklu dil desteği**: İngilizce, Almanca *(Kaynak: AI_USAGE_SYSTEM_CHANGES.md)*
+- [ ] **API marketplace**: 3. parti entegrasyonlar *(Kaynak: AI_USAGE_SYSTEM_CHANGES.md)*
+- [ ] User engagement increase > 20% *(Kaynak: ANALYTICS_PRODUCTION_ENHANCEMENT_TODO.md)*
+- [ ] Conversion rate improvement > 15% *(Kaynak: ANALYTICS_PRODUCTION_ENHANCEMENT_TODO.md)*
+- [ ] Session duration increase > 25% *(Kaynak: ANALYTICS_PRODUCTION_ENHANCEMENT_TODO.md)*
+- [ ] Drop-off rate reduction > 30% *(Kaynak: ANALYTICS_PRODUCTION_ENHANCEMENT_TODO.md)*
+- [ ] Alert response time < 5 minutes *(Kaynak: ANALYTICS_PRODUCTION_ENHANCEMENT_TODO.md)*
+- [ ] False positive rate < 5% *(Kaynak: ANALYTICS_PRODUCTION_ENHANCEMENT_TODO.md)*
+- [ ] Alert coverage > 95% *(Kaynak: ANALYTICS_PRODUCTION_ENHANCEMENT_TODO.md)*
+- [ ] Incident resolution time < 30 minutes *(Kaynak: ANALYTICS_PRODUCTION_ENHANCEMENT_TODO.md)*
+- [ ] Popular pages analizi *(Kaynak: ANALYTICS_REPORT_PLAN.md)*
+- [ ] User activity metrics *(Kaynak: ANALYTICS_REPORT_PLAN.md)*
+- [ ] User journey mapping *(Kaynak: ANALYTICS_REPORT_PLAN.md)*
+- [ ] Cohort analysis *(Kaynak: ANALYTICS_REPORT_PLAN.md)*
+- [ ] Geographic analysis *(Kaynak: ANALYTICS_REPORT_PLAN.md)*
+- [ ] Feature usage tracking *(Kaynak: ANALYTICS_REPORT_PLAN.md)*
+- [ ] Churn prediction *(Kaynak: ANALYTICS_REPORT_PLAN.md)*
+- [ ] User behavior modeling *(Kaynak: ANALYTICS_REPORT_PLAN.md)*
+- [ ] **App.tsx** yeniden yapılandırma *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Auth-based routing implementasyonu *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Conditional navigation setup *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Auth loading screen ekleme *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Auth state listener setup *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **authStore.initialize()** implementasyonu *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Session restoration logic *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Token validation *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] User profile fetch *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Auth state listener setup *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **AuthGuard** component oluşturma *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **ProtectedRoute** wrapper *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **PublicRoute** wrapper *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Navigation structure güncelleme *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Token expiration handling** *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Rate limiting** implementation *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Retry mechanisms** *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Graceful degradation** *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **AuthLoadingScreen** component *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Progress indicators** implementation *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Skeleton screens** for auth *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Loading states** for all auth operations *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Network connectivity** check *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Offline indicators** *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Queue system** for offline actions *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Sync mechanism** when online *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Session timeout** handling *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Auto-logout** implementation *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Session refresh** mechanism *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Multi-device** session management *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Auth deep links** setup *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Password reset** deep linking *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Email verification** deep linking *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **2FA setup** deep linking *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Biometric authentication** (Touch ID/Face ID) *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Certificate pinning** implementation *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Session hijacking** protection *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Lazy loading** for auth components *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Bundle size** reduction *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Caching** strategies *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Authentication Flow Restructure: 0% *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Auth Initialization System: 0% *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Protected Routes Implementation: 0% *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Loading States & UX: 0% *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Offline Support: 0% *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Session Management: 0% *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Deep Linking Support: 0% *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] AuthService test coverage *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] AuthStore test coverage *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] NetworkService test coverage *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Login flow E2E *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Registration flow E2E *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Password reset E2E *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] 2FA flow E2E *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Authentication flow diagram *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] API documentation *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Login/Register guide *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Password reset guide *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] 2FA setup guide *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] All tests passing *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] User feedback collection *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Authentication success rate > 95% *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Loading time < 2 seconds *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Offline functionality working *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] User satisfaction > 4.5/5 *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Support tickets < 5% of auth-related *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] User retention improvement *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Redis sunucu kurulumu *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Redis client konfigürasyonu *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Fallback mechanism (cihaz → sunucu → API) *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] User usage tracking *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] User limits with AI generation *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] ML integration *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Documentation *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] **TODO Audit**: 20+ TODO dosyasını analiz et *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Duplicate Detection**: Tekrar eden task'ları tespit et *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Priority Matrix**: Öncelik matrisi oluştur *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Category Organization**: 5 ana kategoriye ayır *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Technical Debt (7 task) *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Nice to Have (10 task) *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Consolidated TODO**: Ana TODO listesi oluştur *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Progress Tracking**: Kanban board kur *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Response time metrics topla *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Rate limiting effectiveness *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Bundle size analysis *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Code splitting review *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] App startup time *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Database connection pooling *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Sentry integration (Admin Backend) *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Sentry integration (Admin UI) *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Sentry integration (Web App) *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Sentry integration (Mobile App) *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] New Relic setup *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] APM configuration *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Custom metrics tracking *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Alert configuration *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Health check endpoints *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] SLA tracking *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Incident response plan *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] User activity metrics *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Conversion tracking *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Real-time dashboard *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Vulnerability assessment *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Compliance Check** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] GDPR compliance audit *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] KVKK compliance audit *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Data protection review *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Privacy policy update *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Intrusion detection *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Access control audit *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Billing system *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Custom reports *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Data export features *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Advanced search filters *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Priority listing *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Enhanced messaging *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Sitemap generation *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Facebook Pixel integration *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Social media integration *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **User Onboarding** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Onboarding flow design *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Tutorial system *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Progressive disclosure *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] User engagement tracking *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] User growth metrics *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Conversion funnel analysis *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Cohort analysis *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **User Behavior Analysis** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Heatmap integration *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] User journey mapping *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] User churn prediction *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Market trend analysis *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Recommendation engine *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **App Store Preparation** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Screenshot and video creation *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] TestFlight setup (iOS) *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Google Play beta (Android) *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Beta user recruitment *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Feedback collection system *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **App Store Launch** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Launch strategy *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Service Decomposition** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Domain analysis *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Service boundaries definition *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] API design *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Data ownership mapping *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **API Gateway Implementation** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Gateway setup *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Route configuration *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Authentication/Authorization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Rate limiting *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Service Mesh Setup** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Service discovery *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Load balancing *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Circuit breaker pattern *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Distributed tracing *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **CDN Implementation** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] CDN provider selection *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Multi-level Caching** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Application-level caching *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Database query caching *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Session caching *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] GitHub Actions setup *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Automated deployment *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Rollback mechanisms *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Infrastructure as Code** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Terraform configuration *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Kubernetes setup *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Environment management *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Prometheus setup *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Grafana dashboards *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Alert configuration *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Incident management *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Real-time data processing *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Real-time dashboards *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Event streaming *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Machine Learning Integration** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Recommendation system *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Fraud detection *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] User segmentation *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Predictive modeling *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Data Warehouse** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Data lake setup *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] ETL pipeline *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Data governance *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Gün 1: TODO audit ve duplicate detection *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Gün 2: Priority matrix oluştur *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Gün 3: Category organization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Gün 4: Consolidated TODO oluştur *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Gün 5: Progress tracking setup *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Database architecture'ı endüstri standartlarına uygun hale getirmek *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Polyglot persistence pattern uygulamak *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Storage cost %30 azalma *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Development velocity %40 artış *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Data consistency %99.9 *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Task 1.1:** Supabase migration dosyalarını oluştur *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] `alert_rules` table migration *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] `alerts` table migration *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] `notification_channels` table migration *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] `user_journeys` table migration *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Alert rules access policies *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Alerts access policies *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] User data access policies *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Task 1.3:** Database triggers ve functions oluştur *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] `updated_at` trigger *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Alert status change triggers *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] User journey calculation functions *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Task 2.1:** Alert Service'i Supabase'e migrate et *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Supabase client integration *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Transaction handling *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Task 2.2:** User Journey Service'i hybrid yap *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Events ES'te kal *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Sessions Supabase'e geç *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Data sync mechanism *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Task 2.3:** API routes güncelle *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Alert routes Supabase integration *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] User journey routes hybrid approach *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Task 3.1:** Admin UI güncelle *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Alert System Dashboard Supabase integration *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] User Journey Dashboard hybrid approach *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Real-time updates *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Task 3.2:** API service güncelle *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Supabase client methods *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Hybrid data fetching *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Unit tests *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Integration tests *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Task 4.1:** Data migration scripts *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] ES'ten Supabase'e data migration *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Data validation scripts *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Rollback procedures *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Task 4.2:** Elasticsearch cleanup *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Unused indexes sil *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Storage cleanup *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Query response time < 100ms (95th percentile) *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Database connection pool utilization < 80% *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Elasticsearch cluster health = Green *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Supabase connection success rate > 99.9% *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Storage cost reduction > 30% *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Infrastructure cost reduction > 25% *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Code complexity reduction > 20% *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Bug rate reduction > 50% *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Development velocity increase > 40% *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Data Loss Risk:** Migration sırasında veri kaybı *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Downtime Risk:** Migration sırasında servis kesintisi *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Integration Risk:** Supabase-ES sync sorunları *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] **Learning Curve:** Yeni teknoloji öğrenme süresi *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Backup strategy implemented *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Rollback procedures documented *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Team training completed *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Phase 1 completed *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Phase 2 completed *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Phase 3 completed *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Phase 4 completed *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Data integrity verified *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Documentation updated *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Caching strategies *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] API response caching *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Zero-downtime deployment *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Automated rollback capability *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] 5 dakika içinde deployment *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] 99.9% uptime *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Automated backup *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Hızlı sayfa yükleme (<2s) *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Responsive design *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Intuitive interface *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] **Distributed Redis Service** (Cluster) *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] **Event-Driven Invalidation** system *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Basic Invalidation *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Fallback Strategy *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Connection Pooling *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Rate Limiting *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Alert System *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Metrics Collection *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Predictive Caching *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Geographic Caching *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Smart Invalidation *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Enterprise Features *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] `${SERVER_IP}` variable'ını düzgün kullan *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] CORS origin'leri güncelle *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] Environment variable'ları kontrol et *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] **3.1** Admin backend CORS ayarları *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] `benalsam.com:3003` ekle *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] `benalsam.com:5173` ekle *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] Test et *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] **3.2** Frontend CORS ayarları *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] Admin UI CORS ayarları *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] Web app CORS ayarları *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] Test et *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] Admin backend localhost'ta çalışıyor *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] Admin UI localhost'ta çalışıyor *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] Web app localhost'ta çalışıyor *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] Redis localhost'ta çalışıyor *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] Elasticsearch localhost'ta çalışıyor *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] Admin backend VPS'de çalışıyor *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] Admin UI VPS'de çalışıyor *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] Web app VPS'de çalışıyor *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] CORS hataları yok *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] API çağrıları başarılı *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] **Yeni route ekleme** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `/ayarlar2` route'u oluştur *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `SettingsLayout2.jsx` oluştur (responsive tasarım) *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `SettingsPage2.jsx` oluştur (mobil tarzı tek sayfa) *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Mevcut `/ayarlar` route'unu koru *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Test için geçici link ekle *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **SettingsLayout2.jsx** oluşturma *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Responsive tasarım: Desktop'ta sidebar, mobilde tek sayfa *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Desktop: Sidebar + Outlet yapısı koru *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Mobile: Tek sayfa scroll yapısı *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Breakpoint: lg (1024px) üstünde sidebar, altında scroll *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kategori bölümleri oluştur *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **SettingsPage2.jsx** (Mobil için ana sayfa) *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Mobil'deki tüm bölümleri ekle *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kategorileri organize et *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Switch component'leri ekle *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Modal'ları implement et *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Responsive: Sadece mobilde görünür *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Mevcut sayfaları koru** (Desktop için) *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] ProfileSettings.jsx (mevcut) *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] NotificationSettings.jsx (mevcut) *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] PlatformSettings.jsx (mevcut) *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] ContactSettings.jsx (mevcut) *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Test aşaması** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `/ayarlar2` route'unu test et *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Responsive tasarımı test et *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Tüm özellikleri test et *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kullanıcı geri bildirimi al *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Geçiş planı** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `/ayarlar` route'unu `/ayarlar2`'ye yönlendir *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Eski ayarlar sayfalarını kaldır *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Route'ları temizle *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Final test yap *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Modal Components** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `LanguageModal.jsx` *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `CurrencyModal.jsx` *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `LocationModal.jsx` *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `CategoryModal.jsx` *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Settings Components** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `SettingItem.jsx` *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `ToggleItem.jsx` *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `EmailInfo.jsx` *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `SummaryEmailSelector.jsx` *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Test sayfaları geçirilmeyecek** - Kaldırılacak *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Firebase test sayfası kaldırılacak *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] FCM test sayfası kaldırılacak *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **ModerationPage.jsx** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Bekleyen özellikleri listele *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Etiket yönetimi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] İçerik moderasyonu *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] AI performans metrikleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Popüler içerik analizi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kullanıcı davranış analizi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **User Preferences** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] İçerik düzeni tercihleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kategori rozetleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Acil rozetleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kullanıcı puanları *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Mesafe bilgisi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Chat Preferences** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Okundu bilgisi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Son görülme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Otomatik scroll *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Responsive breakpoint ekle (lg: 1024px) *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Desktop: Mevcut sidebar yapısını koru *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Mobile: Tek sayfa scroll yapısı ekle *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Conditional rendering: Ekran boyutuna göre içerik değiştir *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Smooth transition: Ekran boyutu değişiminde animasyon *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Hesap Bölümü** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Profil ayarları *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Güven puanı *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Güvenlik ayarları *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Bildirim tercihleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Gizlilik ayarları *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Engellenen kullanıcılar *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Sohbet Bölümü** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Sohbet ayarları *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Dil seçimi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Uygulama Bölümü** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Tema seçimi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Para birimi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Varsayılan konum *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Varsayılan kategori *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Admin paneli (koşullu) *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Görünüm Tercihleri Bölümü** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] İçerik düzeni *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kategori rozetleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Acil rozetleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kullanıcı puanları *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Mesafe bilgisi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Destek Bölümü** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Yardım *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] İletişim *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Geri bildirim *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Hakkında *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **LanguageModal** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Dil seçenekleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Seçim işlevselliği *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kaydetme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **CurrencyModal** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Para birimi seçenekleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Sembol gösterimi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kaydetme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **LocationModal** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] İl seçimi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] İlçe seçimi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kaydetme işlevi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **CategoryModal** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kategori listesi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] İkon gösterimi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Seçim işlevi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Test sayfaları kaldırılacak** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Firebase test sayfası kaldırılacak *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] FCM test sayfası kaldırılacak *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **ModerationPage** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Bekleyen özellikler *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Etiket yönetimi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] İçerik moderasyonu *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] AI performans metrikleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Popüler içerik analizi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kullanıcı davranış analizi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **User Preferences Context** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] İçerik düzeni tercihleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Görünüm tercihleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Local storage entegrasyonu *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **E-posta Doğrulama Gösterimi** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] E-posta durumu *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Doğrulama badge'i *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Doğrulama işlevi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Haptic Feedback Simülasyonu** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Web için haptic feedback *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Touch feedback *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Visual feedback *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **User Preferences Store** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Zustand store oluştur *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Local storage entegrasyonu *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Real-time sync *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Settings Store** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Ayarlar state yönetimi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Modal state yönetimi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Loading state yönetimi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Settings API** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Ayarlar kaydetme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Ayarlar yükleme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Real-time güncelleme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Settings API** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Ayarlar kaydetme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Ayarlar yükleme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Real-time güncelleme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Switch Component** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Toggle functionality *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Loading state *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Disabled state *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Modal Component** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Backdrop *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Animation *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Close functionality *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Setting Item Component** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Icon support *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Subtitle *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Action button *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `/ayarlar2` route'u oluşturma *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] SettingsLayout2.jsx oluşturma *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Responsive tasarım implementasyonu *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Temel kategori bölümlerini ekleme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] SettingsPage2.jsx oluşturma *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Modal bileşenlerini oluşturma *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Switch/Toggle bileşenleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Form entegrasyonu *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `/ayarlar2` route'unu test etme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Responsive tasarımı test etme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kullanıcı geri bildirimi alma *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Geçiş planını hazırlama *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] User preferences *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] E-posta doğrulama *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Haptic feedback *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] `/ayarlar` → `/ayarlar2` yönlendirme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Eski sayfaları kaldırma *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Route temizleme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Final testler *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Tüm mobil özellikler web'de mevcut *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Test sayfaları çalışıyor *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Admin paneli erişilebilir *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Ayarlar kaydediliyor ve yükleniyor *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Sayfa yükleme süresi < 2 saniye *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Modal açılma süresi < 300ms *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Ayarlar kaydetme süresi < 1 saniye *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Responsive tasarım *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Smooth animasyonlar *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Intuitive navigation *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Consistent styling *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **State Management Complexity** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **API Integration** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Information Overload** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Navigation Complexity** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Caching Strategy** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Redis caching *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Client-side caching *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] CDN setup *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Response compression *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Pagination *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Rate limiting *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] User tracking *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Health Checks** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] API health endpoints *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Database health *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Infrastructure health *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Unit Tests** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] API endpoints *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Utility functions *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Integration Tests** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Database operations *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] External services *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] API integration *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Mobile Settings to Web** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Settings synchronization *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Cross-platform consistency *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Responsive Design** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Real-time Notifications** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] WebSocket implementation *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Push notifications *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] User behavior analysis *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Code Review** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Documentation review *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Environment Setup** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] SSL certificate *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Domain configuration *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Backup Strategy** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Database backup *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] File backup *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Configuration backup *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Automated deployment *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Rollback strategy *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Alert system *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Smoke tests *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Documentation** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] API documentation *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] User documentation *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Maintenance documentation *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] User Experience *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Advanced Features *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Pre-Deployment *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Deployment *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Post-Deployment *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Header**: Butonlar mobilde çok büyük/küçük *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **Sidebar**: Mobilde açılma/kapanma animasyonları *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **CategoriesPage**: *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Search bar mobilde taşıyor *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Stats cards mobilde 2x2 grid olmalı *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] View mode butonları çok küçük *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Table mobilde okunmuyor *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **CategoryMenu**: *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Action butonları mobilde dikey sıralanmalı *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Chip'ler mobilde çok büyük *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Text overflow sorunları *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **CategoryBreadcrumb**: *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Mobilde yatay scroll gerekli *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Chip'ler çok büyük *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **CategoryDetailPage**: *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Header butonları mobilde dikey olmalı *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Grid layout mobilde tek sütun olmalı *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **CategoryEditPage**: *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Form alanları mobilde taşıyor *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Preview section mobilde çok büyük *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **CategoryAttributesPage**: *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Dialog mobilde tam ekran olmalı *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Form alanları responsive değil *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **IconSelector**: *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Grid mobilde 3x3 olmalı *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Icon'lar çok büyük *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **Layout**: Sidebar tablet'te overlay olmalı *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **Grid**: Tablet'te 2 sütun layout *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **Tables**: Tablet'te yatay scroll gerekli *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **Dialogs**: Tablet'te daha büyük margin *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **Sidebar**: Kalıcı sidebar *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **Content**: Tam genişlik kullanımı *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] **Tables**: Tam genişlik tablo görünümü *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Header responsive düzeni *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Stats cards grid sistemi *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Search ve view mode responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Table responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] CategoryMenu responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Breadcrumb responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Header butonları responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Info cards responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Subcategories list responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Attributes list responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Form responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Preview section responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Icon selector responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Color picker responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Dialog responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Form fields responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Options list responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Preview section responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Dialog responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Grid responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Search responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Icon preview responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] iPhone SE (375px) *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] iPhone 12 (390px) *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] iPhone 12 Pro Max (428px) *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Samsung Galaxy S21 (360px) *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] iPad (768px) *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] iPad Pro (1024px) *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Samsung Galaxy Tab (800px) *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Laptop (1366px) *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Desktop (1920px) *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] 4K Monitor (2560px) *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Yatay scroll yok *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Touch target'lar minimum 44px *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Font boyutları okunabilir *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Butonlar tıklanabilir *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Form alanları kullanılabilir *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Dialog'lar açılabilir *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Navigation çalışıyor *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Content taşmıyor *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Mobilde hızlı yükleme *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Smooth scroll *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Touch responsive *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Memory kullanımı optimal *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Mobile admin paneli *(Kaynak: TODO.md)*
+- [ ] Push notification sistemi *(Kaynak: TODO.md)*
+- [ ] Offline capability *(Kaynak: TODO.md)*
+- [ ] Caching strategies *(Kaynak: TODO.md)*
+- [ ] Lazy loading implementation *(Kaynak: TODO.md)*
+- [ ] Service layer standardization *(Kaynak: TODO.md)*
+- [ ] TypeScript strict mode *(Kaynak: TODO.md)*
+- [ ] Mobile app tests *(Kaynak: TODO.md)*
+- [ ] E2E tests *(Kaynak: TODO.md)*
+- [ ] API documentation updates *(Kaynak: TODO.md)*
+- [ ] Code examples *(Kaynak: TODO.md)*
+- [ ] Troubleshooting guides *(Kaynak: TODO.md)*
+- [ ] Video tutorials *(Kaynak: TODO.md)*
+- [ ] CDN implementation *(Kaynak: TODO.md)*
+- [ ] Load balancing *(Kaynak: TODO.md)*
+- [ ] Auto-scaling *(Kaynak: TODO.md)*
+- [ ] Chart.js veya Recharts integration *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] User growth chart *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Listing activity chart *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Geographic distribution *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] API Client oluştur *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Environment config *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Admin auth service *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Listing service hibrit *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Admin management service *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Dashboard components *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Basic charts *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Moderation tools *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] User management *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Role system *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Unit tests *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Integration tests *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] API client %100 test coverage *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Mobile responsive design *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Admin login/logout çalışıyor *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Dashboard verileri doğru *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Moderation işlemleri çalışıyor *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] User management tam fonksiyonel *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] JWT token validation *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Role-based access control *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] CORS configuration *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Input validation *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] **Admin backend'i yeniden başlat** (TypeScript hatası düzeltildi) *(Kaynak: TODO_YARIN.md)*
+- [ ] **Port 3002'de çalıştığını doğrula** (`lsof -i :3002`) *(Kaynak: TODO_YARIN.md)*
+- [ ] **Admin UI'da live user activity test et** *(Kaynak: TODO_YARIN.md)*
+- [ ] **Elasticsearch'te user profile verilerini kontrol et** *(Kaynak: TODO_YARIN.md)*
+- [ ] **User profile verilerinin doğru gönderildiğini doğrula** *(Kaynak: TODO_YARIN.md)*
+- [ ] **Admin panel'de gerçek kullanıcı adı görünüyor mu kontrol et** *(Kaynak: TODO_YARIN.md)*
+- [ ] **Tüm servislerin çalıştığını kontrol et** (pm2 status) *(Kaynak: TODO_YARIN.md)*
+- [ ] **Network bağlantılarını test et** *(Kaynak: TODO_YARIN.md)*
+- [ ] `useAuthStore` - user data doğru alınıyor mu? *(Kaynak: TODO_YARIN.md)*
+- [ ] Network requests - admin backend'e ulaşıyor mu? *(Kaynak: TODO_YARIN.md)*
+- [ ] **İlan oluşturma** → User behavior tracking *(Kaynak: TODO_YARIN.md)*
+- [ ] **Mesaj gönderme** → Activity tracking *(Kaynak: TODO_YARIN.md)*
+- [ ] **Live User Activity** sayfası çalışıyor mu? *(Kaynak: TODO_YARIN.md)*
+- [ ] **User profile** verileri görünüyor mu? *(Kaynak: TODO_YARIN.md)*
+- [ ] **Real-time updates** çalışıyor mu? *(Kaynak: TODO_YARIN.md)*
+- [ ] **Elasticsearch** bağlantısı stabil mi? *(Kaynak: TODO_YARIN.md)*
+- [ ] **User profile** verileri doğru kaydediliyor mu? *(Kaynak: TODO_YARIN.md)*
+- [ ] **User profiles** doğru mu? *(Kaynak: TODO_YARIN.md)*
+- [ ] **Authentication** çalışıyor mu? *(Kaynak: TODO_YARIN.md)*
+- [ ] **RLS policies** doğru mu? *(Kaynak: TODO_YARIN.md)*
+- [ ] **Admin backend port 3002** erişim sorunu *(Kaynak: TODO_YARIN.md)*
+- [ ] **Mobile app network** bağlantı hatası *(Kaynak: TODO_YARIN.md)*
+- [ ] **User profile** verilerinin yanlış mapping'i *(Kaynak: TODO_YARIN.md)*
+- [ ] **Real-time updates** çalışmıyor *(Kaynak: TODO_YARIN.md)*
+- [ ] **Admin backend restart** (pm2 restart admin-backend) *(Kaynak: TODO_YARIN.md)*
+- [ ] **Network configuration** kontrolü *(Kaynak: TODO_YARIN.md)*
+- [ ] **User data mapping** düzeltme *(Kaynak: TODO_YARIN.md)*
+- [ ] **WebSocket connection** kontrolü *(Kaynak: TODO_YARIN.md)*
+- [ ] **CPU usage** kontrol et *(Kaynak: TODO_YARIN.md)*
+- [ ] **Memory usage** kontrol et *(Kaynak: TODO_YARIN.md)*
+- [ ] **Disk space** kontrol et *(Kaynak: TODO_YARIN.md)*
+- [ ] **Network bandwidth** kontrol et *(Kaynak: TODO_YARIN.md)*
+- [ ] **Admin backend response time** *(Kaynak: TODO_YARIN.md)*
+- [ ] **Real-time update frequency** *(Kaynak: TODO_YARIN.md)*
+- [ ] **Admin backend** port 3002'de çalışıyor *(Kaynak: TODO_YARIN.md)*
+- [ ] **Admin UI** live user activity gösteriyor *(Kaynak: TODO_YARIN.md)*
+- [ ] **User profile** verileri doğru görünüyor *(Kaynak: TODO_YARIN.md)*
+- [ ] **Real-time updates** çalışıyor *(Kaynak: TODO_YARIN.md)*
+- [ ] **Response time** 2 saniyenin altında *(Kaynak: TODO_YARIN.md)*
+- [ ] **Data accuracy** %100 *(Kaynak: TODO_YARIN.md)*
+- [ ] **System uptime** %99.9 *(Kaynak: TODO_YARIN.md)*
+
+### Gelecek planlaması ve araştırma (1 task)
+
+- [ ] Future Planning (5 task) *(Kaynak: CTO_ROADMAP_TODO.md)*
+
+## ⚠️ **DUPLICATE TASK'LAR**
+
+- [ ] Rate limiting *(Kaynak: 2FA_IMPLEMENTATION_TODO.md)*
+- [ ] Auth state listener setup *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] **Performance monitoring** *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Performance monitoring *(Kaynak: AUTHENTICATION_IMPROVEMENT_TODO.md)*
+- [ ] Cache migration tools *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] Cache performance metrics *(Kaynak: CACHE_SYSTEM_TODO.md)*
+- [ ] **Performance Monitoring** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] User activity metrics *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Business Metrics Dashboard** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Cohort analysis *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] User journey mapping *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] A/B testing framework *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] **Predictive Analytics** *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Revenue forecasting *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Rate limiting *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Image optimization *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Alert configuration *(Kaynak: CTO_ROADMAP_TODO.md)*
+- [ ] Error handling *(Kaynak: DATABASE_ARCHITECTURE_OPTIMIZATION_TODO.md)*
+- [ ] Index optimization *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Caching strategies *(Kaynak: ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md)*
+- [ ] Query Optimization *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Rate Limiting *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Cache Analytics *(Kaynak: ENTERPRISE_CACHE_SYSTEM_TODO.md)*
+- [ ] Test et *(Kaynak: ENVIRONMENT_CONFIG_TODO.md)*
+- [ ] Kategori rozetleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Acil rozetleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kullanıcı puanları *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Mesafe bilgisi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kaydetme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Firebase test sayfası kaldırılacak *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] FCM test sayfası kaldırılacak *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Analytics test sayfası kaldırılacak *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Etiket yönetimi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] İçerik moderasyonu *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **AnalyticsDashboard** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] AI performans metrikleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Popüler içerik analizi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Kullanıcı davranış analizi *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] İçerik düzeni tercihleri *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Local storage entegrasyonu *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] **Settings API** *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Ayarlar kaydetme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Ayarlar yükleme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Real-time güncelleme *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] SettingsLayout2.jsx oluşturma *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] User preferences *(Kaynak: MOBILE_SETTINGS_TO_WEB_TODO.md)*
+- [ ] Rate limiting *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Unit Tests** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Integration Tests** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] API integration *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Responsive Design** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] User behavior analysis *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **CI/CD Pipeline** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Automated testing *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Automated deployment *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Monitoring Setup** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Alert system *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] **Documentation** *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] API documentation *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Testing *(Kaynak: PRODUCTION_READY_TODO.md)*
+- [ ] Preview section responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Dialog responsive'liği *(Kaynak: RESPONSIVE_TODO.md)*
+- [ ] Image optimization *(Kaynak: TODO.md)*
+- [ ] Caching strategies *(Kaynak: TODO.md)*
+- [ ] Performance tests *(Kaynak: TODO.md)*
+- [ ] Error tracking enhancement *(Kaynak: TODO.md)*
+- [ ] Server monitoring *(Kaynak: TODO.md)*
+- [ ] CDN implementation *(Kaynak: TODO.md)*
+- [ ] Load balancing *(Kaynak: TODO.md)*
+- [ ] Unit tests *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Integration tests *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] Performance optimization *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [ ] **Elasticsearch query performance** *(Kaynak: TODO_YARIN.md)*
+
+---
+
+## 🚀 **SONRAKI ADIMLAR**
+
+1. **Duplicate'ları temizle** - Aynı task'ları birleştir
+2. **Öncelik sıralaması** - Production Critical'ları önce yap
+3. **Progress tracking** - Kanban board kur
+4. **Regular review** - Haftalık TODO review
+
+---
+
+*Generated on: 2025-08-11T20:34:28.878Z*
