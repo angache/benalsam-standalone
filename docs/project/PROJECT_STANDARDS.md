@@ -82,6 +82,22 @@ VITE_ELASTICSEARCH_URL=http://209.227.228.96:9200
 - Hassas bilgiler `.env` dosyasında (git'e commit edilmez)
 - VPS IP adresleri environment'da tanımlı
 
+### **Mobile Environment Özel Kuralları**
+```bash
+# ❌ YANLIŞ - Mobile'da localhost çalışmaz
+EXPO_PUBLIC_ADMIN_BACKEND_URL=http://localhost:3002
+
+# ✅ DOĞRU - Mobile için local IP kullan
+EXPO_PUBLIC_ADMIN_BACKEND_URL=http://192.168.1.6:3002
+# veya
+EXPO_PUBLIC_ADMIN_BACKEND_URL=http://10.0.0.1:3002
+```
+
+**⚠️ ÖNEMLİ:** React Native/Expo uygulamalarında `localhost` çalışmaz. 
+- **Local development**: Local IP adresi kullan (192.168.x.x, 10.0.x.x)
+- **Production**: VPS IP adresi kullan (209.227.228.96)
+- **Emulator**: `10.0.2.2` kullan (Android emulator için)
+
 ---
 
 ## 🐳 **Docker Standartları**
