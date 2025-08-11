@@ -19,7 +19,6 @@
     "audit": "npm audit && npm run security-audit"
   },
   "dependencies": {
-    "benalsam-shared-types": "^1.0.0",
     "@emotion/is-prop-valid": "^1.2.1",
     "@faker-js/faker": "^8.4.1",
     "@radix-ui/react-alert-dialog": "^1.0.5",
@@ -42,6 +41,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "benalsam-shared-types": "^1.0.1",
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
