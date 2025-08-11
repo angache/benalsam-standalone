@@ -1,12 +1,79 @@
 // ===========================
-// RE-EXPORT SHARED TYPES
+// ADMIN-UI SPECIFIC TYPES
 // ===========================
 
-// Re-export all types from shared-types package
-export * from 'benalsam-shared-types';
+// Basic types for Admin UI
+export interface AdminUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
-// Import AdminUser type specifically to avoid TypeScript errors
-import type { AdminUser } from 'benalsam-shared-types';
+export interface Listing {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  status: string;
+  userId: string;
+  category: string;
+  images: string[];
+  location: {
+    province: string;
+    district: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ListingStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'SOLD' | 'EXPIRED';
+
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
+}
+
+export interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface QueryFilters {
+  search?: string;
+  status?: string;
+  category?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export interface AnalyticsEvent {
+  id: string;
+  type: string;
+  userId?: string;
+  data: any;
+  timestamp: string;
+}
+
+export type AnalyticsEventType = 'PAGE_VIEW' | 'CLICK' | 'SEARCH' | 'LOGIN' | 'LOGOUT';
 
 // ===========================
 // ADMIN-UI SPECIFIC TYPES
