@@ -22,6 +22,12 @@ export default defineConfig({
 			interval: 1000, // 1 saniye aralıklarla kontrol et
 		},
 	},
+	preview: {
+		host: '0.0.0.0',
+		port: 5173,
+		cors: true,
+		strictPort: true,
+	},
 	resolve: {
 		extensions: ['.jsx', '.js', '.tsx', '.ts', '.json'],
 		alias: {

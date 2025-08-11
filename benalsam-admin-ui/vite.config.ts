@@ -29,6 +29,12 @@ export default defineConfig({
       interval: 1000, // 1 saniye aralıklarla kontrol et
     }
   },
+  preview: {
+    port: 3003,
+    host: '0.0.0.0',
+    strictPort: true,
+    cors: true,
+  },
   build: {
     outDir: 'dist',
     sourcemap: true,

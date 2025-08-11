@@ -1,6 +1,7 @@
 export default {
   name: 'benalsam-admin-ui',
-  script: 'dist/index.js',
+  script: 'npm',
+  args: 'run preview',
   instances: 1,
   exec_mode: 'fork',
   env: {
