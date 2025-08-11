@@ -22,6 +22,7 @@ import AlertSystemPage from './pages/AlertSystemPage';
 import SessionAnalyticsPage from './pages/SessionAnalyticsPage';
 import SessionJourneyPage from './pages/SessionJourneyPage';
 import CacheDashboardPage from './pages/CacheDashboardPage';
+import SentryDashboardPage from './pages/SentryDashboardPage';
 import { useAuthStore } from './stores/authStore';
 import { CustomThemeProvider } from './contexts/ThemeContext';
 
@@ -248,6 +249,16 @@ function App() {
                 <ProtectedRoute>
                   <Layout>
                     <CacheDashboardPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sentry-dashboard"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <SentryDashboardPage />
                   </Layout>
                 </ProtectedRoute>
               }

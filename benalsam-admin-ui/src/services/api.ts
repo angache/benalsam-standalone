@@ -679,5 +679,26 @@ export const apiService = {
             async checkAlertConditions(): Promise<any> {
               const response = await apiClient.post('/alerts/check');
               return response.data;
+            },
+
+            // Sentry Integration
+            async getSentryMetrics(timeRange: string = '24h'): Promise<any> {
+              const response = await apiClient.get(`/sentry/metrics?timeRange=${timeRange}`);
+              return response.data;
+            },
+
+            async getSentryErrors(timeRange: string = '24h'): Promise<any> {
+              const response = await apiClient.get(`/sentry/errors?timeRange=${timeRange}`);
+              return response.data;
+            },
+
+            async getSentryPerformance(timeRange: string = '24h'): Promise<any> {
+              const response = await apiClient.get(`/sentry/performance?timeRange=${timeRange}`);
+              return response.data;
+            },
+
+            async getSentryReleases(): Promise<any> {
+              const response = await apiClient.get('/sentry/releases');
+              return response.data;
             }
           }; 

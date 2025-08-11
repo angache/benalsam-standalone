@@ -4,6 +4,8 @@ import { config } from 'dotenv';
 config();
 
 import express from 'express';
+import { initializeSentry, errorHandler as sentryErrorHandler } from './config/sentry';
+import { performanceMiddleware } from './middleware/performanceMonitor';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -22,6 +24,7 @@ import elasticsearchRoutes from './routes/elasticsearch';
 import adminManagementRoutes from './routes/admin-management';
 import analyticsRoutes from './routes/analytics';
 import performanceRoutes from './routes/performance';
+import sentryRoutes from './routes/sentry';
 import userJourneyRoutes from './routes/userJourney';
 import analyticsAlertsRoutes from './routes/analyticsAlerts';
 import alertRoutes from './routes/alerts';
@@ -40,6 +43,7 @@ import smartInvalidationRoutes from './routes/smartInvalidation';
 import cacheCompressionRoutes from './routes/cacheCompression';
 import rateLimitRoutes from './routes/rateLimitRoutes';
 import twoFactorRoutes from './routes/twoFactor';
+import sentryTestRoutes from './routes/sentry-test';
 
 // Import services
 import { AdminElasticsearchService } from './services/elasticsearchService';
@@ -57,6 +61,12 @@ import logger from './config/logger';
 const app = express();
 // 🚀 Hot reload test - bu yorum değişikliği otomatik yansımalı
 const PORT = process.env.PORT || 3002;
+
+// Initialize Sentry (must be first middleware)
+initializeSentry(app);
+
+// Performance monitoring middleware (must be early)
+app.use(performanceMiddleware);
 
 // Initialize Supabase client
 export const supabase = createClient(
@@ -172,6 +182,11 @@ app.use('/api/v1/smart-invalidation', smartInvalidationRoutes); // Smart Invalid
 app.use('/api/v1/cache-compression', cacheCompressionRoutes); // Cache Compression sistemi aktif edildi
 app.use('/api/v1/rate-limit', rateLimitRoutes);
 app.use('/api/v1/2fa', twoFactorRoutes); // Cross-Platform Rate Limiting sistemi aktif edildi
+app.use('/api/v1/sentry-test', sentryTestRoutes); // Sentry test routes
+app.use('/api/v1/performance', performanceRoutes); // Performance monitoring routes
+app.use('/api/v1/sentry', sentryRoutes); // Sentry dashboard routes
+
+// Sentry error handler is now integrated into the main error handler
 
 // Global error handler
 app.use(errorHandler);

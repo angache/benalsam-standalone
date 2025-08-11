@@ -1,12 +1,47 @@
 import { supabase } from '@/lib/supabaseClient';
-import { AnalyticsEventType } from 'benalsam-shared-types';
-import type { 
-  AnalyticsEvent as StandardizedAnalyticsEvent, 
-  AnalyticsUser, 
-  AnalyticsSession, 
-  AnalyticsDevice, 
-  AnalyticsContext 
-} from 'benalsam-shared-types';
+
+// Local type definitions since benalsam-shared-types is now an npm package
+const AnalyticsEventType = {
+  PAGE_VIEW: 'page_view',
+  USER_ACTION: 'user_action',
+  ERROR: 'error',
+  PERFORMANCE: 'performance',
+  SESSION_START: 'session_start',
+  SESSION_END: 'session_end'
+} as const;
+
+interface AnalyticsEvent {
+  event_type: string;
+  event_data: Record<string, any>;
+  session_id: string;
+  created_at?: string;
+}
+
+interface AnalyticsUser {
+  id: string;
+  email?: string;
+  role?: string;
+}
+
+interface AnalyticsSession {
+  id: string;
+  user_id: string;
+  started_at: string;
+  ended_at?: string;
+}
+
+interface AnalyticsDevice {
+  type: string;
+  browser: string;
+  os: string;
+  screen_resolution: string;
+}
+
+interface AnalyticsContext {
+  url: string;
+  referrer?: string;
+  user_agent: string;
+}
 
 // Legacy event interface for backward compatibility
 interface AnalyticsEvent {
@@ -238,9 +273,9 @@ export const trackAnalyticsEvent = async (
     };
 
     // Create standardized analytics event (KVKK compliant - no user data)
-    const analyticsEvent: StandardizedAnalyticsEvent = {
+    const analyticsEvent: AnalyticsEvent = {
       event_id: `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      event_name: AnalyticsEventType[eventName],
+              event_name: AnalyticsEventType[eventName as keyof typeof AnalyticsEventType] || eventName,
       event_timestamp: new Date().toISOString(),
       event_properties: eventProperties,
       user: undefined, // KVKK: No user data in analytics

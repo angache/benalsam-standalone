@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import logger from '../config/logger';
+import { captureException } from '../config/sentry';
 
 export interface AppError extends Error {
   status?: number;
@@ -47,6 +48,22 @@ export const errorHandler = (
     },
     timestamp: new Date().toISOString()
   });
+
+  // Capture error in Sentry (only for non-operational errors or 5xx errors)
+  if (!err.isOperational || (error.status && error.status >= 500)) {
+    captureException(err, {
+      request: {
+        method: req.method,
+        url: req.url,
+        ip: req.ip,
+        userAgent: req.get('User-Agent')
+      },
+      user: (req as any).user ? {
+        id: (req as any).user.id,
+        email: (req as any).user.email
+      } : undefined
+    });
+  }
 
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {

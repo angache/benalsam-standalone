@@ -27,6 +27,7 @@ import {
   Route,
   Bell,
   HardDrive,
+  Bug,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
@@ -137,6 +138,13 @@ const navigationItems = [
     title: 'Alert System',
     path: '/alerts',
     icon: Bell,
+    permission: PERMISSIONS.ANALYTICS_VIEW,
+  },
+  {
+    id: 'sentry-dashboard',
+    title: 'Sentry Dashboard',
+    path: '/sentry-dashboard',
+    icon: Bug,
     permission: PERMISSIONS.ANALYTICS_VIEW,
   },
   {
