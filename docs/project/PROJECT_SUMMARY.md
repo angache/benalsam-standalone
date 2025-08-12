@@ -165,6 +165,25 @@ admin-backend/
 - `GET /api/v1/performance/endpoint/:endpoint` - Endpoint-specific stats
 - `POST /api/v1/sentry-test/generate-error` - Test error generation
 
+#### 🏥 Health Check Endpoints
+- `GET /api/v1/health` - Basic health check
+- `GET /api/v1/health/detailed` - Detailed health information
+- `GET /api/v1/health/api` - API health check
+- `GET /api/v1/health/database` - Database health check
+- `GET /api/v1/health/redis` - Redis health check
+- `GET /api/v1/health/elasticsearch` - Elasticsearch health check
+- `GET /api/v1/health/memory` - Memory health check
+- `GET /api/v1/health/disk` - Disk health check
+- `GET /api/v1/health/uptime` - Uptime information
+- `GET /api/v1/health/sla` - SLA monitoring
+
+#### 🔄 Hybrid Monitoring Endpoints
+- `GET /api/v1/hybrid-monitoring/overview` - Hybrid monitoring overview
+- `GET /api/v1/hybrid-monitoring/error-breakdown` - Error classification breakdown
+- `GET /api/v1/hybrid-monitoring/cost-analysis` - Cost analysis
+- `GET /api/v1/hybrid-monitoring/system-comparison` - System comparison
+- `POST /api/v1/hybrid-monitoring/test-classification` - Test error classification
+
 ### 🎨 Admin UI (React + Material-UI + Zustand)
 
 #### 📦 Teknoloji Stack
@@ -220,6 +239,12 @@ admin-ui/
   - Error Analizi (Error Analysis)
   - Maliyet Analizi (Cost Analysis)
   - Sistem Karşılaştırması (System Comparison)
+- **Health Check Dashboard**: Kapsamlı sistem sağlığı monitoring
+  - Genel Bakış (Overview) - Health score ve grafikler
+  - Servis Detayları (Service Details) - Detaylı servis durumları ve öneri sistemi
+  - Uptime - Sistem çalışma süresi
+  - SLA - Service Level Agreement
+  - Health Analysis & Recommendations - Critical issues, performance warnings, healthy services
 
 ---
 
@@ -274,6 +299,111 @@ admin-ui/
    - Browser/device breakdown
    - Geographic distribution
    - User impact analysis
+
+---
+
+## 🏥 Health Check System - Comprehensive System Health Monitoring
+
+### 🎯 Health Check System Özellikleri
+
+#### 📊 Core Monitoring Services
+1. **API Health Monitoring**
+   - Endpoint availability tracking
+   - Response time monitoring
+   - Active connections tracking
+   - Request rate analysis
+
+2. **Database Health Monitoring**
+   - PostgreSQL connection health
+   - Query performance tracking
+   - Connection pool monitoring
+   - Data integrity checks
+
+3. **Redis Health Monitoring**
+   - Connection status tracking
+   - Memory usage monitoring
+   - Performance metrics
+   - Keyspace analysis
+
+4. **Elasticsearch Health Monitoring**
+   - Cluster health status
+   - Search performance tracking
+   - Index health monitoring
+   - Shard allocation status
+
+5. **Memory Health Monitoring**
+   - Heap usage tracking
+   - Memory leak detection
+   - Performance degradation alerts
+   - Resource optimization
+
+6. **Disk Health Monitoring**
+   - Disk space monitoring
+   - File system health
+   - I/O performance tracking
+   - Storage optimization
+
+#### 🎯 Health Check Dashboard Features
+1. **Overall Health Score**
+   - Progress bar ile sağlık puanı
+   - Real-time health calculation
+   - Visual health indicators
+   - Trend analysis
+
+2. **Service Details Table**
+   - Detaylı servis durumları
+   - Response time tracking
+   - Last check timestamps
+   - Error details display
+
+3. **Uptime Monitoring**
+   - System uptime tracking
+   - Start time recording
+   - Current time display
+   - Uptime formatting
+
+4. **SLA Monitoring**
+   - Service Level Agreement tracking
+   - Critical services monitoring
+   - SLA target comparison
+   - Performance metrics
+
+#### 🚀 Health Analysis & Recommendations System
+1. **Critical Issues Detection**
+   - Unhealthy service identification
+   - High response time alerts
+   - Service failure detection
+   - Priority-based categorization
+
+2. **Performance Warnings**
+   - Slow service detection
+   - Response time thresholds
+   - Performance degradation alerts
+   - Optimization suggestions
+
+3. **Service-Specific Recommendations**
+   - **Database Issues**: Connection pool optimization, query optimization, disk space verification
+   - **Redis Issues**: Memory usage checks, connection limits, network connectivity
+   - **Elasticsearch Issues**: Cluster health, shard allocation, disk space, JVM heap
+   - **General Issues**: Service restart, log checking, configuration verification
+
+4. **Healthy Services Monitoring**
+   - Optimal performance tracking
+   - Response time monitoring
+   - Service status confirmation
+   - Performance metrics
+
+#### 📊 Health Check API Endpoints
+- `GET /api/v1/health` - Basic health check
+- `GET /api/v1/health/detailed` - Detailed health information
+- `GET /api/v1/health/api` - API health check
+- `GET /api/v1/health/database` - Database health check
+- `GET /api/v1/health/redis` - Redis health check
+- `GET /api/v1/health/elasticsearch` - Elasticsearch health check
+- `GET /api/v1/health/memory` - Memory health check
+- `GET /api/v1/health/disk` - Disk health check
+- `GET /api/v1/health/uptime` - Uptime information
+- `GET /api/v1/health/sla` - SLA monitoring
 
 ---
 
