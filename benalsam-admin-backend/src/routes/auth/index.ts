@@ -1,12 +1,13 @@
 import { Router, IRouter } from 'express';
 import { AuthController } from '../../controllers/authController';
 import { authMiddleware, requireRole } from '../../middleware/auth';
+import { validateLoginInput } from '../../middleware/validation';
 import { AdminRole } from '../../types/admin-types';
 
 const router: IRouter = Router();
 
 // Public routes
-router.post('/login', AuthController.login);
+router.post('/login', validateLoginInput, AuthController.login);
 router.post('/refresh-token', AuthController.refreshToken);
 
 // Protected routes

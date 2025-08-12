@@ -781,5 +781,30 @@ export const apiService = {
     async getDiskHealth(): Promise<any> {
       const response = await apiClient.get('/health/disk');
       return response.data;
+    },
+
+    // Security API Methods
+    async getSecurityStats(): Promise<any> {
+      const response = await apiClient.get('/security/stats');
+      return response.data;
+    },
+
+    async getSecuritySummary(): Promise<any> {
+      const response = await apiClient.get('/security/summary');
+      return response.data;
+    },
+
+    async getSecurityEvents(): Promise<any> {
+      const response = await apiClient.get('/security/events');
+      return response.data;
+    },
+
+    async getSuspiciousIPs(): Promise<any> {
+      const response = await apiClient.get('/security/suspicious-ips');
+      return response.data;
+    },
+
+    async clearOldSecurityEvents(): Promise<void> {
+      await apiClient.delete('/security/clear-old-events');
     }
           }; 

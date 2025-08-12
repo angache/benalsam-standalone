@@ -196,14 +196,16 @@ export const securityMonitoringMiddleware = (req: Request, res: Response, next: 
     userAgent && pattern.test(userAgent)
   );
 
-  // Suspicious request patterns
+  // Suspicious request patterns - daha spesifik ve doğru
   const suspiciousEndpoints = [
-    /admin/i,
-    /wp-admin/i,
-    /phpmyadmin/i,
-    /\.env/i,
-    /\.git/i,
-    /\.sql/i
+    /^\/wp-admin$/i,        // Sadece /wp-admin
+    /^\/phpmyadmin$/i,      // Sadece /phpmyadmin  
+    /^\/\.env$/i,           // Sadece /.env
+    /^\/\.git/i,            // /.git ile başlayan
+    /^\/\.sql$/i,           // Sadece /.sql
+    /^\/admin$/i,           // Sadece /admin (API değil)
+    /^\/wp-admin\/login$/i, // WordPress login
+    /^\/phpmyadmin\/index\.php$/i, // PHPMyAdmin
   ];
 
   const isSuspiciousEndpoint = suspiciousEndpoints.some(pattern => 

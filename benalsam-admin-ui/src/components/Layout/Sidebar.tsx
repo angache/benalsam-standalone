@@ -30,6 +30,7 @@ import {
   Bug,
   BarChart,
   Heart,
+  Shield as SecurityIcon,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
@@ -164,11 +165,18 @@ const navigationItems = [
     permission: PERMISSIONS.ANALYTICS_VIEW,
   },
   {
+    id: 'security-dashboard',
+    title: 'Security Dashboard',
+    path: '/security-dashboard',
+    icon: SecurityIcon,
+    permission: PERMISSIONS.ADMINS_VIEW,
+  },
+  {
     id: 'settings',
     title: 'Ayarlar',
     path: '/settings',
     icon: Settings,
-    permission: PERMISSIONS.SETTINGS_VIEW,
+    permission: PERMISSIONS.ANALYTICS_VIEW,
   },
 ];
 

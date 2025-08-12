@@ -6,6 +6,7 @@ import { LoginDto, AdminRole, CreateAdminUserDto, JwtPayload } from '../types/ad
 import { ApiResponseUtil } from '../utils/response';
 import { jwtUtils } from '../utils/jwt';
 import logger from '../config/logger';
+import { trackFailedLogin } from '../middleware/securityMonitor';
 
 export class AuthController {
   // Admin login
@@ -32,6 +33,8 @@ export class AuthController {
 
       if (error || !admin) {
         logger.error(`Admin not found or error:`, error);
+        // Track failed login attempt
+        trackFailedLogin(req.ip || 'unknown', req.get('User-Agent'));
         ApiResponseUtil.unauthorized(res, 'Invalid credentials');
         return;
       }
@@ -49,6 +52,8 @@ export class AuthController {
       logger.info(`Password validation result: ${isPasswordValid}`);
       
       if (!isPasswordValid) {
+        // Track failed login attempt
+        trackFailedLogin(req.ip || 'unknown', req.get('User-Agent'));
         ApiResponseUtil.unauthorized(res, 'Invalid credentials');
         return;
       }

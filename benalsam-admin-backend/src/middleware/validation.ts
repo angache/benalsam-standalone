@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
 import logger from '../config/logger';
+import { trackValidationFailure } from './securityMonitor';
 
 // User input validation
 export const validateUserInput = [
@@ -29,6 +30,10 @@ export const validateUserInput = [
         errors: errors.array(),
         ip: req.ip
       });
+      
+      // Track validation failure for security monitoring
+      trackValidationFailure(req, errors.array());
+      
       res.status(400).json({ 
         success: false,
         message: 'Validation failed',
@@ -57,6 +62,10 @@ export const validateLoginInput = [
         errors: errors.array(),
         ip: req.ip
       });
+      
+      // Track validation failure for security monitoring
+      trackValidationFailure(req, errors.array());
+      
       res.status(400).json({ 
         success: false,
         message: 'Login validation failed',
@@ -92,6 +101,10 @@ export const validateListingInput = [
         errors: errors.array(),
         ip: req.ip
       });
+      
+      // Track validation failure for security monitoring
+      trackValidationFailure(req, errors.array());
+      
       res.status(400).json({ 
         success: false,
         message: 'Listing validation failed',
@@ -121,6 +134,10 @@ export const validateSearchInput = [
         errors: errors.array(),
         ip: req.ip
       });
+      
+      // Track validation failure for security monitoring
+      trackValidationFailure(req, errors.array());
+      
       res.status(400).json({ 
         success: false,
         message: 'Search validation failed',
@@ -143,6 +160,9 @@ export const handleValidationErrors = (req: Request, res: Response, next: NextFu
       ip: req.ip,
       userAgent: req.get('User-Agent')
     });
+    
+    // Track validation failure for security monitoring
+    trackValidationFailure(req, errors.array());
     
     res.status(400).json({
       success: false,

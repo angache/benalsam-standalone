@@ -6,7 +6,7 @@ config();
 import express from 'express';
 import { initializeSentry, errorHandler as sentryErrorHandler } from './config/sentry';
 import { performanceMiddleware } from './middleware/performanceMonitor';
-import { securityMonitoringMiddleware } from './middleware/securityMonitor';
+import { securityMonitoringMiddleware, trackRateLimitExceeded } from './middleware/securityMonitor';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -47,6 +47,7 @@ import twoFactorRoutes from './routes/twoFactor';
 import sentryTestRoutes from './routes/sentry-test';
 import hybridMonitoringRoutes from './routes/hybridMonitoring';
 import healthCheckRoutes from './routes/healthCheck';
+import securityRoutes from './routes/security';
 
 // Import services
 import { AdminElasticsearchService } from './services/elasticsearchService';
@@ -130,6 +131,14 @@ const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true, // Don't count successful requests
+  handler: (req, res) => {
+    // Track rate limit exceeded
+    trackRateLimitExceeded(req);
+    res.status(429).json({
+      success: false,
+      message: 'Too many login attempts, please try again later.'
+    });
+  }
 });
 
 const apiLimiter = rateLimit({
@@ -138,6 +147,14 @@ const apiLimiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  handler: (req, res) => {
+    // Track rate limit exceeded
+    trackRateLimitExceeded(req);
+    res.status(429).json({
+      success: false,
+      message: 'Too many requests from this IP, please try again later.'
+    });
+  }
 });
 
 const analyticsLimiter = rateLimit({
@@ -146,12 +163,20 @@ const analyticsLimiter = rateLimit({
   message: 'Too many analytics requests, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  handler: (req, res) => {
+    // Track rate limit exceeded
+    trackRateLimitExceeded(req);
+    res.status(429).json({
+      success: false,
+      message: 'Too many analytics requests, please try again later.'
+    });
+  }
 });
 
 // Apply rate limiting
-app.use('/api/v1/auth', authLimiter); // Auth endpoints için sıkı rate limiting
-app.use('/api/v1/', apiLimiter); // Genel API rate limiting
-app.use('/api/v1/analytics/', analyticsLimiter); // Analytics rate limiting
+app.use('/api/v1/auth', authLimiter);
+app.use('/api/v1/', apiLimiter);
+app.use('/api/v1/analytics/', analyticsLimiter);
 
 // Body parsing middleware
 app.use(compression());
@@ -216,6 +241,7 @@ app.use('/api/v1/performance', performanceRoutes); // Performance monitoring rou
 app.use('/api/v1/sentry', sentryRoutes); // Sentry dashboard routes
 app.use('/api/v1/hybrid-monitoring', hybridMonitoringRoutes); // Hybrid monitoring routes
 app.use('/api/v1/health', healthCheckRoutes); // Health check routes
+app.use('/api/v1/security', securityRoutes); // Security monitoring routes
 
 // Sentry error handler is now integrated into the main error handler
 

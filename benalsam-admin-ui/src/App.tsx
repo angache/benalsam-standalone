@@ -25,6 +25,7 @@ import CacheDashboardPage from './pages/CacheDashboardPage';
 import SentryDashboardPage from './pages/SentryDashboardPage';
 import HybridMonitoringPage from './pages/HybridMonitoringPage';
 import HealthCheckPage from './pages/HealthCheckPage';
+import SecurityDashboardPage from './pages/SecurityDashboardPage';
 import { useAuthStore } from './stores/authStore';
 import { CustomThemeProvider } from './contexts/ThemeContext';
 
@@ -275,7 +276,7 @@ function App() {
         </ProtectedRoute>
       }
     />
-    <Route
+        <Route
       path="/health-check"
       element={
         <ProtectedRoute>
@@ -285,7 +286,17 @@ function App() {
         </ProtectedRoute>
       }
     />
-            <Route path="*" element={<Navigate to="/" replace />} />
+    <Route
+      path="/security-dashboard"
+      element={
+        <ProtectedRoute>
+          <Layout>
+            <SecurityDashboardPage />
+          </Layout>
+        </ProtectedRoute>
+      }
+    />
+    <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
       </CustomThemeProvider>
