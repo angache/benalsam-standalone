@@ -87,23 +87,19 @@ class HealthCheckService {
       // Basic database health check (simplified for now)
       const responseTime = Date.now() - startTime;
       
-      // Test için database'i unhealthy yapalım
-      const isUnhealthy = Math.random() > 0.7; // %30 ihtimalle unhealthy
-      
       return {
-        status: isUnhealthy ? 'unhealthy' : 'healthy',
-        responseTime: isUnhealthy ? 5000 : responseTime, // Unhealthy ise yavaş
+        status: 'healthy',
+        responseTime,
         lastChecked: new Date().toISOString(),
         details: {
           provider: 'postgresql',
-          queryTime: isUnhealthy ? 5000 : 0,
+          queryTime: 0,
           connectionPool: {
             active: 0, // TODO: Implement connection pool monitoring
             idle: 0,
             total: 0
           }
-        },
-        error: isUnhealthy ? 'Database connection timeout' : undefined
+        }
       };
     } catch (error) {
       return {

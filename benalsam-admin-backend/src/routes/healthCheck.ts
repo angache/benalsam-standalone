@@ -9,13 +9,28 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const healthStatus = await healthCheckService.getOverallHealth();
     
+    // Convert checks to services for frontend compatibility
+    const services: Record<string, 'healthy' | 'unhealthy' | 'degraded'> = {};
+    Object.entries(healthStatus.checks).forEach(([key, check]) => {
+      services[key] = check.status;
+    });
+    
+    const response = {
+      status: healthStatus.status,
+      timestamp: healthStatus.timestamp,
+      uptime: healthStatus.uptime,
+      version: healthStatus.version,
+      environment: healthStatus.environment,
+      services
+    };
+    
     // Set appropriate HTTP status code based on health status
     const statusCode = healthStatus.status === 'healthy' ? 200 : 
                       healthStatus.status === 'degraded' ? 200 : 503;
     
     res.status(statusCode).json({
       success: true,
-      data: healthStatus,
+      data: response,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
@@ -33,17 +48,27 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/detailed', async (req: Request, res: Response) => {
   try {
     const detailedHealth = await healthCheckService.getDetailedHealth();
-    const overallHealth = await healthCheckService.getOverallHealth();
+    
+    // Convert array to services object for frontend compatibility
+    const services: Record<string, any> = {};
+    detailedHealth.forEach(service => {
+      const serviceName = service.name.toLowerCase().replace(' health', '');
+      services[serviceName] = {
+        status: service.status,
+        responseTime: service.responseTime,
+        lastChecked: service.lastChecked,
+        details: service.details,
+        error: service.error
+      };
+    });
     
     const response = {
-      overall: overallHealth,
-      details: detailedHealth,
+      services,
       timestamp: new Date().toISOString()
     };
     
     // Set appropriate HTTP status code
-    const statusCode = overallHealth.status === 'healthy' ? 200 : 
-                      overallHealth.status === 'degraded' ? 200 : 503;
+    const statusCode = 200; // Always return 200 for detailed health check
     
     res.status(statusCode).json({
       success: true,
