@@ -215,6 +215,11 @@ admin-ui/
   - Stack Trace Viewer
   - Team Collaboration
   - Error Analytics
+- **Hybrid Monitoring Dashboard**: Error classification ve cost optimization
+  - Genel Bakış (Overview)
+  - Error Analizi (Error Analysis)
+  - Maliyet Analizi (Cost Analysis)
+  - Sistem Karşılaştırması (System Comparison)
 
 ---
 
@@ -270,6 +275,72 @@ admin-ui/
    - Geographic distribution
    - User impact analysis
 
+---
+
+## 🔄 Hybrid Monitoring System - Error Classification & Cost Optimization
+
+### 🎯 Hybrid Monitoring Özellikleri
+
+#### 📊 Error Classification System
+1. **Severity Levels**
+   - **CRITICAL**: Payment, authentication, security issues
+   - **HIGH**: Database, API, system failures
+   - **MEDIUM**: Network, cache, performance issues
+   - **LOW**: UI, analytics, non-critical errors
+
+2. **Error Categories**
+   - **Payment**: Payment processing, billing, financial
+   - **Authentication**: Login, security, access control
+   - **Database**: Database connection, queries, data integrity
+   - **API**: External API calls, integrations
+   - **Network**: Connection issues, timeouts
+   - **Cache**: Cache misses, Redis issues
+   - **Analytics**: Tracking, metrics, reporting
+   - **UI**: Frontend errors, component issues
+
+3. **Smart Routing**
+   - **Sentry**: Critical & High severity errors
+   - **Local**: Medium & Low severity errors
+   - **Cost Optimization**: 70% cost reduction potential
+   - **Risk Management**: Critical errors always tracked
+
+#### 💰 Cost Analysis Dashboard
+1. **Current Costs**
+   - Sentry errors count & cost
+   - Local errors count & cost
+   - Total monthly cost calculation
+   - Cost per error analysis
+
+2. **Optimization Potential**
+   - Potential Sentry cost reduction
+   - Estimated monthly savings
+   - Savings percentage calculation
+   - ROI analysis
+
+3. **Recommendations**
+   - Error classification best practices
+   - Cost optimization strategies
+   - Monitoring setup guidelines
+
+#### 🔍 System Comparison
+1. **Sentry System**
+   - Advanced features & capabilities
+   - Pros: Production-tested, team collaboration
+   - Cons: Costly, 3rd party dependency
+   - Best for: Critical errors, performance monitoring
+
+2. **Local System**
+   - Basic monitoring capabilities
+   - Pros: Free, full control, data privacy
+   - Cons: Limited features, maintenance required
+   - Best for: Basic monitoring, business metrics
+
+3. **Hybrid System**
+   - Best of both worlds approach
+   - Pros: Cost optimized, risk minimized
+   - Cons: Complex setup, dual maintenance
+   - Best for: Balanced approach, cost-conscious
+
 ### 🔧 Backend Integration
 
 #### 📦 Sentry SDK Integration
@@ -293,6 +364,13 @@ admin-ui/
 - **Sentry Releases**: `/api/v1/sentry/releases`
 - **Performance Stats**: `/api/v1/performance/stats`
 - **Test Error Generation**: `/api/v1/sentry-test/generate-error`
+
+#### 🔄 Hybrid Monitoring API Endpoints
+- **Hybrid Overview**: `/api/v1/hybrid-monitoring/overview`
+- **Error Breakdown**: `/api/v1/hybrid-monitoring/error-breakdown`
+- **Cost Analysis**: `/api/v1/hybrid-monitoring/cost-analysis`
+- **System Comparison**: `/api/v1/hybrid-monitoring/system-comparison`
+- **Test Classification**: `/api/v1/hybrid-monitoring/test-classification`
 
 ### 🎨 Frontend Components
 
@@ -585,6 +663,11 @@ JWT_SECRET=your_jwt_secret
   - Advanced alerting rules
   - Team collaboration features
   - Performance optimization
+- Hybrid Monitoring enhancements
+  - Real error statistics tracking
+  - Advanced classification rules
+  - Cost optimization algorithms
+  - Performance impact analysis
 
 ### 🐳 Local Development
 - CI/CD pipeline for local testing
@@ -614,6 +697,7 @@ JWT_SECRET=your_jwt_secret
 - **Migration Management**: ✅ Clean & Synced
 - **Test Coverage**: ✅ 71 Test Başarılı
 - **Error Tracking**: ✅ Sentry Integration Complete
+- **Hybrid Monitoring**: ✅ Error Classification & Cost Optimization Complete
 
 ---
 

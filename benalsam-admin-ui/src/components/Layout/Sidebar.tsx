@@ -29,6 +29,7 @@ import {
   HardDrive,
   Bug,
   BarChart,
+  Heart,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
@@ -153,6 +154,13 @@ const navigationItems = [
     title: 'Hibrit Monitoring',
     path: '/hybrid-monitoring',
     icon: BarChart,
+    permission: PERMISSIONS.ANALYTICS_VIEW,
+  },
+  {
+    id: 'health-check',
+    title: 'System Health',
+    path: '/health-check',
+    icon: Heart,
     permission: PERMISSIONS.ANALYTICS_VIEW,
   },
   {

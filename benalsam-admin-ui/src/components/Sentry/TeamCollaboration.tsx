@@ -324,9 +324,9 @@ const TeamCollaboration: React.FC<TeamCollaborationProps> = ({
                         {formatTimestamp(comment.timestamp)}
                       </Typography>
                     </Box>
-                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                    <Box component="div" sx={{ whiteSpace: 'pre-wrap' }}>
                       {comment.content}
-                    </Typography>
+                    </Box>
                   </Box>
                 </Box>
               </ListItem>

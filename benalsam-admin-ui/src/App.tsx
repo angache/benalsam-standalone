@@ -24,6 +24,7 @@ import SessionJourneyPage from './pages/SessionJourneyPage';
 import CacheDashboardPage from './pages/CacheDashboardPage';
 import SentryDashboardPage from './pages/SentryDashboardPage';
 import HybridMonitoringPage from './pages/HybridMonitoringPage';
+import HealthCheckPage from './pages/HealthCheckPage';
 import { useAuthStore } from './stores/authStore';
 import { CustomThemeProvider } from './contexts/ThemeContext';
 
@@ -264,16 +265,26 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/hybrid-monitoring"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <HybridMonitoringPage />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
+                <Route
+      path="/hybrid-monitoring"
+      element={
+        <ProtectedRoute>
+          <Layout>
+            <HybridMonitoringPage />
+          </Layout>
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/health-check"
+      element={
+        <ProtectedRoute>
+          <Layout>
+            <HealthCheckPage />
+          </Layout>
+        </ProtectedRoute>
+      }
+    />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>

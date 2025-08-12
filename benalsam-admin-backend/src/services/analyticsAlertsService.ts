@@ -217,6 +217,13 @@ export class AnalyticsAlertsService {
 
   async getAlertRules(): Promise<AlertRule[]> {
     try {
+      // Check if index exists first
+      const indexExists = await this.client.indices.exists({ index: this.rulesIndex });
+      if (!indexExists) {
+        logger.info(`Index ${this.rulesIndex} does not exist, returning empty array`);
+        return [];
+      }
+
       const response = await this.client.search({
         index: this.rulesIndex,
         body: {
@@ -229,7 +236,8 @@ export class AnalyticsAlertsService {
       return response.hits.hits.map((hit: any) => hit._source as AlertRule);
     } catch (error: any) {
       logger.error('Error getting alert rules:', error);
-      throw error;
+      // Return empty array instead of throwing error
+      return [];
     }
   }
 
@@ -638,6 +646,13 @@ export class AnalyticsAlertsService {
     limit?: number;
   } = {}): Promise<Alert[]> {
     try {
+      // Check if index exists first
+      const indexExists = await this.client.indices.exists({ index: this.alertsIndex });
+      if (!indexExists) {
+        logger.info(`Index ${this.alertsIndex} does not exist, returning empty array`);
+        return [];
+      }
+
       const query: any = { bool: { must: [] } };
 
       if (params.status) {
@@ -668,7 +683,8 @@ export class AnalyticsAlertsService {
       return response.hits.hits.map((hit: any) => hit._source as Alert);
     } catch (error: any) {
       logger.error('Error getting alerts:', error);
-      throw error;
+      // Return empty array instead of throwing error
+      return [];
     }
   }
 

@@ -45,11 +45,13 @@ import rateLimitRoutes from './routes/rateLimitRoutes';
 import twoFactorRoutes from './routes/twoFactor';
 import sentryTestRoutes from './routes/sentry-test';
 import hybridMonitoringRoutes from './routes/hybridMonitoring';
+import healthCheckRoutes from './routes/healthCheck';
 
 // Import services
 import { AdminElasticsearchService } from './services/elasticsearchService';
 import QueueProcessorService from './services/queueProcessorService';
 import sessionCleanupService from './services/sessionCleanupService';
+import { AnalyticsAlertsService } from './services/analyticsAlertsService';
 
 // Import middleware
 import { authenticateToken } from './middleware/auth';
@@ -78,6 +80,14 @@ export const supabase = createClient(
 // Initialize services
 const elasticsearchService = new AdminElasticsearchService();
 const queueProcessor = new QueueProcessorService();
+
+// Initialize Analytics Alerts Service
+const analyticsAlertsService = new AnalyticsAlertsService();
+analyticsAlertsService.initializeIndexes().then(() => {
+  logger.info('✅ Analytics Alerts Service initialized');
+}).catch((error) => {
+  logger.error('❌ Analytics Alerts Service initialization failed:', error);
+});
 
 // Security middleware
 app.use(helmet({
@@ -187,6 +197,7 @@ app.use('/api/v1/sentry-test', sentryTestRoutes); // Sentry test routes
 app.use('/api/v1/performance', performanceRoutes); // Performance monitoring routes
 app.use('/api/v1/sentry', sentryRoutes); // Sentry dashboard routes
 app.use('/api/v1/hybrid-monitoring', hybridMonitoringRoutes); // Hybrid monitoring routes
+app.use('/api/v1/health', healthCheckRoutes); // Health check routes
 
 // Sentry error handler is now integrated into the main error handler
 

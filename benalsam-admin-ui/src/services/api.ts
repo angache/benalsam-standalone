@@ -723,12 +723,63 @@ export const apiService = {
               return response.data;
             },
 
-            async testErrorClassification(errorMessage: string, errorType?: string, context?: any): Promise<any> {
-              const response = await apiClient.post('/hybrid-monitoring/test-classification', {
-                errorMessage,
-                errorType,
-                context
-              });
-              return response.data;
-            }
+                async testErrorClassification(errorMessage: string, errorType?: string, context?: any): Promise<any> {
+      const response = await apiClient.post('/hybrid-monitoring/test-classification', {
+        errorMessage,
+        errorType,
+        context
+      });
+      return response.data;
+    },
+
+    // Health Check API Methods
+    async getHealthStatus(): Promise<any> {
+      const response = await apiClient.get('/health');
+      return response.data;
+    },
+
+    async getDetailedHealth(): Promise<any> {
+      const response = await apiClient.get('/health/detailed');
+      return response.data;
+    },
+
+    async getUptimeInfo(): Promise<any> {
+      const response = await apiClient.get('/health/uptime');
+      return response.data;
+    },
+
+    async getSLAInfo(): Promise<any> {
+      const response = await apiClient.get('/health/sla');
+      return response.data;
+    },
+
+    async getApiHealth(): Promise<any> {
+      const response = await apiClient.get('/health/api');
+      return response.data;
+    },
+
+    async getDatabaseHealth(): Promise<any> {
+      const response = await apiClient.get('/health/database');
+      return response.data;
+    },
+
+    async getRedisHealth(): Promise<any> {
+      const response = await apiClient.get('/health/redis');
+      return response.data;
+    },
+
+    async getElasticsearchHealth(): Promise<any> {
+      const response = await apiClient.get('/health/elasticsearch');
+      return response.data;
+    },
+
+    async getMemoryHealth(): Promise<any> {
+      const response = await apiClient.get('/health/memory');
+      return response.data;
+    },
+
+    async getDiskHealth(): Promise<any> {
+      const response = await apiClient.get('/health/disk');
+      return response.data;
+    }
           }; 
