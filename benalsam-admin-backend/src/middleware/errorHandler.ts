@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import logger from '../config/logger';
 import { captureException } from '../config/sentry';
+import { handleErrorHybrid } from '../config/errorClassification';
 
 export interface AppError extends Error {
   status?: number;
@@ -49,21 +50,14 @@ export const errorHandler = (
     timestamp: new Date().toISOString()
   });
 
-  // Capture error in Sentry (only for non-operational errors or 5xx errors)
-  if (!err.isOperational || (error.status && error.status >= 500)) {
-    captureException(err, {
-      request: {
-        method: req.method,
-        url: req.url,
-        ip: req.ip,
-        userAgent: req.get('User-Agent')
-      },
-      user: (req as any).user ? {
-        id: (req as any).user.id,
-        email: (req as any).user.email
-      } : undefined
-    });
-  }
+  // Use hybrid error handling system
+  handleErrorHybrid(err, {
+    endpoint: req.url,
+    method: req.method,
+    userId: (req as any).user?.id,
+    userAgent: req.get('User-Agent'),
+    ip: req.ip
+  });
 
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {

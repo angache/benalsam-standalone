@@ -23,6 +23,7 @@ import SessionAnalyticsPage from './pages/SessionAnalyticsPage';
 import SessionJourneyPage from './pages/SessionJourneyPage';
 import CacheDashboardPage from './pages/CacheDashboardPage';
 import SentryDashboardPage from './pages/SentryDashboardPage';
+import HybridMonitoringPage from './pages/HybridMonitoringPage';
 import { useAuthStore } from './stores/authStore';
 import { CustomThemeProvider } from './contexts/ThemeContext';
 
@@ -259,6 +260,16 @@ function App() {
                 <ProtectedRoute>
                   <Layout>
                     <SentryDashboardPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hybrid-monitoring"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <HybridMonitoringPage />
                   </Layout>
                 </ProtectedRoute>
               }

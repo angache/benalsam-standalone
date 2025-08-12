@@ -44,6 +44,7 @@ import cacheCompressionRoutes from './routes/cacheCompression';
 import rateLimitRoutes from './routes/rateLimitRoutes';
 import twoFactorRoutes from './routes/twoFactor';
 import sentryTestRoutes from './routes/sentry-test';
+import hybridMonitoringRoutes from './routes/hybridMonitoring';
 
 // Import services
 import { AdminElasticsearchService } from './services/elasticsearchService';
@@ -185,6 +186,7 @@ app.use('/api/v1/2fa', twoFactorRoutes); // Cross-Platform Rate Limiting sistemi
 app.use('/api/v1/sentry-test', sentryTestRoutes); // Sentry test routes
 app.use('/api/v1/performance', performanceRoutes); // Performance monitoring routes
 app.use('/api/v1/sentry', sentryRoutes); // Sentry dashboard routes
+app.use('/api/v1/hybrid-monitoring', hybridMonitoringRoutes); // Hybrid monitoring routes
 
 // Sentry error handler is now integrated into the main error handler
 

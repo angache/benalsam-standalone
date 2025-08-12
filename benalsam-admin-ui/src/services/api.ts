@@ -700,5 +700,35 @@ export const apiService = {
             async getSentryReleases(): Promise<any> {
               const response = await apiClient.get('/sentry/releases');
               return response.data;
+            },
+
+            // Hybrid Monitoring Integration
+            async getHybridOverview(timeRange: string = '24h'): Promise<any> {
+              const response = await apiClient.get(`/hybrid-monitoring/overview?timeRange=${timeRange}`);
+              return response.data;
+            },
+
+            async getHybridBreakdown(timeRange: string = '24h'): Promise<any> {
+              const response = await apiClient.get(`/hybrid-monitoring/error-breakdown?timeRange=${timeRange}`);
+              return response.data;
+            },
+
+            async getHybridCostAnalysis(timeRange: string = '24h'): Promise<any> {
+              const response = await apiClient.get(`/hybrid-monitoring/cost-analysis?timeRange=${timeRange}`);
+              return response.data;
+            },
+
+            async getHybridComparison(timeRange: string = '24h'): Promise<any> {
+              const response = await apiClient.get(`/hybrid-monitoring/system-comparison?timeRange=${timeRange}`);
+              return response.data;
+            },
+
+            async testErrorClassification(errorMessage: string, errorType?: string, context?: any): Promise<any> {
+              const response = await apiClient.post('/hybrid-monitoring/test-classification', {
+                errorMessage,
+                errorType,
+                context
+              });
+              return response.data;
             }
           }; 

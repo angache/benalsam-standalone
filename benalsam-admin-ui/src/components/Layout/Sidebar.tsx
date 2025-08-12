@@ -28,6 +28,7 @@ import {
   Bell,
   HardDrive,
   Bug,
+  BarChart,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
@@ -145,6 +146,13 @@ const navigationItems = [
     title: 'Sentry Dashboard',
     path: '/sentry-dashboard',
     icon: Bug,
+    permission: PERMISSIONS.ANALYTICS_VIEW,
+  },
+  {
+    id: 'hybrid-monitoring',
+    title: 'Hibrit Monitoring',
+    path: '/hybrid-monitoring',
+    icon: BarChart,
     permission: PERMISSIONS.ANALYTICS_VIEW,
   },
   {
