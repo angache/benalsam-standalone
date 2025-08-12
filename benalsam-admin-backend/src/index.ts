@@ -6,6 +6,7 @@ config();
 import express from 'express';
 import { initializeSentry, errorHandler as sentryErrorHandler } from './config/sentry';
 import { performanceMiddleware } from './middleware/performanceMonitor';
+import { securityMonitoringMiddleware } from './middleware/securityMonitor';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -57,6 +58,7 @@ import { AnalyticsAlertsService } from './services/analyticsAlertsService';
 import { authenticateToken } from './middleware/auth';
 import { errorHandler } from './middleware/errorHandler';
 import { securityConfig } from './config/app';
+import { sanitizeInput } from './middleware/validation';
 
 // Import logger
 import logger from './config/logger';
@@ -70,6 +72,9 @@ initializeSentry(app);
 
 // Performance monitoring middleware (must be early)
 app.use(performanceMiddleware);
+
+// Security monitoring middleware (must be early)
+app.use(securityMonitoringMiddleware);
 
 // Initialize Supabase client
 export const supabase = createClient(
@@ -117,31 +122,44 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Rate limiting
-const limiter = rateLimit({
+// Rate limiting - Enhanced Security
+const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 5, // limit each IP to 5 login attempts per 15 minutes
+  message: 'Too many login attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true, // Don't count successful requests
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // limit each IP to 1000 API calls per 15 minutes
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Analytics için daha yüksek rate limit
 const analyticsLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 300, // limit each IP to 300 requests per minute (5x artırıldı)
+  max: 300, // limit each IP to 300 analytics requests per minute
   message: 'Too many analytics requests, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// app.use('/api/', limiter); // Rate limiting geçici olarak devre dışı
-// app.use('/api/v1/analytics/', analyticsLimiter); // Analytics rate limiting geçici olarak devre dışı
+// Apply rate limiting
+app.use('/api/v1/auth', authLimiter); // Auth endpoints için sıkı rate limiting
+app.use('/api/v1/', apiLimiter); // Genel API rate limiting
+app.use('/api/v1/analytics/', analyticsLimiter); // Analytics rate limiting
 
 // Body parsing middleware
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Security middleware
+app.use(sanitizeInput); // XSS protection
 
 // Request logging middleware
 app.use((req, res, next) => {

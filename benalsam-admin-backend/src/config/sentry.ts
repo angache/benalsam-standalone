@@ -6,6 +6,7 @@ export const initializeSentry = (app: Express) => {
   Sentry.init({
     dsn: process.env.SENTRY_DSN || '',
     environment: process.env.NODE_ENV || 'development',
+    release: process.env.npm_package_version || '1.0.0',
     // Performance Monitoring
     tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
     // Enable debug mode in development
