@@ -806,5 +806,62 @@ export const apiService = {
 
     async clearOldSecurityEvents(): Promise<void> {
       await apiClient.delete('/security/clear-old-events');
+    },
+
+    // Performance Baseline API Methods
+    async getPerformanceBaseline(): Promise<any> {
+      const response = await apiClient.get('/performance/baseline');
+      return response.data;
+    },
+
+    async runPerformanceTest(endpoint: string, iterations: number = 10, concurrent: number = 1): Promise<any> {
+      const response = await apiClient.post(`/performance/test/${endpoint}`, {
+        iterations,
+        concurrent
+      });
+      return response.data;
+    },
+
+    async getPerformanceRecommendations(): Promise<any> {
+      const response = await apiClient.get('/performance/recommendations');
+      return response.data;
+    },
+
+    async clearPerformanceBaseline(): Promise<any> {
+      const response = await apiClient.delete('/performance/baseline');
+      return response.data;
+    },
+
+    async getAvailableEndpoints(): Promise<any> {
+      const response = await apiClient.get('/performance/endpoints');
+      return response.data;
+    },
+
+    // Performance Monitoring API Methods
+    async getMonitoringStatus(): Promise<any> {
+      const response = await apiClient.get('/performance/monitoring/status');
+      return response.data;
+    },
+
+    async getMonitoringResults(endpoint?: string): Promise<any> {
+      const params = endpoint ? { endpoint } : {};
+      const response = await apiClient.get('/performance/monitoring/results', { params });
+      return response.data;
+    },
+
+    async getPerformanceAlerts(severity?: 'warning' | 'critical'): Promise<any> {
+      const params = severity ? { severity } : {};
+      const response = await apiClient.get('/performance/monitoring/alerts', { params });
+      return response.data;
+    },
+
+    async getEndpointStats(endpoint: string): Promise<any> {
+      const response = await apiClient.get(`/performance/monitoring/stats/${endpoint}`);
+      return response.data;
+    },
+
+    async controlMonitoring(action: 'start' | 'stop' | 'clear-alerts'): Promise<any> {
+      const response = await apiClient.post('/performance/monitoring/control', { action });
+      return response.data;
     }
           }; 

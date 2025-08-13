@@ -26,6 +26,7 @@ import SentryDashboardPage from './pages/SentryDashboardPage';
 import HybridMonitoringPage from './pages/HybridMonitoringPage';
 import HealthCheckPage from './pages/HealthCheckPage';
 import SecurityDashboardPage from './pages/SecurityDashboardPage';
+import PerformanceBaselinePage from './pages/PerformanceBaselinePage';
 import { useAuthStore } from './stores/authStore';
 import { CustomThemeProvider } from './contexts/ThemeContext';
 
@@ -292,6 +293,16 @@ function App() {
         <ProtectedRoute>
           <Layout>
             <SecurityDashboardPage />
+          </Layout>
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/performance-baseline"
+      element={
+        <ProtectedRoute>
+          <Layout>
+            <PerformanceBaselinePage />
           </Layout>
         </ProtectedRoute>
       }

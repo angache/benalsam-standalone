@@ -189,6 +189,13 @@ const navigationCategories = [
         permission: PERMISSIONS.ANALYTICS_VIEW,
       },
       {
+        id: 'performance-baseline',
+        title: 'Performance Baseline',
+        path: '/performance-baseline',
+        icon: Activity,
+        permission: PERMISSIONS.ANALYTICS_VIEW,
+      },
+      {
         id: 'performance-test',
         title: 'Performance Test',
         path: '/performance-test',

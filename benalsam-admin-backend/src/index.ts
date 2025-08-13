@@ -54,6 +54,7 @@ import { AdminElasticsearchService } from './services/elasticsearchService';
 import QueueProcessorService from './services/queueProcessorService';
 import sessionCleanupService from './services/sessionCleanupService';
 import { AnalyticsAlertsService } from './services/analyticsAlertsService';
+import performanceMonitoringService from './services/performanceMonitoringService';
 
 // Import middleware
 import { authenticateToken } from './middleware/auth';
@@ -290,6 +291,14 @@ const startServer = async () => {
       logger.info('✅ Session cleanup service started');
     } catch (error) {
       logger.error('❌ Session cleanup service failed to start:', error);
+    }
+
+    // Start performance monitoring service
+    try {
+      await performanceMonitoringService.startMonitoring();
+      logger.info('✅ Performance monitoring service started');
+    } catch (error) {
+      logger.error('❌ Performance monitoring service failed to start:', error);
     }
 
     // Test Redis connection
