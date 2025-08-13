@@ -196,6 +196,13 @@ const navigationCategories = [
         permission: PERMISSIONS.ANALYTICS_VIEW,
       },
       {
+        id: 'backup-dashboard',
+        title: 'Database Backup',
+        path: '/backup-dashboard',
+        icon: Database,
+        permission: PERMISSIONS.ADMINS_VIEW,
+      },
+      {
         id: 'performance-test',
         title: 'Performance Test',
         path: '/performance-test',

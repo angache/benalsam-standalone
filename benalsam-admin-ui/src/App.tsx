@@ -27,6 +27,7 @@ import HybridMonitoringPage from './pages/HybridMonitoringPage';
 import HealthCheckPage from './pages/HealthCheckPage';
 import SecurityDashboardPage from './pages/SecurityDashboardPage';
 import PerformanceBaselinePage from './pages/PerformanceBaselinePage';
+import BackupDashboardPage from './pages/BackupDashboardPage';
 import { useAuthStore } from './stores/authStore';
 import { CustomThemeProvider } from './contexts/ThemeContext';
 
@@ -303,6 +304,16 @@ function App() {
         <ProtectedRoute>
           <Layout>
             <PerformanceBaselinePage />
+          </Layout>
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/backup-dashboard"
+      element={
+        <ProtectedRoute>
+          <Layout>
+            <BackupDashboardPage />
           </Layout>
         </ProtectedRoute>
       }

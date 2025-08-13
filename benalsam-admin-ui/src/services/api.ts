@@ -20,7 +20,7 @@ console.log('🔧 API_BASE_URL:', API_BASE_URL);
 // Axios instance
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 180000, // 3 dakika - Supabase CLI komutları için
 });
 
 // Request interceptor - add auth token
@@ -237,10 +237,7 @@ export const apiService = {
     return response.data.data || [];
   },
 
-  async getPerformanceAlerts(): Promise<any[]> {
-    const response = await apiClient.get('/analytics/performance-alerts');
-    return response.data.data || [];
-  },
+
 
   async getPerformanceMetrics(days: number = 7): Promise<any> {
     const response = await apiClient.get(`/analytics/performance-metrics?days=${days}`);
@@ -863,5 +860,85 @@ export const apiService = {
     async controlMonitoring(action: 'start' | 'stop' | 'clear-alerts'): Promise<any> {
       const response = await apiClient.post('/performance/monitoring/control', { action });
       return response.data;
+    },
+
+    // Database Backup API Methods
+    async getBackups(): Promise<any> {
+      const response = await apiClient.get('/backup');
+      return response.data;
+    },
+
+    async getBackupInfo(backupId: string): Promise<any> {
+      const response = await apiClient.get(`/backup/${backupId}`);
+      return response.data;
+    },
+
+    async createBackup(description?: string, tags?: string[]): Promise<any> {
+      const response = await apiClient.post('/backup', { description, tags });
+      return response.data;
+    },
+
+    async restoreBackup(backupId: string, options: {
+      dryRun?: boolean;
+      includeEdgeFunctions?: boolean;
+      includeMigrations?: boolean;
+      backupBeforeRestore?: boolean;
+    }): Promise<any> {
+      const response = await apiClient.post(`/backup/${backupId}/restore`, options);
+      return response.data;
+    },
+
+    async deleteBackup(backupId: string): Promise<any> {
+      const response = await apiClient.delete(`/backup/${backupId}`);
+      return response.data;
+    },
+
+    async downloadBackup(backupId: string): Promise<any> {
+      const response = await apiClient.get(`/backup/${backupId}/download`, {
+        responseType: 'blob'
+      });
+      return response.data;
+    },
+
+    async getBackupStats(): Promise<any> {
+      const response = await apiClient.get('/backup/stats/summary');
+      return response.data;
+    },
+
+    async validateBackup(backupId: string): Promise<any> {
+      const response = await apiClient.post(`/backup/${backupId}/validate`);
+      return response.data;
+    },
+
+    // ========================================
+    // SUPABASE CLI OPERATIONS
+    // ========================================
+
+    // Check Supabase CLI status
+    async getSupabaseStatus(): Promise<any> {
+      const response = await apiClient.get('/backup/supabase/status');
+      return response.data;
+    },
+
+    // Get Supabase project info
+    async getSupabaseProject(): Promise<any> {
+      const response = await apiClient.get('/backup/supabase/project');
+      return response.data;
+    },
+
+    // Get Supabase functions list
+    async getSupabaseFunctions(): Promise<any> {
+      const response = await apiClient.get('/backup/supabase/functions');
+      return response.data;
+    },
+
+    // Execute Supabase CLI command
+    async executeSupabaseCommand(command: string): Promise<any> {
+      const response = await apiClient.post('/backup/supabase/execute', { command }, {
+        timeout: 300000 // 5 dakika - CLI komutları için özel timeout
+      });
+      return response.data;
     }
-          }; 
+  }; 
+
+export default apiService;

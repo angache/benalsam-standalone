@@ -1,0 +1,82 @@
+[
+  {
+    "id": "backup_1755075427326_kh8mlg4m7",
+    "timestamp": "2025-08-13T08:57:07.326Z",
+    "size": 926,
+    "type": "full",
+    "status": "completed",
+    "databaseSize": 627,
+    "edgeFunctionsCount": 0,
+    "migrationsCount": 0,
+    "checksum": "0dbde337cde2d9a5ccd963fd71af182f97004890f5accd2ab55d8a5e6642cccb",
+    "description": "ilk backup"
+  },
+  {
+    "id": "backup_1755080157114_3v8oc38r5",
+    "timestamp": "2025-08-13T10:15:57.114Z",
+    "size": 3485,
+    "type": "full",
+    "status": "completed",
+    "databaseSize": 627,
+    "edgeFunctionsCount": 0,
+    "migrationsCount": 0,
+    "checksum": "e49782642ed642be84932441c7c15c88d1dc92a2109a945a2275d5bb5edc7803",
+    "description": "Enhanced backup with schema and functions",
+    "tags": [
+      "schema",
+      "functions",
+      "enhanced"
+    ]
+  },
+  {
+    "id": "backup_1755089216931_b8tsq4n31",
+    "timestamp": "2025-08-13T12:46:56.931Z",
+    "size": 4769,
+    "type": "full",
+    "status": "completed",
+    "databaseSize": 627,
+    "edgeFunctionsCount": 0,
+    "migrationsCount": 0,
+    "checksum": "7f64c61eecc8cb8e7b5fe609f257d64a0a2f874a3b7eadf7e3f1e584f55eefdc",
+    "description": "Complete schema backup with all tables",
+    "tags": [
+      "complete",
+      "schema",
+      "all-tables"
+    ]
+  },
+  {
+    "id": "backup_1755089414179_e3pgjpxuo",
+    "timestamp": "2025-08-13T12:50:14.179Z",
+    "size": 3725,
+    "type": "full",
+    "status": "completed",
+    "databaseSize": 627,
+    "edgeFunctionsCount": 0,
+    "migrationsCount": 0,
+    "checksum": "df6dfcc2e6207e12d99cceee9bb947d4a50c90266c62ac7de0f4b95cfcf07e24",
+    "description": "Real schema from Prisma analysis",
+    "tags": [
+      "real",
+      "schema",
+      "prisma"
+    ]
+  },
+  {
+    "id": "backup_1755092795778_twha91qkb",
+    "timestamp": "2025-08-13T13:46:35.780Z",
+    "size": 8671,
+    "type": "full",
+    "status": "completed",
+    "databaseSize": 627,
+    "edgeFunctionsCount": 9,
+    "migrationsCount": 1,
+    "checksum": "6a25899d383d9cfae7f270447aac424df61bd3b88a0e3a6bd777b16e7d8b0ef9",
+    "description": "Complete backup with Supabase CLI functions",
+    "tags": [
+      "complete",
+      "supabase",
+      "functions"
+    ]
+  }
+]

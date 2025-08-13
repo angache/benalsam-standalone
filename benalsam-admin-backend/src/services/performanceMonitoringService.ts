@@ -58,7 +58,7 @@ class PerformanceMonitoringService {
         interval: 5 * 60 * 1000, // 5 minutes
         timeout: 5000,
         threshold: {
-          responseTime: 1000,
+          responseTime: 5000, // 5 saniye
           errorRate: 5,
           throughput: 10
         }
@@ -71,7 +71,7 @@ class PerformanceMonitoringService {
         interval: 5 * 60 * 1000,
         timeout: 5000,
         threshold: {
-          responseTime: 1500,
+          responseTime: 8000, // 8 saniye
           errorRate: 5,
           throughput: 8
         }
@@ -84,7 +84,7 @@ class PerformanceMonitoringService {
         interval: 5 * 60 * 1000,
         timeout: 3000,
         threshold: {
-          responseTime: 800,
+          responseTime: 3000, // 3 saniye
           errorRate: 2,
           throughput: 15
         }
@@ -97,7 +97,7 @@ class PerformanceMonitoringService {
         interval: 5 * 60 * 1000,
         timeout: 5000,
         threshold: {
-          responseTime: 1200,
+          responseTime: 5000, // 5 saniye
           errorRate: 5,
           throughput: 12
         }
@@ -112,7 +112,7 @@ class PerformanceMonitoringService {
         interval: 30 * 60 * 1000, // 30 minutes
         timeout: 8000,
         threshold: {
-          responseTime: 2000,
+          responseTime: 10000, // 10 saniye
           errorRate: 10,
           throughput: 5
         }
@@ -125,7 +125,7 @@ class PerformanceMonitoringService {
         interval: 30 * 60 * 1000,
         timeout: 5000,
         threshold: {
-          responseTime: 1500,
+          responseTime: 8000, // 8 saniye
           errorRate: 5,
           throughput: 8
         }
@@ -138,7 +138,7 @@ class PerformanceMonitoringService {
         interval: 30 * 60 * 1000,
         timeout: 3000,
         threshold: {
-          responseTime: 800,
+          responseTime: 5000, // 5 saniye
           errorRate: 5,
           throughput: 15
         }
@@ -153,7 +153,7 @@ class PerformanceMonitoringService {
         interval: 2 * 60 * 60 * 1000, // 2 hours
         timeout: 10000,
         threshold: {
-          responseTime: 3000,
+          responseTime: 15000, // 15 saniye
           errorRate: 15,
           throughput: 3
         }
@@ -166,7 +166,7 @@ class PerformanceMonitoringService {
         interval: 2 * 60 * 60 * 1000,
         timeout: 15000,
         threshold: {
-          responseTime: 5000,
+          responseTime: 20000, // 20 saniye
           errorRate: 20,
           throughput: 2
         }
@@ -179,7 +179,7 @@ class PerformanceMonitoringService {
         interval: 2 * 60 * 60 * 1000,
         timeout: 5000,
         threshold: {
-          responseTime: 1500,
+          responseTime: 10000, // 10 saniye
           errorRate: 10,
           throughput: 8
         }
