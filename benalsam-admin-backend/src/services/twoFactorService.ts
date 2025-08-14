@@ -120,13 +120,38 @@ export class TwoFactorService {
   }
 
   /**
+   * Verify TOTP code with secret
+   */
+  private verifyTOTP(secret: string, token: string): boolean {
+    try {
+      return authenticator.verify({
+        token,
+        secret
+      });
+    } catch (error) {
+      logger.error('TOTP verification failed', { error });
+      return false;
+    }
+  }
+
+  /**
    * Enable 2FA for user
    */
-  async enableTwoFactor(userId: string): Promise<void> {
+  async enableTwoFactor(userId: string, secret: string, verificationCode: string): Promise<void> {
     try {
+      // Verify the code first
+      const isValid = this.verifyTOTP(secret, verificationCode);
+      
+      if (!isValid) {
+        throw new Error('Invalid verification code');
+      }
+
       const { error } = await supabase
         .from('profiles')
-        .update({ is_2fa_enabled: true })
+        .update({ 
+          is_2fa_enabled: true,
+          totp_secret: secret
+        })
         .eq('id', userId);
 
       if (error) {

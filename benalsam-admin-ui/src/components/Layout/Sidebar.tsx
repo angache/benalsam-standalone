@@ -148,6 +148,13 @@ const navigationCategories = [
         permission: PERMISSIONS.ADMINS_VIEW,
       },
       {
+        id: '2fa-setup',
+        title: '2FA Setup',
+        path: '/2fa-setup',
+        icon: Shield,
+        permission: PERMISSIONS.ADMINS_VIEW,
+      },
+      {
         id: 'cache-dashboard',
         title: 'Cache Dashboard',
         path: '/cache-dashboard',

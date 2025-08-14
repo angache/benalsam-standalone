@@ -119,8 +119,13 @@ export const useAuthStore = create<AuthState>()(
             const requires2FA = await TwoFactorService.requiresTwoFactor(result.user.id);
             
             if (requires2FA) {
-              console.log('🟡 [AuthStore] 2FA required, navigating to verification screen');
-              // Store pending session for 2FA verification
+              console.log('🟡 [AuthStore] 2FA required, clearing session and navigating to verification screen');
+              
+              // Enterprise Security: Clear session before 2FA verification
+              const { supabase } = await import('../services/supabaseClient');
+              await supabase.auth.signOut();
+              
+              // Store pending credentials for 2FA verification
               set({ 
                 user: null, // Don't set user yet
                 loading: false,
@@ -130,21 +135,19 @@ export const useAuthStore = create<AuthState>()(
               // Direct navigation to 2FA screen with retry mechanism
               const attemptNavigation = async (retryCount = 0) => {
                 const { NavigationService } = await import('../services/navigationService');
-                const { supabase } = await import('../services/supabaseClient');
-                const { data: { session } } = await supabase.auth.getSession();
                 
-                if (session?.user) {
-                  // Check if NavigationService is ready
-                  if (NavigationService.isReady()) {
-                    NavigationService.navigate('TwoFactorVerify', {
-                      userId: session.user.id
-                    });
-                  } else if (retryCount < 10) {
-                    // Retry after 200ms if not ready (max 10 times = 2 seconds)
-                    setTimeout(() => attemptNavigation(retryCount + 1), 200);
-                  } else {
-                    console.warn('NavigationService not ready after retries');
-                  }
+                // Check if NavigationService is ready
+                if (NavigationService.isReady()) {
+                  NavigationService.navigate('TwoFactorVerify', {
+                    userId: result.user.id,
+                    email: email,
+                    password: password
+                  });
+                } else if (retryCount < 10) {
+                  // Retry after 200ms if not ready (max 10 times = 2 seconds)
+                  setTimeout(() => attemptNavigation(retryCount + 1), 200);
+                } else {
+                  console.warn('NavigationService not ready after retries');
                 }
               };
               

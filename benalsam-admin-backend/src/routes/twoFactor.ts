@@ -14,8 +14,8 @@ const router = Router();
  */
 router.post('/setup', authenticateToken, authRateLimiter, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
-    const email = req.user?.email;
+    const userId = req.admin?.id || req.user?.id;
+    const email = req.admin?.email || req.user?.email;
 
     if (!userId || !email) {
       return res.status(401).json({
@@ -36,7 +36,7 @@ router.post('/setup', authenticateToken, authRateLimiter, async (req: Authentica
       message: '2FA setup generated successfully'
     });
       } catch (error) {
-      logger.error('2FA setup failed', { error, userId: req.user?.id });
+      logger.error('2FA setup failed', { error, userId: req.admin?.id || req.user?.id });
       return res.status(500).json({
         error: 'Internal server error',
         message: 'Failed to generate 2FA setup'
@@ -49,15 +49,14 @@ router.post('/setup', authenticateToken, authRateLimiter, async (req: Authentica
  * @desc Verify 2FA token
  * @access Private
  */
-router.post('/verify', authenticateToken, authRateLimiter, async (req: AuthenticatedRequest, res: Response) => {
+router.post('/verify', authRateLimiter, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
-    const { token } = req.body;
+    const { userId, token } = req.body;
 
     if (!userId) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'User not authenticated'
+      return res.status(400).json({
+        error: 'Bad request',
+        message: 'User ID is required'
       });
     }
 
@@ -83,7 +82,7 @@ router.post('/verify', authenticateToken, authRateLimiter, async (req: Authentic
       });
     }
       } catch (error) {
-      logger.error('2FA verification failed', { error, userId: req.user?.id });
+      logger.error('2FA verification failed', { error, userId: req.admin?.id || req.user?.id });
       return res.status(500).json({
         error: 'Internal server error',
         message: 'Failed to verify token'
@@ -98,7 +97,7 @@ router.post('/verify', authenticateToken, authRateLimiter, async (req: Authentic
  */
 router.post('/enable', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.admin?.id || req.user?.id;
 
     if (!userId) {
       return res.status(401).json({
@@ -107,14 +106,23 @@ router.post('/enable', authenticateToken, async (req: AuthenticatedRequest, res:
       });
     }
 
-    await twoFactorService.enableTwoFactor(userId);
+    const { secret, verificationCode } = req.body;
+    
+    if (!secret || !verificationCode) {
+      return res.status(400).json({
+        error: 'Bad request',
+        message: 'Secret and verification code are required'
+      });
+    }
+
+    await twoFactorService.enableTwoFactor(userId, secret, verificationCode);
 
     return res.json({
       success: true,
       message: '2FA enabled successfully'
     });
       } catch (error) {
-      logger.error('2FA enable failed', { error, userId: req.user?.id });
+      logger.error('2FA enable failed', { error, userId: req.admin?.id || req.user?.id });
       return res.status(500).json({
         error: 'Internal server error',
         message: 'Failed to enable 2FA'
@@ -129,7 +137,7 @@ router.post('/enable', authenticateToken, async (req: AuthenticatedRequest, res:
  */
 router.post('/disable', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.admin?.id || req.user?.id;
 
     if (!userId) {
       return res.status(401).json({
@@ -145,7 +153,7 @@ router.post('/disable', authenticateToken, async (req: AuthenticatedRequest, res
       message: '2FA disabled successfully'
     });
       } catch (error) {
-      logger.error('2FA disable failed', { error, userId: req.user?.id });
+      logger.error('2FA disable failed', { error, userId: req.admin?.id || req.user?.id });
       return res.status(500).json({
         error: 'Internal server error',
         message: 'Failed to disable 2FA'
@@ -160,7 +168,7 @@ router.post('/disable', authenticateToken, async (req: AuthenticatedRequest, res
  */
 router.post('/backup-codes/regenerate', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.admin?.id || req.user?.id;
 
     if (!userId) {
       return res.status(401).json({
@@ -179,7 +187,7 @@ router.post('/backup-codes/regenerate', authenticateToken, async (req: Authentic
       message: 'Backup codes regenerated successfully'
     });
       } catch (error) {
-      logger.error('Backup codes regeneration failed', { error, userId: req.user?.id });
+      logger.error('Backup codes regeneration failed', { error, userId: req.admin?.id || req.user?.id });
       return res.status(500).json({
         error: 'Internal server error',
         message: 'Failed to regenerate backup codes'
@@ -194,7 +202,7 @@ router.post('/backup-codes/regenerate', authenticateToken, async (req: Authentic
  */
 router.get('/status', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.admin?.id || req.user?.id;
 
     if (!userId) {
       return res.status(401).json({
@@ -212,7 +220,7 @@ router.get('/status', authenticateToken, async (req: AuthenticatedRequest, res: 
       }
     });
       } catch (error) {
-      logger.error('2FA status check failed', { error, userId: req.user?.id });
+      logger.error('2FA status check failed', { error, userId: req.admin?.id || req.user?.id });
       return res.status(500).json({
         error: 'Internal server error',
         message: 'Failed to check 2FA status'

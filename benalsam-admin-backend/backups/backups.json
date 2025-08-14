@@ -1,69 +1,34 @@
 [
   {
-    "id": "backup_1755201431120_4elfs9tpo",
-    "timestamp": "2025-08-14T19:57:11.120Z",
-    "size": 123984,
+    "id": "backup_1755212401105_uk81srvka",
+    "timestamp": "2025-08-14T23:00:01.105Z",
+    "size": 522973,
     "type": "full",
     "status": "completed",
     "databaseSize": 627,
     "edgeFunctionsCount": 9,
     "migrationsCount": 6,
-    "checksum": "4b05a7f0aa88ab2ca2a362efce4ed70e5b71e32e5af4cc61b7c7f040a6637011",
-    "description": "Temiz sistem - ilk backup",
+    "checksum": "23356a151c6ad11f5706a5e92f5cddf98945c3637b6a33a579e191e84cdb5690",
+    "description": "Scheduled backup: test schedule",
     "tags": [
-      "clean",
-      "first",
-      "system"
+      "scheduled",
+      "test schedule"
     ]
   },
   {
-    "id": "backup_1755201788373_7y4agvk52",
-    "timestamp": "2025-08-14T20:03:08.373Z",
-    "size": 123988,
+    "id": "backup_1755212400443_hpdzbk3dw",
+    "timestamp": "2025-08-14T23:00:00.443Z",
+    "size": 522972,
     "type": "full",
     "status": "completed",
     "databaseSize": 627,
     "edgeFunctionsCount": 9,
     "migrationsCount": 6,
-    "checksum": "fdedc91bbfe9a8f0dd3a43b6fb25570b2fa6d7d9197ea9d40fbbfa2e47c292ce",
-    "description": "Seeds dahil tam backup",
+    "checksum": "db1d84befab1e425c93fc8966e2d0bcd97519b14868000b7782c0de23ad35a12",
+    "description": "Scheduled backup: test schedule",
     "tags": [
-      "complete",
-      "with-seeds",
-      "full-system"
-    ]
-  },
-  {
-    "id": "backup_1755201968575_aax52hybq",
-    "timestamp": "2025-08-14T20:06:08.575Z",
-    "size": 123995,
-    "type": "full",
-    "status": "completed",
-    "databaseSize": 627,
-    "edgeFunctionsCount": 9,
-    "migrationsCount": 6,
-    "checksum": "a675c8e8c5e81b28cd2b1396d45df02900e60aa47bbf823ac41476ac9a52f4ff",
-    "description": "Seeds dahil tam sistem backup",
-    "tags": [
-      "complete",
-      "with-seeds",
-      "full-data"
-    ]
-  },
-  {
-    "id": "backup_1755202741312_dz36onemd",
-    "timestamp": "2025-08-14T20:19:01.312Z",
-    "size": 522969,
-    "type": "full",
-    "status": "completed",
-    "databaseSize": 627,
-    "edgeFunctionsCount": 9,
-    "migrationsCount": 6,
-    "checksum": "ba9f20579a91c72b5a6b6f3144be6fa88e1d6aaa6d15c667dff159a68bcd318b",
-    "description": "Test backup with seeds",
-    "tags": [
-      "test",
-      "seeds"
+      "scheduled",
+      "test schedule"
     ]
   }
 ]

@@ -33,37 +33,59 @@ export const authenticateToken = async (
     }
 
     console.log('🔐 Verifying token...');
-    const decoded = jwtUtils.verify(token);
-    console.log('🔐 Token decoded:', decoded);
     
-    // Get admin user from Supabase
-    const { data: admin, error } = await supabase
-      .from('admin_users')
-      .select('*')
-      .eq('id', decoded.adminId)
-      .single();
+    // First try to verify as admin token
+    try {
+      const decoded = jwtUtils.verify(token);
+      console.log('🔐 Token decoded as admin:', decoded);
+      
+      // Get admin user from Supabase
+      const { data: admin, error } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('id', decoded.adminId)
+        .single();
 
-    if (error || !admin || !admin.is_active) {
-      console.log('❌ Admin not found or inactive:', { error, admin: !!admin, isActive: admin?.is_active });
-      ApiResponseUtil.unauthorized(res, 'Invalid or inactive admin account');
-      return;
+      if (!error && admin && admin.is_active) {
+        // Get user permissions
+        const permissions = await PermissionService.getAdminPermissions(admin.id);
+
+        // Update last login
+        await supabase
+          .from('admin_users')
+          .update({ last_login: new Date().toISOString() })
+          .eq('id', admin.id);
+
+        console.log('✅ Auth successful for admin:', admin.email);
+        req.admin = {
+          ...admin,
+          permissions
+        };
+        next();
+        return;
+      }
+    } catch (adminError) {
+      console.log('🔐 Not an admin token, trying Supabase token...');
     }
 
-    // Get user permissions
-    const permissions = await PermissionService.getAdminPermissions(admin.id);
+    // If not admin token, try as Supabase token
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser(token);
+      
+      if (error || !user) {
+        console.log('❌ Supabase user not found:', { error, user: !!user });
+        ApiResponseUtil.unauthorized(res, 'Invalid token');
+        return;
+      }
 
-    // Update last login
-    await supabase
-      .from('admin_users')
-      .update({ last_login: new Date().toISOString() })
-      .eq('id', admin.id);
-
-    console.log('✅ Auth successful for admin:', admin.email);
-    req.admin = {
-      ...admin,
-      permissions
-    };
-    next();
+      console.log('✅ Auth successful for user:', user.email);
+      req.user = user;
+      next();
+    } catch (userError) {
+      console.log('❌ Both admin and user auth failed');
+      logger.error('Authentication error:', userError);
+      ApiResponseUtil.unauthorized(res, 'Invalid token');
+    }
   } catch (error) {
     logger.error('Authentication error:', error);
     ApiResponseUtil.unauthorized(res, 'Invalid token');

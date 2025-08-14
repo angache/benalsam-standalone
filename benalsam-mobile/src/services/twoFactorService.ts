@@ -333,4 +333,97 @@ export class TwoFactorService {
       return false;
     }
   }
+
+  /**
+   * Enterprise 2FA verification with session creation
+   * @param userId User ID
+   * @param code 2FA code
+   * @param email User email for re-login
+   * @param password User password for re-login
+   * @returns Verification result with user data
+   */
+  static async verify2FA(
+    userId: string,
+    code: string,
+    email?: string,
+    password?: string
+  ): Promise<{ success: boolean; error?: string; user?: any }> {
+    try {
+      DebugLogger.info('Enterprise 2FA verification attempt', { userId });
+      
+      // Use backend rate limiting for 2FA verification
+      const API_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3002/api/v1';
+      
+      const response = await fetch(`${API_URL}/2fa/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId,
+          token: code
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        DebugLogger.error('Backend 2FA verification failed', result);
+        return { success: false, error: result.message || '2FA verification failed' };
+      }
+
+      // 2FA verification successful, now create session
+      DebugLogger.info('2FA verification successful, creating session...');
+      
+      if (email && password) {
+        const { supabase } = await import('./supabaseClient');
+        
+        // Re-login to create session
+        const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (loginError) {
+          DebugLogger.error('Login after 2FA failed', loginError);
+          return { success: false, error: 'Failed to create session after 2FA verification' };
+        }
+
+        if (loginData.user) {
+          // Fetch user profile
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', loginData.user.id)
+            .single();
+
+          if (profile) {
+            const user = {
+              id: profile.id,
+              email: profile.email,
+              name: profile.name || 'Kullanıcı',
+              avatar_url: profile.avatar_url,
+              rating: profile.rating,
+              total_ratings: profile.total_ratings,
+              rating_sum: profile.rating_sum,
+              created_at: profile.created_at,
+              updated_at: profile.updated_at
+            };
+
+            DebugLogger.info('Enterprise 2FA session created successfully', { 
+              userId: user.id, 
+              userEmail: user.email 
+            });
+            
+            return { success: true, user };
+          }
+        }
+      }
+
+      return { success: false, error: 'Failed to create user session' };
+    } catch (error) {
+      DebugLogger.error('Enterprise 2FA verification error', error);
+      return { success: false, error: '2FA verification failed' };
+    }
+  }
 } 

@@ -9,10 +9,11 @@ interface AuthState {
   currentUser: User | null;
   loading: boolean;
   initialized: boolean;
-  signIn: (email: string, password: string) => Promise<{ error?: string }>;
+  signIn: (email: string, password: string) => Promise<{ error?: string; requires2FA?: boolean; userId?: string }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   initialize: () => Promise<void>;
+  verify2FA: (userId: string, code: string) => Promise<{ error?: string }>;
 }
 
 // Enterprise Session Logger Service
@@ -208,6 +209,20 @@ export const useAuthStore = create<AuthState>((set, get) => {
             { user_id: data.user.id, email: data.user.email }
           );
 
+          // Check if user has 2FA enabled
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_2fa_enabled')
+            .eq('id', data.user.id)
+            .single();
+
+          if (profile?.is_2fa_enabled) {
+            console.log('🔐 [AuthStore] 2FA enabled for user:', data.user.email);
+            // 2FA gerektiğinde session oluşturma, sadece bilgi döndür
+            set({ loading: false });
+            return { error: '2FA_REQUIRED', requires2FA: true, userId: data.user.id };
+          }
+
           const basicUser = {
             id: data.user.id,
             email: data.user.email,
@@ -236,6 +251,96 @@ export const useAuthStore = create<AuthState>((set, get) => {
         console.error('🔐 [AuthStore] Sign in exception:', error);
         set({ loading: false });
         return { error: 'Giriş yapılırken bir hata oluştu' };
+      }
+    },
+
+        verify2FA: async (userId: string, code: string, email?: string, password?: string) => {
+      console.log('🔐 [AuthStore] 2FA verification attempt:', { userId });
+      set({ loading: true });
+      
+      try {
+        // Backend'e 2FA doğrulama isteği gönder (session olmadan)
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/2fa/verify`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            userId,
+            token: code
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          console.error('🔐 [AuthStore] 2FA verification failed:', result);
+          set({ loading: false });
+          return { error: result.message || '2FA doğrulama başarısız' };
+        }
+
+        // Doğrulama başarılı, şimdi session oluştur
+        console.log('🔐 [AuthStore] 2FA verification successful, creating session...');
+        console.log('🔐 [AuthStore] Email and password check:', { hasEmail: !!email, hasPassword: !!password });
+        
+        // Email ve password ile tekrar login yap
+        if (email && password) {
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (loginError) {
+            console.error('🔐 [AuthStore] Login after 2FA failed:', loginError);
+            set({ loading: false });
+            return { error: 'Giriş yapılamadı' };
+          }
+
+          if (loginData.user) {
+            // Kullanıcı bilgilerini getir
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', loginData.user.id)
+              .single();
+
+            if (profile) {
+              const basicUser = {
+                id: profile.id,
+                email: profile.email,
+                name: profile.name || 'Kullanıcı',
+                avatar_url: profile.avatar_url,
+                rating: profile.rating,
+                total_ratings: profile.total_ratings,
+                rating_sum: profile.rating_sum,
+                created_at: profile.created_at,
+                updated_at: profile.updated_at
+              };
+
+              console.log('🔐 [AuthStore] 2FA verification successful, setting user:', { 
+                userId: basicUser.id, 
+                userEmail: basicUser.email 
+              });
+              
+              // Session oluştur ve kullanıcıyı set et
+              set({ user: basicUser, currentUser: basicUser, loading: false });
+              
+              // Enterprise Session Logging
+              await sessionLoggerService.logSessionActivity(
+                'login',
+                { user_id: basicUser.id, email: basicUser.email, method: '2fa_verified' }
+              );
+              
+              console.log('🔐 [AuthStore] 2FA session created successfully');
+            }
+          }
+        }
+
+        return {};
+      } catch (error) {
+        console.error('🔐 [AuthStore] 2FA verification error:', error);
+        set({ loading: false });
+        return { error: '2FA doğrulama hatası' };
       }
     },
 

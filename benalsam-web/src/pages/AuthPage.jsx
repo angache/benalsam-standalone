@@ -30,6 +30,8 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
+  
+
 
   useEffect(() => {
     setAction(initialAction);
@@ -133,7 +135,14 @@ const AuthPage = () => {
     } else { 
       const result = await signIn(formData.email, formData.password);
       
-      if (result.error) {
+      console.log('🔐 Login result:', result);
+      
+      if (result.error === '2FA_REQUIRED' || result.requires2FA) {
+        // 2FA gerektiğinde Supabase session'ını temizle ve ayrı sayfaya yönlendir
+        await supabase.auth.signOut();
+        navigate(`/2fa?userId=${result.userId}&email=${formData.email}&password=${encodeURIComponent(formData.password)}`, { replace: true });
+        return;
+      } else if (result.error) {
         toast({ title: "Giriş Başarısız", description: result.error, variant: "destructive" });
       } else {
         toast({ title: "Başarılı!", description: "Başarıyla giriş yaptınız.", variant: "default" });
@@ -145,6 +154,8 @@ const AuthPage = () => {
         setFormData({ name: '', email: '', password: '', confirmPassword: '' });
     }
   };
+
+
 
   const switchAuthAction = (newAction) => {
     setAction(newAction);
@@ -158,6 +169,8 @@ const AuthPage = () => {
   const currentTitle = action === 'login' ? 'Giriş Yap' : action === 'register' ? 'Kayıt Ol' : 'Şifremi Unuttum';
   const switchText = action === 'login' ? 'Hesabın yok mu?' : action === 'register' ? 'Zaten hesabın var mı?' : 'Şifreni hatırladın mı?';
   const switchLinkText = action === 'login' ? 'Kayıt Ol' : action === 'register' ? 'Giriş Yap' : 'Giriş Yap';
+
+
 
   return (
     <motion.div 
@@ -181,7 +194,6 @@ const AuthPage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Forgot Password Form */}
           {action === 'forgot-password' ? (
             <>
               {forgotPasswordSent ? (

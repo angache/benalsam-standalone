@@ -22,6 +22,28 @@ const SecurityPage = () => {
   const navigate = useNavigate();
   const { triggerHaptic } = useHapticFeedback();
   const { currentUser } = useAuthStore();
+  const [userProfile, setUserProfile] = useState(null);
+  
+  // Refresh user data to get latest 2FA status
+  const refreshUserData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile) {
+          setUserProfile(profile);
+          console.log('✅ User profile refreshed:', profile);
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+    }
+  };
   
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -31,6 +53,11 @@ const SecurityPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+
+  // Refresh user data on component mount
+  React.useEffect(() => {
+    refreshUserData();
+  }, []);
 
   const validatePasswords = () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
@@ -315,14 +342,30 @@ const SecurityPage = () => {
             İki Aşamalı Doğrulama (2FA)
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Hesabınıza ekstra bir güvenlik katmanı ekleyin. SMS veya uygulama ile doğrulama yapabilirsiniz.
+            Hesabınıza ekstra bir güvenlik katmanı ekleyin. Google Authenticator veya benzeri uygulamalarla doğrulama yapabilirsiniz.
           </p>
-          <button
-            onClick={() => alert('Bu özellik yakında eklenecek!')}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          >
-            2FA Ayarlarını Yönet (Yakında)
-          </button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className={`w-3 h-3 rounded-full ${userProfile?.is_2fa_enabled ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {userProfile?.is_2fa_enabled ? '2FA Aktif' : '2FA Pasif'}
+              </span>
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={refreshUserData}
+                className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
+              >
+                Yenile
+              </button>
+              <button
+                onClick={() => navigate('/ayarlar2/guvenlik/2fa-setup')}
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors"
+              >
+                {userProfile?.is_2fa_enabled ? '2FA Ayarlarını Değiştir' : '2FA Kurulumu'}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Active Sessions */}

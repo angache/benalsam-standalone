@@ -30,6 +30,7 @@ import PerformanceBaselinePage from './pages/PerformanceBaselinePage';
 import BackupDashboardPage from './pages/BackupDashboardPage';
 import SchedulingDashboardPage from './pages/SchedulingDashboardPage';
 import ProgressDashboardPage from './pages/ProgressDashboardPage';
+import TwoFactorSetupPage from './pages/TwoFactorSetupPage';
 import { useAuthStore } from './stores/authStore';
 import { CustomThemeProvider } from './contexts/ThemeContext';
 
@@ -336,6 +337,16 @@ function App() {
         <ProtectedRoute>
           <Layout>
             <ProgressDashboardPage />
+          </Layout>
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/2fa-setup"
+      element={
+        <ProtectedRoute>
+          <Layout>
+            <TwoFactorSetupPage />
           </Layout>
         </ProtectedRoute>
       }

@@ -24,6 +24,7 @@ const SearchResultsPage = lazy(() => import('@/pages/SearchResultsPage.jsx'));
 
 const CreateListingPage = lazy(() => import('@/pages/CreateListingPage.jsx'));
 const AuthPage = lazy(() => import('@/pages/AuthPage.jsx'));
+const TwoFactorAuthPage = lazy(() => import('@/pages/TwoFactorAuthPage.jsx'));
 const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage.jsx'));
 const MakeOfferPage = lazy(() => import('@/pages/MakeOfferPage.jsx'));
 const ReportListingPage = lazy(() => import('@/pages/ReportListingPage.jsx'));
@@ -59,6 +60,7 @@ import LocationPage from '@/pages/SettingsPage/LocationPage';
 import EditProfilePage from '@/pages/SettingsPage/ProfilePage';
 import SettingsTrustScorePage from '@/pages/SettingsPage/TrustScorePage';
 import SecurityPage from '@/pages/SettingsPage/SecurityPage';
+import TwoFactorSetupPage from '@/pages/SettingsPage/TwoFactorSetupPage';
 import NotificationPage from '@/pages/SettingsPage/NotificationPage';
 import PrivacyPage from '@/pages/SettingsPage/PrivacyPage';
 import BlockedUsersPage from '@/pages/SettingsPage/BlockedUsersPage';
@@ -203,6 +205,7 @@ const AppRoutes = ({ currentUser }) => {
           element={<ProtectedRoute>{withPageErrorBoundary(FollowingPage, 'Takip Edilenler')}</ProtectedRoute>} 
         />
         <Route path="/auth/callback" element={withPageErrorBoundary(AuthCallbackPage, 'Auth Callback')} />
+        <Route path="/2fa" element={withPageErrorBoundary(TwoFactorAuthPage, '2FA Doğrulama')} />
         
         <Route 
           path="/premium-dashboard" 
@@ -284,6 +287,14 @@ const AppRoutes = ({ currentUser }) => {
           <ProtectedRoute>
             <SettingsLayout2>
               <SecurityPage />
+            </SettingsLayout2>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/ayarlar2/guvenlik/2fa-setup" element={
+          <ProtectedRoute>
+            <SettingsLayout2>
+              <TwoFactorSetupPage />
             </SettingsLayout2>
           </ProtectedRoute>
         } />

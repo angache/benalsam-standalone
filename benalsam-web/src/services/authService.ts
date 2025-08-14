@@ -101,6 +101,20 @@ export class AuthService {
 
       // Kullanıcı bilgilerini getir
       const user = await this.getUserProfile(authData.user.id);
+      
+      // 2FA kontrolü
+      if (user.is_2fa_enabled) {
+        console.log('🔐 2FA enabled for user:', user.email);
+        return { 
+          error: { 
+            message: '2FA doğrulaması gerekli', 
+            code: '2FA_REQUIRED',
+            requires2FA: true,
+            userId: user.id
+          } 
+        };
+      }
+      
       return { data: user };
     } catch (error) {
       console.error('Sign in error:', error);
@@ -146,6 +160,39 @@ export class AuthService {
     } catch (error) {
       console.error('Get session error:', error);
       return { error: { message: 'Oturum bilgisi alınamadı', code: 'SESSION_ERROR' } };
+    }
+  }
+
+  /**
+   * 2FA doğrulama
+   */
+  static async verify2FA(userId: string, code: string): Promise<ApiResponse<User>> {
+    try {
+      // Backend'e 2FA doğrulama isteği gönder
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/2fa/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        body: JSON.stringify({
+          userId,
+          token: code
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return { error: { message: result.message || '2FA doğrulama başarısız', code: '2FA_VERIFICATION_FAILED' } };
+      }
+
+      // Doğrulama başarılı, kullanıcı bilgilerini getir
+      const user = await this.getUserProfile(userId);
+      return { data: user };
+    } catch (error) {
+      console.error('2FA verification error:', error);
+      return { error: { message: '2FA doğrulama hatası', code: '2FA_ERROR' } };
     }
   }
 

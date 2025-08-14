@@ -23,6 +23,8 @@ interface TwoFactorVerifyScreenProps {
   route: {
     params: {
       userId: string;
+      email?: string;
+      password?: string;
       onSuccess?: () => void;
     };
   };
@@ -168,29 +170,20 @@ export default function TwoFactorVerifyScreen({ route }: TwoFactorVerifyScreenPr
     try {
       setLoading(true);
 
-      const result = await TwoFactorService.verifyTwoFactor(userId, verificationCode);
+      // Enterprise 2FA verification with session creation
+      const { email, password } = route.params;
+      const result = await TwoFactorService.verify2FA(userId, verificationCode, email, password);
 
-      if (result.success) {
+      if (result.success && result.user) {
         setVerificationCode('');
         
         // Set user in authStore after successful 2FA verification
-        const { supabase } = await import('../services/supabaseClient');
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-          // Fetch user profile and set in authStore
-          const { AuthService } = await import('../services/authService');
-          const user = await AuthService.fetchUserProfile(session.user.id);
-          
-          if (user) {
-            useAuthStore.getState().setUser(user);
-            useAuthStore.getState().setRequires2FA(false);
-          }
-        }
+        useAuthStore.getState().setUser(result.user);
+        useAuthStore.getState().setRequires2FA(false);
         
         Alert.alert(
           'Başarılı',
-          'İki faktörlü kimlik doğrulama başarılı',
+          'Güvenlik doğrulaması tamamlandı',
           [
             {
               text: 'Devam Et',
