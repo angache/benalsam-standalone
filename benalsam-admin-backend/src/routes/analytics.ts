@@ -489,6 +489,61 @@ router.get('/session/:sessionId', authenticateToken, async (req, res) => {
   }
 });
 
+// Dashboard stats endpoint
+router.get('/dashboard-stats', authenticateToken, async (req, res) => {
+  try {
+    const { days = 7 } = req.query;
+    
+    // Get various analytics stats for dashboard
+    const stats = {
+      totalEvents: 0,
+      totalSessions: 0,
+      totalUsers: 0,
+      eventTypes: [],
+      recentActivity: [],
+      performanceMetrics: {},
+      userJourneyStats: {}
+    };
+    
+    // Get basic stats from userBehaviorService
+    try {
+      const analyticsStats = await userBehaviorService.getAnalyticsStats();
+      if (analyticsStats) {
+        stats.totalEvents = analyticsStats.total_events || 0;
+        stats.totalSessions = analyticsStats.total_sessions || 0;
+        stats.totalUsers = analyticsStats.unique_users || 0;
+      }
+    } catch (error) {
+      logger.warn('Could not fetch analytics stats:', error);
+    }
+    
+    // Get event types
+    try {
+      const eventTypes = await userBehaviorService.getAnalyticsEventTypes(Number(days));
+      stats.eventTypes = eventTypes || [];
+    } catch (error) {
+      logger.warn('Could not fetch event types:', error);
+    }
+    
+    // Get recent activity
+    try {
+      const recentEvents = await userBehaviorService.getAnalyticsEvents({
+        page: 1,
+        limit: 10,
+        start_date: new Date(Date.now() - Number(days) * 24 * 60 * 60 * 1000).toISOString()
+      });
+      stats.recentActivity = recentEvents?.events || [];
+    } catch (error) {
+      logger.warn('Could not fetch recent activity:', error);
+    }
+    
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    logger.error('Error getting dashboard stats:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 // Session-based analytics endpoints
 router.get('/session-activities', authenticateToken, async (req, res) => {
   try {

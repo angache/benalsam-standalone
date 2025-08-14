@@ -203,6 +203,20 @@ const navigationCategories = [
         permission: PERMISSIONS.ADMINS_VIEW,
       },
       {
+        id: 'scheduling-dashboard',
+        title: 'Backup Scheduling',
+        path: '/scheduling-dashboard',
+        icon: Activity,
+        permission: PERMISSIONS.ADMINS_VIEW,
+      },
+      {
+        id: 'progress-dashboard',
+        title: 'Operation Progress',
+        path: '/progress-dashboard',
+        icon: Activity,
+        permission: PERMISSIONS.ADMINS_VIEW,
+      },
+      {
         id: 'performance-test',
         title: 'Performance Test',
         path: '/performance-test',

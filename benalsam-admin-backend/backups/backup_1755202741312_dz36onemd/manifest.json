@@ -1,0 +1,29 @@
+{
+  "id": "backup_1755202741312_dz36onemd",
+  "timestamp": "2025-08-14T20:19:01.312Z",
+  "size": 0,
+  "type": "full",
+  "status": "in_progress",
+  "databaseSize": 627,
+  "edgeFunctionsCount": 9,
+  "migrationsCount": 6,
+  "checksum": "",
+  "description": "Test backup with seeds",
+  "tags": [
+    "test",
+    "seeds"
+  ],
+  "version": "1.0.0",
+  "createdBy": "Benalsam Backup Service",
+  "components": {
+    "database": true,
+    "edgeFunctions": true,
+    "migrations": true,
+    "seeds": true
+  },
+  "environment": {
+    "nodeVersion": "v20.18.0",
+    "platform": "darwin",
+    "timestamp": "2025-08-14T20:19:05.091Z"
+  }
+}

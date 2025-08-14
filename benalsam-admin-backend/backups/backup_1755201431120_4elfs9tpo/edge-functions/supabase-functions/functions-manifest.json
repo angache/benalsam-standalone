@@ -1,0 +1,72 @@
+{
+  "totalFunctions": 9,
+  "functions": [
+    {
+      "name": "auto-deactivate-listings",
+      "slug": "auto-deactivate-listings",
+      "status": "ACTIVE",
+      "version": 1,
+      "updatedAt": "2025-08-14T19:57:11.153Z"
+    },
+    {
+      "name": "calculate-trust-score",
+      "slug": "calculate-trust-score",
+      "status": "ACTIVE",
+      "version": 1,
+      "updatedAt": "2025-08-14T19:57:11.153Z"
+    },
+    {
+      "name": "create-super-admin",
+      "slug": "create-super-admin",
+      "status": "ACTIVE",
+      "version": 1,
+      "updatedAt": "2025-08-14T19:57:11.153Z"
+    },
+    {
+      "name": "fetch-unsplash-images",
+      "slug": "fetch-unsplash-images",
+      "status": "ACTIVE",
+      "version": 1,
+      "updatedAt": "2025-08-14T19:57:11.153Z"
+    },
+    {
+      "name": "increment-profile-view",
+      "slug": "increment-profile-view",
+      "status": "ACTIVE",
+      "version": 1,
+      "updatedAt": "2025-08-14T19:57:11.153Z"
+    },
+    {
+      "name": "log-user-activity",
+      "slug": "log-user-activity",
+      "status": "ACTIVE",
+      "version": 1,
+      "updatedAt": "2025-08-14T19:57:11.153Z"
+    },
+    {
+      "name": "send-notification",
+      "slug": "send-notification",
+      "status": "ACTIVE",
+      "version": 1,
+      "updatedAt": "2025-08-14T19:57:11.153Z"
+    },
+    {
+      "name": "session-logger",
+      "slug": "session-logger",
+      "status": "ACTIVE",
+      "version": 1,
+      "updatedAt": "2025-08-14T19:57:11.153Z"
+    },
+    {
+      "name": "update-popularity-scores",
+      "slug": "update-popularity-scores",
+      "status": "ACTIVE",
+      "version": 1,
+      "updatedAt": "2025-08-14T19:57:11.153Z"
+    }
+  ],
+  "backupDate": "2025-08-14T19:57:11.153Z",
+  "environment": "development",
+  "notes": "Edge functions backup from local directory",
+  "source": "local"
+}

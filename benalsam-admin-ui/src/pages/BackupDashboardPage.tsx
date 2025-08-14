@@ -51,11 +51,15 @@ import {
   Schedule as ScheduleIcon,
   Security as SecurityIcon,
   ExpandMore as ExpandMoreIcon,
-  Terminal as TerminalIcon
+  Terminal as TerminalIcon,
+  FolderZip as FolderZipIcon
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiService from '../services/api';
+import ZipViewer from '../components/ZipViewer';
+import ActionButtonGroup from '../components/ActionButtonGroup';
 
+// Backup types
 interface BackupInfo {
   id: string;
   timestamp: string;
@@ -99,6 +103,8 @@ const BackupDashboardPage: React.FC = () => {
     includeMigrations: true,
     backupBeforeRestore: true
   });
+  const [zipViewerOpen, setZipViewerOpen] = useState(false);
+  const [selectedBackupForZip, setSelectedBackupForZip] = useState<string>('');
 
   // Supabase CLI states
   const [supabaseStatus, setSupabaseStatus] = useState<any>(null);
@@ -496,48 +502,62 @@ const BackupDashboardPage: React.FC = () => {
                         </Box>
                       </TableCell>
                       <TableCell>
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Tooltip title="Restore">
-                            <IconButton
-                              size="small"
-                              onClick={() => {
+                        <ActionButtonGroup
+                          primaryActions={[
+                            {
+                              icon: <FolderZipIcon fontSize="small" />,
+                              tooltip: "İçeriği Görüntüle",
+                              onClick: () => {
+                                setSelectedBackupForZip(backup.id);
+                                setZipViewerOpen(true);
+                              },
+                              disabled: backup.status !== 'completed',
+                              color: 'secondary',
+                              ariaLabel: "Backup içeriğini görüntüle"
+                            },
+                            {
+                              icon: <DownloadIcon fontSize="small" />,
+                              tooltip: "İndir",
+                              onClick: () => downloadBackup(backup.id),
+                              disabled: backup.status !== 'completed',
+                              color: 'success',
+                              ariaLabel: "Backup dosyasını indir"
+                            }
+                          ]}
+                          secondaryActions={[
+                            {
+                              icon: <RestoreIcon fontSize="small" />,
+                              tooltip: "Geri Yükle",
+                              onClick: () => {
                                 setSelectedBackup(backup);
                                 setRestoreDialogOpen(true);
-                              }}
-                              disabled={backup.status !== 'completed'}
-                            >
-                              <RestoreIcon />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Download">
-                            <IconButton
-                              size="small"
-                              onClick={() => downloadBackup(backup.id)}
-                              disabled={backup.status !== 'completed'}
-                            >
-                              <DownloadIcon />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Validate">
-                            <IconButton
-                              size="small"
-                              onClick={() => validateBackup.mutate(backup.id)}
-                              disabled={validateBackup.isPending}
-                            >
-                              <CheckCircleIcon />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Delete">
-                            <IconButton
-                              size="small"
-                              color="error"
-                              onClick={() => handleDeleteBackup(backup.id)}
-                              disabled={deleteBackup.isPending}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
+                              },
+                              disabled: backup.status !== 'completed',
+                              color: 'warning',
+                              ariaLabel: "Backup'ı geri yükle"
+                            },
+                            {
+                              icon: <CheckCircleIcon fontSize="small" />,
+                              tooltip: "Doğrula",
+                              onClick: () => validateBackup.mutate(backup.id),
+                              loading: validateBackup.isPending,
+                              color: 'primary',
+                              ariaLabel: "Backup'ı doğrula"
+                            }
+                          ]}
+                          destructiveActions={[
+                            {
+                              icon: <DeleteIcon fontSize="small" />,
+                              tooltip: "Sil",
+                              onClick: () => handleDeleteBackup(backup.id),
+                              loading: deleteBackup.isPending,
+                              color: 'error',
+                              ariaLabel: "Backup'ı sil"
+                            }
+                          ]}
+                          size="small"
+                          justifyContent="flex-end"
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -1339,6 +1359,17 @@ const BackupDashboardPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Zip Viewer Dialog */}
+      {zipViewerOpen && selectedBackupForZip && (
+        <ZipViewer
+          backupId={selectedBackupForZip}
+          onClose={() => {
+            setZipViewerOpen(false);
+            setSelectedBackupForZip('');
+          }}
+        />
+      )}
     </Box>
   );
 };

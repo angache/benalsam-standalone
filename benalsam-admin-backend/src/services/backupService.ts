@@ -498,78 +498,65 @@ SELECT 'Backup created successfully' as status;
     }
   }
 
-  // Backup edge functions using Supabase API or CLI
+  // Backup edge functions from local directory
   private async backupSupabaseEdgeFunctions(backupPath: string): Promise<void> {
     logger.info('Starting Supabase edge functions backup');
 
     try {
-      // Get functions list using API or CLI
-      const functions = await this.getFunctionsList();
-
-      if (functions.length === 0) {
-        logger.warn('No functions found, skipping backup');
+      // Check if local edge functions directory exists
+      const localFunctionsDir = path.join(process.cwd(), 'supabase', 'functions');
+      
+      if (!(await this.directoryExists(localFunctionsDir))) {
+        logger.warn('Local edge functions directory not found', { path: localFunctionsDir });
         return;
       }
 
-      // Create edge functions backup
+      // Create edge functions backup directory
       const cliBackupPath = path.join(backupPath, 'supabase-functions');
       await fs.mkdir(cliBackupPath, { recursive: true });
 
+      // Get all function directories
+      const entries = await fs.readdir(localFunctionsDir, { withFileTypes: true });
+      const functionDirs = entries.filter(entry => entry.isDirectory()).map(entry => entry.name);
+
+      if (functionDirs.length === 0) {
+        logger.warn('No function directories found in local edge functions directory');
+        return;
+      }
+
       // Create detailed functions manifest
       const functionsManifest = {
-        totalFunctions: functions.length,
-        functions: functions,
+        totalFunctions: functionDirs.length,
+        functions: functionDirs.map(name => ({
+          name: name,
+          slug: name,
+          status: 'ACTIVE',
+          version: 1,
+          updatedAt: new Date().toISOString()
+        })),
         backupDate: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development',
-        notes: 'Edge functions backup from Supabase API/CLI'
+        notes: 'Edge functions backup from local directory',
+        source: 'local'
       };
 
       await fs.writeFile(path.join(cliBackupPath, 'functions-manifest.json'), JSON.stringify(functionsManifest, null, 2));
 
-      // Try to get function code for each function (try API first, fallback to CLI)
-      for (const func of functions) {
+      // Copy each function directory
+      for (const funcDir of functionDirs) {
         try {
-          let functionCode = '';
+          const sourcePath = path.join(localFunctionsDir, funcDir);
+          const destPath = path.join(cliBackupPath, funcDir);
           
-          // Try to get function code via API first
-          if (this.supabase) {
-            try {
-              const response = await fetch(`${process.env.SUPABASE_URL}/functions/v1/${func.slug}`, {
-                headers: {
-                  'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY!,
-                  'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`
-                }
-              });
-              
-              if (response.ok) {
-                functionCode = await response.text();
-              }
-            } catch (apiError) {
-              logger.warn(`API method failed for function ${func.slug}, trying CLI`, { apiError });
-            }
-          }
-
-          // Fallback to CLI if API failed or not available
-          if (!functionCode) {
-            try {
-              const { exec } = require('child_process');
-              const { promisify } = require('util');
-              const execAsync = promisify(exec);
-              const { stdout } = await execAsync(`supabase functions download ${func.slug}`);
-              functionCode = stdout;
-            } catch (cliError) {
-              logger.warn(`CLI method failed for function ${func.slug}`, { cliError });
-              continue;
-            }
-          }
-
-          await fs.writeFile(path.join(cliBackupPath, `${func.slug}.js`), functionCode);
+          // Copy entire function directory
+          await this.copyDirectory(sourcePath, destPath);
+          logger.info(`Copied function directory: ${funcDir}`);
         } catch (error) {
-          logger.warn(`Failed to download function ${func.slug}`, { error: error instanceof Error ? error.message : 'Unknown error' });
+          logger.warn(`Failed to copy function directory ${funcDir}`, { error: error instanceof Error ? error.message : 'Unknown error' });
         }
       }
 
-      logger.info('Supabase edge functions backup completed', { path: cliBackupPath, functionCount: functions.length });
+      logger.info('Supabase edge functions backup completed', { path: cliBackupPath, functionCount: functionDirs.length });
     } catch (error) {
       logger.error('Supabase edge functions backup failed', { error });
       throw error;
@@ -1154,6 +1141,9 @@ SELECT 'Total enums: 6' as info;
     const seedsDir = path.resolve('./supabase/seed.sql');
     
     try {
+      // Create seeds directory first
+      await fs.mkdir(seedsBackupPath, { recursive: true });
+      
       if (await this.fileExists(seedsDir)) {
         await fs.copyFile(seedsDir, path.join(seedsBackupPath, 'seed.sql'));
         logger.info('Seeds backup completed', { path: seedsBackupPath });

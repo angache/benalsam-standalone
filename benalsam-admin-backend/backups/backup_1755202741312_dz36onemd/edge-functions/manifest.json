@@ -1,0 +1,10 @@
+{
+  "totalFunctions": 1,
+  "functions": [
+    "supabase-functions"
+  ],
+  "backupDate": "2025-08-14T20:19:01.337Z",
+  "environment": "development",
+  "supabaseUrl": "https://dnwreckpeenhbdtapmxr.supabase.co",
+  "notes": "Edge functions backup manifest"
+}

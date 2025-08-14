@@ -1,0 +1,30 @@
+{
+  "id": "backup_1755201431120_4elfs9tpo",
+  "timestamp": "2025-08-14T19:57:11.120Z",
+  "size": 0,
+  "type": "full",
+  "status": "in_progress",
+  "databaseSize": 627,
+  "edgeFunctionsCount": 9,
+  "migrationsCount": 6,
+  "checksum": "",
+  "description": "Temiz sistem - ilk backup",
+  "tags": [
+    "clean",
+    "first",
+    "system"
+  ],
+  "version": "1.0.0",
+  "createdBy": "Benalsam Backup Service",
+  "components": {
+    "database": true,
+    "edgeFunctions": true,
+    "migrations": true,
+    "seeds": true
+  },
+  "environment": {
+    "nodeVersion": "v20.18.0",
+    "platform": "darwin",
+    "timestamp": "2025-08-14T19:57:14.828Z"
+  }
+}

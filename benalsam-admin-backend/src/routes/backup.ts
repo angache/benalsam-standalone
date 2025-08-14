@@ -3,6 +3,7 @@ import { authenticateToken } from '../middleware/auth';
 import logger from '../config/logger';
 import BackupService from '../services/backupService';
 import path from 'path';
+import fs from 'fs';
 
 const router = express.Router();
 const backupService = new BackupService();
@@ -83,6 +84,135 @@ router.get('/:backupId', authenticateToken, async (req, res) => {
       success: false,
       message: 'Failed to get backup info',
       error: errorMessage
+    });
+  }
+});
+
+// Get zip contents
+router.get('/:backupId/contents', authenticateToken, async (req, res) => {
+  try {
+    const { backupId } = req.params;
+    const zipPath = path.join(process.cwd(), 'backups', `${backupId}.zip`);
+    
+    if (!fs.existsSync(zipPath)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Backup file not found'
+      });
+    }
+
+    // Use unzip command to list contents
+    const { exec } = require('child_process');
+    const { promisify } = require('util');
+    const execAsync = promisify(exec);
+
+    try {
+      const { stdout } = await execAsync(`unzip -l "${zipPath}"`);
+      
+      // Parse unzip output
+      const lines = stdout.split('\n');
+      const files: any[] = [];
+      
+      for (const line of lines) {
+        if (line.trim() && !line.includes('Archive:') && !line.includes('Length') && !line.includes('----') && !line.includes('Name')) {
+          // Skip empty lines and headers
+          const trimmedLine = line.trim();
+          if (trimmedLine && !trimmedLine.startsWith('----')) {
+            // Split by multiple spaces and filter out empty parts
+            const parts = trimmedLine.split(/\s+/).filter((part: string) => part.length > 0);
+            
+            if (parts.length >= 4) {
+              const size = parseInt(parts[0]) || 0;
+              const dateStr = parts.slice(1, 4).join(' ');
+              const fileName = parts.slice(4).join(' ');
+              
+              if (fileName && fileName !== 'Name' && fileName !== '----' && !isNaN(size)) {
+                try {
+                  const date = new Date(dateStr);
+                  files.push({
+                    name: fileName.split('/').pop() || fileName,
+                    path: fileName,
+                    size: size,
+                    date: date.toISOString(),
+                    isDirectory: fileName.endsWith('/')
+                  });
+                } catch (dateError) {
+                  // If date parsing fails, use current date
+                  files.push({
+                    name: fileName.split('/').pop() || fileName,
+                    path: fileName,
+                    size: size,
+                    date: new Date().toISOString(),
+                    isDirectory: fileName.endsWith('/')
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return res.json({
+        success: true,
+        data: { files },
+        message: 'Zip contents retrieved successfully'
+      });
+    } catch (execError) {
+      logger.error('Failed to execute unzip command', { error: execError });
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to read zip file'
+      });
+    }
+  } catch (error) {
+    logger.error('Failed to get zip contents', { error });
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to read zip contents',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Get file content from zip
+router.get('/:backupId/file/:filePath(*)', authenticateToken, async (req, res) => {
+  try {
+    const { backupId, filePath } = req.params;
+    const zipPath = path.join(process.cwd(), 'backups', `${backupId}.zip`);
+    
+    if (!fs.existsSync(zipPath)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Backup file not found'
+      });
+    }
+
+    // Use unzip command to extract specific file
+    const { exec } = require('child_process');
+    const { promisify } = require('util');
+    const execAsync = promisify(exec);
+
+    try {
+      const { stdout } = await execAsync(`unzip -p "${zipPath}" "${filePath}"`);
+      
+      return res.json({
+        success: true,
+        data: { content: stdout },
+        message: 'File content retrieved successfully'
+      });
+    } catch (execError) {
+      logger.error('Failed to extract file from zip', { error: execError });
+      return res.status(404).json({
+        success: false,
+        message: 'File not found in zip'
+      });
+    }
+  } catch (error) {
+    logger.error('Failed to get file content', { error });
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to read file content',
+      error: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });

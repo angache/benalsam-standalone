@@ -1,0 +1,296 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Admin Users
+model AdminUser {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String
+  firstName   String
+  lastName    String
+  role        AdminRole @default(ADMIN)
+  permissions Json?    // Stored as JSON for flexibility
+  isActive    Boolean  @default(true)
+  lastLogin   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  activityLogs AdminActivityLog[]
+  moderationDecisions ModerationDecision[]
+  systemSettings SystemSetting[]
+
+  @@map("admin_users")
+}
+
+// Admin Activity Logs
+model AdminActivityLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  action     String
+  resource   String
+  resourceId String?
+  details    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  // Relations
+  admin AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@map("admin_activity_logs")
+}
+
+// Moderation Decisions
+model ModerationDecision {
+  id         String   @id @default(cuid())
+  adminId    String
+  reportId   String?
+  decision   ModerationDecisionType
+  reason     String?
+  duration   Int?     // Duration in days for temporary bans
+  createdAt  DateTime @default(now())
+
+  // Relations
+  admin AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@map("moderation_decisions")
+}
+
+// System Settings
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedBy   String
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  admin AdminUser @relation(fields: [updatedBy], references: [id], onDelete: Cascade)
+
+  @@map("system_settings")
+}
+
+// Daily Statistics
+model DailyStat {
+  id                   String   @id @default(cuid())
+  date                 DateTime @unique
+  totalUsers           Int      @default(0)
+  newUsers             Int      @default(0)
+  activeUsers          Int      @default(0)
+  totalListings        Int      @default(0)
+  newListings          Int      @default(0)
+  activeListings       Int      @default(0)
+  totalRevenue         Float    @default(0)
+  premiumSubscriptions Int      @default(0)
+  reportsCount         Int      @default(0)
+  resolvedReports      Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("daily_stats")
+}
+
+// User Activities (for analytics)
+model UserActivity {
+  id         String   @id @default(cuid())
+  userId     String
+  action     String
+  details    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@map("user_activities")
+}
+
+// Listings (from main app)
+model Listing {
+  id                String   @id @default(cuid())
+  title             String
+  description       String
+  price             Float
+  category          String
+  condition         String?
+  status            ListingStatus @default(PENDING)
+  views             Int      @default(0)
+  favorites         Int      @default(0)
+  userId            String
+  moderatedAt       DateTime?
+  moderatedBy       String?
+  moderationReason  String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images            ListingImage[]
+  location          ListingLocation?
+  reports           Report[]
+  offers            Offer[]
+  conversations     Conversation[]
+
+  @@map("listings")
+}
+
+// Listing Images
+model ListingImage {
+  id        String   @id @default(cuid())
+  listingId String
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  // Relations
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("listing_images")
+}
+
+// Listing Location
+model ListingLocation {
+  id           String   @id @default(cuid())
+  listingId    String   @unique
+  city         String
+  district     String
+  neighborhood String?
+  latitude     Float?
+  longitude    Float?
+  createdAt    DateTime @default(now())
+
+  // Relations
+  listing      Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("listing_locations")
+}
+
+// Users (from main app)
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  avatar        String?
+  status        UserStatus @default(ACTIVE)
+  trustScore    Int      @default(50)
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  listings      Listing[]
+  reports       Report[]
+  offers        Offer[]
+  buyerConversations Conversation[] @relation("BuyerConversations")
+  sellerConversations Conversation[] @relation("SellerConversations")
+
+  @@map("users")
+}
+
+// Reports
+model Report {
+  id          String   @id @default(cuid())
+  listingId   String
+  reporterId  String
+  reason      String
+  description String?
+  status      ReportStatus @default(PENDING)
+  resolvedAt  DateTime?
+  resolvedBy  String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  reporter    User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@map("reports")
+}
+
+// Offers
+model Offer {
+  id        String   @id @default(cuid())
+  listingId String
+  buyerId   String
+  amount    Float
+  message   String?
+  status    OfferStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer     User     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+  @@map("offers")
+}
+
+// Conversations
+model Conversation {
+  id        String   @id @default(cuid())
+  listingId String
+  buyerId   String
+  sellerId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer     User     @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller    User     @relation("SellerConversations", fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@map("conversations")
+}
+
+// Enums
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  MODERATOR
+  SUPPORT
+}
+
+enum ModerationDecisionType {
+  APPROVE
+  REJECT
+  BAN_TEMPORARY
+  BAN_PERMANENT
+  WARNING
+  DELETE
+}
+
+enum ListingStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  REJECTED
+  SOLD
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+  SUSPENDED
+}
+
+enum ReportStatus {
+  PENDING
+  RESOLVED
+  DISMISSED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+} 

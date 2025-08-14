@@ -28,6 +28,8 @@ import HealthCheckPage from './pages/HealthCheckPage';
 import SecurityDashboardPage from './pages/SecurityDashboardPage';
 import PerformanceBaselinePage from './pages/PerformanceBaselinePage';
 import BackupDashboardPage from './pages/BackupDashboardPage';
+import SchedulingDashboardPage from './pages/SchedulingDashboardPage';
+import ProgressDashboardPage from './pages/ProgressDashboardPage';
 import { useAuthStore } from './stores/authStore';
 import { CustomThemeProvider } from './contexts/ThemeContext';
 
@@ -314,6 +316,26 @@ function App() {
         <ProtectedRoute>
           <Layout>
             <BackupDashboardPage />
+          </Layout>
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/scheduling-dashboard"
+      element={
+        <ProtectedRoute>
+          <Layout>
+            <SchedulingDashboardPage />
+          </Layout>
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/progress-dashboard"
+      element={
+        <ProtectedRoute>
+          <Layout>
+            <ProgressDashboardPage />
           </Layout>
         </ProtectedRoute>
       }

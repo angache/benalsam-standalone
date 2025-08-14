@@ -239,7 +239,7 @@ class PerformanceMonitoringService {
 
       const result: MonitoringResult = {
         endpoint: config.endpoint,
-        timestamp,
+          timestamp,
         responseTime,
         statusCode: response.status,
         success,

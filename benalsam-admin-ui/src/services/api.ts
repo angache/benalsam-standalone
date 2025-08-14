@@ -900,6 +900,26 @@ export const apiService = {
       return response.data;
     },
 
+    // Get zip contents
+    async getBackupZipContents(backupId: string): Promise<any> {
+      const response = await apiClient.get(`/backup/${backupId}/contents`);
+      return response.data;
+    },
+
+    // Get file content from zip
+    async getBackupFileContent(backupId: string, filePath: string): Promise<any> {
+      const response = await apiClient.get(`/backup/${backupId}/file/${encodeURIComponent(filePath)}`);
+      return response.data;
+    },
+
+    // Download file from zip
+    async downloadBackupFile(backupId: string, filePath: string): Promise<any> {
+      const response = await apiClient.get(`/backup/${backupId}/file/${encodeURIComponent(filePath)}`, {
+        responseType: 'blob'
+      });
+      return response;
+    },
+
     async getBackupStats(): Promise<any> {
       const response = await apiClient.get('/backup/stats/summary');
       return response.data;
@@ -932,13 +952,87 @@ export const apiService = {
       return response.data;
     },
 
-    // Execute Supabase CLI command
-    async executeSupabaseCommand(command: string): Promise<any> {
-      const response = await apiClient.post('/backup/supabase/execute', { command }, {
-        timeout: 300000 // 5 dakika - CLI komutları için özel timeout
-      });
-      return response.data;
-    }
+      // Execute Supabase CLI command
+      async executeSupabaseCommand(command: string): Promise<any> {
+        const response = await apiClient.post('/backup/supabase/execute', { command }, {
+          timeout: 300000 // 5 dakika - CLI komutları için özel timeout
+        });
+        return response.data;
+      },
+
+          // Scheduling API methods
+      async getSchedules(): Promise<any> {
+        const response = await apiClient.get('/scheduling');
+        return response.data;
+      },
+
+      async getSchedule(id: string): Promise<any> {
+        const response = await apiClient.get(`/scheduling/${id}`);
+        return response.data;
+      },
+
+      async createSchedule(scheduleData: any): Promise<any> {
+        const response = await apiClient.post('/scheduling', scheduleData);
+        return response.data;
+      },
+
+      async updateSchedule(id: string, updates: any): Promise<any> {
+        const response = await apiClient.put(`/scheduling/${id}`, updates);
+        return response.data;
+      },
+
+      async deleteSchedule(id: string): Promise<any> {
+        const response = await apiClient.delete(`/scheduling/${id}`);
+        return response.data;
+      },
+
+      async getScheduleStatus(id: string): Promise<any> {
+        const response = await apiClient.get(`/scheduling/${id}/status`);
+        return response.data;
+      },
+
+      async triggerSchedule(id: string): Promise<any> {
+        const response = await apiClient.post(`/scheduling/${id}/trigger`);
+        return response.data;
+      },
+
+      async getScheduleHistory(id: string, limit?: number): Promise<any> {
+        const params = limit ? { limit } : {};
+        const response = await apiClient.get(`/scheduling/${id}/history`, { params });
+        return response.data;
+      },
+
+      async getSchedulingHealth(): Promise<any> {
+        const response = await apiClient.get('/scheduling/health/status');
+        return response.data;
+      },
+
+      // Progress API methods
+      async getProgress(operationType?: string): Promise<any> {
+        const params = operationType ? { operationType } : {};
+        const response = await apiClient.get('/progress', { params });
+        return response.data;
+      },
+
+      async getProgressById(id: string): Promise<any> {
+        const response = await apiClient.get(`/progress/${id}`);
+        return response.data;
+      },
+
+      async cancelProgress(id: string): Promise<any> {
+        const response = await apiClient.post(`/progress/${id}/cancel`);
+        return response.data;
+      },
+
+      async getProgressHealth(): Promise<any> {
+        const response = await apiClient.get('/progress/health/status');
+        return response.data;
+      },
+
+      async cleanupProgress(daysToKeep: number = 7): Promise<any> {
+        const response = await apiClient.post('/progress/cleanup', { daysToKeep });
+        return response.data;
+      }
   }; 
 
 export default apiService;

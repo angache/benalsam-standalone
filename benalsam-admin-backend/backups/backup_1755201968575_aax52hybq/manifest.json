@@ -1,0 +1,30 @@
+{
+  "id": "backup_1755201968575_aax52hybq",
+  "timestamp": "2025-08-14T20:06:08.575Z",
+  "size": 0,
+  "type": "full",
+  "status": "in_progress",
+  "databaseSize": 627,
+  "edgeFunctionsCount": 9,
+  "migrationsCount": 6,
+  "checksum": "",
+  "description": "Seeds dahil tam sistem backup",
+  "tags": [
+    "complete",
+    "with-seeds",
+    "full-data"
+  ],
+  "version": "1.0.0",
+  "createdBy": "Benalsam Backup Service",
+  "components": {
+    "database": true,
+    "edgeFunctions": true,
+    "migrations": true,
+    "seeds": true
+  },
+  "environment": {
+    "nodeVersion": "v20.18.0",
+    "platform": "darwin",
+    "timestamp": "2025-08-14T20:06:12.552Z"
+  }
+}

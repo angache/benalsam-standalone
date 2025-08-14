@@ -26,6 +26,8 @@ import adminManagementRoutes from './routes/admin-management';
 import analyticsRoutes from './routes/analytics';
 import performanceRoutes from './routes/performance';
 import backupRoutes from './routes/backup';
+import schedulingRoutes from './routes/scheduling';
+import progressRoutes from './routes/progress';
 import sentryRoutes from './routes/sentry';
 import userJourneyRoutes from './routes/userJourney';
 import analyticsAlertsRoutes from './routes/analyticsAlerts';
@@ -240,7 +242,9 @@ app.use('/api/v1/rate-limit', rateLimitRoutes);
 app.use('/api/v1/2fa', twoFactorRoutes); // Cross-Platform Rate Limiting sistemi aktif edildi
 app.use('/api/v1/sentry-test', sentryTestRoutes); // Sentry test routes
 app.use('/api/v1/performance', performanceRoutes); // Performance monitoring routes
-app.use('/api/v1/backup', backupRoutes); // Database backup routes
+app.use('/api/v1/backup', backupRoutes);
+app.use('/api/v1/scheduling', schedulingRoutes);
+app.use('/api/v1/progress', progressRoutes); // Database backup routes
 app.use('/api/v1/sentry', sentryRoutes); // Sentry dashboard routes
 app.use('/api/v1/hybrid-monitoring', hybridMonitoringRoutes); // Hybrid monitoring routes
 app.use('/api/v1/health', healthCheckRoutes); // Health check routes

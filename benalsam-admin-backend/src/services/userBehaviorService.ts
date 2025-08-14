@@ -1439,6 +1439,58 @@ export class UserBehaviorService {
 
     return sessionCount > 0 ? totalDuration / sessionCount : 0;
   }
+
+  async getAnalyticsStats(): Promise<any> {
+    try {
+      const endDate = new Date();
+      const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000); // Last 7 days
+      
+      const stats = await this.client.search({
+        index: this.behaviorIndex,
+        body: {
+          query: {
+            range: { event_timestamp: { gte: startDate.toISOString(), lte: endDate.toISOString() } }
+          },
+          aggs: {
+            total_events: {
+              value_count: { field: 'event_timestamp' }
+            },
+            total_sessions: {
+              cardinality: { field: 'session_id.keyword' }
+            },
+            unique_users: {
+              cardinality: { field: 'user_id.keyword' }
+            },
+            event_types: {
+              terms: { field: 'event_name.keyword', size: 20 }
+            },
+            platforms: {
+              terms: { field: 'device_info.platform.keyword', size: 10 }
+            }
+          }
+        }
+      });
+
+      const aggs = stats.aggregations as any;
+      
+      return {
+        total_events: aggs?.total_events?.value || 0,
+        total_sessions: aggs?.total_sessions?.value || 0,
+        unique_users: aggs?.unique_users?.value || 0,
+        event_types: aggs?.event_types?.buckets || [],
+        platforms: aggs?.platforms?.buckets || []
+      };
+    } catch (error) {
+      logger.error('Error getting analytics stats:', error);
+      return {
+        total_events: 0,
+        total_sessions: 0,
+        unique_users: 0,
+        event_types: [],
+        platforms: []
+      };
+    }
+  }
 }
 
 export default new UserBehaviorService(); 

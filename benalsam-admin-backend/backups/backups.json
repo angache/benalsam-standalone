@@ -1,82 +1,69 @@
 [
   {
-    "id": "backup_1755075427326_kh8mlg4m7",
-    "timestamp": "2025-08-13T08:57:07.326Z",
-    "size": 926,
-    "type": "full",
-    "status": "completed",
-    "databaseSize": 627,
-    "edgeFunctionsCount": 0,
-    "migrationsCount": 0,
-    "checksum": "0dbde337cde2d9a5ccd963fd71af182f97004890f5accd2ab55d8a5e6642cccb",
-    "description": "ilk backup"
-  },
-  {
-    "id": "backup_1755080157114_3v8oc38r5",
-    "timestamp": "2025-08-13T10:15:57.114Z",
-    "size": 3485,
-    "type": "full",
-    "status": "completed",
-    "databaseSize": 627,
-    "edgeFunctionsCount": 0,
-    "migrationsCount": 0,
-    "checksum": "e49782642ed642be84932441c7c15c88d1dc92a2109a945a2275d5bb5edc7803",
-    "description": "Enhanced backup with schema and functions",
-    "tags": [
-      "schema",
-      "functions",
-      "enhanced"
-    ]
-  },
-  {
-    "id": "backup_1755089216931_b8tsq4n31",
-    "timestamp": "2025-08-13T12:46:56.931Z",
-    "size": 4769,
-    "type": "full",
-    "status": "completed",
-    "databaseSize": 627,
-    "edgeFunctionsCount": 0,
-    "migrationsCount": 0,
-    "checksum": "7f64c61eecc8cb8e7b5fe609f257d64a0a2f874a3b7eadf7e3f1e584f55eefdc",
-    "description": "Complete schema backup with all tables",
-    "tags": [
-      "complete",
-      "schema",
-      "all-tables"
-    ]
-  },
-  {
-    "id": "backup_1755089414179_e3pgjpxuo",
-    "timestamp": "2025-08-13T12:50:14.179Z",
-    "size": 3725,
-    "type": "full",
-    "status": "completed",
-    "databaseSize": 627,
-    "edgeFunctionsCount": 0,
-    "migrationsCount": 0,
-    "checksum": "df6dfcc2e6207e12d99cceee9bb947d4a50c90266c62ac7de0f4b95cfcf07e24",
-    "description": "Real schema from Prisma analysis",
-    "tags": [
-      "real",
-      "schema",
-      "prisma"
-    ]
-  },
-  {
-    "id": "backup_1755092795778_twha91qkb",
-    "timestamp": "2025-08-13T13:46:35.780Z",
-    "size": 8671,
+    "id": "backup_1755201431120_4elfs9tpo",
+    "timestamp": "2025-08-14T19:57:11.120Z",
+    "size": 123984,
     "type": "full",
     "status": "completed",
     "databaseSize": 627,
     "edgeFunctionsCount": 9,
-    "migrationsCount": 1,
-    "checksum": "6a25899d383d9cfae7f270447aac424df61bd3b88a0e3a6bd777b16e7d8b0ef9",
-    "description": "Complete backup with Supabase CLI functions",
+    "migrationsCount": 6,
+    "checksum": "4b05a7f0aa88ab2ca2a362efce4ed70e5b71e32e5af4cc61b7c7f040a6637011",
+    "description": "Temiz sistem - ilk backup",
+    "tags": [
+      "clean",
+      "first",
+      "system"
+    ]
+  },
+  {
+    "id": "backup_1755201788373_7y4agvk52",
+    "timestamp": "2025-08-14T20:03:08.373Z",
+    "size": 123988,
+    "type": "full",
+    "status": "completed",
+    "databaseSize": 627,
+    "edgeFunctionsCount": 9,
+    "migrationsCount": 6,
+    "checksum": "fdedc91bbfe9a8f0dd3a43b6fb25570b2fa6d7d9197ea9d40fbbfa2e47c292ce",
+    "description": "Seeds dahil tam backup",
     "tags": [
       "complete",
-      "supabase",
-      "functions"
+      "with-seeds",
+      "full-system"
+    ]
+  },
+  {
+    "id": "backup_1755201968575_aax52hybq",
+    "timestamp": "2025-08-14T20:06:08.575Z",
+    "size": 123995,
+    "type": "full",
+    "status": "completed",
+    "databaseSize": 627,
+    "edgeFunctionsCount": 9,
+    "migrationsCount": 6,
+    "checksum": "a675c8e8c5e81b28cd2b1396d45df02900e60aa47bbf823ac41476ac9a52f4ff",
+    "description": "Seeds dahil tam sistem backup",
+    "tags": [
+      "complete",
+      "with-seeds",
+      "full-data"
+    ]
+  },
+  {
+    "id": "backup_1755202741312_dz36onemd",
+    "timestamp": "2025-08-14T20:19:01.312Z",
+    "size": 522969,
+    "type": "full",
+    "status": "completed",
+    "databaseSize": 627,
+    "edgeFunctionsCount": 9,
+    "migrationsCount": 6,
+    "checksum": "ba9f20579a91c72b5a6b6f3144be6fa88e1d6aaa6d15c667dff159a68bcd318b",
+    "description": "Test backup with seeds",
+    "tags": [
+      "test",
+      "seeds"
     ]
   }
 ]
