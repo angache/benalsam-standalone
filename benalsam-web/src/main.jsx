@@ -10,6 +10,7 @@ import 'leaflet/dist/leaflet.css';
 import 'cropperjs/dist/cropper.css';
 import { useAuthStore } from '@/stores';
 import { queryClient } from '@/lib/queryClient';
+import { initPerformanceTracking } from '@/utils/performance';
 
 function AuthGate({ children }) {
   const { loading, initialized } = useAuthStore();
@@ -27,6 +28,9 @@ function AuthGate({ children }) {
   
   return children;
 }
+
+// Initialize performance tracking
+initPerformanceTracking();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <QueryClientProvider client={queryClient}>

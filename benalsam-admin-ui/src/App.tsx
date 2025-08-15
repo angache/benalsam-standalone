@@ -5,6 +5,7 @@ import { Layout } from './components/Layout/Layout';
 import { LoginPage } from './pages/LoginPage';
 import { useAuthStore } from './stores/authStore';
 import { CustomThemeProvider } from './contexts/ThemeContext';
+import PerformanceMonitor from './components/PerformanceMonitor';
 
 // Lazy loaded components
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(module => ({ default: module.DashboardPage })));
@@ -448,8 +449,9 @@ function App() {
                 </Suspense>
               }
             />
-    <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <PerformanceMonitor showDetails={import.meta.env.DEV} />
         </Router>
       </CustomThemeProvider>
     </QueryClientProvider>

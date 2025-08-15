@@ -14,6 +14,7 @@ import AppErrorBoundary from '@/components/ErrorBoundaries/AppErrorBoundary';
 import { usePreload } from '@/hooks/usePreload.js';
 import { usePerformanceMonitor } from '@/hooks/usePerformanceMonitor.js';
 import ImageOptimizationDebug from '@/components/ImageOptimizationDebug';
+import PerformanceMonitor from '@/components/PerformanceMonitor';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -91,6 +92,7 @@ function App() {
           {!isConversationPage && <Footer />}
           <Toaster />
           <ImageOptimizationDebug />
+          <PerformanceMonitor showDetails={import.meta.env.DEV} />
         </div>
       </UserPreferencesProvider>
     </AppErrorBoundary>
