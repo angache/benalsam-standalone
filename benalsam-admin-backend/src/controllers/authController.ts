@@ -86,8 +86,20 @@ export class AuthController {
           user_agent: req.get('User-Agent'),
         });
 
-      // Remove password from response
+      // Remove password from response first
       const { password: _, ...adminWithoutPassword } = admin;
+
+      // Check if 2FA is required - now from admin_users table
+      if (admin.is_2fa_enabled) {
+        logger.info(`2FA required for admin: ${admin.email}`);
+        
+        // Return 2FA required response without creating session
+        ApiResponseUtil.success(res, {
+          admin: adminWithoutPassword,
+          requires2FA: true,
+        }, '2FA verification required');
+        return;
+      }
 
       logger.info(`Login successful for: ${admin.email}`);
 
@@ -95,6 +107,7 @@ export class AuthController {
         admin: adminWithoutPassword,
         token,
         refreshToken,
+        requires2FA: false,
       }, 'Login successful');
     } catch (error) {
       logger.error('Login error:', error);

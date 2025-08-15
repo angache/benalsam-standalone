@@ -31,6 +31,7 @@ import BackupDashboardPage from './pages/BackupDashboardPage';
 import SchedulingDashboardPage from './pages/SchedulingDashboardPage';
 import ProgressDashboardPage from './pages/ProgressDashboardPage';
 import TwoFactorSetupPage from './pages/TwoFactorSetupPage';
+import TwoFactorVerifyPage from './pages/TwoFactorVerifyPage';
 import { useAuthStore } from './stores/authStore';
 import { CustomThemeProvider } from './contexts/ThemeContext';
 
@@ -350,6 +351,10 @@ function App() {
           </Layout>
         </ProtectedRoute>
       }
+    />
+    <Route
+      path="/2fa-verify"
+      element={<TwoFactorVerifyPage />}
     />
     <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

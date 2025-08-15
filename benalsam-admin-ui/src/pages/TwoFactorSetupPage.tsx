@@ -31,7 +31,7 @@ import {
   Refresh
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
-import TwoFactorService, { TwoFactorSetupData } from '../services/twoFactorService';
+import TwoFactorService, { type TwoFactorSetupData } from '../services/twoFactorService';
 
 const TwoFactorSetupPage: React.FC = () => {
   const navigate = useNavigate();

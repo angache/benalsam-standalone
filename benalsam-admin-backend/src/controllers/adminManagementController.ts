@@ -401,4 +401,152 @@ export class AdminManagementController {
       ApiResponseUtil.error(res, 'Internal server error');
     }
   }
+
+
+
+  // Get admin user profile (from admin_users table)
+  static async getProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const { adminId } = req.params;
+
+      const { data: admin, error } = await supabase
+        .from('admin_users')
+        .select('id, email, first_name, last_name, role, is_active, is_2fa_enabled, totp_secret, backup_codes, last_2fa_used, created_at, updated_at')
+        .eq('id', adminId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          ApiResponseUtil.notFound(res, 'Admin user not found');
+          return;
+        }
+        logger.error('Error fetching admin profile:', error);
+        ApiResponseUtil.error(res, 'Failed to fetch admin profile');
+        return;
+      }
+
+      ApiResponseUtil.success(res, admin);
+    } catch (error) {
+      logger.error('Error in getProfile:', error);
+      ApiResponseUtil.error(res, 'Internal server error');
+    }
+  }
+
+  // Update admin user profile (from admin_users table)
+  static async updateProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const { adminId } = req.params;
+      const updateData = req.body;
+
+      // Remove sensitive fields that shouldn't be updated directly
+      const { id, email, password, ...safeUpdateData } = updateData;
+
+      const { data: admin, error } = await supabase
+        .from('admin_users')
+        .update(safeUpdateData)
+        .eq('id', adminId)
+        .select('id, email, first_name, last_name, role, is_active, is_2fa_enabled, totp_secret, backup_codes, last_2fa_used, created_at, updated_at')
+        .single();
+
+      if (error) {
+        logger.error('Error updating admin profile:', error);
+        ApiResponseUtil.error(res, 'Failed to update admin profile');
+        return;
+      }
+
+      ApiResponseUtil.success(res, admin, 'Admin profile updated successfully');
+    } catch (error) {
+      logger.error('Error in updateProfile:', error);
+      ApiResponseUtil.error(res, 'Internal server error');
+    }
+  }
+
+  // Debug: Get profiles table structure
+  static async getProfilesStructure(req: Request, res: Response): Promise<void> {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .limit(1);
+
+      if (error) {
+        logger.error('Error fetching profiles structure:', error);
+        ApiResponseUtil.error(res, 'Failed to fetch profiles structure');
+        return;
+      }
+
+      // Get column names from first row
+      const columns = data && data.length > 0 ? Object.keys(data[0]) : [];
+      
+      ApiResponseUtil.success(res, {
+        columns,
+        sampleData: data && data.length > 0 ? data[0] : null,
+        totalColumns: columns.length
+      });
+    } catch (error) {
+      logger.error('Error in getProfilesStructure:', error);
+      ApiResponseUtil.error(res, 'Internal server error');
+    }
+  }
+
+  // Debug: Check if admin exists in auth.users
+  static async checkAdminInAuthUsers(req: Request, res: Response): Promise<void> {
+    try {
+      const { adminId } = req.params;
+
+      // Check in admin_users table
+      const { data: adminUser, error: adminError } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('id', adminId)
+        .single();
+
+      // Check in auth.users table (if possible)
+      let authUser = null;
+      try {
+        const { data: authData, error: authError } = await supabase.auth.admin.getUserById(adminId);
+        authUser = authData?.user;
+      } catch (authError) {
+        logger.warn('Could not check auth.users table:', authError);
+      }
+
+      ApiResponseUtil.success(res, {
+        adminUser,
+        authUser,
+        adminExists: !!adminUser,
+        authExists: !!authUser
+      });
+    } catch (error) {
+      logger.error('Error in checkAdminInAuthUsers:', error);
+      ApiResponseUtil.error(res, 'Internal server error');
+    }
+  }
+
+  // Debug: Get admin_users table structure
+  static async getAdminUsersStructure(req: Request, res: Response): Promise<void> {
+    try {
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('*')
+        .limit(1);
+
+      if (error) {
+        logger.error('Error fetching admin_users structure:', error);
+        ApiResponseUtil.error(res, 'Failed to fetch admin_users structure');
+        return;
+      }
+
+      // Get column names from first row
+      const columns = data && data.length > 0 ? Object.keys(data[0]) : [];
+      
+      ApiResponseUtil.success(res, {
+        columns,
+        sampleData: data && data.length > 0 ? data[0] : null,
+        totalColumns: columns.length
+      });
+    } catch (error) {
+      logger.error('Error in getAdminUsersStructure:', error);
+      ApiResponseUtil.error(res, 'Internal server error');
+    }
+  }
 } 

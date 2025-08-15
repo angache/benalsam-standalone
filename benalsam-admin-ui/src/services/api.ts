@@ -18,7 +18,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || config.apiUrl;
 console.log('🔧 API_BASE_URL:', API_BASE_URL);
 
 // Axios instance
-const apiClient = axios.create({
+export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 180000, // 3 dakika - Supabase CLI komutları için
 });
@@ -50,17 +50,18 @@ apiClient.interceptors.response.use(
 // API Service
 export const apiService = {
   // Auth
-  async login(credentials: LoginRequest): Promise<LoginResponse> {
+  async login(credentials: LoginRequest): Promise<LoginResponse & { requires2FA?: boolean }> {
     console.log('🔐 Attempting login with:', credentials.email);
-    const response = await apiClient.post<ApiResponse<LoginResponse>>('/auth/login', credentials);
+    const response = await apiClient.post<ApiResponse<LoginResponse & { requires2FA?: boolean }>>('/auth/login', credentials);
     console.log('🔐 Login response:', response.data);
     
-    // Admin backend returns { success: true, data: { admin, token, refreshToken }, message }
+    // Admin backend returns { success: true, data: { admin, token, refreshToken, requires2FA }, message }
     const loginData = response.data.data!;
     return {
       token: loginData.token,
       refreshToken: loginData.refreshToken,
       admin: loginData.admin,
+      requires2FA: loginData.requires2FA,
     };
   },
 

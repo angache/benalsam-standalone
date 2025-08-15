@@ -58,12 +58,30 @@ export class TwoFactorService {
    */
   async verifyToken(userId: string, token: string): Promise<TwoFactorVerifyResult> {
     try {
-      // Get user's 2FA data
-      const { data: user, error } = await supabase
-        .from('profiles')
+      // Get user's 2FA data - check both admin_users and profiles tables
+      let user = null;
+      let error = null;
+
+      // First try admin_users table
+      const { data: adminUser, error: adminError } = await supabase
+        .from('admin_users')
         .select('totp_secret, backup_codes, is_2fa_enabled')
         .eq('id', userId)
         .single();
+
+      if (adminUser) {
+        user = adminUser;
+      } else {
+        // Fallback to profiles table for regular users
+        const { data: profileUser, error: profileError } = await supabase
+          .from('profiles')
+          .select('totp_secret, backup_codes, is_2fa_enabled')
+          .eq('id', userId)
+          .single();
+        
+        user = profileUser;
+        error = profileError;
+      }
 
       if (error || !user) {
         throw new Error('User not found');
@@ -146,7 +164,22 @@ export class TwoFactorService {
         throw new Error('Invalid verification code');
       }
 
-      const { error } = await supabase
+      // Try admin_users table first
+      const { error: adminError } = await supabase
+        .from('admin_users')
+        .update({ 
+          is_2fa_enabled: true,
+          totp_secret: secret
+        })
+        .eq('id', userId);
+
+      if (!adminError) {
+        logger.info('2FA enabled for admin user', { userId });
+        return;
+      }
+
+      // Fallback to profiles table for regular users
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
           is_2fa_enabled: true,
@@ -154,11 +187,11 @@ export class TwoFactorService {
         })
         .eq('id', userId);
 
-      if (error) {
-        throw error;
+      if (profileError) {
+        throw profileError;
       }
 
-      logger.info('2FA enabled', { userId });
+      logger.info('2FA enabled for regular user', { userId });
     } catch (error) {
       logger.error('Failed to enable 2FA', { error, userId });
       throw new Error('Failed to enable 2FA');
@@ -170,7 +203,23 @@ export class TwoFactorService {
    */
   async disableTwoFactor(userId: string): Promise<void> {
     try {
-      const { error } = await supabase
+      // Try admin_users table first
+      const { error: adminError } = await supabase
+        .from('admin_users')
+        .update({ 
+          is_2fa_enabled: false,
+          totp_secret: null,
+          backup_codes: null
+        })
+        .eq('id', userId);
+
+      if (!adminError) {
+        logger.info('2FA disabled for admin user', { userId });
+        return;
+      }
+
+      // Fallback to profiles table for regular users
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
           is_2fa_enabled: false,
@@ -179,11 +228,11 @@ export class TwoFactorService {
         })
         .eq('id', userId);
 
-      if (error) {
-        throw error;
+      if (profileError) {
+        throw profileError;
       }
 
-      logger.info('2FA disabled', { userId });
+      logger.info('2FA disabled for regular user', { userId });
     } catch (error) {
       logger.error('Failed to disable 2FA', { error, userId });
       throw new Error('Failed to disable 2FA');
@@ -213,17 +262,29 @@ export class TwoFactorService {
    */
   async isTwoFactorEnabled(userId: string): Promise<boolean> {
     try {
-      const { data: user, error } = await supabase
+      // Try admin_users table first
+      const { data: adminUser, error: adminError } = await supabase
+        .from('admin_users')
+        .select('is_2fa_enabled')
+        .eq('id', userId)
+        .single();
+
+      if (adminUser) {
+        return adminUser.is_2fa_enabled || false;
+      }
+
+      // Fallback to profiles table for regular users
+      const { data: profileUser, error: profileError } = await supabase
         .from('profiles')
         .select('is_2fa_enabled')
         .eq('id', userId)
         .single();
 
-      if (error || !user) {
+      if (profileError || !profileUser) {
         return false;
       }
 
-      return user.is_2fa_enabled || false;
+      return profileUser.is_2fa_enabled || false;
     } catch (error) {
       logger.error('Failed to check 2FA status', { error, userId });
       return false;
@@ -234,7 +295,21 @@ export class TwoFactorService {
    * Store 2FA data in database
    */
   private async storeTwoFactorData(userId: string, secret: string, backupCodes: string[]): Promise<void> {
-    const { error } = await supabase
+    // Try admin_users table first
+    const { error: adminError } = await supabase
+      .from('admin_users')
+      .update({
+        totp_secret: secret,
+        backup_codes: backupCodes
+      })
+      .eq('id', userId);
+
+    if (!adminError) {
+      return; // Successfully updated admin_users
+    }
+
+    // Fallback to profiles table for regular users
+    const { error: profileError } = await supabase
       .from('profiles')
       .update({
         totp_secret: secret,
@@ -242,8 +317,8 @@ export class TwoFactorService {
       })
       .eq('id', userId);
 
-    if (error) {
-      throw error;
+    if (profileError) {
+      throw profileError;
     }
   }
 
@@ -251,13 +326,24 @@ export class TwoFactorService {
    * Update backup codes
    */
   private async updateBackupCodes(userId: string, backupCodes: string[]): Promise<void> {
-    const { error } = await supabase
+    // Try admin_users table first
+    const { error: adminError } = await supabase
+      .from('admin_users')
+      .update({ backup_codes: backupCodes })
+      .eq('id', userId);
+
+    if (!adminError) {
+      return; // Successfully updated admin_users
+    }
+
+    // Fallback to profiles table for regular users
+    const { error: profileError } = await supabase
       .from('profiles')
       .update({ backup_codes: backupCodes })
       .eq('id', userId);
 
-    if (error) {
-      throw error;
+    if (profileError) {
+      throw profileError;
     }
   }
 

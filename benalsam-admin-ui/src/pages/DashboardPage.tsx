@@ -126,7 +126,7 @@ export const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Toplam İlan"
-            value={data.totalListings.toLocaleString()}
+            value={data?.totalListings?.toLocaleString() || '0'}
             icon={<Package size={24} color="white" />}
             color="#388e3c"
             trend={8}
@@ -136,7 +136,7 @@ export const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Kategoriler"
-            value={data.totalCategories}
+            value={data?.totalCategories || '0'}
             icon={<FolderOpen size={24} color="white" />}
             color="#f57c00"
           />
@@ -145,7 +145,7 @@ export const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Toplam Gelir"
-            value={`₺${data.totalRevenue.toLocaleString()}`}
+            value={`₺${data?.totalRevenue?.toLocaleString() || '0'}`}
             icon={<TrendingUp size={24} color="white" />}
             color="#7b1fa2"
             trend={15}
@@ -156,7 +156,7 @@ export const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Aktif İlanlar"
-            value={data.activeListings.toLocaleString()}
+            value={data?.activeListings?.toLocaleString() || '0'}
             icon={<CheckCircle size={24} color="white" />}
             color="#388e3c"
           />
@@ -165,7 +165,7 @@ export const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Moderasyon Bekleyen"
-            value={data.pendingModeration}
+            value={data?.pendingModeration || '0'}
             icon={<AlertTriangle size={24} color="white" />}
             color="#f57c00"
           />
@@ -174,7 +174,7 @@ export const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Bugün Yeni Kullanıcı"
-            value={data.newUsersToday}
+            value={data?.newUsersToday || '0'}
             icon={<Users size={24} color="white" />}
             color="#1976d2"
           />
@@ -183,7 +183,7 @@ export const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Bugün Yeni İlan"
-            value={data.newListingsToday}
+            value={data?.newListingsToday || '0'}
             icon={<Package size={24} color="white" />}
             color="#388e3c"
           />

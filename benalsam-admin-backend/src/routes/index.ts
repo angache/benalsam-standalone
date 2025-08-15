@@ -8,6 +8,7 @@ import searchRoutes from './search';
 import elasticsearchRoutes from './elasticsearch';
 import healthRoutes from './health';
 import monitoringRoutes from './monitoring';
+import { twoFactorRouter } from './twoFactor';
 
 const router: IRouter = Router();
 
@@ -22,6 +23,9 @@ router.use('/monitoring', monitoringRoutes);
 
 // Auth routes
 router.use('/auth', authRoutes);
+
+// 2FA routes
+router.use('/2fa', twoFactorRouter);
 
 // Listings routes
 router.use('/listings', listingsRouter);

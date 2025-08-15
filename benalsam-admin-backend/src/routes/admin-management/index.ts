@@ -59,4 +59,36 @@ router.get('/permissions/current',
   AdminManagementController.getCurrentUserPermissions
 );
 
+
+
+// Get profile for admin user
+router.get('/profile/:adminId', 
+  authMiddleware(), 
+  AdminManagementController.getProfile
+);
+
+// Update profile for admin user
+router.put('/profile/:adminId', 
+  authMiddleware(), 
+  AdminManagementController.updateProfile
+);
+
+// Debug: Get profiles table structure
+router.get('/debug/profiles-structure', 
+  authMiddleware(), 
+  AdminManagementController.getProfilesStructure
+);
+
+// Debug: Check if admin exists in auth.users
+router.get('/debug/check-admin/:adminId', 
+  authMiddleware(), 
+  AdminManagementController.checkAdminInAuthUsers
+);
+
+// Debug: Get admin_users table structure
+router.get('/debug/admin-users-structure', 
+  authMiddleware(), 
+  AdminManagementController.getAdminUsersStructure
+);
+
 export default router; 

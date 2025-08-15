@@ -23,9 +23,13 @@ export const LoginPage: React.FC = () => {
     e.preventDefault();
     clearError();
     
-    const success = await login(email, password);
-    if (success) {
+    const result = await login(email, password);
+    
+    if (result.success) {
       navigate('/');
+    } else if (result.requires2FA) {
+      // Redirect to 2FA verification page with credentials
+      navigate(`/2fa-verify?userId=${result.userId}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, { replace: true });
     }
   };
 

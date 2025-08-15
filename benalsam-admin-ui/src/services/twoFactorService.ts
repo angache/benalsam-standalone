@@ -17,7 +17,7 @@ export interface TwoFactorStatus {
   lastVerified?: string;
 }
 
-class TwoFactorService {
+export class TwoFactorService {
   /**
    * Setup 2FA for a user
    * @param userId User ID
@@ -141,7 +141,7 @@ class TwoFactorService {
 
       const response = await apiClient.post('/2fa/verify', {
         userId,
-        code
+        token: code
       });
 
       if (response.data.success) {
@@ -231,4 +231,5 @@ class TwoFactorService {
   }
 }
 
+// Export the class instance
 export default TwoFactorService;
