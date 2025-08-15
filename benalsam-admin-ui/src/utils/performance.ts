@@ -66,30 +66,35 @@ export const initPerformanceTracking = () => {
   try {
     // Largest Contentful Paint (LCP)
     onLCP((metric) => {
+      console.log('📊 LCP Metric:', metric);
       logPerformanceMetric(metric);
-    });
+    }, { reportAllChanges: true });
     
     // Interaction to Next Paint (INP)
     onINP((metric) => {
+      console.log('📊 INP Metric:', metric);
       logPerformanceMetric(metric);
-    });
+    }, { reportAllChanges: true });
     
     // Cumulative Layout Shift (CLS)
     onCLS((metric) => {
+      console.log('📊 CLS Metric:', metric);
       logPerformanceMetric(metric);
-    });
+    }, { reportAllChanges: true });
     
     // First Contentful Paint (FCP)
     onFCP((metric) => {
+      console.log('📊 FCP Metric:', metric);
       logPerformanceMetric(metric);
-    });
+    }, { reportAllChanges: true });
     
     // Time to First Byte (TTFB)
     onTTFB((metric) => {
+      console.log('📊 TTFB Metric:', metric);
       logPerformanceMetric(metric);
-    });
+    }, { reportAllChanges: true });
     
-    console.log('🚀 Core Web Vitals tracking initialized');
+    console.log('🚀 Core Web Vitals tracking initialized with reportAllChanges');
   } catch (error) {
     console.error('❌ Failed to initialize performance tracking:', error);
   }

@@ -61,6 +61,7 @@ import {
 } from 'recharts';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiService } from '../services/api';
+import { usePerformanceMonitoring } from '../utils/performance';
 
 interface PerformanceBaseline {
   endpoint: string;
@@ -112,6 +113,9 @@ const PerformanceBaselinePage: React.FC = () => {
     iterations: 10,
     concurrent: 1
   });
+
+  // Core Web Vitals monitoring
+  const { metrics, isGood, score } = usePerformanceMonitoring();
 
   // Available endpoints query
   const { 
@@ -252,6 +256,312 @@ const PerformanceBaselinePage: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
+      {/* Core Web Vitals Section */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h5" component="h2" fontWeight="bold">
+              📊 Core Web Vitals
+            </Typography>
+            <Chip
+              label={`Score: ${score}`}
+              color={score >= 90 ? 'success' : score >= 70 ? 'warning' : 'error'}
+              variant="outlined"
+            />
+          </Box>
+          
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={2}>
+              <Box textAlign="center">
+                <Typography variant="h6" color="primary">
+                  {metrics.LCP ? `${metrics.LCP}ms` : 'N/A'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  LCP
+                </Typography>
+                <Chip
+                  size="small"
+                  label={metrics.LCP && metrics.LCP <= 2500 ? 'Good' : 'Needs Improvement'}
+                  color={metrics.LCP && metrics.LCP <= 2500 ? 'success' : 'warning'}
+                  sx={{ mt: 1 }}
+                />
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={2}>
+              <Box textAlign="center">
+                <Typography variant="h6" color="primary">
+                  {metrics.INP ? `${metrics.INP}ms` : 'N/A'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  INP
+                </Typography>
+                <Chip
+                  size="small"
+                  label={metrics.INP && metrics.INP <= 200 ? 'Good' : 'Needs Improvement'}
+                  color={metrics.INP && metrics.INP <= 200 ? 'success' : 'warning'}
+                  sx={{ mt: 1 }}
+                />
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={2}>
+              <Box textAlign="center">
+                <Typography variant="h6" color="primary">
+                  {metrics.CLS ? metrics.CLS.toFixed(3) : 'N/A'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  CLS
+                </Typography>
+                <Chip
+                  size="small"
+                  label={metrics.CLS && metrics.CLS <= 0.1 ? 'Good' : 'Needs Improvement'}
+                  color={metrics.CLS && metrics.CLS <= 0.1 ? 'success' : 'warning'}
+                  sx={{ mt: 1 }}
+                />
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={2}>
+              <Box textAlign="center">
+                <Typography variant="h6" color="primary">
+                  {metrics.FCP ? `${metrics.FCP}ms` : 'N/A'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  FCP
+                </Typography>
+                <Chip
+                  size="small"
+                  label={metrics.FCP && metrics.FCP <= 1800 ? 'Good' : 'Needs Improvement'}
+                  color={metrics.FCP && metrics.FCP <= 1800 ? 'success' : 'warning'}
+                  sx={{ mt: 1 }}
+                />
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={2}>
+              <Box textAlign="center">
+                <Typography variant="h6" color="primary">
+                  {metrics.TTFB ? `${metrics.TTFB}ms` : 'N/A'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  TTFB
+                </Typography>
+                <Chip
+                  size="small"
+                  label={metrics.TTFB && metrics.TTFB <= 800 ? 'Good' : 'Needs Improvement'}
+                  color={metrics.TTFB && metrics.TTFB <= 800 ? 'success' : 'warning'}
+                  sx={{ mt: 1 }}
+                />
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={2}>
+              <Box textAlign="center">
+                <Typography variant="h6" color="primary">
+                  {isGood ? '🟢' : '🔴'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Status
+                </Typography>
+                <Chip
+                  size="small"
+                  label={isGood ? 'Good' : 'Needs Improvement'}
+                  color={isGood ? 'success' : 'error'}
+                  sx={{ mt: 1 }}
+                />
+              </Box>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
+      {/* Web App Performance Section */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h5" component="h2" fontWeight="bold">
+              🌐 Web App Performance
+            </Typography>
+            <Chip
+              label="Real-time"
+              color="info"
+              size="small"
+              variant="outlined"
+            />
+          </Box>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" gutterBottom>
+                Core Web Vitals
+              </Typography>
+              <TableContainer component={Paper} variant="outlined">
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Metric</TableCell>
+                      <TableCell align="right">Value</TableCell>
+                      <TableCell align="center">Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>LCP (Largest Contentful Paint)</TableCell>
+                      <TableCell align="right">
+                        {metrics.LCP ? `${metrics.LCP.toFixed(0)}ms` : 'N/A'}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Chip
+                          size="small"
+                          label={metrics.LCP && metrics.LCP <= 2500 ? 'Good' : 'Needs Improvement'}
+                          color={metrics.LCP && metrics.LCP <= 2500 ? 'success' : 'warning'}
+                        />
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>INP (Interaction to Next Paint)</TableCell>
+                      <TableCell align="right">
+                        {metrics.INP ? `${metrics.INP.toFixed(0)}ms` : 'N/A'}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Chip
+                          size="small"
+                          label={metrics.INP && metrics.INP <= 200 ? 'Good' : 'Needs Improvement'}
+                          color={metrics.INP && metrics.INP <= 200 ? 'success' : 'warning'}
+                        />
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>CLS (Cumulative Layout Shift)</TableCell>
+                      <TableCell align="right">
+                        {metrics.CLS ? metrics.CLS.toFixed(3) : 'N/A'}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Chip
+                          size="small"
+                          label={metrics.CLS && metrics.CLS <= 0.1 ? 'Good' : 'Needs Improvement'}
+                          color={metrics.CLS && metrics.CLS <= 0.1 ? 'success' : 'warning'}
+                        />
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>FCP (First Contentful Paint)</TableCell>
+                      <TableCell align="right">
+                        {metrics.FCP ? `${metrics.FCP.toFixed(0)}ms` : 'N/A'}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Chip
+                          size="small"
+                          label={metrics.FCP && metrics.FCP <= 1800 ? 'Good' : 'Needs Improvement'}
+                          color={metrics.FCP && metrics.FCP <= 1800 ? 'success' : 'warning'}
+                        />
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>TTFB (Time to First Byte)</TableCell>
+                      <TableCell align="right">
+                        {metrics.TTFB ? `${metrics.TTFB.toFixed(0)}ms` : 'N/A'}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Chip
+                          size="small"
+                          label={metrics.TTFB && metrics.TTFB <= 800 ? 'Good' : 'Needs Improvement'}
+                          color={metrics.TTFB && metrics.TTFB <= 800 ? 'success' : 'warning'}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Grid>
+            
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" gutterBottom>
+                Performance Summary
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Card variant="outlined">
+                  <CardContent sx={{ py: 2 }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <Typography variant="body2" color="text.secondary">
+                        Overall Score
+                      </Typography>
+                      <Typography variant="h4" fontWeight="bold" color="primary">
+                        {score}
+                      </Typography>
+                    </Box>
+                    <LinearProgress
+                      variant="determinate"
+                      value={score}
+                      color={score >= 90 ? 'success' : score >= 70 ? 'warning' : 'error'}
+                      sx={{ mt: 1 }}
+                    />
+                  </CardContent>
+                </Card>
+                
+                <Card variant="outlined">
+                  <CardContent sx={{ py: 2 }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      <Typography variant="body2" color="text.secondary">
+                        Status
+                      </Typography>
+                      <Chip
+                        label={isGood ? 'All Good' : 'Needs Improvement'}
+                        color={isGood ? 'success' : 'error'}
+                        icon={isGood ? <CheckCircleIcon /> : <WarningIcon />}
+                      />
+                    </Box>
+                  </CardContent>
+                </Card>
+                
+                <Card variant="outlined">
+                  <CardContent sx={{ py: 2 }}>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      Recommendations
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      {metrics.LCP && metrics.LCP > 2500 && (
+                        <Chip
+                          size="small"
+                          label="Optimize images for faster LCP"
+                          color="warning"
+                          variant="outlined"
+                        />
+                      )}
+                      {metrics.INP && metrics.INP > 200 && (
+                        <Chip
+                          size="small"
+                          label="Improve interaction responsiveness"
+                          color="warning"
+                          variant="outlined"
+                        />
+                      )}
+                      {metrics.CLS && metrics.CLS > 0.1 && (
+                        <Chip
+                          size="small"
+                          label="Fix layout shifts"
+                          color="warning"
+                          variant="outlined"
+                        />
+                      )}
+                      {isGood && (
+                        <Chip
+                          size="small"
+                          label="Performance is excellent!"
+                          color="success"
+                          variant="outlined"
+                        />
+                      )}
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Box>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1" fontWeight="bold">
           Performance Baseline

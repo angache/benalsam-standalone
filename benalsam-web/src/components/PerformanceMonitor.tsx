@@ -12,11 +12,21 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
 }) => {
   const { metrics, isGood, score } = usePerformanceMonitoring();
   const [isVisible, setIsVisible] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(0);
 
   useEffect(() => {
     // Show monitor after 3 seconds
     const timer = setTimeout(() => setIsVisible(true), 3000);
-    return () => clearTimeout(timer);
+    
+    // Force update every 2 seconds to show latest metrics
+    const updateTimer = setInterval(() => {
+      setForceUpdate(prev => prev + 1);
+    }, 2000);
+    
+    return () => {
+      clearTimeout(timer);
+      clearInterval(updateTimer);
+    };
   }, []);
 
   if (!isVisible) return null;

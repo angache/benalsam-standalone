@@ -92,7 +92,8 @@ function App() {
           {!isConversationPage && <Footer />}
           <Toaster />
           <ImageOptimizationDebug />
-          <PerformanceMonitor showDetails={import.meta.env.DEV} />
+          {/* Performance Monitor - Only in development */}
+          {import.meta.env.DEV && <PerformanceMonitor showDetails={true} />}
         </div>
       </UserPreferencesProvider>
     </AppErrorBoundary>
