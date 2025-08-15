@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Edit3, Trash2, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import OptimizedImage from '@/components/OptimizedImage';
 
 const InventoryItemCard = ({ item, onEdit, onDelete }) => {
   return (
@@ -16,9 +17,21 @@ const InventoryItemCard = ({ item, onEdit, onDelete }) => {
       <div>
         <div className="w-full h-40 bg-muted rounded-lg flex items-center justify-center mb-3 overflow-hidden">
           {item.main_image_url ? (
-            <img src={item.main_image_url} alt={item.name} className="w-full h-full object-cover" />
+            <OptimizedImage 
+              src={item.main_image_url} 
+              alt={item.name} 
+              className="w-full h-full object-cover"
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, 300px"
+            />
           ) : item.image_url ? ( 
-             <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+             <OptimizedImage 
+               src={item.image_url} 
+               alt={item.name} 
+               className="w-full h-full object-cover"
+               loading="lazy"
+               sizes="(max-width: 768px) 100vw, 300px"
+             />
           ) : (
             <ImageIcon className="w-16 h-16 text-muted-foreground" />
           )}

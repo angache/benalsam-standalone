@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import OptimizedImage from '@/components/OptimizedImage';
 
 const ListingCard = ({ 
   listing, 
@@ -121,10 +122,12 @@ const ListingCard = ({
         <CardContent className="flex-1 flex flex-col pb-4">
           {listing.main_image_url && (
             <div className="w-full h-40 bg-muted rounded-lg mb-4 overflow-hidden">
-              <img 
+              <OptimizedImage 
                 src={listing.main_image_url} 
                 alt={listing.title}
                 className="w-full h-full object-cover"
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, 400px"
               />
             </div>
           )}

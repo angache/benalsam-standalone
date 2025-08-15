@@ -5,6 +5,7 @@ import { toast } from '@/components/ui/use-toast';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import OptimizedImage from '@/components/OptimizedImage';
 
 const AdBanner = ({ placement, format = 'static', className }) => {
   const [ads, setAds] = useState([]);
@@ -75,10 +76,12 @@ const AdBanner = ({ placement, format = 'static', className }) => {
         onClick={() => handleAdClick(ad.id)}
         className="block w-full h-full"
       >
-        <img 
+        <OptimizedImage 
           src={ad.image_url}
           alt={ad.title}
           className="w-full h-full object-cover rounded-lg"
+          loading="lazy"
+          sizes="100vw"
         />
       </a>
     </motion.div>

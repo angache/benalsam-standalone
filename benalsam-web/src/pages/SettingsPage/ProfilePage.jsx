@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 import { useHapticFeedback } from '../../hooks/useHapticFeedback';
+import OptimizedImage from '@/components/OptimizedImage';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -149,7 +150,13 @@ const ProfilePage = () => {
         <div className="relative inline-block">
           <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
             {avatarUri ? (
-              <img src={avatarUri} alt="Profile" className="w-24 h-24 rounded-full object-cover" />
+              <OptimizedImage 
+                src={avatarUri} 
+                alt="Profile" 
+                className="w-24 h-24 rounded-full object-cover"
+                loading="eager"
+                sizes="96px"
+              />
             ) : (
               <User size={40} className="text-primary" />
             )}

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ExternalLink, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabaseClient';
+import OptimizedImage from '@/components/OptimizedImage';
 const AdCard = ({ ad }) => {
   const handleAdClick = async (adId) => {
     supabase.rpc('increment_ad_clicks', { ad_id: adId }).then(({ error }) => {
@@ -17,10 +18,12 @@ const AdCard = ({ ad }) => {
     >
       <a href={ad.link_url} target="_blank" rel="noopener noreferrer sponsored" onClick={() => handleAdClick(ad.id)} className="block">
         <div className="relative overflow-hidden h-48 md:h-56">
-          <img
+          <OptimizedImage
             src={ad.image_url}
             alt={ad.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
+            loading="lazy"
+            sizes="(max-width: 768px) 100vw, 300px"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10"></div>
           
