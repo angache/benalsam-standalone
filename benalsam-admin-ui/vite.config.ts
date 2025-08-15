@@ -47,6 +47,19 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          mui: ['@mui/material', '@mui/icons-material', '@mui/x-charts', '@mui/x-data-grid'],
+          charts: ['recharts'],
+          query: ['@tanstack/react-query', '@tanstack/react-query-devtools'],
+          utils: ['axios', 'date-fns', 'lucide-react'],
+          router: ['react-router-dom'],
+        },
+      }
+    },
+    chunkSizeWarningLimit: 1000,
   },
   resolve: {
     alias: {

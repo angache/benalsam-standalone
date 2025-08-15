@@ -1,39 +1,41 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Layout } from './components/Layout/Layout';
 import { LoginPage } from './pages/LoginPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { ListingsPage } from './pages/ListingsPage';
-import { ListingDetailPage } from './pages/ListingDetailPage';
-import { CategoriesPage } from './pages/CategoriesPage';
-import { CategoryDetailPage } from './pages/CategoryDetailPage';
-import { CategoryAttributesPage } from './pages/CategoryAttributesPage';
-import { CategoryEditPage } from './pages/CategoryEditPage';
-import { UsersPage } from './pages/UsersPage';
-import AdminManagementPage from './pages/AdminManagementPage';
-import ElasticsearchDashboardPage from './pages/ElasticsearchDashboardPage';
-import RealTimeAnalyticsPage from './pages/RealTimeAnalyticsPage';
-import AnalyticsDashboardPage from './pages/AnalyticsDashboardPage';
-import DataExportPage from './pages/DataExportPage';
-import PerformanceTestPage from './pages/PerformanceTestPage';
-import UserJourneyPage from './pages/UserJourneyPage';
-import AlertSystemPage from './pages/AlertSystemPage';
-import SessionAnalyticsPage from './pages/SessionAnalyticsPage';
-import SessionJourneyPage from './pages/SessionJourneyPage';
-import CacheDashboardPage from './pages/CacheDashboardPage';
-import SentryDashboardPage from './pages/SentryDashboardPage';
-import HybridMonitoringPage from './pages/HybridMonitoringPage';
-import HealthCheckPage from './pages/HealthCheckPage';
-import SecurityDashboardPage from './pages/SecurityDashboardPage';
-import PerformanceBaselinePage from './pages/PerformanceBaselinePage';
-import BackupDashboardPage from './pages/BackupDashboardPage';
-import SchedulingDashboardPage from './pages/SchedulingDashboardPage';
-import ProgressDashboardPage from './pages/ProgressDashboardPage';
-import TwoFactorSetupPage from './pages/TwoFactorSetupPage';
-import TwoFactorVerifyPage from './pages/TwoFactorVerifyPage';
 import { useAuthStore } from './stores/authStore';
 import { CustomThemeProvider } from './contexts/ThemeContext';
+
+// Lazy loaded components
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then(module => ({ default: module.DashboardPage })));
+const ListingsPage = lazy(() => import('./pages/ListingsPage').then(module => ({ default: module.ListingsPage })));
+const ListingDetailPage = lazy(() => import('./pages/ListingDetailPage').then(module => ({ default: module.ListingDetailPage })));
+const CategoriesPage = lazy(() => import('./pages/CategoriesPage').then(module => ({ default: module.CategoriesPage })));
+const CategoryDetailPage = lazy(() => import('./pages/CategoryDetailPage').then(module => ({ default: module.CategoryDetailPage })));
+const CategoryAttributesPage = lazy(() => import('./pages/CategoryAttributesPage').then(module => ({ default: module.CategoryAttributesPage })));
+const CategoryEditPage = lazy(() => import('./pages/CategoryEditPage').then(module => ({ default: module.CategoryEditPage })));
+const UsersPage = lazy(() => import('./pages/UsersPage').then(module => ({ default: module.UsersPage })));
+const AdminManagementPage = lazy(() => import('./pages/AdminManagementPage'));
+const ElasticsearchDashboardPage = lazy(() => import('./pages/ElasticsearchDashboardPage'));
+const RealTimeAnalyticsPage = lazy(() => import('./pages/RealTimeAnalyticsPage'));
+const AnalyticsDashboardPage = lazy(() => import('./pages/AnalyticsDashboardPage'));
+const DataExportPage = lazy(() => import('./pages/DataExportPage'));
+const PerformanceTestPage = lazy(() => import('./pages/PerformanceTestPage'));
+const UserJourneyPage = lazy(() => import('./pages/UserJourneyPage'));
+const AlertSystemPage = lazy(() => import('./pages/AlertSystemPage'));
+const SessionAnalyticsPage = lazy(() => import('./pages/SessionAnalyticsPage'));
+const SessionJourneyPage = lazy(() => import('./pages/SessionJourneyPage'));
+const CacheDashboardPage = lazy(() => import('./pages/CacheDashboardPage'));
+const SentryDashboardPage = lazy(() => import('./pages/SentryDashboardPage'));
+const HybridMonitoringPage = lazy(() => import('./pages/HybridMonitoringPage'));
+const HealthCheckPage = lazy(() => import('./pages/HealthCheckPage'));
+const SecurityDashboardPage = lazy(() => import('./pages/SecurityDashboardPage'));
+const PerformanceBaselinePage = lazy(() => import('./pages/PerformanceBaselinePage'));
+const BackupDashboardPage = lazy(() => import('./pages/BackupDashboardPage'));
+const SchedulingDashboardPage = lazy(() => import('./pages/SchedulingDashboardPage'));
+const ProgressDashboardPage = lazy(() => import('./pages/ProgressDashboardPage'));
+const TwoFactorSetupPage = lazy(() => import('./pages/TwoFactorSetupPage'));
+const TwoFactorVerifyPage = lazy(() => import('./pages/TwoFactorVerifyPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,6 +56,34 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+// Loading component for Suspense fallback
+const PageLoadingSpinner = () => (
+  <div style={{ 
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    height: '100vh',
+    flexDirection: 'column',
+    gap: '16px'
+  }}>
+    <div style={{ 
+      width: '40px', 
+      height: '40px', 
+      border: '4px solid #f3f3f3', 
+      borderTop: '4px solid #1976d2', 
+      borderRadius: '50%', 
+      animation: 'spin 1s linear infinite' 
+    }} />
+    <div style={{ color: '#666', fontSize: '14px' }}>Sayfa yükleniyor...</div>
+    <style>{`
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `}</style>
+  </div>
+);
+
 function App() {
   // 🚀 Hot reload test - bu yorum değişikliği otomatik yansımalı
   return (
@@ -67,7 +97,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <DashboardPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <DashboardPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -77,7 +109,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <ListingsPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <ListingsPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -87,7 +121,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <ListingDetailPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <ListingDetailPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -97,7 +133,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <CategoriesPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <CategoriesPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -107,7 +145,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <CategoryDetailPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <CategoryDetailPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -117,7 +157,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <CategoryAttributesPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <CategoryAttributesPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -127,7 +169,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <CategoryEditPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <CategoryEditPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -137,7 +181,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <UsersPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <UsersPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -147,7 +193,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <AdminManagementPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <AdminManagementPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -157,7 +205,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <ElasticsearchDashboardPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <ElasticsearchDashboardPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -167,7 +217,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <RealTimeAnalyticsPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <RealTimeAnalyticsPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -177,7 +229,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <RealTimeAnalyticsPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <RealTimeAnalyticsPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -187,7 +241,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <AnalyticsDashboardPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <AnalyticsDashboardPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -197,7 +253,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <DataExportPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <DataExportPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -207,7 +265,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <PerformanceTestPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <PerformanceTestPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -217,7 +277,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <UserJourneyPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <UserJourneyPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -227,7 +289,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <AlertSystemPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <AlertSystemPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -237,7 +301,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <SessionAnalyticsPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <SessionAnalyticsPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -247,7 +313,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <SessionJourneyPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <SessionJourneyPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -257,7 +325,9 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <CacheDashboardPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <CacheDashboardPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
@@ -267,95 +337,117 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <SentryDashboardPage />
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <SentryDashboardPage />
+                    </Suspense>
                   </Layout>
                 </ProtectedRoute>
               }
             />
-                <Route
-      path="/hybrid-monitoring"
-      element={
-        <ProtectedRoute>
-          <Layout>
-            <HybridMonitoringPage />
-          </Layout>
-        </ProtectedRoute>
-      }
-    />
-        <Route
-      path="/health-check"
-      element={
-        <ProtectedRoute>
-          <Layout>
-            <HealthCheckPage />
-          </Layout>
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/security-dashboard"
-      element={
-        <ProtectedRoute>
-          <Layout>
-            <SecurityDashboardPage />
-          </Layout>
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/performance-baseline"
-      element={
-        <ProtectedRoute>
-          <Layout>
-            <PerformanceBaselinePage />
-          </Layout>
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/backup-dashboard"
-      element={
-        <ProtectedRoute>
-          <Layout>
-            <BackupDashboardPage />
-          </Layout>
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/scheduling-dashboard"
-      element={
-        <ProtectedRoute>
-          <Layout>
-            <SchedulingDashboardPage />
-          </Layout>
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/progress-dashboard"
-      element={
-        <ProtectedRoute>
-          <Layout>
-            <ProgressDashboardPage />
-          </Layout>
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/2fa-setup"
-      element={
-        <ProtectedRoute>
-          <Layout>
-            <TwoFactorSetupPage />
-          </Layout>
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/2fa-verify"
-      element={<TwoFactorVerifyPage />}
-    />
+            <Route
+              path="/hybrid-monitoring"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <HybridMonitoringPage />
+                    </Suspense>
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/health-check"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <HealthCheckPage />
+                    </Suspense>
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/security-dashboard"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <SecurityDashboardPage />
+                    </Suspense>
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/performance-baseline"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <PerformanceBaselinePage />
+                    </Suspense>
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/backup-dashboard"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <BackupDashboardPage />
+                    </Suspense>
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/scheduling-dashboard"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <SchedulingDashboardPage />
+                    </Suspense>
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/progress-dashboard"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <ProgressDashboardPage />
+                    </Suspense>
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/2fa-setup"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Suspense fallback={<PageLoadingSpinner />}>
+                      <TwoFactorSetupPage />
+                    </Suspense>
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/2fa-verify"
+              element={
+                <Suspense fallback={<PageLoadingSpinner />}>
+                  <TwoFactorVerifyPage />
+                </Suspense>
+              }
+            />
     <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>

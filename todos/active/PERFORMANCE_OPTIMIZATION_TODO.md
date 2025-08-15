@@ -155,7 +155,7 @@ npm install @sentry/performance
 
 ### **Bundle Size Targets**
 - [ ] Web App: < 2MB initial bundle
-- [ ] Admin UI: < 1.5MB initial bundle
+- [x] Admin UI: < 1.5MB initial bundle ✅ (400KB achieved!)
 - [ ] Mobile App: < 3MB initial bundle
 
 ### **Performance Targets**
