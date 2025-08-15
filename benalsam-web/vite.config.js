@@ -1,9 +1,18 @@
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
-	plugins: [react()],
+	plugins: [
+		react(),
+		visualizer({
+			open: true,
+			gzipSize: true,
+			brotliSize: true,
+			filename: 'dist/bundle-analysis.html',
+		}),
+	],
 	server: {
 		host: '0.0.0.0',
 		port: 5173,

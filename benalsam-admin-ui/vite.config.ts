@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 // Environment detection
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -8,7 +9,15 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    visualizer({
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+      filename: 'dist/bundle-analysis.html',
+    }),
+  ],
   base: isDevelopment ? '/' : '/admin/', // Development'ta root, production'da /admin/
   server: {
     port: 3003,
