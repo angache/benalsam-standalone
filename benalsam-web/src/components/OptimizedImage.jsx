@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { isWebPSupported, preloadImage, optimizeImage } from '@/utils/imageOptimization';
+import { isWebPSupported, preloadImage } from '@/utils/imageOptimization';
 
 const OptimizedImage = ({
   src,
@@ -12,6 +12,9 @@ const OptimizedImage = ({
   placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2YzZjRmNiIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTNhM2FmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+TG9hZGluZy4uLjwvdGV4dD48L3N2Zz4=',
   onLoad,
   onError,
+  priority = false, // New prop for LCP images
+  width,
+  height,
   ...props
 }) => {
   const [currentSrc, setCurrentSrc] = useState(placeholder);
@@ -32,24 +35,9 @@ const OptimizedImage = ({
 
     const loadImage = async () => {
       try {
-        // Determine the best image source
+        // Simple approach: just preload the original image
         let imageSrc = src;
         
-        // If WebP is supported and we have a WebP version, use it
-        if (webpSupported && src.includes('.')) {
-          const baseName = src.substring(0, src.lastIndexOf('.'));
-          const webpSrc = `${baseName}.webp`;
-          
-          // Try to preload WebP version
-          try {
-            await preloadImage(webpSrc);
-            imageSrc = webpSrc;
-          } catch (error) {
-            // Fallback to original source
-            console.log('WebP not available, using original format');
-          }
-        }
-
         if (!isMounted) return;
 
         // Preload the image
@@ -100,7 +88,7 @@ const OptimizedImage = ({
     return () => {
       isMounted = false;
     };
-  }, [src, fallbackSrc, webpSupported, onLoad, onError]);
+  }, [src, fallbackSrc, onLoad, onError]);
 
   const handleLoad = () => {
     setIsLoaded(true);
@@ -119,15 +107,18 @@ const OptimizedImage = ({
       src={currentSrc}
       alt={alt}
       className={`${className} ${isLoaded ? 'loaded' : 'loading'}`}
-      loading={loading}
-      decoding={decoding}
+      loading={priority ? 'eager' : loading}
+      decoding={priority ? 'sync' : decoding}
       sizes={sizes}
+      width={width}
+      height={height}
       onLoad={handleLoad}
       onError={handleError}
       style={{
         opacity: isLoaded ? 1 : 0.7,
         transition: 'opacity 0.3s ease-in-out',
         filter: isLoaded ? 'none' : 'blur(2px)',
+        aspectRatio: width && height ? `${width} / ${height}` : 'auto',
       }}
       {...props}
     />

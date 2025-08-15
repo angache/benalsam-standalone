@@ -1,25 +1,28 @@
-import React, { useState, useCallback, useMemo } from 'react';
-    import { useNavigate } from 'react-router-dom';
-    import { motion, AnimatePresence } from 'framer-motion';
-    import { Loader2, Tag } from 'lucide-react';
-    import { toast } from '@/components/ui/use-toast';
-    import { useAuthStore } from '@/stores';
-    import { useAppData } from '@/hooks/useAppData';
-    import { useCreateListingForm } from '@/components/CreateListingPage/useCreateListingForm.js';
-    import { checkListingLimit, incrementUserUsage, showPremiumUpgradeToast } from '@/services/premiumService';
-    import ListingRulesModal from '@/components/ListingRulesModal.jsx';
-    import StockImageSearchModal from '@/components/CreateListingPage/StockImageSearchModal.jsx';
-    import PremiumModal from '@/components/PremiumModal.jsx';
-    import Stepper from '@/components/CreateListingPage/Stepper.jsx';
-    import StepButtons from '@/components/CreateListingPage/StepButtons.jsx';
-    import Step1_Category from '@/components/CreateListingPage/steps/Step1_Category.jsx';
-    import Step2_Details from '@/components/CreateListingPage/steps/Step2_Details.jsx';
-    import Step3_Images from '@/components/CreateListingPage/steps/Step3_Images.jsx';
-    import Step4_Location from '@/components/CreateListingPage/steps/Step4_Location.jsx';
-    import Step5_Review from '@/components/CreateListingPage/steps/Step5_Review.jsx';
-    import { turkishProvincesAndDistricts } from '@/config/locations';
-    import { urlToBlob } from '@/lib/utils';
-    import { compressImage } from '@/lib/imageUtils';
+import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, Tag } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
+import { useAuthStore } from '@/stores';
+import { useAppData } from '@/hooks/useAppData';
+import { useCreateListingForm } from '@/components/CreateListingPage/useCreateListingForm.js';
+import { checkListingLimit, incrementUserUsage, showPremiumUpgradeToast } from '@/services/premiumService';
+// Lazy load modal components
+const ListingRulesModal = lazy(() => import('@/components/ListingRulesModal.jsx'));
+const StockImageSearchModal = lazy(() => import('@/components/CreateListingPage/StockImageSearchModal.jsx'));
+const PremiumModal = lazy(() => import('@/components/PremiumModal.jsx'));
+import Stepper from '@/components/CreateListingPage/Stepper.jsx';
+import StepButtons from '@/components/CreateListingPage/StepButtons.jsx';
+import { turkishProvincesAndDistricts } from '@/config/locations';
+import { urlToBlob } from '@/lib/utils';
+import { compressImage } from '@/lib/imageUtils';
+
+// Lazy load step components
+const Step1_Category = lazy(() => import('@/components/CreateListingPage/steps/Step1_Category.jsx'));
+const Step2_Details = lazy(() => import('@/components/CreateListingPage/steps/Step2_Details.jsx'));
+const Step3_Images = lazy(() => import('@/components/CreateListingPage/steps/Step3_Images.jsx'));
+const Step4_Location = lazy(() => import('@/components/CreateListingPage/steps/Step4_Location.jsx'));
+const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Step5_Review.jsx'));
     
     const steps = [
       { name: 'Kategori' },
@@ -168,17 +171,80 @@ import React, { useState, useCallback, useMemo } from 'react';
       }
     
       const renderStepContent = () => {
+        const StepLoadingSpinner = () => (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <span className="ml-3 text-muted-foreground">Adım yükleniyor...</span>
+          </div>
+        );
+
         switch (currentStep) {
           case 1:
-            return <Step1_Category selectedMainCategory={selectedMainCategory} onMainChange={setSelectedMainCategory} selectedSubCategory={selectedSubCategory} onSubChange={setSelectedSubCategory} selectedSubSubCategory={selectedSubSubCategory} onSubSubChange={setSelectedSubSubCategory} errors={errors} />;
+            return (
+              <Suspense fallback={<StepLoadingSpinner />}>
+                <Step1_Category 
+                  selectedMainCategory={selectedMainCategory} 
+                  onMainChange={setSelectedMainCategory} 
+                  selectedSubCategory={selectedSubCategory} 
+                  onSubChange={setSelectedSubCategory} 
+                  selectedSubSubCategory={selectedSubSubCategory} 
+                  onSubSubChange={setSelectedSubSubCategory} 
+                  errors={errors} 
+                />
+              </Suspense>
+            );
           case 2:
-            return <Step2_Details formData={formData} handleInputChange={handleInputChange} errors={errors} />;
+            return (
+              <Suspense fallback={<StepLoadingSpinner />}>
+                <Step2_Details 
+                  formData={formData} 
+                  handleInputChange={handleInputChange} 
+                  errors={errors} 
+                />
+              </Suspense>
+            );
           case 3:
-            return <Step3_Images formData={formData} handleImageArrayChange={handleImageArrayChange} handleRemoveImageFromArray={handleRemoveImageFromArray} handleInputChange={handleInputChange} onOpenStockModal={() => setIsStockModalOpen(true)} errors={errors} />;
+            return (
+              <Suspense fallback={<StepLoadingSpinner />}>
+                <Step3_Images 
+                  formData={formData} 
+                  handleImageArrayChange={handleImageArrayChange} 
+                  handleRemoveImageFromArray={handleRemoveImageFromArray} 
+                  handleInputChange={handleInputChange} 
+                  onOpenStockModal={() => setIsStockModalOpen(true)} 
+                  errors={errors} 
+                />
+              </Suspense>
+            );
           case 4:
-            return <Step4_Location selectedProvince={selectedProvince} setSelectedProvince={setSelectedProvince} selectedDistrict={selectedDistrict} setSelectedDistrict={setSelectedDistrict} formData={formData} handleInputChange={handleInputChange} onLocationDetect={handleLocationDetect} errors={errors} />;
+            return (
+              <Suspense fallback={<StepLoadingSpinner />}>
+                <Step4_Location 
+                  selectedProvince={selectedProvince} 
+                  setSelectedProvince={setSelectedProvince} 
+                  selectedDistrict={selectedDistrict} 
+                  setSelectedDistrict={setSelectedDistrict} 
+                  formData={formData} 
+                  handleInputChange={handleInputChange} 
+                  onLocationDetect={handleLocationDetect} 
+                  errors={errors} 
+                />
+              </Suspense>
+            );
           case 5:
-            return <Step5_Review formData={formData} handleInputChange={handleInputChange} handlePremiumFeatureChange={handlePremiumFeatureChange} selectedCategoryPath={selectedCategoryPath} selectedLocationPath={selectedLocationPath} onOpenRulesModal={() => setIsRulesModalOpen(true)} errors={errors} />;
+            return (
+              <Suspense fallback={<StepLoadingSpinner />}>
+                <Step5_Review 
+                  formData={formData} 
+                  handleInputChange={handleInputChange} 
+                  handlePremiumFeatureChange={handlePremiumFeatureChange} 
+                  selectedCategoryPath={selectedCategoryPath} 
+                  selectedLocationPath={selectedLocationPath} 
+                  onOpenRulesModal={() => setIsRulesModalOpen(true)} 
+                  errors={errors} 
+                />
+              </Suspense>
+            );
           default:
             return null;
         }
@@ -233,18 +299,24 @@ import React, { useState, useCallback, useMemo } from 'react';
             </motion.div>
           </div>
     
-          <StockImageSearchModal
-            isOpen={isStockModalOpen}
-            onOpenChange={setIsStockModalOpen}
-            onImagesSelect={handleSelectStockImages}
-            initialSearchQuery={stockImageSearchQuery}
-          />
-          <ListingRulesModal isOpen={isRulesModalOpen} onOpenChange={setIsRulesModalOpen} />
-          <PremiumModal 
-            isOpen={isPremiumModalOpen} 
-            onOpenChange={setIsPremiumModalOpen}
-            feature="listing"
-          />
+          <Suspense fallback={null}>
+            <StockImageSearchModal
+              isOpen={isStockModalOpen}
+              onOpenChange={setIsStockModalOpen}
+              onImagesSelect={handleSelectStockImages}
+              initialSearchQuery={stockImageSearchQuery}
+            />
+          </Suspense>
+          <Suspense fallback={null}>
+            <ListingRulesModal isOpen={isRulesModalOpen} onOpenChange={setIsRulesModalOpen} />
+          </Suspense>
+          <Suspense fallback={null}>
+            <PremiumModal 
+              isOpen={isPremiumModalOpen} 
+              onOpenChange={setIsPremiumModalOpen}
+              feature="listing"
+            />
+          </Suspense>
         </>
       );
     };

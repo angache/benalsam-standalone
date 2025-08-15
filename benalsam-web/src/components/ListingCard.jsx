@@ -10,7 +10,7 @@ import { formatDate } from 'benalsam-shared-types';
 import OptimizedImage from '@/components/OptimizedImage';
 
 
-const ListingCard = ({ listing, size = 'normal', onToggleFavorite, currentUser, isFavoritedOverride = null }) => {
+const ListingCard = ({ listing, size = 'normal', onToggleFavorite, currentUser, isFavoritedOverride = null, priority = false }) => {
   const navigate = useNavigate();
 
   const getUrgencyColor = (urgency) => {
@@ -98,8 +98,10 @@ const ListingCard = ({ listing, size = 'normal', onToggleFavorite, currentUser, 
             alt={listing.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
             sizes={isSmall ? "(max-width: 640px) 224px, 250px" : "(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"}
+            priority={priority} // Set to true for first 3-4 images on page
             quality={85}
-            priority={false}
+            width={400}
+            height={300}
           />
         ) : (
           <div className="w-full h-full bg-muted flex items-center justify-center">

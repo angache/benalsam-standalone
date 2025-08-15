@@ -310,6 +310,7 @@
                             onToggleFavorite={handleToggleFavoriteClick}
                             currentUser={currentUser}
                             size={viewMode === 'grid' ? 'normal' : 'large'}
+                            priority={index < 3} // Priority for first 3 images
                           />
                         ) : (
                           <AdCard ad={item.data} />

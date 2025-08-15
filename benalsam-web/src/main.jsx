@@ -19,8 +19,8 @@ function AuthGate({ children }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-24 w-24 sm:h-32 sm:w-32 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Giriş kontrol ediliyor...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground text-sm">Yükleniyor...</p>
         </div>
       </div>
     );
@@ -31,6 +31,23 @@ function AuthGate({ children }) {
 
 // Initialize performance tracking
 initPerformanceTracking();
+
+// Prefetch critical data
+const prefetchCriticalData = async () => {
+  try {
+    // Prefetch categories and other critical data
+    await queryClient.prefetchQuery({
+      queryKey: ['categories'],
+      queryFn: () => fetch('/api/categories').then(res => res.json()),
+      staleTime: 30 * 60 * 1000, // 30 minutes
+    });
+  } catch (error) {
+    console.log('Critical data prefetch failed:', error);
+  }
+};
+
+// Start prefetching in background
+prefetchCriticalData();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <QueryClientProvider client={queryClient}>

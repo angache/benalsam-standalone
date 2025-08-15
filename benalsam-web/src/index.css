@@ -98,6 +98,10 @@ body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
   font-feature-settings: "rlig" 1, "calt" 1;
+  font-display: swap; /* Optimize font loading */
+  text-rendering: optimizeSpeed; /* Optimize text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   transition: background 0.2s ease, color 0.2s ease;
   font-family: "Amazon Ember", Arial, sans-serif;
@@ -265,9 +269,27 @@ select:focus {
   border-color: hsl(var(--primary));
   box-shadow: 0 0 0 2px color-mix(in srgb, hsl(var(--primary)) 25%, transparent 75%), 0 0 0 0px rgba(0,0,0,0.05) inset;
 }
+/* Prevent layout shift */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Prevent layout shift for cards */
+.listing-card {
+  min-height: 400px;
+}
+
+/* Prevent layout shift for buttons */
+button {
+  min-height: 2.5rem;
+}
+
+/* Prevent layout shift for inputs */
 input, textarea, select {
   border-radius: calc(var(--radius) - 3px);
   border-width: 1px;
+  min-height: 2.5rem;
   border-color: hsl(var(--border));
   background-color: hsl(var(--input));
 }

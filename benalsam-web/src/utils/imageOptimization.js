@@ -110,6 +110,24 @@ export const generateResponsiveSizes = async (imageElement, sizes = []) => {
   }
 };
 
+// Generate srcSet for responsive images
+export const generateSrcSet = (src, format = 'webp') => {
+  try {
+    if (!src || !src.includes('.')) return '';
+    
+    const baseName = src.substring(0, src.lastIndexOf('.'));
+    const extension = format === 'webp' ? '.webp' : src.substring(src.lastIndexOf('.'));
+    
+    const sizes = [320, 640, 960, 1280, 1920];
+    const srcSetParts = sizes.map(size => `${baseName}-${size}w${extension} ${size}w`);
+    
+    return srcSetParts.join(', ');
+  } catch (error) {
+    console.error('SrcSet generation failed:', error);
+    return '';
+  }
+};
+
 // Create optimized image component props
 export const createOptimizedImageProps = (src, alt, options = {}) => {
   const {
@@ -129,12 +147,7 @@ export const createOptimizedImageProps = (src, alt, options = {}) => {
   };
 };
 
-// Generate srcset for responsive images
-export const generateSrcSet = (images, format = 'webp') => {
-  return images
-    .map(img => `${img.src} ${img.width}w`)
-    .join(', ');
-};
+
 
 // Image optimization hook
 export const useImageOptimization = () => {

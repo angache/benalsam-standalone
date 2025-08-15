@@ -47,18 +47,49 @@ export default defineConfig({
 	// Cache directory configuration for Docker
 	cacheDir: process.env.VITE_CACHE_DIR || 'node_modules/.vite',
 	build: {
+		chunkSizeWarningLimit: 1000,
+		sourcemap: false,
+		cssCodeSplit: true, // CSS code splitting
+		minify: 'terser', // Better minification
+		terserOptions: {
+			compress: {
+				drop_console: true, // Remove console.log in production
+				drop_debugger: true,
+			},
+		},
+		// Bundle preloading optimization
+		assetsInlineLimit: 4096, // Inline small assets
 		rollupOptions: {
 			output: {
-				manualChunks: {
-					vendor: ['react', 'react-dom'],
-					router: ['react-router-dom'],
-					ui: ['framer-motion', 'lucide-react'],
-					query: ['@tanstack/react-query'],
-					supabase: ['@supabase/supabase-js'],
+				// Preload critical chunks
+				manualChunks: (id) => {
+					// CreateListingPage ve ilgili component'ler için özel chunk
+					if (id.includes('CreateListingPage') || id.includes('steps/Step')) {
+						return 'create-listing';
+					}
+					
+					// Vendor chunks
+					if (id.includes('node_modules')) {
+						if (id.includes('react') || id.includes('react-dom')) {
+							return 'vendor';
+						}
+						if (id.includes('react-router-dom')) {
+							return 'router';
+						}
+						if (id.includes('framer-motion') || id.includes('lucide-react')) {
+							return 'ui';
+						}
+						if (id.includes('@tanstack/react-query')) {
+							return 'query';
+						}
+						if (id.includes('@supabase/supabase-js')) {
+							return 'supabase';
+						}
+					}
+					
+					return undefined;
 				},
 			}
 		},
-		chunkSizeWarningLimit: 1000,
-		sourcemap: false,
 	}
 });
