@@ -30,6 +30,27 @@ export default defineConfig({
 			usePolling: true, // VPS'de dosya değişikliklerini izlemek için polling kullan
 			interval: 1000, // 1 saniye aralıklarla kontrol et
 		},
+		headers: {
+			// Cache headers for static assets
+			'*.js': {
+				'Cache-Control': 'public, max-age=31536000, immutable',
+			},
+			'*.css': {
+				'Cache-Control': 'public, max-age=31536000, immutable',
+			},
+			'*.png': {
+				'Cache-Control': 'public, max-age=31536000, immutable',
+			},
+			'*.jpg': {
+				'Cache-Control': 'public, max-age=31536000, immutable',
+			},
+			'*.webp': {
+				'Cache-Control': 'public, max-age=31536000, immutable',
+			},
+			'*.svg': {
+				'Cache-Control': 'public, max-age=31536000, immutable',
+			},
+		},
 	},
 	preview: {
 		host: '0.0.0.0',

@@ -13,6 +13,7 @@ import AppRoutes from '@/components/AppRoutes.jsx';
 import AppErrorBoundary from '@/components/ErrorBoundaries/AppErrorBoundary';
 import { usePreload } from '@/hooks/usePreload.js';
 import { usePerformanceMonitor } from '@/hooks/usePerformanceMonitor.js';
+import useRoutePerformance from '@/hooks/useRoutePerformance.js';
 import ImageOptimizationDebug from '@/components/ImageOptimizationDebug';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
 import {
@@ -45,6 +46,9 @@ function App() {
   
   // Performance monitoring
   usePerformanceMonitor();
+  
+  // Route-based performance tracking
+  useRoutePerformance();
 
   useEffect(() => {
     console.log('🔐 Auth Store State:', { currentUser, loadingAuth });

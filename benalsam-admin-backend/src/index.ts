@@ -58,6 +58,7 @@ import QueueProcessorService from './services/queueProcessorService';
 import sessionCleanupService from './services/sessionCleanupService';
 import { AnalyticsAlertsService } from './services/analyticsAlertsService';
 import performanceMonitoringService from './services/performanceMonitoringService';
+import { initializeRedis } from './services/redisService';
 
 // Import middleware
 import { authenticateToken } from './middleware/auth';
@@ -242,6 +243,7 @@ app.use('/api/v1/rate-limit', rateLimitRoutes);
 app.use('/api/v1/2fa', twoFactorRoutes); // Cross-Platform Rate Limiting sistemi aktif edildi
 app.use('/api/v1/sentry-test', sentryTestRoutes); // Sentry test routes
 app.use('/api/v1/performance', performanceRoutes); // Performance monitoring routes
+app.use('/api/v1/performance-analysis', performanceRoutes); // Performance analysis routes
 app.use('/api/v1/backup', backupRoutes);
 app.use('/api/v1/scheduling', schedulingRoutes);
 app.use('/api/v1/progress', progressRoutes); // Database backup routes
@@ -297,6 +299,14 @@ const startServer = async () => {
       logger.info('✅ Session cleanup service started');
     } catch (error) {
       logger.error('❌ Session cleanup service failed to start:', error);
+    }
+
+    // Initialize Redis Cloud for performance analysis
+    try {
+      await initializeRedis();
+      logger.info('✅ Redis Cloud initialized for performance analysis');
+    } catch (error) {
+      logger.error('❌ Redis Cloud initialization failed:', error);
     }
 
     // Start performance monitoring service

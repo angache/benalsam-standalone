@@ -1,0 +1,116 @@
+import { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { onCLS, onINP, onFCP, onLCP, onTTFB } from 'web-vitals';
+import useAIPerformanceAnalysis from './useAIPerformanceAnalysis.js';
+
+const useRoutePerformance = () => {
+  const location = useLocation();
+  const routeStartTime = useRef(Date.now());
+  const routeMetrics = useRef({});
+  const { addAnalysis } = useAIPerformanceAnalysis();
+
+  useEffect(() => {
+    // Route değiştiğinde yeni ölçüm başlat
+    routeStartTime.current = Date.now();
+    routeMetrics.current = {};
+
+      // Route-specific performance tracking
+  const trackRoutePerformance = () => {
+    const routePath = location.pathname;
+    const routeDuration = Date.now() - routeStartTime.current;
+
+    // Route performance data
+    const routeData = {
+      path: routePath,
+      timestamp: new Date().toISOString(),
+      duration: routeDuration,
+      metrics: routeMetrics.current
+    };
+
+    // Console'da göster (development)
+    if (import.meta.env.DEV) {
+      console.group(`📊 Route Performance: ${routePath}`);
+      console.log('Route Duration:', routeDuration + 'ms');
+      console.log('Route Metrics:', routeMetrics.current);
+      console.log('Route Type:', getRouteType(routePath));
+      console.groupEnd();
+    }
+
+    // AI Analysis'i çalıştır
+    if (Object.keys(routeMetrics.current).length > 0) {
+      addAnalysis(routeMetrics.current, routePath, routeDuration).catch(error => {
+        console.error('AI Analysis failed:', error);
+      });
+    }
+
+    // TODO: Backend'e gönder
+    // sendRoutePerformanceData(routeData);
+  };
+
+  // Route tipini belirle
+  const getRouteType = (path) => {
+    if (path === '/') return 'Home';
+    if (path.startsWith('/profil/')) return 'Profile';
+    if (path.startsWith('/ilan/')) return 'Listing Detail';
+    if (path.startsWith('/ayarlar')) return 'Settings';
+    if (path.startsWith('/mesajlar')) return 'Messages';
+    if (path.startsWith('/envanter')) return 'Inventory';
+    if (path.startsWith('/ilanlarim')) return 'My Listings';
+    if (path.startsWith('/favorilerim')) return 'Favorites';
+    if (path.startsWith('/takip-edilenler')) return 'Following';
+    if (path.startsWith('/gonderdigim-teklifler')) return 'Sent Offers';
+    if (path.startsWith('/aldigim-teklifler')) return 'Received Offers';
+    if (path.startsWith('/premium')) return 'Premium';
+    if (path.startsWith('/auth')) return 'Authentication';
+    return 'Other';
+  };
+
+    // Route değişiminden 2 saniye sonra ölçümü tamamla
+    const timeoutId = setTimeout(trackRoutePerformance, 2000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [location.pathname]);
+
+  // Core Web Vitals'ı route-specific olarak yakala
+  useEffect(() => {
+    const routePath = location.pathname;
+
+    const handleMetric = (metric) => {
+      routeMetrics.current[metric.name] = {
+        value: metric.value,
+        rating: metric.rating,
+        delta: metric.delta
+      };
+
+      if (import.meta.env.DEV) {
+        console.log(`📊 ${metric.name} for ${routePath}:`, metric.value + 'ms', `(${metric.rating})`);
+      }
+    };
+
+    // Route-specific metric listeners
+    const unsubscribeLCP = onLCP(handleMetric, { reportAllChanges: true });
+    const unsubscribeINP = onINP(handleMetric, { reportAllChanges: true });
+    const unsubscribeCLS = onCLS(handleMetric, { reportAllChanges: true });
+    const unsubscribeFCP = onFCP(handleMetric, { reportAllChanges: true });
+    const unsubscribeTTFB = onTTFB(handleMetric, { reportAllChanges: true });
+
+    return () => {
+      // Safe cleanup - check if functions exist before calling
+      if (typeof unsubscribeLCP === 'function') unsubscribeLCP();
+      if (typeof unsubscribeINP === 'function') unsubscribeINP();
+      if (typeof unsubscribeCLS === 'function') unsubscribeCLS();
+      if (typeof unsubscribeFCP === 'function') unsubscribeFCP();
+      if (typeof unsubscribeTTFB === 'function') unsubscribeTTFB();
+    };
+  }, [location.pathname]);
+
+  return {
+    currentRoute: location.pathname,
+    routeStartTime: routeStartTime.current,
+    routeMetrics: routeMetrics.current
+  };
+};
+
+export default useRoutePerformance;

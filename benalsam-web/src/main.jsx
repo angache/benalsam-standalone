@@ -11,6 +11,7 @@ import 'cropperjs/dist/cropper.css';
 import { useAuthStore } from '@/stores';
 import { queryClient } from '@/lib/queryClient';
 import { initPerformanceTracking } from '@/utils/performance';
+import { registerServiceWorker } from '@/utils/serviceWorker';
 
 function AuthGate({ children }) {
   const { loading, initialized } = useAuthStore();
@@ -48,6 +49,9 @@ const prefetchCriticalData = async () => {
 
 // Start prefetching in background
 prefetchCriticalData();
+
+// Register service worker
+registerServiceWorker();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <QueryClientProvider client={queryClient}>

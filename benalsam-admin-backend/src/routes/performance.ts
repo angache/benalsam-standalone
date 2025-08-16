@@ -1,627 +1,417 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { authenticateToken } from '../middleware/auth';
-import { getSecurityStats, clearOldSecurityEvents } from '../middleware/securityMonitor';
-import logger from '../config/logger';
-import { performance } from 'perf_hooks';
-import performanceMonitoringService from '../services/performanceMonitoringService';
+import rateLimit from 'express-rate-limit';
+import { redis } from '../services/redisService';
+
+// Extend Request interface to include user
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    [key: string]: any;
+  };
+}
 
 const router = express.Router();
 
-// Available API endpoints for testing
-const availableEndpoints = [
-  // Health & Monitoring
-  { path: '/api/v1/health', method: 'GET', description: 'System Health Check' },
-  { path: '/api/v1/health/detailed', method: 'GET', description: 'Detailed Health Status' },
-  { path: '/api/v1/health/uptime', method: 'GET', description: 'Uptime Information' },
-  { path: '/api/v1/health/sla', method: 'GET', description: 'SLA Information' },
-  { path: '/api/v1/health/api', method: 'GET', description: 'API Health Status' },
-  { path: '/api/v1/health/database', method: 'GET', description: 'Database Health' },
-  { path: '/api/v1/health/redis', method: 'GET', description: 'Redis Health' },
-  { path: '/api/v1/health/elasticsearch', method: 'GET', description: 'Elasticsearch Health' },
-  { path: '/api/v1/health/memory', method: 'GET', description: 'Memory Health' },
-  { path: '/api/v1/health/disk', method: 'GET', description: 'Disk Health' },
+// Calculate performance score based on Core Web Vitals
+const calculatePerformanceScore = (metrics: any): number => {
+  let score = 100;
   
-  // Analytics
-  { path: '/api/v1/analytics', method: 'GET', description: 'Real-time Analytics' },
-  { path: '/api/v1/analytics/dashboard', method: 'GET', description: 'Analytics Dashboard' },
-  { path: '/api/v1/analytics/session', method: 'GET', description: 'Session Analytics' },
-  { path: '/api/v1/analytics/user-journey', method: 'GET', description: 'User Journey Analytics' },
-  
-  // Security
-  { path: '/api/v1/security/stats', method: 'GET', description: 'Security Statistics' },
-  { path: '/api/v1/security/events', method: 'GET', description: 'Security Events' },
-  { path: '/api/v1/security/suspicious-ips', method: 'GET', description: 'Suspicious IPs' },
-  { path: '/api/v1/security/summary', method: 'GET', description: 'Security Summary' },
-  
-  // Performance
-  { path: '/api/v1/performance/baseline', method: 'GET', description: 'Performance Baseline' },
-  { path: '/api/v1/performance/recommendations', method: 'GET', description: 'Performance Recommendations' },
-  
-  // Cache
-  { path: '/api/v1/cache/stats', method: 'GET', description: 'Cache Statistics' },
-  { path: '/api/v1/cache/analytics', method: 'GET', description: 'Cache Analytics' },
-  { path: '/api/v1/cache/predictive', method: 'GET', description: 'Predictive Cache' },
-  { path: '/api/v1/cache/geographic', method: 'GET', description: 'Geographic Cache' },
-  
-  // Data Export
-  { path: '/api/v1/data-export', method: 'GET', description: 'Data Export' },
-  { path: '/api/v1/data-export-v2', method: 'GET', description: 'Data Export V2' },
-  
-  // Monitoring
-  { path: '/api/v1/monitoring', method: 'GET', description: 'System Monitoring' },
-  { path: '/api/v1/hybrid-monitoring', method: 'GET', description: 'Hybrid Monitoring' },
-  { path: '/api/v1/sentry-dashboard', method: 'GET', description: 'Sentry Dashboard' },
-  
-  // Management
-  { path: '/api/v1/admin-management', method: 'GET', description: 'Admin Management' },
-  { path: '/api/v1/users', method: 'GET', description: 'User Management' },
-  { path: '/api/v1/listings', method: 'GET', description: 'Listings Management' },
-  { path: '/api/v1/categories', method: 'GET', description: 'Categories Management' },
-  
-  // Elasticsearch
-  { path: '/api/v1/elasticsearch', method: 'GET', description: 'Elasticsearch Dashboard' },
-  { path: '/api/v1/elasticsearch/health', method: 'GET', description: 'Elasticsearch Health' },
-  { path: '/api/v1/elasticsearch/indices', method: 'GET', description: 'Elasticsearch Indices' },
-  
-  // Alerts
-  { path: '/api/v1/alerts', method: 'GET', description: 'Alert System' },
-  { path: '/api/v1/analytics-alerts', method: 'GET', description: 'Analytics Alerts' },
-  
-  // Session Management
-  { path: '/api/v1/session-management', method: 'GET', description: 'Session Management' },
-  { path: '/api/v1/session-analytics', method: 'GET', description: 'Session Analytics' },
-  { path: '/api/v1/session-journey', method: 'GET', description: 'Session Journey' },
-  
-  // Load Testing
-  { path: '/api/v1/load-testing', method: 'GET', description: 'Load Testing' },
-  { path: '/api/v1/performance-test', method: 'GET', description: 'Performance Test' },
-  
-  // Rate Limiting
-  { path: '/api/v1/rate-limit', method: 'GET', description: 'Rate Limiting' },
-  
-  // 2FA
-  { path: '/api/v1/2fa', method: 'GET', description: 'Two Factor Authentication' },
-  
-  // Test Routes
-  { path: '/api/v1/test', method: 'GET', description: 'Test Routes' },
-  { path: '/api/v1/sentry-test', method: 'GET', description: 'Sentry Test' },
-];
-
-// Performance baseline storage
-interface PerformanceBaseline {
-  endpoint: string;
-  method: string;
-  avgResponseTime: number;
-  minResponseTime: number;
-  maxResponseTime: number;
-  throughput: number;
-  errorRate: number;
-  timestamp: string;
-  testCount: number;
-}
-
-const performanceBaselines: Map<string, PerformanceBaseline> = new Map();
-
-// Get available endpoints for testing
-router.get('/endpoints', authenticateToken, async (req, res) => {
-  try {
-    logger.info('Available endpoints requested', {
-      endpoint: req.path,
-      ip: req.ip,
-      endpointCount: availableEndpoints.length
-    });
-
-    res.json({
-      success: true,
-      data: {
-        endpoints: availableEndpoints,
-        total: availableEndpoints.length,
-        categories: {
-          health: availableEndpoints.filter(e => e.path.startsWith('/api/v1/health')).length,
-          analytics: availableEndpoints.filter(e => e.path.startsWith('/api/v1/analytics')).length,
-          security: availableEndpoints.filter(e => e.path.startsWith('/api/v1/security')).length,
-          performance: availableEndpoints.filter(e => e.path.startsWith('/api/v1/performance')).length,
-          cache: availableEndpoints.filter(e => e.path.startsWith('/api/v1/cache')).length,
-          management: availableEndpoints.filter(e => ['/api/v1/admin-management', '/api/v1/users', '/api/v1/listings', '/api/v1/categories'].includes(e.path)).length,
-          monitoring: availableEndpoints.filter(e => ['/api/v1/monitoring', '/api/v1/hybrid-monitoring', '/api/v1/sentry-dashboard'].includes(e.path)).length,
-          elasticsearch: availableEndpoints.filter(e => e.path.startsWith('/api/v1/elasticsearch')).length,
-          alerts: availableEndpoints.filter(e => e.path.includes('alert')).length,
-          session: availableEndpoints.filter(e => e.path.includes('session')).length,
-          other: availableEndpoints.filter(e => !['/api/v1/health', '/api/v1/analytics', '/api/v1/security', '/api/v1/performance', '/api/v1/cache', '/api/v1/admin-management', '/api/v1/users', '/api/v1/listings', '/api/v1/categories', '/api/v1/monitoring', '/api/v1/hybrid-monitoring', '/api/v1/sentry-dashboard', '/api/v1/elasticsearch'].some(prefix => e.path.startsWith(prefix))).length
-        }
-      },
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Failed to get available endpoints', {
-      endpoint: req.path,
-      error: errorMessage,
-      ip: req.ip
-    });
-
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get available endpoints',
-      error: errorMessage
-    });
+  // LCP scoring (0-2500ms = good, 2500-4000ms = needs-improvement, >4000ms = poor)
+  if (metrics.LCP?.value) {
+    if (metrics.LCP.value > 4000) score -= 30;
+    else if (metrics.LCP.value > 2500) score -= 15;
+    else if (metrics.LCP.value > 2000) score -= 5;
   }
-});
-
-// Performance testing middleware
-const performanceTest = (endpoint: string) => {
-  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const start = performance.now();
-    const originalSend = res.send;
-    
-    res.send = function(data: any) {
-      const end = performance.now();
-      const responseTime = end - start;
-      
-      // Store performance data
-      const key = `${req.method}:${endpoint}`;
-      const existing = performanceBaselines.get(key);
-      
-      if (existing) {
-        existing.avgResponseTime = (existing.avgResponseTime + responseTime) / 2;
-        existing.minResponseTime = Math.min(existing.minResponseTime, responseTime);
-        existing.maxResponseTime = Math.max(existing.maxResponseTime, responseTime);
-        existing.testCount++;
-        existing.timestamp = new Date().toISOString();
-      } else {
-        performanceBaselines.set(key, {
-          endpoint,
-          method: req.method,
-          avgResponseTime: responseTime,
-          minResponseTime: responseTime,
-          maxResponseTime: responseTime,
-          throughput: 1,
-          errorRate: res.statusCode >= 400 ? 1 : 0,
-          timestamp: new Date().toISOString(),
-          testCount: 1
-        });
-      }
-      
-      return originalSend.call(this, data);
-    };
-    
-    next();
-  };
+  
+  // FCP scoring (0-1800ms = good, 1800-3000ms = needs-improvement, >3000ms = poor)
+  if (metrics.FCP?.value) {
+    if (metrics.FCP.value > 3000) score -= 25;
+    else if (metrics.FCP.value > 1800) score -= 12;
+    else if (metrics.FCP.value > 1000) score -= 5;
+  }
+  
+  // CLS scoring (0-0.1 = good, 0.1-0.25 = needs-improvement, >0.25 = poor)
+  if (metrics.CLS?.value) {
+    if (metrics.CLS.value > 0.25) score -= 25;
+    else if (metrics.CLS.value > 0.1) score -= 12;
+    else if (metrics.CLS.value > 0.05) score -= 5;
+  }
+  
+  // INP scoring (0-200ms = good, 200-500ms = needs-improvement, >500ms = poor)
+  if (metrics.INP?.value) {
+    if (metrics.INP.value > 500) score -= 20;
+    else if (metrics.INP.value > 200) score -= 10;
+    else if (metrics.INP.value > 100) score -= 3;
+  }
+  
+  // TTFB scoring (0-800ms = good, 800-1800ms = needs-improvement, >1800ms = poor)
+  if (metrics.TTFB?.value) {
+    if (metrics.TTFB.value > 1800) score -= 15;
+    else if (metrics.TTFB.value > 800) score -= 8;
+    else if (metrics.TTFB.value > 400) score -= 3;
+  }
+  
+  return Math.max(0, Math.round(score));
 };
 
-// Get performance baseline
-router.get('/baseline', authenticateToken, async (req, res) => {
-  try {
-    const baselines = Array.from(performanceBaselines.values());
-    
-    logger.info('Performance baseline retrieved', {
-      endpoint: req.path,
-      ip: req.ip,
-      baselineCount: baselines.length
-    });
-
-    res.json({
-      success: true,
-      data: {
-        baselines,
-        summary: {
-          totalEndpoints: baselines.length,
-          avgResponseTime: baselines.reduce((sum, b) => sum + b.avgResponseTime, 0) / baselines.length,
-          totalTests: baselines.reduce((sum, b) => sum + b.testCount, 0),
-          lastUpdated: new Date().toISOString()
-        }
-      },
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Failed to get performance baseline', {
-      endpoint: req.path,
-      error: errorMessage,
-      ip: req.ip
-    });
-
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get performance baseline',
-      error: errorMessage
-    });
-  }
+// Rate limiting middleware
+const performanceRateLimit = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many performance analysis requests from this IP, please try again later.'
 });
 
-// Run performance test on specific endpoint
-router.post('/test/:endpoint(*)', authenticateToken, async (req, res) => {
-  try {
-    const { endpoint } = req.params;
-    const { iterations = 10, concurrent = 1 } = req.body;
-    
-    const results = [];
-    const startTime = performance.now();
-    
-    // Run performance tests
-    for (let i = 0; i < iterations; i++) {
-      const testStart = performance.now();
+// Performance analysis endpoints (public for Web App)
+router.post('/analysis', 
+  performanceRateLimit,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { route, duration, metrics, score, issues, severity, trend } = req.body;
+      const userId = req.user?.id || 'web-app';
       
-      // Simulate endpoint call (you can replace this with actual endpoint testing)
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50));
+      // Validate required fields
+      if (!route || !metrics) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Route and metrics are required' 
+        });
+      }
+
+      // Calculate performance score
+      const calculatedScore = calculatePerformanceScore(metrics);
       
-      const testEnd = performance.now();
-      results.push({
-        iteration: i + 1,
-        responseTime: testEnd - testStart,
+      // Generate AI insights and recommendations
+      const aiInsights: string[] = [];
+      const aiRecommendations: any[] = [];
+      
+      if (metrics.LCP?.value > 2500) {
+        aiInsights.push('🖼️ LCP yüksek - sayfa yükleme hızı iyileştirilmeli');
+        aiRecommendations.push({
+          priority: 'high',
+          category: 'image-optimization',
+          title: 'LCP Optimizasyonu',
+          description: 'Hero image\'ları optimize et, critical CSS inline et',
+          impact: 'LCP 20-40% iyileşebilir'
+        });
+      }
+      
+      if (metrics.FCP?.value > 1800) {
+        aiInsights.push('⚡ FCP yüksek - ilk içerik görünümü gecikiyor');
+        aiRecommendations.push({
+          priority: 'medium',
+          category: 'critical-resources',
+          title: 'Critical CSS Optimizasyonu',
+          description: 'Above-the-fold CSS inline et, non-critical CSS defer et',
+          impact: 'FCP 15-30% iyileşebilir'
+        });
+      }
+      
+      if (metrics.CLS?.value > 0.1) {
+        aiInsights.push('📐 CLS yüksek - layout kayması kullanıcı deneyimini etkiliyor');
+        aiRecommendations.push({
+          priority: 'high',
+          category: 'layout-stability',
+          title: 'Layout Shift Prevention',
+          description: 'Image dimensions belirt, font loading optimize et',
+          impact: 'CLS 50-80% iyileşebilir'
+        });
+      }
+      
+      if (metrics.INP?.value > 200) {
+        aiInsights.push('🖱️ INP yüksek - etkileşim gecikmesi var');
+        aiRecommendations.push({
+          priority: 'medium',
+          category: 'interaction-optimization',
+          title: 'Event Handler Optimizasyonu',
+          description: 'Debounce/throttle kullan, event delegation uygula',
+          impact: 'INP 25-50% iyileşebilir'
+        });
+      }
+      
+      if (calculatedScore >= 90) {
+        aiInsights.push('✅ Mükemmel performans! Kullanıcı deneyimi optimal.');
+      } else if (calculatedScore >= 70) {
+        aiInsights.push('👍 İyi performans, bazı iyileştirmeler yapılabilir.');
+      } else {
+        aiInsights.push('⚠️ Performans iyileştirme gerekli. Kullanıcı deneyimi etkilenebilir.');
+      }
+      
+      const analysis = {
+        id: `analysis:${Date.now()}:${userId}`,
+        userId,
+        route,
+        duration: duration || 0,
+        metrics,
+        score: calculatedScore,
+        issues: issues || [],
+        recommendations: aiRecommendations,
+        severity: calculatedScore >= 90 ? 'low' : calculatedScore >= 70 ? 'medium' : 'high',
+        trend: trend || 'stable',
+        insights: aiInsights,
         timestamp: new Date().toISOString()
+      };
+
+      // Save to Redis with TTL (30 days)
+      const key = `performance:analysis:${userId}:${Date.now()}`;
+      await redis.setex(key, 30 * 24 * 60 * 60, JSON.stringify(analysis));
+
+      // Update daily summary
+      const today = new Date().toISOString().split('T')[0];
+      const summaryKey = `performance:summary:${userId}:${today}`;
+      
+      const existingSummary = await redis.get(summaryKey);
+      let summary = existingSummary ? JSON.parse(existingSummary) : {
+        date: today,
+        userId,
+        totalAnalyses: 0,
+        totalScore: 0,
+        criticalIssues: 0,
+        routes: []
+      };
+
+      summary.totalAnalyses++;
+      summary.totalScore += score || 0;
+      summary.criticalIssues += (issues || []).filter((i: any) => i.type === 'critical').length;
+      if (!summary.routes.includes(route)) {
+        summary.routes.push(route);
+      }
+
+      await redis.setex(summaryKey, 30 * 24 * 60 * 60, JSON.stringify(summary));
+
+      // Update route trends
+      const routeKey = `performance:route:${userId}:${route}`;
+      await redis.lpush(routeKey, JSON.stringify(analysis));
+      await redis.ltrim(routeKey, 0, 99); // Keep last 100 analyses per route
+      await redis.expire(routeKey, 30 * 24 * 60 * 60);
+
+      return res.json({
+        success: true,
+        message: 'Performance analysis saved successfully',
+        analysis
+      });
+
+    } catch (error) {
+      console.error('Performance analysis save error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to save performance analysis' 
       });
     }
-    
-    const endTime = performance.now();
-    const totalTime = endTime - startTime;
-    const avgResponseTime = results.reduce((sum, r) => sum + r.responseTime, 0) / results.length;
-    const minResponseTime = Math.min(...results.map(r => r.responseTime));
-    const maxResponseTime = Math.max(...results.map(r => r.responseTime));
-    
-    const baseline: PerformanceBaseline = {
-      endpoint,
-      method: 'GET',
-      avgResponseTime,
-      minResponseTime,
-      maxResponseTime,
-      throughput: iterations / (totalTime / 1000),
-      errorRate: 0,
-      timestamp: new Date().toISOString(),
-      testCount: iterations
-    };
-    
-    performanceBaselines.set(`GET:${endpoint}`, baseline);
-    
-    logger.info('Performance test completed', {
-      endpoint: req.path,
-      ip: req.ip,
-      testEndpoint: endpoint,
-      iterations,
-      avgResponseTime,
-      throughput: baseline.throughput
-    });
-
-    res.json({
-      success: true,
-      data: {
-        endpoint,
-        iterations,
-        concurrent,
-        results: {
-          avgResponseTime,
-          minResponseTime,
-          maxResponseTime,
-          throughput: baseline.throughput,
-          totalTime,
-          results
-        },
-        baseline
-      },
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Failed to run performance test', {
-      endpoint: req.path,
-      error: errorMessage,
-      ip: req.ip
-    });
-
-    res.status(500).json({
-      success: false,
-      message: 'Failed to run performance test',
-      error: errorMessage
-    });
   }
-});
+);
 
-// Get performance recommendations
-router.get('/recommendations', authenticateToken, async (req, res) => {
-  try {
-    const baselines = Array.from(performanceBaselines.values());
-    const recommendations: Array<{
-      type: string;
-      endpoint: string;
-      severity: 'HIGH' | 'MEDIUM' | 'LOW';
-      message: string;
-      suggestion: string;
-    }> = [];
-    
-    // Analyze performance and generate recommendations
-    baselines.forEach(baseline => {
-      if (baseline.avgResponseTime > 1000) {
-        recommendations.push({
-          type: 'SLOW_RESPONSE',
-          endpoint: baseline.endpoint,
-          severity: 'HIGH',
-          message: `${baseline.endpoint} endpoint is slow (${baseline.avgResponseTime.toFixed(2)}ms). Consider optimization.`,
-          suggestion: 'Add caching, optimize database queries, or implement pagination.'
-        });
-      }
-      
-      if (baseline.errorRate > 0.05) {
-        recommendations.push({
-          type: 'HIGH_ERROR_RATE',
-          endpoint: baseline.endpoint,
-          severity: 'HIGH',
-          message: `${baseline.endpoint} has high error rate (${(baseline.errorRate * 100).toFixed(2)}%).`,
-          suggestion: 'Review error handling and fix underlying issues.'
-        });
-      }
-      
-      if (baseline.throughput < 10) {
-        recommendations.push({
-          type: 'LOW_THROUGHPUT',
-          endpoint: baseline.endpoint,
-          severity: 'MEDIUM',
-          message: `${baseline.endpoint} has low throughput (${baseline.throughput.toFixed(2)} req/s).`,
-          suggestion: 'Consider load balancing or horizontal scaling.'
-        });
-      }
-    });
-    
-    logger.info('Performance recommendations generated', {
-      endpoint: req.path,
-      ip: req.ip,
-      recommendationCount: recommendations.length
-    });
+// Get performance analyses
+router.get('/analyses', 
+  rateLimit({ windowMs: 60000, max: 200 }),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id || 'web-app';
+      const { route, limit = 50, offset = 0 } = req.query;
 
-    res.json({
-      success: true,
-      data: {
-        recommendations,
-        summary: {
-          totalRecommendations: recommendations.length,
-          highSeverity: recommendations.filter(r => r.severity === 'HIGH').length,
-          mediumSeverity: recommendations.filter(r => r.severity === 'MEDIUM').length,
-          lowSeverity: recommendations.filter(r => r.severity === 'LOW').length
+      let analyses: any[] = [];
+      
+      if (route) {
+        // Get analyses for specific route
+        const routeKey = `performance:route:${userId}:${route}`;
+        const routeAnalyses = await redis.lrange(routeKey, offset as number, (offset as number) + (limit as number) - 1);
+        analyses = routeAnalyses.map((analysis: string) => JSON.parse(analysis));
+      } else {
+        // Get all analyses for user
+        const pattern = `performance:analysis:${userId}:*`;
+        const keys = await redis.keys(pattern);
+        
+        // Sort by timestamp (newest first)
+        const sortedKeys = keys.sort((a: string, b: string) => {
+          const timestampA = parseInt(a.split(':').pop() || '0');
+          const timestampB = parseInt(b.split(':').pop() || '0');
+          return timestampB - timestampA;
+        });
+
+        const paginatedKeys = sortedKeys.slice(offset as number, (offset as number) + (limit as number));
+        const analysisData = await Promise.all(
+          paginatedKeys.map((key: string) => redis.get(key))
+        );
+        
+        analyses = analysisData
+          .filter((data: string | null) => data)
+          .map((data: string | null) => JSON.parse(data || '{}'));
+      }
+
+      return res.json({
+        success: true,
+        analyses,
+        total: analyses.length,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string)
+      });
+
+    } catch (error) {
+      console.error('Get performance analyses error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to get performance analyses' 
+      });
+    }
+  }
+);
+
+// Get performance trends
+router.get('/trends', 
+  rateLimit({ windowMs: 60000, max: 100 }),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id || 'web-app';
+      const { route, days = 7 } = req.query;
+
+      const trends: any[] = [];
+      const today = new Date();
+
+      for (let i = 0; i < (days as number); i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        
+        const summaryKey = `performance:summary:${userId}:${dateStr}`;
+        const summary = await redis.get(summaryKey);
+        
+        if (summary) {
+          const summaryData = JSON.parse(summary);
+          trends.push({
+            date: dateStr,
+            totalAnalyses: summaryData.totalAnalyses,
+            averageScore: summaryData.totalAnalyses > 0 
+              ? Math.round(summaryData.totalScore / summaryData.totalAnalyses) 
+              : 0,
+            criticalIssues: summaryData.criticalIssues,
+            routes: summaryData.routes.length
+          });
+        } else {
+          trends.push({
+            date: dateStr,
+            totalAnalyses: 0,
+            averageScore: 0,
+            criticalIssues: 0,
+            routes: 0
+          });
         }
-      },
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Failed to get performance recommendations', {
-      endpoint: req.path,
-      error: errorMessage,
-      ip: req.ip
-    });
+      }
 
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get performance recommendations',
-      error: errorMessage
-    });
-  }
-});
+      return res.json({
+        success: true,
+        trends: trends.reverse() // Oldest to newest
+      });
 
-// Clear performance baseline
-router.delete('/baseline', authenticateToken, async (req, res) => {
-  try {
-    const clearedCount = performanceBaselines.size;
-    performanceBaselines.clear();
-    
-    logger.info('Performance baseline cleared', {
-      endpoint: req.path,
-      ip: req.ip,
-      clearedCount
-    });
-
-    res.json({
-      success: true,
-      message: `Cleared ${clearedCount} performance baselines`,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Failed to clear performance baseline', {
-      endpoint: req.path,
-      error: errorMessage,
-      ip: req.ip
-    });
-
-    res.status(500).json({
-      success: false,
-      message: 'Failed to clear performance baseline',
-      error: errorMessage
-    });
-  }
-});
-
-// Get monitoring status
-router.get('/monitoring/status', authenticateToken, async (req, res) => {
-  try {
-    const status = performanceMonitoringService.getMonitoringStatus();
-    
-    logger.info('Performance monitoring status retrieved', {
-      endpoint: req.path,
-      ip: req.ip,
-      status
-    });
-
-    return res.json({
-      success: true,
-      data: status,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Failed to get monitoring status', {
-      endpoint: req.path,
-      error: errorMessage,
-      ip: req.ip
-    });
-
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to get monitoring status',
-      error: errorMessage
-    });
-  }
-});
-
-// Get monitoring results
-router.get('/monitoring/results', authenticateToken, async (req, res) => {
-  try {
-    const { endpoint } = req.query;
-    const results = performanceMonitoringService.getMonitoringResults(endpoint as string);
-    
-    logger.info('Performance monitoring results retrieved', {
-      endpoint: req.path,
-      ip: req.ip,
-      resultCount: Array.isArray(results) ? results.length : Object.keys(results).length
-    });
-
-    return res.json({
-      success: true,
-      data: {
-        results,
-        total: Array.isArray(results) ? results.length : Object.keys(results).length
-      },
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Failed to get monitoring results', {
-      endpoint: req.path,
-      error: errorMessage,
-      ip: req.ip
-    });
-
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to get monitoring results',
-      error: errorMessage
-    });
-  }
-});
-
-// Get performance alerts
-router.get('/monitoring/alerts', authenticateToken, async (req, res) => {
-  try {
-    const { severity } = req.query;
-    const alerts = performanceMonitoringService.getAlerts(severity as 'warning' | 'critical');
-    
-    logger.info('Performance alerts retrieved', {
-      endpoint: req.path,
-      ip: req.ip,
-      alertCount: alerts.length
-    });
-
-    return res.json({
-      success: true,
-      data: {
-        alerts,
-        total: alerts.length,
-        critical: alerts.filter(a => a.severity === 'critical').length,
-        warning: alerts.filter(a => a.severity === 'warning').length
-      },
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Failed to get performance alerts', {
-      endpoint: req.path,
-      error: errorMessage,
-      ip: req.ip
-    });
-
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to get performance alerts',
-      error: errorMessage
-    });
-  }
-});
-
-// Get endpoint statistics
-router.get('/monitoring/stats/:endpoint', authenticateToken, async (req, res) => {
-  try {
-    const { endpoint } = req.params;
-    const stats = performanceMonitoringService.getEndpointStats(endpoint);
-    
-    if (!stats) {
-      return res.status(404).json({
-        success: false,
-        message: 'No monitoring data found for this endpoint'
+    } catch (error) {
+      console.error('Get performance trends error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to get performance trends' 
       });
     }
-
-    logger.info('Endpoint statistics retrieved', {
-      endpoint: req.path,
-      ip: req.ip,
-      targetEndpoint: endpoint
-    });
-
-    return res.json({
-      success: true,
-      data: stats,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Failed to get endpoint statistics', {
-      endpoint: req.path,
-      error: errorMessage,
-      ip: req.ip
-    });
-
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to get endpoint statistics',
-      error: errorMessage
-    });
   }
-});
+);
 
-// Control monitoring service
-router.post('/monitoring/control', authenticateToken, async (req, res) => {
-  try {
-    const { action } = req.body;
-    
-    switch (action) {
-      case 'start':
-        await performanceMonitoringService.startMonitoring();
-        logger.info('Performance monitoring started manually', { ip: req.ip });
-        break;
-      case 'stop':
-        performanceMonitoringService.stopMonitoring();
-        logger.info('Performance monitoring stopped manually', { ip: req.ip });
-        break;
-      case 'clear-alerts':
-        performanceMonitoringService.clearAlerts();
-        logger.info('Performance alerts cleared manually', { ip: req.ip });
-        break;
-      default:
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid action. Use: start, stop, or clear-alerts'
-        });
+// Get performance summary
+router.get('/summary', 
+  rateLimit({ windowMs: 60000, max: 100 }),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id || 'web-app';
+      const { days = 30 } = req.query;
+
+      const today = new Date();
+      const summaries: any[] = [];
+      let totalAnalyses = 0;
+      let totalScore = 0;
+      let totalCriticalIssues = 0;
+      const allRoutes = new Set();
+
+      for (let i = 0; i < (days as number); i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        
+        const summaryKey = `performance:summary:${userId}:${dateStr}`;
+        const summary = await redis.get(summaryKey);
+        
+        if (summary) {
+          const summaryData = JSON.parse(summary);
+          summaries.push(summaryData);
+          totalAnalyses += summaryData.totalAnalyses;
+          totalScore += summaryData.totalScore;
+          totalCriticalIssues += summaryData.criticalIssues;
+          summaryData.routes.forEach((route: string) => allRoutes.add(route));
+        }
+      }
+
+      const averageScore = totalAnalyses > 0 ? Math.round(totalScore / totalAnalyses) : 0;
+
+      return res.json({
+        success: true,
+        summary: {
+          totalAnalyses,
+          averageScore,
+          totalCriticalIssues,
+          uniqueRoutes: allRoutes.size,
+          period: `${days} days`,
+          dailyAverage: Math.round(totalAnalyses / (days as number))
+        },
+        recentSummaries: summaries.slice(0, 7) // Last 7 days
+      });
+
+    } catch (error) {
+      console.error('Get performance summary error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to get performance summary' 
+      });
     }
-
-    const status = performanceMonitoringService.getMonitoringStatus();
-
-    return res.json({
-      success: true,
-      message: `Performance monitoring ${action} successful`,
-      data: status,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Failed to control monitoring service', {
-      endpoint: req.path,
-      error: errorMessage,
-      ip: req.ip
-    });
-
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to control monitoring service',
-      error: errorMessage
-    });
   }
-});
+);
+
+// Get critical alerts
+router.get('/alerts', 
+  rateLimit({ windowMs: 60000, max: 50 }),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id || 'web-app';
+      const { limit = 10 } = req.query;
+
+      const pattern = `performance:analysis:${userId}:*`;
+      const keys = await redis.keys(pattern);
+      
+      const criticalAnalyses: any[] = [];
+      
+      for (const key of keys.slice(0, 100)) { // Check last 100 analyses
+        const analysis = await redis.get(key);
+        if (analysis) {
+          const analysisData = JSON.parse(analysis);
+          if (analysisData.severity === 'critical' || analysisData.severity === 'high') {
+            criticalAnalyses.push(analysisData);
+          }
+        }
+      }
+
+      // Sort by timestamp (newest first) and limit
+      const sortedAlerts = criticalAnalyses
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, limit as number);
+
+      return res.json({
+        success: true,
+        alerts: sortedAlerts,
+        total: criticalAnalyses.length
+      });
+
+    } catch (error) {
+      console.error('Get performance alerts error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to get performance alerts' 
+      });
+    }
+  }
+);
 
 export default router; 

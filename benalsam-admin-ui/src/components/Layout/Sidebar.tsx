@@ -34,6 +34,7 @@ import {
   Shield as SecurityIcon,
   ChevronDown,
   ChevronRight,
+  Brain,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
@@ -202,6 +203,27 @@ const navigationCategories = [
         icon: Activity,
         permission: PERMISSIONS.ANALYTICS_VIEW,
       },
+      {
+        id: 'performance-dashboard',
+        title: 'Performance Dashboard',
+        path: '/performance-dashboard',
+        icon: BarChart3,
+        permission: PERMISSIONS.ANALYTICS_VIEW,
+      },
+                  {
+              id: 'route-performance',
+              title: 'Route Performance',
+              path: '/route-performance',
+              icon: Route,
+              permission: PERMISSIONS.ANALYTICS_VIEW,
+            },
+            {
+              id: 'ai-analysis',
+              title: 'AI Analysis',
+              path: '/ai-analysis',
+              icon: Brain,
+              permission: PERMISSIONS.ANALYTICS_VIEW,
+            },
       {
         id: 'backup-dashboard',
         title: 'Database Backup',
