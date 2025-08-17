@@ -1,5 +1,5 @@
 
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useCallback } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/stores';
@@ -116,10 +116,13 @@ const MainContent = ({ children }) => {
 
 // Helper function to wrap components with PageErrorBoundary and Suspense
 const withPageErrorBoundary = (Component, pageName) => {
+  // If Component is already a function, call it directly
+  const ComponentToRender = typeof Component === 'function' ? Component : () => <Component />;
+  
   return (
     <PageErrorBoundary pageName={pageName}>
       <Suspense fallback={<PageLoadingSpinner />}>
-        <Component />
+        <ComponentToRender />
       </Suspense>
     </PageErrorBoundary>
   );
@@ -129,12 +132,21 @@ const withPageErrorBoundary = (Component, pageName) => {
 const AppRoutes = ({ currentUser }) => {
   const location = useLocation();
 
+  // Stabilize HomePage component with memoized props
+  const MemoizedHomePage = useCallback(() => {
+    const handleToggleFavorite = (listingId, isFavorited) => {
+      // TODO: Implement toggle favorite logic
+    };
+    
+    return <HomePage currentUser={currentUser} onToggleFavorite={handleToggleFavorite} />;
+  }, [currentUser]);
+
   return (
     <MainContent>
-      <Routes location={location} key={location.pathname}>
+      <Routes location={location}>
         <Route 
           path="/" 
-          element={withPageErrorBoundary(() => <HomePage currentUser={currentUser} />, 'Ana Sayfa')}
+          element={withPageErrorBoundary(MemoizedHomePage, 'Ana Sayfa')}
         />
         <Route path="/auth" element={withPageErrorBoundary(AuthPage, 'Giriş/Kayıt')} />
         <Route path="/auth/reset-password" element={withPageErrorBoundary(ResetPasswordPage, 'Şifre Sıfırlama')} />

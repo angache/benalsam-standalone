@@ -1,5 +1,5 @@
 
-    import React, { useState, useMemo, useEffect } from 'react';
+    import React, { useState, useMemo, useEffect, memo, useCallback } from 'react';
     import { motion, AnimatePresence } from 'framer-motion';
     import { useHomePageData } from '@/hooks/useHomePageData';
     import { useNavigate } from 'react-router-dom';
@@ -10,7 +10,7 @@
     import { Input } from '@/components/ui/input';
     import { Button } from '@/components/ui/button';
     import { Slider } from '@/components/ui/slider';
-    import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.jsx";
+    import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
     import { Loader2, LayoutGrid, List, ChevronRight, Search, X } from 'lucide-react';
     import { categoriesConfig } from '@/config/categories';
     import { cn } from '@/lib/utils';
@@ -28,34 +28,35 @@
 
 
     const HomePage = ({ onToggleFavorite, currentUser }) => {
-      const navigate = useNavigate();
-      const [viewMode, setViewMode] = useState('grid');
-      const [sortOption, setSortOption] = useState('created_at-desc');
-      const [localSearchQuery, setLocalSearchQuery] = useState('');
-      const [initialListings, setInitialListings] = useState([]);
-      const [isLoadingInitial, setIsLoadingInitial] = useState(true);
+  
+  const navigate = useNavigate();
+  const [viewMode, setViewMode] = useState('grid');
+  const [sortOption, setSortOption] = useState('created_at-desc');
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const [initialListings, setInitialListings] = useState([]);
+  const [isLoadingInitial, setIsLoadingInitial] = useState(true);
 
-      // Load initial listings
-      useEffect(() => {
-        const loadInitialListings = async () => {
-          try {
-            setIsLoadingInitial(true);
-            const listings = await fetchListings(currentUser?.id);
-            setInitialListings(listings);
-          } catch (error) {
-            console.error('Error loading initial listings:', error);
-            toast({ 
-              title: "İlanlar Yüklenemedi", 
-              description: "Ana sayfa ilanları yüklenirken bir sorun oluştu.", 
-              variant: "destructive" 
-            });
-          } finally {
-            setIsLoadingInitial(false);
-          }
-        };
+        // Load initial listings
+  useEffect(() => {
+    const loadInitialListings = async () => {
+      try {
+        setIsLoadingInitial(true);
+        const listings = await fetchListings(currentUser?.id);
+        setInitialListings(listings);
+      } catch (error) {
+        console.error('Error loading initial listings:', error);
+        toast({ 
+          title: "İlanlar Yüklenemedi", 
+          description: "Ana sayfa ilanları yüklenirken bir sorun oluştu.", 
+          variant: "destructive" 
+        });
+      } finally {
+        setIsLoadingInitial(false);
+      }
+    };
 
-        loadInitialListings();
-      }, [currentUser?.id]);
+    loadInitialListings();
+  }, [currentUser?.id]);
 
       const {
         selectedCategories,
@@ -385,5 +386,5 @@
       );
     };
 
-    export default HomePage;
+    export default memo(HomePage);
   

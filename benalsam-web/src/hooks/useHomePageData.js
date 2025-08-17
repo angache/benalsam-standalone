@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabaseClient';
 const PAGE_SIZE = 16;
 
 export const useHomePageData = ({ initialListings, currentUser }) => {
+  
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [filters, setFilters] = useState({
     priceRange: [0, 50000],
@@ -14,7 +15,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
     keywords: '',
   });
 
-  const [displayedListings, setDisplayedListings] = useState(initialListings || []);
+  const [displayedListings, setDisplayedListings] = useState(() => initialListings || []);
   const [isFiltering, setIsFiltering] = useState(false);
   const debounceTimeoutRef = useRef(null);
 
@@ -52,7 +53,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
       (filters.keywords && filters.keywords.trim() !== '') ||
       (filters.priceRange && (filters.priceRange[0] !== 0 || filters.priceRange[1] !== 50000));
     setIsAnyFilterActive(active);
-  }, [selectedCategories, filters]);
+  }, [selectedCategories.length, filters.location, filters.urgency, filters.keywords, filters.priceRange[0], filters.priceRange[1]]);
 
   useEffect(() => {
     if (!currentUser || !isAnyFilterActive) return;
@@ -63,7 +64,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
       filters,
     };
     saveLastSearch(searchCriteria);
-  }, [selectedCategories, filters, currentUser, isAnyFilterActive]);
+  }, [selectedCategories.length, filters.location, filters.urgency, filters.keywords, filters.priceRange[0], filters.priceRange[1], currentUser?.id, isAnyFilterActive]);
   
   useEffect(() => {
     if (debounceTimeoutRef.current) {
@@ -95,7 +96,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
         clearTimeout(debounceTimeoutRef.current);
       }
     };
-  }, [isAnyFilterActive, selectedCategories, filters, initialListings, currentUser?.id]);
+  }, [isAnyFilterActive, selectedCategories.length, filters.location, filters.urgency, filters.keywords, filters.priceRange[0], filters.priceRange[1], initialListings?.length, currentUser?.id]);
   
   const handleCategorySelect = (categoriesPathArray) => { 
     setSelectedCategories(categoriesPathArray);

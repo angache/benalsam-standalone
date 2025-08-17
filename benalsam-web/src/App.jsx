@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster } from '@/components/ui/toaster.jsx';
@@ -30,6 +30,7 @@ import {
 import { cn } from '@/lib/utils.js';
 
 function App() {
+  
   // 🚀 Hot reload test - bu yorum değişikliği otomatik yansımalı
   const location = useLocation();
   const navigate = useNavigate();
@@ -41,18 +42,20 @@ function App() {
   // Auth store automatically initializes on mount
   // No need to call initialize() manually
 
-  // Code splitting preload strategy
-  usePreload(currentUser);
+  // Stabilize currentUser to prevent unnecessary re-renders
+  const stableCurrentUser = useMemo(() => currentUser, [currentUser?.id]);
   
-  // Performance monitoring
+  // Code splitting preload strategy
+  usePreload(stableCurrentUser);
+  
+  // Performance monitoring (only initialize once)
   usePerformanceMonitor();
   
   // Route-based performance tracking
   useRoutePerformance();
 
   useEffect(() => {
-    console.log('🔐 Auth Store State:', { currentUser, loadingAuth });
-    console.log('🔐 Auth Store Raw State:', useAuthStore.getState());
+    console.log('🔐 Auth Store State:', { currentUser: !!currentUser, loadingAuth });
   }, [currentUser, loadingAuth]);
   
 
@@ -77,7 +80,7 @@ function App() {
           {!isConversationPage && (
             <Header 
               onCreateClick={() => navigate('/ilan-olustur')}
-              currentUser={currentUser}
+              currentUser={stableCurrentUser}
               onLogout={() => useAuthStore.getState().signOut()}
               onLoginClick={() => navigate('/auth?action=login')}
               onRegisterClick={() => navigate('/auth?action=register')}
@@ -89,7 +92,7 @@ function App() {
             !isConversationPage && "pt-16 sm:pt-20"
           )}>
             <AnimatePresence mode="wait">
-              <AppRoutes currentUser={currentUser} />
+              <AppRoutes currentUser={stableCurrentUser} />
             </AnimatePresence>
           </main>
 
