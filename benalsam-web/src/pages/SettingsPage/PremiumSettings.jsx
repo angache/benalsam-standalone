@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback, memo } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
 import { Crown, Star, Zap, Eye, MessageSquare, Camera, TrendingUp, FileText, Users, Shield, Sparkles, Check, X, CreditCard, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,8 +13,9 @@ import {
   createSubscription 
 } from '@/services/premiumService';
 
-const PremiumSettings = () => {
+const PremiumSettings = memo(() => {
   const { currentUser } = useAuthStore();
+  const stableCurrentUser = useMemo(() => currentUser, [currentUser?.id, currentUser?.email]);
   const [userPlan, setUserPlan] = useState(null);
   const [usage, setUsage] = useState(null);
   const [plans] = useState(getPlanFeatures());
@@ -23,18 +23,12 @@ const PremiumSettings = () => {
   const [upgrading, setUpgrading] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  useEffect(() => {
-    if (currentUser?.id && !isInitialized) {
-      loadUserData();
-    }
-  }, [currentUser?.id, isInitialized]);
-
   const loadUserData = useCallback(async () => {
     try {
       setLoading(true);
       const [planData, usageData] = await Promise.all([
-        getUserActivePlan(currentUser.id),
-        getUserMonthlyUsage(currentUser.id)
+        getUserActivePlan(stableCurrentUser.id),
+        getUserMonthlyUsage(stableCurrentUser.id)
       ]);
       setUserPlan(planData);
       setUsage(usageData);
@@ -45,7 +39,13 @@ const PremiumSettings = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser?.id]);
+  }, [stableCurrentUser?.id]);
+
+  useEffect(() => {
+    if (stableCurrentUser?.id && !isInitialized) {
+      loadUserData();
+    }
+  }, [stableCurrentUser?.id, isInitialized, loadUserData]);
 
   const handleUpgrade = useCallback(async (planSlug) => {
     setUpgrading(planSlug);
@@ -357,6 +357,6 @@ const PremiumSettings = () => {
       </Card>
     </div>
   );
-};
+});
 
-export default memo(PremiumSettings);
+export default PremiumSettings;

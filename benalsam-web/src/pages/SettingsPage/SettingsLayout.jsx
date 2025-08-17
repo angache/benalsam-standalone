@@ -1,14 +1,14 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { User, Shield, Bell, MessageSquare, Palette, Crown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
-const SettingsLayout = () => {
+const SettingsLayout = memo(() => {
   const location = useLocation();
+  const pathname = useMemo(() => location.pathname, [location.pathname]);
   
-  const menuItems = [
+  const menuItems = useMemo(() => [
     { path: '/ayarlar', icon: User, label: 'Profil Ayarları', exact: true },
     { path: '/ayarlar/hesap', icon: Shield, label: 'Hesap Güvenliği' },
     { path: '/ayarlar/bildirimler', icon: Bell, label: 'Bildirim Ayarları' },
@@ -21,22 +21,17 @@ const SettingsLayout = () => {
       badge: 'Yeni',
       badgeColor: 'bg-gradient-to-r from-yellow-400 to-orange-500'
     },
-  ];
+  ], []);
 
-  const isActive = (path, exact = false) => {
+  const isActive = useMemo(() => (path, exact = false) => {
     if (exact) {
-      return location.pathname === path;
+      return pathname === path;
     }
-    return location.pathname.startsWith(path);
-  };
+    return pathname.startsWith(path);
+  }, [pathname]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="max-w-6xl mx-auto px-4 py-8"
-    >
+    <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gradient mb-2">Ayarlar</h1>
         <p className="text-muted-foreground">Hesap ve platform tercihlerinizi yönetin</p>
@@ -92,8 +87,8 @@ const SettingsLayout = () => {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
-};
+});
 
-export default memo(SettingsLayout);
+export default SettingsLayout;
