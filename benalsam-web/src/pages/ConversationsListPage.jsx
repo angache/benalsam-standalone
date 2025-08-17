@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MessageSquare, Loader2, Search, ArrowLeft } from 'lucide-react';
@@ -13,7 +13,7 @@ import { toast } from '@/components/ui/use-toast';
 import { formatDate } from 'benalsam-shared-types';
 
 
-const ConversationCard = ({ conversation, currentUser, onClick, unreadCount }) => {
+const ConversationCard = memo(({ conversation, currentUser, onClick, unreadCount }) => {
   const otherUser = conversation.user1_id === currentUser.id ? conversation.user2 : conversation.user1;
   const lastMessage = conversation.last_message;
 
@@ -55,7 +55,7 @@ const ConversationCard = ({ conversation, currentUser, onClick, unreadCount }) =
       </div>
     </motion.div>
   );
-};
+});
 
 
 const ConversationsListPage = () => {
@@ -63,45 +63,66 @@ const ConversationsListPage = () => {
   const [unreadCounts, setUnreadCounts] = useState({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isInitialized, setIsInitialized] = useState(false);
   const { currentUser } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser?.id && !isInitialized) {
       const fetchConversations = async () => {
-        setLoading(true);
-        const [convData, countsData] = await Promise.all([
-          getUserConversations(currentUser.id),
-          getUnreadMessageCounts(currentUser.id)
-        ]);
+        try {
+          setLoading(true);
+          const [convData, countsData] = await Promise.all([
+            getUserConversations(currentUser.id),
+            getUnreadMessageCounts(currentUser.id)
+          ]);
 
-        if (convData) {
-          setConversations(convData);
-        } else {
+          if (convData) {
+            setConversations(convData);
+          } else {
+            toast({
+              title: "Sohbetler Yüklenemedi",
+              description: "Sohbetlerinizi alırken bir sorun oluştu. Lütfen tekrar deneyin.",
+              variant: "destructive",
+            });
+          }
+          setUnreadCounts(countsData || {});
+          setIsInitialized(true);
+        } catch (error) {
+          console.error('Conversation fetch error:', error);
           toast({
-            title: "Sohbetler Yüklenemedi",
-            description: "Sohbetlerinizi alırken bir sorun oluştu. Lütfen tekrar deneyin.",
+            title: "Hata",
+            description: "Sohbetler yüklenirken beklenmedik bir hata oluştu.",
             variant: "destructive",
           });
+        } finally {
+          setLoading(false);
         }
-        setUnreadCounts(countsData || {});
-        setLoading(false);
       };
       fetchConversations();
+    } else if (!currentUser?.id) {
+      setLoading(false);
     }
-  }, [currentUser]);
+  }, [currentUser?.id, isInitialized]);
 
-  const filteredConversations = conversations.filter(conv => {
-    const otherUser = conv.user1_id === currentUser.id ? conv.user2 : conv.user1;
-    const listingTitle = conv.listing?.title || '';
-    const lastMessageContent = conv.last_message?.content || '';
+  const filteredConversations = useMemo(() => {
+    if (!currentUser?.id || !searchTerm.trim()) {
+      return conversations;
+    }
+    
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    return conversations.filter(conv => {
+      const otherUser = conv.user1_id === currentUser.id ? conv.user2 : conv.user1;
+      const listingTitle = conv.listing?.title || '';
+      const lastMessageContent = conv.last_message?.content || '';
 
-    return (
-      otherUser?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      listingTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lastMessageContent.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
+      return (
+        otherUser?.name?.toLowerCase().includes(lowerSearchTerm) ||
+        listingTitle.toLowerCase().includes(lowerSearchTerm) ||
+        lastMessageContent.toLowerCase().includes(lowerSearchTerm)
+      );
+    });
+  }, [conversations, searchTerm, currentUser?.id]);
   
   const handleGoBack = () => {
     navigate(-1);
@@ -137,6 +158,7 @@ const ConversationsListPage = () => {
       {loading ? (
         <div className="flex justify-center items-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <span className="ml-3 text-muted-foreground">Sohbetler yükleniyor...</span>
         </div>
       ) : filteredConversations.length > 0 ? (
         <div className="space-y-3">
@@ -164,4 +186,4 @@ const ConversationsListPage = () => {
   );
 };
 
-export default ConversationsListPage;
+export default memo(ConversationsListPage);

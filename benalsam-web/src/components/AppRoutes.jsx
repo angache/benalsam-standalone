@@ -181,6 +181,10 @@ const AppRoutes = ({ currentUser }) => {
     return <MyListingsPage />;
   }, []);
 
+  const MemoizedConversationsListPage = useCallback(() => {
+    return <ConversationsListPage />;
+  }, []);
+
   return (
     <MainContent>
       <Routes location={location}>
@@ -240,7 +244,7 @@ const AppRoutes = ({ currentUser }) => {
           path="/aldigim-teklifler" 
           element={<ProtectedRoute>{withPageErrorBoundary(ReceivedOffersPage, 'Aldığım Teklifler')}</ProtectedRoute>} 
         />
-        <Route path="/mesajlarim" element={<ProtectedRoute>{withPageErrorBoundary(ConversationsListPage, 'Mesajlarım')}</ProtectedRoute>} />
+        <Route path="/mesajlarim" element={<ProtectedRoute>{withPageErrorBoundary(MemoizedConversationsListPage, 'Mesajlarım')}</ProtectedRoute>} />
         <Route 
           path="/mesajlar/:conversationId" 
           element={<ProtectedRoute>{withPageErrorBoundary(MemoizedConversationPage, 'Mesajlaşma')}</ProtectedRoute>} 
