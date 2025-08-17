@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowDownLeftSquare, Package, AlertTriangle, Loader2, CheckCircle, XCircle, MessageSquare, ExternalLink, Award } from 'lucide-react';
@@ -17,31 +17,39 @@ const ReceivedOffersPage = () => {
   const [loading, setLoading] = useState(true);
   const [updatingOfferId, setUpdatingOfferId] = useState(null);
   const [reviewableOffers, setReviewableOffers] = useState({});
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (!currentUser) {
+    if (!currentUser?.id || isInitialized) {
       return;
     }
     const loadReceivedOffers = async () => {
-      setLoading(true);
-      const offers = await fetchReceivedOffers(currentUser.id);
-      setReceivedOffers(offers || []);
+      try {
+        setLoading(true);
+        const offers = await fetchReceivedOffers(currentUser.id);
+        setReceivedOffers(offers || []);
 
-      const reviewStatus = {};
-      if (offers) {
-        for (const offer of offers) {
-          if (offer.status === 'accepted') {
-            reviewStatus[offer.id] = await canUserReview(currentUser.id, offer.id);
-          } else {
-            reviewStatus[offer.id] = false;
+        const reviewStatus = {};
+        if (offers) {
+          for (const offer of offers) {
+            if (offer.status === 'accepted') {
+              reviewStatus[offer.id] = await canUserReview(currentUser.id, offer.id);
+            } else {
+              reviewStatus[offer.id] = false;
+            }
           }
         }
+        setReviewableOffers(reviewStatus);
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Error loading received offers:', error);
+        toast({ title: "Hata", description: "Aldığım teklifler yüklenirken bir sorun oluştu.", variant: "destructive" });
+      } finally {
+        setLoading(false);
       }
-      setReviewableOffers(reviewStatus);
-      setLoading(false);
     };
     loadReceivedOffers();
-  }, [currentUser, navigate]);
+  }, [currentUser?.id, isInitialized]);
 
   const getStatusColor = status => {
     switch (status?.toLowerCase()) {
@@ -57,33 +65,43 @@ const ReceivedOffersPage = () => {
         return 'text-slate-500 border-slate-500/50 bg-slate-500/10';
     }
   };
-  const handleUpdateStatus = async (offerId, status, offeringUserId, listingId) => {
+  const handleUpdateStatus = useCallback(async (offerId, status, offeringUserId, listingId) => {
     setUpdatingOfferId(offerId);
-    const updatedOffer = await updateOfferStatus(offerId, status, currentUser.id, offeringUserId, currentUser.id, listingId);
-    if (updatedOffer) {
-      setReceivedOffers(prevOffers => prevOffers.map(offer => offer.id === offerId ? {
-        ...offer,
-        status: updatedOffer.status,
-        conversation_id: updatedOffer.conversation_id
-      } : offer));
-      toast({
-        title: "Teklif Durumu Güncellendi",
-        description: `Teklif ${status === 'accepted' ? 'kabul edildi' : 'reddedildi'}.`
-      });
-       if (status === 'accepted') {
-        const canReview = await canUserReview(currentUser.id, offerId);
-        setReviewableOffers(prev => ({...prev, [offerId]: canReview}));
+    try {
+      const updatedOffer = await updateOfferStatus(offerId, status, currentUser.id, offeringUserId, currentUser.id, listingId);
+      if (updatedOffer) {
+        setReceivedOffers(prevOffers => prevOffers.map(offer => offer.id === offerId ? {
+          ...offer,
+          status: updatedOffer.status,
+          conversation_id: updatedOffer.conversation_id
+        } : offer));
+        toast({
+          title: "Teklif Durumu Güncellendi",
+          description: `Teklif ${status === 'accepted' ? 'kabul edildi' : 'reddedildi'}.`
+        });
+         if (status === 'accepted') {
+          const canReview = await canUserReview(currentUser.id, offerId);
+          setReviewableOffers(prev => ({...prev, [offerId]: canReview}));
+        }
+      } else {
+        toast({
+          title: "Hata",
+          description: "Teklif durumu güncellenirken bir sorun oluştu.",
+          variant: "destructive"
+        });
       }
-    } else {
+    } catch (error) {
+      console.error('Error updating offer status:', error);
       toast({
         title: "Hata",
-        description: "Teklif durumu güncellenirken bir sorun oluştu.",
+        description: "Beklenmedik bir hata oluştu.",
         variant: "destructive"
       });
+    } finally {
+      setUpdatingOfferId(null);
     }
-    setUpdatingOfferId(null);
-  };
-  const handleStartOrGoToConversation = async offer => {
+  }, [currentUser?.id]);
+  const handleStartOrGoToConversation = useCallback(async (offer) => {
     if (!currentUser || !offer.profiles) {
       toast({
         title: "Hata",
@@ -109,8 +127,8 @@ const ReceivedOffersPage = () => {
         variant: "destructive"
       });
     }
-  };
-  const handleViewOfferedItem = item => {
+  }, [currentUser]);
+  const handleViewOfferedItem = useCallback((item) => {
     if (item && item.id) {
       toast({
         title: "Ürün Detayı (Yakında)",
@@ -123,11 +141,11 @@ const ReceivedOffersPage = () => {
         variant: "info"
       });
     }
-  };
+  }, []);
 
-  const handleOpenLeaveReview = (offer) => {
+  const handleOpenLeaveReview = useCallback((offer) => {
     navigate(`/degerlendirme/${offer.id}`);
-  };
+  }, [navigate]);
 
   const formatDate = dateString => {
     if (!dateString) return "Bilinmiyor";
@@ -141,9 +159,14 @@ const ReceivedOffersPage = () => {
     });
   };
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-16 h-16 animate-spin text-primary" />
-      </div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-16 h-16 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Aldığım teklifler yükleniyor...</p>
+        </div>
+      </div>
+    );
   }
   return <motion.div initial={{
     opacity: 0,
@@ -282,4 +305,4 @@ const ReceivedOffersPage = () => {
         </div>}
     </motion.div>;
 };
-export default ReceivedOffersPage;
+export default memo(ReceivedOffersPage);

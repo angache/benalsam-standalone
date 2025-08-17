@@ -199,6 +199,14 @@ const AppRoutes = ({ currentUser }) => {
     return <FollowingPage onToggleFavorite={handleToggleFavorite} />;
   }, []);
 
+  const MemoizedSentOffersPage = useCallback(() => {
+    return <SentOffersPage />;
+  }, []);
+
+  const MemoizedReceivedOffersPage = useCallback(() => {
+    return <ReceivedOffersPage />;
+  }, []);
+
   return (
     <MainContent>
       <Routes location={location}>
@@ -252,11 +260,11 @@ const AppRoutes = ({ currentUser }) => {
         />
         <Route 
           path="/gonderdigim-teklifler" 
-          element={<ProtectedRoute>{withPageErrorBoundary(SentOffersPage, 'Gönderdiğim Teklifler')}</ProtectedRoute>} 
+          element={<ProtectedRoute>{withPageErrorBoundary(MemoizedSentOffersPage, 'Gönderdiğim Teklifler')}</ProtectedRoute>} 
         />
         <Route 
           path="/aldigim-teklifler" 
-          element={<ProtectedRoute>{withPageErrorBoundary(ReceivedOffersPage, 'Aldığım Teklifler')}</ProtectedRoute>} 
+          element={<ProtectedRoute>{withPageErrorBoundary(MemoizedReceivedOffersPage, 'Aldığım Teklifler')}</ProtectedRoute>} 
         />
         <Route path="/mesajlarim" element={<ProtectedRoute>{withPageErrorBoundary(MemoizedConversationsListPage, 'Mesajlarım')}</ProtectedRoute>} />
         <Route 

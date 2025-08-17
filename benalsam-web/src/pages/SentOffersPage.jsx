@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowUpRightSquare, Package, AlertTriangle, Loader2, Trash2, MessageSquare, ExternalLink, Award } from 'lucide-react';
@@ -30,33 +30,41 @@ const SentOffersPage = () => {
   const [loading, setLoading] = useState(true);
   const [deletingOfferId, setDeletingOfferId] = useState(null);
   const [reviewableOffers, setReviewableOffers] = useState({});
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (!currentUser) {
+    if (!currentUser?.id || isInitialized) {
       return;
     }
 
     const loadSentOffers = async () => {
-      setLoading(true);
-      const offers = await fetchSentOffers(currentUser.id);
-      setSentOffers(offers || []);
-      
-      const reviewStatus = {};
-      if (offers) {
-        for (const offer of offers) {
-          if (offer.status === 'accepted') {
-            reviewStatus[offer.id] = await canUserReview(currentUser.id, offer.id);
-          } else {
-            reviewStatus[offer.id] = false;
+      try {
+        setLoading(true);
+        const offers = await fetchSentOffers(currentUser.id);
+        setSentOffers(offers || []);
+        
+        const reviewStatus = {};
+        if (offers) {
+          for (const offer of offers) {
+            if (offer.status === 'accepted') {
+              reviewStatus[offer.id] = await canUserReview(currentUser.id, offer.id);
+            } else {
+              reviewStatus[offer.id] = false;
+            }
           }
         }
+        setReviewableOffers(reviewStatus);
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Error loading sent offers:', error);
+        toast({ title: "Hata", description: "Gönderdiğim teklifler yüklenirken bir sorun oluştu.", variant: "destructive" });
+      } finally {
+        setLoading(false);
       }
-      setReviewableOffers(reviewStatus);
-      setLoading(false);
     };
 
     loadSentOffers();
-  }, [currentUser]);
+  }, [currentUser?.id, isInitialized]);
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -68,19 +76,25 @@ const SentOffersPage = () => {
     }
   };
 
-  const handleDeleteOffer = async (offerId) => {
+  const handleDeleteOffer = useCallback(async (offerId) => {
     setDeletingOfferId(offerId);
-    const success = await deleteOffer(offerId, currentUser.id);
-    if (success) {
-      setSentOffers(prevOffers => prevOffers.filter(offer => offer.id !== offerId));
-      toast({ title: "Teklif Silindi", description: "Teklifiniz başarıyla silindi." });
-    } else {
-      toast({ title: "Hata", description: "Teklif silinirken bir sorun oluştu.", variant: "destructive" });
+    try {
+      const success = await deleteOffer(offerId, currentUser.id);
+      if (success) {
+        setSentOffers(prevOffers => prevOffers.filter(offer => offer.id !== offerId));
+        toast({ title: "Teklif Silindi", description: "Teklifiniz başarıyla silindi." });
+      } else {
+        toast({ title: "Hata", description: "Teklif silinirken bir sorun oluştu.", variant: "destructive" });
+      }
+    } catch (error) {
+      console.error('Error deleting offer:', error);
+      toast({ title: "Hata", description: "Beklenmedik bir hata oluştu.", variant: "destructive" });
+    } finally {
+      setDeletingOfferId(null);
     }
-    setDeletingOfferId(null);
-  };
+  }, [currentUser?.id]);
 
-  const handleStartOrGoToConversation = async (offer) => {
+  const handleStartOrGoToConversation = useCallback(async (offer) => {
     if (!currentUser || !offer.listings || !offer.listings.profiles) {
       toast({ title: "Hata", description: "Sohbet başlatılamadı, kullanıcı veya ilan bilgileri eksik.", variant: "destructive" });
       return;
@@ -98,9 +112,9 @@ const SentOffersPage = () => {
     } else {
       toast({ title: "Sohbet Başlatılamadı", description: "Lütfen tekrar deneyin.", variant: "destructive" });
     }
-  };
+  }, [currentUser]);
 
-  const handleViewOfferedItem = (item) => {
+  const handleViewOfferedItem = useCallback((item) => {
     if (item && item.id) {
       toast({
         title: "Ürün Detayı (Yakında)",
@@ -110,17 +124,20 @@ const SentOffersPage = () => {
     } else {
       toast({ title: "Ürün Bilgisi Yok", description: "Bu teklifte bir ürün belirtilmemiş.", variant: "info" });
     }
-  };
+  }, [navigate]);
 
-  const handleOpenLeaveReview = (offer) => {
+  const handleOpenLeaveReview = useCallback((offer) => {
     navigate(`/degerlendirme/${offer.id}`);
-  };
+  }, [navigate]);
 
   
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-16 h-16 animate-spin text-primary" />
+        <div className="text-center">
+          <Loader2 className="w-16 h-16 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Gönderdiğim teklifler yükleniyor...</p>
+        </div>
       </div>
     );
   }
@@ -295,4 +312,4 @@ const SentOffersPage = () => {
   );
 };
 
-export default SentOffersPage;
+export default memo(SentOffersPage);
