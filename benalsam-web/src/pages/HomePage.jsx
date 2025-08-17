@@ -1,30 +1,31 @@
 
     import React, { useState, useMemo, useEffect, memo, useCallback } from 'react';
-    import { motion, AnimatePresence } from 'framer-motion';
-    import { useHomePageData } from '@/hooks/useHomePageData';
-    import { useNavigate } from 'react-router-dom';
-    import { toast } from '@/components/ui/use-toast';
-    import ListingCard from '@/components/ListingCard';
-    import AdCard from '@/components/AdCard';
-    import AdBanner from '@/components/AdBanner';
-    import { Input } from '@/components/ui/input';
-    import { Button } from '@/components/ui/button';
-    import { Slider } from '@/components/ui/slider';
-    import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-    import { Loader2, LayoutGrid, List, ChevronRight, Search, X } from 'lucide-react';
-    import { categoriesConfig } from '@/config/categories';
-    import { cn } from '@/lib/utils';
-    import MobileCategoryScroller from '@/components/HomePage/MobileCategoryScroller';
-    import CategoryItem from '@/components/HomePage/CategoryItem';
-    import FeaturedListings from '@/components/FeaturedListings';
-    import StatsSection from '@/components/StatsSection';
-    import PersonalizedFeed from '@/components/PersonalizedFeed';
-    import {
-      fetchListings,
-      fetchPopularListings,
-      fetchMostOfferedListings,
-      fetchTodaysDeals,
-    } from '@/services/listingService';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useHomePageData } from '@/hooks/useHomePageData';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/components/ui/use-toast';
+import ListingCard from '@/components/ListingCard';
+import AdCard from '@/components/AdCard';
+import AdBanner from '@/components/AdBanner';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, LayoutGrid, List, ChevronRight, Search, X } from 'lucide-react';
+import { categoriesConfig } from '@/config/categories';
+import { cn } from '@/lib/utils';
+import MobileCategoryScroller from '@/components/HomePage/MobileCategoryScroller';
+import CategoryItem from '@/components/HomePage/CategoryItem';
+import FeaturedListings from '@/components/FeaturedListings';
+import StatsSection from '@/components/StatsSection';
+import PersonalizedFeed from '@/components/PersonalizedFeed';
+import SEOHead from '@/components/SEOHead';
+import {
+  fetchListings,
+  fetchPopularListings,
+  fetchMostOfferedListings,
+  fetchTodaysDeals,
+} from '@/services/listingService';
 
 
     const HomePage = ({ onToggleFavorite, currentUser }) => {
@@ -156,13 +157,21 @@
       }
 
       return (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-          className="container mx-auto px-2 sm:px-4 lg:px-6 py-6"
-        >
+        <>
+          <SEOHead 
+            title="BenAlsam - Alım İlanları Platformu | İhtiyacınız Olan Ürün ve Hizmetler"
+            description="İhtiyacınız olan ürün ve hizmetler için alım ilanı verin, teklifler alın! Binlerce kullanıcı ile bağlantı kurun ve en iyi fiyatları bulun."
+            keywords="alım ilanı, ihtiyaç ilanı, teklif alma, ürün alımı, hizmet alımı, satıcı bulma, tedarikçi bulma"
+            image="/og-homepage.jpg"
+            type="website"
+          />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="container mx-auto px-2 sm:px-4 lg:px-6 py-6"
+          >
           <div className="flex flex-col lg:flex-row lg:gap-8">
             <aside className="hidden lg:block w-full lg:w-1/4 xl:w-1/5 mb-6 lg:mb-0 lg:sticky lg:top-24 self-start">
               <div className="p-4 rounded-lg bg-card border">
@@ -382,7 +391,8 @@
               )}
             </main>
           </div>
-        </motion.div>
+          </motion.div>
+        </>
       );
     };
 

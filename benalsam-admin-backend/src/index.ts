@@ -52,6 +52,7 @@ import sentryTestRoutes from './routes/sentry-test';
 import hybridMonitoringRoutes from './routes/hybridMonitoring';
 import healthCheckRoutes from './routes/healthCheck';
 import securityRoutes from './routes/security';
+import seoRoutes from './routes/seo';
 
 // Import services
 import { AdminElasticsearchService } from './services/elasticsearchService';
@@ -253,6 +254,9 @@ app.use('/api/v1/sentry', sentryRoutes); // Sentry dashboard routes
 app.use('/api/v1/hybrid-monitoring', hybridMonitoringRoutes); // Hybrid monitoring routes
 app.use('/api/v1/health', healthCheckRoutes); // Health check routes
 app.use('/api/v1/security', securityRoutes); // Security monitoring routes
+
+// SEO routes (no auth required)
+app.use('/', seoRoutes); // Sitemap and robots.txt
 
 // Sentry error handler is now integrated into the main error handler
 
