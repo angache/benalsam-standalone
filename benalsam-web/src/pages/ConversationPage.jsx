@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Send, Loader2, Paperclip, Briefcase, User, Info } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input.jsx';
+import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
 import { 
   fetchMessages, 
@@ -358,4 +358,4 @@ const ConversationPage = () => {
     </motion.div>
   );
 };
-export default ConversationPage;
+export default memo(ConversationPage);

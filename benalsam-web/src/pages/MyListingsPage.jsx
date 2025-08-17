@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/stores';
 import { supabase } from '@/lib/supabaseClient';
-import MyListingsHeader from '@/components/MyListingsPage/MyListingsHeader.jsx';
-import ListingCard from '@/components/MyListingsPage/ListingCard.jsx';
-import EmptyState from '@/components/MyListingsPage/EmptyState.jsx';
-import DopingModal from '@/components/MyListingsPage/DopingModal.jsx';
-import { statusConfig, getListingStatus, getStatusBadge, getPremiumBadges } from '@/components/MyListingsPage/utils.jsx';
+import MyListingsHeader from '@/components/MyListingsPage/MyListingsHeader';
+import ListingCard from '@/components/MyListingsPage/ListingCard';
+import EmptyState from '@/components/MyListingsPage/EmptyState';
+import DopingModal from '@/components/MyListingsPage/DopingModal';
+import { statusConfig, getListingStatus, getStatusBadge, getPremiumBadges } from '@/components/MyListingsPage/utils';
 
 const MyListingsPage = () => {
   const navigate = useNavigate();
@@ -250,4 +250,4 @@ const MyListingsPage = () => {
   );
 };
 
-export default MyListingsPage;
+export default memo(MyListingsPage);

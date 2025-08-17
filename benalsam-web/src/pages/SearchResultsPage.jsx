@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchFilteredListings } from '@/services/listingService/fetchers';
@@ -8,7 +8,7 @@ import { toast } from '@/components/ui/use-toast';
 
 import ListingCard from '@/components/ListingCard';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.jsx";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from '@/components/ui/pagination';
 import { Loader2, LayoutGrid, List, Search, Frown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -226,4 +226,4 @@ const SearchResultsPage = ({ onToggleFavorite }) => {
   );
 };
 
-export default SearchResultsPage;
+export default memo(SearchResultsPage);

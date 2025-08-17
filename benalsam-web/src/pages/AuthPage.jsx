@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Key, User, Eye, EyeOff, ArrowLeft } from 'lucide-react';
@@ -378,4 +378,4 @@ const AuthPage = () => {
   );
 };
 
-export default AuthPage;
+export default memo(AuthPage);

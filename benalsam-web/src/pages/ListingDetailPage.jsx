@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, AlertTriangle, ListChecks, Clock as ClockIcon, XCircle, ArrowLeftRight } from 'lucide-react';
@@ -339,4 +339,4 @@ const ListingDetailPage = ({ setListings, onToggleFavorite }) => {
   );
 };
 
-export default ListingDetailPage;
+export default memo(ListingDetailPage);

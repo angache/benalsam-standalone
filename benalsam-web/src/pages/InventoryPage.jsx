@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Package, Plus, Loader2 } from 'lucide-react';
@@ -144,4 +144,4 @@ const InventoryPage = () => {
   );
 };
 
-export default InventoryPage;
+export default memo(InventoryPage);

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useMemo, lazy, Suspense, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Tag } from 'lucide-react';
@@ -321,4 +321,4 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
       );
     };
     
-    export default CreateListingPage;
+    export default memo(CreateListingPage);

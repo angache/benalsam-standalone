@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useContext, useMemo, useCallback, memo } from 'react';
 import { useParams, useNavigate, useLocation as routerLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast.js';
-import { Button } from '@/components/ui/button.jsx';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.jsx';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Edit3, User, MapPin, Image as ImageIcon, Star, Eye, MessageSquare, ShoppingBag, Award, Settings, UserPlus, UserMinus, Users, WifiOff, RefreshCw } from 'lucide-react';
 import ListingCard from '@/components/ListingCard';
 import { ThemeContext } from '@/contexts/ThemeContext';
@@ -390,4 +390,4 @@ const ProfilePage = ({ onOpenLeaveReviewModal, openAuthModal, onToggleFavorite }
   );
 };
 
-export default ProfilePage;
+export default memo(ProfilePage);

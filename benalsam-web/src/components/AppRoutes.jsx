@@ -7,52 +7,52 @@ import PageErrorBoundary from '@/components/ErrorBoundaries/PageErrorBoundary';
 
 // Lazy loaded components for code splitting
 const HomePage = lazy(() => import('@/pages/HomePage'));
-const ProfilePage = lazy(() => import('@/pages/ProfilePage.jsx'));
+const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const InventoryPage = lazy(() => import('@/pages/InventoryPage'));
-const MyListingsPage = lazy(() => import('@/pages/MyListingsPage.jsx'));
+const MyListingsPage = lazy(() => import('@/pages/MyListingsPage'));
 const ListingDetailPage = lazy(() => import('@/pages/ListingDetailPage'));
 const SentOffersPage = lazy(() => import('@/pages/SentOffersPage'));
 const ReceivedOffersPage = lazy(() => import('@/pages/ReceivedOffersPage'));
 const ConversationPage = lazy(() => import('@/pages/ConversationPage'));
-const ConversationsListPage = lazy(() => import('@/pages/ConversationsListPage.jsx'));
-const AuthCallbackPage = lazy(() => import('@/pages/AuthCallbackPage.jsx'));
-const FavoritesPage = lazy(() => import('@/pages/FavoritesPage.jsx')); 
-const FollowingPage = lazy(() => import('@/pages/FollowingPage.jsx'));
+const ConversationsListPage = lazy(() => import('@/pages/ConversationsListPage'));
+const AuthCallbackPage = lazy(() => import('@/pages/AuthCallbackPage'));
+const FavoritesPage = lazy(() => import('@/pages/FavoritesPage')); 
+const FollowingPage = lazy(() => import('@/pages/FollowingPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const AdBanner = lazy(() => import('@/components/AdBanner'));
-const SearchResultsPage = lazy(() => import('@/pages/SearchResultsPage.jsx'));
+const SearchResultsPage = lazy(() => import('@/pages/SearchResultsPage'));
 
-const CreateListingPage = lazy(() => import('@/pages/CreateListingPage.jsx'));
-const AuthPage = lazy(() => import('@/pages/AuthPage.jsx'));
-const TwoFactorAuthPage = lazy(() => import('@/pages/TwoFactorAuthPage.jsx'));
-const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage.jsx'));
-const MakeOfferPage = lazy(() => import('@/pages/MakeOfferPage.jsx'));
-const ReportListingPage = lazy(() => import('@/pages/ReportListingPage.jsx'));
-const LeaveReviewPage = lazy(() => import('@/pages/LeaveReviewPage.jsx'));
-const InventoryFormPage = lazy(() => import('@/pages/InventoryFormPage.jsx'));
-const EditListingPage = lazy(() => import('@/pages/EditListingPage.jsx'));
-const StockImageSearchPage = lazy(() => import('@/pages/StockImageSearchPage.jsx'));
-const FollowCategoryPage = lazy(() => import('@/pages/FollowCategoryPage.jsx'));
-const ListingRulesPage = lazy(() => import('@/pages/ListingRulesPage.jsx'));
-const DopingPage = lazy(() => import('@/pages/DopingPage.jsx'));
-const PremiumPage = lazy(() => import('@/pages/PremiumPage.jsx'));
-const TrustScorePage = lazy(() => import('@/pages/TrustScorePage.jsx'));
-const UnpublishListingPage = lazy(() => import('@/pages/UnpublishListingPage.jsx'));
+const CreateListingPage = lazy(() => import('@/pages/CreateListingPage'));
+const AuthPage = lazy(() => import('@/pages/AuthPage'));
+const TwoFactorAuthPage = lazy(() => import('@/pages/TwoFactorAuthPage'));
+const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage'));
+const MakeOfferPage = lazy(() => import('@/pages/MakeOfferPage'));
+const ReportListingPage = lazy(() => import('@/pages/ReportListingPage'));
+const LeaveReviewPage = lazy(() => import('@/pages/LeaveReviewPage'));
+const InventoryFormPage = lazy(() => import('@/pages/InventoryFormPage'));
+const EditListingPage = lazy(() => import('@/pages/EditListingPage'));
+const StockImageSearchPage = lazy(() => import('@/pages/StockImageSearchPage'));
+const FollowCategoryPage = lazy(() => import('@/pages/FollowCategoryPage'));
+const ListingRulesPage = lazy(() => import('@/pages/ListingRulesPage'));
+const DopingPage = lazy(() => import('@/pages/DopingPage'));
+const PremiumPage = lazy(() => import('@/pages/PremiumPage'));
+const TrustScorePage = lazy(() => import('@/pages/TrustScorePage'));
+const UnpublishListingPage = lazy(() => import('@/pages/UnpublishListingPage'));
 const ErrorTestComponent = lazy(() => import('@/components/ErrorBoundaries/ErrorTestComponent'));
-const PerformanceTestPage = lazy(() => import('@/pages/PerformanceTestPage.jsx'));
+const PerformanceTestPage = lazy(() => import('@/pages/PerformanceTestPage'));
 
-const SettingsLayout = lazy(() => import('@/pages/SettingsPage/SettingsLayout.jsx'));
-const SettingsLayout2 = lazy(() => import('@/pages/SettingsPage/SettingsLayout2.jsx'));
+const SettingsLayout = lazy(() => import('@/pages/SettingsPage/SettingsLayout'));
+const SettingsLayout2 = lazy(() => import('@/pages/SettingsPage/SettingsLayout2'));
 import SettingsPage2 from '@/pages/SettingsPage/SettingsPage2';
-const ProfileSettings = lazy(() => import('@/pages/SettingsPage/ProfileSettings.jsx'));
-const ContactSettings = lazy(() => import('@/pages/SettingsPage/ContactSettings.jsx'));
-const SecuritySettings = lazy(() => import('@/pages/SettingsPage/SecuritySettings.jsx'));
-const NotificationSettings = lazy(() => import('@/pages/SettingsPage/NotificationSettings.jsx'));
-const PlatformSettings = lazy(() => import('@/pages/SettingsPage/PlatformSettings.jsx'));
-const AccountSettings = lazy(() => import('@/pages/SettingsPage/AccountSettings.jsx'));
-const FeedbackSection = lazy(() => import('@/pages/SettingsPage/FeedbackSection.jsx'));
-const PlaceholderSettings = lazy(() => import('@/pages/SettingsPage/PlaceholderSettings.jsx'));
-const PremiumSettings = lazy(() => import('@/pages/SettingsPage/PremiumSettings.jsx'));
+const ProfileSettings = lazy(() => import('@/pages/SettingsPage/ProfileSettings'));
+const ContactSettings = lazy(() => import('@/pages/SettingsPage/ContactSettings'));
+const SecuritySettings = lazy(() => import('@/pages/SettingsPage/SecuritySettings'));
+const NotificationSettings = lazy(() => import('@/pages/SettingsPage/NotificationSettings'));
+const PlatformSettings = lazy(() => import('@/pages/SettingsPage/PlatformSettings'));
+const AccountSettings = lazy(() => import('@/pages/SettingsPage/AccountSettings'));
+const FeedbackSection = lazy(() => import('@/pages/SettingsPage/FeedbackSection'));
+const PlaceholderSettings = lazy(() => import('@/pages/SettingsPage/PlaceholderSettings'));
+const PremiumSettings = lazy(() => import('@/pages/SettingsPage/PremiumSettings'));
 const PremiumDashboard = lazy(() => import('@/pages/PremiumDashboard/index'));
 
 import LanguagePage from '@/pages/SettingsPage/LanguagePage';
@@ -146,6 +146,41 @@ const AppRoutes = ({ currentUser }) => {
     return <MakeOfferPage currentUser={currentUser} />;
   }, [currentUser]);
 
+  // Stabilize other critical pages
+  const MemoizedSearchResultsPage = useCallback(() => {
+    const handleToggleFavorite = (listingId, isFavorited) => {
+      // TODO: Implement toggle favorite logic
+    };
+    return <SearchResultsPage onToggleFavorite={handleToggleFavorite} />;
+  }, []);
+
+  const MemoizedListingDetailPage = useCallback(() => {
+    const handleToggleFavorite = (listingId, isFavorited) => {
+      // TODO: Implement toggle favorite logic
+    };
+    return <ListingDetailPage setListings={() => {}} onToggleFavorite={handleToggleFavorite} />;
+  }, []);
+
+  const MemoizedProfilePage = useCallback(() => {
+    return <ProfilePage />;
+  }, []);
+
+  const MemoizedCreateListingPage = useCallback(() => {
+    return <CreateListingPage />;
+  }, []);
+
+  const MemoizedConversationPage = useCallback(() => {
+    return <ConversationPage />;
+  }, []);
+
+  const MemoizedInventoryPage = useCallback(() => {
+    return <InventoryPage />;
+  }, []);
+
+  const MemoizedMyListingsPage = useCallback(() => {
+    return <MyListingsPage />;
+  }, []);
+
   return (
     <MainContent>
       <Routes location={location}>
@@ -155,9 +190,9 @@ const AppRoutes = ({ currentUser }) => {
         />
         <Route path="/auth" element={withPageErrorBoundary(AuthPage, 'Giriş/Kayıt')} />
         <Route path="/auth/reset-password" element={withPageErrorBoundary(ResetPasswordPage, 'Şifre Sıfırlama')} />
-        <Route path="/arama" element={withPageErrorBoundary(SearchResultsPage, 'Arama Sonuçları')} />
+        <Route path="/arama" element={withPageErrorBoundary(MemoizedSearchResultsPage, 'Arama Sonuçları')} />
 
-        <Route path="/ilan-olustur" element={<ProtectedRoute>{withPageErrorBoundary(CreateListingPage, 'İlan Oluştur')}</ProtectedRoute>} />
+        <Route path="/ilan-olustur" element={<ProtectedRoute>{withPageErrorBoundary(MemoizedCreateListingPage, 'İlan Oluştur')}</ProtectedRoute>} />
         <Route path="/teklif-yap/:listingId" element={<ProtectedRoute>{withPageErrorBoundary(MemoizedMakeOfferPage, 'Teklif Yap')}</ProtectedRoute>} />
         <Route path="/sikayet-et/:listingId" element={<ProtectedRoute>{withPageErrorBoundary(ReportListingPage, 'Şikayet Et')}</ProtectedRoute>} />
         <Route path="/degerlendirme/:offerId" element={<ProtectedRoute>{withPageErrorBoundary(LeaveReviewPage, 'Değerlendirme')}</ProtectedRoute>} />
@@ -172,13 +207,13 @@ const AppRoutes = ({ currentUser }) => {
         
         <Route 
           path="/profil/:userId" 
-          element={withPageErrorBoundary(ProfilePage, 'Profil')}
+          element={withPageErrorBoundary(MemoizedProfilePage, 'Profil')}
         />
         <Route 
           path="/envanterim" 
           element={
             <ProtectedRoute>
-              {withPageErrorBoundary(InventoryPage, 'Envanterim')}
+              {withPageErrorBoundary(MemoizedInventoryPage, 'Envanterim')}
             </ProtectedRoute>
           } 
         />
@@ -186,7 +221,7 @@ const AppRoutes = ({ currentUser }) => {
           path="/ilanlarim" 
           element={
             <ProtectedRoute>
-              {withPageErrorBoundary(MyListingsPage, 'İlanlarım')}
+              {withPageErrorBoundary(MemoizedMyListingsPage, 'İlanlarım')}
             </ProtectedRoute>
           } 
         />
@@ -195,7 +230,7 @@ const AppRoutes = ({ currentUser }) => {
 
         <Route 
           path="/ilan/:listingId" 
-          element={withPageErrorBoundary(ListingDetailPage, 'İlan Detayı')}
+          element={withPageErrorBoundary(MemoizedListingDetailPage, 'İlan Detayı')}
         />
         <Route 
           path="/gonderdigim-teklifler" 
@@ -208,7 +243,7 @@ const AppRoutes = ({ currentUser }) => {
         <Route path="/mesajlarim" element={<ProtectedRoute>{withPageErrorBoundary(ConversationsListPage, 'Mesajlarım')}</ProtectedRoute>} />
         <Route 
           path="/mesajlar/:conversationId" 
-          element={<ProtectedRoute>{withPageErrorBoundary(ConversationPage, 'Mesajlaşma')}</ProtectedRoute>} 
+          element={<ProtectedRoute>{withPageErrorBoundary(MemoizedConversationPage, 'Mesajlaşma')}</ProtectedRoute>} 
         />
          <Route 
           path="/favorilerim" 
