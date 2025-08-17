@@ -1,3 +1,4 @@
+import React from 'react';
 import { onCLS, onINP, onFCP, onLCP, onTTFB, type Metric } from 'web-vitals';
 
 // Performance metrics interface
@@ -33,6 +34,10 @@ const PERFORMANCE_CONFIG = {
   // Backend API configuration
   BACKEND_URL: import.meta.env.VITE_API_URL || 'http://localhost:3002',
   API_ENDPOINT: '/trends/performance-data',
+  
+  // Timeout configuration for metrics collection
+  METRICS_TIMEOUT: 10000, // 10 seconds
+  FORCE_SEND_TIMEOUT: 15000, // 15 seconds
 };
 
 // Calculate performance score
@@ -133,31 +138,26 @@ const sendToAnalytics = (metric: Metric) => {
   });
 };
 
-// Log performance metrics
-const logPerformanceMetric = (metric: Metric) => {
-  const { name, value, rating } = metric;
-  
-  if (PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
-    const emoji = rating === 'good' ? '🟢' : rating === 'needs-improvement' ? '🟡' : '🔴';
-    console.log(`${emoji} ${name}: ${value}ms (${rating})`);
+// Check if we have enough metrics to send
+const hasEnoughMetrics = (): boolean => {
+  const collectedMetrics = Object.values(metrics).filter(value => value !== null);
+  return collectedMetrics.length >= 3; // At least 3 metrics collected
+};
+
+// Force send metrics after timeout (even if incomplete)
+let forceSendTimeout: NodeJS.Timeout | null = null;
+
+const scheduleForceSend = (route: string) => {
+  if (forceSendTimeout) {
+    clearTimeout(forceSendTimeout);
   }
   
-  // Store metric
-  metrics[name as keyof PerformanceMetrics] = value;
-  
-  // Send to analytics
-  sendToAnalytics(metric);
-  
-  // Check if all metrics are collected
-  const allMetricsCollected = Object.values(metrics).every(value => value !== null);
-  if (allMetricsCollected) {
-    const route = window.location.pathname;
+  forceSendTimeout = setTimeout(() => {
     const score = calculatePerformanceScore(metrics);
-    
-    // Send to backend
+    console.log('⏰ Force sending performance data after timeout');
     sendToBackend(route, metrics, score);
     
-    // Reset metrics for next page
+    // Reset metrics
     metrics = {
       LCP: null,
       INP: null,
@@ -165,43 +165,100 @@ const logPerformanceMetric = (metric: Metric) => {
       FCP: null,
       TTFB: null,
     };
+  }, PERFORMANCE_CONFIG.FORCE_SEND_TIMEOUT);
+};
+
+// Log performance metrics
+const logPerformanceMetric = (metric: Metric) => {
+  const { name, value, rating } = metric;
+  
+  if (PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
+    const emoji = rating === 'good' ? '🟢' : rating === 'needs-improvement' ? '🟡' : '🔴';
+    console.log(`${emoji} ${name}: ${value}${name === 'CLS' ? '' : 'ms'} (${rating})`);
+  }
+  
+  // Store metric
+  metrics[name as keyof PerformanceMetrics] = value;
+  
+  console.log('📊 Performance Metric:', metric);
+  console.log('📊 Current metrics state:', metrics);
+  
+  // Send to analytics
+  sendToAnalytics(metric);
+  
+  // Check if we have enough metrics or all metrics are collected
+  const allMetricsCollected = Object.values(metrics).every(value => value !== null);
+  const enoughMetrics = hasEnoughMetrics();
+  
+  if (allMetricsCollected || enoughMetrics) {
+    const route = window.location.pathname;
+    const score = calculatePerformanceScore(metrics);
+    
+    // Send to backend
+    sendToBackend(route, metrics, score);
+    
+    // Clear force send timeout
+    if (forceSendTimeout) {
+      clearTimeout(forceSendTimeout);
+      forceSendTimeout = null;
+    }
+    
+    // DON'T reset metrics immediately - keep them for UI display
+    // Only reset when navigating to a new page
   }
 };
 
 // Initialize Core Web Vitals tracking
 export const initPerformanceTracking = () => {
   try {
-    // Largest Contentful Paint (LCP)
+    const route = window.location.pathname;
+    
+    // Schedule force send for this page
+    scheduleForceSend(route);
+    
+    // Largest Contentful Paint (LCP) - Most important metric
     onLCP((metric) => {
       console.log('📊 LCP Metric:', metric);
       logPerformanceMetric(metric);
-    }, { reportAllChanges: true });
+    }, { 
+      reportAllChanges: true
+    });
     
-    // Interaction to Next Paint (INP)
-    onINP((metric) => {
-      console.log('📊 INP Metric:', metric);
-      logPerformanceMetric(metric);
-    }, { reportAllChanges: true });
-    
-    // Cumulative Layout Shift (CLS)
-    onCLS((metric) => {
-      console.log('📊 CLS Metric:', metric);
-      logPerformanceMetric(metric);
-    }, { reportAllChanges: true });
-    
-    // First Contentful Paint (FCP)
+    // First Contentful Paint (FCP) - Early loading metric
     onFCP((metric) => {
       console.log('📊 FCP Metric:', metric);
       logPerformanceMetric(metric);
-    }, { reportAllChanges: true });
+    }, { 
+      reportAllChanges: true 
+    });
     
-    // Time to First Byte (TTFB)
+    // Cumulative Layout Shift (CLS) - Visual stability
+    onCLS((metric) => {
+      console.log('📊 CLS Metric:', metric);
+      logPerformanceMetric(metric);
+    }, { 
+      reportAllChanges: true 
+    });
+    
+    // Time to First Byte (TTFB) - Server response time
     onTTFB((metric) => {
       console.log('📊 TTFB Metric:', metric);
       logPerformanceMetric(metric);
-    }, { reportAllChanges: true });
+    }, { 
+      reportAllChanges: true 
+    });
     
-    console.log('🚀 Core Web Vitals tracking initialized with backend integration');
+    // Interaction to Next Paint (INP) - User interaction responsiveness
+    onINP((metric) => {
+      console.log('📊 INP Metric:', metric);
+      logPerformanceMetric(metric);
+    }, { 
+      reportAllChanges: true 
+    });
+    
+    console.log('🚀 Core Web Vitals tracking initialized with improved metrics collection');
+    console.log('📊 Tracking metrics for route:', route);
+    
   } catch (error) {
     console.error('❌ Failed to initialize performance tracking:', error);
   }
@@ -209,25 +266,64 @@ export const initPerformanceTracking = () => {
 
 // Hook for React components
 export const usePerformanceMonitoring = () => {
-  const getCurrentMetrics = () => {
-    const score = calculatePerformanceScore(metrics);
-    const isGood = score >= 90;
-    
-    return {
-      metrics: {
+  const [currentMetrics, setCurrentMetrics] = React.useState({
+    LCP: metrics.LCP || 0,
+    INP: metrics.INP || 0,
+    CLS: metrics.CLS || 0,
+    FCP: metrics.FCP || 0,
+    TTFB: metrics.TTFB || 0,
+  });
+
+  const [score, setScore] = React.useState(calculatePerformanceScore(metrics));
+  const [isComplete, setIsComplete] = React.useState(Object.values(metrics).every(value => value !== null));
+  const [hasEnoughData, setHasEnoughData] = React.useState(hasEnoughMetrics());
+
+  // Update metrics when they change
+  React.useEffect(() => {
+    const updateMetrics = () => {
+      // Manuel CLS değerini kontrol et
+      const manualCLS = (window as any).simulatedCLS || 0;
+      const effectiveCLS = metrics.CLS || manualCLS;
+      
+      const newMetrics = {
         LCP: metrics.LCP || 0,
         INP: metrics.INP || 0,
-        CLS: metrics.CLS || 0,
+        CLS: effectiveCLS,
         FCP: metrics.FCP || 0,
         TTFB: metrics.TTFB || 0,
-      },
-      score,
-      isGood,
-      isComplete: Object.values(metrics).every(value => value !== null)
+      };
+      
+      setCurrentMetrics(newMetrics);
+      
+      // Manuel CLS ile score hesapla
+      const metricsWithManualCLS = { ...metrics, CLS: effectiveCLS };
+      const newScore = calculatePerformanceScore(metricsWithManualCLS);
+      setScore(newScore);
+      
+      // Completion durumunu kontrol et
+      const hasAllMetrics = Object.values(metrics).some(value => value !== null);
+      setIsComplete(hasAllMetrics);
+      setHasEnoughData(hasEnoughMetrics());
+      
+      console.log('🔄 Metrics updated:', newMetrics, 'Score:', newScore);
     };
-  };
 
-  return getCurrentMetrics();
+    // Update immediately
+    updateMetrics();
+
+    // Set up interval to check for updates
+    const interval = setInterval(updateMetrics, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return {
+    metrics: currentMetrics,
+    score,
+    isGood: score >= 90,
+    isComplete,
+    hasEnoughData
+  };
 };
 
 // Export for manual tracking

@@ -24,6 +24,7 @@
 - **Port:** 5173
 - **Framework:** React + Vite
 - **Performance Tracking:** `performance.ts` - Core Web Vitals tracking
+- **Test Sayfası:** `/performance-test` - Performance metrics test sayfası
 
 ## 🚀 **Kurulum ve Çalıştırma**
 
@@ -76,6 +77,12 @@ curl -X POST "http://localhost:3002/api/v1/auth/login" \
 - Her metric için puan düşürme
 - **85 puan** varsayılan (eksik metrics için)
 
+### **İyileştirilmiş Metrics Collection:**
+- **Timeout-based collection:** 15 saniye sonra force send
+- **Minimum metrics:** En az 3 metric toplandığında gönder
+- **Enhanced LCP tracking:** 5 saniye maxWaitTime
+- **Real-time monitoring:** Console'da canlı metrics görüntüleme
+
 ## 🚀 **API Endpoints**
 
 ### **Trend Analysis:**
@@ -83,6 +90,8 @@ curl -X POST "http://localhost:3002/api/v1/auth/login" \
 - `GET /api/v1/trends/alerts` - Aktif alertler
 - `POST /api/v1/trends/alerts/generate` - Alert oluştur
 - `PUT /api/v1/trends/alerts/:id/resolve` - Alert çöz
+- `GET /api/v1/trends/history/:route` - Route geçmişi (Yeni)
+- `GET /api/v1/trends/summary` - Performance summary (Yeni)
 
 ### **Performance Data:**
 - `POST /api/v1/trends/performance-data` - Web app'ten veri al
@@ -123,8 +132,10 @@ Redis (perf:data:*)
 - `src/services/api.ts` - API client
 
 ### **Web App:**
-- `src/utils/performance.ts` - Performance tracking
+- `src/utils/performance.ts` - Performance tracking (İyileştirildi)
 - `src/hooks/useRoutePerformance.js` - Route performance
+- `src/pages/PerformanceTestPage.jsx` - Performance test sayfası (Yeni)
+- `src/config/performance.ts` - Performance configuration
 
 ## ⚠️ **Bilinen Sorunlar ve Çözümler**
 
@@ -139,6 +150,10 @@ Redis (perf:data:*)
 ### **3. Trend Analysis'te Az Veri**
 **Sorun:** Sadece TTFB ve INP var
 **Çözüm:** Diğer metrics için varsayılan score (85) kullanılıyor
+
+### **4. Performance Tracking Kısıtlı**
+**Sorun:** Sadece development ve admin için aktif
+**Çözüm:** Normal kullanıcılar için %1 sampling rate (sistem yükü için)
 
 ## 🧪 **Test Senaryoları**
 
@@ -161,22 +176,49 @@ curl -X POST "http://localhost:3002/api/v1/trends/alerts/generate" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
+### **4. Performance Test Sayfası:**
+```
+http://localhost:5173/performance-test
+```
+- **LCP Test:** Sayfa yükleme simülasyonu
+- **FCP Test:** İlk içerik görüntüleme
+- **CLS Test:** Layout shift simülasyonu
+- **INP Test:** Kullanıcı etkileşimi simülasyonu
+- **TTFB Test:** Otomatik ölçüm
+
+### **Dashboard Test:**
+```bash
+# Admin UI'da dashboard'ı aç
+http://localhost:3003/trend-analysis
+
+# Real-time mode'u aktif et
+# Auto refresh'i aç
+# Charts'ları test et (Line, Bar, Pie)
+# Route-specific analysis yap
+```
+
 ## 🎯 **Sonraki Adımlar**
 
-### **1. Eksik Metrics Tamamlama:**
-- LCP, FCP, CLS metrics'lerinin web app'te tam ölçülmesi
-- Sayfa yükleme sürelerini bekletme
-- Kullanıcı etkileşimi için INP ölçümü
+### **1. ✅ Eksik Metrics Tamamlama (TAMAMLANDI):**
+- ✅ LCP, FCP, CLS metrics'lerinin web app'te tam ölçülmesi
+- ✅ Sayfa yükleme sürelerini bekletme
+- ✅ Kullanıcı etkileşimi için INP ölçümü
+- ✅ Timeout-based collection sistemi
+- ✅ Performance test sayfası oluşturuldu
 
-### **2. Alert Sistemi Geliştirme:**
+### **2. ✅ Dashboard Geliştirme (TAMAMLANDI):**
+- ✅ Real-time charts (Line, Bar, Pie charts)
+- ✅ Interactive performance monitoring
+- ✅ Real-time mode ve auto-refresh
+- ✅ Historical data visualization
+- ✅ Metrics breakdown charts
+- ✅ Route-specific analysis
+- ✅ Enhanced UI with icons and better layout
+
+### **3. Alert Sistemi Geliştirme:**
 - Email/Slack entegrasyonu
 - Threshold ayarları
 - Alert geçmişi
-
-### **3. Dashboard Geliştirme:**
-- Real-time charts
-- Performance history
-- Route-specific analytics
 
 ## 🔧 **Hızlı Komutlar**
 
@@ -195,6 +237,26 @@ curl -X DELETE "http://localhost:3002/api/v1/trends/performance-data" \
 ```bash
 curl -X GET "http://localhost:3002/api/v1/trends/debug/keys" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+### **Performance Test:**
+```bash
+# Web app'te test sayfasını aç
+http://localhost:5173/performance-test
+
+# Console'da metrics'leri izle
+# Network tab'da backend'e gönderilen data'yı kontrol et
+```
+
+### **Dashboard Test:**
+```bash
+# Admin UI'da dashboard'ı aç
+http://localhost:3003/trend-analysis
+
+# Real-time mode'u aktif et
+# Auto refresh'i aç
+# Charts'ları test et (Line, Bar, Pie)
+# Route-specific analysis yap
 ```
 
 ## 📝 **Önemli Notlar**
@@ -218,8 +280,27 @@ TREND_THRESHOLDS = {
 - Backend: `localhost:3003` whitelist'te
 - Web App: `localhost:3002` backend'e bağlanıyor
 
+### **Performance Tracking Configuration:**
+```typescript
+// Development: Her zaman aktif
+// Admin/Moderator: Her zaman aktif
+// Normal kullanıcılar: %1 sampling rate (sistem yükü için)
+```
+
 ---
 
 **✅ Not:** Bu sistem şu anda çalışır durumda. Web app'te sayfa ziyaretleri yapıldığında performance data otomatik olarak backend'e gönderiliyor ve Admin UI'da gerçek zamanlı olarak görüntüleniyor.
+
+**🚀 Yeni Özellikler:**
+- ✅ İyileştirilmiş performance tracking
+- ✅ Timeout-based metrics collection
+- ✅ Performance test sayfası
+- ✅ Real-time metrics monitoring
+- ✅ Enhanced LCP, FCP, CLS tracking
+- ✅ Real-time dashboard charts
+- ✅ Interactive performance monitoring
+- ✅ Historical data visualization
+- ✅ Route-specific analysis
+- ✅ Enhanced UI with icons
 
 **📅 Son Güncelleme:** Bu dosya projenin mevcut durumunu yansıtır ve gelecekteki geliştirmeler için referans olarak kullanılabilir.

@@ -39,6 +39,7 @@ const PremiumPage = lazy(() => import('@/pages/PremiumPage.jsx'));
 const TrustScorePage = lazy(() => import('@/pages/TrustScorePage.jsx'));
 const UnpublishListingPage = lazy(() => import('@/pages/UnpublishListingPage.jsx'));
 const ErrorTestComponent = lazy(() => import('@/components/ErrorBoundaries/ErrorTestComponent'));
+const PerformanceTestPage = lazy(() => import('@/pages/PerformanceTestPage.jsx'));
 
 const SettingsLayout = lazy(() => import('@/pages/SettingsPage/SettingsLayout.jsx'));
 const SettingsLayout2 = lazy(() => import('@/pages/SettingsPage/SettingsLayout2.jsx'));
@@ -212,9 +213,12 @@ const AppRoutes = ({ currentUser }) => {
           element={<ProtectedRoute>{withPageErrorBoundary(PremiumDashboard, 'Premium Dashboard')}</ProtectedRoute>} 
         />
         
-        {/* Test route - sadece development modunda */}
+        {/* Test routes - sadece development modunda */}
         {process.env.NODE_ENV === 'development' && (
-          <Route path="/test-error" element={withPageErrorBoundary(ErrorTestComponent, 'Error Test')} />
+          <>
+            <Route path="/test-error" element={withPageErrorBoundary(ErrorTestComponent, 'Error Test')} />
+            <Route path="/performance-test" element={withPageErrorBoundary(PerformanceTestPage, 'Performance Test')} />
+          </>
         )}
         
         <Route path="/ayarlar" element={<ProtectedRoute>{withPageErrorBoundary(SettingsLayout, 'Ayarlar')}</ProtectedRoute>}>

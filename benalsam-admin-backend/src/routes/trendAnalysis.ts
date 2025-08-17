@@ -375,4 +375,129 @@ router.post('/performance-data', async (req, res) => {
   }
 });
 
+/**
+ * @route GET /api/v1/trends/history/:route
+ * @desc Belirli bir route'un geçmiş performance data'sını al
+ * @access Private
+ */
+router.get('/history/:route', authenticateToken, async (req, res) => {
+  try {
+    const { route } = req.params;
+    const { period = '24h' } = req.query as { period?: '1h' | '24h' | '7d' | '30d' };
+    
+    // Redis'ten geçmiş data'yı al
+    const historyKeys = await redis.keys(`perf:history:${route}:*`);
+    const historyData = [];
+    
+    for (const key of historyKeys) {
+      const data = await redis.get(key);
+      if (data) {
+        const parsedData = JSON.parse(data);
+        historyData.push({
+          timestamp: parsedData.timestamp,
+          score: parsedData.score,
+          lcp: parsedData.metrics.lcp,
+          fcp: parsedData.metrics.fcp,
+          cls: parsedData.metrics.cls,
+          ttfb: parsedData.metrics.ttfb,
+        });
+      }
+    }
+    
+    // Tarihe göre sırala
+    historyData.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    
+    // Period'a göre filtrele
+    const now = new Date();
+    const periodMs = {
+      '1h': 60 * 60 * 1000,
+      '24h': 24 * 60 * 60 * 1000,
+      '7d': 7 * 24 * 60 * 60 * 1000,
+      '30d': 30 * 24 * 60 * 60 * 1000,
+    }[period];
+    
+    const filteredData = historyData.filter(item => 
+      now.getTime() - new Date(item.timestamp).getTime() <= periodMs
+    );
+    
+    res.json({
+      success: true,
+      data: {
+        route,
+        period,
+        history: filteredData,
+        totalRecords: filteredData.length
+      }
+    });
+  } catch (error: any) {
+    console.error('Historical data alma hatası:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Historical data alınamadı',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * @route GET /api/v1/trends/summary
+ * @desc Performance summary istatistiklerini al
+ * @access Private
+ */
+router.get('/summary', authenticateToken, async (req, res) => {
+  try {
+    // Tüm route'ları al
+    const dataKeys = await redis.keys('perf:data:*');
+    const trends = [];
+    
+    for (const key of dataKeys) {
+      const data = await redis.get(key);
+      if (data) {
+        const parsedData = JSON.parse(data);
+        trends.push({
+          route: parsedData.route,
+          score: parsedData.score,
+          timestamp: parsedData.timestamp
+        });
+      }
+    }
+    
+    // Summary hesapla
+    const totalRoutes = trends.length;
+    const averageScore = totalRoutes > 0 
+      ? Math.round(trends.reduce((sum, t) => sum + t.score, 0) / totalRoutes)
+      : 0;
+    
+    // Improving/degrading trends (basit hesaplama)
+    const improvingTrends = trends.filter(t => t.score >= 90).length;
+    const degradingTrends = trends.filter(t => t.score < 70).length;
+    
+    // Active alerts sayısı
+    const alertKeys = await redis.keys('perf:alert:*');
+    const activeAlerts = alertKeys.length;
+    
+    res.json({
+      success: true,
+      data: {
+        summary: {
+          totalRoutes,
+          averageScore,
+          improvingTrends,
+          degradingTrends,
+          criticalIssues: degradingTrends,
+          activeAlerts
+        },
+        generatedAt: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    console.error('Summary alma hatası:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Summary alınamadı',
+      details: error.message
+    });
+  }
+});
+
 export default router;

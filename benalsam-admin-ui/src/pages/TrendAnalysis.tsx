@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -17,6 +17,12 @@ import {
   Tooltip,
   CircularProgress,
   Divider,
+  Switch,
+  FormControlLabel,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import {
   TrendingUp,
@@ -30,7 +36,14 @@ import {
   Refresh,
   Visibility,
   VisibilityOff,
+  PlayArrow,
+  Pause,
+  AutoGraph,
+  Speed,
+  Memory,
+  NetworkCheck,
 } from '@mui/icons-material';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart as RechartsBarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { apiClient } from '../services/api';
 
 interface PerformanceTrend {
@@ -70,6 +83,15 @@ interface PerformanceSummary {
   activeAlerts: number;
 }
 
+interface HistoricalData {
+  timestamp: string;
+  score: number;
+  lcp: number;
+  fcp: number;
+  cls: number;
+  ttfb: number;
+}
+
 const TrendAnalysis: React.FC = () => {
   const [trends, setTrends] = useState<PerformanceTrend[]>([]);
   const [alerts, setAlerts] = useState<TrendAlert[]>([]);
@@ -78,12 +100,34 @@ const TrendAnalysis: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'1h' | '24h' | '7d' | '30d'>('24h');
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
+  const [realTimeMode, setRealTimeMode] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [selectedRoute, setSelectedRoute] = useState<string>('all');
+  const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
+  const [chartType, setChartType] = useState<'line' | 'bar' | 'pie'>('line');
+
+  // Real-time data refresh
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (autoRefresh && realTimeMode) {
+      interval = setInterval(() => {
+        loadTrendData();
+      }, 30000); // 30 saniye
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [autoRefresh, realTimeMode]);
 
   useEffect(() => {
     loadTrendData();
   }, [selectedPeriod]);
 
-  const loadTrendData = async () => {
+  const loadTrendData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -99,6 +143,12 @@ const TrendAnalysis: React.FC = () => {
       // Load summary
       const summaryResponse = await apiClient.get('/trends/summary');
       setSummary(summaryResponse.data.data.summary);
+
+      // Load historical data for charts
+      if (selectedRoute !== 'all') {
+        const historyResponse = await apiClient.get(`/trends/history/${selectedRoute}?period=${selectedPeriod}`);
+        setHistoricalData(historyResponse.data.data.history || []);
+      }
 
     } catch (err: any) {
       console.error('Trend data yükleme hatası:', err);
@@ -117,7 +167,7 @@ const TrendAnalysis: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedPeriod, selectedRoute]);
 
   const generateAlerts = async () => {
     try {
@@ -171,6 +221,28 @@ const TrendAnalysis: React.FC = () => {
     return 'error.main';
   };
 
+  // Chart data preparation
+  const getChartData = () => {
+    if (chartType === 'pie') {
+      return trends.map(trend => ({
+        name: trend.route,
+        value: trend.score,
+        color: getScoreColor(trend.score)
+      }));
+    }
+    
+    return historicalData.map(item => ({
+      time: new Date(item.timestamp).toLocaleTimeString(),
+      score: item.score,
+      lcp: item.lcp,
+      fcp: item.fcp,
+      cls: item.cls,
+      ttfb: item.ttfb,
+    }));
+  };
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -192,6 +264,27 @@ const TrendAnalysis: React.FC = () => {
           </Typography>
         </Box>
         <Stack direction="row" spacing={2}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={realTimeMode}
+                onChange={(e) => setRealTimeMode(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Real-time Mode"
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={autoRefresh}
+                onChange={(e) => setAutoRefresh(e.target.checked)}
+                disabled={!realTimeMode}
+                color="primary"
+              />
+            }
+            label="Auto Refresh"
+          />
           <Button
             variant="outlined"
             startIcon={<FlashOn />}
@@ -212,6 +305,23 @@ const TrendAnalysis: React.FC = () => {
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
+        </Alert>
+      )}
+
+      {/* Real-time Status */}
+      {realTimeMode && (
+        <Alert 
+          severity="info" 
+          sx={{ mb: 3 }}
+          action={
+            <Box display="flex" alignItems="center" gap={1}>
+              <CircularProgress size={16} />
+              <Typography variant="body2">Live</Typography>
+            </Box>
+          }
+        >
+          Real-time monitoring aktif. Veriler otomatik olarak güncelleniyor.
+          {autoRefresh && ' (30s interval)'}
         </Alert>
       )}
 
@@ -298,6 +408,92 @@ const TrendAnalysis: React.FC = () => {
         </Grid>
       )}
 
+      {/* Charts Section */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6">Performance Charts</Typography>
+            <Stack direction="row" spacing={2}>
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Route</InputLabel>
+                <Select
+                  value={selectedRoute}
+                  label="Route"
+                  onChange={(e) => setSelectedRoute(e.target.value)}
+                >
+                  <MenuItem value="all">All Routes</MenuItem>
+                  {trends.map(trend => (
+                    <MenuItem key={trend.route} value={trend.route}>
+                      {trend.route}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Chart Type</InputLabel>
+                <Select
+                  value={chartType}
+                  label="Chart Type"
+                  onChange={(e) => setChartType(e.target.value as 'line' | 'bar' | 'pie')}
+                >
+                  <MenuItem value="line">Line Chart</MenuItem>
+                  <MenuItem value="bar">Bar Chart</MenuItem>
+                  <MenuItem value="pie">Pie Chart</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+          </Box>
+          
+          <Box sx={{ height: 400 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              {chartType === 'line' && (
+                <LineChart data={getChartData()}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="time" />
+                  <YAxis />
+                  <RechartsTooltip />
+                  <Line type="monotone" dataKey="score" stroke="#8884d8" strokeWidth={2} />
+                  <Line type="monotone" dataKey="lcp" stroke="#82ca9d" strokeWidth={2} />
+                  <Line type="monotone" dataKey="fcp" stroke="#ffc658" strokeWidth={2} />
+                </LineChart>
+              )}
+              
+              {chartType === 'bar' && (
+                <RechartsBarChart data={getChartData()}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="time" />
+                  <YAxis />
+                  <RechartsTooltip />
+                  <Bar dataKey="score" fill="#8884d8" />
+                  <Bar dataKey="lcp" fill="#82ca9d" />
+                  <Bar dataKey="fcp" fill="#ffc658" />
+                </RechartsBarChart>
+              )}
+              
+              {chartType === 'pie' && (
+                <PieChart>
+                  <Pie
+                    data={getChartData()}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {getChartData().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                </PieChart>
+              )}
+            </ResponsiveContainer>
+          </Box>
+        </CardContent>
+      </Card>
+
       {/* Period Selector */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
@@ -327,6 +523,7 @@ const TrendAnalysis: React.FC = () => {
         <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
           <Tab label="Performance Trends" />
           <Tab label="Active Alerts" />
+          <Tab label="Metrics Breakdown" />
         </Tabs>
 
         <Box sx={{ p: 3 }}>
@@ -360,20 +557,40 @@ const TrendAnalysis: React.FC = () => {
                     
                     <Grid container spacing={2}>
                       <Grid item xs={6} sm={3}>
-                        <Typography variant="body2" color="text.secondary">LCP</Typography>
-                        <Typography variant="h6">{trend.metrics.lcp}ms</Typography>
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <Speed color="action" />
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">LCP</Typography>
+                            <Typography variant="h6">{trend.metrics.lcp}ms</Typography>
+                          </Box>
+                        </Box>
                       </Grid>
                       <Grid item xs={6} sm={3}>
-                        <Typography variant="body2" color="text.secondary">FID</Typography>
-                        <Typography variant="h6">{trend.metrics.fid}ms</Typography>
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <FlashOn color="action" />
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">FID</Typography>
+                            <Typography variant="h6">{trend.metrics.fid}ms</Typography>
+                          </Box>
+                        </Box>
                       </Grid>
                       <Grid item xs={6} sm={3}>
-                        <Typography variant="body2" color="text.secondary">CLS</Typography>
-                        <Typography variant="h6">{trend.metrics.cls}</Typography>
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <Memory color="action" />
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">CLS</Typography>
+                            <Typography variant="h6">{trend.metrics.cls}</Typography>
+                          </Box>
+                        </Box>
                       </Grid>
                       <Grid item xs={6} sm={3}>
-                        <Typography variant="body2" color="text.secondary">TTFB</Typography>
-                        <Typography variant="h6">{trend.metrics.ttfb}ms</Typography>
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <NetworkCheck color="action" />
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">TTFB</Typography>
+                            <Typography variant="h6">{trend.metrics.ttfb}ms</Typography>
+                          </Box>
+                        </Box>
                       </Grid>
                     </Grid>
                     
@@ -458,6 +675,48 @@ const TrendAnalysis: React.FC = () => {
                 ))
               )}
             </Stack>
+          )}
+
+          {activeTab === 2 && (
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>LCP Distribution</Typography>
+                    <Box sx={{ height: 300 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <RechartsBarChart data={trends.map(t => ({ route: t.route, lcp: t.metrics.lcp }))}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="route" />
+                          <YAxis />
+                          <RechartsTooltip />
+                          <Bar dataKey="lcp" fill="#82ca9d" />
+                        </RechartsBarChart>
+                      </ResponsiveContainer>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>CLS Distribution</Typography>
+                    <Box sx={{ height: 300 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <RechartsBarChart data={trends.map(t => ({ route: t.route, cls: t.metrics.cls }))}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="route" />
+                          <YAxis />
+                          <RechartsTooltip />
+                          <Bar dataKey="cls" fill="#ffc658" />
+                        </RechartsBarChart>
+                      </ResponsiveContainer>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
           )}
         </Box>
       </Paper>
