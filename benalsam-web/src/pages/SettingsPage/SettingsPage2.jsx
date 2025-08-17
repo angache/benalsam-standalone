@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -31,10 +31,12 @@ import {
 } from 'lucide-react';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 import { useHapticFeedback } from '../../hooks/useHapticFeedback';
+import { useAuthStore } from '../../stores';
 import EmailInfo from '../../components/SettingsComponents/EmailInfo';
 
 const SettingsPage2 = () => {
   const navigate = useNavigate();
+  const { currentUser, loading: loadingAuth } = useAuthStore();
   const { preferences, platformPreferences } = useUserPreferences();
   const { triggerHaptic } = useHapticFeedback();
   
@@ -42,13 +44,19 @@ const SettingsPage2 = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   
   React.useEffect(() => {
-    setIsLoaded(true);
-  }, []);
+    // Wait for auth to load and preferences to be available
+    if (!loadingAuth && preferences) {
+      setIsLoaded(true);
+    }
+  }, [loadingAuth, preferences]);
 
   const handleNavigation = (path) => {
-    console.log('🔍 [SettingsPage2] handleNavigation called with path:', path);
-    triggerHaptic();
-    navigate(path);
+    try {
+      triggerHaptic();
+      navigate(path);
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
   };
 
   const handleLogout = () => {
@@ -245,15 +253,15 @@ const SettingsPage2 = () => {
     );
   };
 
-  // Show loading state during hydration
-  if (!isLoaded) {
+  // Show loading state during hydration and data loading
+  if (!isLoaded || loadingAuth) {
     return (
       <div className="space-y-6">
         <div className="animate-pulse">
-          <div className="h-20 bg-gray-200 rounded-lg mb-6"></div>
+          <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg mb-6"></div>
           <div className="space-y-4">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded-lg"></div>
+              <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
             ))}
           </div>
         </div>
@@ -265,7 +273,7 @@ const SettingsPage2 = () => {
     <div className="space-y-6">
       {/* Email Info */}
       <div className="mb-6">
-        <EmailInfo />
+        <EmailInfo currentUser={currentUser} />
       </div>
 
       {/* Account Settings */}
@@ -346,4 +354,4 @@ const SettingsPage2 = () => {
   );
 };
 
-export default SettingsPage2; 
+export default memo(SettingsPage2); 

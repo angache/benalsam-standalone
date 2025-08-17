@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -23,15 +23,31 @@ import {
 
 const SettingsLayout2 = ({ children }) => {
   const location = useLocation();
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+  const [isDesktop, setIsDesktop] = useState(false); // Default to mobile to prevent hydration mismatch
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 1024);
+    // Initialize on client side to prevent hydration mismatch
+    const initializeDesktopState = () => {
+      if (typeof window !== 'undefined') {
+        setIsDesktop(window.innerWidth >= 1024);
+        setIsLoaded(true);
+      }
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        setIsDesktop(window.innerWidth >= 1024);
+      }
+    };
+
+    // Initialize immediately
+    initializeDesktopState();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
   }, []);
 
   const menuItems = [
@@ -74,6 +90,18 @@ const SettingsLayout2 = ({ children }) => {
   const isActive = (path) => {
     return location.pathname === path;
   };
+
+  // Show loading during hydration
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Desktop için sidebar layout
   if (isDesktop) {
@@ -190,4 +218,4 @@ const SettingsLayout2 = ({ children }) => {
   );
 };
 
-export default SettingsLayout2; 
+export default memo(SettingsLayout2); 
