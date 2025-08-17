@@ -209,18 +209,7 @@ const UserNav = ({ currentUser, onLogout, onLoginClick, onRegisterClick, unreadM
             <Settings className="mr-2 h-3 w-3 sm:h-4 sm:w-4 text-primary" /> Ayarlar
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link 
-            to="/ayarlar" 
-            onMouseEnter={() => preloadChunk('profile')}
-            className="cursor-pointer flex items-center text-xs sm:text-sm"
-          >
-            <Settings className="mr-2 h-3 w-3 sm:h-4 sm:w-4 text-primary" /> Ayarlar 2.0
-            <Badge className="ml-auto bg-blue-500 text-white text-xs px-1.5 py-0.5">
-              Test
-            </Badge>
-          </Link>
-        </DropdownMenuItem>
+
         <DropdownMenuItem onClick={onLogout} className="cursor-pointer flex items-center text-destructive hover:!bg-destructive/10 hover:!text-destructive focus:!bg-destructive/20 focus:!text-destructive text-xs sm:text-sm">
           <LogOut className="mr-2 h-3 w-3 sm:h-4 sm:w-4" /> Çıkış Yap
         </DropdownMenuItem>
