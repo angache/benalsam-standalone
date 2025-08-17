@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { HeartCrack, Loader2, Search } from 'lucide-react';
@@ -13,16 +13,18 @@ const FavoritesPage = ({ onToggleFavorite }) => {
   const [favoriteListings, setFavoriteListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser?.id || isInitialized) return;
 
     const loadFavorites = async () => {
-      setLoading(true);
-      setError(null);
       try {
+        setLoading(true);
+        setError(null);
         const fetchedFavorites = await fetchUserFavoriteListings(currentUser.id);
         setFavoriteListings(fetchedFavorites.map(fav => ({...fav, is_favorited: true})));
+        setIsInitialized(true);
       } catch (e) {
         console.error("Error in FavoritesPage useEffect:", e);
         setError("Favori ilanlar yüklenirken bir sorun oluştu.");
@@ -32,22 +34,25 @@ const FavoritesPage = ({ onToggleFavorite }) => {
       }
     };
     loadFavorites();
-  }, [currentUser]);
+  }, [currentUser?.id, isInitialized]);
 
-  const handleToggleFavoriteState = (listingId, isFavorited) => {
+  const handleToggleFavoriteState = useCallback((listingId, isFavorited) => {
     setFavoriteListings(prev => 
       isFavorited 
       ? prev.map(l => l.id === listingId ? { ...l, is_favorited: true, favorites_count: (l.favorites_count || 0) + 1 } : l)
       : prev.filter(l => l.id !== listingId) 
     );
-    onToggleFavorite(listingId, isFavorited); 
-  };
+    onToggleFavorite?.(listingId, isFavorited); 
+  }, [onToggleFavorite]);
 
 
   if (loading) {
     return (
       <div className="min-h-[calc(100vh-160px)] flex items-center justify-center bg-background">
-        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+        <div className="text-center">
+          <Loader2 className="h-16 w-16 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Favori ilanlarınız yükleniyor...</p>
+        </div>
       </div>
     );
   }
@@ -117,4 +122,4 @@ const FavoritesPage = ({ onToggleFavorite }) => {
   );
 };
 
-export default FavoritesPage;
+export default memo(FavoritesPage);

@@ -185,6 +185,13 @@ const AppRoutes = ({ currentUser }) => {
     return <ConversationsListPage />;
   }, []);
 
+  const MemoizedFavoritesPage = useCallback(() => {
+    const handleToggleFavorite = (listingId, isFavorited) => {
+      // TODO: Implement toggle favorite logic
+    };
+    return <FavoritesPage onToggleFavorite={handleToggleFavorite} />;
+  }, []);
+
   return (
     <MainContent>
       <Routes location={location}>
@@ -251,7 +258,7 @@ const AppRoutes = ({ currentUser }) => {
         />
          <Route 
           path="/favorilerim" 
-          element={<ProtectedRoute>{withPageErrorBoundary(FavoritesPage, 'Favorilerim')}</ProtectedRoute>} 
+          element={<ProtectedRoute>{withPageErrorBoundary(MemoizedFavoritesPage, 'Favorilerim')}</ProtectedRoute>} 
         />
         <Route 
           path="/takip-edilenler/:userId" 
