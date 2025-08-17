@@ -141,6 +141,11 @@ const AppRoutes = ({ currentUser }) => {
     return <HomePage currentUser={currentUser} onToggleFavorite={handleToggleFavorite} />;
   }, [currentUser]);
 
+  // Stabilize MakeOfferPage component
+  const MemoizedMakeOfferPage = useCallback(() => {
+    return <MakeOfferPage currentUser={currentUser} />;
+  }, [currentUser]);
+
   return (
     <MainContent>
       <Routes location={location}>
@@ -153,7 +158,7 @@ const AppRoutes = ({ currentUser }) => {
         <Route path="/arama" element={withPageErrorBoundary(SearchResultsPage, 'Arama Sonuçları')} />
 
         <Route path="/ilan-olustur" element={<ProtectedRoute>{withPageErrorBoundary(CreateListingPage, 'İlan Oluştur')}</ProtectedRoute>} />
-        <Route path="/teklif-yap/:listingId" element={<ProtectedRoute>{withPageErrorBoundary(MakeOfferPage, 'Teklif Yap')}</ProtectedRoute>} />
+        <Route path="/teklif-yap/:listingId" element={<ProtectedRoute>{withPageErrorBoundary(MemoizedMakeOfferPage, 'Teklif Yap')}</ProtectedRoute>} />
         <Route path="/sikayet-et/:listingId" element={<ProtectedRoute>{withPageErrorBoundary(ReportListingPage, 'Şikayet Et')}</ProtectedRoute>} />
         <Route path="/degerlendirme/:offerId" element={<ProtectedRoute>{withPageErrorBoundary(LeaveReviewPage, 'Değerlendirme')}</ProtectedRoute>} />
         <Route path="/ilan-duzenle/:listingId" element={<ProtectedRoute>{withPageErrorBoundary(EditListingPage, 'İlan Düzenle')}</ProtectedRoute>} />
