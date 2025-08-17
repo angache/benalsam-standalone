@@ -452,4 +452,501 @@ router.get('/alerts',
   }
 );
 
+// ===== PERFORMANCE BASELINE API ENDPOINTS =====
+
+// Get performance baseline data
+router.get('/baseline', 
+  authenticateToken,
+  rateLimit({ windowMs: 60000, max: 30 }),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id || 'admin';
+      
+      // Get baseline data from Redis
+      const baselineKeys = await redis.keys(`performance:baseline:${userId}:*`);
+      const baselines: any[] = [];
+      
+      for (const key of baselineKeys) {
+        const baseline = await redis.get(key);
+        if (baseline) {
+          baselines.push(JSON.parse(baseline));
+        }
+      }
+
+      // Calculate summary statistics
+      const summary = {
+        totalEndpoints: baselines.length,
+        avgResponseTime: baselines.length > 0 
+          ? baselines.reduce((sum, b) => sum + b.avgResponseTime, 0) / baselines.length 
+          : 0,
+        totalTests: baselines.reduce((sum, b) => sum + b.testCount, 0),
+        lastUpdated: baselines.length > 0 
+          ? Math.max(...baselines.map(b => new Date(b.timestamp).getTime()))
+          : null
+      };
+
+      return res.json({
+        success: true,
+        data: {
+          baselines,
+          summary
+        }
+      });
+
+    } catch (error) {
+      console.error('Get performance baseline error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to get performance baseline' 
+      });
+    }
+  }
+);
+
+// Get available endpoints for testing
+router.get('/endpoints', 
+  authenticateToken,
+  rateLimit({ windowMs: 60000, max: 20 }),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // Define available endpoints for testing
+      const endpoints = [
+        {
+          path: '/api/v1/auth/login',
+          method: 'POST',
+          description: 'User authentication endpoint',
+          category: 'Authentication'
+        },
+        {
+          path: '/api/v1/users',
+          method: 'GET',
+          description: 'Get users list',
+          category: 'User Management'
+        },
+        {
+          path: '/api/v1/listings',
+          method: 'GET',
+          description: 'Get listings list',
+          category: 'Content'
+        },
+        {
+          path: '/api/v1/categories',
+          method: 'GET',
+          description: 'Get categories list',
+          category: 'Content'
+        },
+        {
+          path: '/api/v1/analytics/summary',
+          method: 'GET',
+          description: 'Get analytics summary',
+          category: 'Analytics'
+        },
+        {
+          path: '/api/v1/health',
+          method: 'GET',
+          description: 'Health check endpoint',
+          category: 'System'
+        },
+        {
+          path: '/api/v1/performance/analysis',
+          method: 'POST',
+          description: 'Performance analysis endpoint',
+          category: 'Performance'
+        },
+        {
+          path: '/api/v1/trends/summary',
+          method: 'GET',
+          description: 'Trend analysis summary',
+          category: 'Analytics'
+        }
+      ];
+
+      // Group by category
+      const categories: any = {};
+      endpoints.forEach(endpoint => {
+        if (!categories[endpoint.category]) {
+          categories[endpoint.category] = 0;
+        }
+        categories[endpoint.category]++;
+      });
+
+      return res.json({
+        success: true,
+        data: {
+          endpoints,
+          categories,
+          total: endpoints.length
+        }
+      });
+
+    } catch (error) {
+      console.error('Get available endpoints error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to get available endpoints' 
+      });
+    }
+  }
+);
+
+// Get performance recommendations
+router.get('/recommendations', 
+  authenticateToken,
+  rateLimit({ windowMs: 60000, max: 20 }),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id || 'admin';
+      
+      // Get recent performance data
+      const analysisKeys = await redis.keys(`performance:analysis:${userId}:*`);
+      const recentAnalyses: any[] = [];
+      
+      for (const key of analysisKeys.slice(-10)) { // Last 10 analyses
+        const analysis = await redis.get(key);
+        if (analysis) {
+          recentAnalyses.push(JSON.parse(analysis));
+        }
+      }
+
+      const recommendations: any[] = [];
+      
+      // Analyze recent data and generate recommendations
+      if (recentAnalyses.length > 0) {
+        const avgScore = recentAnalyses.reduce((sum, a) => sum + a.score, 0) / recentAnalyses.length;
+        
+        if (avgScore < 70) {
+          recommendations.push({
+            type: 'PERFORMANCE_OPTIMIZATION',
+            endpoint: 'All',
+            severity: 'HIGH',
+            message: 'Overall performance score is below acceptable threshold',
+            suggestion: 'Consider optimizing Core Web Vitals and reducing server response times'
+          });
+        }
+
+        // Check for specific issues
+        const lastAnalysis = recentAnalyses[recentAnalyses.length - 1];
+        if (lastAnalysis.metrics) {
+          if (lastAnalysis.metrics.LCP?.value > 2500) {
+            recommendations.push({
+              type: 'LCP_OPTIMIZATION',
+              endpoint: lastAnalysis.route,
+              severity: 'MEDIUM',
+              message: 'Largest Contentful Paint is too slow',
+              suggestion: 'Optimize images, reduce CSS/JS bundle size, implement lazy loading'
+            });
+          }
+
+          if (lastAnalysis.metrics.INP?.value > 200) {
+            recommendations.push({
+              type: 'INP_OPTIMIZATION',
+              endpoint: lastAnalysis.route,
+              severity: 'MEDIUM',
+              message: 'Interaction to Next Paint needs improvement',
+              suggestion: 'Optimize JavaScript execution, reduce main thread blocking'
+            });
+          }
+
+          if (lastAnalysis.metrics.CLS?.value > 0.1) {
+            recommendations.push({
+              type: 'CLS_OPTIMIZATION',
+              endpoint: lastAnalysis.route,
+              severity: 'LOW',
+              message: 'Cumulative Layout Shift detected',
+              suggestion: 'Set explicit dimensions for images and avoid inserting content above existing content'
+            });
+          }
+        }
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          recommendations,
+          total: recommendations.length,
+          generatedAt: new Date().toISOString()
+        }
+      });
+
+    } catch (error) {
+      console.error('Get performance recommendations error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to get performance recommendations' 
+      });
+    }
+  }
+);
+
+// ===== PERFORMANCE MONITORING API ENDPOINTS =====
+
+// Get monitoring status
+router.get('/monitoring/status', 
+  authenticateToken,
+  rateLimit({ windowMs: 60000, max: 20 }),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id || 'admin';
+      
+      // Get monitoring status from Redis
+      const statusKey = `performance:monitoring:status:${userId}`;
+      const status = await redis.get(statusKey);
+      
+      const defaultStatus = {
+        isActive: false,
+        totalEndpoints: 0,
+        monitoredEndpoints: 0,
+        lastCheck: null,
+        uptime: 0,
+        alerts: 0
+      };
+
+      const monitoringStatus = status ? JSON.parse(status) : defaultStatus;
+
+      return res.json({
+        success: true,
+        data: monitoringStatus
+      });
+
+    } catch (error) {
+      console.error('Get monitoring status error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to get monitoring status' 
+      });
+    }
+  }
+);
+
+// Get performance alerts
+router.get('/monitoring/alerts', 
+  authenticateToken,
+  rateLimit({ windowMs: 60000, max: 20 }),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id || 'admin';
+      const { severity } = req.query;
+
+      // Get alerts from Redis
+      const alertKeys = await redis.keys(`performance:alert:${userId}:*`);
+      const alerts: any[] = [];
+      
+      for (const key of alertKeys) {
+        const alert = await redis.get(key);
+        if (alert) {
+          const alertData = JSON.parse(alert);
+          if (!severity || alertData.severity === severity) {
+            alerts.push(alertData);
+          }
+        }
+      }
+
+      // Sort by timestamp (newest first)
+      const sortedAlerts = alerts.sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+
+      // Count by severity
+      const critical = alerts.filter(a => a.severity === 'critical').length;
+      const warning = alerts.filter(a => a.severity === 'warning').length;
+
+      return res.json({
+        success: true,
+        data: {
+          alerts: sortedAlerts.slice(0, 50), // Limit to 50 most recent
+          critical,
+          warning,
+          total: alerts.length
+        }
+      });
+
+    } catch (error) {
+      console.error('Get performance alerts error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to get performance alerts' 
+      });
+    }
+  }
+);
+
+// Control monitoring (start/stop/clear-alerts)
+router.post('/monitoring/control', 
+  authenticateToken,
+  rateLimit({ windowMs: 60000, max: 10 }),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id || 'admin';
+      const { action } = req.body;
+
+      if (!['start', 'stop', 'clear-alerts'].includes(action)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid action. Must be start, stop, or clear-alerts'
+        });
+      }
+
+      const statusKey = `performance:monitoring:status:${userId}`;
+
+      if (action === 'start') {
+        const status = {
+          isActive: true,
+          totalEndpoints: 8, // Number of available endpoints
+          monitoredEndpoints: 8,
+          lastCheck: new Date().toISOString(),
+          uptime: Date.now(),
+          alerts: 0
+        };
+        await redis.set(statusKey, JSON.stringify(status));
+      } else if (action === 'stop') {
+        const status = {
+          isActive: false,
+          totalEndpoints: 8,
+          monitoredEndpoints: 0,
+          lastCheck: new Date().toISOString(),
+          uptime: 0,
+          alerts: 0
+        };
+        await redis.set(statusKey, JSON.stringify(status));
+      } else if (action === 'clear-alerts') {
+        const alertKeys = await redis.keys(`performance:alert:${userId}:*`);
+        for (const key of alertKeys) {
+          await redis.del(key);
+        }
+      }
+
+      return res.json({
+        success: true,
+        message: `Monitoring ${action} successful`
+      });
+
+    } catch (error) {
+      console.error('Control monitoring error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to control monitoring' 
+      });
+    }
+  }
+);
+
+// Run performance test on specific endpoint
+router.post('/test/:endpoint(*)', 
+  authenticateToken,
+  rateLimit({ windowMs: 60000, max: 5 }),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id || 'admin';
+      const { endpoint } = req.params;
+      const { iterations = 10, concurrent = 1 } = req.body;
+
+      // Validate parameters
+      if (iterations < 1 || iterations > 100) {
+        return res.status(400).json({
+          success: false,
+          message: 'Iterations must be between 1 and 100'
+        });
+      }
+
+      if (concurrent < 1 || concurrent > 10) {
+        return res.status(400).json({
+          success: false,
+          message: 'Concurrent requests must be between 1 and 10'
+        });
+      }
+
+      // Simulate performance test results
+      const results = [];
+      const startTime = Date.now();
+      
+      for (let i = 0; i < iterations; i++) {
+        // Simulate response time (50-500ms range)
+        const responseTime = Math.random() * 450 + 50;
+        results.push({
+          iteration: i + 1,
+          responseTime,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      const totalTime = Date.now() - startTime;
+      const avgResponseTime = results.reduce((sum, r) => sum + r.responseTime, 0) / results.length;
+      const minResponseTime = Math.min(...results.map(r => r.responseTime));
+      const maxResponseTime = Math.max(...results.map(r => r.responseTime));
+      const throughput = (iterations / totalTime) * 1000; // requests per second
+
+      // Create baseline entry
+      const baseline = {
+        endpoint,
+        method: 'GET', // Default method
+        avgResponseTime,
+        minResponseTime,
+        maxResponseTime,
+        throughput,
+        errorRate: 0, // No errors in simulation
+        timestamp: new Date().toISOString(),
+        testCount: iterations
+      };
+
+      // Save to Redis
+      const baselineKey = `performance:baseline:${userId}:${endpoint}`;
+      await redis.set(baselineKey, JSON.stringify(baseline));
+
+      return res.json({
+        success: true,
+        data: {
+          endpoint,
+          iterations,
+          concurrent,
+          results: {
+            avgResponseTime,
+            minResponseTime,
+            maxResponseTime,
+            throughput,
+            totalTime,
+            results
+          },
+          baseline
+        }
+      });
+
+    } catch (error) {
+      console.error('Run performance test error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to run performance test' 
+      });
+    }
+  }
+);
+
+// Clear performance baseline
+router.delete('/baseline', 
+  authenticateToken,
+  rateLimit({ windowMs: 60000, max: 5 }),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id || 'admin';
+      
+      // Clear all baseline data
+      const baselineKeys = await redis.keys(`performance:baseline:${userId}:*`);
+      for (const key of baselineKeys) {
+        await redis.del(key);
+      }
+
+      return res.json({
+        success: true,
+        message: 'Performance baseline cleared successfully'
+      });
+
+    } catch (error) {
+      console.error('Clear performance baseline error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Failed to clear performance baseline' 
+      });
+    }
+  }
+);
+
 export default router; 

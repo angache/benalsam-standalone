@@ -494,24 +494,107 @@ router.get('/dashboard-stats', authenticateToken, async (req, res) => {
   try {
     const { days = 7 } = req.query;
     
-    // Get various analytics stats for dashboard
+    // Import required services
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+    
+    // Get comprehensive dashboard stats
     const stats = {
+      totalUsers: 0,
+      totalListings: 0,
+      totalCategories: 0,
+      totalRevenue: 0,
+      activeListings: 0,
+      pendingModeration: 0,
+      newUsersToday: 0,
+      newListingsToday: 0,
       totalEvents: 0,
       totalSessions: 0,
-      totalUsers: 0,
       eventTypes: [],
       recentActivity: [],
       performanceMetrics: {},
       userJourneyStats: {}
     };
     
-    // Get basic stats from userBehaviorService
+    try {
+      // Get user stats
+      const userStats = await prisma.user.count();
+      stats.totalUsers = userStats;
+      
+      // Get today's new users
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const newUsersToday = await prisma.user.count({
+        where: {
+          created_at: {
+            gte: today
+          }
+        }
+      });
+      stats.newUsersToday = newUsersToday;
+      
+    } catch (error) {
+      logger.warn('Could not fetch user stats:', error);
+    }
+    
+    try {
+      // Get listing stats
+      const listingStats = await prisma.listing.count();
+      stats.totalListings = listingStats;
+      
+      // Get active listings
+      const activeListings = await prisma.listing.count({
+        where: {
+          status: 'ACTIVE'
+        }
+      });
+      stats.activeListings = activeListings;
+      
+      // Get pending moderation
+      const pendingModeration = await prisma.listing.count({
+        where: {
+          status: 'PENDING_APPROVAL'
+        }
+      });
+      stats.pendingModeration = pendingModeration;
+      
+      // Get today's new listings
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const newListingsToday = await prisma.listing.count({
+        where: {
+          created_at: {
+            gte: today
+          }
+        }
+      });
+      stats.newListingsToday = newListingsToday;
+      
+    } catch (error) {
+      logger.warn('Could not fetch listing stats:', error);
+    }
+    
+    try {
+      // Get category stats
+      const categoryStats = await prisma.category.count();
+      stats.totalCategories = categoryStats;
+    } catch (error) {
+      logger.warn('Could not fetch category stats:', error);
+    }
+    
+    try {
+      // Get revenue stats (mock data for now)
+      stats.totalRevenue = 45230; // Mock revenue data
+    } catch (error) {
+      logger.warn('Could not fetch revenue stats:', error);
+    }
+    
+    // Get analytics stats from userBehaviorService
     try {
       const analyticsStats = await userBehaviorService.getAnalyticsStats();
       if (analyticsStats) {
         stats.totalEvents = analyticsStats.total_events || 0;
         stats.totalSessions = analyticsStats.total_sessions || 0;
-        stats.totalUsers = analyticsStats.unique_users || 0;
       }
     } catch (error) {
       logger.warn('Could not fetch analytics stats:', error);

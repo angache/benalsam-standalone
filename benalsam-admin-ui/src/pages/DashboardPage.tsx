@@ -87,19 +87,17 @@ export const DashboardPage: React.FC = () => {
     );
   }
 
-  // Mock data for demo
-  const mockStats = {
-    totalUsers: 1247,
-    totalListings: 3421,
-    totalCategories: 156,
-    totalRevenue: 45230,
-    activeListings: 2891,
-    pendingModeration: 23,
-    newUsersToday: 12,
-    newListingsToday: 45,
+  // Use real data from API, fallback to zeros if not available
+  const data = stats || {
+    totalUsers: 0,
+    totalListings: 0,
+    totalCategories: 0,
+    totalRevenue: 0,
+    activeListings: 0,
+    pendingModeration: 0,
+    newUsersToday: 0,
+    newListingsToday: 0,
   };
-
-  const data = stats || mockStats;
 
   return (
     <Box>

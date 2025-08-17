@@ -132,23 +132,16 @@ const TrendAnalysis: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // Load trends
-      const trendsResponse = await apiClient.get(`/trends/analysis?period=${selectedPeriod}`);
+      // Parallel API calls for better performance
+      const [trendsResponse, alertsResponse, summaryResponse] = await Promise.all([
+        apiClient.get(`/trends/analysis?period=${selectedPeriod}`),
+        apiClient.get('/trends/alerts'),
+        apiClient.get('/trends/summary')
+      ]);
+
       setTrends(trendsResponse.data.data.trends || []);
-
-      // Load alerts
-      const alertsResponse = await apiClient.get('/trends/alerts');
       setAlerts(alertsResponse.data.data.alerts || []);
-
-      // Load summary
-      const summaryResponse = await apiClient.get('/trends/summary');
       setSummary(summaryResponse.data.data.summary);
-
-      // Load historical data for charts
-      if (selectedRoute !== 'all') {
-        const historyResponse = await apiClient.get(`/trends/history/${selectedRoute}?period=${selectedPeriod}`);
-        setHistoricalData(historyResponse.data.data.history || []);
-      }
 
     } catch (err: any) {
       console.error('Trend data yükleme hatası:', err);
@@ -167,7 +160,28 @@ const TrendAnalysis: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [selectedPeriod, selectedRoute]);
+  }, [selectedPeriod]);
+
+  // Separate function for historical data
+  const loadHistoricalData = useCallback(async () => {
+    if (selectedRoute === 'all') {
+      setHistoricalData([]);
+      return;
+    }
+
+    try {
+      const historyResponse = await apiClient.get(`/trends/history/${selectedRoute}?period=${selectedPeriod}`);
+      setHistoricalData(historyResponse.data.data.history || []);
+    } catch (err: any) {
+      console.error('Historical data yükleme hatası:', err);
+      setHistoricalData([]);
+    }
+  }, [selectedRoute, selectedPeriod]);
+
+  // Load historical data when route changes
+  useEffect(() => {
+    loadHistoricalData();
+  }, [loadHistoricalData]);
 
   const generateAlerts = async () => {
     try {
@@ -223,6 +237,8 @@ const TrendAnalysis: React.FC = () => {
 
   // Chart data preparation
   const getChartData = () => {
+    console.log('getChartData called - chartType:', chartType, 'trends:', trends.length, 'historicalData:', historicalData.length);
+    
     if (chartType === 'pie') {
       return trends.map(trend => ({
         name: trend.route,
@@ -231,14 +247,32 @@ const TrendAnalysis: React.FC = () => {
       }));
     }
     
-    return historicalData.map(item => ({
-      time: new Date(item.timestamp).toLocaleTimeString(),
-      score: item.score,
-      lcp: item.lcp,
-      fcp: item.fcp,
-      cls: item.cls,
-      ttfb: item.ttfb,
-    }));
+    // Use historical data if available, otherwise use trend data
+    if (historicalData.length > 0) {
+      return historicalData.map(item => ({
+        time: new Date(item.timestamp).toLocaleTimeString(),
+        score: item.score,
+        lcp: item.lcp,
+        fcp: item.fcp,
+        cls: item.cls,
+        ttfb: item.ttfb,
+      }));
+    }
+    
+    // Fallback to trend data for charts
+    if (trends.length > 0) {
+      return trends.map((trend, index) => ({
+        time: `Route ${index + 1}`,
+        score: trend.score,
+        lcp: trend.metrics.lcp,
+        fcp: 0, // FCP not available in trend metrics
+        cls: trend.metrics.cls,
+        ttfb: trend.metrics.ttfb,
+      }));
+    }
+    
+    // Final fallback - empty data
+    return [];
   };
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];

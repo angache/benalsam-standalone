@@ -9,6 +9,7 @@ import elasticsearchRoutes from './elasticsearch';
 import healthRoutes from './health';
 import monitoringRoutes from './monitoring';
 import { twoFactorRouter } from './twoFactor';
+import trendAnalysisRoutes from './trendAnalysis';
 
 const router: IRouter = Router();
 
@@ -44,6 +45,9 @@ router.use('/search', searchRoutes);
 
 // Elasticsearch routes
 router.use('/elasticsearch', elasticsearchRoutes);
+
+// Trend Analysis routes
+router.use('/trends', trendAnalysisRoutes);
 
 router.get('/reports', (req, res) => {
   res.status(501).json({

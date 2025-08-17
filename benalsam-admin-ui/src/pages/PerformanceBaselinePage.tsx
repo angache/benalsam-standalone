@@ -229,9 +229,18 @@ const PerformanceBaselinePage: React.FC = () => {
     }
   };
 
-  const formatResponseTime = (time: number) => `${time.toFixed(2)}ms`;
-  const formatThroughput = (throughput: number) => `${throughput.toFixed(2)} req/s`;
-  const formatErrorRate = (rate: number) => `${(rate * 100).toFixed(2)}%`;
+  const formatResponseTime = (time: number | null | undefined) => {
+    if (time === null || time === undefined) return 'N/A';
+    return `${time.toFixed(2)}ms`;
+  };
+  const formatThroughput = (throughput: number | null | undefined) => {
+    if (throughput === null || throughput === undefined) return 'N/A';
+    return `${throughput.toFixed(2)} req/s`;
+  };
+  const formatErrorRate = (rate: number | null | undefined) => {
+    if (rate === null || rate === undefined) return 'N/A';
+    return `${(rate * 100).toFixed(2)}%`;
+  };
 
   if (baselineLoading) {
     return (
@@ -829,7 +838,7 @@ const PerformanceBaselinePage: React.FC = () => {
                       {alert.message}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      <strong>Endpoint:</strong> {alert.endpoint} | <strong>Value:</strong> {alert.value.toFixed(2)} | <strong>Threshold:</strong> {alert.threshold}
+                      <strong>Endpoint:</strong> {alert.endpoint} | <strong>Value:</strong> {alert.value ? alert.value.toFixed(2) : 'N/A'} | <strong>Threshold:</strong> {alert.threshold}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       {new Date(alert.timestamp).toLocaleString()}

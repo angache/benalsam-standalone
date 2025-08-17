@@ -217,6 +217,13 @@ const navigationCategories = [
         icon: BarChart3,
         permission: PERMISSIONS.ANALYTICS_VIEW,
       },
+      {
+        id: 'admin-performance',
+        title: 'Admin Performance',
+        path: '/admin-performance',
+        icon: Activity,
+        permission: PERMISSIONS.ANALYTICS_VIEW,
+      },
                   {
               id: 'route-performance',
               title: 'Route Performance',

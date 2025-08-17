@@ -42,6 +42,7 @@ const SchedulingDashboardPage = lazy(() => import('./pages/SchedulingDashboardPa
 const ProgressDashboardPage = lazy(() => import('./pages/ProgressDashboardPage'));
 const TwoFactorSetupPage = lazy(() => import('./pages/TwoFactorSetupPage'));
 const TwoFactorVerifyPage = lazy(() => import('./pages/TwoFactorVerifyPage'));
+const AdminPerformanceDashboard = lazy(() => import('./components/AdminPerformanceDashboard'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -470,6 +471,20 @@ function App() {
                     <Layout>
                       <Suspense fallback={<PageLoadingSpinner />}>
                         <PerformanceDashboardPage />
+                      </Suspense>
+                    </Layout>
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin-performance"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <Layout>
+                      <Suspense fallback={<PageLoadingSpinner />}>
+                        <AdminPerformanceDashboard />
                       </Suspense>
                     </Layout>
                   </ErrorBoundary>

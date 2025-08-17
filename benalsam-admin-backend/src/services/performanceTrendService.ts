@@ -30,8 +30,8 @@ interface TrendAlert {
 }
 
 class PerformanceTrendService {
-  private readonly TREND_CACHE_PREFIX = 'perf:trend:';
-  private readonly ALERT_CACHE_PREFIX = 'perf:alert:';
+  private readonly TREND_CACHE_PREFIX = 'performance:trend:';
+  private readonly ALERT_CACHE_PREFIX = 'performance:alert:';
   private readonly TREND_THRESHOLDS = {
     degradation: -5, // 5 puan düşüş
     improvement: 5,  // 5 puan artış
@@ -44,17 +44,36 @@ class PerformanceTrendService {
   async analyzeTrends(route?: string, period: '1h' | '24h' | '7d' | '30d' = '24h'): Promise<PerformanceTrend[]> {
     try {
       const routes = route ? [route] : await this.getActiveRoutes();
+      console.log('Active routes found:', routes);
+      
+      if (routes.length === 0) {
+        return [];
+      }
+
+      // Batch Redis operations for better performance
+      const [currentDataBatch, historicalDataBatch] = await Promise.all([
+        this.getCurrentPerformanceDataBatch(routes),
+        this.getHistoricalPerformanceDataBatch(routes, period)
+      ]);
+
       const trends: PerformanceTrend[] = [];
 
       for (const currentRoute of routes) {
-        const trend = await this.calculateTrend(currentRoute, period);
+        console.log('Calculating trend for route:', currentRoute);
+        const currentData = currentDataBatch[currentRoute];
+        const historicalData = historicalDataBatch[currentRoute] || [];
+        
+        const trend = this.calculateTrendFromData(currentRoute, currentData, historicalData, period);
         if (trend) {
           trends.push(trend);
+          console.log('Trend calculated:', trend);
+        } else {
+          console.log('No trend calculated for route:', currentRoute);
         }
       }
 
-      // Trendleri cache'le
-      await this.cacheTrends(trends, period);
+      // Trendleri cache'le (batch)
+      await this.cacheTrendsBatch(trends, period);
       
       return trends;
     } catch (error) {
@@ -71,19 +90,59 @@ class PerformanceTrendService {
       const currentData = await this.getCurrentPerformanceData(route);
       const historicalData = await this.getHistoricalPerformanceData(route, period);
 
-      if (!currentData || historicalData.length < 2) {
+      return this.calculateTrendFromData(route, currentData, historicalData, period);
+    } catch (error) {
+      console.error(`${route} trend hesaplama hatası:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Verilerden trend hesapla (sync version for batch processing)
+   */
+  private calculateTrendFromData(route: string, currentData: any, historicalData: any[], period: '1h' | '24h' | '7d' | '30d'): PerformanceTrend | null {
+    try {
+      // Eğer güncel data yoksa, geçmiş verilerden en son veriyi kullan
+      if (!currentData && historicalData.length === 0) {
         return null;
       }
 
-      const currentScore = currentData.score;
-      const previousScore = historicalData[historicalData.length - 2]?.score || currentScore;
-      const change = currentScore - previousScore;
+      let currentScore: number;
+      let currentMetrics: any;
 
+      if (currentData) {
+        currentScore = currentData.score;
+        currentMetrics = currentData.metrics;
+      } else {
+        // En son historical data'yı kullan
+        const latestData = historicalData[historicalData.length - 1];
+        currentScore = latestData.score;
+        currentMetrics = {
+          lcp: latestData.lcp || 0,
+          fid: 0, // FID historical data'da yok
+          cls: latestData.cls || 0,
+          ttfb: latestData.ttfb || 0
+        };
+      }
+
+      // Geçmiş verilerden trend hesapla
       let trend: 'improving' | 'degrading' | 'stable' = 'stable';
-      if (change >= this.TREND_THRESHOLDS.improvement) {
-        trend = 'improving';
-      } else if (change <= this.TREND_THRESHOLDS.degradation) {
-        trend = 'degrading';
+      let change = 0;
+
+      if (historicalData.length >= 2) {
+        const previousData = historicalData[historicalData.length - 2];
+        const previousScore = previousData.score;
+        change = currentScore - previousScore;
+
+        if (change > this.TREND_THRESHOLDS.improvement) {
+          trend = 'improving';
+        } else if (change < this.TREND_THRESHOLDS.degradation) {
+          trend = 'degrading';
+        }
+      } else if (historicalData.length === 1) {
+        // Sadece 1 veri varsa stable
+        trend = 'stable';
+        change = 0;
       }
 
       return {
@@ -93,7 +152,7 @@ class PerformanceTrendService {
         change,
         period,
         timestamp: new Date(),
-        metrics: currentData.metrics
+        metrics: currentMetrics
       };
     } catch (error) {
       console.error(`${route} trend hesaplama hatası:`, error);
@@ -171,10 +230,40 @@ class PerformanceTrendService {
    */
   private async getActiveRoutes(): Promise<string[]> {
     try {
-      const keys = await redis.keys('perf:data:*');
-      return keys.map((key: string) => key.replace('perf:data:', ''));
+      console.log('🔍 [TrendService] Getting active routes...');
+      
+      // Önce güncel data key'lerini dene
+      let keys = await redis.keys('perf:data:*');
+      console.log('🔍 [TrendService] Current data keys:', keys);
+      
+      // Eğer güncel data yoksa, history key'lerinden route'ları çıkar
+      if (keys.length === 0) {
+        console.log('🔍 [TrendService] No current data, checking history keys...');
+        const historyKeys = await redis.keys('perf:history:*');
+        console.log('🔍 [TrendService] History keys found:', historyKeys.length);
+        
+        const routeSet = new Set<string>();
+        
+        for (const key of historyKeys) {
+          const parts = key.split(':');
+          if (parts.length >= 3) {
+            const route = parts[2]; // perf:history:route:timestamp -> parts[2] = route
+            if (route && route !== 'history') {
+              routeSet.add(route);
+            }
+          }
+        }
+        
+        const routes = Array.from(routeSet);
+        console.log('🔍 [TrendService] Routes extracted from history:', routes);
+        return routes;
+      }
+      
+      const routes = keys.map((key: string) => key.replace('perf:data:', ''));
+      console.log('🔍 [TrendService] Routes from current data:', routes);
+      return routes;
     } catch (error) {
-      console.error('Aktif route\'lar alınamadı:', error);
+      console.error('❌ [TrendService] Aktif route\'lar alınamadı:', error);
       return [];
     }
   }
@@ -215,6 +304,88 @@ class PerformanceTrendService {
   }
 
   /**
+   * Batch olarak güncel performance data'sını al
+   */
+  private async getCurrentPerformanceDataBatch(routes: string[]): Promise<Record<string, any>> {
+    try {
+      const pipeline = redis.pipeline();
+      const keys = routes.map(route => `perf:data:${route}`);
+      
+      keys.forEach(key => pipeline.get(key as string));
+      
+      const results = await pipeline.exec();
+      const data: Record<string, any> = {};
+      
+      if (results) {
+        results.forEach((result, index) => {
+          const [error, value] = result;
+          if (!error && value) {
+            try {
+              data[routes[index]] = JSON.parse(value as string);
+            } catch (parseError) {
+              console.error(`JSON parse error for route ${routes[index]}:`, parseError);
+            }
+          }
+        });
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Batch current data alınamadı:', error);
+      return {};
+    }
+  }
+
+  /**
+   * Batch olarak geçmiş performance data'sını al
+   */
+  private async getHistoricalPerformanceDataBatch(routes: string[], period: '1h' | '24h' | '7d' | '30d'): Promise<Record<string, any[]>> {
+    try {
+      const pipeline = redis.pipeline();
+      const routeKeys: { route: string; keys: string[] }[] = [];
+      
+      // Her route için history key'lerini al
+      for (const route of routes) {
+        const keys = await redis.keys(`perf:history:${route}:*`);
+        routeKeys.push({ route, keys });
+        
+        // Her key için get komutu ekle
+        keys.forEach(key => pipeline.get(key as string));
+      }
+      
+      const results = await pipeline.exec();
+      const data: Record<string, any[]> = {};
+      
+      if (results) {
+        let resultIndex = 0;
+        
+        for (const { route, keys } of routeKeys) {
+          const routeData: any[] = [];
+          
+          for (const key of keys) {
+            const [error, value] = results[resultIndex++];
+            if (!error && value) {
+              try {
+                routeData.push(JSON.parse(value as string));
+              } catch (parseError) {
+                console.error(`JSON parse error for key ${key}:`, parseError);
+              }
+            }
+          }
+          
+          // Tarihe göre sırala
+          data[route] = routeData.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+        }
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Batch historical data alınamadı:', error);
+      return {};
+    }
+  }
+
+  /**
    * Trendleri cache'le
    */
   private async cacheTrends(trends: PerformanceTrend[], period: string): Promise<void> {
@@ -225,6 +396,24 @@ class PerformanceTrendService {
       }
     } catch (error) {
       console.error('Trend cache hatası:', error);
+    }
+  }
+
+  /**
+   * Batch olarak trendleri cache'le
+   */
+  private async cacheTrendsBatch(trends: PerformanceTrend[], period: string): Promise<void> {
+    try {
+      const pipeline = redis.pipeline();
+      
+      for (const trend of trends) {
+        const key = `${this.TREND_CACHE_PREFIX}${trend.route}:${period}`;
+        pipeline.setex(key as string, 3600, JSON.stringify(trend)); // 1 saat cache
+      }
+      
+      await pipeline.exec();
+    } catch (error) {
+      console.error('Batch trend cache hatası:', error);
     }
   }
 
