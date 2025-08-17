@@ -111,7 +111,7 @@ const ChatSettingsPage = () => {
       const confirmed = confirm('Kaydedilmemiş değişiklikleriniz var. Çıkmak istediğinizden emin misiniz?');
       if (!confirmed) return;
     }
-    navigate('/ayarlar2');
+    navigate('/ayarlar');
   };
 
   const renderToggleItem = (title, subtitle, key, icon, description = '') => (

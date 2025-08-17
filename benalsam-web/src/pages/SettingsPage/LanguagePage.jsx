@@ -34,7 +34,7 @@ const LanguagePage = () => {
     
     // Kısa bir gecikme ile geri dön
     setTimeout(() => {
-      navigate('/ayarlar2');
+      navigate('/ayarlar');
     }, 300);
   };
 
@@ -48,7 +48,7 @@ const LanguagePage = () => {
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button
-          onClick={() => navigate('/ayarlar2')}
+          onClick={() => navigate('/ayarlar')}
           className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         >
           <ArrowLeft size={20} />

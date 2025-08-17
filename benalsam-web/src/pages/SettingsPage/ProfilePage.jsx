@@ -98,10 +98,10 @@ const ProfilePage = () => {
   const handleGoBack = () => {
     if (hasUnsavedChanges) {
       if (confirm('Kaydedilmemiş değişiklikleriniz var. Çıkmak istediğinize emin misiniz?')) {
-        navigate('/ayarlar2');
+        navigate('/ayarlar');
       }
     } else {
-      navigate('/ayarlar2');
+      navigate('/ayarlar');
     }
   };
 

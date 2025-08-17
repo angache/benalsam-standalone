@@ -22,7 +22,7 @@ const AboutPage = () => {
   const { triggerHaptic } = useHapticFeedback();
 
   const handleGoBack = () => {
-    navigate('/ayarlar2');
+    navigate('/ayarlar');
   };
 
   const appInfo = {

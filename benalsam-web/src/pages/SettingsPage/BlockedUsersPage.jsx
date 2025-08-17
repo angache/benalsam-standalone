@@ -89,7 +89,7 @@ const BlockedUsersPage = () => {
   };
 
   const handleGoBack = () => {
-    navigate('/ayarlar2');
+    navigate('/ayarlar');
   };
 
   const formatDate = (dateString) => {

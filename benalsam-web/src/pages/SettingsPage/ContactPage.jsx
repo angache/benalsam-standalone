@@ -71,7 +71,7 @@ const ContactPage = () => {
   };
 
   const handleGoBack = () => {
-    navigate('/ayarlar2');
+    navigate('/ayarlar');
   };
 
   const contactMethods = [

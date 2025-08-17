@@ -176,9 +176,9 @@ const MobileMenu = ({ isOpen, setIsOpen, currentUser, onLogout, onLoginClick, on
                         <Settings className="w-4 h-4 mr-3" /> Ayarlar
                       </Button>
                     </Link>
-                    <Link to="/ayarlar2" onClick={() => setIsOpen(false)}>
+                    <Link to="/ayarlar" onClick={() => setIsOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start text-sm">
-                        <Settings className="w-4 h-4 mr-3" /> Ayarlar 2.0
+                                                  <Settings className="w-4 h-4 mr-3" /> Ayarlar
                         <Badge className="ml-auto bg-blue-500 text-white text-xs px-1.5 py-0.5">
                           Test
                         </Badge>

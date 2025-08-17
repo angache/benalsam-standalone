@@ -125,11 +125,11 @@ const TwoFactorSetupPage = () => {
   };
 
   const handleGoBack = () => {
-    navigate('/ayarlar2/guvenlik');
+    navigate('/ayarlar/guvenlik');
   };
 
   const handleComplete = () => {
-    navigate('/ayarlar2/guvenlik');
+    navigate('/ayarlar/guvenlik');
   };
 
   if (step === 1) {

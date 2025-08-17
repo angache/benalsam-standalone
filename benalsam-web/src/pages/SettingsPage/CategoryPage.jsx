@@ -121,7 +121,7 @@ const CategoryPage = () => {
       const confirmed = confirm('Kaydedilmemiş değişiklikleriniz var. Çıkmak istediğinizden emin misiniz?');
       if (!confirmed) return;
     }
-    navigate('/ayarlar2');
+    navigate('/ayarlar');
   };
 
   // Filter categories based on search term

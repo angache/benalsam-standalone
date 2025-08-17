@@ -19,7 +19,7 @@ const preloadStrategies = {
   // Preload profile pages when user is authenticated
   profile: () => {
     import('@/pages/ProfilePage.jsx');
-    import('@/pages/SettingsPage/SettingsLayout.jsx');
+    
   },
   
   // Preload messaging when user is authenticated

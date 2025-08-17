@@ -42,15 +42,8 @@ const ErrorTestComponent = lazy(() => import('@/components/ErrorBoundaries/Error
 const PerformanceTestPage = lazy(() => import('@/pages/PerformanceTestPage'));
 
 const SettingsLayout = lazy(() => import('@/pages/SettingsPage/SettingsLayout'));
-const SettingsLayout2 = lazy(() => import('@/pages/SettingsPage/SettingsLayout2'));
-import SettingsPage2 from '@/pages/SettingsPage/SettingsPage2';
-const ProfileSettings = lazy(() => import('@/pages/SettingsPage/ProfileSettings'));
-const ContactSettings = lazy(() => import('@/pages/SettingsPage/ContactSettings'));
-const SecuritySettings = lazy(() => import('@/pages/SettingsPage/SecuritySettings'));
-const NotificationSettings = lazy(() => import('@/pages/SettingsPage/NotificationSettings'));
-const PlatformSettings = lazy(() => import('@/pages/SettingsPage/PlatformSettings'));
-const AccountSettings = lazy(() => import('@/pages/SettingsPage/AccountSettings'));
-const FeedbackSection = lazy(() => import('@/pages/SettingsPage/FeedbackSection'));
+import SettingsPage from '@/pages/SettingsPage/SettingsPage';
+
 const PlaceholderSettings = lazy(() => import('@/pages/SettingsPage/PlaceholderSettings'));
 const PremiumSettings = lazy(() => import('@/pages/SettingsPage/PremiumSettings'));
 const PremiumDashboard = lazy(() => import('@/pages/PremiumDashboard/index'));
@@ -311,169 +304,152 @@ const AppRoutes = ({ currentUser }) => {
           </>
         )}
         
-        <Route path="/ayarlar" element={<ProtectedRoute>{withPageErrorBoundary(SettingsLayout, 'Ayarlar')}</ProtectedRoute>}>
-          <Route index element={<Navigate to="profil" replace />} />
-          <Route path="profil" element={withPageErrorBoundary(ProfileSettings, 'Profil Ayarları')} />
-          <Route path="iletisim" element={withPageErrorBoundary(ContactSettings, 'İletişim Ayarları')} />
-          <Route path="guvenlik" element={withPageErrorBoundary(SecuritySettings, 'Güvenlik Ayarları')} />
-          <Route path="bildirimler" element={withPageErrorBoundary(NotificationSettings, 'Bildirim Ayarları')} />
-          <Route path="platform" element={withPageErrorBoundary(PlatformSettings, 'Platform Ayarları')} />
-          <Route path="hesap" element={withPageErrorBoundary(AccountSettings, 'Hesap Ayarları')} />
-          <Route path="premium" element={withPageErrorBoundary(MemoizedPremiumSettings, 'Premium Ayarları')} />
-          <Route path="geribildirim" element={withPageErrorBoundary(FeedbackSection, 'Geribildirim')} />
-          
-          <Route path="sohbet" element={withPageErrorBoundary(() => <PlaceholderSettings title="Sohbet" />, 'Sohbet Ayarları')} />
-          <Route path="istek-teklif" element={withPageErrorBoundary(() => <PlaceholderSettings title="İstek ve Teklif Yönetimi" />, 'İstek Teklif Ayarları')} />
-          <Route path="odeme" element={withPageErrorBoundary(() => <PlaceholderSettings title="Fatura ve Ödemeler" />, 'Ödeme Ayarları')} />
-          <Route path="gelistirici" element={withPageErrorBoundary(() => <PlaceholderSettings title="Geliştirici" />, 'Geliştirici Ayarları')} />
-        </Route>
-
-        {/* Yeni responsive ayarlar sayfası - Test aşamasında */}
-        <Route path="/ayarlar2" element={
+        {/* Ana ayarlar sayfası - Responsive tasarım */}
+        <Route path="/ayarlar" element={
           <ProtectedRoute>
             <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div></div>}>
-              <SettingsLayout2>
-                <SettingsPage2 />
-              </SettingsLayout2>
+              <SettingsLayout>
+                <SettingsPage />
+              </SettingsLayout>
             </Suspense>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/dil" element={
+        <Route path="/ayarlar/dil" element={
           <ProtectedRoute>
             <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div></div>}>
-              <SettingsLayout2>
+              <SettingsLayout>
                 <LanguagePage />
-              </SettingsLayout2>
+              </SettingsLayout>
             </Suspense>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/para-birimi" element={
+        <Route path="/ayarlar/para-birimi" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <CurrencyPage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/konum" element={
+        <Route path="/ayarlar/konum" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <LocationPage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/profil" element={
+        <Route path="/ayarlar/profil" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <EditProfilePage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/guven-puani" element={
+        <Route path="/ayarlar/guven-puani" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <SettingsTrustScorePage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/guvenlik" element={
+        <Route path="/ayarlar/guvenlik" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <SecurityPage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/guvenlik/2fa-setup" element={
+        <Route path="/ayarlar/guvenlik/2fa-setup" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <TwoFactorSetupPage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/bildirimler" element={
+        <Route path="/ayarlar/bildirimler" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <NotificationPage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/gizlilik" element={
+        <Route path="/ayarlar/gizlilik" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <PrivacyPage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/engellenen-kullanicilar" element={
+        <Route path="/ayarlar/engellenen-kullanicilar" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <BlockedUsersPage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/sohbet-ayarlari" element={
+        <Route path="/ayarlar/sohbet-ayarlari" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <ChatSettingsPage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/tema" element={
+        <Route path="/ayarlar/tema" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <ThemePage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/kategori" element={
+        <Route path="/ayarlar/kategori" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <CategoryPage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/yardim" element={
+        <Route path="/ayarlar/yardim" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <HelpPage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/iletisim" element={
+        <Route path="/ayarlar/iletisim" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <ContactPage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/geri-bildirim" element={
+        <Route path="/ayarlar/geri-bildirim" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <FeedbackPage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="/ayarlar2/hakkinda" element={
+        <Route path="/ayarlar/hakkinda" element={
           <ProtectedRoute>
-            <SettingsLayout2>
+            <SettingsLayout>
               <AboutPage />
-            </SettingsLayout2>
+            </SettingsLayout>
           </ProtectedRoute>
         } />
         

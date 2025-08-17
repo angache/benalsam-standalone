@@ -34,7 +34,7 @@ import { useHapticFeedback } from '../../hooks/useHapticFeedback';
 import { useAuthStore } from '../../stores';
 import EmailInfo from '../../components/SettingsComponents/EmailInfo';
 
-const SettingsPage2 = () => {
+const SettingsPage = () => {
   const navigate = useNavigate();
   const { currentUser, loading: loadingAuth } = useAuthStore();
   const { preferences, platformPreferences } = useUserPreferences();
@@ -66,16 +66,16 @@ const SettingsPage2 = () => {
   };
 
   const accountSettings = [
-    { id: 'profile', title: 'Profil', subtitle: 'Kişisel bilgilerinizi düzenleyin', icon: User, path: '/ayarlar2/profil' },
-    { id: 'trust-score', title: 'Güven Puanı', subtitle: 'Güvenilirlik puanınızı görün ve artırın', icon: Award, path: '/ayarlar2/guven-puani' },
-    { id: 'security', title: 'Güvenlik', subtitle: 'Şifre değiştirme ve 2FA ayarları', icon: Shield, path: '/ayarlar2/guvenlik' },
-    { id: 'notifications', title: 'Bildirimler', subtitle: 'Bildirim tercihlerinizi yönetin', icon: Bell, path: '/ayarlar2/bildirimler' },
-    { id: 'privacy', title: 'Gizlilik', subtitle: 'Gizlilik ayarlarınızı yönetin', icon: Eye, path: '/ayarlar2/gizlilik' },
-    { id: 'blocked-users', title: 'Engellenen Kullanıcılar', subtitle: 'Engellediğiniz kullanıcıları yönetin', icon: UserX, path: '/ayarlar2/engellenen-kullanicilar' },
+    { id: 'profile', title: 'Profil', subtitle: 'Kişisel bilgilerinizi düzenleyin', icon: User, path: '/ayarlar/profil' },
+    { id: 'trust-score', title: 'Güven Puanı', subtitle: 'Güvenilirlik puanınızı görün ve artırın', icon: Award, path: '/ayarlar/guven-puani' },
+    { id: 'security', title: 'Güvenlik', subtitle: 'Şifre değiştirme ve 2FA ayarları', icon: Shield, path: '/ayarlar/guvenlik' },
+    { id: 'notifications', title: 'Bildirimler', subtitle: 'Bildirim tercihlerinizi yönetin', icon: Bell, path: '/ayarlar/bildirimler' },
+    { id: 'privacy', title: 'Gizlilik', subtitle: 'Gizlilik ayarlarınızı yönetin', icon: Eye, path: '/ayarlar/gizlilik' },
+    { id: 'blocked-users', title: 'Engellenen Kullanıcılar', subtitle: 'Engellediğiniz kullanıcıları yönetin', icon: UserX, path: '/ayarlar/engellenen-kullanicilar' },
   ];
 
   const chatSettings = [
-    { id: 'chat-settings', title: 'Sohbet Ayarları', subtitle: 'Mesajlaşma tercihlerinizi düzenleyin', icon: MessageCircle, path: '/ayarlar2/sohbet-ayarlari' },
+    { id: 'chat-settings', title: 'Sohbet Ayarları', subtitle: 'Mesajlaşma tercihlerinizi düzenleyin', icon: MessageCircle, path: '/ayarlar/sohbet-ayarlari' },
   ];
 
   const appSettings = [
@@ -84,28 +84,28 @@ const SettingsPage2 = () => {
       title: 'Tema',
       subtitle: 'Açık/Koyu tema',
       icon: Palette,
-      path: '/ayarlar2/tema'
+      path: '/ayarlar/tema'
     },
     {
       id: 'currency',
       title: 'Para Birimi',
       subtitle: platformPreferences?.currency || 'TRY',
       icon: DollarSign,
-      path: '/ayarlar2/para-birimi'
+      path: '/ayarlar/para-birimi'
     },
     {
       id: 'location',
       title: 'Varsayılan Konum',
       subtitle: 'İstanbul',
       icon: MapPin,
-      path: '/ayarlar2/konum'
+      path: '/ayarlar/konum'
     },
     {
       id: 'category',
       title: 'Varsayılan Kategori',
       subtitle: 'Seçilmedi',
       icon: Settings,
-      path: '/ayarlar2/kategori'
+      path: '/ayarlar/kategori'
     }
   ];
 
@@ -154,28 +154,28 @@ const SettingsPage2 = () => {
       title: 'Yardım',
       subtitle: 'Sıkça sorulan sorular ve yardım merkezi',
       icon: HelpCircle,
-      path: '/ayarlar2/yardim'
+      path: '/ayarlar/yardim'
     },
     {
       id: 'contact',
       title: 'İletişim',
       subtitle: 'Bizimle iletişime geçin',
       icon: Mail,
-      path: '/ayarlar2/iletisim'
+      path: '/ayarlar/iletisim'
     },
     {
       id: 'feedback',
       title: 'Geri Bildirim',
       subtitle: 'Önerilerinizi paylaşın',
       icon: MessageSquarePlus,
-      path: '/ayarlar2/geri-bildirim'
+      path: '/ayarlar/geri-bildirim'
     },
     {
       id: 'about',
       title: 'Hakkında',
       subtitle: 'Platform hakkında bilgiler',
       icon: Info,
-      path: '/ayarlar2/hakkinda'
+      path: '/ayarlar/hakkinda'
     }
   ];
 
@@ -354,4 +354,4 @@ const SettingsPage2 = () => {
   );
 };
 
-export default memo(SettingsPage2); 
+export default memo(SettingsPage); 

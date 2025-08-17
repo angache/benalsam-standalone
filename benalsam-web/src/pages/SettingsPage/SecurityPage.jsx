@@ -154,7 +154,7 @@ const SecurityPage = () => {
   };
 
   const handleGoBack = () => {
-    navigate('/ayarlar2');
+    navigate('/ayarlar');
   };
 
   const getPasswordStrengthColor = () => {
@@ -359,7 +359,7 @@ const SecurityPage = () => {
                 Yenile
               </button>
               <button
-                onClick={() => navigate('/ayarlar2/guvenlik/2fa-setup')}
+                onClick={() => navigate('/ayarlar/guvenlik/2fa-setup')}
                 className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors"
               >
                 {userProfile?.is_2fa_enabled ? '2FA Ayarlarını Değiştir' : '2FA Kurulumu'}

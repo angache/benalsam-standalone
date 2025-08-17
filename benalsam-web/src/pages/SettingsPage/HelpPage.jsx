@@ -25,7 +25,7 @@ const HelpPage = () => {
   const [expandedItems, setExpandedItems] = useState(new Set());
 
   const handleGoBack = () => {
-    navigate('/ayarlar2');
+    navigate('/ayarlar');
   };
 
   const toggleItem = (id) => {
@@ -276,7 +276,7 @@ const HelpPage = () => {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <button
-          onClick={() => navigate('/ayarlar2/iletisim')}
+          onClick={() => navigate('/ayarlar/iletisim')}
           className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary transition-colors"
         >
           <div className="flex items-center space-x-3">
@@ -291,7 +291,7 @@ const HelpPage = () => {
         </button>
 
         <button
-          onClick={() => navigate('/ayarlar2/geri-bildirim')}
+          onClick={() => navigate('/ayarlar/geri-bildirim')}
           className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary transition-colors"
         >
           <div className="flex items-center space-x-3">
@@ -357,7 +357,7 @@ const HelpPage = () => {
             </p>
             <div className="flex space-x-4 mt-3">
               <button
-                onClick={() => navigate('/ayarlar2/iletisim')}
+                onClick={() => navigate('/ayarlar/iletisim')}
                 className="text-sm text-primary hover:underline"
               >
                 İletişim Formu

@@ -211,7 +211,7 @@ const UserNav = ({ currentUser, onLogout, onLoginClick, onRegisterClick, unreadM
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link 
-            to="/ayarlar2" 
+            to="/ayarlar" 
             onMouseEnter={() => preloadChunk('profile')}
             className="cursor-pointer flex items-center text-xs sm:text-sm"
           >

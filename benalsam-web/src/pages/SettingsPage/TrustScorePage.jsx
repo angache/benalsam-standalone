@@ -114,7 +114,7 @@ const TrustScorePage = () => {
   };
 
   const handleGoBack = () => {
-    navigate('/ayarlar2');
+    navigate('/ayarlar');
   };
 
   const renderCircularProgress = () => {
