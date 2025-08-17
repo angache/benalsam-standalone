@@ -192,6 +192,13 @@ const AppRoutes = ({ currentUser }) => {
     return <FavoritesPage onToggleFavorite={handleToggleFavorite} />;
   }, []);
 
+  const MemoizedFollowingPage = useCallback(() => {
+    const handleToggleFavorite = (listingId, isFavorited) => {
+      // TODO: Implement toggle favorite logic
+    };
+    return <FollowingPage onToggleFavorite={handleToggleFavorite} />;
+  }, []);
+
   return (
     <MainContent>
       <Routes location={location}>
@@ -262,11 +269,11 @@ const AppRoutes = ({ currentUser }) => {
         />
         <Route 
           path="/takip-edilenler/:userId" 
-          element={<ProtectedRoute>{withPageErrorBoundary(FollowingPage, 'Takip Edilenler')}</ProtectedRoute>} 
+          element={<ProtectedRoute>{withPageErrorBoundary(MemoizedFollowingPage, 'Takip Edilenler')}</ProtectedRoute>} 
         />
         <Route 
           path="/takip-edilenler" 
-          element={<ProtectedRoute>{withPageErrorBoundary(FollowingPage, 'Takip Edilenler')}</ProtectedRoute>} 
+          element={<ProtectedRoute>{withPageErrorBoundary(MemoizedFollowingPage, 'Takip Edilenler')}</ProtectedRoute>} 
         />
         <Route path="/auth/callback" element={withPageErrorBoundary(AuthCallbackPage, 'Auth Callback')} />
         <Route path="/2fa" element={withPageErrorBoundary(TwoFactorAuthPage, '2FA Doğrulama')} />

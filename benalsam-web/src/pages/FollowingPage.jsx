@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Loader2, WifiOff, Rss, PlusCircle, Tag } from 'lucide-react';
-import { Button } from '@/components/ui/button.jsx';
-import { toast } from '@/components/ui/use-toast.js';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/stores';
 import { 
   fetchFollowingUsers, 
   fetchUserProfile,
   fetchListingsForFollowedCategories,
 } from '@/services/supabaseService';
-import UserCard from '@/components/FollowingPage/UserCard.jsx';
-import CategoryFollowCard from '@/components/FollowingPage/CategoryFollowCard.jsx';
-import FollowCategoryModal from '@/components/FollowingPage/FollowCategoryModal.jsx';
+import UserCard from '@/components/FollowingPage/UserCard';
+import CategoryFollowCard from '@/components/FollowingPage/CategoryFollowCard';
+import FollowCategoryModal from '@/components/FollowingPage/FollowCategoryModal';
 
 const FollowingPage = ({ onToggleFavorite }) => {
   const { userId: routeUserId } = useParams();
@@ -27,20 +27,21 @@ const FollowingPage = ({ onToggleFavorite }) => {
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [error, setError] = useState(null);
   const [isFollowCategoryModalOpen, setIsFollowCategoryModalOpen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const targetUserId = routeUserId || currentUser?.id;
 
   useEffect(() => {
-    if (!targetUserId) {
+    if (!targetUserId || isInitialized) {
         return;
     }
 
     const loadInitialData = async () => {
-      setLoadingUsers(true);
-      setLoadingCategories(true);
-      setError(null);
-
       try {
+        setLoadingUsers(true);
+        setLoadingCategories(true);
+        setError(null);
+
         if (routeUserId && routeUserId !== currentUser?.id) {
           const fetchedProfileUser = await fetchUserProfile(routeUserId);
           if (!fetchedProfileUser) throw new Error("Profil sahibi bulunamadı.");
@@ -56,6 +57,8 @@ const FollowingPage = ({ onToggleFavorite }) => {
         const fetchedCategoriesListings = await fetchListingsForFollowedCategories(targetUserId, 3, currentUser?.id);
         setFollowedCategoriesWithListings(fetchedCategoriesListings);
         setLoadingCategories(false);
+        
+        setIsInitialized(true);
 
       } catch (e) {
         console.error("Error in FollowingPage useEffect:", e);
@@ -66,22 +69,28 @@ const FollowingPage = ({ onToggleFavorite }) => {
       }
     };
     loadInitialData();
-  }, [targetUserId, currentUser, routeUserId]);
+  }, [targetUserId, currentUser?.id, routeUserId, isInitialized]);
 
-  const handleUnfollowUserOptimistic = (unfollowedUserId) => {
+  const handleUnfollowUserOptimistic = useCallback((unfollowedUserId) => {
     setFollowingUsers(prev => prev.filter(user => user.id !== unfollowedUserId));
-  };
+  }, []);
 
-  const handleUnfollowCategoryOptimistic = (unfollowedCategoryName) => {
+  const handleUnfollowCategoryOptimistic = useCallback((unfollowedCategoryName) => {
     setFollowedCategoriesWithListings(prev => prev.filter(cat => cat.category_name !== unfollowedCategoryName));
-  };
+  }, []);
   
-  const handleCategoryFollowed = async () => {
+  const handleCategoryFollowed = useCallback(async () => {
     setLoadingCategories(true);
-    const updatedCategoriesListings = await fetchListingsForFollowedCategories(targetUserId, 3, currentUser?.id);
-    setFollowedCategoriesWithListings(updatedCategoriesListings);
-    setLoadingCategories(false);
-  };
+    try {
+      const updatedCategoriesListings = await fetchListingsForFollowedCategories(targetUserId, 3, currentUser?.id);
+      setFollowedCategoriesWithListings(updatedCategoriesListings);
+    } catch (error) {
+      console.error('Error refreshing categories:', error);
+      toast({ title: "Hata", description: "Kategoriler güncellenirken bir sorun oluştu.", variant: "destructive" });
+    } finally {
+      setLoadingCategories(false);
+    }
+  }, [targetUserId, currentUser?.id]);
 
   const pageTitle = profileUser 
     ? (profileUser.id === currentUser?.id ? "Takip Ettiklerim" : `${profileUser.name || 'Kullanıcı'}'nın Takip Ettikleri`)
@@ -92,7 +101,10 @@ const FollowingPage = ({ onToggleFavorite }) => {
   if (isLoading && !error) {
     return (
       <div className="min-h-[calc(100vh-160px)] flex items-center justify-center bg-background">
-        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+        <div className="text-center">
+          <Loader2 className="h-16 w-16 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Takip edilenler yükleniyor...</p>
+        </div>
       </div>
     );
   }
@@ -218,4 +230,4 @@ const FollowingPage = ({ onToggleFavorite }) => {
   );
 };
 
-export default FollowingPage;
+export default memo(FollowingPage);
