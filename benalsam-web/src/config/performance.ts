@@ -1,13 +1,13 @@
 // Performance Tracking Configuration
 export const PERFORMANCE_CONFIG = {
-  // Enable performance tracking in development
-  ENABLE_IN_DEV: true,
+  // Enable performance tracking in development (reduced)
+  ENABLE_IN_DEV: false, // Disabled by default to reduce noise
   
   // Enable for admin users in production
   ENABLE_FOR_ADMIN: true,
   
-  // Sampling rate for normal users (0.01 = 1%)
-  SAMPLING_RATE: 0.01,
+  // Sampling rate for normal users (0.001 = 0.1% - very low)
+  SAMPLING_RATE: 0.001,
   
   // Critical pages that should always be tracked
   CRITICAL_PAGES: [
@@ -34,7 +34,7 @@ export const shouldEnablePerformanceTracking = (user?: any): boolean => {
   const isAdmin = user?.role === 'admin' || user?.role === 'moderator';
   const isProduction = import.meta.env.PROD;
   
-  // Always enable in development
+  // Enable in development only when explicitly enabled
   if (isDevelopment && PERFORMANCE_CONFIG.ENABLE_IN_DEV) {
     return true;
   }

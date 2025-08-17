@@ -26,10 +26,10 @@ const PERFORMANCE_CONFIG = {
   INP_THRESHOLD: 200,  // 200 milliseconds
   CLS_THRESHOLD: 0.1,  // 0.1
   
-  // Logging configuration
-  LOG_TO_CONSOLE: import.meta.env.DEV,
-  SEND_TO_ANALYTICS: true,
-  SEND_TO_BACKEND: true,
+  // Logging configuration - Reduced verbosity
+  LOG_TO_CONSOLE: false, // Disable console logging by default
+  SEND_TO_ANALYTICS: false, // Disable analytics to reduce noise
+  SEND_TO_BACKEND: import.meta.env.DEV ? false : true, // Only in production
   
   // Backend API configuration
   BACKEND_URL: import.meta.env.VITE_API_URL || 'http://localhost:3002',
@@ -37,7 +37,7 @@ const PERFORMANCE_CONFIG = {
   
   // Timeout configuration for metrics collection
   METRICS_TIMEOUT: 10000, // 10 seconds
-  FORCE_SEND_TIMEOUT: 15000, // 15 seconds
+  FORCE_SEND_TIMEOUT: 30000, // Increased to 30 seconds
 };
 
 // Calculate performance score
@@ -113,13 +113,15 @@ const sendToBackend = async (route: string, metrics: PerformanceMetrics, score: 
       body: JSON.stringify(performanceData)
     });
 
-    if (response.ok) {
+    if (response.ok && PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
       console.log('✅ Performance data sent to backend successfully');
-    } else {
+    } else if (!response.ok && PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
       console.warn('⚠️ Failed to send performance data to backend:', response.status);
     }
   } catch (error) {
-    console.error('❌ Error sending performance data to backend:', error);
+    if (PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
+      console.error('❌ Error sending performance data to backend:', error);
+    }
   }
 };
 
@@ -129,13 +131,15 @@ const sendToAnalytics = (metric: Metric) => {
   
   // TODO: Implement analytics integration
   // Example: Google Analytics, Sentry, custom backend
-  console.log('📊 Performance Metric:', {
-    name: metric.name,
-    value: metric.value,
-    rating: metric.rating,
-    delta: metric.delta,
-    id: metric.id,
-  });
+  if (PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
+    console.log('📊 Performance Metric:', {
+      name: metric.name,
+      value: metric.value,
+      rating: metric.rating,
+      delta: metric.delta,
+      id: metric.id,
+    });
+  }
 };
 
 // Check if we have enough metrics to send
@@ -154,7 +158,9 @@ const scheduleForceSend = (route: string) => {
   
   forceSendTimeout = setTimeout(() => {
     const score = calculatePerformanceScore(metrics);
-    console.log('⏰ Force sending performance data after timeout');
+    if (PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
+      console.log('⏰ Force sending performance data after timeout');
+    }
     sendToBackend(route, metrics, score);
     
     // Reset metrics
@@ -180,8 +186,11 @@ const logPerformanceMetric = (metric: Metric) => {
   // Store metric
   metrics[name as keyof PerformanceMetrics] = value;
   
-  console.log('📊 Performance Metric:', metric);
-  console.log('📊 Current metrics state:', metrics);
+  // Only log if explicitly enabled
+  if (PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
+    console.log('📊 Performance Metric:', metric);
+    console.log('📊 Current metrics state:', metrics);
+  }
   
   // Send to analytics
   sendToAnalytics(metric);
@@ -218,46 +227,48 @@ export const initPerformanceTracking = () => {
     
     // Largest Contentful Paint (LCP) - Most important metric
     onLCP((metric) => {
-      console.log('📊 LCP Metric:', metric);
+      if (PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
+        console.log('📊 LCP Metric:', metric);
+      }
       logPerformanceMetric(metric);
-    }, { 
-      reportAllChanges: true
     });
     
     // First Contentful Paint (FCP) - Early loading metric
     onFCP((metric) => {
-      console.log('📊 FCP Metric:', metric);
+      if (PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
+        console.log('📊 FCP Metric:', metric);
+      }
       logPerformanceMetric(metric);
-    }, { 
-      reportAllChanges: true 
     });
     
     // Cumulative Layout Shift (CLS) - Visual stability
     onCLS((metric) => {
-      console.log('📊 CLS Metric:', metric);
+      if (PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
+        console.log('📊 CLS Metric:', metric);
+      }
       logPerformanceMetric(metric);
-    }, { 
-      reportAllChanges: true 
     });
     
     // Time to First Byte (TTFB) - Server response time
     onTTFB((metric) => {
-      console.log('📊 TTFB Metric:', metric);
+      if (PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
+        console.log('📊 TTFB Metric:', metric);
+      }
       logPerformanceMetric(metric);
-    }, { 
-      reportAllChanges: true 
     });
     
     // Interaction to Next Paint (INP) - User interaction responsiveness
     onINP((metric) => {
-      console.log('📊 INP Metric:', metric);
+      if (PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
+        console.log('📊 INP Metric:', metric);
+      }
       logPerformanceMetric(metric);
-    }, { 
-      reportAllChanges: true 
     });
     
-    console.log('🚀 Core Web Vitals tracking initialized with improved metrics collection');
-    console.log('📊 Tracking metrics for route:', route);
+    if (PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
+      console.log('🚀 Core Web Vitals tracking initialized with improved metrics collection');
+      console.log('📊 Tracking metrics for route:', route);
+    }
     
   } catch (error) {
     console.error('❌ Failed to initialize performance tracking:', error);
@@ -305,14 +316,17 @@ export const usePerformanceMonitoring = () => {
       setIsComplete(hasAllMetrics);
       setHasEnoughData(hasEnoughMetrics());
       
-      console.log('🔄 Metrics updated:', newMetrics, 'Score:', newScore);
+      // Only log significant score changes (more than 5 points)
+      if (Math.abs(newScore - score) > 5 && PERFORMANCE_CONFIG.LOG_TO_CONSOLE) {
+        console.log('🔄 Metrics updated:', newMetrics, 'Score:', newScore);
+      }
     };
 
     // Update immediately
     updateMetrics();
 
-    // Set up interval to check for updates
-    const interval = setInterval(updateMetrics, 1000);
+    // Set up interval to check for updates (reduced frequency)
+    const interval = setInterval(updateMetrics, 5000); // Every 5 seconds instead of 1
 
     return () => clearInterval(interval);
   }, []);

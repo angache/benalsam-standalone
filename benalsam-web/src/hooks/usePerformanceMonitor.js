@@ -10,23 +10,31 @@ export const usePerformanceMonitor = () => {
     const navigationEnd = performance.now();
     const navigationTime = navigationEnd - navigationStart.current;
     
-    // Log navigation performance
-    console.log(`🚀 Navigation to ${location.pathname}: ${navigationTime.toFixed(2)}ms`);
+    // Only log in development and when performance monitoring is enabled
+    const shouldLog = import.meta.env.DEV && false; // Disabled by default
     
-    // Track first load vs subsequent navigations
-    if (isFirstLoad.current) {
-      console.log('📊 First page load completed');
-      isFirstLoad.current = false;
+    if (shouldLog) {
+      console.log(`🚀 Navigation to ${location.pathname}: ${navigationTime.toFixed(2)}ms`);
+      
+      // Track first load vs subsequent navigations
+      if (isFirstLoad.current) {
+        console.log('📊 First page load completed');
+        isFirstLoad.current = false;
+      } else {
+        console.log('📊 Client-side navigation completed');
+      }
     } else {
-      console.log('📊 Client-side navigation completed');
+      // Just track first load status without logging
+      if (isFirstLoad.current) {
+        isFirstLoad.current = false;
+      }
     }
     
     // Update navigation start time for next navigation
     navigationStart.current = performance.now();
     
-    // Track Core Web Vitals if available
-    if ('web-vital' in window) {
-      // This would integrate with web-vitals library
+    // Track Core Web Vitals if available (silent)
+    if ('web-vital' in window && shouldLog) {
       console.log('📈 Core Web Vitals tracking available');
     }
     
@@ -38,7 +46,7 @@ export const usePerformanceMonitor = () => {
         entry.name.includes('chunk')
       );
       
-      if (jsChunks.length > 0) {
+      if (jsChunks.length > 0 && shouldLog) {
         console.log('📦 Chunks loaded:', jsChunks.map(chunk => ({
           name: chunk.name.split('/').pop(),
           duration: chunk.duration.toFixed(2) + 'ms',

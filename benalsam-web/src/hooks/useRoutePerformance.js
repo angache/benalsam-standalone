@@ -27,8 +27,9 @@ const useRoutePerformance = () => {
       metrics: routeMetrics.current
     };
 
-    // Console'da göster (development)
-    if (import.meta.env.DEV) {
+    // Console'da göster (sadece debug modunda)
+    const debugMode = import.meta.env.DEV && false; // Disabled by default
+    if (debugMode) {
       console.group(`📊 Route Performance: ${routePath}`);
       console.log('Route Duration:', routeDuration + 'ms');
       console.log('Route Metrics:', routeMetrics.current);
@@ -84,17 +85,19 @@ const useRoutePerformance = () => {
         delta: metric.delta
       };
 
-      if (import.meta.env.DEV) {
+      // Only log in debug mode
+      const debugMode = import.meta.env.DEV && false; // Disabled by default
+      if (debugMode) {
         console.log(`📊 ${metric.name} for ${routePath}:`, metric.value + 'ms', `(${metric.rating})`);
       }
     };
 
-    // Route-specific metric listeners
-    const unsubscribeLCP = onLCP(handleMetric, { reportAllChanges: true });
-    const unsubscribeINP = onINP(handleMetric, { reportAllChanges: true });
-    const unsubscribeCLS = onCLS(handleMetric, { reportAllChanges: true });
-    const unsubscribeFCP = onFCP(handleMetric, { reportAllChanges: true });
-    const unsubscribeTTFB = onTTFB(handleMetric, { reportAllChanges: true });
+    // Route-specific metric listeners (reduced frequency)
+    const unsubscribeLCP = onLCP(handleMetric);
+    const unsubscribeINP = onINP(handleMetric);
+    const unsubscribeCLS = onCLS(handleMetric);
+    const unsubscribeFCP = onFCP(handleMetric);
+    const unsubscribeTTFB = onTTFB(handleMetric);
 
     return () => {
       // Safe cleanup - check if functions exist before calling

@@ -31,16 +31,18 @@ function AuthGate({ children }) {
   return children;
 }
 
-// Initialize performance tracking (Development & Admin only)
+// Initialize performance tracking (Only when really needed)
 const user = useAuthStore.getState().user;
 const isEnabled = shouldEnablePerformanceTracking(user);
 
 if (isEnabled) {
-  console.log('🚀 Performance tracking enabled for:', import.meta.env.DEV ? 'development' : 'admin user');
+  // Only log when tracking is actually enabled
+  if (import.meta.env.DEV) {
+    console.log('🚀 Performance tracking enabled for development');
+  }
   initPerformanceTracking();
-} else {
-  console.log('📊 Performance tracking disabled for normal users in production');
 }
+// No need to log when disabled - reduces console noise
 
 // Prefetch critical data
 const prefetchCriticalData = async () => {
