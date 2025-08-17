@@ -11,6 +11,7 @@ import 'cropperjs/dist/cropper.css';
 import { useAuthStore } from '@/stores';
 import { queryClient } from '@/lib/queryClient';
 import { initPerformanceTracking } from '@/utils/performance';
+import { shouldEnablePerformanceTracking } from '@/config/performance';
 import { registerServiceWorker } from '@/utils/serviceWorker';
 
 function AuthGate({ children }) {
@@ -30,8 +31,16 @@ function AuthGate({ children }) {
   return children;
 }
 
-// Initialize performance tracking
-initPerformanceTracking();
+// Initialize performance tracking (Development & Admin only)
+const user = useAuthStore.getState().user;
+const isEnabled = shouldEnablePerformanceTracking(user);
+
+if (isEnabled) {
+  console.log('🚀 Performance tracking enabled for:', import.meta.env.DEV ? 'development' : 'admin user');
+  initPerformanceTracking();
+} else {
+  console.log('📊 Performance tracking disabled for normal users in production');
+}
 
 // Prefetch critical data
 const prefetchCriticalData = async () => {

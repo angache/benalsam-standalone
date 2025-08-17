@@ -25,6 +25,7 @@ import elasticsearchRoutes from './routes/elasticsearch';
 import adminManagementRoutes from './routes/admin-management';
 import analyticsRoutes from './routes/analytics';
 import performanceRoutes from './routes/performance';
+import trendAnalysisRoutes from './routes/trendAnalysis';
 import backupRoutes from './routes/backup';
 import schedulingRoutes from './routes/scheduling';
 import progressRoutes from './routes/progress';
@@ -223,6 +224,7 @@ app.use('/api/v1/elasticsearch', elasticsearchRoutes);
 app.use('/api/v1/admin-management', authenticateToken, adminManagementRoutes);
 app.use('/api/v1/analytics', analyticsRoutes); // Analytics aktif edildi
 app.use('/api/v1/performance', performanceRoutes); // Performance monitoring aktif edildi
+app.use('/api/v1/trends', trendAnalysisRoutes); // Trend Analysis sistemi aktif edildi
 app.use('/api/v1/user-journey', userJourneyRoutes); // User Journey tracking aktif edildi
 app.use('/api/v1/analytics-alerts', analyticsAlertsRoutes); // Analytics Alerts sistemi aktif edildi
 app.use('/api/v1/alerts', alertRoutes); // Alert System aktif edildi

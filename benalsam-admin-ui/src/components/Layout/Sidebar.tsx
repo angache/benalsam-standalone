@@ -135,6 +135,13 @@ const navigationCategories = [
         icon: Route,
         permission: PERMISSIONS.ANALYTICS_VIEW,
       },
+      {
+        id: 'trend-analysis',
+        title: 'Trend Analysis',
+        path: '/trend-analysis',
+        icon: Brain,
+        permission: PERMISSIONS.ANALYTICS_VIEW,
+      },
     ]
   },
   {

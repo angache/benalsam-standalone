@@ -36,6 +36,7 @@ const PerformanceBaselinePage = lazy(() => import('./pages/PerformanceBaselinePa
 const PerformanceDashboardPage = lazy(() => import('./pages/PerformanceDashboardPage'));
 const RoutePerformancePage = lazy(() => import('./pages/RoutePerformancePage'));
 const AIAnalysisDashboard = lazy(() => import('./components/AIAnalysisDashboard'));
+const TrendAnalysisPage = lazy(() => import('./pages/TrendAnalysis'));
 const BackupDashboardPage = lazy(() => import('./pages/BackupDashboardPage'));
 const SchedulingDashboardPage = lazy(() => import('./pages/SchedulingDashboardPage'));
 const ProgressDashboardPage = lazy(() => import('./pages/ProgressDashboardPage'));
@@ -315,6 +316,20 @@ function App() {
                     <Layout>
                       <Suspense fallback={<PageLoadingSpinner />}>
                         <UserJourneyPage />
+                      </Suspense>
+                    </Layout>
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trend-analysis"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <Layout>
+                      <Suspense fallback={<PageLoadingSpinner />}>
+                        <TrendAnalysisPage />
                       </Suspense>
                     </Layout>
                   </ErrorBoundary>

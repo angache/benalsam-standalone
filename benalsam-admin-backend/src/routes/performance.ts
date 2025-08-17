@@ -16,40 +16,51 @@ const router = express.Router();
 // Calculate performance score based on Core Web Vitals
 const calculatePerformanceScore = (metrics: any): number => {
   let score = 100;
+  let metricsCount = 0;
   
   // LCP scoring (0-2500ms = good, 2500-4000ms = needs-improvement, >4000ms = poor)
-  if (metrics.LCP?.value) {
+  if (metrics.LCP?.value && metrics.LCP.value > 0) {
+    metricsCount++;
     if (metrics.LCP.value > 4000) score -= 30;
     else if (metrics.LCP.value > 2500) score -= 15;
     else if (metrics.LCP.value > 2000) score -= 5;
   }
   
   // FCP scoring (0-1800ms = good, 1800-3000ms = needs-improvement, >3000ms = poor)
-  if (metrics.FCP?.value) {
+  if (metrics.FCP?.value && metrics.FCP.value > 0) {
+    metricsCount++;
     if (metrics.FCP.value > 3000) score -= 25;
     else if (metrics.FCP.value > 1800) score -= 12;
     else if (metrics.FCP.value > 1000) score -= 5;
   }
   
   // CLS scoring (0-0.1 = good, 0.1-0.25 = needs-improvement, >0.25 = poor)
-  if (metrics.CLS?.value) {
+  if (metrics.CLS?.value && metrics.CLS.value > 0) {
+    metricsCount++;
     if (metrics.CLS.value > 0.25) score -= 25;
     else if (metrics.CLS.value > 0.1) score -= 12;
     else if (metrics.CLS.value > 0.05) score -= 5;
   }
   
   // INP scoring (0-200ms = good, 200-500ms = needs-improvement, >500ms = poor)
-  if (metrics.INP?.value) {
+  if (metrics.INP?.value && metrics.INP.value > 0) {
+    metricsCount++;
     if (metrics.INP.value > 500) score -= 20;
     else if (metrics.INP.value > 200) score -= 10;
     else if (metrics.INP.value > 100) score -= 3;
   }
   
   // TTFB scoring (0-800ms = good, 800-1800ms = needs-improvement, >1800ms = poor)
-  if (metrics.TTFB?.value) {
+  if (metrics.TTFB?.value && metrics.TTFB.value > 0) {
+    metricsCount++;
     if (metrics.TTFB.value > 1800) score -= 15;
     else if (metrics.TTFB.value > 800) score -= 8;
     else if (metrics.TTFB.value > 400) score -= 3;
+  }
+  
+  // Eğer hiç metric yoksa varsayılan score döndür
+  if (metricsCount === 0) {
+    return 85; // Varsayılan iyi score
   }
   
   return Math.max(0, Math.round(score));
@@ -73,13 +84,17 @@ router.post('/analysis',
       // Validate required fields
       if (!route || !metrics) {
         return res.status(400).json({ 
-          success: false, 
+        success: false,
           message: 'Route and metrics are required' 
         });
       }
 
+      // Debug: Log incoming metrics
+      console.log('🔍 Incoming metrics:', JSON.stringify(metrics, null, 2));
+      
       // Calculate performance score
       const calculatedScore = calculatePerformanceScore(metrics);
+      console.log('🔍 Calculated score:', calculatedScore);
       
       // Generate AI insights and recommendations
       const aiInsights: string[] = [];
@@ -156,6 +171,29 @@ router.post('/analysis',
       const key = `performance:analysis:${userId}:${Date.now()}`;
       await redis.setex(key, 30 * 24 * 60 * 60, JSON.stringify(analysis));
 
+      // Also save to trend analysis format
+      const trendData = {
+        route,
+        timestamp: new Date().toISOString(),
+        metrics: {
+          lcp: metrics.LCP?.value || 0,
+          fid: metrics.FID?.value || 0,
+          cls: metrics.CLS?.value || 0,
+          ttfb: metrics.TTFB?.value || 0,
+          fcp: metrics.FCP?.value || 0
+        },
+        score: calculatedScore,
+        userAgent: req.headers['user-agent'] || 'web-app',
+        viewport: { width: 1920, height: 1080 }
+      };
+
+      // Save current data for trend analysis
+      await redis.setex(`perf:data:${route}`, 3600, JSON.stringify(trendData));
+      
+      // Save to history for trend analysis
+      const historyKey = `perf:history:${route}:${Date.now()}`;
+      await redis.setex(historyKey, 86400, JSON.stringify(trendData)); // 24 hours
+
       // Update daily summary
       const today = new Date().toISOString().split('T')[0];
       const summaryKey = `performance:summary:${userId}:${today}`;
@@ -185,16 +223,16 @@ router.post('/analysis',
       await redis.ltrim(routeKey, 0, 99); // Keep last 100 analyses per route
       await redis.expire(routeKey, 30 * 24 * 60 * 60);
 
-      return res.json({
-        success: true,
+    return res.json({
+      success: true,
         message: 'Performance analysis saved successfully',
         analysis
-      });
+    });
 
-    } catch (error) {
+  } catch (error) {
       console.error('Performance analysis save error:', error);
-      return res.status(500).json({ 
-        success: false, 
+    return res.status(500).json({
+      success: false,
         message: 'Failed to save performance analysis' 
       });
     }
@@ -239,17 +277,17 @@ router.get('/analyses',
       }
 
       return res.json({
-        success: true,
+      success: true,
         analyses,
         total: analyses.length,
         limit: parseInt(limit as string),
         offset: parseInt(offset as string)
       });
 
-    } catch (error) {
+  } catch (error) {
       console.error('Get performance analyses error:', error);
       return res.status(500).json({ 
-        success: false, 
+      success: false,
         message: 'Failed to get performance analyses' 
       });
     }
@@ -298,14 +336,14 @@ router.get('/trends',
       }
 
       return res.json({
-        success: true,
+      success: true,
         trends: trends.reverse() // Oldest to newest
-      });
+    });
 
-    } catch (error) {
+  } catch (error) {
       console.error('Get performance trends error:', error);
       return res.status(500).json({ 
-        success: false, 
+      success: false,
         message: 'Failed to get performance trends' 
       });
     }
@@ -360,10 +398,10 @@ router.get('/summary',
         recentSummaries: summaries.slice(0, 7) // Last 7 days
       });
 
-    } catch (error) {
+  } catch (error) {
       console.error('Get performance summary error:', error);
       return res.status(500).json({ 
-        success: false, 
+      success: false,
         message: 'Failed to get performance summary' 
       });
     }
