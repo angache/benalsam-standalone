@@ -207,6 +207,14 @@ const AppRoutes = ({ currentUser }) => {
     return <ReceivedOffersPage />;
   }, []);
 
+  const MemoizedPremiumPage = useCallback(() => {
+    return <PremiumPage />;
+  }, []);
+
+  const MemoizedPremiumDashboard = useCallback(() => {
+    return <PremiumDashboard />;
+  }, []);
+
   return (
     <MainContent>
       <Routes location={location}>
@@ -227,7 +235,7 @@ const AppRoutes = ({ currentUser }) => {
         <Route path="/kategori-takip-et" element={<ProtectedRoute>{withPageErrorBoundary(FollowCategoryPage, 'Kategori Takip Et')}</ProtectedRoute>} />
         <Route path="/ilan-kurallari" element={withPageErrorBoundary(ListingRulesPage, 'İlan Kuralları')} />
         <Route path="/doping/:listingId" element={<ProtectedRoute>{withPageErrorBoundary(DopingPage, 'Doping')}</ProtectedRoute>} />
-        <Route path="/premium" element={<ProtectedRoute>{withPageErrorBoundary(PremiumPage, 'Premium')}</ProtectedRoute>} />
+        <Route path="/premium" element={<ProtectedRoute>{withPageErrorBoundary(MemoizedPremiumPage, 'Premium')}</ProtectedRoute>} />
         <Route path="/guven-puani/:userId" element={withPageErrorBoundary(TrustScorePage, 'Güven Puanı')} />
         <Route path="/ilan-kaldir/:listingId" element={<ProtectedRoute>{withPageErrorBoundary(UnpublishListingPage, 'İlan Kaldır')}</ProtectedRoute>} />
         
@@ -288,7 +296,7 @@ const AppRoutes = ({ currentUser }) => {
         
         <Route 
           path="/premium-dashboard" 
-          element={<ProtectedRoute>{withPageErrorBoundary(PremiumDashboard, 'Premium Dashboard')}</ProtectedRoute>} 
+          element={<ProtectedRoute>{withPageErrorBoundary(MemoizedPremiumDashboard, 'Premium Dashboard')}</ProtectedRoute>} 
         />
         
         {/* Test routes - sadece development modunda */}

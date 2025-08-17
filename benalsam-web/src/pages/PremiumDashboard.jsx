@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
 import { Crown, TrendingUp, Star, Zap, Eye, MessageSquare, Camera, FileText, Users, Award, Calendar, BarChart3, Target, Sparkles, ArrowUp, ArrowDown, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +20,7 @@ const PremiumDashboard = () => {
   const [usage, setUsage] = useState(null);
   const [isPremium, setIsPremium] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [stats, setStats] = useState({
     totalOffers: 0,
     acceptedOffers: 0,
@@ -30,14 +31,14 @@ const PremiumDashboard = () => {
   });
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser?.id && !isInitialized) {
       loadDashboardData();
     }
-  }, [currentUser]);
+  }, [currentUser?.id, isInitialized]);
 
-  const loadDashboardData = async () => {
-    setLoading(true);
+  const loadDashboardData = useCallback(async () => {
     try {
+      setLoading(true);
       const [planData, usageData, premiumStatus] = await Promise.all([
         getUserActivePlan(currentUser.id),
         getUserMonthlyUsage(currentUser.id),
@@ -47,6 +48,7 @@ const PremiumDashboard = () => {
       setUserPlan(planData);
       setUsage(usageData);
       setIsPremium(premiumStatus);
+      setIsInitialized(true);
       
       // Mock istatistik verileri - gerçek uygulamada API'den gelecek
       setStats({
@@ -67,7 +69,7 @@ const PremiumDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser?.id]);
 
   const getUsagePercentage = (current, limit) => {
     if (limit === -1) return 0; // Sınırsız
@@ -505,4 +507,4 @@ const PremiumDashboard = () => {
   );
 };
 
-export default PremiumDashboard;
+export default memo(PremiumDashboard);

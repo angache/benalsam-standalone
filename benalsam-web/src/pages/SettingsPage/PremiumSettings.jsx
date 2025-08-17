@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
 import { Crown, Star, Zap, Eye, MessageSquare, Camera, TrendingUp, FileText, Users, Shield, Sparkles, Check, X, CreditCard, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,30 +21,33 @@ const PremiumSettings = () => {
   const [plans] = useState(getPlanFeatures());
   const [loading, setLoading] = useState(true);
   const [upgrading, setUpgrading] = useState(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser?.id && !isInitialized) {
       loadUserData();
     }
-  }, [currentUser]);
+  }, [currentUser?.id, isInitialized]);
 
-  const loadUserData = async () => {
-    setLoading(true);
+  const loadUserData = useCallback(async () => {
     try {
+      setLoading(true);
       const [planData, usageData] = await Promise.all([
         getUserActivePlan(currentUser.id),
         getUserMonthlyUsage(currentUser.id)
       ]);
       setUserPlan(planData);
       setUsage(usageData);
+      setIsInitialized(true);
     } catch (error) {
       console.error('Error loading user data:', error);
+      toast({ title: "Hata", description: "Premium ayarları yüklenirken bir sorun oluştu.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser?.id]);
 
-  const handleUpgrade = async (planSlug) => {
+  const handleUpgrade = useCallback(async (planSlug) => {
     setUpgrading(planSlug);
     
     // Gerçek ödeme sistemi entegrasyonu burada olacak
@@ -55,9 +58,9 @@ const PremiumSettings = () => {
     });
     
     setUpgrading(null);
-  };
+  }, []);
 
-  const getFeatureIcon = (featureName) => {
+  const getFeatureIcon = useCallback((featureName) => {
     if (featureName.includes('teklif')) return <Zap className="w-4 h-4" />;
     if (featureName.includes('resim') || featureName.includes('fotoğraf')) return <Camera className="w-4 h-4" />;
     if (featureName.includes('mesaj')) return <MessageSquare className="w-4 h-4" />;
@@ -68,7 +71,7 @@ const PremiumSettings = () => {
     if (featureName.includes('destek')) return <Shield className="w-4 h-4" />;
     if (featureName.includes('kurumsal') || featureName.includes('rozet')) return <Users className="w-4 h-4" />;
     return <Check className="w-4 h-4" />;
-  };
+  }, []);
 
   const getCurrentPlanSlug = () => {
     return userPlan?.plan_slug || 'basic';
@@ -356,4 +359,4 @@ const PremiumSettings = () => {
   );
 };
 
-export default PremiumSettings;
+export default memo(PremiumSettings);

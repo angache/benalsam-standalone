@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/stores';
@@ -24,20 +24,21 @@ const PremiumDashboard = () => {
   const [usage, setUsage] = useState(null);
   const [isPremium, setIsPremium] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [stats, setStats] = useState(null);
   const [activities, setActivities] = useState([]);
   const [categoryStats, setCategoryStats] = useState([]);
   const [performanceMetrics, setPerformanceMetrics] = useState({});
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser?.id && !isInitialized) {
       loadDashboardData();
     }
-  }, [currentUser]);
+  }, [currentUser?.id, isInitialized]);
 
-  const loadDashboardData = async () => {
-    setLoading(true);
+  const loadDashboardData = useCallback(async () => {
     try {
+      setLoading(true);
       const [
         planData, 
         usageData, 
@@ -67,6 +68,7 @@ const PremiumDashboard = () => {
         setPerformanceMetrics(metrics);
       }
       
+      setIsInitialized(true);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       toast({
@@ -77,7 +79,7 @@ const PremiumDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser?.id]);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -107,4 +109,4 @@ const PremiumDashboard = () => {
   );
 };
 
-export default PremiumDashboard;
+export default memo(PremiumDashboard);
