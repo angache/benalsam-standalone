@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { User, Shield, Bell, MessageSquare, Palette, Crown, ChevronRight } from 'lucide-react';
@@ -96,4 +96,4 @@ const SettingsLayout = () => {
   );
 };
 
-export default SettingsLayout;
+export default memo(SettingsLayout);

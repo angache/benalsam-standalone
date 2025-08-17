@@ -215,6 +215,10 @@ const AppRoutes = ({ currentUser }) => {
     return <PremiumDashboard />;
   }, []);
 
+  const MemoizedPremiumSettings = useCallback(() => {
+    return <PremiumSettings />;
+  }, []);
+
   return (
     <MainContent>
       <Routes location={location}>
@@ -315,7 +319,7 @@ const AppRoutes = ({ currentUser }) => {
           <Route path="bildirimler" element={withPageErrorBoundary(NotificationSettings, 'Bildirim Ayarları')} />
           <Route path="platform" element={withPageErrorBoundary(PlatformSettings, 'Platform Ayarları')} />
           <Route path="hesap" element={withPageErrorBoundary(AccountSettings, 'Hesap Ayarları')} />
-          <Route path="premium" element={withPageErrorBoundary(PremiumSettings, 'Premium Ayarları')} />
+          <Route path="premium" element={withPageErrorBoundary(MemoizedPremiumSettings, 'Premium Ayarları')} />
           <Route path="geribildirim" element={withPageErrorBoundary(FeedbackSection, 'Geribildirim')} />
           
           <Route path="sohbet" element={withPageErrorBoundary(() => <PlaceholderSettings title="Sohbet" />, 'Sohbet Ayarları')} />
