@@ -2,6 +2,7 @@
     import React, { useState, useMemo, useEffect, memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHomePageData } from '@/hooks/useHomePageData';
+import useGoogleAnalytics from '@/hooks/useGoogleAnalytics';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import ListingCard from '@/components/ListingCard';
@@ -32,6 +33,7 @@ import {
     const HomePage = ({ onToggleFavorite, currentUser }) => {
   
   const navigate = useNavigate();
+  const { trackSearch, trackUserInteraction } = useGoogleAnalytics();
   const [viewMode, setViewMode] = useState('grid');
   const [sortOption, setSortOption] = useState('created_at-desc');
   const [localSearchQuery, setLocalSearchQuery] = useState('');
@@ -123,6 +125,10 @@ import {
       const handleSearchSubmit = (e) => {
         e.preventDefault();
         if (localSearchQuery.trim()) {
+          // Track search event
+          trackSearch(localSearchQuery, displayedListings.length);
+          trackUserInteraction('search_submit', { query: localSearchQuery });
+          
           navigate(`/arama?q=${encodeURIComponent(localSearchQuery)}`);
         }
       };
