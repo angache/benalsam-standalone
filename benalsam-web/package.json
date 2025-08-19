@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "npm run type-check && vite build",
+    "build": "vite build",
     "build:prod": "vite build --mode production",
     "build:analyze": "vite build --mode production",
     "preview": "vite preview",

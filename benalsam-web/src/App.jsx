@@ -14,6 +14,7 @@ import AppErrorBoundary from '@/components/ErrorBoundaries/AppErrorBoundary';
 import { usePreload } from '@/hooks/usePreload.js';
 import { usePerformanceMonitor } from '@/hooks/usePerformanceMonitor.js';
 import useRoutePerformance from '@/hooks/useRoutePerformance.js';
+import usePerformance from '@/hooks/usePerformance.js';
 import ImageOptimizationDebug from '@/components/ImageOptimizationDebug';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
 import {
@@ -53,6 +54,9 @@ function App() {
   
   // Route-based performance tracking
   useRoutePerformance();
+  
+  // Core Web Vitals and performance monitoring
+  usePerformance();
 
   useEffect(() => {
     console.log('🔐 Auth Store State:', { currentUser: !!currentUser, loadingAuth });

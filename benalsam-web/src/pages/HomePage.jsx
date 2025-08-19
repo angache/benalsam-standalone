@@ -1,5 +1,5 @@
 
-    import React, { useState, useMemo, useEffect, memo, useCallback } from 'react';
+    import React, { useState, useMemo, useEffect, memo, useCallback, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHomePageData } from '@/hooks/useHomePageData';
 import useGoogleAnalytics from '@/hooks/useGoogleAnalytics';
@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import ListingCard from '@/components/ListingCard';
 import AdCard from '@/components/AdCard';
-import AdBanner from '@/components/AdBanner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -15,11 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, LayoutGrid, List, ChevronRight, Search, X } from 'lucide-react';
 import { categoriesConfig } from '@/config/categories';
 import { cn } from '@/lib/utils';
-import MobileCategoryScroller from '@/components/HomePage/MobileCategoryScroller';
-import CategoryItem from '@/components/HomePage/CategoryItem';
-import FeaturedListings from '@/components/FeaturedListings';
-import StatsSection from '@/components/StatsSection';
-import PersonalizedFeed from '@/components/PersonalizedFeed';
 import SEOHead from '@/components/SEOHead';
 import StructuredData from '@/components/StructuredData';
 import {
@@ -29,6 +23,20 @@ import {
   fetchTodaysDeals,
 } from '@/services/listingService';
 
+// Lazy load non-critical components for better LCP
+const AdBanner = lazy(() => import('@/components/AdBanner'));
+const MobileCategoryScroller = lazy(() => import('@/components/HomePage/MobileCategoryScroller'));
+const CategoryItem = lazy(() => import('@/components/HomePage/CategoryItem'));
+const FeaturedListings = lazy(() => import('@/components/FeaturedListings'));
+const StatsSection = lazy(() => import('@/components/StatsSection'));
+const PersonalizedFeed = lazy(() => import('@/components/PersonalizedFeed'));
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center p-4">
+    <Loader2 className="h-6 w-6 animate-spin" />
+  </div>
+);
 
     const HomePage = ({ onToggleFavorite, currentUser }) => {
   
@@ -113,16 +121,16 @@ import {
         return combined;
       }, [sortedListings, nativeAds]);
 
-      const handleToggleFavoriteClick = (listingId, isFavorited) => {
+      const handleToggleFavoriteClick = useCallback((listingId, isFavorited) => {
         if (!currentUser) {
           toast({ title: "Giriş Gerekli", description: "Favorilere eklemek için giriş yapmalısınız.", variant: "destructive" });
           navigate('/auth?action=login');
           return;
         }
         onToggleFavorite(listingId, isFavorited);
-      };
+      }, [currentUser, navigate, onToggleFavorite]);
 
-      const handleSearchSubmit = (e) => {
+      const handleSearchSubmit = useCallback((e) => {
         e.preventDefault();
         if (localSearchQuery.trim()) {
           // Track search event
@@ -131,9 +139,9 @@ import {
           
           navigate(`/arama?q=${encodeURIComponent(localSearchQuery)}`);
         }
-      };
+      }, [localSearchQuery, displayedListings.length, trackSearch, trackUserInteraction, navigate]);
 
-      const clearFilters = () => {
+      const clearFilters = useCallback(() => {
         setFilters({
           priceRange: [0, 50000],
           location: '',
@@ -141,15 +149,15 @@ import {
           keywords: ''
         });
         handleCategorySelect([]);
-      };
+      }, [setFilters, handleCategorySelect]);
 
       const selectedCategoryPath = useMemo(() => selectedCategories.map(c => c.name), [selectedCategories]);
 
-      const handleCategoryClick = (category, level) => {
+      const handleCategoryClick = useCallback((category, level) => {
         const newPath = selectedCategories.slice(0, level);
         newPath.push(category);
         handleCategorySelect(newPath);
-      };
+      }, [selectedCategories, handleCategorySelect]);
 
       // Show loading state while initial listings are loading
       if (isLoadingInitial) {
@@ -195,9 +203,11 @@ import {
                   >
                     Tüm Kategoriler
                   </div>
-                  {categoriesConfig.map(cat => (
-                    <CategoryItem key={cat.name} category={cat} onSelect={handleCategoryClick} selectedPath={selectedCategoryPath} />
-                  ))}
+                  <Suspense fallback={<LoadingFallback />}>
+                    {categoriesConfig.map(cat => (
+                      <CategoryItem key={cat.name} category={cat} onSelect={handleCategoryClick} selectedPath={selectedCategoryPath} />
+                    ))}
+                  </Suspense>
                 </div>
                 <hr className="my-6" />
                 <h3 className="font-bold text-lg mb-4">Filtreler</h3>
@@ -236,10 +246,12 @@ import {
 
             <main className="w-full lg:w-3/4 xl:w-4/5">
                <div className="lg:hidden">
-                <MobileCategoryScroller
-                  selectedCategories={selectedCategories}
-                  onCategorySelect={handleCategorySelect}
-                />
+                <Suspense fallback={<LoadingFallback />}>
+                  <MobileCategoryScroller
+                    selectedCategories={selectedCategories}
+                    onCategorySelect={handleCategorySelect}
+                  />
+                </Suspense>
               </div>
 
               <div className="mb-4">
@@ -364,37 +376,49 @@ import {
               
               {!isAnyFilterActive && (
                 <div className="mt-16 space-y-8">
-                  <StatsSection />
+                  <Suspense fallback={<LoadingFallback />}>
+                    <StatsSection />
+                  </Suspense>
                   
                   {currentUser && (
-                    <PersonalizedFeed 
-                      currentUser={currentUser} 
-                      onToggleFavorite={handleToggleFavoriteClick} 
-                    />
+                    <Suspense fallback={<LoadingFallback />}>
+                      <PersonalizedFeed 
+                        currentUser={currentUser} 
+                        onToggleFavorite={handleToggleFavoriteClick} 
+                      />
+                    </Suspense>
                   )}
 
-                  <FeaturedListings
-                    title="Popüler İlanlar"
-                    fetchFunction={() => fetchPopularListings(currentUser?.id)}
-                    currentUser={currentUser}
-                    onToggleFavorite={handleToggleFavoriteClick}
-                  />
+                  <Suspense fallback={<LoadingFallback />}>
+                    <FeaturedListings
+                      title="Popüler İlanlar"
+                      fetchFunction={() => fetchPopularListings(currentUser?.id)}
+                      currentUser={currentUser}
+                      onToggleFavorite={handleToggleFavoriteClick}
+                    />
+                  </Suspense>
           
-                  <AdBanner placement="homepage_featured" format="static" className="h-48" />
+                  <Suspense fallback={<LoadingFallback />}>
+                    <AdBanner placement="homepage_featured" format="static" className="h-48" />
+                  </Suspense>
 
-                  <FeaturedListings
-                    title="En Çok Teklif Alanlar"
-                    fetchFunction={() => fetchMostOfferedListings(currentUser?.id)}
-                    currentUser={currentUser}
-                    onToggleFavorite={handleToggleFavoriteClick}
-                  />
+                  <Suspense fallback={<LoadingFallback />}>
+                    <FeaturedListings
+                      title="En Çok Teklif Alanlar"
+                      fetchFunction={() => fetchMostOfferedListings(currentUser?.id)}
+                      currentUser={currentUser}
+                      onToggleFavorite={handleToggleFavoriteClick}
+                    />
+                  </Suspense>
 
-                  <FeaturedListings
-                    title="Günün Fırsatları"
-                    fetchFunction={() => fetchTodaysDeals(currentUser?.id)}
-                    currentUser={currentUser}
-                    onToggleFavorite={handleToggleFavoriteClick}
-                  />
+                  <Suspense fallback={<LoadingFallback />}>
+                    <FeaturedListings
+                      title="Günün Fırsatları"
+                      fetchFunction={() => fetchTodaysDeals(currentUser?.id)}
+                      currentUser={currentUser}
+                      onToggleFavorite={handleToggleFavoriteClick}
+                    />
+                  </Suspense>
                 </div>
               )}
             </main>
