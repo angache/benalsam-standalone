@@ -7,6 +7,8 @@ const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1N
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+const MAX_URLS_PER_SITEMAP = 45000; // Google limiti 50,000, güvenli margin
+
 async function generateSitemap() {
   try {
     console.log('🔍 Generating sitemap...');
@@ -23,12 +25,17 @@ async function generateSitemap() {
       { url: 'https://benalsam.com/ilan-olustur', priority: '0.8', changefreq: 'weekly' },
     ];
 
-    // Get active listings from Supabase
+    // Get active listings from Supabase (son 30 gün)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
     const { data: listings, error } = await supabase
       .from('listings')
-      .select('id, title, updated_at, status')
+      .select('id, title, updated_at, status, views_count')
       .eq('status', 'active')
-      .order('updated_at', { ascending: false });
+      .gte('updated_at', thirtyDaysAgo.toISOString())
+      .order('updated_at', { ascending: false })
+      .limit(100000); // Limit to prevent memory issues
 
     if (error) {
       console.error('❌ Error fetching listings:', error);
@@ -37,46 +44,111 @@ async function generateSitemap() {
 
     console.log(`📋 Found ${listings.length} active listings`);
 
-    // Generate sitemap XML
-    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+    // Generate static sitemap
+    generateStaticSitemap(staticPages);
+
+    // Generate listing sitemaps with pagination
+    const sitemapFiles = generateListingSitemaps(listings);
+
+    // Generate sitemap index
+    generateSitemapIndex(sitemapFiles);
+
+    console.log(`✅ Sitemap generation completed!`);
+    console.log(`📁 Generated ${sitemapFiles.length + 1} sitemap files`);
+
+  } catch (error) {
+    console.error('❌ Error generating sitemap:', error);
+  }
+}
+
+function generateStaticSitemap(staticPages) {
+  let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 `;
 
-    // Add static pages
-    staticPages.forEach(page => {
-      sitemap += `  <url>
+  staticPages.forEach(page => {
+    sitemap += `  <url>
     <loc>${page.url}</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
   </url>
 `;
-    });
+  });
 
-    // Add listing pages
-    listings.forEach(listing => {
+  sitemap += '</urlset>';
+
+  const sitemapPath = path.join(process.cwd(), 'public', 'sitemap-static.xml');
+  fs.writeFileSync(sitemapPath, sitemap);
+  console.log(`✅ Static sitemap generated: sitemap-static.xml`);
+}
+
+function generateListingSitemaps(listings) {
+  const sitemapFiles = [];
+  const chunks = chunkArray(listings, MAX_URLS_PER_SITEMAP);
+
+  chunks.forEach((chunk, index) => {
+    const sitemapNumber = index + 1;
+    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+`;
+
+    chunk.forEach(listing => {
       const lastmod = new Date(listing.updated_at).toISOString().split('T')[0];
+      const priority = listing.views_count > 100 ? '0.8' : '0.7';
+      
       sitemap += `  <url>
     <loc>https://benalsam.com/ilan/${listing.id}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>${priority}</priority>
   </url>
 `;
     });
 
     sitemap += '</urlset>';
 
-    // Write to file
-    const sitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');
+    const filename = `sitemap-listings-${sitemapNumber}.xml`;
+    const sitemapPath = path.join(process.cwd(), 'public', filename);
     fs.writeFileSync(sitemapPath, sitemap);
+    
+    sitemapFiles.push(filename);
+    console.log(`✅ Listing sitemap ${sitemapNumber} generated: ${filename} (${chunk.length} URLs)`);
+  });
 
-    console.log(`✅ Sitemap generated successfully with ${staticPages.length + listings.length} URLs`);
-    console.log(`📁 Saved to: ${sitemapPath}`);
+  return sitemapFiles;
+}
 
-  } catch (error) {
-    console.error('❌ Error generating sitemap:', error);
+function generateSitemapIndex(sitemapFiles) {
+  let sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://benalsam.com/sitemap-static.xml</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+  </sitemap>
+`;
+
+  sitemapFiles.forEach(filename => {
+    sitemapIndex += `  <sitemap>
+    <loc>https://benalsam.com/${filename}</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+  </sitemap>
+`;
+  });
+
+  sitemapIndex += '</sitemapindex>';
+
+  const indexPath = path.join(process.cwd(), 'public', 'sitemap.xml');
+  fs.writeFileSync(indexPath, sitemapIndex);
+  console.log(`✅ Sitemap index generated: sitemap.xml`);
+}
+
+function chunkArray(array, size) {
+  const chunks = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
   }
+  return chunks;
 }
 
 // Run if called directly

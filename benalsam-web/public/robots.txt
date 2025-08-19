@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 
-# Sitemap
+# Sitemap Index
 Sitemap: https://benalsam.com/sitemap.xml
 
 # Crawl-delay
