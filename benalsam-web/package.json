@@ -18,7 +18,8 @@
     "security-audit": "node scripts/security-audit.cjs",
     "audit": "npm audit && npm run security-audit",
     "generate-sitemap": "node scripts/generate-sitemap.js",
-    "seo-build": "npm run generate-sitemap && npm run build"
+    "seo-build": "npm run generate-sitemap && npm run build",
+    "build:analyze": "VITE_ENABLE_ANALYZER=true npm run build"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.2.1",

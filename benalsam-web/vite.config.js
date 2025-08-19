@@ -1,18 +1,28 @@
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
-import { visualizer } from 'rollup-plugin-visualizer';
+
+// Conditional import for visualizer (only in development)
+const plugins = [react()];
+
+if (process.env.NODE_ENV === 'development' && process.env.VITE_ENABLE_ANALYZER === 'true') {
+	try {
+		const { visualizer } = await import('rollup-plugin-visualizer');
+		plugins.push(
+			visualizer({
+				open: true,
+				gzipSize: true,
+				brotliSize: true,
+				filename: 'dist/bundle-analysis.html',
+			})
+		);
+	} catch (error) {
+		console.log('Visualizer plugin not available, skipping...');
+	}
+}
 
 export default defineConfig({
-	plugins: [
-		react(),
-		visualizer({
-			open: true,
-			gzipSize: true,
-			brotliSize: true,
-			filename: 'dist/bundle-analysis.html',
-		}),
-	],
+	plugins,
 	server: {
 		host: '0.0.0.0',
 		port: 5173,
