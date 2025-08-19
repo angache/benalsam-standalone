@@ -20,6 +20,8 @@ import UnpublishListingModal from '@/components/UnpublishListingModal';
 import { updateListingStatus, deleteListing } from '@/services/listingService';
 import { addToListingHistory } from '@/services/userActivityService';
 import { trackEvent } from '@/services/analyticsService';
+import SEOHead from '@/components/SEOHead';
+import StructuredData from '@/components/StructuredData';
 
 const ListingDetailPage = ({ setListings, onToggleFavorite }) => {
   const { listingId } = useParams();
@@ -191,14 +193,37 @@ const ListingDetailPage = ({ setListings, onToggleFavorite }) => {
   };
 
   return (
-    <motion.div
-      ref={pageRef}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className="max-w-6xl mx-auto px-4 py-8"
-    >
+    <>
+      {listing && (
+        <>
+          <SEOHead 
+            title={`${listing.title} - BenAlsam`}
+            description={listing.description || `İhtiyacınız olan ${listing.title} için alım ilanı. Fiyat: ${listing.price} TL`}
+            keywords={`${listing.title}, alım ilanı, ${listing.category}, ${listing.location}`}
+            image={listing.main_image_url || listing.image_url || "/og-listing.jpg"}
+            type="product"
+            url={`https://benalsam.com/ilan/${listing.id}`}
+          />
+          <StructuredData 
+            type="listing" 
+            data={{
+              title: listing.title,
+              description: listing.description,
+              image_url: listing.main_image_url || listing.image_url,
+              price: listing.price,
+              seller_name: listing.user?.name || "Satıcı"
+            }}
+          />
+        </>
+      )}
+      <motion.div
+        ref={pageRef}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        className="max-w-6xl mx-auto px-4 py-8"
+      >
       <Button variant="outline" onClick={() => navigate(-1)} className="mb-8 border-primary/50 text-primary hover:bg-primary/10 transition-colors">
         <ArrowLeft className="w-4 h-4 mr-2" /> İlanlara Geri Dön
       </Button>
@@ -335,7 +360,8 @@ const ListingDetailPage = ({ setListings, onToggleFavorite }) => {
           />
         </>
       )}
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 

@@ -16,7 +16,9 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "type-check": "tsc --noEmit",
     "security-audit": "node scripts/security-audit.cjs",
-    "audit": "npm audit && npm run security-audit"
+    "audit": "npm audit && npm run security-audit",
+    "generate-sitemap": "node scripts/generate-sitemap.js",
+    "seo-build": "npm run generate-sitemap && npm run build"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.2.1",

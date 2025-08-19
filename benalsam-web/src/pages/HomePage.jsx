@@ -20,6 +20,7 @@ import FeaturedListings from '@/components/FeaturedListings';
 import StatsSection from '@/components/StatsSection';
 import PersonalizedFeed from '@/components/PersonalizedFeed';
 import SEOHead from '@/components/SEOHead';
+import StructuredData from '@/components/StructuredData';
 import {
   fetchListings,
   fetchPopularListings,
@@ -165,6 +166,7 @@ import {
             image="/og-homepage.jpg"
             type="website"
           />
+          <StructuredData type="website" />
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
