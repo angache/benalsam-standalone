@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const CategoryItem = ({ category, level = 0, onSelect, selectedPath = [] }) => {
+const CategoryItem = ({ category, level = 0, onSelect, selectedPath = [], getCategoryCount, isLoadingCounts }) => {
   const [isOpen, setIsOpen] = useState(() => {
     if (selectedPath.length > level) {
       return selectedPath[level] === category.name;
@@ -52,6 +52,11 @@ const CategoryItem = ({ category, level = 0, onSelect, selectedPath = [] }) => {
           {category.icon && <category.icon className="w-4 h-4" />}
           <span>{category.name}</span>
         </span>
+        {getCategoryCount && (
+          <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+            {isLoadingCounts ? '...' : getCategoryCount([category.name])}
+          </span>
+        )}
         {hasSubcategories && (
           <button onClick={handleToggle} className="p-1 rounded-full hover:bg-primary/10">
             <ChevronRight className={cn("w-4 h-4 transition-transform", isOpen && "rotate-90")} />

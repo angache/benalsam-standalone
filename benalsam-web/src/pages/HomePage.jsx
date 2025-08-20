@@ -2,6 +2,7 @@
     import React, { useState, useMemo, useEffect, memo, useCallback, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHomePageData } from '@/hooks/useHomePageData';
+import { useCategoryCounts } from '@/hooks/useCategoryCounts';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import ListingCard from '@/components/ListingCard';
@@ -105,6 +106,9 @@ const LoadingFallback = () => (
         handleLoadMore,
       } = useHomePageData({ initialListings, currentUser });
 
+      // Kategori sayılarını hesapla
+      const { getCategoryCount, isLoading: isLoadingCounts } = useCategoryCounts(displayedListings);
+
       const sortedListings = useMemo(() => {
         if (!Array.isArray(displayedListings)) return [];
         
@@ -203,8 +207,8 @@ const LoadingFallback = () => (
             className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-6"
           >
           <div className="flex flex-col lg:flex-row lg:gap-8">
-            <aside className="hidden lg:block w-full lg:w-1/3 xl:w-1/4 2xl:w-1/5 mb-6 lg:mb-0 lg:sticky lg:top-24 self-start">
-              <div className="p-4 rounded-lg bg-card border shadow-sm">
+            <aside className="hidden lg:block w-full lg:w-1/4 xl:w-1/5 2xl:w-1/6 mb-6 lg:mb-0 lg:sticky lg:top-20 self-start">
+              <div className="p-4 rounded-lg bg-card border shadow-sm hover:shadow-md transition-shadow duration-200">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                   <Filter className="w-5 h-5 text-primary" />
                   Kategoriler
@@ -220,12 +224,19 @@ const LoadingFallback = () => (
                   >
                     <span>Tüm Kategoriler</span>
                     <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
-                      {listingsWithAds.length}
+                      {isLoadingCounts ? '...' : getCategoryCount([])}
                     </span>
                   </div>
                   <Suspense fallback={<LoadingFallback />}>
                     {categoriesConfig.map(cat => (
-                      <CategoryItem key={cat.name} category={cat} onSelect={handleCategoryClick} selectedPath={selectedCategoryPath} />
+                      <CategoryItem 
+                        key={cat.name} 
+                        category={cat} 
+                        onSelect={handleCategoryClick} 
+                        selectedPath={selectedCategoryPath}
+                        getCategoryCount={getCategoryCount}
+                        isLoadingCounts={isLoadingCounts}
+                      />
                     ))}
                   </Suspense>
                 </div>
@@ -240,7 +251,7 @@ const LoadingFallback = () => (
                     <Slider
                       value={filters.priceRange}
                       onValueChange={(value) => setFilters(prev => ({ ...prev, priceRange: value }))}
-                      max={50000}
+                      max={10000}
                       min={0}
                       step={100}
                       className="mb-3"
@@ -248,6 +259,17 @@ const LoadingFallback = () => (
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span className="bg-background px-2 py-1 rounded">₺{filters.priceRange[0].toLocaleString()}</span>
                       <span className="bg-background px-2 py-1 rounded">₺{filters.priceRange[1].toLocaleString()}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {[1000, 5000, 10000].map(price => (
+                        <button
+                          key={price}
+                          onClick={() => setFilters(prev => ({ ...prev, priceRange: [0, price] }))}
+                          className="text-xs bg-background hover:bg-primary/10 px-2 py-1 rounded transition-colors"
+                        >
+                          ₺{price.toLocaleString()}+
+                        </button>
+                      ))}
                     </div>
                   </div>
                   <div className="bg-muted/30 rounded-lg p-3">
@@ -259,6 +281,24 @@ const LoadingFallback = () => (
                       className="bg-background"
                     />
                   </div>
+                  <div className="bg-muted/30 rounded-lg p-3">
+                    <label className="block text-sm font-medium mb-2">🚨 Acil Durum</label>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="urgent"
+                        checked={filters.urgency === 'Acil'}
+                        onChange={(e) => setFilters(prev => ({ 
+                          ...prev, 
+                          urgency: e.target.checked ? 'Acil' : '' 
+                        }))}
+                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <label htmlFor="urgent" className="text-sm cursor-pointer">
+                        Sadece acil ilanları göster
+                      </label>
+                    </div>
+                  </div>
                   {isAnyFilterActive && (
                     <Button onClick={clearFilters} variant="outline" className="w-full text-primary border-primary/20 hover:bg-primary/5">
                       <X className="w-4 h-4 mr-2" />
@@ -269,7 +309,7 @@ const LoadingFallback = () => (
               </div>
             </aside>
 
-            <main className="w-full lg:w-2/3 xl:w-3/4 2xl:w-4/5">
+            <main className="w-full lg:w-3/4 xl:w-4/5 2xl:w-5/6">
                <div className="lg:hidden">
                 <Suspense fallback={<LoadingFallback />}>
                   <MobileCategoryScroller
