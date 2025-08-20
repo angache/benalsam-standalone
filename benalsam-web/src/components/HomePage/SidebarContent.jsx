@@ -69,6 +69,7 @@ const SidebarContent = ({
                 category={cat} 
                 onSelect={handleCategoryClick} 
                 selectedPath={selectedCategoryPath}
+                parentPath={[]}
                 getCategoryCount={getCategoryCount}
                 isLoadingCounts={isLoadingCounts}
               />

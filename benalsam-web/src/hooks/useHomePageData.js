@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { fetchFilteredListings } from '@/services/listingService/fetchers';
+import { searchListingsWithElasticsearch } from '@/services/elasticsearchService';
 import { saveLastSearch } from '@/services/userActivityService';
 import { supabase } from '@/lib/supabaseClient';
 const PAGE_SIZE = 16;
@@ -75,19 +76,63 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
       setIsFiltering(true);
       setCurrentPage(1);
       debounceTimeoutRef.current = setTimeout(async () => {
-        const allFilters = {
-          search: '',
-          selectedCategories: selectedCategories,
-          location: filters.location,
-          minBudget: filters.priceRange[0],
-          maxBudget: filters.priceRange[1],
-          urgency: filters.urgency,
-          sortBy: 'created_at',
-          sortOrder: 'desc'
-        };
-        const { listings, totalCount } = await fetchFilteredListings(allFilters, currentUser?.id, 1, PAGE_SIZE);
-        setDisplayedListings(listings);
-        setHasMore((1 * PAGE_SIZE) < totalCount);
+        try {
+          // Elasticsearch ile arama yap
+          const searchParams = {
+            query: '',
+            filters: {
+              category: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].name : undefined,
+              location: filters.location,
+              minBudget: filters.priceRange[0],
+              maxBudget: filters.priceRange[1],
+              urgency: filters.urgency
+            },
+            sort: {
+              field: 'created_at',
+              order: 'desc'
+            },
+            page: 1,
+            limit: PAGE_SIZE
+          };
+
+          const result = await searchListingsWithElasticsearch(searchParams, currentUser?.id);
+          
+          if (result.data) {
+            setDisplayedListings(result.data);
+            setHasMore(result.data.length === PAGE_SIZE);
+          } else {
+            // Fallback to Supabase
+            const allFilters = {
+              search: '',
+              selectedCategories: selectedCategories,
+              location: filters.location,
+              minBudget: filters.priceRange[0],
+              maxBudget: filters.priceRange[1],
+              urgency: filters.urgency,
+              sortBy: 'created_at',
+              sortOrder: 'desc'
+            };
+            const { listings, totalCount } = await fetchFilteredListings(allFilters, currentUser?.id, 1, PAGE_SIZE);
+            setDisplayedListings(listings);
+            setHasMore((1 * PAGE_SIZE) < totalCount);
+          }
+        } catch (error) {
+          console.error('Error in search:', error);
+          // Fallback to Supabase
+          const allFilters = {
+            search: '',
+            selectedCategories: selectedCategories,
+            location: filters.location,
+            minBudget: filters.priceRange[0],
+            maxBudget: filters.priceRange[1],
+            urgency: filters.urgency,
+            sortBy: 'created_at',
+            sortOrder: 'desc'
+          };
+          const { listings, totalCount } = await fetchFilteredListings(allFilters, currentUser?.id, 1, PAGE_SIZE);
+          setDisplayedListings(listings);
+          setHasMore((1 * PAGE_SIZE) < totalCount);
+        }
         setIsFiltering(false);
       }, 500);
     } else {
@@ -113,25 +158,76 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
     setIsLoadingMore(true);
     const nextPage = currentPage + 1;
     
-    const allFilters = {
-        search: '',
-        selectedCategories: selectedCategories,
-        location: filters.location,
-        minBudget: filters.priceRange[0],
-        maxBudget: filters.priceRange[1],
-        urgency: filters.urgency,
-        sortBy: 'created_at',
-        sortOrder: 'desc'
-    };
+    try {
+      // Elasticsearch ile arama yap
+      const searchParams = {
+        query: '',
+        filters: {
+          category: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].name : undefined,
+          location: filters.location,
+          minBudget: filters.priceRange[0],
+          maxBudget: filters.priceRange[1],
+          urgency: filters.urgency
+        },
+        sort: {
+          field: 'created_at',
+          order: 'desc'
+        },
+        page: nextPage,
+        limit: PAGE_SIZE
+      };
 
-    const { listings: newResults, totalCount } = await fetchFilteredListings(allFilters, currentUser?.id, nextPage, PAGE_SIZE);
-
-    if (newResults.length > 0) {
-        setDisplayedListings(prev => [...prev, ...newResults]);
+      const result = await searchListingsWithElasticsearch(searchParams, currentUser?.id);
+      
+      if (result.data && result.data.length > 0) {
+        setDisplayedListings(prev => [...prev, ...result.data]);
         setCurrentPage(nextPage);
+        setHasMore(result.data.length === PAGE_SIZE);
+      } else {
+        // Fallback to Supabase
+        const allFilters = {
+            search: '',
+            selectedCategories: selectedCategories,
+            location: filters.location,
+            minBudget: filters.priceRange[0],
+            maxBudget: filters.priceRange[1],
+            urgency: filters.urgency,
+            sortBy: 'created_at',
+            sortOrder: 'desc'
+        };
+
+        const { listings: newResults, totalCount } = await fetchFilteredListings(allFilters, currentUser?.id, nextPage, PAGE_SIZE);
+
+        if (newResults.length > 0) {
+            setDisplayedListings(prev => [...prev, ...newResults]);
+            setCurrentPage(nextPage);
+        }
+        
+        setHasMore((nextPage * PAGE_SIZE) < totalCount);
+      }
+    } catch (error) {
+      console.error('Error in load more:', error);
+      // Fallback to Supabase
+      const allFilters = {
+          search: '',
+          selectedCategories: selectedCategories,
+          location: filters.location,
+          minBudget: filters.priceRange[0],
+          maxBudget: filters.priceRange[1],
+          urgency: filters.urgency,
+          sortBy: 'created_at',
+          sortOrder: 'desc'
+      };
+
+      const { listings: newResults, totalCount } = await fetchFilteredListings(allFilters, currentUser?.id, nextPage, PAGE_SIZE);
+
+      if (newResults.length > 0) {
+          setDisplayedListings(prev => [...prev, ...newResults]);
+          setCurrentPage(nextPage);
+      }
+      
+      setHasMore((nextPage * PAGE_SIZE) < totalCount);
     }
-    
-    setHasMore((nextPage * PAGE_SIZE) < totalCount);
 
     setIsLoadingMore(false);
   };

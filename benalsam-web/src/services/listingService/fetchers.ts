@@ -318,7 +318,7 @@ export const fetchFilteredListings = async (
     const rpcParams = {
       search_query: filterParams.search || null,
       p_categories: filterParams.selectedCategories && filterParams.selectedCategories.length > 0 
-        ? filterParams.selectedCategories.map(cat => cat.name) 
+        ? [filterParams.selectedCategories.map(cat => cat.name).join(' > ')] 
         : filterParams.category ? [filterParams.category] : null,
       p_location: filterParams.location || null,
       p_urgency: filterParams.urgency || 'Tümü',
@@ -386,9 +386,12 @@ const fetchFilteredListingsFallback = async (
     // Apply category filter
     if (filterParams.selectedCategories && filterParams.selectedCategories.length > 0) {
       const categoryNames = filterParams.selectedCategories.map(cat => cat.name);
-      query = query.in('category', categoryNames);
+      // Veritabanında kategori "Ana > Alt" formatında saklanıyor
+      // Seçilen kategori path'ini kullanarak filtreleme yap
+      const categoryPath = categoryNames.join(' > ');
+      query = query.ilike('category', `%${categoryPath}%`);
     } else if (filterParams.category) {
-      query = query.eq('category', filterParams.category);
+      query = query.ilike('category', `%${filterParams.category}%`);
     }
 
     // Apply location filter

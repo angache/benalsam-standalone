@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const CategoryItem = ({ category, level = 0, onSelect, selectedPath = [], getCategoryCount, isLoadingCounts }) => {
+const CategoryItem = ({ category, level = 0, onSelect, selectedPath = [], getCategoryCount, isLoadingCounts, parentPath = [] }) => {
   const [isOpen, setIsOpen] = useState(() => {
     if (selectedPath.length > level) {
       return selectedPath[level] === category.name;
@@ -26,7 +26,8 @@ const CategoryItem = ({ category, level = 0, onSelect, selectedPath = [], getCat
 
   const handleSelect = (e) => {
     e.stopPropagation();
-    onSelect(category, level);
+    const fullPath = [...parentPath, category.name];
+    onSelect(category, level, fullPath);
   };
 
   const handleToggle = (e) => {
@@ -65,7 +66,7 @@ const CategoryItem = ({ category, level = 0, onSelect, selectedPath = [], getCat
             {isLoadingCounts ? (
               <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
             ) : (
-              getCategoryCount([category.name])
+              getCategoryCount([...parentPath, category.name])
             )}
           </motion.span>
         )}
@@ -90,6 +91,9 @@ const CategoryItem = ({ category, level = 0, onSelect, selectedPath = [], getCat
                 level={level + 1}
                 onSelect={onSelect}
                 selectedPath={selectedPath}
+                parentPath={[...parentPath, category.name]}
+                getCategoryCount={getCategoryCount}
+                isLoadingCounts={isLoadingCounts}
               />
             ))}
           </motion.div>

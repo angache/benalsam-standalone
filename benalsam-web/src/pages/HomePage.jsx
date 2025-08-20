@@ -199,7 +199,7 @@ const LoadingFallback = () => (
 
       const selectedCategoryPath = useMemo(() => selectedCategories.map(c => c.name), [selectedCategories]);
 
-      const handleCategoryClick = useCallback((category, level) => {
+      const handleCategoryClick = useCallback((category, level, fullPath) => {
         const newPath = selectedCategories.slice(0, level);
         newPath.push(category);
         handleCategorySelect(newPath);
