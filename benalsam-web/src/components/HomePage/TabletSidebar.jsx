@@ -71,8 +71,8 @@ const TabletSidebar = ({
             </div>
 
             {/* Content */}
-            <div className="h-full overflow-y-auto">
-              <div className="p-4">
+            <div className="h-full overflow-y-auto sidebar-scroll">
+              <div className="p-4 pb-8">
                 {children}
               </div>
             </div>

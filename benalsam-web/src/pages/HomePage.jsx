@@ -252,7 +252,7 @@ const LoadingFallback = () => (
             className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-6"
           >
           <div className="flex flex-col lg:flex-row lg:gap-8">
-            <aside className="hidden lg:block w-full lg:w-1/4 xl:w-1/5 2xl:w-1/6 mb-6 lg:mb-0 lg:sticky lg:top-20 self-start">
+            <aside className="hidden lg:block w-full lg:w-1/4 xl:w-1/5 2xl:w-1/6 mb-6 lg:mb-0 lg:sticky lg:top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto sidebar-scroll">
               <Suspense fallback={<LoadingFallback />}>
                 <SidebarContent
                   selectedCategories={selectedCategories}

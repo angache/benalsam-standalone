@@ -31,7 +31,7 @@ const SidebarContent = ({
   isLoadingCounts
 }) => {
   return (
-    <div className="p-4 rounded-lg bg-card border shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div className="p-4 rounded-lg bg-card border shadow-sm hover:shadow-md transition-shadow duration-200 pb-8">
       <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
         <Filter className="w-5 h-5 text-primary" />
         Kategoriler
