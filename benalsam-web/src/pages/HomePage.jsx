@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHomePageData } from '@/hooks/useHomePageData';
 import { useCategoryCounts } from '@/hooks/useCategoryCounts';
+import { usePagination } from '@/hooks/usePagination';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import ListingCard from '@/components/ListingCard';
@@ -27,6 +28,7 @@ const CategoryItem = lazy(() => import('@/components/HomePage/CategoryItem'));
 const CategorySearch = lazy(() => import('@/components/HomePage/CategorySearch'));
 const TabletSidebar = lazy(() => import('@/components/HomePage/TabletSidebar'));
 const SidebarContent = lazy(() => import('@/components/HomePage/SidebarContent'));
+const Pagination = lazy(() => import('@/components/ui/Pagination'));
 const FeaturedListings = lazy(() => import('@/components/FeaturedListings'));
 const StatsSection = lazy(() => import('@/components/StatsSection'));
 const PersonalizedFeed = lazy(() => import('@/components/PersonalizedFeed'));
@@ -112,12 +114,26 @@ const LoadingFallback = () => (
 
       // Kategori sayılarını hesapla
       const { getCategoryCount, isLoading: isLoadingCounts } = useCategoryCounts(displayedListings);
+      
+      // Pagination hook'u
+      const {
+        currentPage,
+        totalPages,
+        currentItems: paginatedListings,
+        goToPage,
+        hasNextPage,
+        hasPrevPage,
+        totalItems,
+        startIndex,
+        endIndex,
+        getPageNumbers
+      } = usePagination(displayedListings, 12); // Sayfa başına 12 ilan
 
       const sortedListings = useMemo(() => {
-        if (!Array.isArray(displayedListings)) return [];
+        if (!Array.isArray(paginatedListings)) return [];
         
         const [key, direction] = sortOption.split('-');
-        return [...displayedListings].sort((a, b) => {
+        return [...paginatedListings].sort((a, b) => {
           let valA = a[key];
           let valB = b[key];
 
@@ -132,7 +148,7 @@ const LoadingFallback = () => (
             return valA < valB ? 1 : -1;
           }
         });
-      }, [displayedListings, sortOption]);
+      }, [paginatedListings, sortOption]);
 
       const listingsWithAds = useMemo(() => {
         if (nativeAds.length === 0) {
@@ -497,18 +513,22 @@ const LoadingFallback = () => (
                 </div>
               )}
 
-              {hasMore && !isFiltering && (
-                <div className="text-center mt-8">
-                  <Button onClick={handleLoadMore} disabled={isLoadingMore} variant="outline" size="lg">
-                    {isLoadingMore ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Yükleniyor...
-                      </>
-                    ) : (
-                      'Daha Fazla Göster'
-                    )}
-                  </Button>
+              {/* Pagination */}
+              {!isFiltering && totalPages > 1 && (
+                <div className="mt-8">
+                  <Suspense fallback={<LoadingFallback />}>
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={goToPage}
+                      getPageNumbers={getPageNumbers}
+                      hasNextPage={hasNextPage}
+                      hasPrevPage={hasPrevPage}
+                      totalItems={totalItems}
+                      startIndex={startIndex}
+                      endIndex={endIndex}
+                    />
+                  </Suspense>
                 </div>
               )}
               

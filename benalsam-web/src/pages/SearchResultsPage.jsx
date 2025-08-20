@@ -9,7 +9,7 @@ import { toast } from '@/components/ui/use-toast';
 import ListingCard from '@/components/ListingCard';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from '@/components/ui/pagination';
+import Pagination from '@/components/ui/Pagination';
 import { Loader2, LayoutGrid, List, Search, Frown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AdBanner from '@/components/AdBanner';
@@ -84,55 +84,33 @@ const SearchResultsPage = ({ onToggleFavorite }) => {
     updateURL(1, newSort);
   };
 
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
+  const getPageNumbers = useCallback(() => {
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
 
-    const items = [];
-    const maxPagesToShow = 5;
-    const half = Math.floor(maxPagesToShow / 2);
-
-    let start = Math.max(1, page - half);
-    let end = Math.min(totalPages, page + half);
-
-    if (page <= half) {
-        end = Math.min(totalPages, maxPagesToShow);
-    }
-    if (page + half >= totalPages) {
-        start = Math.max(1, totalPages - maxPagesToShow + 1);
-    }
-    
-    if (start > 1) {
-        items.push(<PaginationItem key="start-ellipsis"><PaginationEllipsis /></PaginationItem>);
+    for (let i = Math.max(2, page - delta); 
+         i <= Math.min(totalPages - 1, page + delta); 
+         i++) {
+      range.push(i);
     }
 
-    for (let i = start; i <= end; i++) {
-        items.push(
-            <PaginationItem key={i}>
-                <PaginationLink href="#" isActive={i === page} onClick={(e) => { e.preventDefault(); handlePageChange(i); }}>
-                    {i}
-                </PaginationLink>
-            </PaginationItem>
-        );
+    if (page - delta > 2) {
+      rangeWithDots.push(1, '...');
+    } else {
+      rangeWithDots.push(1);
     }
 
-    if (end < totalPages) {
-        items.push(<PaginationItem key="end-ellipsis"><PaginationEllipsis /></PaginationItem>);
+    rangeWithDots.push(...range);
+
+    if (page + delta < totalPages - 1) {
+      rangeWithDots.push('...', totalPages);
+    } else if (totalPages > 1) {
+      rangeWithDots.push(totalPages);
     }
 
-    return (
-      <Pagination className="mt-8">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); handlePageChange(page - 1); }} disabled={page === 1} />
-          </PaginationItem>
-          {items}
-          <PaginationItem>
-            <PaginationNext href="#" onClick={(e) => { e.preventDefault(); handlePageChange(page + 1); }} disabled={page === totalPages} />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    );
-  };
+    return rangeWithDots;
+  }, [page, totalPages]);
 
 
   return (
@@ -210,7 +188,21 @@ const SearchResultsPage = ({ onToggleFavorite }) => {
               ))}
             </motion.div>
           </AnimatePresence>
-          {renderPagination()}
+          {totalPages > 1 && (
+            <div className="mt-8">
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                getPageNumbers={getPageNumbers}
+                hasNextPage={page < totalPages}
+                hasPrevPage={page > 1}
+                totalItems={totalCount}
+                startIndex={(page - 1) * PAGE_SIZE + 1}
+                endIndex={Math.min(page * PAGE_SIZE, totalCount)}
+              />
+            </div>
+          )}
         </>
       ) : (
         <div className="text-center py-16 bg-card rounded-lg border">
