@@ -76,9 +76,14 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
       setCurrentPage(1);
       debounceTimeoutRef.current = setTimeout(async () => {
         const allFilters = {
-          searchQuery: '',
-          selectedCategories,
-          ...filters
+          search: '',
+          selectedCategories: selectedCategories,
+          location: filters.location,
+          minBudget: filters.priceRange[0],
+          maxBudget: filters.priceRange[1],
+          urgency: filters.urgency,
+          sortBy: 'created_at',
+          sortOrder: 'desc'
         };
         const { listings, totalCount } = await fetchFilteredListings(allFilters, currentUser?.id, 1, PAGE_SIZE);
         setDisplayedListings(listings);
@@ -109,9 +114,14 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
     const nextPage = currentPage + 1;
     
     const allFilters = {
-        searchQuery: '',
-        selectedCategories,
-        ...filters
+        search: '',
+        selectedCategories: selectedCategories,
+        location: filters.location,
+        minBudget: filters.priceRange[0],
+        maxBudget: filters.priceRange[1],
+        urgency: filters.urgency,
+        sortBy: 'created_at',
+        sortOrder: 'desc'
     };
 
     const { listings: newResults, totalCount } = await fetchFilteredListings(allFilters, currentUser?.id, nextPage, PAGE_SIZE);

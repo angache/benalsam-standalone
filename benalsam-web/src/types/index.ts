@@ -9,5 +9,7 @@ export * from 'benalsam-shared-types';
 // WEB-SPECIFIC TYPES (if any)
 // ===========================
 
-// Add any web-specific types here that are not in shared-types
-// For now, all types are shared between mobile and web 
+// Extended QueryFilters for web-specific functionality
+export interface ExtendedQueryFilters extends QueryFilters {
+  selectedCategories?: Array<{ name: string; icon?: any }>;
+} 

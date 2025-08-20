@@ -301,7 +301,7 @@ export const fetchMyListings = async (userId: string): Promise<Listing[]> => {
 };
 
 export const fetchFilteredListings = async (
-  filterParams: QueryFilters,
+  filterParams: QueryFilters & { selectedCategories?: Array<{ name: string; icon?: any }> },
   currentUserId: string | null = null,
   page = 1,
   pageSize = 20
@@ -317,7 +317,9 @@ export const fetchFilteredListings = async (
     // Use the new database function for better performance and attribute filtering
     const rpcParams = {
       search_query: filterParams.search || null,
-      p_categories: filterParams.category ? [filterParams.category] : null,
+      p_categories: filterParams.selectedCategories && filterParams.selectedCategories.length > 0 
+        ? filterParams.selectedCategories.map(cat => cat.name) 
+        : filterParams.category ? [filterParams.category] : null,
       p_location: filterParams.location || null,
       p_urgency: filterParams.urgency || 'Tümü',
       min_price: filterParams.minBudget || null,
@@ -362,7 +364,7 @@ export const fetchFilteredListings = async (
 };
 
 const fetchFilteredListingsFallback = async (
-  filterParams: QueryFilters,
+  filterParams: QueryFilters & { selectedCategories?: Array<{ name: string; icon?: any }> },
   currentUserId: string | null = null,
   page = 1,
   pageSize = 20
@@ -382,7 +384,10 @@ const fetchFilteredListingsFallback = async (
     }
 
     // Apply category filter
-    if (filterParams.category) {
+    if (filterParams.selectedCategories && filterParams.selectedCategories.length > 0) {
+      const categoryNames = filterParams.selectedCategories.map(cat => cat.name);
+      query = query.in('category', categoryNames);
+    } else if (filterParams.category) {
       query = query.eq('category', filterParams.category);
     }
 
