@@ -24,6 +24,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const AdBanner = lazy(() => import('@/components/AdBanner'));
 const MobileCategoryScroller = lazy(() => import('@/components/HomePage/MobileCategoryScroller'));
 const CategoryItem = lazy(() => import('@/components/HomePage/CategoryItem'));
+const CategorySearch = lazy(() => import('@/components/HomePage/CategorySearch'));
+const TabletSidebar = lazy(() => import('@/components/HomePage/TabletSidebar'));
+const SidebarContent = lazy(() => import('@/components/HomePage/SidebarContent'));
 const FeaturedListings = lazy(() => import('@/components/FeaturedListings'));
 const StatsSection = lazy(() => import('@/components/StatsSection'));
 const PersonalizedFeed = lazy(() => import('@/components/PersonalizedFeed'));
@@ -68,6 +71,7 @@ const LoadingFallback = () => (
   const [localSearchQuery, setLocalSearchQuery] = useState('');
   const [initialListings, setInitialListings] = useState([]);
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
+  const [isTabletSidebarOpen, setIsTabletSidebarOpen] = useState(false);
 
         // Load initial listings with limit for faster loading
   useEffect(() => {
@@ -199,6 +203,29 @@ const LoadingFallback = () => (
             type="website"
           />
           <StructuredData type="website" />
+          
+          {/* Tablet Sidebar */}
+          <Suspense fallback={<LoadingFallback />}>
+            <TabletSidebar
+              isOpen={isTabletSidebarOpen}
+              onClose={() => setIsTabletSidebarOpen(false)}
+              selectedCategories={selectedCategories}
+              onCategorySelect={handleCategorySelect}
+            >
+              <SidebarContent
+                selectedCategories={selectedCategories}
+                selectedCategoryPath={selectedCategoryPath}
+                filters={filters}
+                setFilters={setFilters}
+                handleCategoryClick={handleCategoryClick}
+                handleCategorySelect={handleCategorySelect}
+                clearFilters={clearFilters}
+                isAnyFilterActive={isAnyFilterActive}
+                getCategoryCount={getCategoryCount}
+                isLoadingCounts={isLoadingCounts}
+              />
+            </TabletSidebar>
+          </Suspense>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -208,105 +235,20 @@ const LoadingFallback = () => (
           >
           <div className="flex flex-col lg:flex-row lg:gap-8">
             <aside className="hidden lg:block w-full lg:w-1/4 xl:w-1/5 2xl:w-1/6 mb-6 lg:mb-0 lg:sticky lg:top-20 self-start">
-              <div className="p-4 rounded-lg bg-card border shadow-sm hover:shadow-md transition-shadow duration-200">
-                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                  <Filter className="w-5 h-5 text-primary" />
-                  Kategoriler
-                </h3>
-                <div className="space-y-1">
-                  <div
-                    className={cn(
-                      "flex items-center justify-between py-2 px-3 rounded-md cursor-pointer transition-colors text-sm",
-                      "hover:bg-accent hover:shadow-sm",
-                      selectedCategoryPath.length === 0 && "bg-primary/10 text-primary font-semibold border border-primary/20"
-                    )}
-                    onClick={() => handleCategorySelect([])}
-                  >
-                    <span>Tüm Kategoriler</span>
-                    <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
-                      {isLoadingCounts ? '...' : getCategoryCount([])}
-                    </span>
-                  </div>
-                  <Suspense fallback={<LoadingFallback />}>
-                    {categoriesConfig.map(cat => (
-                      <CategoryItem 
-                        key={cat.name} 
-                        category={cat} 
-                        onSelect={handleCategoryClick} 
-                        selectedPath={selectedCategoryPath}
-                        getCategoryCount={getCategoryCount}
-                        isLoadingCounts={isLoadingCounts}
-                      />
-                    ))}
-                  </Suspense>
-                </div>
-                <hr className="my-6" />
-                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                  <Settings className="w-5 h-5 text-primary" />
-                  Filtreler
-                </h3>
-                <div className="space-y-6">
-                  <div className="bg-muted/30 rounded-lg p-3">
-                    <label className="block text-sm font-medium mb-3">💰 Fiyat Aralığı</label>
-                    <Slider
-                      value={filters.priceRange}
-                      onValueChange={(value) => setFilters(prev => ({ ...prev, priceRange: value }))}
-                      max={10000}
-                      min={0}
-                      step={100}
-                      className="mb-3"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span className="bg-background px-2 py-1 rounded">₺{filters.priceRange[0].toLocaleString()}</span>
-                      <span className="bg-background px-2 py-1 rounded">₺{filters.priceRange[1].toLocaleString()}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {[1000, 5000, 10000].map(price => (
-                        <button
-                          key={price}
-                          onClick={() => setFilters(prev => ({ ...prev, priceRange: [0, price] }))}
-                          className="text-xs bg-background hover:bg-primary/10 px-2 py-1 rounded transition-colors"
-                        >
-                          ₺{price.toLocaleString()}+
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="bg-muted/30 rounded-lg p-3">
-                    <label className="block text-sm font-medium mb-2">📍 Konum</label>
-                    <Input
-                      placeholder="Şehir, ilçe..."
-                      value={filters.location}
-                      onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
-                      className="bg-background"
-                    />
-                  </div>
-                  <div className="bg-muted/30 rounded-lg p-3">
-                    <label className="block text-sm font-medium mb-2">🚨 Acil Durum</label>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="urgent"
-                        checked={filters.urgency === 'Acil'}
-                        onChange={(e) => setFilters(prev => ({ 
-                          ...prev, 
-                          urgency: e.target.checked ? 'Acil' : '' 
-                        }))}
-                        className="rounded border-gray-300 text-primary focus:ring-primary"
-                      />
-                      <label htmlFor="urgent" className="text-sm cursor-pointer">
-                        Sadece acil ilanları göster
-                      </label>
-                    </div>
-                  </div>
-                  {isAnyFilterActive && (
-                    <Button onClick={clearFilters} variant="outline" className="w-full text-primary border-primary/20 hover:bg-primary/5">
-                      <X className="w-4 h-4 mr-2" />
-                      Filtreleri Temizle
-                    </Button>
-                  )}
-                </div>
-              </div>
+              <Suspense fallback={<LoadingFallback />}>
+                <SidebarContent
+                  selectedCategories={selectedCategories}
+                  selectedCategoryPath={selectedCategoryPath}
+                  filters={filters}
+                  setFilters={setFilters}
+                  handleCategoryClick={handleCategoryClick}
+                  handleCategorySelect={handleCategorySelect}
+                  clearFilters={clearFilters}
+                  isAnyFilterActive={isAnyFilterActive}
+                  getCategoryCount={getCategoryCount}
+                  isLoadingCounts={isLoadingCounts}
+                />
+              </Suspense>
             </aside>
 
             <main className="w-full lg:w-3/4 xl:w-4/5 2xl:w-5/6">
@@ -317,6 +259,18 @@ const LoadingFallback = () => (
                     onCategorySelect={handleCategorySelect}
                   />
                 </Suspense>
+              </div>
+              
+              {/* Tablet Sidebar Toggle Button */}
+              <div className="hidden md:block lg:hidden mb-4">
+                <Button
+                  onClick={() => setIsTabletSidebarOpen(true)}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Filter className="w-4 h-4" />
+                  Filtreler
+                </Button>
               </div>
 
               <div className="mb-4">
