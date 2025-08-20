@@ -22,6 +22,7 @@ const OptimizedImage = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [webpSupported, setWebpSupported] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const imgRef = useRef(null);
 
   useEffect(() => {
@@ -36,10 +37,13 @@ const OptimizedImage = ({
 
     const loadImage = async () => {
       try {
+        setIsLoading(true);
+        
         // Skip loading for placeholder images that are known to fail
         if (src.includes('via.placeholder.com') || src.includes('source.boringavatars.com')) {
           setShowFallback(true);
           setHasError(true);
+          setIsLoading(false);
           if (onError) {
             onError(new Error('Placeholder image skipped'));
           }
@@ -53,7 +57,7 @@ const OptimizedImage = ({
 
         // Add timeout for slow images
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Image load timeout')), 3000); // 3 second timeout
+          setTimeout(() => reject(new Error('Image load timeout')), 5000); // 5 second timeout
         });
 
         // Preload the image with timeout
@@ -64,6 +68,7 @@ const OptimizedImage = ({
         setCurrentSrc(imageSrc);
         setIsLoaded(true);
         setHasError(false);
+        setIsLoading(false);
         
         if (onLoad) {
           onLoad(imageSrc);
@@ -137,26 +142,33 @@ const OptimizedImage = ({
   }
 
   return (
-    <img
-      ref={imgRef}
-      src={currentSrc}
-      alt={alt}
-      className={`${className} ${isLoaded ? 'loaded' : 'loading'}`}
-      loading={priority ? 'eager' : loading}
-      decoding={priority ? 'sync' : decoding}
-      sizes={sizes}
-      width={width}
-      height={height}
-      onLoad={handleLoad}
-      onError={handleError}
-      style={{
-        opacity: isLoaded ? 1 : 0.7,
-        transition: 'opacity 0.3s ease-in-out',
-        filter: isLoaded ? 'none' : 'blur(2px)',
-        aspectRatio: width && height ? `${width} / ${height}` : 'auto',
-      }}
-      {...props}
-    />
+    <div className="relative">
+      {isLoading && !isLoaded && (
+        <div className="absolute inset-0 bg-muted animate-pulse rounded-lg flex items-center justify-center">
+          <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+        </div>
+      )}
+      <img
+        ref={imgRef}
+        src={currentSrc}
+        alt={alt}
+        className={`${className} ${isLoaded ? 'loaded' : 'loading'} transition-all duration-300`}
+        loading={priority ? 'eager' : loading}
+        decoding={priority ? 'sync' : decoding}
+        sizes={sizes}
+        width={width}
+        height={height}
+        onLoad={handleLoad}
+        onError={handleError}
+        style={{
+          opacity: isLoaded ? 1 : 0.6,
+          transition: 'all 0.3s ease-in-out',
+          filter: isLoaded ? 'none' : 'blur(1px)',
+          aspectRatio: width && height ? `${width} / ${height}` : 'auto',
+        }}
+        {...props}
+      />
+    </div>
   );
 };
 

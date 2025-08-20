@@ -29,6 +29,7 @@ const CategorySearch = lazy(() => import('@/components/HomePage/CategorySearch')
 const TabletSidebar = lazy(() => import('@/components/HomePage/TabletSidebar'));
 const SidebarContent = lazy(() => import('@/components/HomePage/SidebarContent'));
 const Pagination = lazy(() => import('@/components/ui/Pagination'));
+const HomePageErrorBoundary = lazy(() => import('@/components/ErrorBoundaries/HomePageErrorBoundary'));
 const FeaturedListings = lazy(() => import('@/components/FeaturedListings'));
 const StatsSection = lazy(() => import('@/components/StatsSection'));
 const PersonalizedFeed = lazy(() => import('@/components/PersonalizedFeed'));
@@ -210,15 +211,16 @@ const LoadingFallback = () => (
       }
 
       return (
-        <>
-          <SEOHead 
-            title="BenAlsam - Alım İlanları Platformu | İhtiyacınız Olan Ürün ve Hizmetler"
-            description="İhtiyacınız olan ürün ve hizmetler için alım ilanı verin, teklifler alın! Binlerce kullanıcı ile bağlantı kurun ve en iyi fiyatları bulun."
-            keywords="alım ilanı, ihtiyaç ilanı, teklif alma, ürün alımı, hizmet alımı, satıcı bulma, tedarikçi bulma"
-            image="/og-homepage.jpg"
-            type="website"
-          />
-          <StructuredData type="website" />
+        <Suspense fallback={<LoadingFallback />}>
+          <HomePageErrorBoundary>
+            <SEOHead 
+              title="BenAlsam - Alım İlanları Platformu | İhtiyacınız Olan Ürün ve Hizmetler"
+              description="İhtiyacınız olan ürün ve hizmetler için alım ilanı verin, teklifler alın! Binlerce kullanıcı ile bağlantı kurun ve en iyi fiyatları bulun."
+              keywords="alım ilanı, ihtiyaç ilanı, teklif alma, ürün alımı, hizmet alımı, satıcı bulma, tedarikçi bulma"
+              image="/og-homepage.jpg"
+              type="website"
+            />
+            <StructuredData type="website" />
           
           {/* Tablet Sidebar */}
           <Suspense fallback={<LoadingFallback />}>
@@ -582,7 +584,8 @@ const LoadingFallback = () => (
             </main>
           </div>
           </motion.div>
-        </>
+          </HomePageErrorBoundary>
+        </Suspense>
       );
     };
 
