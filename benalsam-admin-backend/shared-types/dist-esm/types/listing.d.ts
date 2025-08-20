@@ -5,6 +5,8 @@ export interface Listing {
     title: string;
     description: string;
     category: string;
+    category_id?: number;
+    category_path?: number[];
     budget: number;
     location: string;
     urgency: 'low' | 'medium' | 'high';
@@ -79,6 +81,8 @@ export interface SearchOptimizedListing {
     title: string;
     description: string;
     category: string;
+    category_id: number;
+    category_path: number[];
     subcategory?: string;
     budget: {
         min: number;

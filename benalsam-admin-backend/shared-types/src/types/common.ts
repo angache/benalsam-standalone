@@ -129,10 +129,11 @@ export interface Language {
 }
 
 // ===========================
-// CATEGORY TYPES
+// CATEGORY TYPES (DEPRECATED - Use category.ts instead)
 // ===========================
 
-export interface Category {
+// @deprecated Use Category from './category' instead
+export interface LegacyCategory {
   code: string;
   name: string;
   icon: any; // IconType will be imported from enums

@@ -10,7 +10,9 @@ export interface Listing {
   user_id: string;
   title: string;
   description: string;
-  category: string;
+  category: string;           // ✅ Geriye uyumluluk için koru
+  category_id?: number;       // ✅ Yeni ID field
+  category_path?: number[];   // ✅ Hiyerarşik path [1,2,3]
   budget: number;
   location: string;
   urgency: 'low' | 'medium' | 'high';
@@ -109,8 +111,10 @@ export interface SearchOptimizedListing {
   user_id: string;
   title: string;
   description: string;
-  category: string;
-  subcategory?: string;
+  category: string;           // ✅ Geriye uyumluluk
+  category_id: number;        // ✅ Yeni ID field
+  category_path: number[];    // ✅ Hiyerarşik path [1,2,3]
+  subcategory?: string;       // ✅ Geriye uyumluluk
   
   // Temel alanlar
   budget: {

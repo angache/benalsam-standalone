@@ -86,7 +86,7 @@ export interface Language {
     name: string;
     nativeName: string;
 }
-export interface Category {
+export interface LegacyCategory {
     code: string;
     name: string;
     icon: any;

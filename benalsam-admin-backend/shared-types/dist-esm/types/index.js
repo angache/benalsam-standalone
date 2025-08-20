@@ -17,6 +17,8 @@ export * from './admin';
 export * from './analytics';
 // Common and Utility Types
 export * from './common';
+// Category Types (ID Based System)
+export * from './category';
 // Category Attributes Types
 export * from './category-attributes';
 // Rate Limiting Types
