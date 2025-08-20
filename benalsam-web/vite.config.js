@@ -107,7 +107,7 @@ export default defineConfig({
 						if (id.includes('react-router-dom')) {
 							return 'router';
 						}
-						if (id.includes('framer-motion') || id.includes('lucide-react')) {
+						if (id.includes('framer-motion') || id.includes('lucide-react') || id.includes('clsx') || id.includes('tailwind-merge')) {
 							return 'ui';
 						}
 						if (id.includes('@tanstack/react-query')) {

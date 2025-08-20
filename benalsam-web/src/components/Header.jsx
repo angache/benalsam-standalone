@@ -38,7 +38,7 @@ const Header = ({
         transition={{ type: 'spring', stiffness: 70, damping: 20, delay: 0.1 }}
         className="fixed top-0 left-0 right-0 z-50 h-14 sm:h-16 lg:h-20 bg-background/80 backdrop-blur-lg shadow-lg border-b border-border/50"
       >
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 h-full flex items-center justify-between">
+        <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 h-full flex items-center justify-between">
           <Link to="/" className="flex items-center min-w-0">
             <div className="flex items-center text-base sm:text-lg lg:text-2xl font-bold text-gradient">
               <Zap className="h-4 w-4 sm:h-5 sm:w-5 lg:h-8 lg:w-8 mr-1 sm:mr-2 flex-shrink-0" />

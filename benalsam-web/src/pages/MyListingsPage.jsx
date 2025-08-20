@@ -193,7 +193,7 @@ const MyListingsPage = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-7xl mx-auto px-4 py-8"
+      className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8"
     >
       <MyListingsHeader
         selectedStatus={selectedStatus}
@@ -214,7 +214,7 @@ const MyListingsPage = () => {
           onCreateClick={() => navigate('/ilan-olustur')}
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 xl:gap-5 2xl:gap-4">
           <AnimatePresence>
             {filteredListings.map((listing) => {
               const status = getListingStatus(listing);

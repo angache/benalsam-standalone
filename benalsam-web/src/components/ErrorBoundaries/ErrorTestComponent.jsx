@@ -44,7 +44,7 @@ const ErrorTestComponent = () => {
   const [throwImmediate, setThrowImmediate] = useState(false);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+            <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 p-6 space-y-6">
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
         <h2 className="text-xl font-bold text-yellow-800 mb-2">
           Error Boundary Test Sayfası

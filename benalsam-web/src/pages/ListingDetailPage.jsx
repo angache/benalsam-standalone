@@ -222,7 +222,7 @@ const ListingDetailPage = ({ setListings, onToggleFavorite }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="max-w-6xl mx-auto px-4 py-8"
+        className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8"
       >
       <Button variant="outline" onClick={() => navigate(-1)} className="mb-8 border-primary/50 text-primary hover:bg-primary/10 transition-colors">
         <ArrowLeft className="w-4 h-4 mr-2" /> İlanlara Geri Dön

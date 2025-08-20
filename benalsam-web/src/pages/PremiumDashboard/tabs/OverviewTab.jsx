@@ -36,8 +36,8 @@ const OverviewTab = ({ stats, activities, performanceMetrics }) => {
 
   return (
     <>
-      {/* Ana İstatistikler */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Tüm İstatistikler */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-6 xl:gap-5 2xl:gap-4">
         <StatCard
           icon={Zap}
           title="Toplam Teklif"
@@ -74,10 +74,6 @@ const OverviewTab = ({ stats, activities, performanceMetrics }) => {
           trendValue={trends.response.value}
           color="text-orange-500"
         />
-      </div>
-
-      {/* Ek Metrikler */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">

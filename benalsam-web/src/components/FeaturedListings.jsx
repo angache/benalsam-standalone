@@ -60,7 +60,7 @@
       if (loading) {
         return (
           <section className="py-6 sm:py-8 lg:py-12">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6">
               <div className="h-4 sm:h-6 lg:h-8 bg-muted/50 rounded w-1/4 mb-4 sm:mb-6 lg:mb-8 animate-pulse"></div>
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {[...Array(4)].map((_, i) => (
@@ -85,7 +85,7 @@
 
       return (
         <section className="py-6 sm:py-8 lg:py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 lg:mb-8 gap-3 sm:gap-4">
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gradient">{title}</h2>
               <div className="flex items-center gap-2">

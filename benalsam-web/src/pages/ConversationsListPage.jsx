@@ -132,7 +132,7 @@ const ConversationsListPage = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="max-w-2xl mx-auto px-4 py-8"
+      className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8"
     >
       <div className="flex items-center mb-6">
         <Button variant="ghost" size="icon" onClick={handleGoBack} className="mr-4 text-muted-foreground hover:text-foreground">

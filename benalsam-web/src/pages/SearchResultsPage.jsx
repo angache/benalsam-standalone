@@ -141,7 +141,7 @@ const SearchResultsPage = ({ onToggleFavorite }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="container mx-auto px-4 lg:px-6 py-6"
+      className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-6"
     >
       <div className="mb-6 bg-card border rounded-lg p-4">
         <h1 className="text-2xl md:text-3xl font-bold text-gradient">Arama Sonuçları</h1>
@@ -187,7 +187,7 @@ const SearchResultsPage = ({ onToggleFavorite }) => {
               key={viewMode}
               className={cn(
                 viewMode === 'grid'
-                  ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                  ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 xl:gap-5 2xl:gap-4'
                   : 'flex flex-col gap-4'
               )}
             >

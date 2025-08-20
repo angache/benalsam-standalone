@@ -159,7 +159,7 @@ const HomePageNew = ({ onToggleFavorite, currentUser }) => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
+            <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gradient mb-4">BenAlsam</h1>

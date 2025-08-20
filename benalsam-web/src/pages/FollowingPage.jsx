@@ -129,7 +129,7 @@ const FollowingPage = ({ onToggleFavorite }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="max-w-5xl mx-auto px-4 py-8"
+      className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8"
     >
       <div className="mb-10 text-center">
         <h1 className="text-4xl font-bold text-gradient mb-3">{pageTitle}</h1>

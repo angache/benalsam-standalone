@@ -33,7 +33,7 @@ const AnalyticsTab = ({ stats, categoryStats, performanceMetrics }) => {
   ];
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6 xl:gap-5 2xl:gap-4">
       {/* Teklif Performansı */}
       <Card>
         <CardHeader>
@@ -115,7 +115,7 @@ const AnalyticsTab = ({ stats, categoryStats, performanceMetrics }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-6 xl:gap-5 2xl:gap-4">
             <div className="text-center p-4 bg-muted/50 rounded-lg">
               <div className="text-2xl font-bold text-blue-600">{stats?.total_offers || 0}</div>
               <div className="text-sm text-muted-foreground">Toplam Teklif</div>
@@ -135,7 +135,7 @@ const AnalyticsTab = ({ stats, categoryStats, performanceMetrics }) => {
           </div>
           
           {/* Ek İstatistikler */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 xl:gap-3 2xl:gap-2">
             <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
               <Zap className="w-8 h-8 text-blue-600" />
               <div>

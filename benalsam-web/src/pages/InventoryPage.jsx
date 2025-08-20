@@ -90,7 +90,7 @@ const InventoryPage = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-6xl mx-auto px-4 py-8"
+      className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8"
     >
       <div className="flex flex-col md:flex-row justify-between items-center mb-8">
         <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-4 md:mb-0">

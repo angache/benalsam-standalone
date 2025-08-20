@@ -9,7 +9,7 @@ const Hero = ({ onCreateClick, onDiscoverClick }) => {
       <div className="hero-gradient absolute inset-0"></div>
       <div className="pattern-grid absolute inset-0 opacity-20"></div>
       
-      <div className="max-w-7xl mx-auto relative z-10">
+              <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 relative z-10">
         <div className="text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

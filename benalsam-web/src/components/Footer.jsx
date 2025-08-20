@@ -43,10 +43,10 @@ const Footer = () => {
 
   return (
     <footer className="bg-card text-card-foreground border-t border-border/50 mt-8 sm:mt-12 lg:mt-16">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 pt-8 sm:pt-12">
+      <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 pt-8 sm:pt-12">
         <AdBanner placement="footer_banner" />
       </div>
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 pt-8 sm:pt-12 pb-6 sm:pb-8">
+      <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 pt-8 sm:pt-12 pb-6 sm:pb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {footerSections.map((section) => (
             <div key={section.title}>

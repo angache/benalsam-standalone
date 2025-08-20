@@ -4,7 +4,7 @@ import UsageCard from '../components/UsageCard';
 
 const UsageTab = ({ userPlan, usage }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 xl:gap-5 2xl:gap-4">
       <UsageCard
         title="Aylık Teklifler"
         current={usage?.offers_count || 0}

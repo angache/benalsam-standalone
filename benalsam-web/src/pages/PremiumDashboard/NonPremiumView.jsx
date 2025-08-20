@@ -8,7 +8,7 @@ const NonPremiumView = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="container mx-auto px-4 py-8"
+      className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8"
     >
       <div className="text-center py-12">
         <Crown className="w-16 h-16 mx-auto text-yellow-400 mb-4" />

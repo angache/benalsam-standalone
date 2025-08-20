@@ -157,7 +157,7 @@ const PremiumDashboard = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="container mx-auto px-4 py-8"
+        className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8"
       >
         <div className="text-center py-12">
           <Crown className="w-16 h-16 mx-auto text-yellow-400 mb-4" />
@@ -181,7 +181,7 @@ const PremiumDashboard = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="container mx-auto px-4 py-8"
+      className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8"
     >
       {/* Başlık */}
       <div className="mb-8">
@@ -228,7 +228,7 @@ const PremiumDashboard = () => {
 
         <TabsContent value="overview" className="space-y-6">
           {/* Ana İstatistikler */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-6 gap-6 xl:gap-5 2xl:gap-4">
             <StatCard
               icon={Zap}
               title="Toplam Teklif"
@@ -308,7 +308,7 @@ const PremiumDashboard = () => {
         </TabsContent>
 
         <TabsContent value="usage" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 xl:gap-5 2xl:gap-4">
             <UsageCard
               title="Aylık Teklifler"
               current={usage?.offers_count || 0}
@@ -355,7 +355,7 @@ const PremiumDashboard = () => {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6 xl:gap-5 2xl:gap-4">
             {/* Teklif Performansı */}
             <Card>
               <CardHeader>
@@ -425,7 +425,7 @@ const PremiumDashboard = () => {
         </TabsContent>
 
         <TabsContent value="features" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 xl:gap-5 2xl:gap-4">
             {[
               {
                 icon: Star,

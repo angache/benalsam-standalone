@@ -18,6 +18,7 @@ const OptimizedImage = ({
   ...props
 }) => {
   const [currentSrc, setCurrentSrc] = useState(placeholder);
+  const [showFallback, setShowFallback] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [webpSupported, setWebpSupported] = useState(false);
@@ -35,13 +36,28 @@ const OptimizedImage = ({
 
     const loadImage = async () => {
       try {
+        // Skip loading for placeholder images that are known to fail
+        if (src.includes('via.placeholder.com') || src.includes('source.boringavatars.com')) {
+          setShowFallback(true);
+          setHasError(true);
+          if (onError) {
+            onError(new Error('Placeholder image skipped'));
+          }
+          return;
+        }
+
         // Simple approach: just preload the original image
         let imageSrc = src;
         
         if (!isMounted) return;
 
-        // Preload the image
-        await preloadImage(imageSrc);
+        // Add timeout for slow images
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Image load timeout')), 3000); // 3 second timeout
+        });
+
+        // Preload the image with timeout
+        await Promise.race([preloadImage(imageSrc), timeoutPromise]);
         
         if (!isMounted) return;
 
@@ -100,6 +116,25 @@ const OptimizedImage = ({
       onError(error);
     }
   };
+
+  // Show fallback for placeholder images
+  if (showFallback) {
+    return (
+      <div 
+        className={`${className} bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center`}
+        style={{
+          width: width || '100%',
+          height: height || '200px',
+          aspectRatio: width && height ? `${width} / ${height}` : 'auto',
+        }}
+      >
+        <div className="text-center text-gray-500">
+          <div className="text-2xl mb-2">📷</div>
+          <div className="text-sm">Resim</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <img

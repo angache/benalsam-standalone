@@ -234,7 +234,7 @@ const ConversationPage = () => {
       className="flex flex-col h-screen bg-gradient-to-br from-background to-slate-900/50"
     >
       <header className="flex-shrink-0 bg-background/80 backdrop-blur-md shadow-sm p-3 border-b border-border">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+        <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 flex items-center justify-between">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="mr-2 text-muted-foreground hover:text-foreground">
             <ArrowLeft className="w-5 h-5" />
           </Button>
@@ -284,7 +284,7 @@ const ConversationPage = () => {
       </header>
 
       <main ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-transparent">
-        <div className="max-w-4xl mx-auto">
+        <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6">
           {messages.map((msg) => {
             const isCurrentUser = msg.sender_id === currentUser.id;
             return (
@@ -338,7 +338,7 @@ const ConversationPage = () => {
       </main>
 
       <footer className="flex-shrink-0 bg-background/80 backdrop-blur-md p-3 border-t border-border">
-        <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto flex items-center gap-2">
+        <form onSubmit={handleSendMessage} className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 flex items-center gap-2">
           <Button variant="ghost" size="icon" type="button" className="text-muted-foreground hover:text-primary" onClick={() => toast({title: "🚧 Çok Yakında!", description:"Dosya ve görsel gönderme özelliği geliştirme aşamasında.", variant:"info"})}>
             <Paperclip className="w-5 h-5" />
           </Button>

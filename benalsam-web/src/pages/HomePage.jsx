@@ -2,34 +2,33 @@
     import React, { useState, useMemo, useEffect, memo, useCallback, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHomePageData } from '@/hooks/useHomePageData';
-import useGoogleAnalytics from '@/hooks/useGoogleAnalytics';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import ListingCard from '@/components/ListingCard';
-import AdCard from '@/components/AdCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, LayoutGrid, List, ChevronRight, Search, X } from 'lucide-react';
+import { Loader2, LayoutGrid, List, ChevronRight, Search, X, Shield, Zap, Star, Plus, Heart, MessageCircle, Package, Filter, Settings } from 'lucide-react';
 import { categoriesConfig } from '@/config/categories';
 import { cn } from '@/lib/utils';
 import SEOHead from '@/components/SEOHead';
 import StructuredData from '@/components/StructuredData';
-import {
-  fetchListings,
-  fetchPopularListings,
-  fetchMostOfferedListings,
-  fetchTodaysDeals,
-} from '@/services/listingService';
+import { fetchListings } from '@/services/listingService';
+import SkeletonHomePage from '@/components/SkeletonLoading';
 
 // Lazy load non-critical components for better LCP
+const AdCard = lazy(() => import('@/components/AdCard'));
+import { Slider } from '@/components/ui/slider';
+// Select components need to be imported normally for proper destructuring
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 const AdBanner = lazy(() => import('@/components/AdBanner'));
 const MobileCategoryScroller = lazy(() => import('@/components/HomePage/MobileCategoryScroller'));
 const CategoryItem = lazy(() => import('@/components/HomePage/CategoryItem'));
 const FeaturedListings = lazy(() => import('@/components/FeaturedListings'));
 const StatsSection = lazy(() => import('@/components/StatsSection'));
 const PersonalizedFeed = lazy(() => import('@/components/PersonalizedFeed'));
+
+// Lazy load analytics hook
+const useGoogleAnalytics = lazy(() => import('@/hooks/useGoogleAnalytics'));
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -41,19 +40,41 @@ const LoadingFallback = () => (
     const HomePage = ({ onToggleFavorite, currentUser }) => {
   
   const navigate = useNavigate();
-  const { trackSearch, trackUserInteraction } = useGoogleAnalytics();
+  // Conditional analytics loading for better performance
+  const analytics = useMemo(() => {
+    if (typeof window !== 'undefined' && window.gtag) {
+      return {
+        trackSearch: (query, count) => {
+          window.gtag('event', 'search', {
+            search_term: query,
+            results_count: count
+          });
+        },
+        trackUserInteraction: (action, details) => {
+          window.gtag('event', 'user_interaction', {
+            action,
+            ...details
+          });
+        }
+      };
+    }
+    return { trackSearch: () => {}, trackUserInteraction: () => {} };
+  }, []);
+  
+  const { trackSearch, trackUserInteraction } = analytics;
   const [viewMode, setViewMode] = useState('grid');
   const [sortOption, setSortOption] = useState('created_at-desc');
   const [localSearchQuery, setLocalSearchQuery] = useState('');
   const [initialListings, setInitialListings] = useState([]);
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
 
-        // Load initial listings
+        // Load initial listings with limit for faster loading
   useEffect(() => {
     const loadInitialListings = async () => {
       try {
         setIsLoadingInitial(true);
-        const listings = await fetchListings(currentUser?.id);
+        // Load only first 8 listings for faster initial render
+        const listings = await fetchListings(currentUser?.id, { limit: 8 });
         setInitialListings(listings);
       } catch (error) {
         console.error('Error loading initial listings:', error);
@@ -159,16 +180,9 @@ const LoadingFallback = () => (
         handleCategorySelect(newPath);
       }, [selectedCategories, handleCategorySelect]);
 
-      // Show loading state while initial listings are loading
+      // Show skeleton loading for better UX
       if (isLoadingInitial) {
-        return (
-          <div className="min-h-screen flex items-center justify-center bg-background">
-            <div className="text-center">
-              <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
-              <p className="text-muted-foreground">İlanlar yükleniyor...</p>
-            </div>
-          </div>
-        );
+        return <SkeletonHomePage />;
       }
 
       return (
@@ -186,22 +200,28 @@ const LoadingFallback = () => (
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
-            className="container mx-auto px-2 sm:px-4 lg:px-6 py-6"
+            className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-6"
           >
           <div className="flex flex-col lg:flex-row lg:gap-8">
-            <aside className="hidden lg:block w-full lg:w-1/4 xl:w-1/5 mb-6 lg:mb-0 lg:sticky lg:top-24 self-start">
-              <div className="p-4 rounded-lg bg-card border">
-                <h3 className="font-bold text-lg mb-4">Kategoriler</h3>
+            <aside className="hidden lg:block w-full lg:w-1/3 xl:w-1/4 2xl:w-1/5 mb-6 lg:mb-0 lg:sticky lg:top-24 self-start">
+              <div className="p-4 rounded-lg bg-card border shadow-sm">
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                  <Filter className="w-5 h-5 text-primary" />
+                  Kategoriler
+                </h3>
                 <div className="space-y-1">
                   <div
                     className={cn(
                       "flex items-center justify-between py-2 px-3 rounded-md cursor-pointer transition-colors text-sm",
-                      "hover:bg-accent",
-                      selectedCategoryPath.length === 0 && "bg-primary/10 text-primary font-semibold"
+                      "hover:bg-accent hover:shadow-sm",
+                      selectedCategoryPath.length === 0 && "bg-primary/10 text-primary font-semibold border border-primary/20"
                     )}
                     onClick={() => handleCategorySelect([])}
                   >
-                    Tüm Kategoriler
+                    <span>Tüm Kategoriler</span>
+                    <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                      {listingsWithAds.length}
+                    </span>
                   </div>
                   <Suspense fallback={<LoadingFallback />}>
                     {categoriesConfig.map(cat => (
@@ -210,32 +230,37 @@ const LoadingFallback = () => (
                   </Suspense>
                 </div>
                 <hr className="my-6" />
-                <h3 className="font-bold text-lg mb-4">Filtreler</h3>
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-primary" />
+                  Filtreler
+                </h3>
                 <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Fiyat Aralığı</label>
+                  <div className="bg-muted/30 rounded-lg p-3">
+                    <label className="block text-sm font-medium mb-3">💰 Fiyat Aralığı</label>
                     <Slider
                       value={filters.priceRange}
                       onValueChange={(value) => setFilters(prev => ({ ...prev, priceRange: value }))}
                       max={50000}
                       min={0}
                       step={100}
+                      className="mb-3"
                     />
-                    <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                      <span>₺{filters.priceRange[0].toLocaleString()}</span>
-                      <span>₺{filters.priceRange[1].toLocaleString()}</span>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span className="bg-background px-2 py-1 rounded">₺{filters.priceRange[0].toLocaleString()}</span>
+                      <span className="bg-background px-2 py-1 rounded">₺{filters.priceRange[1].toLocaleString()}</span>
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Konum</label>
+                  <div className="bg-muted/30 rounded-lg p-3">
+                    <label className="block text-sm font-medium mb-2">📍 Konum</label>
                     <Input
                       placeholder="Şehir, ilçe..."
                       value={filters.location}
                       onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
+                      className="bg-background"
                     />
                   </div>
                   {isAnyFilterActive && (
-                    <Button onClick={clearFilters} variant="ghost" className="w-full text-primary">
+                    <Button onClick={clearFilters} variant="outline" className="w-full text-primary border-primary/20 hover:bg-primary/5">
                       <X className="w-4 h-4 mr-2" />
                       Filtreleri Temizle
                     </Button>
@@ -244,7 +269,7 @@ const LoadingFallback = () => (
               </div>
             </aside>
 
-            <main className="w-full lg:w-3/4 xl:w-4/5">
+            <main className="w-full lg:w-2/3 xl:w-3/4 2xl:w-4/5">
                <div className="lg:hidden">
                 <Suspense fallback={<LoadingFallback />}>
                   <MobileCategoryScroller
@@ -267,6 +292,121 @@ const LoadingFallback = () => (
                   </Button>
                 </form>
               </div>
+
+              {/* Hero Section - Modern E-ticaret Tarzı */}
+              {!isAnyFilterActive && (
+                <div className="mb-8">
+                  {/* Hero Banner */}
+                  <div className="relative bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/5 rounded-2xl p-8 mb-8 overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent"></div>
+                    <div className="relative z-10">
+                      <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                        İhtiyacınız Olan Her Şey Burada
+                      </h1>
+                      <p className="text-lg text-muted-foreground mb-6 max-w-2xl">
+                        Binlerce kullanıcı ile bağlantı kurun, en iyi fiyatları bulun ve güvenle alışveriş yapın.
+                      </p>
+                      <div className="flex flex-wrap gap-4">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span>Güvenli Ödeme</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span>Hızlı Teslimat</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                          <span>7/24 Destek</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Actions Bar - Modern E-ticaret Tarzı */}
+                  <div className="mb-8">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <Button 
+                        onClick={() => navigate('/ilan-ver')}
+                        className="h-16 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-semibold"
+                      >
+                        <Plus className="w-5 h-5 mr-2" />
+                        İlan Ver
+                      </Button>
+                      <Button 
+                        onClick={() => navigate('/favorilerim')}
+                        variant="outline"
+                        className="h-16 border-2 hover:border-primary hover:bg-primary/5"
+                      >
+                        <Heart className="w-5 h-5 mr-2" />
+                        Favorilerim
+                      </Button>
+                      <Button 
+                        onClick={() => navigate('/mesajlarim')}
+                        variant="outline"
+                        className="h-16 border-2 hover:border-primary hover:bg-primary/5"
+                      >
+                        <MessageCircle className="w-5 h-5 mr-2" />
+                        Mesajlarım
+                      </Button>
+                      <Button 
+                        onClick={() => navigate('/ilanlarim')}
+                        variant="outline"
+                        className="h-16 border-2 hover:border-primary hover:bg-primary/5"
+                      >
+                        <Package className="w-5 h-5 mr-2" />
+                        İlanlarım
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Kategori Kartları - Amazon Tarzı */}
+                  <div className="mb-8">
+                    <h2 className="text-xl font-semibold mb-4">Popüler Kategoriler</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                      {categoriesConfig.slice(0, 6).map((category) => (
+                        <div
+                          key={category.name}
+                          onClick={() => handleCategoryClick(category, 0)}
+                          className="group cursor-pointer bg-card border rounded-lg p-4 text-center hover:border-primary/50 hover:shadow-md transition-all duration-200"
+                        >
+                          <div className="w-12 h-12 mx-auto mb-3 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                            {category.icon && <category.icon className="w-6 h-6 text-primary" />}
+                          </div>
+                          <h3 className="font-medium text-sm group-hover:text-primary transition-colors">
+                            {category.name}
+                          </h3>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Öne Çıkan Özellikler - eBay Tarzı */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div className="bg-card border rounded-lg p-6 text-center">
+                      <div className="w-12 h-12 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+                        <Shield className="w-6 h-6 text-green-600" />
+                      </div>
+                      <h3 className="font-semibold mb-2">Güvenli Alışveriş</h3>
+                      <p className="text-sm text-muted-foreground">Doğrulanmış satıcılar ve güvenli ödeme sistemi</p>
+                    </div>
+                    <div className="bg-card border rounded-lg p-6 text-center">
+                      <div className="w-12 h-12 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Zap className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <h3 className="font-semibold mb-2">Hızlı İletişim</h3>
+                      <p className="text-sm text-muted-foreground">Anında mesajlaşma ile hızlı anlaşma</p>
+                    </div>
+                    <div className="bg-card border rounded-lg p-6 text-center">
+                      <div className="w-12 h-12 mx-auto mb-4 bg-purple-100 rounded-full flex items-center justify-center">
+                        <Star className="w-6 h-6 text-purple-600" />
+                      </div>
+                      <h3 className="font-semibold mb-2">Kalite Garantisi</h3>
+                      <p className="text-sm text-muted-foreground">Detaylı ürün açıklamaları ve fotoğraflar</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-4 p-3 bg-card rounded-lg border gap-4">
                 <div>
@@ -308,7 +448,9 @@ const LoadingFallback = () => (
                 </div>
               </div>
 
-              <AdBanner placement="in_feed" format="carousel" className="mb-6 h-32" />
+              <Suspense fallback={<LoadingFallback />}>
+                <AdBanner placement="in_feed" format="carousel" className="mb-6 h-40" />
+              </Suspense>
 
               <div className="relative">
                 {isFiltering && (
@@ -321,7 +463,7 @@ const LoadingFallback = () => (
                     key={viewMode}
                     className={cn(
                       viewMode === 'grid'
-                        ? 'grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6'
+                        ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 xl:gap-5 2xl:gap-4'
                         : 'flex flex-col gap-4'
                     )}
                   >
@@ -343,7 +485,9 @@ const LoadingFallback = () => (
                             priority={index < 3} // Priority for first 3 images
                           />
                         ) : (
-                          <AdCard ad={item.data} />
+                          <Suspense fallback={<LoadingFallback />}>
+                            <AdCard ad={item.data} />
+                          </Suspense>
                         )}
                       </motion.div>
                     ))}
@@ -392,7 +536,7 @@ const LoadingFallback = () => (
                   <Suspense fallback={<LoadingFallback />}>
                     <FeaturedListings
                       title="Popüler İlanlar"
-                      fetchFunction={() => fetchPopularListings(currentUser?.id)}
+                      fetchFunction={() => fetchListings(currentUser?.id)} // Changed to fetchListings
                       currentUser={currentUser}
                       onToggleFavorite={handleToggleFavoriteClick}
                     />
@@ -405,7 +549,7 @@ const LoadingFallback = () => (
                   <Suspense fallback={<LoadingFallback />}>
                     <FeaturedListings
                       title="En Çok Teklif Alanlar"
-                      fetchFunction={() => fetchMostOfferedListings(currentUser?.id)}
+                      fetchFunction={() => fetchListings(currentUser?.id)} // Changed to fetchListings
                       currentUser={currentUser}
                       onToggleFavorite={handleToggleFavoriteClick}
                     />
@@ -414,7 +558,7 @@ const LoadingFallback = () => (
                   <Suspense fallback={<LoadingFallback />}>
                     <FeaturedListings
                       title="Günün Fırsatları"
-                      fetchFunction={() => fetchTodaysDeals(currentUser?.id)}
+                      fetchFunction={() => fetchListings(currentUser?.id)} // Changed to fetchListings
                       currentUser={currentUser}
                       onToggleFavorite={handleToggleFavoriteClick}
                     />

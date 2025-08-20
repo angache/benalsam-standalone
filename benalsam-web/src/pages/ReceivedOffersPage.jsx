@@ -178,7 +178,7 @@ const ReceivedOffersPage = () => {
     opacity: 0
   }} transition={{
     duration: 0.5
-  }} className="max-w-5xl mx-auto px-4 py-8">
+        }} className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8">
       <div className="flex items-center justify-between mb-10">
         <h1 className="text-3xl md:text-4xl font-bold text-gradient flex items-center">
           <ArrowDownLeftSquare className="w-8 h-8 mr-3 text-primary" /> Aldığım Teklifler

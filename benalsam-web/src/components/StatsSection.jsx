@@ -32,7 +32,7 @@ const stats = [
 const StatsSection = () => {
   return (
     <section className="py-8 sm:py-12 lg:py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
           {stats.map((stat, index) => {
             const Icon = stat.icon;

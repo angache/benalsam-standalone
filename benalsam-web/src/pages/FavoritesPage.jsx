@@ -89,7 +89,7 @@ const FavoritesPage = ({ onToggleFavorite }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="max-w-7xl mx-auto px-4 py-8"
+      className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8"
     >
       <div className="mb-12 text-center">
         <h1 className="text-4xl font-bold text-gradient mb-4">Favori İlanlarım</h1>
@@ -99,7 +99,7 @@ const FavoritesPage = ({ onToggleFavorite }) => {
       </div>
 
       <AnimatePresence>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 xl:gap-5 2xl:gap-4">
           {favoriteListings.map((listing, index) => (
             <motion.div
               key={listing.id}

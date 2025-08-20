@@ -53,12 +53,49 @@ const AdBanner = ({ placement, format = 'static', className }) => {
 
   if (loading) {
     return (
-      <div className={cn("w-full h-24 bg-muted/50 animate-pulse rounded-lg my-4", className)}></div>
+      <div className={cn("relative my-6 overflow-hidden rounded-lg bg-gradient-to-r from-primary/5 to-secondary/5 border border-border/30", className)}>
+        <div className="flex items-center justify-center h-full p-6">
+          <div className="text-center animate-pulse">
+            <div className="h-4 bg-muted rounded w-48 mx-auto mb-2"></div>
+            <div className="h-3 bg-muted rounded w-32 mx-auto mb-4"></div>
+            <div className="flex gap-2 justify-center">
+              <div className="h-6 bg-muted rounded-full w-12"></div>
+              <div className="h-6 bg-muted rounded-full w-16"></div>
+              <div className="h-6 bg-muted rounded-full w-14"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
   if (!ads || ads.length === 0) {
-    return null;
+    // Fallback content when no ads are available
+    return (
+      <div className={cn("relative my-6 overflow-hidden rounded-lg bg-gradient-to-r from-primary/10 to-secondary/10 border border-border/50", className)}>
+        <div className="flex items-center justify-center h-full p-6">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              İhtiyacınız Olan Ürünü Bulun
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Binlerce kullanıcı ile bağlantı kurun ve en iyi fiyatları bulun
+            </p>
+            <div className="flex gap-2 justify-center">
+              <span className="px-3 py-1 bg-primary/20 text-primary rounded-full text-xs font-medium">
+                Hızlı
+              </span>
+              <span className="px-3 py-1 bg-secondary/20 text-secondary rounded-full text-xs font-medium">
+                Güvenli
+              </span>
+              <span className="px-3 py-1 bg-green-500/20 text-green-600 rounded-full text-xs font-medium">
+                Ücretsiz
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const renderAd = (ad) => (

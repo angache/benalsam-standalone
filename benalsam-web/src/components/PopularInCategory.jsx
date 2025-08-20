@@ -100,7 +100,7 @@ const PopularInCategory = ({ currentListingId, category, sortBy = 'views_count',
 
   return (
     <div className="py-12 bg-background/30 backdrop-blur-sm rounded-xl mt-8">
-      <div className="max-w-7xl mx-auto px-4">
+              <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6">
         <motion.h3 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

@@ -82,7 +82,7 @@ const PerformanceTestPage = () => {
 
   return (
     <div className="min-h-screen bg-background p-8">
-      <div className="max-w-4xl mx-auto">
+              <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6">
         <h1 className="text-3xl font-bold mb-8">Performance Metrics Test Page</h1>
         
         {/* Performance Data Display */}

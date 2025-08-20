@@ -252,7 +252,7 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
     
       return (
         <>
-          <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8">
             <div className="mb-10">
               <Stepper currentStep={currentStep} steps={steps} />
             </div>
