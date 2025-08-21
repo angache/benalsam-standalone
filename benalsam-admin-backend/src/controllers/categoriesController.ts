@@ -21,8 +21,8 @@ export interface Category {
 }
 
 export const categoriesController = {
-  // Tüm kategorileri getir
-  async getCategories(req: AuthenticatedRequest, res: Response): Promise<Response | void> {
+  // Tüm kategorileri getir - Auth gerektirmeyen versiyon
+  async getCategories(req: any, res: Response): Promise<Response | void> {
     try {
       logger.info('Fetching categories from Supabase');
 
@@ -44,8 +44,8 @@ export const categoriesController = {
     }
   },
 
-  // Tek kategori getir (ID veya path ile)
-  async getCategory(req: AuthenticatedRequest, res: Response): Promise<Response | void> {
+  // Tek kategori getir - Auth gerektirmeyen versiyon
+  async getCategory(req: any, res: Response): Promise<Response | void> {
     try {
       const { id } = req.params;
       

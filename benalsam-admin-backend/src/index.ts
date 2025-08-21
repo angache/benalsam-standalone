@@ -52,10 +52,12 @@ import sentryTestRoutes from './routes/sentry-test';
 import hybridMonitoringRoutes from './routes/hybridMonitoring';
 import healthCheckRoutes from './routes/healthCheck';
 import securityRoutes from './routes/security';
-import seoRoutes from './routes/seo';
+import uploadRoutes from './routes/upload';
+// import seoRoutes from './routes/seo';
 
 // Import services
 import { AdminElasticsearchService } from './services/elasticsearchService';
+import './config/cloudinary'; // Initialize Cloudinary
 import QueueProcessorService from './services/queueProcessorService';
 import sessionCleanupService from './services/sessionCleanupService';
 import { AnalyticsAlertsService } from './services/analyticsAlertsService';
@@ -218,7 +220,7 @@ app.get('/health', (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/listings', authenticateToken, listingsRouter);
 app.use('/api/v1/users', authenticateToken, usersRouter);
-app.use('/api/v1/categories', authenticateToken, categoriesRouter);
+app.use('/api/v1/categories', categoriesRouter); // ✅ Auth kaldırıldı
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/monitoring', monitoringRoutes);
 app.use('/api/v1/elasticsearch', elasticsearchRoutes);
@@ -254,9 +256,10 @@ app.use('/api/v1/sentry', sentryRoutes); // Sentry dashboard routes
 app.use('/api/v1/hybrid-monitoring', hybridMonitoringRoutes); // Hybrid monitoring routes
 app.use('/api/v1/health', healthCheckRoutes); // Health check routes
 app.use('/api/v1/security', securityRoutes); // Security monitoring routes
+app.use('/api/v1/upload', uploadRoutes); // Cloudinary upload routes
 
 // SEO routes (no auth required)
-app.use('/', seoRoutes); // Sitemap and robots.txt
+// app.use('/', seoRoutes); // Sitemap and robots.txt
 
 // Sentry error handler is now integrated into the main error handler
 

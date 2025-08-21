@@ -4,6 +4,7 @@ import {
   QueueProcessorService
 } from '../services';
 import logger from '../config/logger';
+import { supabase } from '../config/supabase';
 
 export class ElasticsearchController {
   private elasticsearchService: AdminElasticsearchService;
@@ -71,6 +72,28 @@ export class ElasticsearchController {
       res.status(500).json({
         success: false,
         message: 'Search failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  /**
+   * Get category counts from Elasticsearch
+   */
+  async getCategoryCounts(req: Request, res: Response) {
+    try {
+      const categoryCounts = await this.elasticsearchService.getCategoryCounts();
+      
+      res.json({
+        success: true,
+        data: categoryCounts,
+        message: 'Category counts retrieved successfully'
+      });
+    } catch (error) {
+      logger.error('❌ Category counts failed:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Category counts failed',
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -387,6 +410,135 @@ export class ElasticsearchController {
       res.status(500).json({
         success: false,
         message: 'Redis connection test failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  /**
+   * Clear search cache (Debug endpoint)
+   */
+  async clearSearchCache(req: Request, res: Response) {
+    try {
+      const searchCacheService = await import('../services/searchCacheService');
+      await searchCacheService.default.clearAll();
+      
+      res.json({
+        success: true,
+        message: 'Search cache cleared successfully'
+      });
+    } catch (error) {
+      logger.error('❌ Clear search cache failed:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Clear search cache failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  /**
+   * Clear all listings and related data (Debug endpoint)
+   */
+  async clearAllListings(req: Request, res: Response) {
+    try {
+      // 🔒 SECURITY: Only allow in development mode
+      if (process.env.NODE_ENV === 'production') {
+        logger.warn('🚫 Attempted to clear all listings in production environment');
+        return res.status(403).json({
+          success: false,
+          message: 'This operation is not allowed in production environment'
+        });
+      }
+
+      // 🔒 SECURITY: Check for admin authentication (temporarily disabled for development)
+      // if (!req.user || req.user.role !== 'admin') {
+      //   logger.warn('🚫 Unauthorized attempt to clear all listings');
+      //   return res.status(401).json({
+      //     success: false,
+      //     message: 'Admin authentication required'
+      //   });
+      // }
+
+      logger.info('🧹 Starting comprehensive listing cleanup...');
+
+      // Step 1: Get current statistics
+      const { count: listingsCount } = await supabase
+        .from('listings')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: offersCount } = await supabase
+        .from('offers')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: conversationsCount } = await supabase
+        .from('conversations')
+        .select('*', { count: 'exact', head: true });
+
+      logger.info(`📊 Current data counts: Listings=${listingsCount}, Offers=${offersCount}, Conversations=${conversationsCount}`);
+
+      // Step 2: Delete all listings from Supabase (CASCADE will handle related data)
+      const { error: deleteError } = await supabase
+        .from('listings')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+
+      if (deleteError) {
+        throw new Error(`Failed to delete listings: ${deleteError.message}`);
+      }
+
+      logger.info('✅ All listings deleted from Supabase');
+
+      // Step 3: Clear Elasticsearch index
+      try {
+        await this.elasticsearchService.deleteIndex();
+        logger.info('✅ Elasticsearch index deleted');
+      } catch (esError) {
+        logger.warn(`⚠️ Elasticsearch error: ${esError instanceof Error ? esError.message : 'Unknown error'}`);
+      }
+
+      // Step 4: Recreate Elasticsearch index
+      try {
+        await this.elasticsearchService.createIndex();
+        logger.info('✅ Elasticsearch index recreated');
+      } catch (esError) {
+        logger.warn(`⚠️ Elasticsearch recreation error: ${esError instanceof Error ? esError.message : 'Unknown error'}`);
+      }
+
+      // Step 5: Clear Redis cache
+      try {
+        const searchCacheService = await import('../services/searchCacheService');
+        await searchCacheService.default.clearAll();
+        logger.info('✅ Redis cache cleared');
+      } catch (redisError) {
+        logger.warn(`⚠️ Redis error: ${redisError instanceof Error ? redisError.message : 'Unknown error'}`);
+      }
+
+      // Step 6: Verify cleanup
+      const { count: finalListingsCount } = await supabase
+        .from('listings')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: finalOffersCount } = await supabase
+        .from('offers')
+        .select('*', { count: 'exact', head: true });
+
+      logger.info(`✅ Final verification: Listings=${finalListingsCount}, Offers=${finalOffersCount}`);
+
+      return res.json({
+        success: true,
+        message: 'All listings and related data cleared successfully',
+        data: {
+          before: { listings: listingsCount, offers: offersCount, conversations: conversationsCount },
+          after: { listings: finalListingsCount, offers: finalOffersCount }
+        }
+      });
+
+    } catch (error) {
+      logger.error('❌ Clear all listings failed:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Clear all listings failed',
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }

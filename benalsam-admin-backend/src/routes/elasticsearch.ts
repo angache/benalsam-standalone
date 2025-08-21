@@ -1,5 +1,6 @@
 import { Router, IRouter } from 'express';
 import { ElasticsearchController } from '../controllers/elasticsearchController';
+import { Request, Response, NextFunction } from 'express';
 
 const router: IRouter = Router();
 const elasticsearchController = new ElasticsearchController();
@@ -17,6 +18,9 @@ router.get('/test-redis', (req, res) => elasticsearchController.testRedisConnect
 router.post('/search', (req, res) => elasticsearchController.searchListings(req, res));
 router.get('/search', (req, res) => elasticsearchController.searchIndex(req, res));
 
+// Category Counts Route
+router.get('/category-counts', (req, res) => elasticsearchController.getCategoryCounts(req, res));
+
 // Sync Management Routes
 router.get('/sync/status', (req, res) => elasticsearchController.getSyncStatus(req, res));
 router.get('/sync/config', (req, res) => elasticsearchController.getSyncConfig(req, res));
@@ -27,6 +31,22 @@ router.post('/sync/trigger', (req, res) => elasticsearchController.triggerManual
 router.get('/queue/stats', (req, res) => elasticsearchController.getQueueStats(req, res));
 router.post('/queue/retry-failed', (req, res) => elasticsearchController.retryFailedJobs(req, res));
 router.post('/queue/clear', (req, res) => elasticsearchController.clearQueue(req, res));
+
+// Development-only middleware for dangerous operations
+const developmentOnly = (req: Request, res: Response, next: NextFunction): void => {
+  if (process.env.NODE_ENV === 'production') {
+    res.status(403).json({
+      success: false,
+      message: 'Debug endpoints are not available in production'
+    });
+    return;
+  }
+  next();
+};
+
+// Debug Routes (Development Only)
+router.post('/debug/clear-cache', developmentOnly, (req, res) => elasticsearchController.clearSearchCache(req, res));
+router.post('/debug/clear-all-listings', developmentOnly, (req, res) => elasticsearchController.clearAllListings(req, res));
 
 // Index Management Routes
 router.post('/create-index', (req, res) => elasticsearchController.createIndex(req, res));

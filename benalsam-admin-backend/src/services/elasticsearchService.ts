@@ -2,11 +2,13 @@ import { Client } from '@elastic/elasticsearch';
 import logger from '../config/logger';
 import { SearchOptimizedListing } from 'benalsam-shared-types';
 import searchCacheService from './searchCacheService';
+import { createClient } from '@supabase/supabase-js';
 
 export class AdminElasticsearchService {
   protected client: Client;
   protected defaultIndexName: string;
   protected isConnected: boolean = false;
+  protected supabase: any; // ✅ Supabase client ekle
 
   constructor(
     node: string = process.env.ELASTICSEARCH_URL || 'http://localhost:9200',
@@ -20,6 +22,12 @@ export class AdminElasticsearchService {
       auth: username && password ? { username, password } : undefined,
       tls: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
     });
+    
+    // ✅ Supabase client'ı başlat
+    this.supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
   }
 
   private getListingsIndexMapping() {
@@ -42,6 +50,8 @@ export class AdminElasticsearchService {
           title: { type: 'text', analyzer: 'turkish_analyzer' },
           description: { type: 'text', analyzer: 'turkish_analyzer' },
           category: { type: 'keyword' },
+          category_id: { type: 'integer' },
+          category_path: { type: 'integer' },
           subcategory: { type: 'keyword' },
           
           // Temel alanlar
@@ -538,21 +548,23 @@ export class AdminElasticsearchService {
 
   async reindexAllListings(): Promise<{ success: boolean; count: number; errors: string[] }> {
     try {
-      // Supabase'den tüm listings'i çek
-      const response = await this.client.search({
-        index: 'benalsam_listings',
-        size: 10000,
-        query: { match_all: {} }
-      });
+      // Supabase'den tüm aktif listings'i çek
+      const { data: listings, error } = await this.supabase
+        .from('listings')
+        .select('*')
+        .eq('status', 'active');
+
+      if (error) {
+        throw new Error(`Supabase error: ${error.message}`);
+      }
 
       // Listings'i Enhanced Elasticsearch formatına çevir
-      const documents = response.hits.hits.map((hit: any) => {
-        const listing = hit._source;
+      const documents = listings.map((listing: any) => {
         return this.transformListingForElasticsearch(listing);
       });
 
       // Elasticsearch'e bulk index
-        const success = await this.bulkIndex(documents);
+      const success = await this.bulkIndex(documents);
 
       return {
         success,
@@ -580,18 +592,18 @@ export class AdminElasticsearchService {
     try {
       const { query, filters, sort, page = 1, limit = 20, sessionId } = params;
       
-      // Try to get from cache first
-      const cachedResults = await searchCacheService.getCachedSearch(params, sessionId);
-      if (cachedResults) {
-        logger.info('🎯 Search results served from cache');
-        return {
-          success: true,
-          data: cachedResults.results,
-          total: cachedResults.total,
-          aggregations: cachedResults.aggregations,
-          fromCache: true
-        };
-      }
+      // Try to get from cache first (TEMPORARILY DISABLED FOR DEBUG)
+      // const cachedResults = await searchCacheService.getCachedSearch(params, sessionId);
+      // if (cachedResults) {
+      //   logger.info('🎯 Search results served from cache');
+      //   return {
+      //     success: true,
+      //     data: cachedResults.results,
+      //     total: cachedResults.total,
+      //     aggregations: cachedResults.aggregations,
+      //     fromCache: true
+      //   };
+      // }
 
       const searchQuery: any = {
           bool: {
@@ -614,8 +626,32 @@ export class AdminElasticsearchService {
 
       // Filters
       if (filters) {
-      if (filters.category) {
-          searchQuery.bool.filter.push({ term: { category: filters.category } });
+        logger.info('🔍 Debug - Filters received:', JSON.stringify(filters, null, 2));
+        
+        if (filters.category_id) {
+          // Category ID varsa her zaman ID bazlı filtreleme kullan
+          logger.info('🔍 Debug - Using category_id filter:', filters.category_id);
+          searchQuery.bool.filter.push({ term: { category_id: filters.category_id } });
+        } else if (filters.category) {
+          // Sadece category string varsa string bazlı filtreleme
+          logger.info('🔍 Debug - Using category filter:', filters.category);
+          
+          // Hierarchy format için prefix match kullan
+          if (filters.category.includes('>')) {
+            // Alt kategori için prefix match
+            searchQuery.bool.filter.push({ 
+              prefix: { 
+                category: filters.category 
+              } 
+            });
+          } else {
+            // Ana kategori için wildcard match
+            searchQuery.bool.filter.push({ 
+              wildcard: { 
+                category: `${filters.category}*` 
+              } 
+            });
+          }
         }
         if (filters.subcategory) {
           searchQuery.bool.filter.push({ term: { subcategory: filters.subcategory } });
@@ -663,6 +699,21 @@ export class AdminElasticsearchService {
         sortQuery.push({ created_at: { order: 'desc' } });
       }
 
+      logger.info('🔍 Elasticsearch search query:', JSON.stringify({
+        index: this.defaultIndexName,
+        body: {
+          query: searchQuery,
+          sort: sortQuery,
+          from: (page - 1) * limit,
+          size: limit,
+          aggs: {
+            categories: {
+              terms: { field: 'category_id', size: 20 }
+            }
+          }
+        }
+      }, null, 2));
+
       const response = await this.client.search({
         index: this.defaultIndexName,
         body: {
@@ -672,29 +723,17 @@ export class AdminElasticsearchService {
           size: limit,
           aggs: {
             categories: {
-              terms: { field: 'category', size: 20 }
-            },
-            conditions: {
-              terms: { field: 'condition', size: 10 }
-            },
-            locations: {
-              terms: { field: 'location.province', size: 20 }
-            },
-            budget_ranges: {
-              range: {
-                field: 'budget.min',
-                ranges: [
-                  { to: 1000 },
-                  { from: 1000, to: 5000 },
-                  { from: 5000, to: 10000 },
-                  { from: 10000, to: 50000 },
-                  { from: 50000 }
-                ]
-              }
+              terms: { field: 'category_id', size: 20 }
             }
           }
         }
       });
+
+      logger.info('🔍 Elasticsearch response:', JSON.stringify({
+        total: response.hits.total,
+        hits_count: response.hits.hits.length,
+        first_hit: response.hits.hits[0] ? response.hits.hits[0]._source : null
+      }, null, 2));
 
       const total = typeof response.hits.total === 'number' 
           ? response.hits.total
@@ -732,17 +771,31 @@ export class AdminElasticsearchService {
 
   // Transform listing to SearchOptimizedListing format
   private transformListingForElasticsearch(listing: any): SearchOptimizedListing {
-    // Parse location details
-    const locationParts = (listing.location || '').split(',').map((part: string) => part.trim());
-    const location = {
-      province: locationParts[0] || '',
-      district: locationParts[1] || '',
-      neighborhood: locationParts[2] || '',
-      coordinates: listing.latitude && listing.longitude ? {
-        lat: listing.latitude,
-        lng: listing.longitude
-      } : undefined
-    };
+    // Parse location details - düzeltilmiş
+    let location;
+    if (typeof listing.location === 'string') {
+      const locationParts = listing.location.split(',').map((part: string) => part.trim());
+      location = {
+        province: locationParts[0] || '',
+        district: locationParts[1] || '',
+        neighborhood: locationParts[2] || '',
+        coordinates: listing.latitude && listing.longitude ? {
+          lat: listing.latitude,
+          lng: listing.longitude
+        } : undefined
+      };
+    } else {
+      // Location zaten object ise
+      location = {
+        province: listing.location?.province || '',
+        district: listing.location?.district || '',
+        neighborhood: listing.location?.neighborhood || '',
+        coordinates: listing.latitude && listing.longitude ? {
+          lat: listing.latitude,
+          lng: listing.longitude
+        } : undefined
+      };
+    }
 
     // Parse budget details
     const budget = {
@@ -766,6 +819,8 @@ export class AdminElasticsearchService {
       title: listing.title,
       description: listing.description,
       category: listing.category,
+      category_id: listing.category_id || null,        // ✅ Yeni alan
+      category_path: listing.category_id ? [listing.category_id] : [], // ✅ Sadece ilgili kategori ID'si
       subcategory: listing.subcategory,
       budget,
       location,
@@ -831,6 +886,39 @@ export class AdminElasticsearchService {
     if (listing.offers) score += listing.offers * 1;
 
     return Math.min(score, 100); // Cap at 100
+  }
+
+  // Get category counts from Elasticsearch
+  async getCategoryCounts(): Promise<Record<number, number>> {
+    try {
+      const response = await this.client.search({
+        index: this.defaultIndexName,
+        body: {
+          size: 0, // Don't return documents, only aggregations
+          aggs: {
+            category_counts: {
+              terms: {
+                field: 'category_id',
+                size: 1000 // Get all categories
+              }
+            }
+          }
+        }
+      });
+
+      const buckets = (response.aggregations?.category_counts as any)?.buckets || [];
+      const categoryCounts: Record<number, number> = {};
+
+      buckets.forEach((bucket: any) => {
+        categoryCounts[bucket.key] = bucket.doc_count;
+      });
+
+      logger.info(`📊 Retrieved category counts for ${Object.keys(categoryCounts).length} categories`);
+      return categoryCounts;
+    } catch (error) {
+      logger.error('❌ Error getting category counts:', error);
+      throw error;
+    }
   }
 }
 
