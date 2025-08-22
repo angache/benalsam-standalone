@@ -1,21 +1,19 @@
+import type { AdminListingStatusType } from './enums';
 export interface AdminListing {
     id: string;
     title: string;
     description: string;
     price: number;
+    status: AdminListingStatusType;
+    userId: string;
     category: string;
-    status: 'PENDING_APPROVAL' | 'ACTIVE' | 'INACTIVE' | 'REJECTED';
-    views: number;
-    favorites: number;
+    images: string[];
+    location: {
+        province: string;
+        district: string;
+    };
     createdAt: string;
     updatedAt: string;
-    userId: string;
-    images: string[];
-    user?: {
-        id: string;
-        email: string;
-        name: string;
-    };
 }
 export interface AdminUser {
     id: string;

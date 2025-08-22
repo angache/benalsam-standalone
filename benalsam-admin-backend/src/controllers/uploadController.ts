@@ -2,11 +2,19 @@ import { Request, Response } from 'express';
 import cloudinaryService from '../services/cloudinaryService';
 import logger from '../config/logger';
 
+// Request tipini extend et
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+  };
+}
+
 export class UploadController {
   /**
    * Upload single image
    */
-  async uploadSingleImage(req: Request, res: Response) {
+  async uploadSingleImage(req: AuthenticatedRequest, res: Response): Promise<Response | void> {
     try {
       if (!req.file) {
         return res.status(400).json({
@@ -25,7 +33,7 @@ export class UploadController {
 
       const result = await cloudinaryService.uploadImage(req.file, userId);
 
-      res.json({
+      return res.json({
         success: true,
         message: 'Image uploaded successfully',
         data: {
@@ -40,7 +48,7 @@ export class UploadController {
 
     } catch (error) {
       logger.error('❌ Single image upload failed:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Image upload failed',
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -51,7 +59,7 @@ export class UploadController {
   /**
    * Upload multiple images
    */
-  async uploadMultipleImages(req: Request, res: Response) {
+  async uploadMultipleImages(req: AuthenticatedRequest, res: Response): Promise<Response | void> {
     try {
       if (!req.files || req.files.length === 0) {
         return res.status(400).json({
@@ -71,7 +79,7 @@ export class UploadController {
       const files = req.files as Express.Multer.File[];
       const results = await cloudinaryService.uploadMultipleImages(files, userId);
 
-      res.json({
+      return res.json({
         success: true,
         message: 'Images uploaded successfully',
         data: {
@@ -89,7 +97,7 @@ export class UploadController {
 
     } catch (error) {
       logger.error('❌ Multiple image upload failed:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Image upload failed',
         error: error instanceof Error ? error.message : 'Unknown error'

@@ -3,6 +3,7 @@ import logger from '../config/logger';
 import { SearchOptimizedListing } from 'benalsam-shared-types';
 import searchCacheService from './searchCacheService';
 import { createClient } from '@supabase/supabase-js';
+import cacheManager from './cacheManager';
 
 export class AdminElasticsearchService {
   protected client: Client;
@@ -55,14 +56,7 @@ export class AdminElasticsearchService {
           subcategory: { type: 'keyword' },
           
           // Temel alanlar
-          budget: {
-            type: 'object',
-            properties: {
-              min: { type: 'float' },
-              max: { type: 'float' },
-              currency: { type: 'keyword' }
-            }
-          },
+          budget: { type: 'integer' },
           location: {
             type: 'object',
             properties: {
@@ -612,6 +606,9 @@ export class AdminElasticsearchService {
         }
       };
 
+      // Default filters - always active
+      searchQuery.bool.filter.push({ term: { status: 'active' } });
+
       // Text search
       if (query) {
         searchQuery.bool.must.push({
@@ -632,6 +629,37 @@ export class AdminElasticsearchService {
           // Category ID varsa her zaman ID bazlı filtreleme kullan
           logger.info('🔍 Debug - Using category_id filter:', filters.category_id);
           searchQuery.bool.filter.push({ term: { category_id: filters.category_id } });
+        } else if (filters.categoryPath) {
+          // Category path array'i varsa, ilk kategori ID'sini kullan
+          logger.info('🔍 Debug - Using categoryPath filter:', filters.categoryPath);
+          if (filters.categoryPath.length > 0) {
+            const firstCategory = filters.categoryPath[0];
+            // Kategori isminden ID'ye çevir
+            const categoryIdMapping = {
+              'Elektronik': 1,
+              'Araç & Vasıta': 2,
+              'Emlak': 3,
+              'Moda': 4,
+              'Ev & Yaşam': 5,
+              'Eğitim & Kitap': 6,
+              'Hizmetler': 7,
+              'Spor & Outdoor': 8,
+              'Sanat & Hobi': 9,
+              'Anne & Bebek': 10,
+              'Oyun & Eğlence': 11,
+              'Seyahat': 12,
+              'Kripto & Finans': 13
+            };
+            
+            const categoryId = categoryIdMapping[firstCategory as keyof typeof categoryIdMapping];
+            logger.info('🔍 Debug - Mapping attempt:', { firstCategory, categoryId, mapping: categoryIdMapping });
+            if (categoryId) {
+              logger.info('🔍 Debug - Mapped category name to ID:', firstCategory, '->', categoryId);
+              searchQuery.bool.filter.push({ term: { category_id: categoryId } });
+            } else {
+              logger.warn('⚠️ Debug - Unknown category name:', firstCategory);
+            }
+          }
         } else if (filters.category) {
           // Sadece category string varsa string bazlı filtreleme
           logger.info('🔍 Debug - Using category filter:', filters.category);
@@ -713,6 +741,11 @@ export class AdminElasticsearchService {
           }
         }
       }, null, 2));
+      
+      // Debug için detaylı query log'u
+      logger.info('🔍 Raw searchQuery:', JSON.stringify(searchQuery, null, 2));
+      logger.info('🔍 searchQuery.bool:', JSON.stringify(searchQuery.bool, null, 2));
+      logger.info('🔍 searchQuery.bool.filter:', JSON.stringify(searchQuery.bool.filter, null, 2));
 
       const response = await this.client.search({
         index: this.defaultIndexName,
@@ -732,8 +765,18 @@ export class AdminElasticsearchService {
       logger.info('🔍 Elasticsearch response:', JSON.stringify({
         total: response.hits.total,
         hits_count: response.hits.hits.length,
-        first_hit: response.hits.hits[0] ? response.hits.hits[0]._source : null
+        first_hit: response.hits.hits[0] ? response.hits.hits[0]._source : null,
+        query: searchQuery,
+        filters: filters
       }, null, 2));
+      
+      // Debug için detaylı log
+      if (response.hits.hits.length === 0) {
+        logger.warn('⚠️ No hits found in Elasticsearch for query:', JSON.stringify(searchQuery, null, 2));
+        logger.warn('⚠️ searchQuery.bool.filter:', JSON.stringify(searchQuery.bool.filter, null, 2));
+      } else {
+        logger.info('✅ Found hits in Elasticsearch:', response.hits.hits.length);
+      }
 
       const total = typeof response.hits.total === 'number' 
           ? response.hits.total
@@ -891,6 +934,18 @@ export class AdminElasticsearchService {
   // Get category counts from Elasticsearch
   async getCategoryCounts(): Promise<Record<number, number>> {
     try {
+      // ✅ Cache key oluştur
+      const cacheKey = 'category_counts';
+      const cacheTTL = 30 * 60 * 1000; // 30 dakika
+      
+      // ✅ Cache'den kontrol et
+      const cached = await cacheManager.get(cacheKey);
+      if (cached) {
+        logger.info('📦 Category counts loaded from cache');
+        return cached;
+      }
+
+      // ✅ Elasticsearch'ten çek
       const response = await this.client.search({
         index: this.defaultIndexName,
         body: {
@@ -913,11 +968,25 @@ export class AdminElasticsearchService {
         categoryCounts[bucket.key] = bucket.doc_count;
       });
 
-      logger.info(`📊 Retrieved category counts for ${Object.keys(categoryCounts).length} categories`);
+      // ✅ Cache'e kaydet
+      await cacheManager.set(cacheKey, categoryCounts, cacheTTL);
+      
+      logger.info(`📊 Retrieved and cached category counts for ${Object.keys(categoryCounts).length} categories`);
       return categoryCounts;
     } catch (error) {
       logger.error('❌ Error getting category counts:', error);
       throw error;
+    }
+  }
+
+  // Invalidate category counts cache
+  async invalidateCategoryCountsCache(): Promise<void> {
+    try {
+      const cacheKey = 'category_counts';
+      await cacheManager.delete(cacheKey);
+      logger.info('🗑️ Category counts cache invalidated');
+    } catch (error) {
+      logger.error('❌ Error invalidating category counts cache:', error);
     }
   }
 }

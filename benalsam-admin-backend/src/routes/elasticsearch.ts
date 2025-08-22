@@ -20,6 +20,7 @@ router.get('/search', (req, res) => elasticsearchController.searchIndex(req, res
 
 // Category Counts Route
 router.get('/category-counts', (req, res) => elasticsearchController.getCategoryCounts(req, res));
+router.post('/category-counts/invalidate', (req, res) => elasticsearchController.invalidateCategoryCountsCache(req, res));
 
 // Sync Management Routes
 router.get('/sync/status', (req, res) => elasticsearchController.getSyncStatus(req, res));

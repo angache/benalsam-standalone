@@ -1,4 +1,5 @@
 import { Listing, ApiResponse, QueryFilters } from '@/types';
+import { supabase } from '@/lib/supabaseClient';
 
 // Admin backend üzerinden Elasticsearch API endpoint'i
 const ADMIN_BACKEND_URL = import.meta.env.VITE_ADMIN_BACKEND_URL || 'http://localhost:3002';
@@ -7,6 +8,7 @@ export interface ElasticsearchSearchParams {
   query?: string;
   filters?: {
     category?: string;
+    categoryPath?: string[]; // ✅ Kategori path array'i eklendi
     location?: string;
     minBudget?: number;
     maxBudget?: number;

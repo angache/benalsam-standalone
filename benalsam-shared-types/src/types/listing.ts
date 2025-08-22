@@ -10,7 +10,9 @@ export interface Listing {
   user_id: string;
   title: string;
   description: string;
-  category: string;
+  category: string;           // ✅ Geriye uyumluluk için koru
+  category_id?: number;       // ✅ Yeni ID field
+  category_path?: number[];   // ✅ Hiyerarşik path [1,2,3]
   budget: number;
   location: string;
   urgency: 'low' | 'medium' | 'high';
@@ -30,7 +32,7 @@ export interface Listing {
   };
   created_at: string;
   updated_at: string;
-  status: 'active' | 'inactive' | 'deleted' | 'expired';
+  status: ListingStatusType;
   is_favorited?: boolean;
   user?: Partial<UserProfile>;
   condition: string[];
@@ -109,8 +111,10 @@ export interface SearchOptimizedListing {
   user_id: string;
   title: string;
   description: string;
-  category: string;
-  subcategory?: string;
+  category: string;           // ✅ Geriye uyumluluk
+  category_id: number;        // ✅ Yeni ID field (required)
+  category_path: number[];    // ✅ Hiyerarşik path [1,2,3] (required)
+  subcategory?: string;       // ✅ Geriye uyumluluk
   
   // Temel alanlar
   budget: {
@@ -131,7 +135,7 @@ export interface SearchOptimizedListing {
   urgency: string;
   main_image_url: string;
   additional_image_urls?: string[];
-  status: string;
+  status: ListingStatusType;
   created_at: string;
   updated_at: string;
   

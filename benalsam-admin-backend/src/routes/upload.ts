@@ -46,3 +46,4 @@ router.post('/single', upload.single('image'), uploadController.uploadSingleImag
 router.post('/multiple', upload.array('images', 10), uploadController.uploadMultipleImages);
 
 export default router;
+

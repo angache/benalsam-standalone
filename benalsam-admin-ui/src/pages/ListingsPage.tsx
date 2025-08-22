@@ -76,6 +76,7 @@ const statusColors = {
   [ListingStatus.INACTIVE]: 'default',
   [ListingStatus.PENDING_APPROVAL]: 'warning',
   [ListingStatus.REJECTED]: 'error',
+  'PENDING': 'warning', // Backend'den gelen status
 } as const;
 
 const statusLabels = {
@@ -83,6 +84,7 @@ const statusLabels = {
   [ListingStatus.INACTIVE]: 'Pasif',
   [ListingStatus.PENDING_APPROVAL]: 'Onay Bekliyor',
   [ListingStatus.REJECTED]: 'Reddedildi',
+  'PENDING': 'Onay Bekliyor', // Backend'den gelen status
 } as const;
 
 export const ListingsPage: React.FC = () => {
@@ -93,7 +95,7 @@ export const ListingsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>(ListingStatus.PENDING_APPROVAL); // İlk tab için PENDING_APPROVAL
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [moderationDialog, setModerationDialog] = useState(false);
-  const [moderationAction, setModerationAction] = useState<'approve' | 'reject' | 're-evaluate'>('approve');
+  const [moderationAction, setModerationAction] = useState<'approve' | 'reject' | 're-evaluate' | 'deactivate' | 'activate'>('approve');
   const [moderationReason, setModerationReason] = useState('');
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -136,9 +138,15 @@ export const ListingsPage: React.FC = () => {
 
   // Moderation mutation
   const moderationMutation = useMutation({
-    mutationFn: ({ id, action, reason }: { id: string; action: 'approve' | 'reject' | 're-evaluate'; reason?: string }) => {
+    mutationFn: ({ id, action, reason }: { id: string; action: 'approve' | 'reject' | 're-evaluate' | 'deactivate' | 'activate'; reason?: string }) => {
       if (action === 're-evaluate') {
         return apiService.reEvaluateListing(id, reason);
+      }
+      if (action === 'deactivate') {
+        return apiService.moderateListing(id, 'inactive', reason);
+      }
+      if (action === 'activate') {
+        return apiService.moderateListing(id, 'active', reason);
       }
       return apiService.moderateListing(id, action as 'approve' | 'reject', reason);
     },
@@ -323,24 +331,78 @@ export const ListingsPage: React.FC = () => {
             </>
           )}
           
-          {(params.row.status === ListingStatus.ACTIVE || params.row.status === ListingStatus.INACTIVE) && (
-            <Tooltip title="Tekrar Değerlendir">
-              <IconButton
-                size="small"
-                color="warning"
-                onClick={() => navigate(`/listings/${params.row.id}`)}
-              >
-                <AlertTriangle size={16} />
-              </IconButton>
-            </Tooltip>
+          {params.row.status === ListingStatus.ACTIVE && (
+            <>
+              <Tooltip title="Yayından Kaldır">
+                <IconButton
+                  size="small"
+                  color="warning"
+                  onClick={() => {
+                    setSelectedListing(params.row);
+                    setModerationAction('deactivate');
+                    setModerationDialog(true);
+                  }}
+                >
+                  <AlertTriangle size={16} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Tekrar Değerlendir">
+                <IconButton
+                  size="small"
+                  color="info"
+                  onClick={() => {
+                    setSelectedListing(params.row);
+                    setModerationAction('re-evaluate');
+                    setModerationDialog(true);
+                  }}
+                >
+                  <RefreshCw size={16} />
+                </IconButton>
+              </Tooltip>
+            </>
+          )}
+          
+          {params.row.status === ListingStatus.INACTIVE && (
+            <>
+              <Tooltip title="Yayına Al">
+                <IconButton
+                  size="small"
+                  color="success"
+                  onClick={() => {
+                    setSelectedListing(params.row);
+                    setModerationAction('activate');
+                    setModerationDialog(true);
+                  }}
+                >
+                  <CheckCircle size={16} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Tekrar Değerlendir">
+                <IconButton
+                  size="small"
+                  color="info"
+                  onClick={() => {
+                    setSelectedListing(params.row);
+                    setModerationAction('re-evaluate');
+                    setModerationDialog(true);
+                  }}
+                >
+                  <RefreshCw size={16} />
+                </IconButton>
+              </Tooltip>
+            </>
           )}
           
           {params.row.status === ListingStatus.REJECTED && (
-            <Tooltip title="Yeniden İncele">
+            <Tooltip title="Tekrar Değerlendir">
               <IconButton
                 size="small"
                 color="info"
-                onClick={() => navigate(`/listings/${params.row.id}`)}
+                onClick={() => {
+                  setSelectedListing(params.row);
+                  setModerationAction('re-evaluate');
+                  setModerationDialog(true);
+                }}
               >
                 <RefreshCw size={16} />
               </IconButton>
@@ -622,7 +684,11 @@ export const ListingsPage: React.FC = () => {
       {/* Moderation Dialog */}
       <Dialog open={moderationDialog} onClose={() => setModerationDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          İlan {moderationAction === 'approve' ? 'Onaylama' : moderationAction === 'reject' ? 'Reddetme' : 'Tekrar Değerlendirme'}
+          İlan {moderationAction === 'approve' ? 'Onaylama' : 
+                moderationAction === 'reject' ? 'Reddetme' : 
+                moderationAction === 'deactivate' ? 'Yayından Kaldırma' :
+                moderationAction === 'activate' ? 'Yayına Alma' :
+                'Tekrar Değerlendirme'}
         </DialogTitle>
         <DialogContent>
           {selectedListing && (
@@ -639,15 +705,19 @@ export const ListingsPage: React.FC = () => {
             </Box>
           )}
           
-          {(moderationAction === 'reject' || moderationAction === 're-evaluate') && (
+          {(moderationAction === 'reject' || moderationAction === 're-evaluate' || moderationAction === 'deactivate') && (
             <TextField
               fullWidth
-              label={moderationAction === 'reject' ? 'Red Nedeni' : 'Tekrar Değerlendirme Nedeni'}
+              label={moderationAction === 'reject' ? 'Red Nedeni' : 
+                     moderationAction === 're-evaluate' ? 'Tekrar Değerlendirme Nedeni' :
+                     'Yayından Kaldırma Nedeni'}
               multiline
               rows={3}
               value={moderationReason}
               onChange={(e) => setModerationReason(e.target.value)}
-              placeholder={moderationAction === 'reject' ? 'İlanı neden reddettiğinizi belirtin...' : 'İlanı neden tekrar değerlendirmeye aldığınızı belirtin...'}
+              placeholder={moderationAction === 'reject' ? 'İlanı neden reddettiğinizi belirtin...' : 
+                          moderationAction === 're-evaluate' ? 'İlanı neden tekrar değerlendirmeye aldığınızı belirtin...' :
+                          'İlanı neden yayından kaldırdığınızı belirtin...'}
             />
           )}
           
@@ -664,12 +734,16 @@ export const ListingsPage: React.FC = () => {
           <Button
             onClick={handleModeration}
             variant="contained"
-            color={moderationAction === 'approve' ? 'success' : moderationAction === 'reject' ? 'error' : 'warning'}
+            color={moderationAction === 'approve' || moderationAction === 'activate' ? 'success' : 
+                   moderationAction === 'reject' || moderationAction === 'deactivate' ? 'error' : 'warning'}
             disabled={moderationMutation.isPending}
           >
             {moderationMutation.isPending ? 'İşleniyor...' : 
              moderationAction === 'approve' ? 'Onayla' : 
-             moderationAction === 'reject' ? 'Reddet' : 'Tekrar Değerlendir'}
+             moderationAction === 'reject' ? 'Reddet' : 
+             moderationAction === 'deactivate' ? 'Yayından Kaldır' :
+             moderationAction === 'activate' ? 'Yayına Al' :
+             'Tekrar Değerlendir'}
           </Button>
         </DialogActions>
       </Dialog>

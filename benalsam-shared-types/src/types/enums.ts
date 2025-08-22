@@ -39,16 +39,28 @@ export const ReportStatus = {
 export type ReportStatusType = typeof ReportStatus[keyof typeof ReportStatus];
 
 export const ListingStatus = {
-  ACTIVE: 'ACTIVE',
-  INACTIVE: 'INACTIVE',
-  PENDING_APPROVAL: 'PENDING_APPROVAL',
-  REJECTED: 'REJECTED',
-  SOLD: 'SOLD',
-  DELETED: 'DELETED',
-  EXPIRED: 'EXPIRED'
+  ACTIVE: 'active',
+  INACTIVE: 'inactive',
+  PENDING_APPROVAL: 'pending_approval',
+  REJECTED: 'rejected',
+  SOLD: 'sold',
+  DELETED: 'deleted',
+  EXPIRED: 'expired'
 } as const;
 
 export type ListingStatusType = typeof ListingStatus[keyof typeof ListingStatus];
+
+// Admin-specific listing status (farklı değerler)
+export const AdminListingStatus = {
+  PENDING_APPROVAL: 'PENDING_APPROVAL',
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  REJECTED: 'REJECTED',
+  SOLD: 'SOLD',
+  EXPIRED: 'EXPIRED'
+} as const;
+
+export type AdminListingStatusType = typeof AdminListingStatus[keyof typeof AdminListingStatus];
 
 // ===========================
 // ANALYTICS EVENT TYPES - STANDARDIZED
@@ -249,11 +261,6 @@ export interface EngagementEventProperties {
 }
 
 // Combined Event Properties Interface
-export interface AnalyticsEventProperties extends 
-  CoreEventProperties, 
-  PerformanceEventProperties, 
-  BusinessEventProperties, 
-  EngagementEventProperties {
-  // Additional custom properties
+export interface AnalyticsEventProperties {
   [key: string]: any;
 } 

@@ -1,55 +1,12 @@
 import { supabase } from '@/lib/supabaseClient';
-
-// Local type definitions since benalsam-shared-types is now an npm package
-const AnalyticsEventType = {
-  PAGE_VIEW: 'page_view',
-  USER_ACTION: 'user_action',
-  ERROR: 'error',
-  PERFORMANCE: 'performance',
-  SESSION_START: 'session_start',
-  SESSION_END: 'session_end'
-} as const;
-
-interface AnalyticsEvent {
-  event_type: string;
-  event_data: Record<string, any>;
-  session_id: string;
-  created_at?: string;
-}
-
-interface AnalyticsUser {
-  id: string;
-  email?: string;
-  role?: string;
-}
-
-interface AnalyticsSession {
-  id: string;
-  user_id: string;
-  started_at: string;
-  ended_at?: string;
-}
-
-interface AnalyticsDevice {
-  type: string;
-  browser: string;
-  os: string;
-  screen_resolution: string;
-}
-
-interface AnalyticsContext {
-  url: string;
-  referrer?: string;
-  user_agent: string;
-}
-
-// Legacy event interface for backward compatibility
-interface AnalyticsEvent {
-  event_type: string;
-  event_data: Record<string, any>;
-  session_id: string;
-  created_at?: string;
-}
+import { 
+  AnalyticsEvent, 
+  AnalyticsUser, 
+  AnalyticsSession, 
+  AnalyticsDevice, 
+  AnalyticsContext 
+} from 'benalsam-shared-types';
+import { AnalyticsEventType, AnalyticsEventProperties } from 'benalsam-shared-types';
 
 // Session management helper
 const getSessionId = async (): Promise<string> => {
@@ -100,18 +57,70 @@ export const trackEvent = async (
   }
 
   try {
-    const event: AnalyticsEvent = {
-      event_type: eventType,
-      event_data: eventData,
-      session_id: await getSessionId(),
-      created_at: new Date().toISOString(),
+    const sessionId = await getSessionId();
+    
+    // Get current user if available
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    const analyticsEvent: AnalyticsEvent = {
+      event_id: `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      event_name: eventType as any, // Cast to shared-types enum
+      event_timestamp: new Date().toISOString(),
+      event_properties: eventData as AnalyticsEventProperties,
+      user: user ? {
+        id: user.id,
+        email: user.email || '',
+        name: user.user_metadata?.full_name || user.email || '',
+        avatar: user.user_metadata?.avatar_url,
+        properties: {
+          registration_date: user.created_at,
+          last_login: user.last_sign_in_at,
+          user_type: 'returning' // TODO: Determine if new user
+        }
+      } : {
+        id: 'anonymous',
+        email: '',
+        name: 'Anonymous User',
+        properties: {
+          user_type: 'new'
+        }
+      },
+      session: {
+        id: sessionId,
+        start_time: new Date().toISOString(),
+        page_views: 0,
+        events_count: 0
+      },
+      device: {
+        platform: 'web',
+        browser: navigator.userAgent.includes('Chrome') ? 'chrome' : 
+                 navigator.userAgent.includes('Firefox') ? 'firefox' : 
+                 navigator.userAgent.includes('Safari') ? 'safari' : 'other',
+        user_agent: navigator.userAgent,
+        screen_resolution: `${screen.width}x${screen.height}`,
+        app_version: '1.0.0'
+      },
+      context: {
+        language: navigator.language,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        user_agent: navigator.userAgent
+      }
     };
 
-    const { error } = await supabase.from('user_events').insert(event);
+    // Send to backend
+    const response = await fetch(`${(import.meta as any).env.VITE_API_URL}/api/v1/analytics/track-event`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(analyticsEvent)
+    });
 
-    if (error) {
-      handleAnalyticsError(error, eventType);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    console.log('✅ Analytics event tracked:', eventType);
   } catch (error) {
     handleAnalyticsError(error, eventType);
   }
@@ -242,43 +251,60 @@ export const trackAnalyticsEvent = async (
   try {
     // Get session ID
     const sessionId = await getSessionId();
+    
+    // Get current user if available
+    const { data: { user } } = await supabase.auth.getUser();
 
     // Create analytics session object
     const analyticsSession: AnalyticsSession = {
       id: sessionId,
       start_time: new Date().toISOString(),
-      duration: undefined, // Will be calculated when session ends
-      page_views: 0, // TODO: Track page views
-      events_count: 0 // TODO: Track event count
+      page_views: 0,
+      events_count: 0
     };
 
     // Create analytics device object
     const analyticsDevice: AnalyticsDevice = {
       platform: 'web',
-      version: navigator.userAgent,
-      model: undefined,
-      screen_resolution: `${screen.width}x${screen.height}`,
-      app_version: '1.0.0', // TODO: Get from app config
-      os_version: undefined,
       browser: navigator.userAgent.includes('Chrome') ? 'chrome' : 
                navigator.userAgent.includes('Firefox') ? 'firefox' : 
                navigator.userAgent.includes('Safari') ? 'safari' : 'other',
-      user_agent: navigator.userAgent
+      user_agent: navigator.userAgent,
+      screen_resolution: `${screen.width}x${screen.height}`,
+      app_version: '1.0.0'
     };
 
     // Create analytics context object
     const analyticsContext: AnalyticsContext = {
       language: navigator.language,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      user_agent: navigator.userAgent
     };
 
-    // Create standardized analytics event (KVKK compliant - no user data)
+    // Create standardized analytics event
     const analyticsEvent: AnalyticsEvent = {
       event_id: `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-              event_name: AnalyticsEventType[eventName as keyof typeof AnalyticsEventType] || eventName,
+      event_name: AnalyticsEventType[eventName],
       event_timestamp: new Date().toISOString(),
-      event_properties: eventProperties,
-      user: undefined, // KVKK: No user data in analytics
+      event_properties: eventProperties as AnalyticsEventProperties,
+      user: user ? {
+        id: user.id,
+        email: user.email || '',
+        name: user.user_metadata?.full_name || user.email || '',
+        avatar: user.user_metadata?.avatar_url,
+        properties: {
+          registration_date: user.created_at,
+          last_login: user.last_sign_in_at,
+          user_type: 'returning'
+        }
+      } : {
+        id: 'anonymous',
+        email: '',
+        name: 'Anonymous User',
+        properties: {
+          user_type: 'new'
+        }
+      },
       session: analyticsSession,
       device: analyticsDevice,
       context: analyticsContext
@@ -370,7 +396,7 @@ export const trackApiCallNew = async (endpoint: string, duration: number, proper
   });
 };
 
-export const trackErrorNew = async (errorType: string, errorMessage: string, properties: Record<string, any> = {}): Promise<boolean> => {
+export const trackErrorOccurredNew = async (errorType: string, errorMessage: string, properties: Record<string, any> = {}): Promise<boolean> => {
   return trackAnalyticsEvent('ERROR_OCCURRED', {
     error_type: errorType,
     error_message: errorMessage,

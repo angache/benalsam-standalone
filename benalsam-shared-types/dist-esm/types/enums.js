@@ -23,12 +23,21 @@ export const ReportStatus = {
     DISMISSED: 'dismissed'
 };
 export const ListingStatus = {
+    ACTIVE: 'active',
+    INACTIVE: 'inactive',
+    PENDING_APPROVAL: 'pending_approval',
+    REJECTED: 'rejected',
+    SOLD: 'sold',
+    DELETED: 'deleted',
+    EXPIRED: 'expired'
+};
+// Admin-specific listing status (farklı değerler)
+export const AdminListingStatus = {
+    PENDING_APPROVAL: 'PENDING_APPROVAL',
     ACTIVE: 'ACTIVE',
     INACTIVE: 'INACTIVE',
-    PENDING_APPROVAL: 'PENDING_APPROVAL',
     REJECTED: 'REJECTED',
     SOLD: 'SOLD',
-    DELETED: 'DELETED',
     EXPIRED: 'EXPIRED'
 };
 // ===========================

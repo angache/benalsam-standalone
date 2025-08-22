@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:prod": "vite build --mode production",
-    "build:analyze": "vite build --mode production",
+    "build:analyze": "VITE_ENABLE_ANALYZER=true npm run build",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
@@ -18,8 +18,7 @@
     "security-audit": "node scripts/security-audit.cjs",
     "audit": "npm audit && npm run security-audit",
     "generate-sitemap": "node scripts/generate-sitemap.js",
-    "seo-build": "npm run generate-sitemap && npm run build",
-    "build:analyze": "VITE_ENABLE_ANALYZER=true npm run build"
+    "seo-build": "npm run generate-sitemap && npm run build"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.2.1",
@@ -44,7 +43,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^5.0.0",
-    "benalsam-shared-types": "^1.0.1",
+    "benalsam-shared-types": "^1.0.4",
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",

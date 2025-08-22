@@ -30,10 +30,10 @@ export const cloudinaryUploadOptions = {
     { width: 800, height: 600, crop: 'fill' },
     { quality: 'auto', format: 'auto' }
   ],
-  resource_type: 'image'
+  resource_type: 'image' as const
 };
 
 // Cloudinary delete options
 export const cloudinaryDeleteOptions = {
-  resource_type: 'image'
+  resource_type: 'image' as const
 };

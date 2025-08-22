@@ -1,10 +1,13 @@
 import { UserProfile } from './user';
+import { ListingStatusType } from './enums';
 export interface Listing {
     id: string;
     user_id: string;
     title: string;
     description: string;
     category: string;
+    category_id?: number;
+    category_path?: number[];
     budget: number;
     location: string;
     urgency: 'low' | 'medium' | 'high';
@@ -24,7 +27,7 @@ export interface Listing {
     };
     created_at: string;
     updated_at: string;
-    status: 'active' | 'inactive' | 'deleted' | 'expired';
+    status: ListingStatusType;
     is_favorited?: boolean;
     user?: Partial<UserProfile>;
     condition: string[];
@@ -79,6 +82,8 @@ export interface SearchOptimizedListing {
     title: string;
     description: string;
     category: string;
+    category_id: number;
+    category_path: number[];
     subcategory?: string;
     budget: {
         min: number;
@@ -98,7 +103,7 @@ export interface SearchOptimizedListing {
     urgency: string;
     main_image_url: string;
     additional_image_urls?: string[];
-    status: string;
+    status: ListingStatusType;
     created_at: string;
     updated_at: string;
     attributes: Record<string, any>;

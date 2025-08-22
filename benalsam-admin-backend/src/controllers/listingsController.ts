@@ -103,7 +103,7 @@ export const listingsController = {
         description: listing.description,
         price: listing.budget || 0,
         category: listing.category,
-        status: listing.status?.toUpperCase() || 'PENDING',
+        status: listing.status || 'pending_approval',
         views: listing.views_count || 0,
         favorites: listing.favorites_count || 0,
         createdAt: listing.created_at,
@@ -188,7 +188,7 @@ export const listingsController = {
         description: listing.description,
         price: listing.budget || 0,
         category: listing.category,
-        status: listing.status?.toUpperCase() || 'PENDING',
+        status: listing.status || 'pending_approval',
         views: listing.views_count || 0,
         favorites: listing.favorites_count || 0,
         createdAt: listing.created_at,
@@ -264,7 +264,7 @@ export const listingsController = {
         description: listing.description,
         price: listing.budget || 0,
         category: listing.category,
-        status: listing.status?.toUpperCase() || 'PENDING',
+        status: listing.status || 'pending_approval',
         views: listing.views_count || 0,
         favorites: listing.favorites_count || 0,
         createdAt: listing.created_at,
@@ -299,6 +299,13 @@ export const listingsController = {
 
       logger.info(`Deleting listing with ID: ${id}`);
 
+      // Önce ilanı al (kategori bilgisi için)
+      const { data: listing } = await supabase
+        .from('listings')
+        .select('category_id')
+        .eq('id', id)
+        .single();
+
       const { error } = await supabase
         .from('listings')
         .delete()
@@ -312,6 +319,16 @@ export const listingsController = {
         });
         return;
       }
+
+              // Kategori sayıları cache'ini temizle
+        try {
+          const { AdminElasticsearchService } = await import('../services/elasticsearchService');
+          const elasticsearchService = new AdminElasticsearchService();
+          await elasticsearchService.invalidateCategoryCountsCache();
+          logger.info(`✅ Category counts cache invalidated after deleting listing: ${id}`);
+        } catch (cacheError) {
+          logger.warn(`⚠️ Failed to invalidate category counts cache:`, cacheError);
+        }
 
       res.json({
         success: true,
@@ -420,6 +437,32 @@ export const listingsController = {
         },
       };
 
+      // ES ve Cache temizleme işlemleri
+      try {
+        const { AdminElasticsearchService } = await import('../services/elasticsearchService');
+        const elasticsearchService = new AdminElasticsearchService();
+        
+        if (status.toLowerCase() === 'inactive') {
+          // İlan yayından kaldırıldığında ES'den sil
+          await elasticsearchService.deleteDocument(id);
+          logger.info(`✅ Elasticsearch'ten ilan silindi: ${id}`);
+          
+          // Kategori sayıları cache'ini temizle
+          await elasticsearchService.invalidateCategoryCountsCache();
+          logger.info(`✅ Kategori sayıları cache temizlendi`);
+        } else if (status.toLowerCase() === 'active') {
+          // İlan yayına alındığında ES'ye ekle
+          await elasticsearchService.indexDocument(id, transformedListing);
+          logger.info(`✅ Elasticsearch'e ilan eklendi: ${id}`);
+          
+          // Kategori sayıları cache'ini temizle
+          await elasticsearchService.invalidateCategoryCountsCache();
+          logger.info(`✅ Kategori sayıları cache temizlendi`);
+        }
+      } catch (cacheError) {
+        logger.warn(`⚠️ ES/Cache işlemlerinde hata:`, cacheError);
+      }
+
       res.json({
         success: true,
         data: transformedListing,
@@ -454,7 +497,7 @@ export const listingsController = {
       const { data: listing, error } = await supabase
         .from('listings')
         .update({
-          status: 'pending',
+          status: 'pending_approval',
           reviewed_at: new Date().toISOString(),
           reviewed_by: adminProfile?.id || admin?.id,
           rejection_reason: reason,
@@ -509,7 +552,7 @@ export const listingsController = {
         description: listing.description,
         price: listing.budget || 0,
         category: listing.category,
-        status: listing.status?.toUpperCase() || 'PENDING',
+        status: listing.status || 'pending_approval',
         views: listing.views_count || 0,
         favorites: listing.favorites_count || 0,
         createdAt: listing.created_at,

@@ -24,7 +24,6 @@
     "deploy:firebase:ios:prod": "./scripts/deploy-firebase.sh ios production"
   },
   "dependencies": {
-    "benalsam-shared-types": "^1.0.0",
     "@expo/metro-config": "^0.20.17",
     "@expo/webpack-config": "^19.0.1",
     "@react-native-async-storage/async-storage": "2.1.2",
@@ -42,6 +41,7 @@
     "@types/crypto-js": "^4.2.2",
     "axios": "^1.10.0",
     "babel-preset-expo": "~13.0.0",
+    "benalsam-shared-types": "^1.0.4",
     "buffer": "^6.0.3",
     "cheerio": "^1.1.0",
     "crypto-js": "^4.2.0",

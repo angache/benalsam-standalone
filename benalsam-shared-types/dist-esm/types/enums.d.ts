@@ -25,15 +25,24 @@ export declare const ReportStatus: {
 };
 export type ReportStatusType = typeof ReportStatus[keyof typeof ReportStatus];
 export declare const ListingStatus: {
-    readonly ACTIVE: "ACTIVE";
-    readonly INACTIVE: "INACTIVE";
-    readonly PENDING_APPROVAL: "PENDING_APPROVAL";
-    readonly REJECTED: "REJECTED";
-    readonly SOLD: "SOLD";
-    readonly DELETED: "DELETED";
-    readonly EXPIRED: "EXPIRED";
+    readonly ACTIVE: "active";
+    readonly INACTIVE: "inactive";
+    readonly PENDING_APPROVAL: "pending_approval";
+    readonly REJECTED: "rejected";
+    readonly SOLD: "sold";
+    readonly DELETED: "deleted";
+    readonly EXPIRED: "expired";
 };
 export type ListingStatusType = typeof ListingStatus[keyof typeof ListingStatus];
+export declare const AdminListingStatus: {
+    readonly PENDING_APPROVAL: "PENDING_APPROVAL";
+    readonly ACTIVE: "ACTIVE";
+    readonly INACTIVE: "INACTIVE";
+    readonly REJECTED: "REJECTED";
+    readonly SOLD: "SOLD";
+    readonly EXPIRED: "EXPIRED";
+};
+export type AdminListingStatusType = typeof AdminListingStatus[keyof typeof AdminListingStatus];
 export declare const AnalyticsEventType: {
     readonly PAGE_VIEW: "page_view";
     readonly SCREEN_VIEW: "screen_view";
@@ -176,7 +185,7 @@ export interface EngagementEventProperties {
         lng: number;
     };
 }
-export interface AnalyticsEventProperties extends CoreEventProperties, PerformanceEventProperties, BusinessEventProperties, EngagementEventProperties {
+export interface AnalyticsEventProperties {
     [key: string]: any;
 }
 //# sourceMappingURL=enums.d.ts.map

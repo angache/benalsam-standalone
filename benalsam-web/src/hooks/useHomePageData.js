@@ -82,6 +82,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
             query: '',
             filters: {
               category: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].name : undefined,
+              categoryPath: selectedCategories.map(c => c.name), // ✅ Tüm kategori path'ini gönder
               location: filters.location,
               minBudget: filters.priceRange[0],
               maxBudget: filters.priceRange[1],
@@ -164,6 +165,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
         query: '',
         filters: {
           category: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].name : undefined,
+          categoryPath: selectedCategories.map(c => c.name), // ✅ Tüm kategori path'ini gönder
           location: filters.location,
           minBudget: filters.priceRange[0],
           maxBudget: filters.priceRange[1],

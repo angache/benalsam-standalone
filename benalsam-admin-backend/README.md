@@ -1,20 +1,5 @@
 # Benalsam Admin Backend
 
-## ⚠️ **DANGEROUS DEBUG ENDPOINTS**
-
-**⚠️ WARNING: The following endpoints are for development use only and will permanently delete data:**
-
-- `POST /api/v1/elasticsearch/debug/clear-all-listings` - Deletes ALL listings and related data
-- `POST /api/v1/elasticsearch/debug/clear-cache` - Clears all search cache
-
-**These endpoints are automatically disabled in production environment.**
-
-**Use with extreme caution!**
-
----
-
-## Overview
-
 Modern ve güçlü bir admin backend API'si. React Native/Expo mobil uygulaması için kapsamlı yönetim sistemi.
 
 ## 🚀 Özellikler

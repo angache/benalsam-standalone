@@ -1,5 +1,6 @@
 import { Listing } from './listing';
 import { UserProfile } from './user';
+import type { AdminListingStatusType } from './enums';
 
 // ===========================
 // ADMIN PANEL TYPES
@@ -10,19 +11,16 @@ export interface AdminListing {
   title: string;
   description: string;
   price: number;
+  status: AdminListingStatusType;
+  userId: string;
   category: string;
-  status: 'PENDING_APPROVAL' | 'ACTIVE' | 'INACTIVE' | 'REJECTED';
-  views: number;
-  favorites: number;
+  images: string[];
+  location: {
+    province: string;
+    district: string;
+  };
   createdAt: string;
   updatedAt: string;
-  userId: string;
-  images: string[];
-  user?: {
-    id: string;
-    email: string;
-    name: string;
-  };
 }
 
 export interface AdminUser {

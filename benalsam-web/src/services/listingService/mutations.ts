@@ -4,6 +4,71 @@ import { addUserActivity } from '@/services/userActivityService';
 import { processImagesForSupabase } from '@/services/imageService';
 import { Listing } from '@/types';
 
+import { categoriesConfig } from '@/config/categories';
+
+// Kategori path'ini ID'lere çevir
+const getCategoryIds = (categoryString: string) => {
+  if (!categoryString) return { category_id: null, category_path: null };
+  
+  console.log('🔍 Processing category string:', categoryString);
+  
+  // Kategori path'ini parçala
+  const pathParts = categoryString.split(' > ');
+  console.log('🔍 Path parts:', pathParts);
+  
+  if (pathParts.length === 0) {
+    console.log('⚠️ No path parts found');
+    return { category_id: null, category_path: null };
+  }
+  
+  // Ana kategoriyi bul
+  const mainCategory = categoriesConfig.find(cat => cat.name === pathParts[0]);
+  if (!mainCategory) {
+    console.log('⚠️ Main category not found:', pathParts[0]);
+    return { category_id: null, category_path: null };
+  }
+  
+  // Ana kategori ID'si (1-13 arası)
+  const mainCategoryId = categoriesConfig.findIndex(cat => cat.name === pathParts[0]) + 1;
+  console.log('✅ Main category found:', pathParts[0], 'ID:', mainCategoryId);
+  
+  const categoryPath = [mainCategoryId];
+  let categoryId = mainCategoryId;
+  
+  // Alt kategori varsa
+  if (pathParts.length > 1 && mainCategory.subcategories) {
+    const subCategory = mainCategory.subcategories.find(sub => sub.name === pathParts[1]);
+    if (subCategory) {
+      // Alt kategori ID'si (101-1303 arası)
+      const subCategoryId = mainCategoryId * 100 + mainCategory.subcategories.findIndex(sub => sub.name === pathParts[1]) + 1;
+      categoryPath.push(subCategoryId);
+      categoryId = subCategoryId;
+      console.log('✅ Subcategory found:', pathParts[1], 'ID:', subCategoryId);
+      
+      // Alt-alt kategori varsa
+      if (pathParts.length > 2 && subCategory.subcategories) {
+        const subSubCategory = subCategory.subcategories.find(subSub => subSub.name === pathParts[2]);
+        if (subSubCategory) {
+          // Alt-alt kategori ID'si (1001-9999 arası)
+          const subSubCategoryId = subCategoryId * 10 + subCategory.subcategories.findIndex(subSub => subSub.name === pathParts[2]) + 1;
+          categoryPath.push(subSubCategoryId);
+          categoryId = subSubCategoryId;
+          console.log('✅ Sub-subcategory found:', pathParts[2], 'ID:', subSubCategoryId);
+        }
+      }
+    }
+  }
+  
+  console.log('✅ Final result - Category ID:', categoryId, 'Path:', categoryPath);
+  
+  return {
+    category_id: categoryId,
+    category_path: categoryPath
+  };
+};
+
+
+
 export const createListing = async (
   listingData: any, 
   currentUserId: string, 
@@ -31,11 +96,17 @@ export const createListing = async (
       expiresAt.setDate(expiresAt.getDate() + listingData.duration);
     }
 
+    // Kategori ID'lerini hesapla
+    const { category_id, category_path } = getCategoryIds(listingData.category);
+
     const listingToInsert = {
       user_id: currentUserId,
       title: listingData.title,
       description: listingData.description,
       category: listingData.category,
+      category_id: category_id, // ✅ Kategori ID eklendi
+      category_path: category_path, // ✅ Kategori path eklendi
+      status: 'pending_approval', // ✅ Status eklendi
       budget: listingData.budget,
       location: listingData.location,
       urgency: listingData.urgency,
@@ -53,6 +124,12 @@ export const createListing = async (
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
+
+    console.log('🔍 Creating listing with category data:', {
+      category: listingData.category,
+      category_id,
+      category_path
+    });
 
     const { data, error } = await supabase
       .from('listings')

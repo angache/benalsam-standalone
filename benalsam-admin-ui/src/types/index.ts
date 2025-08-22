@@ -1,9 +1,10 @@
+import type { Listing, ListingStatusType } from 'benalsam-shared-types';
+
 // ===========================
 // ADMIN-UI SPECIFIC TYPES
 // ===========================
 
-// Basic types for Admin UI
-export interface AdminUser {
+export interface Admin {
   id: string;
   email: string;
   firstName: string;
@@ -14,24 +15,11 @@ export interface AdminUser {
   updatedAt: string;
 }
 
-export interface Listing {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  status: string;
-  userId: string;
-  category: string;
-  images: string[];
-  location: {
-    province: string;
-    district: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
+// Listing interface'ını shared-types'dan import ediyoruz
+// export interface Listing { ... } - KALDIRILDI
 
-export type ListingStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'SOLD' | 'EXPIRED';
+// ListingStatus type'ını shared-types'dan import ediyoruz
+// export type ListingStatus = ... - KALDIRILDI
 
 export interface User {
   id: string;
@@ -332,8 +320,8 @@ export interface AppContextType {
   notifications: Notification[];
   addNotification: (notification: Omit<Notification, 'id'>) => void;
   removeNotification: (id: string) => void;
-  user: AdminUser | null;
-  setUser: (user: AdminUser | null) => void;
+  user: Admin | null;
+  setUser: (user: Admin | null) => void;
   logout: () => void;
 }
 

@@ -100,6 +100,27 @@ export class ElasticsearchController {
   }
 
   /**
+   * Invalidate category counts cache
+   */
+  async invalidateCategoryCountsCache(req: Request, res: Response) {
+    try {
+      await this.elasticsearchService.invalidateCategoryCountsCache();
+      
+      res.json({
+        success: true,
+        message: 'Category counts cache invalidated successfully'
+      });
+    } catch (error) {
+      logger.error('❌ Category counts cache invalidation failed:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Category counts cache invalidation failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  /**
    * Search specific index
    */
   async searchIndex(req: Request, res: Response) {
