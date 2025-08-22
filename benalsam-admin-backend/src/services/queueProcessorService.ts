@@ -200,6 +200,8 @@ export class QueueProcessorService {
       title: listing.title,
       description: listing.description,
       category: listing.category,
+      category_id: listing.category_id, // ✅ category_id eklendi
+      category_path: listing.category_path, // ✅ category_path eklendi
       budget: listing.budget,
       location: listing.location ? {
         lat: listing.latitude,

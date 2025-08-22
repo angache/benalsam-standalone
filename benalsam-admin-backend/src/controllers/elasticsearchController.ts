@@ -459,6 +459,38 @@ export class ElasticsearchController {
   }
 
   /**
+   * Delete Elasticsearch index
+   */
+  async deleteIndex(req: Request, res: Response): Promise<void> {
+    try {
+      logger.info('🗑️ Deleting Elasticsearch index...');
+      
+      const success = await this.elasticsearchService.deleteIndex();
+      
+      if (success) {
+        logger.info('✅ Elasticsearch index deleted successfully');
+        res.json({
+          success: true,
+          message: 'Elasticsearch index deleted successfully'
+        });
+      } else {
+        logger.error('❌ Failed to delete Elasticsearch index');
+        res.status(500).json({
+          success: false,
+          message: 'Failed to delete Elasticsearch index'
+        });
+      }
+    } catch (error) {
+      logger.error('❌ Delete index failed:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Delete index failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  /**
    * Clear all listings and related data (Debug endpoint)
    */
   async clearAllListings(req: Request, res: Response) {

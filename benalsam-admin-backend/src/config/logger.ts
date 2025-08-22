@@ -24,7 +24,7 @@ if (!fs.existsSync(logsDir)) {
 
 // Create logger instance
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL || 'warn', // info -> warn yaparak gereksiz logları azalt
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),

@@ -201,7 +201,46 @@ const LoadingFallback = () => (
 
       const handleCategoryClick = useCallback((category, level, fullPath) => {
         const newPath = selectedCategories.slice(0, level);
-        newPath.push(category);
+        
+        // Kategori ID'sini categoriesConfig'den bul
+        let categoryId = null;
+        let categoryName = category.name || category;
+        
+        // Ana kategori ID'sini bul
+        const mainCategory = categoriesConfig.find(cat => cat.name === categoryName);
+        if (mainCategory) {
+          categoryId = mainCategory.id;
+        } else {
+          // Alt kategori ID'sini bul
+          for (const mainCat of categoriesConfig) {
+            if (mainCat.subcategories) {
+              const subCategory = mainCat.subcategories.find(sub => sub.name === categoryName);
+              if (subCategory) {
+                categoryId = subCategory.id;
+                break;
+              }
+              // Alt-alt kategori ID'sini bul
+              if (subCategory && subCategory.subcategories) {
+                const subSubCategory = subCategory.subcategories.find(subSub => subSub.name === categoryName);
+                if (subSubCategory) {
+                  categoryId = subSubCategory.id;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        
+        // Kategori objesi {id, name} yapısında olmalı
+        const categoryObj = {
+          id: categoryId,
+          name: categoryName
+        };
+        
+        console.log('🔍 Category click - Category:', category, 'Level:', level, 'FullPath:', fullPath);
+        console.log('🔍 Category obj created:', categoryObj);
+        
+        newPath.push(categoryObj);
         handleCategorySelect(newPath);
       }, [selectedCategories, handleCategorySelect]);
 

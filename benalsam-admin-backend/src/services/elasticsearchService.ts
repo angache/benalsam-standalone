@@ -31,6 +31,8 @@ export class AdminElasticsearchService {
     );
   }
 
+
+
   private getListingsIndexMapping() {
     return {
       settings: {
@@ -542,11 +544,13 @@ export class AdminElasticsearchService {
 
   async reindexAllListings(): Promise<{ success: boolean; count: number; errors: string[] }> {
     try {
-      // Supabase'den tüm aktif listings'i çek
+      // Supabase'den tüm listings'i çek (debug için status filtresi kaldırıldı)
+      logger.info('🔍 Fetching all listings from Supabase...');
       const { data: listings, error } = await this.supabase
         .from('listings')
-        .select('*')
-        .eq('status', 'active');
+        .select('*');
+
+      logger.info(`🔍 Found ${listings?.length || 0} listings in Supabase`);
 
       if (error) {
         throw new Error(`Supabase error: ${error.message}`);
@@ -606,8 +610,10 @@ export class AdminElasticsearchService {
         }
       };
 
-      // Default filters - always active
-      searchQuery.bool.filter.push({ term: { status: 'active' } });
+      // Default filters - include all statuses for debugging
+      // searchQuery.bool.filter.push({ term: { status: 'active' } });
+      
+      // ✅ Status filtresi kaldırıldı - tüm status'ları göster
 
       // Text search
       if (query) {
@@ -623,41 +629,46 @@ export class AdminElasticsearchService {
 
       // Filters
       if (filters) {
+        if (process.env.NODE_ENV === 'development') {
         logger.info('🔍 Debug - Filters received:', JSON.stringify(filters, null, 2));
+      }
         
-        if (filters.category_id) {
+        if (filters.category_id && filters.category_id !== null) {
           // Category ID varsa her zaman ID bazlı filtreleme kullan
           logger.info('🔍 Debug - Using category_id filter:', filters.category_id);
           searchQuery.bool.filter.push({ term: { category_id: filters.category_id } });
         } else if (filters.categoryPath) {
-          // Category path array'i varsa, ilk kategori ID'sini kullan
-          logger.info('🔍 Debug - Using categoryPath filter:', filters.categoryPath);
+          // Category path array'i varsa, seçili kategori ID'sini kullan
+          if (process.env.NODE_ENV === 'development') {
+            logger.info('🔍 Debug - Using categoryPath filter:', filters.categoryPath);
+          }
           if (filters.categoryPath.length > 0) {
-            const firstCategory = filters.categoryPath[0];
-            // Kategori isminden ID'ye çevir
-            const categoryIdMapping = {
-              'Elektronik': 1,
-              'Araç & Vasıta': 2,
-              'Emlak': 3,
-              'Moda': 4,
-              'Ev & Yaşam': 5,
-              'Eğitim & Kitap': 6,
-              'Hizmetler': 7,
-              'Spor & Outdoor': 8,
-              'Sanat & Hobi': 9,
-              'Anne & Bebek': 10,
-              'Oyun & Eğlence': 11,
-              'Seyahat': 12,
-              'Kripto & Finans': 13
-            };
+            // Son seçili kategori ID'sini al (en spesifik kategori)
+            const selectedCategory = filters.categoryPath[filters.categoryPath.length - 1];
+            if (process.env.NODE_ENV === 'development') {
+              logger.info('🔍 Debug - Using selected category:', selectedCategory);
+            }
             
-            const categoryId = categoryIdMapping[firstCategory as keyof typeof categoryIdMapping];
-            logger.info('🔍 Debug - Mapping attempt:', { firstCategory, categoryId, mapping: categoryIdMapping });
-            if (categoryId) {
-              logger.info('🔍 Debug - Mapped category name to ID:', firstCategory, '->', categoryId);
-              searchQuery.bool.filter.push({ term: { category_id: categoryId } });
-            } else {
-              logger.warn('⚠️ Debug - Unknown category name:', firstCategory);
+            // Kategori objesi veya string olabilir
+            let selectedCategoryId = null;
+            if (typeof selectedCategory === 'object' && selectedCategory !== null) {
+              selectedCategoryId = selectedCategory.id;
+            } else if (typeof selectedCategory === 'string' || typeof selectedCategory === 'number') {
+              selectedCategoryId = selectedCategory;
+            }
+            
+            if (process.env.NODE_ENV === 'development') {
+              logger.info('🔍 Debug - Extracted category ID:', selectedCategoryId);
+            }
+            
+            // Null check ekle
+            if (selectedCategoryId && selectedCategoryId !== null) {
+              // Seçili kategori ID'si category_path array'inde var mı kontrol et
+              searchQuery.bool.filter.push({ 
+                match: { 
+                  "category_path": parseInt(selectedCategoryId) 
+                } 
+              });
             }
           }
         } else if (filters.category) {
@@ -688,9 +699,9 @@ export class AdminElasticsearchService {
           searchQuery.bool.filter.push({ term: { 'location.province': filters.location } });
         }
       if (filters.minBudget || filters.maxBudget) {
-          const rangeQuery: any = { range: { 'budget.min': {} } };
-          if (filters.minBudget) rangeQuery.range['budget.min'].gte = filters.minBudget;
-          if (filters.maxBudget) rangeQuery.range['budget.min'].lte = filters.maxBudget;
+          const rangeQuery: any = { range: { budget: {} } };
+          if (filters.minBudget) rangeQuery.range.budget.gte = filters.minBudget;
+          if (filters.maxBudget) rangeQuery.range.budget.lte = filters.maxBudget;
           searchQuery.bool.filter.push(rangeQuery);
         }
         if (filters.condition) {
@@ -727,20 +738,22 @@ export class AdminElasticsearchService {
         sortQuery.push({ created_at: { order: 'desc' } });
       }
 
-      logger.info('🔍 Elasticsearch search query:', JSON.stringify({
-        index: this.defaultIndexName,
-        body: {
-          query: searchQuery,
-          sort: sortQuery,
-          from: (page - 1) * limit,
-          size: limit,
-          aggs: {
-            categories: {
-              terms: { field: 'category_id', size: 20 }
+      if (process.env.NODE_ENV === 'development') {
+        logger.info('🔍 Elasticsearch search query:', JSON.stringify({
+          index: this.defaultIndexName,
+          body: {
+            query: searchQuery,
+            sort: sortQuery,
+            from: (page - 1) * limit,
+            size: limit,
+            aggs: {
+              categories: {
+                terms: { field: 'category_id', size: 20 }
+              }
             }
           }
-        }
-      }, null, 2));
+        }, null, 2));
+      }
       
       // Debug için detaylı query log'u
       logger.info('🔍 Raw searchQuery:', JSON.stringify(searchQuery, null, 2));
@@ -814,6 +827,21 @@ export class AdminElasticsearchService {
 
   // Transform listing to SearchOptimizedListing format
   private transformListingForElasticsearch(listing: any): SearchOptimizedListing {
+    // Debug: Log raw listing data
+    logger.info(`🔍 Raw listing data for ${listing.id}:`, JSON.stringify(listing, null, 2));
+
+    // Validate required fields with fallbacks
+    if (!listing.id) {
+      logger.error('❌ Missing id for listing:', listing);
+      throw new Error('Listing id is required');
+    }
+
+    // Use fallbacks for missing category data
+    const categoryId = listing.category_id || null;
+    const categoryPath = listing.category_path || [];
+
+    logger.info(`🔍 Transforming listing ${listing.id} for Elasticsearch with category_id: ${categoryId}, category_path: ${JSON.stringify(categoryPath)}`);
+
     // Parse location details - düzeltilmiş
     let location;
     if (typeof listing.location === 'string') {
@@ -840,12 +868,8 @@ export class AdminElasticsearchService {
       };
     }
 
-    // Parse budget details
-    const budget = {
-      min: listing.budget || 0,
-      max: listing.budget || 0,
-      currency: 'TRY'
-    };
+    // Parse budget details - convert to integer for Elasticsearch
+    const budget = listing.budget || 0;
 
     // Parse attributes
     const attributes = listing.attributes || {};
@@ -862,8 +886,8 @@ export class AdminElasticsearchService {
       title: listing.title,
       description: listing.description,
       category: listing.category,
-      category_id: listing.category_id || null,        // ✅ Yeni alan
-      category_path: listing.category_id ? [listing.category_id] : [], // ✅ Sadece ilgili kategori ID'si
+      category_id: categoryId,        // ✅ Fallback ile
+      category_path: categoryPath, // ✅ Fallback ile
       subcategory: listing.subcategory,
       budget,
       location,

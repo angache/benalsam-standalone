@@ -418,6 +418,8 @@ export const listingsController = {
         description: listing.description,
         price: listing.budget || 0,
         category: listing.category,
+        category_id: listing.category_id, // ✅ category_id eklendi
+        category_path: listing.category_path, // ✅ category_path eklendi
         status: listing.status?.toUpperCase() || 'PENDING',
         views: listing.views_count || 0,
         favorites: listing.favorites_count || 0,

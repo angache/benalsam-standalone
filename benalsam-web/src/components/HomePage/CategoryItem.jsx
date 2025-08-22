@@ -27,7 +27,15 @@ const CategoryItem = ({ category, level = 0, onSelect, selectedPath = [], getCat
   const handleSelect = (e) => {
     e.stopPropagation();
     const fullPath = [...parentPath, category.name];
-    onSelect(category, level, fullPath);
+    
+    // Kategori objesine ID ekle
+    const categoryWithId = {
+      ...category,
+      id: category.id || null // Eğer yoksa null bırak, HomePage'de bulacak
+    };
+    
+    console.log('🔍 CategoryItem handleSelect - Category:', categoryWithId, 'Level:', level, 'FullPath:', fullPath);
+    onSelect(categoryWithId, level, fullPath);
   };
 
   const handleToggle = (e) => {

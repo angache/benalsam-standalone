@@ -94,7 +94,6 @@ export const searchListingsWithElasticsearch = async (
       .from('listings')
       .select('*')
       .in('id', listingIds)
-      .eq('status', 'active')
       .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
 
     if (error) {

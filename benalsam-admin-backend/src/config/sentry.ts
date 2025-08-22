@@ -2,6 +2,12 @@ import * as Sentry from '@sentry/node';
 import { Express } from 'express';
 
 export const initializeSentry = (app: Express) => {
+  // Sentry'yi tamamen kapatmak için
+  if (process.env.DISABLE_SENTRY === 'true') {
+    console.log('🚫 Sentry disabled');
+    return;
+  }
+  
   // Sentry initialization
   Sentry.init({
     dsn: process.env.SENTRY_DSN || '',
@@ -10,7 +16,7 @@ export const initializeSentry = (app: Express) => {
     // Performance Monitoring
     tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
     // Enable debug mode in development
-    debug: process.env.NODE_ENV === 'development',
+    debug: process.env.SENTRY_DEBUG === 'true', // Sadece SENTRY_DEBUG=true olduğunda açık
     // Before send function to filter events
     beforeSend(event) {
       // Filter out health check errors

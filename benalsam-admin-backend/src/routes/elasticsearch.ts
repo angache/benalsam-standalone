@@ -51,6 +51,7 @@ router.post('/debug/clear-all-listings', developmentOnly, (req, res) => elastics
 
 // Index Management Routes
 router.post('/create-index', (req, res) => elasticsearchController.createIndex(req, res));
+router.delete('/delete-index', (req, res) => elasticsearchController.deleteIndex(req, res));
 router.post('/reindex', (req, res) => elasticsearchController.reindexAll(req, res));
 
 export default router; 
