@@ -29,6 +29,7 @@ export default defineConfig({
 		cors: true,
 		strictPort: true,
 		hmr: true, // Hot Module Replacement etkinleştir
+		force: true, // Force reload on changes
 		allowedHosts: [
 			'benalsam.com',
 			'www.benalsam.com',
@@ -41,12 +42,21 @@ export default defineConfig({
 			interval: 1000, // 1 saniye aralıklarla kontrol et
 		},
 		headers: {
-			// Cache headers for static assets
+			// Disable cache in development - Chrome specific
 			'*.js': {
-				'Cache-Control': 'public, max-age=31536000, immutable',
+				'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+				'Pragma': 'no-cache',
+				'Expires': '0',
+			},
+			'*.jsx': {
+				'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+				'Pragma': 'no-cache',
+				'Expires': '0',
 			},
 			'*.css': {
-				'Cache-Control': 'public, max-age=31536000, immutable',
+				'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+				'Pragma': 'no-cache',
+				'Expires': '0',
 			},
 			'*.png': {
 				'Cache-Control': 'public, max-age=31536000, immutable',
@@ -70,10 +80,9 @@ export default defineConfig({
 	},
 	resolve: {
 		extensions: ['.jsx', '.js', '.tsx', '.ts', '.json'],
-		alias: {
-			'@': path.resolve(__dirname, './src'),
-			'benalsam-shared-types': path.resolve(__dirname, '../benalsam-shared-types/dist-esm'),
-		},
+			alias: {
+		'@': path.resolve(__dirname, './src'),
+	},
 	},
 	// Cache directory configuration for Docker
 	cacheDir: process.env.VITE_CACHE_DIR || 'node_modules/.vite',

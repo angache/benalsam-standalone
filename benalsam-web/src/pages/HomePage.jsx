@@ -36,6 +36,7 @@ const PersonalizedFeed = lazy(() => import('@/components/PersonalizedFeed'));
 
 // Lazy load analytics hook
 const useGoogleAnalytics = lazy(() => import('@/hooks/useGoogleAnalytics'));
+import AISuggestions from '@/components/AISuggestions.jsx';
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -75,6 +76,20 @@ const LoadingFallback = () => (
   const [initialListings, setInitialListings] = useState([]);
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isTabletSidebarOpen, setIsTabletSidebarOpen] = useState(false);
+  const [showAISuggestions, setShowAISuggestions] = useState(false);
+  const [selectedCategoryForAI, setSelectedCategoryForAI] = useState(null);
+
+  // Click outside handler for AI suggestions
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showAISuggestions && !event.target.closest('.ai-suggestions-container')) {
+        setShowAISuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showAISuggestions]);
 
         // Load initial listings with limit for faster loading
   useEffect(() => {
@@ -114,7 +129,12 @@ const LoadingFallback = () => (
       } = useHomePageData({ initialListings, currentUser });
 
       // Kategori sayılarını hesapla
-      const { getCategoryCount, isLoading: isLoadingCounts } = useCategoryCounts(displayedListings);
+      const { getCategoryCount, isLoading: isLoadingCounts } = useCategoryCounts();
+      
+      // Memoize getCategoryCount to prevent unnecessary re-renders
+      const memoizedGetCategoryCount = useCallback((categoryPath) => {
+        return getCategoryCount(categoryPath);
+      }, [getCategoryCount]);
       
       // Pagination hook'u
       const {
@@ -199,6 +219,22 @@ const LoadingFallback = () => (
 
       const selectedCategoryPath = useMemo(() => selectedCategories.map(c => c.name), [selectedCategories]);
 
+      const handleAISuggestionClick = useCallback((suggestion) => {
+        console.log('🤖 AI Suggestion clicked:', suggestion);
+        
+        if (suggestion.type === 'category' && suggestion.category) {
+          // Kategori önerisi tıklandığında
+          setSelectedCategoryForAI(suggestion.category.id);
+          handleCategorySelect([suggestion.category]);
+        } else {
+          // Arama önerisi tıklandığında
+          setLocalSearchQuery(suggestion.text);
+          navigate(`/arama?q=${encodeURIComponent(suggestion.text)}`);
+        }
+        
+        setShowAISuggestions(false);
+      }, [handleCategorySelect, navigate]);
+
       const handleCategoryClick = useCallback((category, level, fullPath) => {
         const newPath = selectedCategories.slice(0, level);
         
@@ -278,7 +314,7 @@ const LoadingFallback = () => (
                 handleCategorySelect={handleCategorySelect}
                 clearFilters={clearFilters}
                 isAnyFilterActive={isAnyFilterActive}
-                getCategoryCount={getCategoryCount}
+                getCategoryCount={memoizedGetCategoryCount}
                 isLoadingCounts={isLoadingCounts}
               />
             </TabletSidebar>
@@ -302,7 +338,7 @@ const LoadingFallback = () => (
                   handleCategorySelect={handleCategorySelect}
                   clearFilters={clearFilters}
                   isAnyFilterActive={isAnyFilterActive}
-                  getCategoryCount={getCategoryCount}
+                  getCategoryCount={memoizedGetCategoryCount}
                   isLoadingCounts={isLoadingCounts}
                 />
               </Suspense>
@@ -336,12 +372,29 @@ const LoadingFallback = () => (
                     placeholder="Aradığınız ürünü veya hizmeti yazın..."
                     className="w-full pl-4 pr-12 py-6 text-base"
                     value={localSearchQuery}
-                    onChange={(e) => setLocalSearchQuery(e.target.value)}
+                    onChange={(e) => {
+                      setLocalSearchQuery(e.target.value);
+                      setShowAISuggestions(e.target.value.length > 0);
+                    }}
+                    onFocus={() => setShowAISuggestions(true)}
                   />
                   <Button type="submit" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10">
                     <Search className="text-primary-foreground" />
                   </Button>
                 </form>
+                
+                {/* AI Suggestions */}
+                {showAISuggestions && (
+                  <div className="absolute z-50 w-full mt-1 ai-suggestions-container">
+                    <AISuggestions
+                      query={localSearchQuery}
+                      categoryId={selectedCategoryForAI}
+                      onSuggestionClick={handleAISuggestionClick}
+                      maxSuggestions={8}
+                      className="shadow-lg"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Hero Section - Modern E-ticaret Tarzı */}

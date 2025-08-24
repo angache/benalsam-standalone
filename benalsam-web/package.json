@@ -43,7 +43,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^5.0.0",
-    "benalsam-shared-types": "^1.0.4",
+    "benalsam-shared-types": "^1.0.5",
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",

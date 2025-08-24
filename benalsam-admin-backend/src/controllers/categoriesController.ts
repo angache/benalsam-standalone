@@ -91,6 +91,9 @@ export const categoriesController = {
 
       const category = await categoryService.createCategory(createData);
 
+      // Invalidate category cache
+      await categoryService.invalidateAllCategoryCaches();
+
       // Admin aktivite logunu kaydet
       await categoriesController.logCategoryActivity(admin, 'CREATE_CATEGORY', category.path, createData);
 
@@ -118,6 +121,9 @@ export const categoriesController = {
       logger.info(`Updating category ${id}`, { admin: admin?.email });
 
       const category = await categoryService.updateCategory(id, updateData);
+
+      // Invalidate category cache
+      await categoryService.invalidateAllCategoryCaches();
 
       // Admin aktivite logunu kaydet
       await categoriesController.logCategoryActivity(admin, 'UPDATE_CATEGORY', category.path, updateData);
@@ -149,6 +155,9 @@ export const categoriesController = {
       const categoryPath = category?.path || id;
 
       await categoryService.deleteCategory(id);
+
+      // Invalidate category cache
+      await categoryService.invalidateAllCategoryCaches();
 
       // Admin aktivite logunu kaydet
       await categoriesController.logCategoryActivity(admin, 'DELETE_CATEGORY', categoryPath);

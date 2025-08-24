@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 // Kategori ID mapping'i
@@ -51,10 +51,13 @@ export const useCategoryCounts = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Local storage cache functions
-  const CACHE_KEY = 'category_counts_cache';
-  const CACHE_TTL = 5 * 60 * 1000; // 5 dakika
+  const CACHE_KEY = 'category_counts_cache_v4';
+  const CACHE_TTL = 10 * 60 * 1000; // 10 dakika
+  const RATE_LIMIT = 30 * 1000; // 30 saniye
+  const lastFetchTime = useRef(0);
+  const isInitialized = useRef(false);
 
-  const getCachedCategoryCounts = () => {
+  const getCachedCategoryCounts = useCallback(() => {
     try {
       const cached = localStorage.getItem(CACHE_KEY);
       if (!cached) return null;
@@ -72,9 +75,9 @@ export const useCategoryCounts = () => {
       console.error('Error reading from cache:', error);
       return null;
     }
-  };
+  }, []);
 
-  const setCachedCategoryCounts = (data) => {
+  const setCachedCategoryCounts = useCallback((data) => {
     try {
       const cacheData = {
         data,
@@ -84,10 +87,10 @@ export const useCategoryCounts = () => {
     } catch (error) {
       console.error('Error writing to cache:', error);
     }
-  };
+  }, []);
 
   // Elasticsearch'ten category counts çek
-  const fetchCategoryCountsFromElasticsearch = async () => {
+  const fetchCategoryCountsFromElasticsearch = useCallback(async () => {
     try {
       const ADMIN_BACKEND_URL = import.meta.env.VITE_ADMIN_BACKEND_URL || 'http://localhost:3002';
       const response = await fetch(`${ADMIN_BACKEND_URL}/api/v1/elasticsearch/category-counts`);
@@ -101,10 +104,10 @@ export const useCategoryCounts = () => {
       console.error('Elasticsearch category counts error:', error);
     }
     return null;
-  };
+  }, []);
 
   // Supabase'den category counts çek (fallback)
-  const fetchCategoryCountsFromSupabase = async () => {
+  const fetchCategoryCountsFromSupabase = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('listings')
@@ -125,17 +128,27 @@ export const useCategoryCounts = () => {
       console.error('Supabase category counts error:', error);
       return {};
     }
-  };
+  }, []);
 
   // Ana fetch fonksiyonu
-  const fetchCategoryCounts = async () => {
+  const fetchCategoryCounts = useCallback(async () => {
     try {
+      // Rate limiting kontrol
+      const now = Date.now();
+      if (now - lastFetchTime.current < RATE_LIMIT) {
+        console.log('⏱️ Rate limit active, using cached data');
+        const cached = getCachedCategoryCounts();
+        if (cached) return cached;
+      }
+
       // 1. Local cache kontrol
       const localCached = getCachedCategoryCounts();
       if (localCached) {
         console.log('📦 Category counts loaded from local cache');
         return localCached;
       }
+      
+      lastFetchTime.current = now;
       
       // 2. Elasticsearch'ten çek
       const elasticsearchCounts = await fetchCategoryCountsFromElasticsearch();
@@ -158,10 +171,10 @@ export const useCategoryCounts = () => {
       console.error('Error in fetchCategoryCounts:', error);
       return {};
     }
-  };
+  }, [getCachedCategoryCounts, fetchCategoryCountsFromElasticsearch, fetchCategoryCountsFromSupabase]);
 
   // Kategori path'ine göre sayı getir (ID tabanlı)
-  const getCategoryCount = (categoryPath) => {
+  const getCategoryCount = useCallback((categoryPath) => {
     if (!categoryPath || categoryPath.length === 0) {
       // Tüm ilanlar için toplam sayı
       return Object.values(categoryCounts).reduce((sum, count) => sum + count, 0);
@@ -172,7 +185,6 @@ export const useCategoryCounts = () => {
     
     if (categoryId) {
       const count = categoryCounts[categoryId] || 0;
-      console.log('🔍 getCategoryCount - Path:', fullPath, 'ID:', categoryId, 'Count:', count);
       return count;
     }
     
@@ -184,12 +196,11 @@ export const useCategoryCounts = () => {
       }
     });
     
-    console.log('🔍 getCategoryCount - Path:', fullPath, 'Count:', totalCount);
     return totalCount;
-  };
+  }, [categoryCounts]);
 
   // Alt kategorileri getir
-  const getSubcategories = (parentPath = []) => {
+  const getSubcategories = useCallback((parentPath = []) => {
     const parentString = parentPath.join(' > ');
     const subcategories = [];
     
@@ -207,24 +218,48 @@ export const useCategoryCounts = () => {
     });
 
     return subcategories;
-  };
+  }, [categoryCounts]);
+
+  // Memoize category ID mapping
+  const categoryIdMapping = useMemo(() => CATEGORY_ID_MAPPING, []);
 
   useEffect(() => {
     const loadCategoryCounts = async () => {
+      if (isInitialized.current) return;
+      
       setIsLoading(true);
       const counts = await fetchCategoryCounts();
       setCategoryCounts(counts);
       setIsLoading(false);
+      isInitialized.current = true;
     };
     
     loadCategoryCounts();
-  }, []);
+  }, [fetchCategoryCounts]);
+
+  // Memoize total listings
+  const totalListings = useMemo(() => 
+    Object.values(categoryCounts).reduce((sum, count) => sum + count, 0), 
+    [categoryCounts]
+  );
 
   return {
     categoryCounts,
     getCategoryCount,
     getSubcategories,
     isLoading,
-    totalListings: Object.values(categoryCounts).reduce((sum, count) => sum + count, 0)
+    totalListings,
+    clearCache: () => {
+      localStorage.removeItem(CACHE_KEY);
+      isInitialized.current = false;
+    },
+    refresh: async () => {
+      isInitialized.current = false;
+      lastFetchTime.current = 0;
+      setIsLoading(true);
+      const counts = await fetchCategoryCounts();
+      setCategoryCounts(counts);
+      setIsLoading(false);
+    }
   };
 };

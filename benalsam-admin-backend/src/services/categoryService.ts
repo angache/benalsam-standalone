@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import logger from '../config/logger';
+import cacheManager from './cacheManager';
 
 // Lazy Supabase client
 let supabase: any = null;
@@ -93,6 +94,15 @@ export const categoryService = {
   // Get all categories with tree structure
   async getCategories(): Promise<Category[]> {
     try {
+      // Try to get from cache first
+      const cacheKey = 'categories_tree';
+      const cachedCategories = await cacheManager.get(cacheKey);
+      
+      if (cachedCategories) {
+        logger.info('📦 Categories loaded from cache');
+        return cachedCategories;
+      }
+
       logger.info('Fetching categories from Supabase');
 
       const { data: categories, error } = await getSupabaseClient()
@@ -118,6 +128,9 @@ export const categoryService = {
         ...category,
         stats: this.calculateCategoryStats(category)
       }));
+
+      // Cache the result for 30 minutes
+      await cacheManager.set(cacheKey, categoriesWithStats, 30 * 60 * 1000);
 
       logger.info(`Fetched ${categoriesWithStats.length} main categories`);
       return categoriesWithStats;
@@ -512,5 +525,35 @@ export const categoryService = {
     };
 
     return countRecursive(category);
+  },
+
+  // Cache invalidation methods
+  async invalidateCategoriesCache(): Promise<void> {
+    try {
+      await cacheManager.delete('categories_tree');
+      logger.info('🗑️ Categories cache invalidated');
+    } catch (error) {
+      logger.error('Error invalidating categories cache:', error);
+    }
+  },
+
+  async invalidateCategoryCache(categoryId: number): Promise<void> {
+    try {
+      await cacheManager.delete(`category_${categoryId}`);
+      await cacheManager.delete('categories_tree');
+      logger.info(`🗑️ Category ${categoryId} cache invalidated`);
+    } catch (error) {
+      logger.error('Error invalidating category cache:', error);
+    }
+  },
+
+  async invalidateAllCategoryCaches(): Promise<void> {
+    try {
+      await cacheManager.delete('categories_tree');
+      await cacheManager.delete('category_counts');
+      logger.info('🗑️ All category caches invalidated');
+    } catch (error) {
+      logger.error('Error invalidating all category caches:', error);
+    }
   }
 }; 

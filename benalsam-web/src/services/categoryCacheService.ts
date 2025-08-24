@@ -1,107 +1,212 @@
 import { Category } from 'benalsam-shared-types';
 
-class CategoryCacheService {
-  private readonly CACHE_KEY = 'categories_v1.1.0';
-  private readonly CACHE_TTL = 24 * 60 * 60 * 1000; // 24 saat
+// Cache configuration
+const CACHE_KEY = 'benalsam_categories_v1.2.0';
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+const RATE_LIMIT = 60 * 1000; // 1 minute between API calls
 
-  // Cache'den kategorileri al
+interface CachedData {
+  data: Category[];
+  timestamp: number;
+  version: string;
+}
+
+class CategoryCacheService {
+  private lastFetchTime = 0;
+  private isFetching = false;
+
+  /**
+   * Get categories from cache or API
+   */
   async getCategories(): Promise<Category[]> {
     try {
-      const cached = localStorage.getItem(this.CACHE_KEY);
-      if (cached) {
-        const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < this.CACHE_TTL) {
-          console.log('📦 Categories loaded from cache');
-          return data;
-        }
+      // Check if we're already fetching
+      if (this.isFetching) {
+        console.log('⏳ Category fetch already in progress, waiting...');
+        // Wait for current fetch to complete
+        await this.waitForFetch();
+        return this.getCachedData();
       }
-      
-      // Cache yoksa veya expired ise API'den çek
-      console.log('🔄 Fetching categories from API...');
-      return await this.fetchCategoriesFromAPI();
-    } catch (error) {
-      console.error('❌ Category cache error:', error);
-      return await this.fetchCategoriesFromAPI();
-    }
-  }
 
-  // API'den kategorileri çek ve cache'le
-  private async fetchCategoriesFromAPI(): Promise<Category[]> {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/categories`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // Check rate limiting
+      const now = Date.now();
+      if (now - this.lastFetchTime < RATE_LIMIT) {
+        console.log('⏱️ Rate limit active, using cached data');
+        return this.getCachedData();
       }
-      
-      const result = await response.json();
-      
-      if (result.success && result.data) {
-        // Cache'e kaydet
-        localStorage.setItem(this.CACHE_KEY, JSON.stringify({
-          data: result.data,
-          timestamp: Date.now()
-        }));
-        
-        console.log('✅ Categories cached successfully');
-        return result.data;
+
+      // Try to get from cache first
+      const cached = this.getCachedData();
+      if (cached && cached.length > 0) {
+        console.log('📦 Categories loaded from cache');
+        return cached;
       }
-      
-      throw new Error('Failed to fetch categories from API');
+
+      // Fetch from API
+      return await this.fetchFromAPI();
     } catch (error) {
-      console.error('❌ API fetch error:', error);
+      console.error('❌ Error in getCategories:', error);
+      
+      // Fallback to cached data if available
+      const cached = this.getCachedData();
+      if (cached && cached.length > 0) {
+        console.log('🔄 Falling back to cached data');
+        return cached;
+      }
+      
       throw error;
     }
   }
 
-  // Cache'i temizle
-  clearCache(): void {
-    localStorage.removeItem(this.CACHE_KEY);
-    console.log('🗑️ Category cache cleared');
-  }
+  /**
+   * Fetch categories from API
+   */
+  private async fetchFromAPI(): Promise<Category[]> {
+    this.isFetching = true;
+    this.lastFetchTime = Date.now();
 
-  // Cache durumunu kontrol et
-  isCached(): boolean {
-    const cached = localStorage.getItem(this.CACHE_KEY);
-    if (!cached) return false;
-    
     try {
-      const { timestamp } = JSON.parse(cached);
-      return Date.now() - timestamp < this.CACHE_TTL;
-    } catch {
-      return false;
-    }
-  }
-
-  // Cache'deki veriyi getir (API çağrısı yapmadan)
-  getCachedData(): Category[] | null {
-    try {
-      const cached = localStorage.getItem(this.CACHE_KEY);
-      if (!cached) return null;
+      console.log('🌐 Fetching categories from API...');
       
-      const { data, timestamp } = JSON.parse(cached);
-      if (Date.now() - timestamp < this.CACHE_TTL) {
-        return data;
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/categories`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      return null;
-    } catch {
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.message || 'API returned error');
+      }
+      
+      const categories = result.data;
+      
+      // Cache the data
+      this.setCachedData(categories);
+      
+      console.log(`✅ Fetched ${categories.length} categories from API`);
+      return categories;
+    } catch (error) {
+      console.error('❌ Error fetching from API:', error);
+      throw error;
+    } finally {
+      this.isFetching = false;
+    }
+  }
+
+  /**
+   * Get cached data from localStorage
+   */
+  private getCachedData(): Category[] | null {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (!cached) return null;
+
+      const parsed: CachedData = JSON.parse(cached);
+      
+      // Check if cache is expired
+      if (Date.now() - parsed.timestamp > CACHE_TTL) {
+        console.log('⏰ Cache expired, will fetch fresh data');
+        return null;
+      }
+
+      // Check version compatibility
+      if (parsed.version !== 'v1.2.0') {
+        console.log('🔄 Cache version mismatch, clearing cache');
+        this.clearCache();
+        return null;
+      }
+
+      return parsed.data;
+    } catch (error) {
+      console.error('❌ Error reading cache:', error);
+      this.clearCache();
       return null;
     }
   }
 
-  // Cache TTL'ini kontrol et
-  getCacheAge(): number {
+  /**
+   * Set data in cache
+   */
+  private setCachedData(categories: Category[]): void {
     try {
-      const cached = localStorage.getItem(this.CACHE_KEY);
-      if (!cached) return -1;
+      const cacheData: CachedData = {
+        data: categories,
+        timestamp: Date.now(),
+        version: 'v1.2.0'
+      };
       
-      const { timestamp } = JSON.parse(cached);
-      return Date.now() - timestamp;
-    } catch {
-      return -1;
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+      console.log('💾 Categories cached successfully');
+    } catch (error) {
+      console.error('❌ Error setting cache:', error);
+    }
+  }
+
+  /**
+   * Clear cache
+   */
+  clearCache(): void {
+    try {
+      localStorage.removeItem(CACHE_KEY);
+      console.log('🗑️ Category cache cleared');
+    } catch (error) {
+      console.error('❌ Error clearing cache:', error);
+    }
+  }
+
+  /**
+   * Refresh cache (force fetch from API)
+   */
+  async refresh(): Promise<Category[]> {
+    console.log('🔄 Forcing category refresh...');
+    this.clearCache();
+    this.lastFetchTime = 0;
+    return await this.fetchFromAPI();
+  }
+
+  /**
+   * Wait for current fetch to complete
+   */
+  private async waitForFetch(): Promise<void> {
+    return new Promise((resolve) => {
+      const checkFetching = () => {
+        if (!this.isFetching) {
+          resolve();
+        } else {
+          setTimeout(checkFetching, 100);
+        }
+      };
+      checkFetching();
+    });
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getCacheStats(): { hasCache: boolean; cacheAge: number | null; cacheSize: number } {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (!cached) {
+        return { hasCache: false, cacheAge: null, cacheSize: 0 };
+      }
+
+      const parsed: CachedData = JSON.parse(cached);
+      const cacheAge = Date.now() - parsed.timestamp;
+      const cacheSize = cached.length;
+
+      return {
+        hasCache: true,
+        cacheAge,
+        cacheSize
+      };
+    } catch (error) {
+      return { hasCache: false, cacheAge: null, cacheSize: 0 };
     }
   }
 }
 
+// Export singleton instance
 export const categoryCacheService = new CategoryCacheService();
+export default categoryCacheService;

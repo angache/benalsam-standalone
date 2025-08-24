@@ -1,11 +1,11 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { Filter, Settings, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { categoriesConfig } from '@/config/categories';
+import categoryCacheService from '@/services/categoryCacheService';
 
 // Lazy load components
 const CategorySearch = React.lazy(() => import('./CategorySearch'));
@@ -30,6 +30,26 @@ const SidebarContent = ({
   getCategoryCount,
   isLoadingCounts
 }) => {
+  const [categories, setCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  // Load categories from cache service
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        const fetchedCategories = await categoryCacheService.getCategories();
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        setCategories([]);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
   return (
     <div className="p-4 rounded-lg bg-card border shadow-sm hover:shadow-md transition-shadow duration-200 pb-8">
       <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
@@ -39,7 +59,7 @@ const SidebarContent = ({
       
       <Suspense fallback={<LoadingFallback />}>
         <CategorySearch
-          categories={categoriesConfig}
+          categories={categories}
           onSelect={handleCategoryClick}
           selectedPath={selectedCategoryPath}
           getCategoryCount={getCategoryCount}
@@ -63,17 +83,23 @@ const SidebarContent = ({
             </span>
           </div>
           <Suspense fallback={<LoadingFallback />}>
-            {categoriesConfig.map(cat => (
-              <CategoryItem 
-                key={cat.name} 
-                category={cat} 
-                onSelect={handleCategoryClick} 
-                selectedPath={selectedCategoryPath}
-                parentPath={[]}
-                getCategoryCount={getCategoryCount}
-                isLoadingCounts={isLoadingCounts}
-              />
-            ))}
+            {isLoadingCategories ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              categories.map(cat => (
+                <CategoryItem 
+                  key={cat.id} 
+                  category={cat} 
+                  onSelect={handleCategoryClick} 
+                  selectedPath={selectedCategoryPath}
+                  parentPath={[]}
+                  getCategoryCount={getCategoryCount}
+                  isLoadingCounts={isLoadingCounts}
+                />
+              ))
+            )}
           </Suspense>
         </div>
       </div>

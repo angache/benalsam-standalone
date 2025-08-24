@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores';
 import PageErrorBoundary from '@/components/ErrorBoundaries/PageErrorBoundary';
 
 // Lazy loaded components for code splitting
-const HomePage = lazy(() => import('@/pages/HomePage'));
+import HomePage from '@/pages/HomePage';
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const InventoryPage = lazy(() => import('@/pages/InventoryPage'));
 const MyListingsPage = lazy(() => import('@/pages/MyListingsPage'));
