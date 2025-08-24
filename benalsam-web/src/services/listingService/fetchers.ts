@@ -3,35 +3,84 @@ import { toast } from '@/components/ui/use-toast';
 import { addPremiumSorting, processFetchedListings } from './core';
 import { getListingHistory, getLastSearch } from '@/services/userActivityService';
 import { Listing, ApiResponse, QueryFilters } from '@/types';
+import { searchListingsWithElasticsearch } from '@/services/elasticsearchService';
 
-export const fetchListings = async (currentUserId: string | null = null): Promise<Listing[]> => {
+export const fetchListings = async (
+  currentUserId: string | null = null, 
+  options: { page?: number; limit?: number } = {}
+): Promise<{ listings: Listing[]; total: number; hasMore: boolean }> => {
   try {
+    const { page = 1, limit = 24 } = options;
+    console.log('🔍 fetchListings - Using Elasticsearch', { page, limit });
+    
+    // Elasticsearch'ten çek
+    const searchParams = {
+      query: '',
+      filters: {},
+      sort: {
+        field: 'created_at',
+        order: 'desc'
+      },
+      page,
+      limit
+    };
+
+    const result = await searchListingsWithElasticsearch(searchParams, currentUserId);
+    
+    if (result.data && result.data.length > 0) {
+      console.log('✅ fetchListings - Found', result.data.length, 'listings from Elasticsearch, total:', result.total);
+      return {
+        listings: result.data,
+        total: result.total || 0,
+        hasMore: result.data.length === limit
+      };
+    }
+
+    // Fallback to Supabase
+    console.log('⚠️ fetchListings - Elasticsearch failed, falling back to Supabase');
+    
+    // Count total listings first
+    const { count: totalCount } = await supabase
+      .from('listings')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'active')
+      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
+
+    // Fetch paginated listings
+    const offset = (page - 1) * limit;
     let query = supabase
       .from('listings')
       .select('*')
       .eq('status', 'active')
-      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
+      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+      .range(offset, offset + limit - 1);
       
     query = addPremiumSorting(query).order('created_at', { ascending: false });
 
     const { data: listingsData, error: listingsError } = await query;
 
     if (listingsError) {
-      console.error('Error fetching listings:', listingsError);
+      console.error('Error fetching listings from Supabase:', listingsError);
       if (listingsError.message.toLowerCase().includes('failed to fetch')) {
         toast({ title: "Ağ Hatası", description: "İlanlar yüklenemedi. İnternet bağlantınızı kontrol edin.", variant: "destructive" });
       } else {
         toast({ title: "Veri Çekme Hatası", description: "İlanlar yüklenirken bir sorun oluştu.", variant: "destructive" });
       }
-      return [];
+      return { listings: [], total: 0, hasMore: false };
     }
 
-    return await processFetchedListings(listingsData, currentUserId);
+    const processedListings = await processFetchedListings(listingsData, currentUserId);
+    
+    return {
+      listings: processedListings,
+      total: totalCount || 0,
+      hasMore: offset + limit < (totalCount || 0)
+    };
 
   } catch (e) {
     console.error('Unexpected error in fetchListings:', e);
     toast({ title: "Beklenmedik İlan Hatası", description: "İlanlar yüklenirken beklenmedik bir sorun oluştu.", variant: "destructive" });
-    return [];
+    return { listings: [], total: 0, hasMore: false };
   }
 };
 

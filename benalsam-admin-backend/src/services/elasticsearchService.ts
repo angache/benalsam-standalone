@@ -663,11 +663,17 @@ export class AdminElasticsearchService {
             
             // Null check ekle
             if (selectedCategoryId && selectedCategoryId !== null) {
-              // Seçili kategori ID'si category_path array'inde var mı kontrol et
+              // Seçili kategori ID'si ve alt kategorilerini dahil et
               searchQuery.bool.filter.push({ 
-                match: { 
-                  "category_path": parseInt(selectedCategoryId) 
-                } 
+                bool: {
+                  should: [
+                    // Seçili kategori ID'si category_path array'inde var mı kontrol et
+                    { match: { "category_path": parseInt(selectedCategoryId) } },
+                    // Kategori ID'si category_id field'ında var mı kontrol et
+                    { term: { "category_id": parseInt(selectedCategoryId) } }
+                  ],
+                  minimum_should_match: 1
+                }
               });
             }
           }

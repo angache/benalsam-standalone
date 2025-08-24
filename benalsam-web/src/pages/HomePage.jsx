@@ -74,6 +74,7 @@ const LoadingFallback = () => (
   const [sortOption, setSortOption] = useState('created_at-desc');
   const [localSearchQuery, setLocalSearchQuery] = useState('');
   const [initialListings, setInitialListings] = useState([]);
+  const [totalListingsCount, setTotalListingsCount] = useState(0);
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isTabletSidebarOpen, setIsTabletSidebarOpen] = useState(false);
   const [showAISuggestions, setShowAISuggestions] = useState(false);
@@ -91,14 +92,20 @@ const LoadingFallback = () => (
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showAISuggestions]);
 
-        // Load initial listings with limit for faster loading
+        // Load initial listings with pagination
   useEffect(() => {
     const loadInitialListings = async () => {
       try {
         setIsLoadingInitial(true);
-        // Load only first 8 listings for faster initial render
-        const listings = await fetchListings(currentUser?.id, { limit: 8 });
-        setInitialListings(listings);
+        // Load first 24 listings for initial render
+        const result = await fetchListings(currentUser?.id, { page: 1, limit: 24 });
+        setInitialListings(result.listings);
+        setTotalListingsCount(result.total || 0);
+        console.log('🔍 Initial listings loaded:', { 
+          listingsCount: result.listings.length, 
+          total: result.total,
+          hasMore: result.hasMore 
+        });
       } catch (error) {
         console.error('Error loading initial listings:', error);
         toast({ 
@@ -119,6 +126,7 @@ const LoadingFallback = () => (
         filters,
         setFilters,
         displayedListings,
+        totalListings,
         isFiltering,
         hasMore,
         isLoadingMore,
@@ -136,19 +144,77 @@ const LoadingFallback = () => (
         return getCategoryCount(categoryPath);
       }, [getCategoryCount]);
       
-      // Pagination hook'u
-      const {
-        currentPage,
-        totalPages,
-        currentItems: paginatedListings,
-        goToPage,
-        hasNextPage,
-        hasPrevPage,
-        totalItems,
-        startIndex,
-        endIndex,
-        getPageNumbers
-      } = usePagination(displayedListings, 12); // Sayfa başına 12 ilan
+      // Pagination state
+      const [currentPage, setCurrentPage] = useState(1);
+      const [isLoadingPage, setIsLoadingPage] = useState(false);
+      
+      // Pagination hesaplamaları
+      const totalPages = Math.ceil(totalListingsCount / 24);
+      const hasNextPage = currentPage < totalPages;
+      const hasPrevPage = currentPage > 1;
+      const startIndex = (currentPage - 1) * 24 + 1;
+      const endIndex = Math.min(currentPage * 24, totalListingsCount);
+      
+      // Sayfa değiştirme fonksiyonu
+      const goToPage = useCallback(async (page) => {
+        if (page < 1 || page > totalPages || page === currentPage) return;
+        
+        setIsLoadingPage(true);
+        try {
+          const result = await fetchListings(currentUser?.id, { page, limit: 24 });
+          setInitialListings(result.listings);
+          setCurrentPage(page);
+          console.log('🔍 Page loaded:', { page, listingsCount: result.listings.length, total: result.total });
+        } catch (error) {
+          console.error('Error loading page:', error);
+          toast({ 
+            title: "Sayfa Yüklenemedi", 
+            description: "İlanlar yüklenirken bir sorun oluştu.", 
+            variant: "destructive" 
+          });
+        } finally {
+          setIsLoadingPage(false);
+        }
+      }, [currentPage, totalPages, currentUser?.id]);
+      
+      // Sayfa numaralarını hesapla
+      const getPageNumbers = useCallback(() => {
+        const pages = [];
+        const maxVisible = 5;
+        
+        if (totalPages <= maxVisible) {
+          for (let i = 1; i <= totalPages; i++) {
+            pages.push(i);
+          }
+        } else {
+          if (currentPage <= 3) {
+            for (let i = 1; i <= 4; i++) {
+              pages.push(i);
+            }
+            pages.push('...');
+            pages.push(totalPages);
+          } else if (currentPage >= totalPages - 2) {
+            pages.push(1);
+            pages.push('...');
+            for (let i = totalPages - 3; i <= totalPages; i++) {
+              pages.push(i);
+            }
+          } else {
+            pages.push(1);
+            pages.push('...');
+            for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+              pages.push(i);
+            }
+            pages.push('...');
+            pages.push(totalPages);
+          }
+        }
+        
+        return pages;
+      }, [currentPage, totalPages]);
+      
+      // Mevcut sayfadaki ilanları kullan
+      const paginatedListings = displayedListings;
 
       const sortedListings = useMemo(() => {
         if (!Array.isArray(paginatedListings)) return [];
@@ -284,6 +350,8 @@ const LoadingFallback = () => (
       if (isLoadingInitial) {
         return <SkeletonHomePage />;
       }
+
+
 
       return (
         <Suspense fallback={<LoadingFallback />}>
@@ -608,21 +676,52 @@ const LoadingFallback = () => (
               )}
 
               {/* Pagination */}
-              {!isFiltering && totalPages > 1 && (
+              {console.log('🔍 Pagination Debug:', { isFiltering, totalPages, totalListingsCount, displayedListingsLength: displayedListings.length, currentPage })}
+              {!isFiltering && totalListingsCount > 24 && (
                 <div className="mt-8">
-                  <Suspense fallback={<LoadingFallback />}>
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      onPageChange={goToPage}
-                      getPageNumbers={getPageNumbers}
-                      hasNextPage={hasNextPage}
-                      hasPrevPage={hasPrevPage}
-                      totalItems={totalItems}
-                      startIndex={startIndex}
-                      endIndex={endIndex}
-                    />
-                  </Suspense>
+                  {isLoadingPage ? (
+                    <div className="flex justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-muted-foreground">
+                        {startIndex}-{endIndex} / {totalListingsCount} ilan
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => goToPage(currentPage - 1)}
+                          disabled={!hasPrevPage}
+                        >
+                          Önceki
+                        </Button>
+                        
+                        {getPageNumbers().map((page, index) => (
+                          <Button
+                            key={index}
+                            variant={page === currentPage ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => typeof page === 'number' ? goToPage(page) : null}
+                            disabled={page === '...'}
+                          >
+                            {page}
+                          </Button>
+                        ))}
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => goToPage(currentPage + 1)}
+                          disabled={!hasNextPage}
+                        >
+                          Sonraki
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               
@@ -644,7 +743,7 @@ const LoadingFallback = () => (
                   <Suspense fallback={<LoadingFallback />}>
                     <FeaturedListings
                       title="Popüler İlanlar"
-                      fetchFunction={() => fetchListings(currentUser?.id)} // Changed to fetchListings
+                      fetchFunction={() => fetchListings(currentUser?.id, { page: 1, limit: 8 })} // Updated for pagination
                       currentUser={currentUser}
                       onToggleFavorite={handleToggleFavoriteClick}
                     />
@@ -657,7 +756,7 @@ const LoadingFallback = () => (
                   <Suspense fallback={<LoadingFallback />}>
                     <FeaturedListings
                       title="En Çok Teklif Alanlar"
-                      fetchFunction={() => fetchListings(currentUser?.id)} // Changed to fetchListings
+                      fetchFunction={() => fetchListings(currentUser?.id, { page: 1, limit: 8 })} // Updated for pagination
                       currentUser={currentUser}
                       onToggleFavorite={handleToggleFavoriteClick}
                     />
@@ -666,7 +765,7 @@ const LoadingFallback = () => (
                   <Suspense fallback={<LoadingFallback />}>
                     <FeaturedListings
                       title="Günün Fırsatları"
-                      fetchFunction={() => fetchListings(currentUser?.id)} // Changed to fetchListings
+                      fetchFunction={() => fetchListings(currentUser?.id, { page: 1, limit: 8 })} // Updated for pagination
                       currentUser={currentUser}
                       onToggleFavorite={handleToggleFavoriteClick}
                     />

@@ -1,6 +1,7 @@
 import { Router, IRouter } from 'express';
 import authRoutes from './auth';
 import { listingsRouter } from './listings';
+import { testListingsRouter } from './testListings';
 import { categoriesRouter } from './categories';
 import { usersRouter } from './users';
 import adminManagementRoutes from './admin-management';
@@ -28,6 +29,9 @@ router.use('/auth', authRoutes);
 
 // 2FA routes
 router.use('/2fa', twoFactorRouter);
+
+// Test Listings routes (no auth required)
+router.use('/test-listings', testListingsRouter);
 
 // Listings routes
 router.use('/listings', listingsRouter);

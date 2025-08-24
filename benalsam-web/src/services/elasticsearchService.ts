@@ -112,7 +112,10 @@ export const searchListingsWithElasticsearch = async (
       listings: sortedListings.length
     });
 
-    return { data: sortedListings };
+    return { 
+      data: sortedListings,
+      total: result.total 
+    };
 
   } catch (error) {
     console.error('❌ Unexpected error in Elasticsearch search:', error);

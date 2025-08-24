@@ -4,7 +4,7 @@ import { fetchFilteredListings } from '@/services/listingService/fetchers';
 import { searchListingsWithElasticsearch } from '@/services/elasticsearchService';
 import { saveLastSearch } from '@/services/userActivityService';
 import { supabase } from '@/lib/supabaseClient';
-const PAGE_SIZE = 16;
+const PAGE_SIZE = 24;
 
 export const useHomePageData = ({ initialListings, currentUser }) => {
   
@@ -17,6 +17,14 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
   });
 
   const [displayedListings, setDisplayedListings] = useState(() => initialListings || []);
+  
+  // initialListings değiştiğinde displayedListings'i güncelle
+  useEffect(() => {
+    if (initialListings && initialListings.length > 0) {
+      setDisplayedListings(initialListings);
+    }
+  }, [initialListings]);
+  const [totalListings, setTotalListings] = useState(0);
   const [isFiltering, setIsFiltering] = useState(false);
   const debounceTimeoutRef = useRef(null);
 
@@ -44,6 +52,18 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
       }
     };
     fetchNativeAds();
+  }, []);
+
+  // Listen for total listings count from main page
+  useEffect(() => {
+    const handleSetTotalListings = (event) => {
+      setTotalListings(event.detail);
+    };
+
+    window.addEventListener('setTotalListings', handleSetTotalListings);
+    return () => {
+      window.removeEventListener('setTotalListings', handleSetTotalListings);
+    };
   }, []);
 
   useEffect(() => {
@@ -82,7 +102,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
             query: '',
             filters: {
               category: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].name : undefined,
-              categoryPath: selectedCategories.map(c => c.id), // ✅ Kategori ID'lerini gönder
+              categoryPath: selectedCategories.map(c => c.id || c), // ✅ Kategori ID'lerini gönder
               location: filters.location,
               minBudget: filters.priceRange[0],
               maxBudget: filters.priceRange[1],
@@ -100,6 +120,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
           
           if (result.data) {
             setDisplayedListings(result.data);
+            setTotalListings(result.total || result.data.length);
             setHasMore(result.data.length === PAGE_SIZE);
           } else {
             // Fallback to Supabase
@@ -115,6 +136,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
             };
             const { listings, totalCount } = await fetchFilteredListings(allFilters, currentUser?.id, 1, PAGE_SIZE);
             setDisplayedListings(listings);
+            setTotalListings(totalCount || listings.length);
             setHasMore((1 * PAGE_SIZE) < totalCount);
           }
         } catch (error) {
@@ -132,6 +154,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
           };
           const { listings, totalCount } = await fetchFilteredListings(allFilters, currentUser?.id, 1, PAGE_SIZE);
           setDisplayedListings(listings);
+          setTotalListings(totalCount || listings.length);
           setHasMore((1 * PAGE_SIZE) < totalCount);
         }
         setIsFiltering(false);
@@ -165,7 +188,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
         query: '',
         filters: {
           category: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].name : undefined,
-          categoryPath: selectedCategories.map(c => c.id), // ✅ Kategori ID'lerini gönder
+          categoryPath: selectedCategories.map(c => c.id || c), // ✅ Kategori ID'lerini gönder
           location: filters.location,
           minBudget: filters.priceRange[0],
           maxBudget: filters.priceRange[1],
@@ -239,6 +262,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
     filters,
     setFilters,
     displayedListings,
+    totalListings,
     isFiltering,
     hasMore,
     isLoadingMore,

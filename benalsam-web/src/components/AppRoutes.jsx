@@ -40,6 +40,7 @@ const TrustScorePage = lazy(() => import('@/pages/TrustScorePage'));
 const UnpublishListingPage = lazy(() => import('@/pages/UnpublishListingPage'));
 const ErrorTestComponent = lazy(() => import('@/components/ErrorBoundaries/ErrorTestComponent'));
 const PerformanceTestPage = lazy(() => import('@/pages/PerformanceTestPage'));
+const TestListingsPage = lazy(() => import('@/pages/TestListingsPage'));
 
 const SettingsLayout = lazy(() => import('@/pages/SettingsPage/SettingsLayout'));
 import SettingsPage from '@/pages/SettingsPage/SettingsPage';
@@ -295,6 +296,9 @@ const AppRoutes = ({ currentUser }) => {
           path="/premium-dashboard" 
           element={<ProtectedRoute>{withPageErrorBoundary(MemoizedPremiumDashboard, 'Premium Dashboard')}</ProtectedRoute>} 
         />
+        
+        {/* Test Sayfaları */}
+        <Route path="/test-listings" element={withPageErrorBoundary(TestListingsPage, 'Test İlanları')} />
         
         {/* Test routes - sadece development modunda */}
         {process.env.NODE_ENV === 'development' && (

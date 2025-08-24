@@ -1,12 +1,13 @@
 import { useState, useMemo, useCallback } from 'react';
 
-export const usePagination = (items = [], itemsPerPage = 12) => {
+export const usePagination = (items = [], itemsPerPage = 12, totalItems = null) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Toplam sayfa sayısını hesapla
   const totalPages = useMemo(() => {
-    return Math.ceil(items.length / itemsPerPage);
-  }, [items.length, itemsPerPage]);
+    const total = totalItems !== null ? totalItems : items.length;
+    return Math.ceil(total / itemsPerPage);
+  }, [items.length, itemsPerPage, totalItems]);
 
   // Mevcut sayfadaki itemları getir
   const currentItems = useMemo(() => {
@@ -87,8 +88,8 @@ export const usePagination = (items = [], itemsPerPage = 12) => {
     getPageNumbers,
     hasNextPage: currentPage < totalPages,
     hasPrevPage: currentPage > 1,
-    totalItems: items.length,
+    totalItems: totalItems !== null ? totalItems : items.length,
     startIndex: (currentPage - 1) * itemsPerPage + 1,
-    endIndex: Math.min(currentPage * itemsPerPage, items.length)
+    endIndex: Math.min(currentPage * itemsPerPage, totalItems !== null ? totalItems : items.length)
   };
 };

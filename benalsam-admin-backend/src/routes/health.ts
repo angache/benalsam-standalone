@@ -466,4 +466,209 @@ router.get('/elasticsearch', async (req, res) => {
   }
 });
 
+// Test endpoint - Create test listings (no auth required)
+router.post('/test-listings/create', async (req, res): Promise<void> => {
+  try {
+    console.log('🧪 POST /test-listings/create endpoint called!');
+    console.log('🧪 Request body:', req.body);
+    
+    const { count = 5, includeImages = true } = req.body;
+    
+    if (!count || count < 1 || count > 100) {
+      res.status(400).json({ error: 'Count must be between 1 and 100' });
+      return;
+    }
+
+    console.log('🧪 Test listings endpoint called with count:', count);
+    
+    // Import Supabase client
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // Get users
+    const { data: users, error: usersError } = await supabase
+      .from('profiles')
+      .select('id, name')
+      .limit(10);
+
+    if (usersError) {
+      console.error('❌ Users fetch error:', usersError);
+      res.status(500).json({ error: 'Failed to fetch users' });
+      return;
+    }
+
+    if (!users || users.length === 0) {
+      res.status(500).json({ error: 'No users found' });
+      return;
+    }
+
+    // Get categories (leaf categories only)
+    const { data: categories, error: categoriesError } = await supabase
+      .from('categories')
+      .select('*')
+      .order('name');
+
+    if (categoriesError) {
+      console.error('❌ Categories fetch error:', categoriesError);
+      res.status(500).json({ error: 'Failed to fetch categories' });
+      return;
+    }
+
+    // Filter for leaf categories
+    const leafCategories = categories?.filter((cat: any) => 
+      !categories.some((child: any) => child.parent_id === cat.id)
+    ) || [];
+
+    if (leafCategories.length === 0) {
+      res.status(500).json({ error: 'No leaf categories found' });
+      return;
+    }
+
+    // Generate test listings
+    const createdListings = [];
+    const productNames = [
+      'iPhone 15 Pro Max', 'Samsung Galaxy S24', 'MacBook Pro M3', 'iPad Air', 'AirPods Pro',
+      'PlayStation 5', 'Xbox Series X', 'Nintendo Switch', 'Sony WH-1000XM5', 'Bose QuietComfort',
+      'IKEA Malm Yatak', 'IKEA Billy Kitaplık', 'IKEA Poäng Koltuk', 'IKEA Hemnes Komodin',
+      'Honda Civic', 'Toyota Corolla', 'BMW 3 Serisi', 'Mercedes C Serisi', 'Audi A4',
+      'Nike Air Max', 'Adidas Ultraboost', 'Puma RS-X', 'New Balance 574', 'Converse Chuck Taylor'
+    ];
+
+    const descriptions = [
+      'Mükemmel durumda, az kullanılmış ürün arıyorum.',
+      'Hızlı teslimat, güvenilir satıcı arıyorum.',
+      'Uygun fiyatlı, kaliteli ürün arıyorum.',
+      'İkinci el ama çok temiz ürün arıyorum.',
+      'Yeni gibi, orijinal kutusunda ürün arıyorum.',
+      'Acil ihtiyacım var, hızlı satıcı arıyorum.',
+      'Kaliteli marka, uygun fiyat arıyorum.',
+      'Güvenilir satıcıdan, garantili ürün arıyorum.',
+      'Temiz ve bakımlı ürün arıyorum.',
+      'Orijinal parçalı, sorunsuz ürün arıyorum.'
+    ];
+
+    const locations = [
+      'İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya', 'Adana', 'Konya', 'Gaziantep',
+      'Mersin', 'Diyarbakır', 'Samsun', 'Denizli', 'Eskişehir', 'Trabzon', 'Erzurum'
+    ];
+
+    for (let i = 0; i < count; i++) {
+      const user = users[Math.floor(Math.random() * users.length)];
+      const category = leafCategories[Math.floor(Math.random() * leafCategories.length)];
+      const productName = productNames[Math.floor(Math.random() * productNames.length)];
+      const description = descriptions[Math.floor(Math.random() * descriptions.length)];
+      const location = locations[Math.floor(Math.random() * locations.length)];
+      const urgency = ['Acil', 'Normal', 'Acil Değil'][Math.floor(Math.random() * 3)];
+      const condition = ['Yeni', 'İkinci El', 'Çok İyi', 'İyi'][Math.floor(Math.random() * 4)];
+      const price = Math.floor(Math.random() * 50000) + 100;
+
+      let imageUrl = '';
+      if (includeImages) {
+        try {
+          // Use Picsum for random images
+          const imageId = Math.floor(Math.random() * 1000);
+          imageUrl = `https://picsum.photos/400/300?random=${imageId}`;
+        } catch (error) {
+          console.warn('⚠️ Image generation failed, using placeholder');
+          imageUrl = 'https://via.placeholder.com/400x300?text=No+Image';
+        }
+      }
+
+      const listing = {
+        user_id: user.id,
+        title: `${productName} Arıyorum`,
+        description: `${productName} için ${description}`,
+        category: `${category.name} > ${category.name}`,
+        category_id: category.id,
+        category_path: [category.id],
+        budget: price,
+        location: location,
+        urgency: urgency,
+        condition: [condition],
+        main_image_url: imageUrl,
+        additional_image_urls: imageUrl ? [imageUrl] : [],
+        contact_preference: ['Telefon', 'Mesaj', 'Email'][Math.floor(Math.random() * 3)],
+        features: [],
+        attributes: {},
+        offers_count: 0,
+        views_count: 0,
+        favorites_count: 0,
+        popularity_score: 0,
+        is_featured: false,
+        is_urgent_premium: false,
+        is_showcase: false,
+        up_to_date: true,
+        has_bold_border: false,
+        accept_terms: true,
+        auto_republish: false,
+        status: 'active',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      createdListings.push(listing);
+    }
+
+    console.log('💾 Generated listings:', createdListings.length);
+
+    // Insert listings to Supabase
+    const { data, error } = await supabase
+      .from('listings')
+      .insert(createdListings)
+      .select();
+
+    if (error) {
+      console.error('❌ Supabase error:', error);
+      res.status(500).json({ error: error.message });
+      return;
+    }
+
+    console.log('✅ Test listings created in Supabase:', data?.length || 0);
+
+    // Insert listings to Elasticsearch
+    try {
+      const elasticsearchClient = require('../services/elasticsearchService').elasticsearchClient;
+      
+      const bulkBody = [];
+      for (const listing of data) {
+        bulkBody.push(
+          { index: { _index: 'listings', _id: listing.id } },
+          {
+            ...listing,
+            search_text: `${listing.title} ${listing.description} ${listing.category}`,
+            created_at: new Date(listing.created_at).toISOString(),
+            updated_at: new Date(listing.updated_at).toISOString()
+          }
+        );
+      }
+
+      if (bulkBody.length > 0) {
+        const { body } = await elasticsearchClient.bulk({ body: bulkBody });
+        console.log('✅ Test listings indexed in Elasticsearch:', body.items?.length || 0);
+      }
+    } catch (elasticError) {
+      console.error('❌ Elasticsearch error:', elasticError);
+      // Don't fail the request, just log the error
+    }
+    res.json({ 
+      success: true, 
+      data, 
+      count: data?.length || 0,
+      stats: {
+        users: users.length,
+        categories: leafCategories.length,
+        generated: createdListings.length,
+        inserted: data?.length || 0
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Test endpoint error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router; 
