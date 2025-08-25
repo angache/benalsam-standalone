@@ -7,8 +7,7 @@ const ADMIN_BACKEND_URL = import.meta.env.VITE_ADMIN_BACKEND_URL || 'http://loca
 export interface ElasticsearchSearchParams {
   query?: string;
   filters?: {
-    category?: string;
-    categoryPath?: string[]; // ✅ Kategori path array'i eklendi
+    category_id?: number; // ✅ Sadece category_id kullan
     location?: string;
     minBudget?: number;
     maxBudget?: number;
@@ -139,7 +138,7 @@ const searchListingsWithSupabase = async (
     
     const filterParams: QueryFilters = {
       search: params.query,
-      category: params.filters?.category,
+      category: params.filters?.category_id, // Supabase'de category_id kullanılıyor
       location: params.filters?.location,
       minBudget: params.filters?.minBudget,
       maxBudget: params.filters?.maxBudget,

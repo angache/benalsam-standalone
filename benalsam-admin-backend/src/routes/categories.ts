@@ -8,6 +8,9 @@ const router: IRouter = Router();
 // Get all categories - temporarily without auth for testing
 router.get('/', categoriesController.getCategories);
 
+// Get ALL categories (main + subcategories) - temporarily without auth for testing
+router.get('/all', categoriesController.getAllCategories);
+
 // Get single category by ID - temporarily without auth for testing
 router.get('/:id', categoriesController.getCategory);
 

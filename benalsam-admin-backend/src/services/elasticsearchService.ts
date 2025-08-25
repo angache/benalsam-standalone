@@ -12,8 +12,8 @@ export class AdminElasticsearchService {
   protected supabase: any; // ✅ Supabase client ekle
 
   constructor(
-    node: string = process.env.ELASTICSEARCH_URL || 'http://localhost:9200',
-    defaultIndexName: string = 'benalsam_listings',
+    node: string = process.env.ELASTICSEARCH_URL || 'http://209.227.228.96:9200',
+    defaultIndexName: string = 'listings',
     username: string = process.env.ELASTICSEARCH_USERNAME || '',
     password: string = process.env.ELASTICSEARCH_PASSWORD || ''
   ) {
@@ -276,9 +276,9 @@ export class AdminElasticsearchService {
   // Static methods for health checks
   static async getAllIndicesStats(): Promise<any> {
     try {
-      const client = new Client({ 
-        node: process.env.ELASTICSEARCH_URL || 'http://localhost:9200',
-        auth: process.env.ELASTICSEARCH_USERNAME && process.env.ELASTICSEARCH_PASSWORD ? {
+          const client = new Client({ 
+      node: process.env.ELASTICSEARCH_URL || 'http://209.227.228.96:9200',
+      auth: process.env.ELASTICSEARCH_USERNAME && process.env.ELASTICSEARCH_PASSWORD ? {
           username: process.env.ELASTICSEARCH_USERNAME,
           password: process.env.ELASTICSEARCH_PASSWORD
         } : undefined,
@@ -296,7 +296,7 @@ export class AdminElasticsearchService {
   static async searchIndexStatic(indexName: string, options: { size?: number } = {}): Promise<any> {
     try {
       const client = new Client({ 
-        node: process.env.ELASTICSEARCH_URL || 'http://localhost:9200',
+        node: process.env.ELASTICSEARCH_URL || 'http://209.227.228.96:9200',
         auth: process.env.ELASTICSEARCH_USERNAME && process.env.ELASTICSEARCH_PASSWORD ? {
           username: process.env.ELASTICSEARCH_USERNAME,
           password: process.env.ELASTICSEARCH_PASSWORD
@@ -630,81 +630,22 @@ export class AdminElasticsearchService {
       // Filters
       if (filters) {
         if (process.env.NODE_ENV === 'development') {
-        logger.info('🔍 Debug - Filters received:', JSON.stringify(filters, null, 2));
-      }
-        
-        if (filters.category_id && filters.category_id !== null) {
-          // Category ID varsa her zaman ID bazlı filtreleme kullan
-          logger.info('🔍 Debug - Using category_id filter:', filters.category_id);
-          searchQuery.bool.filter.push({ term: { category_id: filters.category_id } });
-        } else if (filters.categoryPath) {
-          // Category path array'i varsa, seçili kategori ID'sini kullan
-          if (process.env.NODE_ENV === 'development') {
-            logger.info('🔍 Debug - Using categoryPath filter:', filters.categoryPath);
-          }
-          if (filters.categoryPath.length > 0) {
-            // Son seçili kategori ID'sini al (en spesifik kategori)
-            const selectedCategory = filters.categoryPath[filters.categoryPath.length - 1];
-            if (process.env.NODE_ENV === 'development') {
-              logger.info('🔍 Debug - Using selected category:', selectedCategory);
-            }
-            
-            // Kategori objesi veya string olabilir
-            let selectedCategoryId = null;
-            if (typeof selectedCategory === 'object' && selectedCategory !== null) {
-              selectedCategoryId = selectedCategory.id;
-            } else if (typeof selectedCategory === 'string' || typeof selectedCategory === 'number') {
-              selectedCategoryId = selectedCategory;
-            }
-            
-            if (process.env.NODE_ENV === 'development') {
-              logger.info('🔍 Debug - Extracted category ID:', selectedCategoryId);
-            }
-            
-            // Null check ekle
-            if (selectedCategoryId && selectedCategoryId !== null) {
-              // Seçili kategori ID'si ve alt kategorilerini dahil et
-              searchQuery.bool.filter.push({ 
-                bool: {
-                  should: [
-                    // Seçili kategori ID'si category_path array'inde var mı kontrol et
-                    { match: { "category_path": parseInt(selectedCategoryId) } },
-                    // Kategori ID'si category_id field'ında var mı kontrol et
-                    { term: { "category_id": parseInt(selectedCategoryId) } }
-                  ],
-                  minimum_should_match: 1
-                }
-              });
-            }
-          }
-        } else if (filters.category) {
-          // Sadece category string varsa string bazlı filtreleme
-          logger.info('🔍 Debug - Using category filter:', filters.category);
-          
-          // Hierarchy format için prefix match kullan
-          if (filters.category.includes('>')) {
-            // Alt kategori için prefix match
-            searchQuery.bool.filter.push({ 
-              prefix: { 
-                category: filters.category 
-              } 
-            });
-          } else {
-            // Ana kategori için wildcard match
-            searchQuery.bool.filter.push({ 
-              wildcard: { 
-                category: `${filters.category}*` 
-              } 
-            });
-          }
+          logger.info('🔍 Debug - Filters received:', JSON.stringify(filters, null, 2));
         }
+        
+        // Kategori filtreleme - sadece category_id kullan
+        if (filters.category_id && filters.category_id !== null) {
+          logger.info('🔍 Debug - Using category_id filter:', filters.category_id);
+          searchQuery.bool.filter.push({ term: { category_id: parseInt(filters.category_id) } });
+        }
+        
         if (filters.subcategory) {
           searchQuery.bool.filter.push({ term: { subcategory: filters.subcategory } });
         }
         if (filters.location) {
           searchQuery.bool.filter.push({ term: { 'location.province': filters.location } });
         }
-      if (filters.minBudget || filters.maxBudget) {
+        if (filters.minBudget || filters.maxBudget) {
           const rangeQuery: any = { range: { budget: {} } };
           if (filters.minBudget) rangeQuery.range.budget.gte = filters.minBudget;
           if (filters.maxBudget) rangeQuery.range.budget.lte = filters.maxBudget;
@@ -975,7 +916,7 @@ export class AdminElasticsearchService {
         return cached;
       }
 
-      // ✅ Elasticsearch'ten çek
+      // ✅ Elasticsearch'ten çek - category_id field'ına göre (leaf kategoriler)
       const response = await this.client.search({
         index: this.defaultIndexName,
         body: {
@@ -994,18 +935,43 @@ export class AdminElasticsearchService {
       const buckets = (response.aggregations?.category_counts as any)?.buckets || [];
       const categoryCounts: Record<number, number> = {};
 
+      // Leaf kategorileri say
       buckets.forEach((bucket: any) => {
         categoryCounts[bucket.key] = bucket.doc_count;
       });
 
+      // Hiyerarşik sayıları hesapla - Supabase'den kategori yapısını al
+      const { data: categories } = await this.supabase
+        .from('categories')
+        .select('id, parent_id, name');
+
+      if (categories) {
+        // Her leaf kategori için parent'larına sayı ekle
+        Object.entries(categoryCounts).forEach(([categoryId, count]) => {
+          const categoryIdNum = parseInt(categoryId);
+          this.addCountToParents(categoryIdNum, count, categories, categoryCounts);
+        });
+      }
+
       // ✅ Cache'e kaydet
       await cacheManager.set(cacheKey, categoryCounts, cacheTTL);
       
-      logger.info(`📊 Retrieved and cached category counts for ${Object.keys(categoryCounts).length} categories`);
+      logger.info(`📊 Retrieved and cached hierarchical category counts for ${Object.keys(categoryCounts).length} categories`);
       return categoryCounts;
     } catch (error) {
       logger.error('❌ Error getting category counts:', error);
       throw error;
+    }
+  }
+
+  // Parent kategorilere sayı ekle
+  private addCountToParents(categoryId: number, count: number, categories: any[], categoryCounts: Record<number, number>) {
+    const category = categories.find(cat => cat.id === categoryId);
+    if (category && category.parent_id) {
+      // Parent'a sayı ekle
+      categoryCounts[category.parent_id] = (categoryCounts[category.parent_id] || 0) + count;
+      // Recursive olarak üst parent'lara da ekle
+      this.addCountToParents(category.parent_id, count, categories, categoryCounts);
     }
   }
 

@@ -1,8 +1,34 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// Icon mapping - dinamik olarak yükle
+const ICON_COMPONENTS = {
+  'Smartphone': React.lazy(() => import('lucide-react').then(module => ({ default: module.Smartphone }))),
+  'Laptop': React.lazy(() => import('lucide-react').then(module => ({ default: module.Laptop }))),
+  'Gamepad2': React.lazy(() => import('lucide-react').then(module => ({ default: module.Gamepad2 }))),
+  'Camera': React.lazy(() => import('lucide-react').then(module => ({ default: module.Camera }))),
+  'Music': React.lazy(() => import('lucide-react').then(module => ({ default: module.Music }))),
+  'Wrench': React.lazy(() => import('lucide-react').then(module => ({ default: module.Wrench }))),
+  'Car': React.lazy(() => import('lucide-react').then(module => ({ default: module.Car }))),
+  'Building': React.lazy(() => import('lucide-react').then(module => ({ default: module.Building }))),
+  'Home': React.lazy(() => import('lucide-react').then(module => ({ default: module.Home }))),
+  'Shirt': React.lazy(() => import('lucide-react').then(module => ({ default: module.Shirt }))),
+  'Dumbbell': React.lazy(() => import('lucide-react').then(module => ({ default: module.Dumbbell }))),
+  'GraduationCap': React.lazy(() => import('lucide-react').then(module => ({ default: module.GraduationCap }))),
+  'Briefcase': React.lazy(() => import('lucide-react').then(module => ({ default: module.Briefcase }))),
+  'Palette': React.lazy(() => import('lucide-react').then(module => ({ default: module.Palette }))),
+  'Baby': React.lazy(() => import('lucide-react').then(module => ({ default: module.Baby }))),
+  'Heart': React.lazy(() => import('lucide-react').then(module => ({ default: module.Heart }))),
+  'Plane': React.lazy(() => import('lucide-react').then(module => ({ default: module.Plane }))),
+  'Bitcoin': React.lazy(() => import('lucide-react').then(module => ({ default: module.Bitcoin }))),
+  'Star': React.lazy(() => import('lucide-react').then(module => ({ default: module.Star }))),
+  'Utensils': React.lazy(() => import('lucide-react').then(module => ({ default: module.Utensils }))),
+  'Book': React.lazy(() => import('lucide-react').then(module => ({ default: module.Book }))),
+  'MoreHorizontal': React.lazy(() => import('lucide-react').then(module => ({ default: module.MoreHorizontal })))
+};
 
 const CategoryItem = ({ category, level = 0, onSelect, selectedPath = [], getCategoryCount, isLoadingCounts, parentPath = [] }) => {
   const [isOpen, setIsOpen] = useState(() => {
@@ -45,6 +71,22 @@ const CategoryItem = ({ category, level = 0, onSelect, selectedPath = [], getCat
     }
   };
 
+  // Kategori sayısını al - sadece ID ile
+  const getCategoryCountValue = () => {
+    if (getCategoryCount && category.id) {
+      const count = getCategoryCount(category.id);
+      console.log(`🔍 CategoryItem - ${category.name} (ID: ${category.id}): ${count}`);
+      return count;
+    }
+    console.log(`🔍 CategoryItem - ${category.name} (ID: ${category.id}): No ID or getCategoryCount`);
+    return 0;
+  };
+
+  // Icon component'ini al
+  const IconComponent = category.icon && ICON_COMPONENTS[category.icon] ? 
+    ICON_COMPONENTS[category.icon] : 
+    ICON_COMPONENTS['MoreHorizontal'];
+
   return (
     <div className="text-sm">
       <motion.div
@@ -61,7 +103,9 @@ const CategoryItem = ({ category, level = 0, onSelect, selectedPath = [], getCat
         whileTap={{ scale: 0.98 }}
       >
         <span className="flex items-center gap-2">
-          {category.icon && <category.icon className="w-4 h-4" />}
+          <Suspense fallback={<MoreHorizontal className="w-4 h-4" />}>
+            <IconComponent className="w-4 h-4" />
+          </Suspense>
           <span>{category.name}</span>
         </span>
         {getCategoryCount && (
@@ -74,7 +118,7 @@ const CategoryItem = ({ category, level = 0, onSelect, selectedPath = [], getCat
             {isLoadingCounts ? (
               <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
             ) : (
-              getCategoryCount([...parentPath, category.name])
+              getCategoryCountValue()
             )}
           </motion.span>
         )}

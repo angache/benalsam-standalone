@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import categoryCacheService from '@/services/categoryCacheService';
+import dynamicCategoryService from '@/services/dynamicCategoryService';
 
 // Lazy load components
 const CategorySearch = React.lazy(() => import('./CategorySearch'));
@@ -33,12 +33,14 @@ const SidebarContent = ({
   const [categories, setCategories] = useState([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
-  // Load categories from cache service
+  // Load categories from dynamic service
   useEffect(() => {
     const loadCategories = async () => {
       try {
         setIsLoadingCategories(true);
-        const fetchedCategories = await categoryCacheService.getCategories();
+        console.log('🔄 Loading categories from dynamic service...');
+        const fetchedCategories = await dynamicCategoryService.getCategoryTree();
+        console.log('📦 Categories loaded:', fetchedCategories);
         setCategories(fetchedCategories);
       } catch (error) {
         console.error('Error loading categories:', error);

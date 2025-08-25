@@ -44,6 +44,29 @@ export const categoriesController = {
     }
   },
 
+  // TÜM kategorileri getir (ana + alt kategoriler) - Auth gerektirmeyen versiyon
+  async getAllCategories(req: any, res: Response): Promise<Response | void> {
+    try {
+      logger.info('Fetching ALL categories from Supabase');
+
+      const categories = await categoryService.getAllCategories();
+
+      logger.info(`Fetched ${categories.length} total categories`);
+
+      res.json({
+        success: true,
+        data: categories,
+        message: 'Tüm kategoriler başarıyla getirildi',
+      });
+    } catch (error) {
+      logger.error('Error fetching all categories:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Kategoriler getirilirken bir hata oluştu',
+      });
+    }
+  },
+
   // Tek kategori getir - Auth gerektirmeyen versiyon
   async getCategory(req: any, res: Response): Promise<Response | void> {
     try {

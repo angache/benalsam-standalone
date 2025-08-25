@@ -101,8 +101,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
           const searchParams = {
             query: '',
             filters: {
-              category: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].name : undefined,
-              categoryPath: selectedCategories.map(c => c.id || c), // ✅ Kategori ID'lerini gönder
+              category_id: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].id : undefined,
               location: filters.location,
               minBudget: filters.priceRange[0],
               maxBudget: filters.priceRange[1],
@@ -187,8 +186,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
       const searchParams = {
         query: '',
         filters: {
-          category: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].name : undefined,
-          categoryPath: selectedCategories.map(c => c.id || c), // ✅ Kategori ID'lerini gönder
+          category_id: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].id : undefined,
           location: filters.location,
           minBudget: filters.priceRange[0],
           maxBudget: filters.priceRange[1],

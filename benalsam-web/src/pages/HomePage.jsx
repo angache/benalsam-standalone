@@ -140,9 +140,13 @@ const LoadingFallback = () => (
       const { getCategoryCount, isLoading: isLoadingCounts } = useCategoryCounts();
       
       // Memoize getCategoryCount to prevent unnecessary re-renders
-      const memoizedGetCategoryCount = useCallback((categoryPath) => {
-        return getCategoryCount(categoryPath);
+      const memoizedGetCategoryCount = useCallback((categoryId) => {
+        const count = getCategoryCount(categoryId);
+        console.log(`🔍 HomePage memoizedGetCategoryCount - ID: ${categoryId}, Count: ${count}`);
+        return count;
       }, [getCategoryCount]);
+
+      // getCategoryCountByName fonksiyonunu kaldırdık, artık sadece ID bazlı çalışıyoruz
       
       // Pagination state
       const [currentPage, setCurrentPage] = useState(1);

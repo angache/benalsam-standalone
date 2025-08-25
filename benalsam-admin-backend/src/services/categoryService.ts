@@ -141,6 +141,35 @@ export const categoryService = {
     }
   },
 
+  // Get ALL categories (main + subcategories) as flat list
+  async getAllCategories(): Promise<Category[]> {
+    try {
+      logger.info('Fetching ALL categories from Supabase');
+
+      const { data: categories, error } = await getSupabaseClient()
+        .from('categories')
+        .select(`
+          *,
+          category_attributes (*)
+        `)
+        .eq('is_active', true)
+        .order('level', { ascending: true })
+        .order('sort_order', { ascending: true });
+
+      if (error) {
+        logger.error('Error fetching all categories:', error);
+        throw error;
+      }
+
+      logger.info(`Fetched ${categories?.length || 0} total categories`);
+      return categories || [];
+
+    } catch (error) {
+      logger.error('Error in getAllCategories:', error);
+      throw error;
+    }
+  },
+
   // Get single category by ID
   async getCategory(id: string | number): Promise<Category | null> {
     try {

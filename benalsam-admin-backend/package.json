@@ -17,7 +17,10 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "db:seed": "ts-node src/database/seed.ts"
+    "db:seed": "ts-node src/database/seed.ts",
+    "infra:setup": "chmod +x scripts/setup-infrastructure.sh && ./scripts/setup-infrastructure.sh",
+    "infra:sync": "node scripts/sync-listings-to-es.js",
+    "infra:reset": "npm run infra:setup && npm run infra:sync"
   },
   "keywords": [
     "admin",

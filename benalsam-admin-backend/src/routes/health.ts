@@ -577,13 +577,33 @@ router.post('/test-listings/create', async (req, res): Promise<void> => {
         }
       }
 
+      // Kategori path'ini Supabase'den al ve " > " ile ayır
+      const getCategoryPath = (cat: any): string => {
+        return cat.path.replace(/\//g, ' > ');
+      };
+
+      // Kategori path array'ini ID'lerden oluştur
+      const getCategoryPathArray = (cat: any, allCategories: any[]): number[] => {
+        if (!cat.parent_id) {
+          return [cat.id];
+        }
+        const parent = allCategories.find(c => c.id === cat.parent_id);
+        if (parent) {
+          const parentPath = getCategoryPathArray(parent, allCategories);
+          return [...parentPath, cat.id];
+        }
+        return [cat.id];
+      };
+
+      const categoryPath = getCategoryPath(category);
+
       const listing = {
         user_id: user.id,
         title: `${productName} Arıyorum`,
         description: `${productName} için ${description}`,
-        category: `${category.name} > ${category.name}`,
+        category: categoryPath,
         category_id: category.id,
-        category_path: [category.id],
+        category_path: getCategoryPathArray(category, categories || []),
         budget: price,
         location: location,
         urgency: urgency,
@@ -668,6 +688,53 @@ router.post('/test-listings/create', async (req, res): Promise<void> => {
   } catch (error) {
     console.error('❌ Test endpoint error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Clear test listings
+router.delete('/test-listings/clear', async (req, res) => {
+  try {
+    console.log('🗑️ Clearing test listings...');
+    
+    // Delete from Supabase
+    const { error: deleteError } = await supabase
+      .from('listings')
+      .delete()
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()); // Son 24 saatteki ilanları sil
+
+    if (deleteError) {
+      console.error('❌ Error deleting test listings from Supabase:', deleteError);
+      res.status(500).json({ error: 'Failed to delete test listings from Supabase' });
+      return;
+    }
+
+    console.log('✅ Test listings cleared from Supabase');
+
+    // Delete from Elasticsearch
+    try {
+      const elasticsearchClient = require('../services/elasticsearchService').elasticsearchClient;
+      const { body } = await elasticsearchClient.deleteByQuery({
+        index: 'listings',
+        body: {
+          query: {
+            range: {
+              created_at: {
+                gte: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+              }
+            }
+          }
+        }
+      });
+      console.log('✅ Test listings cleared from Elasticsearch');
+    } catch (elasticError) {
+      console.error('❌ Error deleting test listings from Elasticsearch:', elasticError);
+      // Don't fail the request, just log the error
+    }
+
+    res.json({ success: true, message: 'Test listings cleared successfully from both Supabase and Elasticsearch' });
+  } catch (error) {
+    console.error('❌ Error clearing test listings:', error);
+    res.status(500).json({ error: 'Failed to clear test listings' });
   }
 });
 

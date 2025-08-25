@@ -1,8 +1,34 @@
 import React, { useState, useMemo } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X, MoreHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+// Icon mapping - dinamik olarak yükle
+const ICON_COMPONENTS = {
+  'Smartphone': React.lazy(() => import('lucide-react').then(module => ({ default: module.Smartphone }))),
+  'Laptop': React.lazy(() => import('lucide-react').then(module => ({ default: module.Laptop }))),
+  'Gamepad2': React.lazy(() => import('lucide-react').then(module => ({ default: module.Gamepad2 }))),
+  'Camera': React.lazy(() => import('lucide-react').then(module => ({ default: module.Camera }))),
+  'Music': React.lazy(() => import('lucide-react').then(module => ({ default: module.Music }))),
+  'Wrench': React.lazy(() => import('lucide-react').then(module => ({ default: module.Wrench }))),
+  'Car': React.lazy(() => import('lucide-react').then(module => ({ default: module.Car }))),
+  'Building': React.lazy(() => import('lucide-react').then(module => ({ default: module.Building }))),
+  'Home': React.lazy(() => import('lucide-react').then(module => ({ default: module.Home }))),
+  'Shirt': React.lazy(() => import('lucide-react').then(module => ({ default: module.Shirt }))),
+  'Dumbbell': React.lazy(() => import('lucide-react').then(module => ({ default: module.Dumbbell }))),
+  'GraduationCap': React.lazy(() => import('lucide-react').then(module => ({ default: module.GraduationCap }))),
+  'Briefcase': React.lazy(() => import('lucide-react').then(module => ({ default: module.Briefcase }))),
+  'Palette': React.lazy(() => import('lucide-react').then(module => ({ default: module.Palette }))),
+  'Baby': React.lazy(() => import('lucide-react').then(module => ({ default: module.Baby }))),
+  'Heart': React.lazy(() => import('lucide-react').then(module => ({ default: module.Heart }))),
+  'Plane': React.lazy(() => import('lucide-react').then(module => ({ default: module.Plane }))),
+  'Bitcoin': React.lazy(() => import('lucide-react').then(module => ({ default: module.Bitcoin }))),
+  'Star': React.lazy(() => import('lucide-react').then(module => ({ default: module.Star }))),
+  'Utensils': React.lazy(() => import('lucide-react').then(module => ({ default: module.Utensils }))),
+  'Book': React.lazy(() => import('lucide-react').then(module => ({ default: module.Book }))),
+  'MoreHorizontal': React.lazy(() => import('lucide-react').then(module => ({ default: module.MoreHorizontal })))
+};
 
 const CategorySearch = ({ categories, onSelect, selectedPath = [], getCategoryCount, isLoadingCounts }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -86,26 +112,35 @@ const CategorySearch = ({ categories, onSelect, selectedPath = [], getCategoryCo
         <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
           {filteredCategories.length > 0 ? (
             <div className="p-2">
-              {filteredCategories.map((category, index) => (
-                <div
-                  key={`${category.fullPath}-${index}`}
-                  onClick={() => handleSelect(category)}
-                  className={cn(
-                    "flex items-center justify-between p-2 rounded-md cursor-pointer text-sm",
-                    "hover:bg-accent transition-colors"
-                  )}
-                >
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    {category.icon && <category.icon className="w-4 h-4 flex-shrink-0" />}
-                    <span className="truncate">{category.fullPath}</span>
+              {filteredCategories.map((category, index) => {
+                // Icon component'ini al
+                const IconComponent = category.icon && ICON_COMPONENTS[category.icon] ? 
+                  ICON_COMPONENTS[category.icon] : 
+                  ICON_COMPONENTS['MoreHorizontal'];
+
+                return (
+                  <div
+                    key={`${category.fullPath}-${index}`}
+                    onClick={() => handleSelect(category)}
+                    className={cn(
+                      "flex items-center justify-between p-2 rounded-md cursor-pointer text-sm",
+                      "hover:bg-accent transition-colors"
+                    )}
+                  >
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <React.Suspense fallback={<MoreHorizontal className="w-4 h-4 flex-shrink-0" />}>
+                        <IconComponent className="w-4 h-4 flex-shrink-0" />
+                      </React.Suspense>
+                      <span className="truncate">{category.fullPath}</span>
+                    </div>
+                    {getCategoryCount && (
+                      <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full flex-shrink-0">
+                        {isLoadingCounts ? '...' : (category.id ? getCategoryCount(category.id) : 0)}
+                      </span>
+                    )}
                   </div>
-                  {getCategoryCount && (
-                    <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full flex-shrink-0">
-                      {isLoadingCounts ? '...' : getCategoryCount(category.path)}
-                    </span>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : searchQuery.length > 0 ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
