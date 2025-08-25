@@ -10,6 +10,8 @@ AI Suggestions sistemi, kullanıcıların arama yaparken daha iyi sonuçlar alma
 - **Gerçek Zamanlı Sync**: Otomatik veri senkronizasyonu
 - **Akıllı Filtreleme**: Query bazlı kategori filtreleme
 - **Fallback Sistemi**: ES yoksa database'den veri
+- **Queue Processing**: PostgreSQL queue ile güvenilir sync
+- **Category Filtering**: İlgisiz kategorileri filtreleme
 
 ---
 
@@ -529,7 +531,23 @@ FROM elasticsearch_sync_queue
 GROUP BY status;
 ```
 
-### **2. Elasticsearch Health**
+### **2. Debug Endpoint**
+```bash
+# Queue ve ES durumunu kontrol et
+curl "http://localhost:3002/api/v1/ai-suggestions/debug-queue"
+
+# Response:
+{
+  "success": true,
+  "data": {
+    "queueJobs": [...],
+    "esCount": 1,
+    "esHits": [...]
+  }
+}
+```
+
+### **3. Elasticsearch Health**
 ```bash
 # ES cluster durumu
 curl "http://209.227.228.96:9200/_cluster/health"
@@ -538,12 +556,24 @@ curl "http://209.227.228.96:9200/_cluster/health"
 curl "http://209.227.228.96:9200/ai_suggestions/_stats"
 ```
 
-### **3. API Monitoring**
+### **4. API Monitoring**
 ```bash
 # AI suggestions API health
 curl "http://localhost:3002/api/v1/ai-suggestions?q=test"
 
 # Response time ve error rate monitoring
+```
+
+### **5. Category Filtering Test**
+```bash
+# Samsung araması - sadece Elektronik kategorisi
+curl "http://localhost:3002/api/v1/ai-suggestions?query=samsung"
+
+# iPhone araması - sadece Elektronik kategorisi  
+curl "http://localhost:3002/api/v1/ai-suggestions?query=iphone"
+
+# Emlak araması - sadece Emlak kategorisi
+curl "http://localhost:3002/api/v1/ai-suggestions?query=ev"
 ```
 
 ---
@@ -577,9 +607,13 @@ Hybrid AI Suggestions sistemi, modern web uygulamaları için gerekli olan hızl
 - ✅ **Real-time Sync**: Otomatik veri senkronizasyonu
 - ✅ **Scalable**: Büyük veri setleri için uygun
 - ✅ **Reliable**: Fallback sistemi ile güvenilir
+- ✅ **Smart Filtering**: Query bazlı kategori filtreleme
+- ✅ **Queue Processing**: PostgreSQL queue ile güvenilir sync
+- ✅ **Debug Tools**: Kapsamlı monitoring ve debugging araçları
 
 ---
 
 **Dokümantasyon Tarihi:** 2025-08-25  
-**Versiyon:** 1.0.0  
-**Durum:** Production Ready
+**Versiyon:** 1.1.0  
+**Durum:** Production Ready  
+**Son Güncelleme:** Queue processing ve category filtering eklendi
