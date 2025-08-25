@@ -43,6 +43,7 @@ const ProgressDashboardPage = lazy(() => import('./pages/ProgressDashboardPage')
 const TwoFactorSetupPage = lazy(() => import('./pages/TwoFactorSetupPage'));
 const TwoFactorVerifyPage = lazy(() => import('./pages/TwoFactorVerifyPage'));
 const AdminPerformanceDashboard = lazy(() => import('./components/AdminPerformanceDashboard'));
+const AISuggestionsManagement = lazy(() => import('./pages/AISuggestionsManagement').then(module => ({ default: module.default })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -191,6 +192,20 @@ function App() {
                     <Layout>
                       <Suspense fallback={<PageLoadingSpinner />}>
                         <CategoryEditPage />
+                      </Suspense>
+                    </Layout>
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ai-suggestions"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <Layout>
+                      <Suspense fallback={<PageLoadingSpinner />}>
+                        <AISuggestionsManagement />
                       </Suspense>
                     </Layout>
                   </ErrorBoundary>

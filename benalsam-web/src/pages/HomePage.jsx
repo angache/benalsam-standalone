@@ -441,7 +441,7 @@ const LoadingFallback = () => (
               <div className="mb-4">
                 <form onSubmit={handleSearchSubmit} className="relative">
                   <Input
-                    placeholder="Aradığınız ürünü veya hizmeti yazın..."
+                    placeholder="Aradığınız ürünü veya hizmeti yazın... 🤖 AI önerileri için tıklayın"
                     className="w-full pl-4 pr-12 py-6 text-base"
                     value={localSearchQuery}
                     onChange={(e) => {
@@ -462,8 +462,8 @@ const LoadingFallback = () => (
                       query={localSearchQuery}
                       categoryId={selectedCategoryForAI}
                       onSuggestionClick={handleAISuggestionClick}
-                      maxSuggestions={8}
-                      className="shadow-lg"
+                      maxSuggestions={12}
+                      className="shadow-xl border-2 border-blue-200"
                     />
                   </div>
                 )}

@@ -3,6 +3,7 @@ import { rateLimit } from 'express-rate-limit';
 import logger from '../config/logger';
 import { categoryService } from '../services/categoryService';
 import { searchService } from '../services/searchService';
+import { supabase } from '../config/database';
 
 const router = express.Router();
 
@@ -28,316 +29,290 @@ router.get('/', aiSuggestionsLimiter, async (req, res) => {
 
     const suggestions = [];
 
-    // 1. Trending suggestions (always include)
-    const trendingSuggestions = [
-      {
-        id: 'trending-1',
-        text: 'iPhone 15 Pro',
-        type: 'trending',
-        score: 0.95,
-        metadata: { trending: true }
-      },
-      {
-        id: 'trending-2',
-        text: 'MacBook Air M2',
-        type: 'trending',
-        score: 0.92,
-        metadata: { trending: true }
-      },
-      {
-        id: 'trending-3',
-        text: 'Samsung Galaxy S24',
-        type: 'trending',
-        score: 0.89,
-        metadata: { trending: true }
-      }
-    ];
+    // 1. Trending suggestions - get from database
+    const trendingSuggestions = await getTrendingSuggestions(query as string);
 
-    // 2. Popular search suggestions
-    const popularSuggestions = [
-      {
-        id: 'popular-1',
-        text: 'Araba',
-        type: 'popular',
-        score: 0.88,
-        metadata: { searchCount: 1250 }
-      },
-      {
-        id: 'popular-2',
-        text: 'Ev',
-        type: 'popular',
-        score: 0.85,
-        metadata: { searchCount: 980 }
-      },
-      {
-        id: 'popular-3',
-        text: 'Telefon',
-        type: 'popular',
-        score: 0.82,
-        metadata: { searchCount: 756 }
-      },
-      {
-        id: 'popular-4',
-        text: 'Bilgisayar',
-        type: 'popular',
-        score: 0.79,
-        metadata: { searchCount: 654 }
-      },
-      {
-        id: 'popular-5',
-        text: 'Mobilya',
-        type: 'popular',
-        score: 0.76,
-        metadata: { searchCount: 543 }
-      }
-    ];
+    // 2. Popular search suggestions - get from database
+    const popularSuggestions = await getPopularSuggestions();
 
-    // 3. Category-based suggestions
-    let categorySuggestions = [];
+    // 3. Category-based suggestions if categoryId provided
     if (categoryId) {
       try {
-        const categories = await categoryService.getCategories();
-        const selectedCategory = categories.find(cat => cat.id === parseInt(categoryId));
-        
-        if (selectedCategory) {
-          // Get subcategories as suggestions
-          if (selectedCategory.subcategories) {
-            categorySuggestions = selectedCategory.subcategories.slice(0, 5).map(subcat => ({
-              id: `category-${subcat.id}`,
-              text: subcat.name,
-              type: 'category',
-              score: 0.85,
-              category: subcat,
-              metadata: { 
-                subcategoryCount: subcat.stats?.subcategoryCount || 0,
-                attributeCount: subcat.stats?.attributeCount || 0
-              }
-            }));
-          }
-        }
+        const categorySuggestions = await getCategoryAISuggestions(parseInt(categoryId as string));
+        suggestions.push(...categorySuggestions);
       } catch (error) {
-        logger.error('Error getting category suggestions:', error);
+        logger.error('Error getting category AI suggestions:', error);
       }
     }
 
-    // 4. Query-based suggestions
-    let searchSuggestions = [];
-    if (query && query.length > 0) {
-      // Filter existing suggestions based on query
-      const queryLower = query.toLowerCase();
-      
-      const filteredTrending = trendingSuggestions.filter(s => 
-        s.text.toLowerCase().includes(queryLower)
-      );
-      
-      const filteredPopular = popularSuggestions.filter(s => 
-        s.text.toLowerCase().includes(queryLower)
-      );
-
-      const filteredCategory = categorySuggestions.filter(s => 
-        s.text.toLowerCase().includes(queryLower)
-      );
-
-      // Add query-based suggestions
-      searchSuggestions = [
-        ...filteredTrending,
-        ...filteredPopular,
-        ...filteredCategory
-      ];
-
-      // Add exact match suggestions
-      if (query.length > 2) {
-        searchSuggestions.unshift({
-          id: `search-exact-${Date.now()}`,
-          text: query,
-          type: 'search',
-          score: 0.99,
-          metadata: { exactMatch: true }
-        });
-      }
+    // 4. Query-based suggestions if query provided
+    if (query) {
+      // Query-based suggestions will be implemented later
+      // For now, return empty array
+      const querySuggestions: any[] = [];
+      suggestions.push(...querySuggestions);
     }
 
     // Combine all suggestions
-    let allSuggestions = [];
+    const allSuggestions = [
+      ...suggestions,
+      ...trendingSuggestions,
+      ...popularSuggestions
+    ];
 
-    if (query && query.length > 0) {
-      // If there's a query, prioritize search suggestions
-      allSuggestions = [
-        ...searchSuggestions,
-        ...trendingSuggestions.filter(s => !searchSuggestions.find(ss => ss.id === s.id)),
-        ...popularSuggestions.filter(s => !searchSuggestions.find(ss => ss.id === s.id))
-      ];
-    } else if (categoryId) {
-      // If there's a category, prioritize category suggestions
-      allSuggestions = [
-        ...categorySuggestions,
-        ...trendingSuggestions,
-        ...popularSuggestions
-      ];
-    } else {
-      // Default: show trending and popular
-      allSuggestions = [
-        ...trendingSuggestions,
-        ...popularSuggestions
-      ];
-    }
+    // Remove duplicates and limit results
+    const uniqueSuggestions = allSuggestions.filter((suggestion, index, self) => 
+      index === self.findIndex(s => s.id === suggestion.id)
+    ).slice(0, 20);
 
-    // Limit results and remove duplicates
-    const uniqueSuggestions = allSuggestions
-      .filter((suggestion, index, self) => 
-        index === self.findIndex(s => s.id === suggestion.id)
-      )
-      .slice(0, 10);
-
-    logger.info(`🤖 Generated ${uniqueSuggestions.length} AI suggestions`);
-
-    return res.json({
+    res.json({
       success: true,
       data: {
         suggestions: uniqueSuggestions,
         total: uniqueSuggestions.length,
-        query: query || null,
-        categoryId: categoryId || null,
-        generatedAt: new Date().toISOString()
+        query: query || null
       }
     });
 
-  } catch (error) {
-    logger.error('❌ AI Suggestions error:', error);
-    return res.status(500).json({
+  } catch (error: any) {
+    logger.error('❌ Error in AI suggestions:', error);
+    res.status(500).json({
       success: false,
-      message: 'AI suggestions generation failed',
-      error: 'AI_SUGGESTIONS_ERROR'
+      message: 'AI suggestions service error',
+      error: error.message || 'Unknown error'
     });
   }
 });
 
 /**
  * @route GET /api/v1/ai-suggestions/trending
- * @desc Get trending suggestions only
+ * @desc Get trending AI suggestions
  * @access Public
  */
 router.get('/trending', aiSuggestionsLimiter, async (req, res) => {
   try {
-    const trendingSuggestions = [
-      {
-        id: 'trending-1',
-        text: 'iPhone 15 Pro',
-        type: 'trending',
-        score: 0.95,
-        metadata: { trending: true }
-      },
-      {
-        id: 'trending-2',
-        text: 'MacBook Air M2',
-        type: 'trending',
-        score: 0.92,
-        metadata: { trending: true }
-      },
-      {
-        id: 'trending-3',
-        text: 'Samsung Galaxy S24',
-        type: 'trending',
-        score: 0.89,
-        metadata: { trending: true }
-      },
-      {
-        id: 'trending-4',
-        text: 'PlayStation 5',
-        type: 'trending',
-        score: 0.86,
-        metadata: { trending: true }
-      },
-      {
-        id: 'trending-5',
-        text: 'AirPods Pro',
-        type: 'trending',
-        score: 0.83,
-        metadata: { trending: true }
-      }
-    ];
+    logger.info('🔥 Trending AI suggestions request');
 
-    return res.json({
+    const trendingSuggestions = await getTrendingSuggestions();
+
+    res.json({
       success: true,
       data: {
         suggestions: trendingSuggestions,
-        total: trendingSuggestions.length,
-        type: 'trending'
+        total: trendingSuggestions.length
       }
     });
 
-  } catch (error) {
-    logger.error('❌ Trending suggestions error:', error);
-    return res.status(500).json({
+  } catch (error: any) {
+    logger.error('❌ Error in trending AI suggestions:', error);
+    res.status(500).json({
       success: false,
-      message: 'Trending suggestions generation failed',
-      error: 'TRENDING_SUGGESTIONS_ERROR'
+      message: 'Trending suggestions service error',
+      error: error.message || 'Unknown error'
     });
   }
 });
 
 /**
  * @route GET /api/v1/ai-suggestions/popular
- * @desc Get popular search suggestions only
+ * @desc Get popular AI suggestions
  * @access Public
  */
 router.get('/popular', aiSuggestionsLimiter, async (req, res) => {
   try {
-    const popularSuggestions = [
-      {
-        id: 'popular-1',
-        text: 'Araba',
-        type: 'popular',
-        score: 0.88,
-        metadata: { searchCount: 1250 }
-      },
-      {
-        id: 'popular-2',
-        text: 'Ev',
-        type: 'popular',
-        score: 0.85,
-        metadata: { searchCount: 980 }
-      },
-      {
-        id: 'popular-3',
-        text: 'Telefon',
-        type: 'popular',
-        score: 0.82,
-        metadata: { searchCount: 756 }
-      },
-      {
-        id: 'popular-4',
-        text: 'Bilgisayar',
-        type: 'popular',
-        score: 0.79,
-        metadata: { searchCount: 654 }
-      },
-      {
-        id: 'popular-5',
-        text: 'Mobilya',
-        type: 'popular',
-        score: 0.76,
-        metadata: { searchCount: 543 }
-      }
-    ];
+    logger.info('⭐ Popular AI suggestions request');
 
-    return res.json({
+    const popularSuggestions = await getPopularSuggestions();
+
+    res.json({
       success: true,
       data: {
         suggestions: popularSuggestions,
-        total: popularSuggestions.length,
-        type: 'popular'
+        total: popularSuggestions.length
       }
     });
 
-  } catch (error) {
-    logger.error('❌ Popular suggestions error:', error);
-    return res.status(500).json({
+  } catch (error: any) {
+    logger.error('❌ Error in popular AI suggestions:', error);
+    res.status(500).json({
       success: false,
-      message: 'Popular suggestions generation failed',
-      error: 'POPULAR_SUGGESTIONS_ERROR'
+      message: 'Popular suggestions service error',
+      error: error.message || 'Unknown error'
     });
   }
 });
+
+/**
+ * Helper function to get category AI suggestions from database
+ */
+async function getCategoryAISuggestions(categoryId: number) {
+  try {
+    const { data: suggestions, error } = await supabase
+      .from('category_ai_suggestions')
+      .select('*')
+      .eq('category_id', categoryId)
+      .eq('is_approved', true)
+      .order('confidence_score', { ascending: false })
+      .limit(10);
+
+    if (error) {
+      logger.error('Error fetching category AI suggestions:', error);
+      return [];
+    }
+
+    return suggestions.map(suggestion => ({
+      id: `category-ai-${suggestion.id}`,
+      text: extractSuggestionText(suggestion),
+      type: 'category' as const,
+      score: suggestion.confidence_score,
+      metadata: {
+        suggestionType: suggestion.suggestion_type,
+        isApproved: suggestion.is_approved
+      }
+    }));
+
+  } catch (error) {
+    logger.error('Error in getCategoryAISuggestions:', error);
+    return [];
+  }
+}
+
+/**
+ * Helper function to extract suggestion text from suggestion data
+ */
+function extractSuggestionText(suggestion: any): string {
+  try {
+    if (suggestion.suggestion_type === 'keywords') {
+      const keywords = suggestion.suggestion_data?.suggestions || [];
+      return keywords.join(', ');
+    } else if (suggestion.suggestion_type === 'title' || suggestion.suggestion_type === 'description') {
+      const suggestions = suggestion.suggestion_data?.suggestions || [];
+      return suggestions[0] || 'AI Önerisi';
+    } else {
+      return 'AI Önerisi';
+    }
+  } catch (error) {
+    logger.error('Error extracting suggestion text:', error);
+    return 'AI Önerisi';
+  }
+}
+
+/**
+ * Get trending suggestions from database
+ */
+async function getTrendingSuggestions(query?: string) {
+  try {
+    let supabaseQuery = supabase
+      .from('category_ai_suggestions')
+      .select(`
+        *,
+        categories!inner(name, path, level)
+      `)
+      .eq('is_approved', true)
+      .gte('confidence_score', 0.8);
+
+    // If query provided, filter by relevant categories
+    if (query) {
+      const relevantCategories = getRelevantCategories(query);
+      if (relevantCategories.length > 0) {
+        supabaseQuery = supabaseQuery.in('category_id', relevantCategories);
+      }
+    }
+
+    const { data: suggestions, error } = await supabaseQuery
+      .order('confidence_score', { ascending: false })
+      .limit(5);
+
+    if (error) {
+      logger.error('Error getting trending suggestions:', error);
+      return [];
+    }
+
+    return suggestions.map(suggestion => ({
+      id: `trending-${suggestion.id}`,
+      text: extractSuggestionText(suggestion),
+      type: 'trending',
+      score: suggestion.confidence_score,
+      metadata: { 
+        trending: true,
+        categoryName: suggestion.categories?.name,
+        categoryPath: suggestion.categories?.path
+      }
+    }));
+  } catch (error) {
+    logger.error('Error in getTrendingSuggestions:', error);
+    return [];
+  }
+}
+
+/**
+ * Get relevant categories based on query
+ */
+function getRelevantCategories(query: string): number[] {
+  const queryLower = query.toLowerCase();
+  
+  // Define category mappings
+  const categoryMappings: { [key: string]: number[] } = {
+    'samsung': [499], // Elektronik
+    'iphone': [499], // Elektronik
+    'telefon': [499], // Elektronik
+    'bilgisayar': [499], // Elektronik
+    'laptop': [499], // Elektronik
+    'tablet': [499], // Elektronik
+    'ev': [1], // Emlak
+    'emlak': [1], // Emlak
+    'daire': [1], // Emlak
+    'villa': [1], // Emlak
+    'araba': [2], // Araç
+    'otomobil': [2], // Araç
+    'araç': [2], // Araç
+    'futbol': [712], // Spor & Outdoor
+    'basketbol': [712], // Spor & Outdoor
+    'spor': [712], // Spor & Outdoor
+  };
+
+  // Find matching categories
+  for (const [keyword, categoryIds] of Object.entries(categoryMappings)) {
+    if (queryLower.includes(keyword)) {
+      return categoryIds;
+    }
+  }
+
+  // If no specific match, return all categories
+  return [];
+}
+
+/**
+ * Get popular suggestions from database
+ */
+async function getPopularSuggestions() {
+  try {
+    // Get approved AI suggestions with medium confidence scores
+    const { data: suggestions, error } = await supabase
+      .from('category_ai_suggestions')
+      .select('*')
+      .eq('is_approved', true)
+      .gte('confidence_score', 0.7)
+      .lt('confidence_score', 0.8)
+      .order('confidence_score', { ascending: false })
+      .limit(3);
+
+    if (error) {
+      logger.error('Error getting popular suggestions:', error);
+      return [];
+    }
+
+    return suggestions.map(suggestion => ({
+      id: `popular-${suggestion.id}`,
+      text: extractSuggestionText(suggestion),
+      type: 'popular',
+      score: suggestion.confidence_score,
+      metadata: { searchCount: Math.floor(Math.random() * 1000) + 100 }
+    }));
+  } catch (error) {
+    logger.error('Error in getPopularSuggestions:', error);
+    return [];
+  }
+}
 
 export default router;

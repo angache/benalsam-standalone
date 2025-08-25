@@ -17,11 +17,32 @@ export interface AISuggestionsResponse {
   suggestions: AISuggestion[];
   total: number;
   query?: string;
-  category?: string;
+}
+
+// Yeni Category AI Suggestion interface'leri
+export interface CategoryAISuggestion {
+  id: number;
+  categoryId: number;
+  suggestionType: 'title' | 'description' | 'attributes' | 'keywords';
+  suggestionData: any;
+  confidenceScore: number;
+  isApproved: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CategoryAISuggestionsResponse {
+  success: boolean;
+  data: {
+    categoryId: number;
+    suggestions: CategoryAISuggestion[];
+    total: number;
+  };
 }
 
 class AISuggestionsService {
-  private readonly CACHE_KEY = 'ai_suggestions_v1';
+  private readonly CACHE_KEY = 'ai_suggestions_v2';
+  private readonly CATEGORY_AI_CACHE_KEY = 'category_ai_suggestions_v1';
   private readonly CACHE_TTL = 30 * 60 * 1000; // 30 minutes
   private readonly RATE_LIMIT = 60 * 1000; // 1 minute
   private lastFetchTime = 0;
@@ -32,20 +53,8 @@ class AISuggestionsService {
    */
   async getSuggestions(query?: string, categoryId?: number): Promise<AISuggestion[]> {
     try {
-      // Rate limiting
-      if (Date.now() - this.lastFetchTime < this.RATE_LIMIT) {
-        console.log('⏰ Rate limited, using cached suggestions');
-        return this.getCachedSuggestions();
-      }
-
-      // Check cache first
-      const cached = this.getCachedSuggestions();
-      if (cached.length > 0) {
-        console.log('📦 AI suggestions loaded from cache');
-        return cached;
-      }
-
-      // Fetch from API
+      // Always fetch from API - disable cache temporarily
+      console.log('🔄 Fetching AI suggestions from API...');
       return await this.fetchSuggestionsFromAPI(query, categoryId);
     } catch (error) {
       console.error('❌ Error getting AI suggestions:', error);
@@ -58,11 +67,93 @@ class AISuggestionsService {
    */
   async getCategorySuggestions(categoryId: number): Promise<AISuggestion[]> {
     try {
-      const suggestions = await this.getSuggestions(undefined, categoryId);
-      return suggestions.filter(s => s.type === 'category');
+      console.log('🤖 Getting category AI suggestions for category:', categoryId);
+      
+      // Önce category AI suggestions'ları getir
+      const categorySuggestions = await this.getCategoryAISuggestions(categoryId);
+      
+      // Sonra genel AI suggestions'ları getir
+      const generalSuggestions = await this.getSuggestions();
+      
+      // Kategori bazlı önerileri önceliklendir
+      const categoryBasedSuggestions = categorySuggestions.map(suggestion => ({
+        id: `category-ai-${suggestion.id}`,
+        text: this.extractSuggestionText(suggestion),
+        type: 'category' as const,
+        score: suggestion.confidenceScore,
+        category: { id: suggestion.categoryId } as any,
+        metadata: {
+          suggestionType: suggestion.suggestionType,
+          isApproved: suggestion.isApproved
+        } as any
+      }));
+
+      return [...categoryBasedSuggestions, ...generalSuggestions];
     } catch (error) {
       console.error('❌ Error getting category suggestions:', error);
       return [];
+    }
+  }
+
+  /**
+   * Get category AI suggestions from database
+   */
+  async getCategoryAISuggestions(categoryId: number): Promise<CategoryAISuggestion[]> {
+    try {
+      const cacheKey = `${this.CATEGORY_AI_CACHE_KEY}_${categoryId}`;
+      const cached = this.getCachedCategorySuggestions(categoryId);
+      
+      if (cached.length > 0) {
+        console.log('📦 Category AI suggestions loaded from cache');
+        return cached;
+      }
+
+      console.log('🤖 Fetching category AI suggestions from API...');
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/categories/${categoryId}/ai-suggestions`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result: CategoryAISuggestionsResponse = await response.json();
+      
+      if (!result.success) {
+        throw new Error('API returned error');
+      }
+      
+      // Cache the suggestions
+      this.setCachedCategorySuggestions(categoryId, result.data.suggestions);
+      
+      console.log(`✅ Fetched ${result.data.suggestions.length} category AI suggestions`);
+      return result.data.suggestions;
+    } catch (error) {
+      console.error('❌ Error fetching category AI suggestions:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Extract suggestion text from suggestion data
+   */
+  private extractSuggestionText(suggestion: CategoryAISuggestion): string {
+    try {
+      if (suggestion.suggestionType === 'keywords') {
+        const keywords = suggestion.suggestionData?.suggestions || [];
+        // İlk 3 keyword'ü göster, geri kalanı "..." ile kısalt
+        if (keywords.length > 3) {
+          return `${keywords.slice(0, 3).join(', ')}...`;
+        }
+        return keywords.join(', ');
+      } else if (suggestion.suggestionType === 'title' || suggestion.suggestionType === 'description') {
+        const suggestions = suggestion.suggestionData?.suggestions || [];
+        return suggestions[0] || 'AI Önerisi';
+      } else {
+        return 'AI Önerisi';
+      }
+    } catch (error) {
+      console.error('Error extracting suggestion text:', error);
+      return 'AI Önerisi';
     }
   }
 
@@ -71,23 +162,35 @@ class AISuggestionsService {
    */
   async getTrendingSuggestions(): Promise<AISuggestion[]> {
     try {
-      const suggestions = await this.getSuggestions();
-      return suggestions.filter(s => s.type === 'trending');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai-suggestions/trending`);
+      const result = await response.json();
+      
+      if (result.success) {
+        return result.data.suggestions || [];
+      }
+      
+      return [];
     } catch (error) {
-      console.error('❌ Error getting trending suggestions:', error);
+      console.error('Error getting trending suggestions:', error);
       return [];
     }
   }
 
   /**
-   * Get popular search suggestions
+   * Get popular suggestions
    */
   async getPopularSuggestions(): Promise<AISuggestion[]> {
     try {
-      const suggestions = await this.getSuggestions();
-      return suggestions.filter(s => s.type === 'popular');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai-suggestions/popular`);
+      const result = await response.json();
+      
+      if (result.success) {
+        return result.data.suggestions || [];
+      }
+      
+      return [];
     } catch (error) {
-      console.error('❌ Error getting popular suggestions:', error);
+      console.error('Error getting popular suggestions:', error);
       return [];
     }
   }
@@ -139,25 +242,20 @@ class AISuggestionsService {
   private getCachedSuggestions(): AISuggestion[] {
     try {
       const cached = localStorage.getItem(this.CACHE_KEY);
-      if (!cached) return [];
-
-      const parsed = JSON.parse(cached);
-      
-      // Check if cache is expired
-      if (Date.now() - parsed.timestamp > this.CACHE_TTL) {
-        console.log('⏰ AI suggestions cache expired');
-        return [];
+      if (cached) {
+        const { suggestions, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < this.CACHE_TTL) {
+          return suggestions;
+        }
       }
-
-      return parsed.suggestions || [];
     } catch (error) {
-      console.error('❌ Error reading AI suggestions cache:', error);
-      return [];
+      console.error('Error getting cached suggestions:', error);
     }
+    return [];
   }
 
   /**
-   * Set suggestions in cache
+   * Set cached suggestions
    */
   private setCachedSuggestions(suggestions: AISuggestion[]): void {
     try {
@@ -165,64 +263,55 @@ class AISuggestionsService {
         suggestions,
         timestamp: Date.now()
       };
-      
       localStorage.setItem(this.CACHE_KEY, JSON.stringify(cacheData));
-      console.log('💾 AI suggestions cached successfully');
     } catch (error) {
-      console.error('❌ Error setting AI suggestions cache:', error);
+      console.error('Error setting cached suggestions:', error);
     }
   }
 
   /**
-   * Get fallback suggestions when API fails
+   * Get cached category suggestions
+   */
+  private getCachedCategorySuggestions(categoryId: number): CategoryAISuggestion[] {
+    try {
+      const cacheKey = `${this.CATEGORY_AI_CACHE_KEY}_${categoryId}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const { suggestions, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < this.CACHE_TTL) {
+          return suggestions;
+        }
+      }
+    } catch (error) {
+      console.error('Error getting cached category suggestions:', error);
+    }
+    return [];
+  }
+
+  /**
+   * Set cached category suggestions
+   */
+  private setCachedCategorySuggestions(categoryId: number, suggestions: CategoryAISuggestion[]): void {
+    try {
+      const cacheKey = `${this.CATEGORY_AI_CACHE_KEY}_${categoryId}`;
+      const cacheData = {
+        suggestions,
+        timestamp: Date.now()
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    } catch (error) {
+      console.error('Error setting cached category suggestions:', error);
+    }
+  }
+
+  /**
+   * Get fallback suggestions
    */
   private getFallbackSuggestions(query?: string, categoryId?: number): AISuggestion[] {
-    const fallbackSuggestions: AISuggestion[] = [
-      {
-        id: 'trending-1',
-        text: 'iPhone 15 Pro',
-        type: 'trending',
-        score: 0.95,
-        metadata: { trending: true }
-      },
-      {
-        id: 'trending-2',
-        text: 'MacBook Air M2',
-        type: 'trending',
-        score: 0.92,
-        metadata: { trending: true }
-      },
-      {
-        id: 'popular-1',
-        text: 'Araba',
-        type: 'popular',
-        score: 0.88,
-        metadata: { searchCount: 1250 }
-      },
-      {
-        id: 'popular-2',
-        text: 'Ev',
-        type: 'popular',
-        score: 0.85,
-        metadata: { searchCount: 980 }
-      },
-      {
-        id: 'popular-3',
-        text: 'Telefon',
-        type: 'popular',
-        score: 0.82,
-        metadata: { searchCount: 756 }
-      }
-    ];
-
-    // Filter by query if provided
-    if (query) {
-      return fallbackSuggestions.filter(s => 
-        s.text.toLowerCase().includes(query.toLowerCase())
-      );
-    }
-
-    return fallbackSuggestions;
+    console.log('🔄 Using fallback suggestions');
+    
+    // Boş array döndür - gerçek veri kullan
+    return [];
   }
 
   /**
@@ -231,9 +320,18 @@ class AISuggestionsService {
   clearCache(): void {
     try {
       localStorage.removeItem(this.CACHE_KEY);
+      
+      // Clear all category AI suggestion caches
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.startsWith(this.CATEGORY_AI_CACHE_KEY)) {
+          localStorage.removeItem(key);
+        }
+      });
+      
       console.log('🗑️ AI suggestions cache cleared');
     } catch (error) {
-      console.error('❌ Error clearing AI suggestions cache:', error);
+      console.error('Error clearing cache:', error);
     }
   }
 

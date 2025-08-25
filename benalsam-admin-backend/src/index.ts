@@ -53,6 +53,7 @@ import hybridMonitoringRoutes from './routes/hybridMonitoring';
 import healthCheckRoutes from './routes/healthCheck';
 import securityRoutes from './routes/security';
 import uploadRoutes from './routes/upload';
+import aiSuggestionsRoutes from './routes/aiSuggestions';
 // import seoRoutes from './routes/seo';
 
 // Import services
@@ -257,6 +258,7 @@ app.use('/api/v1/hybrid-monitoring', hybridMonitoringRoutes); // Hybrid monitori
 app.use('/api/v1/health', healthCheckRoutes); // Health check routes
 app.use('/api/v1/security', securityRoutes); // Security monitoring routes
 app.use('/api/v1/upload', uploadRoutes); // Cloudinary upload routes
+app.use('/api/v1/ai-suggestions', aiSuggestionsRoutes); // AI Suggestions sistemi aktif edildi
 
 // SEO routes (no auth required)
 // app.use('/', seoRoutes); // Sitemap and robots.txt

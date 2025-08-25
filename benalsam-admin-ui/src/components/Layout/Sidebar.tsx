@@ -74,6 +74,13 @@ const navigationCategories = [
         icon: Folder,
         permission: PERMISSIONS.CATEGORIES_VIEW,
       },
+      {
+        id: 'ai-suggestions',
+        title: 'AI Önerileri',
+        path: '/ai-suggestions',
+        icon: Brain,
+        permission: PERMISSIONS.CATEGORIES_VIEW,
+      },
     ]
   },
   {

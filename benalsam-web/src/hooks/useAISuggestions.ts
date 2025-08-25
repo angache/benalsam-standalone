@@ -24,11 +24,27 @@ export const useAISuggestions = (query = '', categoryId = null) => {
     setError(null);
 
     try {
-      const results = await aiSuggestionsService.getSuggestions(debouncedQuery, categoryId);
+      console.log('🤖 Fetching AI suggestions:', { query: debouncedQuery, categoryId });
+      
+      let results: AISuggestion[] = [];
+      
+      if (categoryId) {
+        // Kategori bazlı öneriler
+        results = await aiSuggestionsService.getCategorySuggestions(categoryId);
+      } else if (debouncedQuery) {
+        // Arama bazlı öneriler
+        results = await aiSuggestionsService.getSuggestions(debouncedQuery);
+      } else {
+        // Genel öneriler
+        results = await aiSuggestionsService.getSuggestions();
+      }
+      
       setSuggestions(results);
       setLastQuery(debouncedQuery);
+      
+      console.log('✅ AI suggestions fetched:', results.length);
     } catch (err) {
-      console.error('Error fetching AI suggestions:', err);
+      console.error('❌ Error fetching AI suggestions:', err);
       setError(err.message);
       setSuggestions([]);
     } finally {
