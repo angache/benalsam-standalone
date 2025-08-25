@@ -35,7 +35,7 @@ const SecurityDashboardPage = lazy(() => import('./pages/SecurityDashboardPage')
 const PerformanceBaselinePage = lazy(() => import('./pages/PerformanceBaselinePage'));
 const PerformanceDashboardPage = lazy(() => import('./pages/PerformanceDashboardPage'));
 const RoutePerformancePage = lazy(() => import('./pages/RoutePerformancePage'));
-const AIAnalysisDashboard = lazy(() => import('./components/AIAnalysisDashboard'));
+const PerformanceAnalytics = lazy(() => import('./components/PerformanceAnalytics'));
 const TrendAnalysisPage = lazy(() => import('./pages/TrendAnalysis'));
 const BackupDashboardPage = lazy(() => import('./pages/BackupDashboardPage'));
 const SchedulingDashboardPage = lazy(() => import('./pages/SchedulingDashboardPage'));
@@ -522,13 +522,13 @@ function App() {
                   }
                 />
                 <Route
-                  path="/ai-analysis"
+                  path="/performance-analytics"
                   element={
                     <ProtectedRoute>
                       <ErrorBoundary>
                         <Layout>
                           <Suspense fallback={<PageLoadingSpinner />}>
-                            <AIAnalysisDashboard />
+                            <PerformanceAnalytics />
                           </Suspense>
                         </Layout>
                       </ErrorBoundary>

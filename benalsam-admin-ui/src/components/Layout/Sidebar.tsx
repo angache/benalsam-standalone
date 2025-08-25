@@ -246,9 +246,9 @@ const navigationCategories = [
               permission: PERMISSIONS.ANALYTICS_VIEW,
             },
             {
-              id: 'ai-analysis',
-              title: 'AI Analysis',
-              path: '/ai-analysis',
+              id: 'performance-analytics',
+              title: 'Performance Analytics',
+              path: '/performance-analytics',
               icon: Brain,
               permission: PERMISSIONS.ANALYTICS_VIEW,
             },

@@ -4,7 +4,7 @@ import {
   Box, Card, CardContent, Typography, Grid, Chip, Alert, AlertTitle,
   List, ListItem, ListItemText, ListItemIcon, Accordion, AccordionSummary,
   AccordionDetails, Button, IconButton, Tooltip, Badge, Divider,
-  LinearProgress, Paper
+  LinearProgress, Paper, Pagination, Stack
 } from '@mui/material';
 import {
   Psychology as PsychologyIcon, TrendingUp as TrendingUpIcon, TrendingDown as TrendingDownIcon,
@@ -51,6 +51,10 @@ const PerformanceAnalytics: React.FC = () => {
   const [analyses, setAnalyses] = useState<AIAnalysis[]>([]);
   const [selectedAnalysis, setSelectedAnalysis] = useState<AIAnalysis | null>(null);
   const [expandedIssues, setExpandedIssues] = useState<string[]>([]);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5); // Her sayfada 5 analiz
 
   // Fetch real performance analysis data from Redis via backend
   useEffect(() => {
@@ -286,6 +290,12 @@ const PerformanceAnalytics: React.FC = () => {
     degradingTrends: 0
   });
 
+  // Pagination logic
+  const totalPages = Math.ceil(analyses.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentAnalyses = analyses.slice(startIndex, endIndex);
+
   const averageScore = overallStats.totalAnalyses > 0 
     ? Math.round(overallStats.totalScore / overallStats.totalAnalyses) 
     : 0;
@@ -298,17 +308,20 @@ const PerformanceAnalytics: React.FC = () => {
           <PsychologyIcon color="primary" sx={{ fontSize: 40 }} />
           <Box>
             <Typography variant="h4" component="h1" fontWeight="bold">
-              🤖 AI Performance Analysis
+              📊 Performance Analytics
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Akıllı performans analizi ve öneriler
+              Web performans analizi ve optimizasyon önerileri
             </Typography>
           </Box>
         </Box>
         <Button
           variant="outlined"
           startIcon={<RefreshIcon />}
-          onClick={() => window.location.reload()}
+          onClick={() => {
+            setCurrentPage(1); // Reset to first page
+            window.location.reload();
+          }}
         >
           Refresh Analysis
         </Button>
@@ -401,7 +414,7 @@ const PerformanceAnalytics: React.FC = () => {
                 📊 AI Analysis Results
               </Typography>
               
-              {analyses.map((analysis, index) => (
+              {currentAnalyses.map((analysis, index) => (
                 <Box key={index} sx={{ mb: 3, p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
                   {/* Analysis Header */}
                   <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -532,6 +545,26 @@ const PerformanceAnalytics: React.FC = () => {
                   )}
                 </Box>
               ))}
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+                  <Stack spacing={2} alignItems="center">
+                    <Typography variant="body2" color="text.secondary">
+                      Sayfa {currentPage} / {totalPages} - Toplam {analyses.length} analiz
+                    </Typography>
+                    <Pagination
+                      count={totalPages}
+                      page={currentPage}
+                      onChange={(event, page) => setCurrentPage(page)}
+                      color="primary"
+                      size="large"
+                      showFirstButton
+                      showLastButton
+                    />
+                  </Stack>
+                </Box>
+              )}
             </CardContent>
           </Card>
         </Grid>
