@@ -64,7 +64,7 @@ router.get('/', aiSuggestionsLimiter, async (req, res) => {
 
     // 4. Popular suggestions - get from database (fallback)
     if (suggestions.length < 10) {
-      const popularSuggestions = await getPopularSuggestions();
+      const popularSuggestions = await getPopularSuggestions(query as string);
       suggestions.push(...popularSuggestions);
     }
 
@@ -378,22 +378,34 @@ function getRelevantCategories(query: string): number[] {
     }
   }
 
-  // If no specific match, return all categories
+  // If no specific match, return empty array (no irrelevant suggestions)
   return [];
 }
 
 /**
  * Get popular suggestions from database
  */
-async function getPopularSuggestions() {
+async function getPopularSuggestions(query?: string) {
   try {
-    // Get approved AI suggestions with medium confidence scores
-    const { data: suggestions, error } = await supabase
+    let supabaseQuery = supabase
       .from('category_ai_suggestions')
-      .select('*')
+      .select(`
+        *,
+        categories!inner(name, path, level)
+      `)
       .eq('is_approved', true)
       .gte('confidence_score', 0.7)
-      .lt('confidence_score', 0.8)
+      .lt('confidence_score', 0.8);
+
+    // If query provided, filter by relevant categories
+    if (query) {
+      const relevantCategories = getRelevantCategories(query);
+      if (relevantCategories.length > 0) {
+        supabaseQuery = supabaseQuery.in('category_id', relevantCategories);
+      }
+    }
+
+    const { data: suggestions, error } = await supabaseQuery
       .order('confidence_score', { ascending: false })
       .limit(3);
 
@@ -407,12 +419,63 @@ async function getPopularSuggestions() {
       text: extractSuggestionText(suggestion),
       type: 'popular',
       score: suggestion.confidence_score,
-      metadata: { searchCount: Math.floor(Math.random() * 1000) + 100 }
+      metadata: { 
+        searchCount: Math.floor(Math.random() * 1000) + 100,
+        categoryName: suggestion.categories?.name,
+        categoryPath: suggestion.categories?.path
+      }
     }));
   } catch (error) {
     logger.error('Error in getPopularSuggestions:', error);
     return [];
   }
 }
+
+/**
+ * @route GET /api/v1/ai-suggestions/debug-queue
+ * @desc Debug queue processing
+ * @access Public
+ */
+router.get('/debug-queue', async (req, res) => {
+  try {
+    // Queue durumunu kontrol et
+    const { data: queueJobs, error: queueError } = await supabase
+      .from('elasticsearch_sync_queue')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (queueError) {
+      return res.status(500).json({
+        success: false,
+        message: 'Queue error',
+        error: queueError
+      });
+    }
+
+    // ES durumunu kontrol et
+    const esResponse = await aiSuggestionsES.search({
+      query: { match_all: {} },
+      size: 5
+    });
+
+    return res.json({
+      success: true,
+      data: {
+        queueJobs,
+        esCount: esResponse?.hits?.total?.value || 0,
+        esHits: esResponse?.hits?.hits?.map((hit: any) => hit._source) || []
+      }
+    });
+
+  } catch (error: any) {
+    logger.error('❌ Error in debug queue:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Debug error',
+      error: error.message
+    });
+  }
+});
 
 export default router;
