@@ -4,8 +4,15 @@ import logger from '../config/logger';
 import { categoryService } from '../services/categoryService';
 import { searchService } from '../services/searchService';
 import { supabase } from '../config/database';
+import { AdminElasticsearchService } from '../services/elasticsearchService';
 
 const router = express.Router();
+
+// Initialize Elasticsearch service for AI suggestions
+const aiSuggestionsES = new AdminElasticsearchService(
+  process.env.ELASTICSEARCH_URL || 'http://209.227.228.96:9200',
+  'ai_suggestions'
+);
 
 // Rate limiting for AI suggestions
 const aiSuggestionsLimiter = rateLimit({
@@ -27,15 +34,19 @@ router.get('/', aiSuggestionsLimiter, async (req, res) => {
     
     logger.info('🤖 AI Suggestions request:', { query, categoryId });
 
-    const suggestions = [];
+    let suggestions = [];
 
-    // 1. Trending suggestions - get from database
-    const trendingSuggestions = await getTrendingSuggestions(query as string);
+    // 1. Query-based suggestions from Elasticsearch (if query provided)
+    if (query) {
+      try {
+        const esSuggestions = await getESSuggestions(query as string);
+        suggestions.push(...esSuggestions);
+      } catch (error) {
+        logger.error('Error getting ES suggestions:', error);
+      }
+    }
 
-    // 2. Popular search suggestions - get from database
-    const popularSuggestions = await getPopularSuggestions();
-
-    // 3. Category-based suggestions if categoryId provided
+    // 2. Category-based suggestions if categoryId provided
     if (categoryId) {
       try {
         const categorySuggestions = await getCategoryAISuggestions(parseInt(categoryId as string));
@@ -45,23 +56,20 @@ router.get('/', aiSuggestionsLimiter, async (req, res) => {
       }
     }
 
-    // 4. Query-based suggestions if query provided
-    if (query) {
-      // Query-based suggestions will be implemented later
-      // For now, return empty array
-      const querySuggestions: any[] = [];
-      suggestions.push(...querySuggestions);
+    // 3. Trending suggestions - get from database (fallback)
+    if (suggestions.length < 5) {
+      const trendingSuggestions = await getTrendingSuggestions(query as string);
+      suggestions.push(...trendingSuggestions);
     }
 
-    // Combine all suggestions
-    const allSuggestions = [
-      ...suggestions,
-      ...trendingSuggestions,
-      ...popularSuggestions
-    ];
+    // 4. Popular suggestions - get from database (fallback)
+    if (suggestions.length < 10) {
+      const popularSuggestions = await getPopularSuggestions();
+      suggestions.push(...popularSuggestions);
+    }
 
     // Remove duplicates and limit results
-    const uniqueSuggestions = allSuggestions.filter((suggestion, index, self) => 
+    const uniqueSuggestions = suggestions.filter((suggestion, index, self) => 
       index === self.findIndex(s => s.id === suggestion.id)
     ).slice(0, 20);
 
@@ -70,7 +78,8 @@ router.get('/', aiSuggestionsLimiter, async (req, res) => {
       data: {
         suggestions: uniqueSuggestions,
         total: uniqueSuggestions.length,
-        query: query || null
+        query: query || null,
+        source: query ? 'hybrid' : 'database'
       }
     });
 
@@ -194,6 +203,97 @@ function extractSuggestionText(suggestion: any): string {
   } catch (error) {
     logger.error('Error extracting suggestion text:', error);
     return 'AI Önerisi';
+  }
+}
+
+/**
+ * Get suggestions from Elasticsearch
+ */
+async function getESSuggestions(query: string) {
+  try {
+    logger.info(`🔍 ES search for query: ${query}`);
+
+    // Build Elasticsearch query
+    const esQuery = {
+      query: {
+        bool: {
+          must: [
+            {
+              multi_match: {
+                query: query,
+                fields: [
+                  'suggestion_data.keywords^3',
+                  'suggestion_data.brand^2',
+                  'suggestion_data.model^2',
+                  'category_name^1.5',
+                  'suggestion_data.description^1'
+                ],
+                fuzziness: 'AUTO',
+                type: 'best_fields'
+              }
+            }
+          ],
+          filter: [
+            { term: { is_approved: true } },
+            { range: { confidence_score: { gte: 0.7 } } }
+          ]
+        }
+      },
+      sort: [
+        { confidence_score: { order: 'desc' } },
+        { search_boost: { order: 'desc' } }
+      ],
+      size: 10
+    };
+
+    // Search in Elasticsearch
+    const response = await aiSuggestionsES.search(esQuery);
+    
+    if (!response || !response.hits || !response.hits.hits) {
+      logger.warn('No ES results found');
+      return [];
+    }
+
+    // Get suggestion IDs from ES results
+    const suggestionIds = response.hits.hits.map((hit: any) => hit._source.id);
+
+    // Get detailed data from Supabase
+    const { data: suggestions, error } = await supabase
+      .from('category_ai_suggestions')
+      .select(`
+        *,
+        categories!inner(name, path, level)
+      `)
+      .in('id', suggestionIds)
+      .eq('is_approved', true);
+
+    if (error) {
+      logger.error('Error getting suggestions from Supabase:', error);
+      return [];
+    }
+
+    // Combine ES scores with Supabase data
+    const esScores = new Map();
+    response.hits.hits.forEach((hit: any) => {
+      esScores.set(hit._source.id, hit._score);
+    });
+
+    return suggestions.map(suggestion => ({
+      id: `es-${suggestion.id}`,
+      text: extractSuggestionText(suggestion),
+      type: 'search',
+      score: esScores.get(suggestion.id) || suggestion.confidence_score,
+      metadata: {
+        categoryName: suggestion.categories?.name,
+        categoryPath: suggestion.categories?.path,
+        confidenceScore: suggestion.confidence_score,
+        source: 'elasticsearch'
+      }
+    }));
+
+  } catch (error) {
+    logger.error('Error in getESSuggestions:', error);
+    return [];
   }
 }
 

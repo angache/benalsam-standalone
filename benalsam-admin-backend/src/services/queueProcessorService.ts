@@ -113,6 +113,9 @@ export class QueueProcessorService {
         case 'categories':
           await this.processCategoryJob(operation, record_id, change_data);
           break;
+        case 'category_ai_suggestions':
+          await this.processAiSuggestionJob(operation, record_id, change_data);
+          break;
         default:
           logger.warn(`⚠️ Unknown table: ${table_name}`);
           await this.updateJobStatus(job.id, 'failed', `Unknown table: ${table_name}`);
@@ -189,6 +192,83 @@ export class QueueProcessorService {
     // Category değişiklikleri için şimdilik sadece log
     logger.info(`📝 Category ${operation}: ${recordId}`);
     // TODO: Category değişikliklerini ilgili listing'lere yansıt
+  }
+
+  /**
+   * AI Suggestion job'ını işle
+   */
+  private async processAiSuggestionJob(operation: string, recordId: string, changeData: any): Promise<void> {
+    try {
+      switch (operation) {
+        case 'INSERT':
+          // Yeni AI suggestion eklendi
+          if (changeData.is_approved) {
+            await this.elasticsearchService.indexDocument(
+              `ai_suggestions_${recordId}`, 
+              this.transformAiSuggestionForElasticsearch(changeData),
+              'ai_suggestions'
+            );
+          }
+          break;
+
+        case 'UPDATE':
+          // AI suggestion güncellendi
+          const newData = changeData.new;
+          const oldData = changeData.old;
+
+          if (newData.is_approved && oldData.is_approved) {
+            // Onaylı suggestion güncellendi - Elasticsearch'i güncelle
+            await this.elasticsearchService.updateDocument(
+              `ai_suggestions_${recordId}`,
+              this.transformAiSuggestionForElasticsearch(newData),
+              'ai_suggestions'
+            );
+          } else if (newData.is_approved && !oldData.is_approved) {
+            // Suggestion onaylandı - Elasticsearch'e ekle
+            await this.elasticsearchService.indexDocument(
+              `ai_suggestions_${recordId}`,
+              this.transformAiSuggestionForElasticsearch(newData),
+              'ai_suggestions'
+            );
+          } else if (!newData.is_approved && oldData.is_approved) {
+            // Suggestion onayı kaldırıldı - Elasticsearch'ten sil
+            await this.elasticsearchService.deleteDocument(`ai_suggestions_${recordId}`, 'ai_suggestions');
+          }
+          break;
+
+        case 'DELETE':
+          // AI suggestion silindi
+          await this.elasticsearchService.deleteDocument(`ai_suggestions_${recordId}`, 'ai_suggestions');
+          break;
+
+        default:
+          throw new Error(`Unknown operation: ${operation}`);
+      }
+    } catch (error) {
+      logger.error(`❌ Error processing AI suggestion job:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * AI Suggestion'ı Elasticsearch formatına çevir
+   */
+  private transformAiSuggestionForElasticsearch(suggestion: any): any {
+    return {
+      id: suggestion.id,
+      category_id: suggestion.category_id,
+      category_name: suggestion.category_name,
+      category_path: suggestion.category_path,
+      suggestion_type: suggestion.suggestion_type,
+      suggestion_data: suggestion.suggestion_data,
+      confidence_score: suggestion.confidence_score,
+      is_approved: suggestion.is_approved,
+      created_at: suggestion.created_at,
+      updated_at: suggestion.updated_at,
+      search_boost: suggestion.search_boost || 1.0,
+      usage_count: suggestion.usage_count || 0,
+      last_used_at: suggestion.last_used_at
+    };
   }
 
   /**

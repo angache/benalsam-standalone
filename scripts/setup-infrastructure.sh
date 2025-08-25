@@ -163,6 +163,101 @@ setup_elasticsearch() {
         }'
     
     log "✅ Elasticsearch kurulumu tamamlandı"
+    
+    # AI Suggestions index'ini oluştur
+    log "🤖 AI Suggestions index oluşturuluyor..."
+    
+    curl -X PUT "$ELASTICSEARCH_URL/ai_suggestions" \
+        -H "Content-Type: application/json" \
+        -d '{
+            "settings": {
+                "number_of_shards": 1,
+                "number_of_replicas": 0,
+                "analysis": {
+                    "analyzer": {
+                        "turkish_analyzer": {
+                            "type": "custom",
+                            "tokenizer": "standard",
+                            "filter": ["lowercase", "turkish_stop", "turkish_stemmer", "asciifolding"]
+                        }
+                    },
+                    "filter": {
+                        "turkish_stop": {
+                            "type": "stop",
+                            "stopwords": "_turkish_"
+                        },
+                        "turkish_stemmer": {
+                            "type": "stemmer",
+                            "language": "turkish"
+                        }
+                    }
+                }
+            },
+            "mappings": {
+                "properties": {
+                    "id": { "type": "integer" },
+                    "category_id": { "type": "integer" },
+                    "category_name": { 
+                        "type": "text",
+                        "analyzer": "turkish_analyzer",
+                        "fields": {
+                            "keyword": { "type": "keyword" }
+                        }
+                    },
+                    "category_path": { 
+                        "type": "text",
+                        "analyzer": "turkish_analyzer",
+                        "fields": {
+                            "keyword": { "type": "keyword" }
+                        }
+                    },
+                    "suggestion_type": { "type": "keyword" },
+                    "suggestion_data": {
+                        "properties": {
+                            "keywords": { 
+                                "type": "text",
+                                "analyzer": "turkish_analyzer",
+                                "fields": {
+                                    "keyword": { "type": "keyword" }
+                                }
+                            },
+                            "description": { 
+                                "type": "text",
+                                "analyzer": "turkish_analyzer" 
+                            },
+                            "brand": { 
+                                "type": "text",
+                                "analyzer": "turkish_analyzer",
+                                "fields": {
+                                    "keyword": { "type": "keyword" }
+                                }
+                            },
+                            "model": { 
+                                "type": "text",
+                                "analyzer": "turkish_analyzer",
+                                "fields": {
+                                    "keyword": { "type": "keyword" }
+                                }
+                            },
+                            "attributes": { "type": "object", "dynamic": true }
+                        }
+                    },
+                    "confidence_score": { "type": "float" },
+                    "is_approved": { "type": "boolean" },
+                    "created_at": { "type": "date" },
+                    "updated_at": { "type": "date" },
+                    "search_boost": { "type": "float" },
+                    "usage_count": { "type": "integer" },
+                    "last_used_at": { "type": "date" }
+                }
+            }
+        }'
+    
+    if [ $? -eq 0 ]; then
+        log "✅ AI Suggestions index oluşturuldu"
+    else
+        error "❌ AI Suggestions index oluşturulamadı"
+    fi
 }
 
 # Redis kurulumu
@@ -189,6 +284,10 @@ setup_redis() {
     
     # Rate limiting için boş cache'ler
     redis-cli -u "$REDIS_URL" SET "rate_limit:global" "0" EX 900
+    
+    # AI Suggestions için cache key'leri
+    redis-cli -u "$REDIS_URL" SET "ai_suggestions_v2" "[]" EX 1800
+    redis-cli -u "$REDIS_URL" SET "category_ai_suggestions_v1" "{}" EX 1800
     
     log "✅ Redis kurulumu tamamlandı"
 }
@@ -245,6 +344,9 @@ health_check() {
     # Index count check
     INDEX_COUNT=$(curl -s "$ELASTICSEARCH_URL/listings/_count" | jq -r '.count')
     log "📊 Listings index'inde $INDEX_COUNT doküman var"
+    
+    AI_SUGGESTIONS_COUNT=$(curl -s "$ELASTICSEARCH_URL/ai_suggestions/_count" | jq -r '.count')
+    log "🤖 AI Suggestions index'inde $AI_SUGGESTIONS_COUNT doküman var"
 }
 
 # Ana fonksiyon
