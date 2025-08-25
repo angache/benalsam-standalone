@@ -30,5 +30,20 @@
       "scheduled",
       "test schedule"
     ]
+  },
+  {
+    "id": "backup_1756129653966_j6ywhr2ta",
+    "timestamp": "2025-08-25T13:47:33.966Z",
+    "size": 522968,
+    "type": "full",
+    "status": "completed",
+    "databaseSize": 627,
+    "edgeFunctionsCount": 0,
+    "migrationsCount": 6,
+    "checksum": "74a1b7904bbad64329b66f602cec5da680878540f9f5ffa8143ebcd6f2e2c658",
+    "description": "category-update-migration",
+    "tags": [
+      "category"
+    ]
   }
 ]

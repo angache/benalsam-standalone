@@ -1,0 +1,28 @@
+{
+  "id": "backup_1756129653966_j6ywhr2ta",
+  "timestamp": "2025-08-25T13:47:33.966Z",
+  "size": 0,
+  "type": "full",
+  "status": "in_progress",
+  "databaseSize": 627,
+  "edgeFunctionsCount": 0,
+  "migrationsCount": 6,
+  "checksum": "",
+  "description": "category-update-migration",
+  "tags": [
+    "category"
+  ],
+  "version": "1.0.0",
+  "createdBy": "Benalsam Backup Service",
+  "components": {
+    "database": true,
+    "edgeFunctions": true,
+    "migrations": true,
+    "seeds": true
+  },
+  "environment": {
+    "nodeVersion": "v20.18.0",
+    "platform": "darwin",
+    "timestamp": "2025-08-25T13:47:38.578Z"
+  }
+}
