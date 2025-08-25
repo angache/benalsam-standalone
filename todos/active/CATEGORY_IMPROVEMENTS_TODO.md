@@ -20,6 +20,56 @@ Bu TODO, kategori sisteminin mevcut durumunu analiz edip iyileştirmeler yapmak 
 
 ---
 
+## 🚨 **KATEGORİ 0: CATEGORY ORDER SYSTEM (URGENT)**
+
+### **0.1 Manual Category Ordering System**
+- [ ] **Admin Category Order Management**
+  - [ ] Category order editing interface in Admin UI
+  - [ ] Drag-and-drop category reordering
+  - [ ] Category order preview
+  - [ ] Category order validation
+  - [ ] Category order history tracking
+
+- [ ] **Database Schema Updates**
+  - [ ] Ensure `sort_order` column exists and is properly indexed
+  - [ ] Add `is_featured` boolean column for highlighted categories
+  - [ ] Add `display_priority` integer column for manual priority
+  - [ ] Add `order_updated_at` timestamp for tracking changes
+  - [ ] Add `order_updated_by` user reference for audit trail
+
+- [ ] **Order Management Algorithm**
+  - [ ] Manual sort_order assignment (1, 2, 3, 4...)
+  - [ ] Featured categories always on top
+  - [ ] Display priority override system
+  - [ ] Category order validation rules
+  - [ ] Order conflict resolution
+
+### **0.2 Category Order API**
+- [ ] **Order Management Endpoints**
+  - [ ] `GET /api/v1/categories/ordered` - Manual ordered categories
+  - [ ] `PUT /api/v1/categories/:id/order` - Update category order
+  - [ ] `POST /api/v1/categories/reorder` - Bulk reorder categories
+  - [ ] `GET /api/v1/categories/order-history` - Order change history
+  - [ ] `POST /api/v1/categories/:id/toggle-featured` - Toggle featured status
+
+
+
+### **0.3 Frontend Order Integration**
+- [ ] **Admin Category Order Interface**
+  - [ ] Category order management page
+  - [ ] Drag-and-drop reordering component
+  - [ ] Order preview and validation
+  - [ ] Featured category toggle
+  - [ ] Order change confirmation
+
+- [ ] **Category Order Service**
+  - [ ] Manual order-based category fetching
+  - [ ] Category order caching
+  - [ ] Real-time order updates
+  - [ ] Fallback to default order
+
+---
+
 ## 🎯 **KATEGORİ 1: CATEGORY ANALYTICS & PERFORMANCE**
 
 ### **1.1 Category Performance Metrics**
@@ -257,6 +307,12 @@ Bu TODO, kategori sisteminin mevcut durumunu analiz edip iyileştirmeler yapmak 
 
 ## 🚀 **ÖNCELİK SIRASI**
 
+### **Phase 0 (URGENT - This Week)**
+1. **Category Order System** - Manual ordering with Admin UI
+2. **Database Schema Updates** - Order management columns
+3. **Order API Implementation** - Backend endpoints
+4. **Admin UI Integration** - Drag-and-drop order management
+
 ### **Phase 1 (High Priority - Week 1)**
 1. Category Performance Metrics (Backend)
 2. Category Loading Performance (Backend)
@@ -284,18 +340,21 @@ Bu TODO, kategori sisteminin mevcut durumunu analiz edip iyileştirmeler yapmak 
 - ID-based filtering yaklaşımı devam edecek
 - Cache system optimize edilecek
 - AI suggestions entegrasyonu korunacak
+- **NEW:** Manual category ordering sistemi eklenecek
 
 ### **Business Impact**
 - Kullanıcı deneyimi iyileşecek
 - Kategori performansı artacak
 - Admin yönetimi kolaylaşacak
 - Analytics insights sağlanacak
+- **NEW:** Manuel olarak önemli kategoriler üstte görünecek
 
 ### **Success Metrics**
 - Category load time < 200ms
 - Category cache hit rate > 90%
 - Mobile category usability score > 85%
 - Category conversion rate improvement > 15%
+- **NEW:** Manual order management efficiency > 95%
 
 ---
 
@@ -303,8 +362,9 @@ Bu TODO, kategori sisteminin mevcut durumunu analiz edip iyileştirmeler yapmak 
 
 - **Başlangıç:** 2025-08-25
 - **Tahmini Bitiş:** 2025-09-15
-- **Tamamlanan:** 0/50 tasks
+- **Tamamlanan:** 0/60 tasks
 - **Durum:** Active
+- **Öncelik:** Category Order System (URGENT)
 
 ---
 
