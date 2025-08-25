@@ -254,13 +254,23 @@ export class QueueProcessorService {
    * AI Suggestion'ı Elasticsearch formatına çevir
    */
   private transformAiSuggestionForElasticsearch(suggestion: any): any {
+    // Supabase'den gelen suggestion_data'yı ES formatına çevir
+    let transformedSuggestionData = { ...suggestion.suggestion_data };
+    
+    // Eğer 'suggestions' varsa 'keywords' olarak kopyala
+    if (suggestion.suggestion_data.suggestions) {
+      transformedSuggestionData.keywords = suggestion.suggestion_data.suggestions;
+      // suggestions'ı kaldır (ES mapping'de yok)
+      delete transformedSuggestionData.suggestions;
+    }
+
     return {
       id: suggestion.id,
       category_id: suggestion.category_id,
       category_name: suggestion.category_name,
       category_path: suggestion.category_path,
       suggestion_type: suggestion.suggestion_type,
-      suggestion_data: suggestion.suggestion_data,
+      suggestion_data: transformedSuggestionData,
       confidence_score: suggestion.confidence_score,
       is_approved: suggestion.is_approved,
       created_at: suggestion.created_at,

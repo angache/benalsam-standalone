@@ -138,6 +138,49 @@ const AISuggestionsManagement: React.FC = () => {
     }
   };
 
+  const rebuildESIndexes = async () => {
+    if (!confirm('ES indexlerini temizleyip yeniden yüklemek istediğinizden emin misiniz? Bu işlem biraz zaman alabilir.')) {
+      return;
+    }
+
+    setLoading(true);
+    setMessage({ text: 'ES indexleri temizleniyor ve yeniden yükleniyor...', type: 'info' });
+
+    try {
+      // 1. ES indexlerini temizle
+      const clearResponse = await fetch(`${import.meta.env.VITE_API_URL}/ai-suggestions/rebuild-indexes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const clearData = await clearResponse.json();
+      
+      if (clearData.success) {
+        setMessage({ 
+          text: `ES indexleri başarıyla yeniden yüklendi! ${clearData.data.indexedCount} kayıt indexlendi.`, 
+          type: 'success' 
+        });
+        
+        // Kategorileri yenile
+        fetchCategories();
+        
+        // Seçili kategorinin önerilerini yenile
+        if (selectedCategory) {
+          fetchSuggestions(selectedCategory);
+        }
+      } else {
+        setMessage({ text: clearData.message || 'ES indexleri yeniden yüklenirken hata oluştu', type: 'error' });
+      }
+    } catch (error) {
+      console.error('Error rebuilding ES indexes:', error);
+      setMessage({ text: 'ES indexleri yeniden yüklenirken hata oluştu', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getSuggestionTypeLabel = (type: string) => {
     const labels = {
       title: 'Başlık',
@@ -204,13 +247,24 @@ const AISuggestionsManagement: React.FC = () => {
         <Typography variant="h4" component="h1">
           AI Önerileri Yönetimi
         </Typography>
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={() => fetchCategories()}
-        >
-          Yenile
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="outlined"
+            startIcon={<RefreshIcon />}
+            onClick={() => fetchCategories()}
+          >
+            Yenile
+          </Button>
+          <Button
+            variant="contained"
+            color="warning"
+            startIcon={<RefreshIcon />}
+            onClick={rebuildESIndexes}
+            disabled={loading}
+          >
+            ES Indexlerini Temizle ve Yeniden Yükle
+          </Button>
+        </Box>
       </Box>
 
       {message && (

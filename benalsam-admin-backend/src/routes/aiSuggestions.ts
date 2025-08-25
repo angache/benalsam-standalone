@@ -57,12 +57,14 @@ router.get('/', aiSuggestionsLimiter, async (req, res) => {
     }
 
     // 3. Trending suggestions - get from database (fallback)
+    // Trending'ler Supabase'de çünkü usage tracking ve analytics orada
     if (suggestions.length < 5) {
       const trendingSuggestions = await getTrendingSuggestions(query as string);
       suggestions.push(...trendingSuggestions);
     }
 
     // 4. Popular suggestions - get from database (fallback)
+    // Popular'lar da Supabase'de çünkü confidence score ve category analytics orada
     if (suggestions.length < 10) {
       const popularSuggestions = await getPopularSuggestions(query as string);
       suggestions.push(...popularSuggestions);
@@ -213,23 +215,39 @@ async function getESSuggestions(query: string) {
   try {
     logger.info(`🔍 ES search for query: ${query}`);
 
-    // Build Elasticsearch query
+    // Build Elasticsearch query with better relevance
     const esQuery = {
+      min_score: 0.3, // Lower minimum score to include more relevant results
       query: {
         bool: {
-          must: [
+          should: [
+            // Exact phrase match (highest priority)
             {
               multi_match: {
                 query: query,
                 fields: [
-                  'suggestion_data.keywords^3',
-                  'suggestion_data.brand^2',
-                  'suggestion_data.model^2',
-                  'category_name^1.5',
-                  'suggestion_data.description^1'
+                  'suggestion_data.keywords^4',
+                  'suggestion_data.brand^3',
+                  'suggestion_data.model^3'
+                ],
+                type: 'phrase',
+                boost: 3.0
+              }
+            },
+            // Individual terms match
+            {
+              multi_match: {
+                query: query,
+                fields: [
+                  'suggestion_data.keywords^2',
+                  'suggestion_data.brand^1.5',
+                  'suggestion_data.model^1.5',
+                  'category_name^1',
+                  'suggestion_data.description^0.5'
                 ],
                 fuzziness: 'AUTO',
-                type: 'best_fields'
+                type: 'best_fields',
+                minimum_should_match: '60%'
               }
             }
           ],
@@ -240,8 +258,8 @@ async function getESSuggestions(query: string) {
         }
       },
       sort: [
-        { confidence_score: { order: 'desc' } },
-        { search_boost: { order: 'desc' } }
+        { _score: { order: 'desc' } },
+        { confidence_score: { order: 'desc' } }
       ],
       size: 10
     };
@@ -280,7 +298,7 @@ async function getESSuggestions(query: string) {
 
     return suggestions.map(suggestion => ({
       id: `es-${suggestion.id}`,
-      text: extractSuggestionText(suggestion),
+      text: `[ES] ${extractSuggestionText(suggestion)}`,
       type: 'search',
       score: esScores.get(suggestion.id) || suggestion.confidence_score,
       metadata: {
@@ -311,17 +329,13 @@ async function getTrendingSuggestions(query?: string) {
       .eq('is_approved', true)
       .gte('confidence_score', 0.8);
 
-    // If query provided, filter by relevant categories
-    if (query) {
-      const relevantCategories = getRelevantCategories(query);
-      if (relevantCategories.length > 0) {
-        supabaseQuery = supabaseQuery.in('category_id', relevantCategories);
-      }
-    }
+    // ES handles relevance automatically, no need for manual filtering
 
     const { data: suggestions, error } = await supabaseQuery
       .order('confidence_score', { ascending: false })
       .limit(5);
+
+    logger.info(`📊 Found ${suggestions?.length || 0} suggestions for query: "${query}"`);
 
     if (error) {
       logger.error('Error getting trending suggestions:', error);
@@ -330,7 +344,7 @@ async function getTrendingSuggestions(query?: string) {
 
     return suggestions.map(suggestion => ({
       id: `trending-${suggestion.id}`,
-      text: extractSuggestionText(suggestion),
+      text: `[SPB-TRENDING] ${extractSuggestionText(suggestion)}`,
       type: 'trending',
       score: suggestion.confidence_score,
       metadata: { 
@@ -349,36 +363,8 @@ async function getTrendingSuggestions(query?: string) {
  * Get relevant categories based on query
  */
 function getRelevantCategories(query: string): number[] {
-  const queryLower = query.toLowerCase();
-  
-  // Define category mappings
-  const categoryMappings: { [key: string]: number[] } = {
-    'samsung': [499], // Elektronik
-    'iphone': [499], // Elektronik
-    'telefon': [499], // Elektronik
-    'bilgisayar': [499], // Elektronik
-    'laptop': [499], // Elektronik
-    'tablet': [499], // Elektronik
-    'ev': [1], // Emlak
-    'emlak': [1], // Emlak
-    'daire': [1], // Emlak
-    'villa': [1], // Emlak
-    'araba': [2], // Araç
-    'otomobil': [2], // Araç
-    'araç': [2], // Araç
-    'futbol': [712], // Spor & Outdoor
-    'basketbol': [712], // Spor & Outdoor
-    'spor': [712], // Spor & Outdoor
-  };
-
-  // Find matching categories
-  for (const [keyword, categoryIds] of Object.entries(categoryMappings)) {
-    if (queryLower.includes(keyword)) {
-      return categoryIds;
-    }
-  }
-
-  // If no specific match, return empty array (no irrelevant suggestions)
+  // ES full-text search already handles relevance automatically
+  // No need for manual category filtering
   return [];
 }
 
@@ -397,13 +383,7 @@ async function getPopularSuggestions(query?: string) {
       .gte('confidence_score', 0.7)
       .lt('confidence_score', 0.8);
 
-    // If query provided, filter by relevant categories
-    if (query) {
-      const relevantCategories = getRelevantCategories(query);
-      if (relevantCategories.length > 0) {
-        supabaseQuery = supabaseQuery.in('category_id', relevantCategories);
-      }
-    }
+    // ES handles relevance automatically, no need for manual filtering
 
     const { data: suggestions, error } = await supabaseQuery
       .order('confidence_score', { ascending: false })
@@ -416,7 +396,7 @@ async function getPopularSuggestions(query?: string) {
 
     return suggestions.map(suggestion => ({
       id: `popular-${suggestion.id}`,
-      text: extractSuggestionText(suggestion),
+      text: `[SPB-POPULAR] ${extractSuggestionText(suggestion)}`,
       type: 'popular',
       score: suggestion.confidence_score,
       metadata: { 
@@ -474,6 +454,383 @@ router.get('/debug-queue', async (req, res) => {
       success: false,
       message: 'Debug error',
       error: error.message
+    });
+  }
+});
+
+/**
+ * @route POST /api/v1/ai-suggestions/process-queue
+ * @desc Manually process queue
+ * @access Public
+ */
+router.post('/process-queue', async (req, res) => {
+  try {
+    // Queue processor'ı manuel olarak çalıştır
+    const { QueueProcessorService } = require('../services/queueProcessorService');
+    const queueProcessor = new QueueProcessorService();
+    
+    // Pending job'ları al ve işle
+    const { data: pendingJobs, error } = await supabase
+      .from('elasticsearch_sync_queue')
+      .select('*')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: true })
+      .limit(5);
+
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Queue error',
+        error: error
+      });
+    }
+
+    let processedCount = 0;
+    for (const job of pendingJobs || []) {
+      try {
+        await queueProcessor['processJob'](job);
+        processedCount++;
+      } catch (error) {
+        logger.error(`Error processing job ${job.id}:`, error);
+      }
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        processedCount,
+        totalJobs: pendingJobs?.length || 0
+      }
+    });
+
+  } catch (error: any) {
+    logger.error('❌ Error in manual queue processing:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Manual processing error',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route GET /api/v1/ai-suggestions/debug-categories
+ * @desc Debug category filtering
+ * @access Public
+ */
+router.get('/debug-categories', async (req, res) => {
+  try {
+    const { q: query } = req.query;
+    
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        message: 'Query parameter required'
+      });
+    }
+
+    const relevantCategories = getRelevantCategories(query as string);
+    
+    // Tüm AI suggestions'ları al
+    const { data: allSuggestions, error } = await supabase
+      .from('category_ai_suggestions')
+      .select(`
+        *,
+        categories!inner(name, path, level)
+      `)
+      .eq('is_approved', true);
+
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Database error',
+        error: error
+      });
+    }
+
+    // Filtrelenmiş suggestions'ları al
+    const filteredSuggestions = relevantCategories.length > 0 
+      ? allSuggestions.filter(s => relevantCategories.includes(s.category_id))
+      : [];
+
+    return res.json({
+      success: true,
+      data: {
+        query: query,
+        relevantCategories,
+        totalSuggestions: allSuggestions.length,
+        filteredSuggestionsCount: filteredSuggestions.length,
+        allSuggestions: allSuggestions.map(s => ({
+          id: s.id,
+          category_id: s.category_id,
+          category_name: s.categories?.name,
+          suggestion_data: s.suggestion_data
+        })),
+        filteredSuggestions: filteredSuggestions.map(s => ({
+          id: s.id,
+          category_id: s.category_id,
+          category_name: s.categories?.name,
+          suggestion_data: s.suggestion_data
+        }))
+      }
+    });
+
+  } catch (error: any) {
+    logger.error('❌ Error in debug categories:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Debug error',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route POST /api/v1/ai-suggestions/log-click
+ * @desc Log AI suggestion click for usage tracking
+ * @access Public
+ */
+router.post('/log-click', async (req, res) => {
+  try {
+    const { suggestionId, query, sessionId, resultPosition, searchType } = req.body;
+
+    if (!suggestionId || !query) {
+      return res.status(400).json({
+        success: false,
+        message: 'suggestionId and query are required'
+      });
+    }
+
+    // Log the click using Supabase function
+    const { error } = await supabase.rpc('log_ai_suggestion_click', {
+      p_suggestion_id: suggestionId,
+      p_query: query,
+      p_session_id: sessionId || null,
+      p_result_position: resultPosition || null,
+      p_search_type: searchType || 'ai_suggestion'
+    });
+
+    if (error) {
+      logger.error('Error logging AI suggestion click:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to log click',
+        error: error.message
+      });
+    }
+
+    // Update usage count
+    await supabase.rpc('update_suggestion_usage_count', {
+      p_suggestion_id: suggestionId
+    });
+
+    logger.info(`✅ AI suggestion click logged: ${suggestionId} for query: "${query}"`);
+
+    return res.json({
+      success: true,
+      message: 'Click logged successfully'
+    });
+
+  } catch (error: any) {
+    logger.error('❌ Error logging AI suggestion click:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Click logging failed',
+      error: error.message || 'Unknown error'
+    });
+  }
+});
+
+/**
+ * @route GET /api/v1/ai-suggestions/trending-by-usage
+ * @desc Get trending suggestions based on actual usage data
+ * @access Public
+ */
+router.get('/trending-by-usage', async (req, res) => {
+  try {
+    const { days = 7, limit = 10 } = req.query;
+
+    const { data: trendingData, error } = await supabase.rpc('get_trending_suggestions_by_usage', {
+      p_days: parseInt(days as string),
+      p_limit: parseInt(limit as string)
+    });
+
+    if (error) {
+      logger.error('Error getting trending by usage:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to get trending data',
+        error: error.message
+      });
+    }
+
+    // Get detailed suggestion data
+    const suggestionIds = trendingData.map((item: any) => item.suggestion_id);
+    const { data: suggestions, error: suggestionsError } = await supabase
+      .from('category_ai_suggestions')
+      .select(`
+        *,
+        categories!inner(name, path, level)
+      `)
+      .in('id', suggestionIds)
+      .eq('is_approved', true);
+
+    if (suggestionsError) {
+      logger.error('Error getting suggestion details:', suggestionsError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to get suggestion details',
+        error: suggestionsError.message
+      });
+    }
+
+    // Combine trending data with suggestion details
+    const trendingSuggestions = suggestions.map(suggestion => {
+      const trendingInfo = trendingData.find((item: any) => item.suggestion_id === suggestion.id);
+      return {
+        id: `trending-usage-${suggestion.id}`,
+        text: `[TRENDING-USAGE] ${extractSuggestionText(suggestion)}`,
+        type: 'trending_usage',
+        score: trendingInfo?.total_clicks || 0,
+        metadata: {
+          categoryName: suggestion.categories?.name,
+          categoryPath: suggestion.categories?.path,
+          totalClicks: trendingInfo?.total_clicks || 0,
+          clickThroughRate: trendingInfo?.click_through_rate || 0,
+          avgDwellTime: trendingInfo?.avg_dwell_time || 0,
+          days: parseInt(days as string)
+        }
+      };
+    });
+
+    return res.json({
+      success: true,
+      data: {
+        suggestions: trendingSuggestions,
+        total: trendingSuggestions.length,
+        days: parseInt(days as string),
+        source: 'usage_analytics'
+      }
+    });
+
+  } catch (error: any) {
+    logger.error('❌ Error getting trending by usage:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Trending by usage failed',
+      error: error.message || 'Unknown error'
+    });
+  }
+});
+
+/**
+ * @route POST /api/v1/ai-suggestions/rebuild-indexes
+ * @desc Rebuild ES indexes from Supabase data
+ * @access Public
+ */
+router.post('/rebuild-indexes', async (req, res) => {
+  try {
+    logger.info('🔄 Starting ES index rebuild...');
+
+    // 1. ES indexini temizle
+    try {
+      await aiSuggestionsES.deleteIndex();
+      logger.info('✅ ES index deleted');
+    } catch (error: any) {
+      logger.warn('⚠️ ES index delete failed (might not exist):', error);
+    }
+
+    // 2. ES indexini yeniden oluştur
+    try {
+      await aiSuggestionsES.createIndex();
+      logger.info('✅ ES index recreated');
+    } catch (error: any) {
+      logger.error('❌ ES index creation failed:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'ES index creation failed',
+        error: error.message || 'Unknown error'
+      });
+    }
+
+    // 3. Supabase'den tüm onaylı önerileri al
+    const { data: suggestions, error } = await supabase
+      .from('category_ai_suggestions')
+      .select(`
+        *,
+        categories!inner(name, path, level)
+      `)
+      .eq('is_approved', true);
+
+    if (error) {
+      logger.error('❌ Error fetching suggestions from Supabase:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Database error',
+        error: error.message || 'Unknown error'
+      });
+    }
+
+    logger.info(`📊 Found ${suggestions?.length || 0} approved suggestions`);
+
+    // 4. Her öneriyi ES'ye indexle
+    let indexedCount = 0;
+    for (const suggestion of suggestions || []) {
+      try {
+        const transformedData = {
+          id: suggestion.id,
+          category_id: suggestion.category_id,
+          category_name: suggestion.categories?.name,
+          category_path: suggestion.categories?.path,
+          suggestion_type: suggestion.suggestion_type,
+          suggestion_data: {
+            ...suggestion.suggestion_data,
+            // suggestions varsa keywords olarak kopyala
+            ...(suggestion.suggestion_data.suggestions && {
+              keywords: suggestion.suggestion_data.suggestions
+            })
+          },
+          confidence_score: suggestion.confidence_score,
+          is_approved: suggestion.is_approved,
+          created_at: suggestion.created_at,
+          updated_at: suggestion.updated_at,
+          search_boost: suggestion.search_boost || 1.0,
+          usage_count: suggestion.usage_count || 0,
+          last_used_at: suggestion.last_used_at
+        };
+
+        // suggestions field'ını kaldır
+        if (transformedData.suggestion_data.suggestions) {
+          delete transformedData.suggestion_data.suggestions;
+        }
+
+        await aiSuggestionsES.indexDocument(
+          `ai_suggestions_${suggestion.id}`,
+          transformedData
+        );
+        indexedCount++;
+      } catch (error) {
+        logger.error(`❌ Error indexing suggestion ${suggestion.id}:`, error);
+      }
+    }
+
+    logger.info(`✅ Successfully indexed ${indexedCount} suggestions`);
+
+    return res.json({
+      success: true,
+      data: {
+        indexedCount,
+        totalSuggestions: suggestions?.length || 0,
+        message: `ES indexleri başarıyla yeniden yüklendi! ${indexedCount} kayıt indexlendi.`
+      }
+    });
+
+  } catch (error: any) {
+    logger.error('❌ Error rebuilding ES indexes:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'ES index rebuild failed',
+      error: error.message || 'Unknown error'
     });
   }
 });
