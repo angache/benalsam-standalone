@@ -60,6 +60,7 @@ const AISuggestionsManagement: React.FC = () => {
   const [isApproved, setIsApproved] = useState(true);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
+
   // Fetch categories
   useEffect(() => {
     fetchCategories();
@@ -71,6 +72,8 @@ const AISuggestionsManagement: React.FC = () => {
       fetchSuggestions(selectedCategory);
     }
   }, [selectedCategory]);
+
+
 
   const fetchCategories = async () => {
     try {
@@ -181,6 +184,10 @@ const AISuggestionsManagement: React.FC = () => {
     }
   };
 
+
+
+
+
   const getSuggestionTypeLabel = (type: string) => {
     const labels = {
       title: 'Başlık',
@@ -266,6 +273,10 @@ const AISuggestionsManagement: React.FC = () => {
           </Button>
         </Box>
       </Box>
+
+
+
+
 
       {message && (
         <Alert severity={message.type} sx={{ mb: 2 }} onClose={() => setMessage(null)}>

@@ -81,6 +81,13 @@ const navigationCategories = [
         icon: Brain,
         permission: PERMISSIONS.CATEGORIES_VIEW,
       },
+      {
+        id: 'queue-management',
+        title: 'Queue Yönetimi',
+        path: '/queue-management',
+        icon: Activity,
+        permission: PERMISSIONS.CATEGORIES_VIEW,
+      },
     ]
   },
   {

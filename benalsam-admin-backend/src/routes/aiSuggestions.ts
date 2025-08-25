@@ -5,6 +5,7 @@ import { categoryService } from '../services/categoryService';
 import { searchService } from '../services/searchService';
 import { supabase } from '../config/database';
 import { AdminElasticsearchService } from '../services/elasticsearchService';
+import QueueProcessorService from '../services/queueProcessorService';
 
 const router = express.Router();
 
@@ -13,6 +14,9 @@ const aiSuggestionsES = new AdminElasticsearchService(
   process.env.ELASTICSEARCH_URL || 'http://209.227.228.96:9200',
   'ai_suggestions'
 );
+
+// Initialize Queue Processor Service
+const queueProcessor = new QueueProcessorService();
 
 // Rate limiting for AI suggestions
 const aiSuggestionsLimiter = rateLimit({
@@ -831,6 +835,188 @@ router.post('/rebuild-indexes', async (req, res) => {
       success: false,
       message: 'ES index rebuild failed',
       error: error.message || 'Unknown error'
+    });
+  }
+});
+
+/**
+ * @route GET /api/v1/ai-suggestions/queue/health
+ * @desc Get queue health status
+ * @access Admin
+ */
+router.get('/queue/health', async (req, res) => {
+  try {
+    const healthStatus = await queueProcessor.getHealthStatus();
+    
+    res.json({
+      success: true,
+      data: healthStatus
+    });
+
+  } catch (error: any) {
+    logger.error('❌ Error getting queue health:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get queue health status',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route GET /api/v1/ai-suggestions/queue/stats
+ * @desc Get queue statistics
+ * @access Admin
+ */
+router.get('/queue/stats', async (req, res) => {
+  try {
+    const stats = await queueProcessor.getQueueStats();
+    
+    res.json({
+      success: true,
+      data: stats
+    });
+
+  } catch (error: any) {
+    logger.error('❌ Error getting queue stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get queue statistics',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route GET /api/v1/ai-suggestions/queue/jobs
+ * @desc Get queue jobs with filtering
+ * @access Admin
+ */
+router.get('/queue/jobs', async (req, res) => {
+  try {
+    const { status, limit = 50, offset = 0 } = req.query;
+    
+    const jobs = await queueProcessor.getQueueJobs(
+      status as string, 
+      parseInt(limit as string), 
+      parseInt(offset as string)
+    );
+    
+    res.json({
+      success: true,
+      data: jobs
+    });
+
+  } catch (error: any) {
+    logger.error('❌ Error getting queue jobs:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get queue jobs',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route POST /api/v1/ai-suggestions/queue/retry-failed
+ * @desc Retry failed jobs
+ * @access Admin
+ */
+router.post('/queue/retry-failed', async (req, res) => {
+  try {
+    const retryCount = await queueProcessor.retryFailedJobs();
+    
+    res.json({
+      success: true,
+      data: {
+        retriedJobs: retryCount,
+        message: `Retried ${retryCount} failed jobs`
+      }
+    });
+
+  } catch (error: any) {
+    logger.error('❌ Error retrying failed jobs:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retry failed jobs',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route POST /api/v1/ai-suggestions/queue/clear
+ * @desc Clear queue (optional status filter)
+ * @access Admin
+ */
+router.post('/queue/clear', async (req, res) => {
+  try {
+    const { status } = req.body; // optional: 'failed', 'completed', etc.
+    const clearedCount = await queueProcessor.clearQueue(status);
+    
+    res.json({
+      success: true,
+      data: {
+        clearedJobs: clearedCount,
+        status: status || 'all',
+        message: `Cleared ${clearedCount} jobs from queue`
+      }
+    });
+
+  } catch (error: any) {
+    logger.error('❌ Error clearing queue:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to clear queue',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route POST /api/v1/ai-suggestions/queue/start
+ * @desc Start queue processor
+ * @access Admin
+ */
+router.post('/queue/start', async (req, res) => {
+  try {
+    await queueProcessor.startProcessing();
+    
+    res.json({
+      success: true,
+      message: 'Queue processor started successfully'
+    });
+
+  } catch (error: any) {
+    logger.error('❌ Error starting queue processor:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to start queue processor',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route POST /api/v1/ai-suggestions/queue/stop
+ * @desc Stop queue processor
+ * @access Admin
+ */
+router.post('/queue/stop', async (req, res) => {
+  try {
+    await queueProcessor.stopProcessing();
+    
+    res.json({
+      success: true,
+      message: 'Queue processor stopped successfully'
+    });
+
+  } catch (error: any) {
+    logger.error('❌ Error stopping queue processor:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to stop queue processor',
+      error: error.message
     });
   }
 });

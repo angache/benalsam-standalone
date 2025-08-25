@@ -12,6 +12,8 @@ AI Suggestions sistemi, kullanıcıların arama yaparken daha iyi sonuçlar alma
 - **Fallback Sistemi**: ES yoksa database'den veri
 - **Queue Processing**: PostgreSQL queue ile güvenilir sync
 - **Category Filtering**: İlgisiz kategorileri filtreleme
+- **Self-Healing Queue**: Akıllı stuck job detection ve auto-fix
+- **Queue Management UI**: Gerçek zamanlı queue monitoring
 
 ---
 
@@ -42,6 +44,42 @@ AI Suggestions sistemi, kullanıcıların arama yaparken daha iyi sonuçlar alma
 ---
 
 ## 🔧 **Veritabanı Yapısı**
+
+### **Queue Stats RPC Function**
+```sql
+-- Queue stats için RPC fonksiyonu
+CREATE OR REPLACE FUNCTION get_elasticsearch_queue_stats()
+RETURNS TABLE (
+  total_jobs BIGINT,
+  pending_jobs BIGINT,
+  processing_jobs BIGINT,
+  completed_jobs BIGINT,
+  failed_jobs BIGINT,
+  avg_processing_time NUMERIC,
+  last_processed_at TIMESTAMPTZ
+) 
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    COUNT(*) as total_jobs,
+    COUNT(*) FILTER (WHERE status = 'pending') as pending_jobs,
+    COUNT(*) FILTER (WHERE status = 'processing') as processing_jobs,
+    COUNT(*) FILTER (WHERE status = 'completed') as completed_jobs,
+    COUNT(*) FILTER (WHERE status = 'failed') as failed_jobs,
+    COALESCE(
+      AVG(
+        EXTRACT(EPOCH FROM (processed_at - created_at)) * 1000
+      ) FILTER (WHERE status IN ('completed', 'failed') AND processed_at IS NOT NULL),
+      0
+    ) as avg_processing_time,
+    MAX(processed_at) FILTER (WHERE status IN ('completed', 'failed')) as last_processed_at
+  FROM elasticsearch_sync_queue;
+END;
+$$;
+```
 
 ### **1. Supabase Tabloları**
 
@@ -208,7 +246,48 @@ $$ LANGUAGE plpgsql;
 
 ### **2. Queue Processing**
 
-#### **QueueProcessorService**
+#### **QueueProcessorService (Enhanced with Self-Healing)**
+
+**Self-Healing Özellikleri:**
+- **Stuck Job Detection**: 30 saniye sonra stuck job'ları tespit eder
+- **Auto Reset**: Takılı job'ları otomatik olarak reset eder
+- **Smart Retry Logic**: Retry count'a göre akıllı karar verir
+- **Health Check**: 15 saniyede bir queue sağlığını kontrol eder
+- **Critical Alerts**: 5+ stuck job varsa kritik uyarı verir
+
+**Konfigürasyon:**
+```typescript
+private stuckJobTimeout: number = 30 * 1000; // 30 saniye
+private maxRetries: number = 3;
+private batchSize: number = 5;
+private processingTimeout: number = 30 * 1000; // 30 saniye
+```
+
+**Enhanced Stuck Job Detection:**
+```typescript
+private async detectStuckJobs(): Promise<any[]> {
+  // 1. Zaman bazlı stuck job'lar (30 saniye)
+  // 2. Çok uzun süredir processing'de olan job'lar (10 dakika)
+  // 3. Çok fazla retry yapmış ama hala processing'de olan job'lar
+  // 4. Unique stuck job'ları birleştir ve detaylı log
+}
+```
+
+**Smart Reset Logic:**
+```typescript
+private async resetStuckJob(job: any): Promise<void> {
+  const stuckDuration = Math.round((Date.now() - new Date(job.created_at).getTime()) / 1000 / 60);
+  const retryCount = job.retry_count || 0;
+  
+  // Eğer max retry'yi aştıysa failed olarak işaretle
+  if (retryCount >= this.maxRetries) {
+    await this.updateJobStatus(job.id, 'failed', `Job stuck for ${stuckDuration} minutes and exceeded max retries`);
+  } else {
+    // Normal reset
+    await this.updateJobStatus(job.id, 'pending', `Reset from stuck state (stuck for ${stuckDuration} minutes)`);
+  }
+}
+```
 ```typescript
 private async processAiSuggestionJob(operation: string, recordId: string, changeData: any): Promise<void> {
   try {
@@ -261,6 +340,76 @@ private async processAiSuggestionJob(operation: string, recordId: string, change
 ---
 
 ## 🔍 **Arama API'si**
+
+### **Queue Management API Endpoints**
+
+#### **Queue Stats & Health**
+```typescript
+// Queue istatistiklerini al
+GET /api/v1/ai-suggestions/queue/stats
+Response: {
+  success: true,
+  data: {
+    total: number,
+    pending: number,
+    processing: number,
+    completed: number,
+    failed: number,
+    stuck: number,
+    avgProcessingTime: number,
+    lastProcessedAt: string
+  }
+}
+
+// Queue sağlık durumunu kontrol et
+GET /api/v1/ai-suggestions/queue/health
+Response: {
+  success: true,
+  data: {
+    isHealthy: boolean,
+    issues: string[],
+    recommendations: string[]
+  }
+}
+```
+
+#### **Queue Control Endpoints**
+```typescript
+// Queue processor'ı başlat
+POST /api/v1/ai-suggestions/queue/start
+
+// Queue processor'ı durdur
+POST /api/v1/ai-suggestions/queue/stop
+
+// Başarısız job'ları yeniden dene
+POST /api/v1/ai-suggestions/queue/retry-failed
+
+// Queue'yu temizle (opsiyonel status filter)
+POST /api/v1/ai-suggestions/queue/clear
+Body: { status?: 'failed' | 'completed' | 'pending' }
+```
+
+#### **Queue Jobs Management**
+```typescript
+// Queue job'larını listele (filtreli)
+GET /api/v1/ai-suggestions/queue/jobs?status=pending&limit=50&offset=0
+Response: {
+  success: true,
+  data: QueueJob[]
+}
+
+interface QueueJob {
+  id: number;
+  table_name: string;
+  operation: string;
+  record_id: string;
+  status: string;
+  retry_count: number;
+  error_message?: string;
+  created_at: string;
+  processed_at?: string;
+}
+```
 
 ### **1. Hybrid Search Endpoint**
 
@@ -747,6 +896,46 @@ Frontend'de veri kaynağını belirlemek için ID'lere prefix'ler eklendi:
 ---
 
 ## 🎨 **Frontend Integration**
+
+### **Queue Management UI**
+
+**Yeni Sayfa:** `benalsam-admin-ui/src/pages/QueueManagement.tsx`
+
+**Özellikler:**
+- **Real-time Queue Stats**: Toplam, bekleyen, işlenen, tamamlanan, başarısız, takılı job sayıları
+- **Queue Health Monitoring**: Sağlık durumu ve öneriler
+- **Queue Controls**: Başlat/Durdur, retry, clear işlemleri
+- **Queue Jobs Table**: Detaylı job listesi ve filtreleme
+- **Auto Refresh**: 5 saniyede bir otomatik yenileme
+- **Smart Error Display**: Completed job'larda "🔄 Auto-fixed" gösterimi
+
+**Queue Stats Cards:**
+```typescript
+// 6 farklı stat card'ı
+- Toplam Job (mavi)
+- Bekleyen (sarı)
+- İşlenen (mavi)
+- Tamamlanan (yeşil)
+- Başarısız (kırmızı)
+- Takılı (kırmızı)
+```
+
+**Smart Error Handling:**
+```typescript
+// Completed job'larda error mesajı yerine success mesajı
+{job.error_message && job.status !== 'completed' ? (
+  // Kırmızı error mesajı
+) : job.error_message && job.status === 'completed' ? (
+  // Yeşil "🔄 Auto-fixed" mesajı
+) : (
+  '-'
+)}
+```
+
+**Navigation Integration:**
+- **Sidebar Link**: "Queue Yönetimi" menü öğesi
+- **Route**: `/queue-management`
+- **Permission**: `PERMISSIONS.CATEGORIES_VIEW`
 
 ### **AISuggestions Component**
 Ana AI suggestions component'i, kullanıcı aramalarına göre önerileri gösterir.

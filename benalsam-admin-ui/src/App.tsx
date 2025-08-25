@@ -44,6 +44,7 @@ const TwoFactorSetupPage = lazy(() => import('./pages/TwoFactorSetupPage'));
 const TwoFactorVerifyPage = lazy(() => import('./pages/TwoFactorVerifyPage'));
 const AdminPerformanceDashboard = lazy(() => import('./components/AdminPerformanceDashboard'));
 const AISuggestionsManagement = lazy(() => import('./pages/AISuggestionsManagement').then(module => ({ default: module.default })));
+const QueueManagement = lazy(() => import('./pages/QueueManagement').then(module => ({ default: module.default })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -598,6 +599,20 @@ function App() {
                     <TwoFactorVerifyPage />
                   </Suspense>
                 </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/queue-management"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <Layout>
+                      <Suspense fallback={<PageLoadingSpinner />}>
+                        <QueueManagement />
+                      </Suspense>
+                    </Layout>
+                  </ErrorBoundary>
+                </ProtectedRoute>
               }
             />
                 <Route path="*" element={<Navigate to="/" replace />} />
