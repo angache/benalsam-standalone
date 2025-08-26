@@ -1,10 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { categoriesConfig } from '@/config/categories';
 import { ChevronRight, Smartphone } from 'lucide-react';
+import dynamicCategoryService from '@/services/dynamicCategoryService';
 
 const CategoryGrid = ({ selectedCategories, onCategorySelect, searchQuery }) => {
+  const [categories, setCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const isSearching = searchQuery && searchQuery.trim().length > 1;
+
+  // Load categories from dynamic service
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        console.log('🔄 Loading categories from dynamic service...');
+        const fetchedCategories = await dynamicCategoryService.getCategoryTree();
+        console.log('📦 Categories loaded:', fetchedCategories);
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        setError('Kategoriler yüklenirken sorun oluştu. Lütfen sayfayı yenileyin.');
+        setCategories([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   const getDisplayedCategories = () => {
     if (isSearching) {
@@ -29,12 +54,12 @@ const CategoryGrid = ({ selectedCategories, onCategorySelect, searchQuery }) => 
         }
       };
 
-      searchRecursive(categoriesConfig);
+      searchRecursive(categories);
       return allCategories;
     }
 
     if (!selectedCategories || selectedCategories.length === 0) {
-      return categoriesConfig;
+      return categories;
     }
     const lastSelected = selectedCategories[selectedCategories.length - 1];
     return lastSelected.subcategories || [];
@@ -44,7 +69,7 @@ const CategoryGrid = ({ selectedCategories, onCategorySelect, searchQuery }) => 
 
   const handleCategoryClick = (category) => {
     if (isSearching) {
-      let currentLevel = categoriesConfig;
+      let currentLevel = categories;
       const categoryObjectsPath = [];
       for (const part of category.path) {
         const catObj = currentLevel.find(c => c.name === part);
@@ -105,7 +130,23 @@ const CategoryGrid = ({ selectedCategories, onCategorySelect, searchQuery }) => 
         </div>
       )}
 
-      {displayedCategories.length > 0 ? (
+      {isLoading ? (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground mt-2">Kategoriler yükleniyor...</p>
+        </div>
+      ) : error ? (
+        <div className="text-center py-8">
+          <div className="text-red-500 mb-2">⚠️</div>
+          <p className="text-foreground mb-2">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            Sayfayı Yenile
+          </button>
+        </div>
+      ) : displayedCategories.length > 0 ? (
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
           {displayedCategories.map((category) => {
             const parent = !isSearching && selectedCategories.length > 0 ? selectedCategories[selectedCategories.length-1] : null;

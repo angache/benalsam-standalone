@@ -131,6 +131,13 @@ class DynamicCategoryService {
         return null;
       }
       
+      // Veri kontrolü - boş array varsa cache'i geçersiz say
+      if (Array.isArray(data) && data.length === 0) {
+        console.log('⚠️ Empty data in cache, treating as invalid');
+        localStorage.removeItem(key);
+        return null;
+      }
+      
       return data;
     } catch (error) {
       console.error('Error reading from cache:', error);
@@ -151,11 +158,14 @@ class DynamicCategoryService {
   }
 
   // Backend'den kategorileri çek
-  async fetchCategories() {
+  async fetchCategories(retryCount = 0) {
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 1000; // 1 saniye
+
     try {
-      console.log('📥 Fetching categories from backend...');
+      console.log(`📥 Fetching categories from backend... (attempt ${retryCount + 1}/${MAX_RETRIES})`);
       
-      const response = await fetch(`${ADMIN_BACKEND_URL}/api/v1/categories/all`);
+      const response = await fetch(`${ADMIN_BACKEND_URL}/api/v1/categories`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -166,11 +176,24 @@ class DynamicCategoryService {
       if (!result.success || !result.data) {
         throw new Error('Invalid response format');
       }
+
+      // Veri kontrolü - boş array veya null ise hata say
+      if (!Array.isArray(result.data) || result.data.length === 0) {
+        throw new Error('Empty categories data received');
+      }
       
       console.log(`✅ Fetched ${result.data.length} categories from backend`);
       return result.data;
     } catch (error) {
-      console.error('❌ Error fetching categories:', error);
+      console.error(`❌ Error fetching categories (attempt ${retryCount + 1}):`, error);
+      
+      // Retry mekanizması
+      if (retryCount < MAX_RETRIES - 1) {
+        console.log(`🔄 Retrying in ${RETRY_DELAY}ms...`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        return this.fetchCategories(retryCount + 1);
+      }
+      
       throw error;
     }
   }
