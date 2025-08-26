@@ -32,6 +32,10 @@ import {
   Eye,
   Grid3X3,
   ListTree,
+  ArrowUp,
+  ArrowDown,
+  Star,
+  X,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -47,6 +51,7 @@ export const CategoriesPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('menu');
   const [currentPath, setCurrentPath] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [sortOrderMode, setSortOrderMode] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -54,7 +59,8 @@ export const CategoriesPage: React.FC = () => {
   const { data: categories, isLoading, error } = useQuery({
     queryKey: ['categories'],
     queryFn: categoryService.getCategories,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes - reasonable cache time
+    gcTime: 5 * 60 * 1000, // 5 minutes garbage collection
   });
 
   // Delete mutation
@@ -63,6 +69,37 @@ export const CategoriesPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       setSuccessMessage('Kategori başarıyla silindi');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    },
+  });
+
+  // Sort order mutations
+  const updateSortOrderMutation = useMutation({
+    mutationFn: ({ id, sort_order, display_priority, is_featured }: {
+      id: number;
+      sort_order: number;
+      display_priority: number;
+      is_featured: boolean;
+    }) => {
+      console.log('🔄 [FRONTEND] updateSortOrderMutation.mutationFn called with:', { id, sort_order, display_priority, is_featured });
+      return categoryService.updateCategoryOrder(id, { sort_order, display_priority, is_featured });
+    },
+    onSuccess: (data) => {
+      console.log('✅ [FRONTEND] updateSortOrderMutation.onSuccess called with data:', data);
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setSuccessMessage('Sıralama güncellendi');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    },
+    onError: (error) => {
+      console.log('❌ [FRONTEND] updateSortOrderMutation.onError called with error:', error);
+    },
+  });
+
+  const toggleFeaturedMutation = useMutation({
+    mutationFn: (id: number) => categoryService.toggleFeatured(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setSuccessMessage('Öne çıkan durumu güncellendi');
       setTimeout(() => setSuccessMessage(null), 3000);
     },
   });
@@ -93,6 +130,82 @@ export const CategoriesPage: React.FC = () => {
     setCurrentPath(path);
   };
 
+  const handleSortOrderChange = (categoryId: number, newSortOrder: number) => {
+    console.log('🔄 [FRONTEND] handleSortOrderChange çağrıldı, categoryId:', categoryId, 'newSortOrder:', newSortOrder);
+    console.log('🚀 [FRONTEND] Calling updateSortOrderMutation.mutate...');
+    
+    updateSortOrderMutation.mutate({
+      id: categoryId,
+      sort_order: newSortOrder,
+      display_priority: 0,
+      is_featured: false
+    });
+  };
+
+  const handleToggleFeatured = (categoryId: number) => {
+    toggleFeaturedMutation.mutate(categoryId);
+  };
+
+  const handleMoveUp = (category: Category) => {
+    console.log('🔄 [FRONTEND] handleMoveUp çağrıldı, kategori:', category.name, 'ID:', category.id);
+    console.log('🔄 [FRONTEND] Current sort_order:', category.sort_order);
+    
+    const currentIndex = sortedCategories.findIndex(cat => cat.id === category.id);
+    console.log('🔄 [FRONTEND] Current index in sorted list:', currentIndex);
+    
+    if (currentIndex > 0) {
+      const prevCategory = sortedCategories[currentIndex - 1];
+      console.log('📋 [FRONTEND] Previous category:', prevCategory.name, 'ID:', prevCategory.id, 'sort_order:', prevCategory.sort_order);
+      
+      // Swap sort orders
+      const newSortOrder = prevCategory.sort_order;
+      const newSortOrderPrev = category.sort_order;
+      
+      console.log('🔄 [FRONTEND] Swapping sort orders:', {
+        [category.name]: newSortOrder,
+        [prevCategory.name]: newSortOrderPrev
+      });
+      
+      console.log('🚀 [FRONTEND] Calling handleSortOrderChange for both categories...');
+      
+      // Update both categories
+      handleSortOrderChange(category.id, newSortOrder);
+      handleSortOrderChange(prevCategory.id, newSortOrderPrev);
+    } else {
+      console.log('❌ [FRONTEND] Kategori zaten en üstte');
+    }
+  };
+
+  const handleMoveDown = (category: Category) => {
+    console.log('🔄 [FRONTEND] handleMoveDown çağrıldı, kategori:', category.name, 'ID:', category.id);
+    console.log('🔄 [FRONTEND] Current sort_order:', category.sort_order);
+    
+    const currentIndex = sortedCategories.findIndex(cat => cat.id === category.id);
+    console.log('🔄 [FRONTEND] Current index in sorted list:', currentIndex);
+    
+    if (currentIndex < sortedCategories.length - 1) {
+      const nextCategory = sortedCategories[currentIndex + 1];
+      console.log('📋 [FRONTEND] Next category:', nextCategory.name, 'ID:', nextCategory.id, 'sort_order:', nextCategory.sort_order);
+      
+      // Swap sort orders
+      const newSortOrder = nextCategory.sort_order;
+      const newSortOrderNext = category.sort_order;
+      
+      console.log('🔄 [FRONTEND] Swapping sort orders:', {
+        [category.name]: newSortOrder,
+        [nextCategory.name]: newSortOrderNext
+      });
+      
+      console.log('🚀 [FRONTEND] Calling handleSortOrderChange for both categories...');
+      
+      // Update both categories
+      handleSortOrderChange(category.id, newSortOrder);
+      handleSortOrderChange(nextCategory.id, newSortOrderNext);
+    } else {
+      console.log('❌ [FRONTEND] Kategori zaten en altta');
+    }
+  };
+
   // Get current level categories
   const getCurrentCategories = (): Category[] => {
     if (!categories) return [];
@@ -116,7 +229,18 @@ export const CategoriesPage: React.FC = () => {
   };
 
   const currentCategories = getCurrentCategories();
-  const filteredCategories = currentCategories.filter(category =>
+  
+  // Sort categories by sort_order if available
+  const sortedCategories = [...currentCategories].sort((a, b) => {
+    if (a.sort_order !== undefined && b.sort_order !== undefined) {
+      return a.sort_order - b.sort_order; // Lower sort_order first (correct order)
+    }
+    return a.name.localeCompare(b.name); // Fallback to alphabetical
+  });
+
+
+
+  const filteredCategories = sortedCategories.filter(category =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -183,28 +307,38 @@ export const CategoriesPage: React.FC = () => {
           flexDirection: { xs: 'column', sm: 'row' },
           width: { xs: '100%', md: 'auto' }
         }}>
-          <Button
-            variant="contained"
-            startIcon={<Plus />}
-            onClick={() => navigate('/categories/create')}
-            sx={{ 
-              minWidth: { xs: '100%', sm: 'auto' },
-              fontSize: { xs: '0.875rem', sm: '1rem' }
-            }}
-          >
-            Yeni Kategori
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshCw />}
-            onClick={() => queryClient.invalidateQueries({ queryKey: ['categories'] })}
-            sx={{ 
-              minWidth: { xs: '100%', sm: 'auto' },
-              fontSize: { xs: '0.875rem', sm: '1rem' }
-            }}
-          >
-            Yenile
-          </Button>
+          {!sortOrderMode && (
+            <>
+              <Button
+                variant="contained"
+                startIcon={<Plus />}
+                onClick={() => navigate('/categories/create')}
+                sx={{ 
+                  minWidth: { xs: '100%', sm: 'auto' },
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                }}
+              >
+                Yeni Kategori
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<RefreshCw />}
+                onClick={() => {
+                  console.log('🔄 Cache temizleniyor...');
+                  queryClient.removeQueries({ queryKey: ['categories'] });
+                  queryClient.invalidateQueries({ queryKey: ['categories'] });
+                  queryClient.refetchQueries({ queryKey: ['categories'] });
+                  console.log('✅ Cache temizlendi ve veriler yeniden yüklendi');
+                }}
+                sx={{ 
+                  minWidth: { xs: '100%', sm: 'auto' },
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                }}
+              >
+                Yenile
+              </Button>
+            </>
+          )}
         </Box>
       </Box>
 
@@ -386,6 +520,47 @@ export const CategoriesPage: React.FC = () => {
                 >
                   Liste
                 </Button>
+                {!sortOrderMode && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<ArrowUp size={16} />}
+                    onClick={() => {
+                      console.log('SIRALA butonuna tıklandı, mevcut sortOrderMode:', sortOrderMode);
+                      setSortOrderMode(!sortOrderMode);
+                      console.log('Yeni sortOrderMode olacak:', !sortOrderMode);
+                    }}
+                    size="small"
+                    color="warning"
+                    sx={{ 
+                      minWidth: { xs: '70px', sm: 'auto' },
+                      fontSize: { xs: '0.65rem', sm: '0.875rem' },
+                      height: { xs: '32px', sm: 'auto' },
+                      px: { xs: 1, sm: 2 }
+                    }}
+                  >
+                    Sırala
+                  </Button>
+                )}
+                {sortOrderMode && (
+                  <Button
+                    variant="contained"
+                    startIcon={<X size={16} />}
+                    onClick={() => {
+                      console.log('SIRALA KAPAT butonuna tıklandı');
+                      setSortOrderMode(false);
+                    }}
+                    size="small"
+                    color="error"
+                    sx={{ 
+                      minWidth: { xs: '70px', sm: 'auto' },
+                      fontSize: { xs: '0.65rem', sm: '0.875rem' },
+                      height: { xs: '32px', sm: 'auto' },
+                      px: { xs: 1, sm: 2 }
+                    }}
+                  >
+                    Sıralamayı Kapat
+                  </Button>
+                )}
               </Box>
             </Grid>
           </Grid>
@@ -406,6 +581,10 @@ export const CategoriesPage: React.FC = () => {
               onAddSubcategory={handleAddSubcategory}
               onEditAttributes={handleEditAttributes}
               isLoading={isLoading}
+              sortOrderMode={sortOrderMode}
+              onMoveUp={handleMoveUp}
+              onMoveDown={handleMoveDown}
+              onToggleFeatured={handleToggleFeatured}
             />
           ) : (
             <TableContainer sx={{ 
@@ -543,85 +722,148 @@ export const CategoriesPage: React.FC = () => {
                             justifyContent: 'flex-end',
                             flexWrap: 'wrap'
                           }}>
-                            <Tooltip title="Görüntüle">
-                              <IconButton
-                                size="small"
-                                color="primary"
-                                onClick={() => handleView(path)}
-                                sx={{ 
-                                  minWidth: { xs: '36px', sm: 'auto' },
-                                  minHeight: { xs: '36px', sm: 'auto' },
-                                  p: { xs: 0.5, sm: 1 }
-                                }}
-                              >
-                                <Eye size={16} />
-                              </IconButton>
-                            </Tooltip>
-                            
-                            <Tooltip title="Düzenle">
-                              <IconButton
-                                size="small"
-                                color="info"
-                                onClick={() => handleEdit(path)}
-                                sx={{ 
-                                  minWidth: { xs: '36px', sm: 'auto' },
-                                  minHeight: { xs: '36px', sm: 'auto' },
-                                  p: { xs: 0.5, sm: 1 }
-                                }}
-                              >
-                                <Edit size={16} />
-                              </IconButton>
-                            </Tooltip>
-                            
-                            {isLeaf && (
-                              <Tooltip title="Özellikleri Düzenle">
-                                <IconButton
-                                  size="small"
-                                  color="secondary"
-                                  onClick={() => handleEditAttributes(path)}
-                                  sx={{ 
-                                    minWidth: { xs: '36px', sm: 'auto' },
-                                    minHeight: { xs: '36px', sm: 'auto' },
-                                    p: { xs: 0.5, sm: 1 }
-                                  }}
-                                >
-                                  <ListTree size={16} />
-                                </IconButton>
-                              </Tooltip>
+                            {!sortOrderMode && (
+                              <>
+                                <Tooltip title="Görüntüle">
+                                  <IconButton
+                                    size="small"
+                                    color="primary"
+                                    onClick={() => handleView(path)}
+                                    sx={{ 
+                                      minWidth: { xs: '36px', sm: 'auto' },
+                                      minHeight: { xs: '36px', sm: 'auto' },
+                                      p: { xs: 0.5, sm: 1 }
+                                    }}
+                                  >
+                                    <Eye size={16} />
+                                  </IconButton>
+                                </Tooltip>
+                                
+                                <Tooltip title="Düzenle">
+                                  <IconButton
+                                    size="small"
+                                    color="info"
+                                    onClick={() => handleEdit(path)}
+                                    sx={{ 
+                                      minWidth: { xs: '36px', sm: 'auto' },
+                                      minHeight: { xs: '36px', sm: 'auto' },
+                                      p: { xs: 0.5, sm: 1 }
+                                    }}
+                                  >
+                                    <Edit size={16} />
+                                  </IconButton>
+                                </Tooltip>
+                                
+                                {isLeaf && (
+                                  <Tooltip title="Özellikleri Düzenle">
+                                    <IconButton
+                                      size="small"
+                                      color="secondary"
+                                      onClick={() => handleEditAttributes(path)}
+                                      sx={{ 
+                                        minWidth: { xs: '36px', sm: 'auto' },
+                                        minHeight: { xs: '36px', sm: 'auto' },
+                                        p: { xs: 0.5, sm: 1 }
+                                      }}
+                                    >
+                                      <ListTree size={16} />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
+                                
+                                {!isLeaf && (
+                                  <Tooltip title="Alt Kategori Ekle">
+                                    <IconButton
+                                      size="small"
+                                      color="success"
+                                      onClick={() => handleAddSubcategory(path)}
+                                      sx={{ 
+                                        minWidth: { xs: '36px', sm: 'auto' },
+                                        minHeight: { xs: '36px', sm: 'auto' },
+                                        p: { xs: 0.5, sm: 1 }
+                                      }}
+                                    >
+                                      <Plus size={16} />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
+                                
+                                <Tooltip title="Sil">
+                                  <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={() => handleDelete(path, category.name)}
+                                    disabled={deleteMutation.isPending}
+                                    sx={{ 
+                                      minWidth: { xs: '36px', sm: 'auto' },
+                                      minHeight: { xs: '36px', sm: 'auto' },
+                                      p: { xs: 0.5, sm: 1 }
+                                    }}
+                                  >
+                                    <Delete size={16} />
+                                  </IconButton>
+                                </Tooltip>
+                              </>
                             )}
-                            
-                            {!isLeaf && (
-                              <Tooltip title="Alt Kategori Ekle">
-                                <IconButton
-                                  size="small"
-                                  color="success"
-                                  onClick={() => handleAddSubcategory(path)}
-                                  sx={{ 
-                                    minWidth: { xs: '36px', sm: 'auto' },
-                                    minHeight: { xs: '36px', sm: 'auto' },
-                                    p: { xs: 0.5, sm: 1 }
-                                  }}
-                                >
-                                  <Plus size={16} />
-                                </IconButton>
-                              </Tooltip>
+
+                            {/* Sort Order Buttons */}
+                            {sortOrderMode && (
+                              <>
+                                <Tooltip title="Yukarı Taşı">
+                                  <IconButton
+                                    size="small"
+                                    color="warning"
+                                    onClick={() => {
+                                      console.log('YUKARI OK tıklandı, kategori:', category.name);
+                                      handleMoveUp(category);
+                                    }}
+                                    sx={{ 
+                                      minWidth: { xs: '36px', sm: 'auto' },
+                                      minHeight: { xs: '36px', sm: 'auto' },
+                                      p: { xs: 0.5, sm: 1 }
+                                    }}
+                                  >
+                                    <ArrowUp size={16} />
+                                  </IconButton>
+                                </Tooltip>
+                                
+                                <Tooltip title="Aşağı Taşı">
+                                  <IconButton
+                                    size="small"
+                                    color="warning"
+                                    onClick={() => {
+                                      console.log('AŞAĞI OK tıklandı, kategori:', category.name);
+                                      handleMoveDown(category);
+                                    }}
+                                    sx={{ 
+                                      minWidth: { xs: '36px', sm: 'auto' },
+                                      minHeight: { xs: '36px', sm: 'auto' },
+                                      p: { xs: 0.5, sm: 1 }
+                                    }}
+                                  >
+                                    <ArrowDown size={16} />
+                                  </IconButton>
+                                </Tooltip>
+                                
+                                <Tooltip title={category.is_featured ? "Öne Çıkanı Kaldır" : "Öne Çıkar"}>
+                                  <IconButton
+                                    size="small"
+                                    color={category.is_featured ? "success" : "default"}
+                                    onClick={() => {
+                                      console.log('YILDIZ tıklandı, kategori:', category.name);
+                                      handleToggleFeatured(category.id);
+                                    }}
+                                    sx={{ 
+                                      minWidth: { xs: '36px', sm: 'auto' },
+                                      minHeight: { xs: '36px', sm: 'auto' },
+                                      p: { xs: 0.5, sm: 1 }
+                                    }}
+                                  >
+                                    <Star size={16} />
+                                  </IconButton>
+                                </Tooltip>
+                              </>
                             )}
-                            
-                            <Tooltip title="Sil">
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => handleDelete(path, category.name)}
-                                disabled={deleteMutation.isPending}
-                                sx={{ 
-                                  minWidth: { xs: '36px', sm: 'auto' },
-                                  minHeight: { xs: '36px', sm: 'auto' },
-                                  p: { xs: 0.5, sm: 1 }
-                                }}
-                              >
-                                <Delete size={16} />
-                              </IconButton>
-                            </Tooltip>
                           </Box>
                         </TableCell>
                       </TableRow>

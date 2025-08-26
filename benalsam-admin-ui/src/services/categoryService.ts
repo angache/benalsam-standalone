@@ -42,11 +42,26 @@ export interface CategoryAttribute {
 }
 
 export interface Category {
+  id: number;
   name: string;
   icon: string;
   color: string;
+  path: string;
+  parent_id?: number;
+  level: number;
+  sort_order: number;
+  is_active: boolean;
+  is_featured: boolean;
+  display_priority: number;
+  order_updated_at?: string;
+  order_updated_by?: string;
+  created_at: string;
+  updated_at: string;
+  ai_suggestions?: any;
+  ai_enhanced: boolean;
   subcategories?: Category[];
   attributes?: CategoryAttribute[];
+  category_attributes?: CategoryAttribute[];
   stats?: {
     subcategoryCount: number;
     totalSubcategories: number;
@@ -83,5 +98,17 @@ export const categoryService = {
   // Delete category
   async deleteCategory(path: string): Promise<void> {
     await apiClient.delete(`/categories/${encodeURIComponent(path)}`);
+  },
+
+  // Update category order
+  async updateCategoryOrder(id: number, data: { sort_order: number; display_priority: number; is_featured: boolean }): Promise<Category> {
+    const response = await apiClient.put<Category>(`/categories/${id}/order`, data);
+    return response.data;
+  },
+
+  // Toggle featured status
+  async toggleFeatured(id: number): Promise<Category> {
+    const response = await apiClient.post<Category>(`/categories/${id}/toggle-featured`);
+    return response.data;
   },
 }; 

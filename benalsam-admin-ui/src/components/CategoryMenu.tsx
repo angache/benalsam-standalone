@@ -21,6 +21,9 @@ import {
   Eye,
   Plus,
   List as ListIcon,
+  ArrowUp,
+  ArrowDown,
+  Star,
 } from 'lucide-react';
 import type { Category } from '../services/categoryService';
 import { getIconComponent } from '../utils/iconUtils';
@@ -36,6 +39,10 @@ interface CategoryMenuProps {
   onAddSubcategory?: (parentPath: string) => void;
   onEditAttributes?: (path: string) => void;
   isLoading?: boolean;
+  sortOrderMode?: boolean;
+  onMoveUp?: (category: Category) => void;
+  onMoveDown?: (category: Category) => void;
+  onToggleFeatured?: (categoryId: number) => void;
 }
 
 export const CategoryMenu: React.FC<CategoryMenuProps> = ({
@@ -48,6 +55,10 @@ export const CategoryMenu: React.FC<CategoryMenuProps> = ({
   onAddSubcategory,
   onEditAttributes,
   isLoading = false,
+  sortOrderMode = false,
+  onMoveUp,
+  onMoveDown,
+  onToggleFeatured,
 }) => {
   const handleCategoryClick = (category: Category) => {
     const hasSubcategories = category.subcategories && category.subcategories.length > 0;
@@ -214,104 +225,173 @@ export const CategoryMenu: React.FC<CategoryMenuProps> = ({
                 alignItems: { xs: 'center', sm: 'flex-end' },
                 flexWrap: 'wrap'
               }}>
-                {onView && (
-                  <Tooltip title="Görüntüle">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onView(path);
-                      }}
-                      sx={{ 
-                        minWidth: { xs: '36px', sm: 'auto' },
-                        minHeight: { xs: '36px', sm: 'auto' },
-                        p: { xs: 0.5, sm: 1 }
-                      }}
-                    >
-                      <Eye size={16} />
-                    </IconButton>
-                  </Tooltip>
+                {!sortOrderMode && (
+                  <>
+                    {onView && (
+                      <Tooltip title="Görüntüle">
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onView(path);
+                          }}
+                          sx={{ 
+                            minWidth: { xs: '36px', sm: 'auto' },
+                            minHeight: { xs: '36px', sm: 'auto' },
+                            p: { xs: 0.5, sm: 1 }
+                          }}
+                        >
+                          <Eye size={16} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    
+                    {onEdit && (
+                      <Tooltip title="Düzenle">
+                        <IconButton
+                          size="small"
+                          color="info"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit(path);
+                          }}
+                          sx={{ 
+                            minWidth: { xs: '36px', sm: 'auto' },
+                            minHeight: { xs: '36px', sm: 'auto' },
+                            p: { xs: 0.5, sm: 1 }
+                          }}
+                        >
+                          <Edit size={16} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    
+                    {onEditAttributes && isLeaf && (
+                      <Tooltip title="Özellikleri Düzenle">
+                        <IconButton
+                          size="small"
+                          color="secondary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditAttributes(path);
+                          }}
+                          sx={{ 
+                            minWidth: { xs: '36px', sm: 'auto' },
+                            minHeight: { xs: '36px', sm: 'auto' },
+                            p: { xs: 0.5, sm: 1 }
+                          }}
+                        >
+                          <ListIcon size={16} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    
+                    {onAddSubcategory && !isLeaf && (
+                      <Tooltip title="Alt Kategori Ekle">
+                        <IconButton
+                          size="small"
+                          color="success"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAddSubcategory(path);
+                          }}
+                          sx={{ 
+                            minWidth: { xs: '36px', sm: 'auto' },
+                            minHeight: { xs: '36px', sm: 'auto' },
+                            p: { xs: 0.5, sm: 1 }
+                          }}
+                        >
+                          <Plus size={16} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    
+                    {onDelete && (
+                      <Tooltip title="Sil">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(path, category.name);
+                          }}
+                          sx={{ 
+                            minWidth: { xs: '36px', sm: 'auto' },
+                            minHeight: { xs: '36px', sm: 'auto' },
+                            p: { xs: 0.5, sm: 1 }
+                          }}
+                        >
+                          <Delete size={16} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </>
                 )}
-                
-                {onEdit && (
-                  <Tooltip title="Düzenle">
-                    <IconButton
-                      size="small"
-                      color="info"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEdit(path);
-                      }}
-                      sx={{ 
-                        minWidth: { xs: '36px', sm: 'auto' },
-                        minHeight: { xs: '36px', sm: 'auto' },
-                        p: { xs: 0.5, sm: 1 }
-                      }}
-                    >
-                      <Edit size={16} />
-                    </IconButton>
-                  </Tooltip>
-                )}
-                
-                {onEditAttributes && isLeaf && (
-                  <Tooltip title="Özellikleri Düzenle">
-                    <IconButton
-                      size="small"
-                      color="secondary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEditAttributes(path);
-                      }}
-                      sx={{ 
-                        minWidth: { xs: '36px', sm: 'auto' },
-                        minHeight: { xs: '36px', sm: 'auto' },
-                        p: { xs: 0.5, sm: 1 }
-                      }}
-                    >
-                      <ListIcon size={16} />
-                    </IconButton>
-                  </Tooltip>
-                )}
-                
-                {onAddSubcategory && !isLeaf && (
-                  <Tooltip title="Alt Kategori Ekle">
-                    <IconButton
-                      size="small"
-                      color="success"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onAddSubcategory(path);
-                      }}
-                      sx={{ 
-                        minWidth: { xs: '36px', sm: 'auto' },
-                        minHeight: { xs: '36px', sm: 'auto' },
-                        p: { xs: 0.5, sm: 1 }
-                      }}
-                    >
-                      <Plus size={16} />
-                    </IconButton>
-                  </Tooltip>
-                )}
-                
-                {onDelete && (
-                  <Tooltip title="Sil">
-                    <IconButton
-                      size="small"
-                      color="error"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(path, category.name);
-                      }}
-                      sx={{ 
-                        minWidth: { xs: '36px', sm: 'auto' },
-                        minHeight: { xs: '36px', sm: 'auto' },
-                        p: { xs: 0.5, sm: 1 }
-                      }}
-                    >
-                      <Delete size={16} />
-                    </IconButton>
-                  </Tooltip>
+
+                {/* Sort Order Buttons */}
+                {sortOrderMode && (
+                  <>
+                    {onMoveUp && (
+                      <Tooltip title="Yukarı Taşı">
+                        <IconButton
+                          size="small"
+                          color="warning"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onMoveUp(category);
+                          }}
+                          sx={{ 
+                            minWidth: { xs: '36px', sm: 'auto' },
+                            minHeight: { xs: '36px', sm: 'auto' },
+                            p: { xs: 0.5, sm: 1 }
+                          }}
+                        >
+                          <ArrowUp size={16} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    
+                    {onMoveDown && (
+                      <Tooltip title="Aşağı Taşı">
+                        <IconButton
+                          size="small"
+                          color="warning"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onMoveDown(category);
+                          }}
+                          sx={{ 
+                            minWidth: { xs: '36px', sm: 'auto' },
+                            minHeight: { xs: '36px', sm: 'auto' },
+                            p: { xs: 0.5, sm: 1 }
+                          }}
+                        >
+                          <ArrowDown size={16} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    
+                    {onToggleFeatured && (
+                      <Tooltip title={category.is_featured ? "Öne Çıkanı Kaldır" : "Öne Çıkar"}>
+                        <IconButton
+                          size="small"
+                          color={category.is_featured ? "success" : "default"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleFeatured(category.id);
+                          }}
+                          sx={{ 
+                            minWidth: { xs: '36px', sm: 'auto' },
+                            minHeight: { xs: '36px', sm: 'auto' },
+                            p: { xs: 0.5, sm: 1 }
+                          }}
+                        >
+                          <Star size={16} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </>
                 )}
               </Box>
             </ListItemSecondaryAction>
