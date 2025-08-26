@@ -4,6 +4,8 @@ import { config } from 'dotenv';
 config();
 
 import express from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import { initializeSentry, errorHandler as sentryErrorHandler } from './config/sentry';
 import { performanceMiddleware } from './middleware/performanceMonitor';
 import { securityMonitoringMiddleware, trackRateLimitExceeded } from './middleware/securityMonitor';

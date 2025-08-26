@@ -94,7 +94,6 @@ export const categoryService = {
   // Get all categories with tree structure
   async getCategories(): Promise<Category[]> {
     try {
-      // Try to get from cache first
       const cacheKey = 'categories_tree';
       const cachedCategories = await cacheManager.get(cacheKey);
       
@@ -103,7 +102,7 @@ export const categoryService = {
         return cachedCategories;
       }
 
-      logger.info('Fetching categories from Supabase');
+      logger.info('🔄 Fetching categories from Supabase');
 
       const { data: categories, error } = await getSupabaseClient()
         .from('categories')
@@ -129,10 +128,9 @@ export const categoryService = {
         stats: this.calculateCategoryStats(category)
       }));
 
-      // Cache the result for 30 minutes
-      await cacheManager.set(cacheKey, categoriesWithStats, 30 * 60 * 1000);
+      await cacheManager.set(cacheKey, categoriesWithStats, 5 * 60 * 1000);
 
-      logger.info(`Fetched ${categoriesWithStats.length} main categories`);
+      logger.info(`✅ Fetched ${categoriesWithStats.length} main categories`);
       return categoriesWithStats;
 
     } catch (error) {

@@ -4,24 +4,37 @@ import { authMiddleware } from '../middleware/auth';
 import apiCacheService from '../services/apiCacheService';
 import { supabase } from '../config/database';
 import logger from '../config/logger';
+import { Request, Response } from 'express';
+
+// Extend Request interface to include user
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    permissions?: string[];
+  };
+}
 
 const router: IRouter = Router();
 
-// Get all categories - temporarily without auth for testing
+// Get all categories - PUBLIC (no auth required)
 router.get('/', categoriesController.getCategories);
 
-// Get ALL categories (main + subcategories) - temporarily without auth for testing
-router.get('/all', categoriesController.getAllCategories);
+// Admin endpoint for category management (requires auth)
+router.get('/admin', authMiddleware({ requiredPermissions: ['categories:read'] }), categoriesController.getCategories);
 
-// Get single category by ID - temporarily without auth for testing
-router.get('/:id', categoriesController.getCategory);
+// Get ALL categories (main + subcategories)
+router.get('/all', authMiddleware({ requiredPermissions: ['categories:read'] }), categoriesController.getAllCategories);
+
+// Get single category by ID
+router.get('/:id', authMiddleware({ requiredPermissions: ['categories:read'] }), categoriesController.getCategory);
 
 /**
  * @route GET /api/v1/categories/:id/ai-suggestions
  * @desc Get AI suggestions for a specific category
- * @access Public
+ * @access Admin
  */
-router.get('/:id/ai-suggestions', async (req, res) => {
+router.get('/:id/ai-suggestions', authMiddleware({ requiredPermissions: ['categories:read'] }), async (req: Request, res: Response) => {
   try {
     const categoryId = parseInt(req.params.id);
     
@@ -296,5 +309,244 @@ router.put('/attributes/:id', ...authMiddleware({ requiredPermissions: ['categor
 
 // Delete attribute - requires categories:edit permission
 router.delete('/attributes/:id', ...authMiddleware({ requiredPermissions: ['categories:edit'] }), categoriesController.deleteAttribute);
+
+// Category Order System Endpoints
+router.get('/ordered', authMiddleware({ requiredPermissions: ['categories:read'] }), async (req: Request, res: Response) => {
+  try {
+    const { data: categories, error } = await supabase
+      .from('categories')
+      .select('*')
+      .is('parent_id', null)
+      .order('sort_order', { ascending: false })
+      .order('display_priority', { ascending: false })
+      .order('name', { ascending: true });
+
+    if (error) {
+      logger.error('❌ Error fetching ordered categories:', error);
+      return res.status(500).json({ error: 'Failed to fetch ordered categories' });
+    }
+
+    return res.json(categories);
+  } catch (error) {
+    logger.error('❌ Error in /ordered endpoint:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.put('/:id/order', authMiddleware({ requiredPermissions: ['categories:edit'] }), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { sort_order, display_priority, is_featured } = req.body;
+    const userId = req.user?.id;
+
+    console.log('🔄 [BACKEND] PUT /:id/order called with:', { id, sort_order, display_priority, is_featured, userId });
+
+    const { data, error } = await supabase
+      .from('categories')
+      .update({
+        sort_order: sort_order || 1000,
+        display_priority: display_priority || 0,
+        is_featured: is_featured || false,
+        order_updated_at: new Date().toISOString(),
+        order_updated_by: userId
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.log('❌ [BACKEND] Database error:', error);
+      logger.error('❌ Error updating category order:', error);
+      return res.status(500).json({ error: 'Failed to update category order' });
+    }
+
+    console.log('✅ [BACKEND] Database update successful:', data);
+    logger.info(`✅ Category order updated: ${data.name} (ID: ${id})`);
+    
+    // Clear categories cache after order update
+    try {
+      // Clear both cache keys
+      await apiCacheService.invalidateAPICache('categories');
+      
+      // Also clear the specific cache key used by categoryService
+      const cacheManager = require('../services/cacheManager').default;
+      await cacheManager.delete('categories_tree');
+      
+      console.log('🗑️ [BACKEND] Categories cache cleared (both keys)');
+      logger.info('🗑️ Categories cache cleared after order update');
+    } catch (cacheError) {
+      console.log('⚠️ [BACKEND] Failed to clear cache:', cacheError);
+      logger.warn('⚠️ Failed to clear categories cache:', cacheError);
+    }
+    
+    return res.json(data);
+  } catch (error) {
+    console.log('❌ [BACKEND] Unexpected error:', error);
+    logger.error('❌ Error in /:id/order endpoint:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/reorder', authMiddleware({ requiredPermissions: ['categories:edit'] }), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { categories } = req.body; // Array of {id, sort_order, display_priority, is_featured}
+    const userId = req.user?.id;
+
+    if (!Array.isArray(categories)) {
+      return res.status(400).json({ error: 'Categories must be an array' });
+    }
+
+    const updates = categories.map(cat => ({
+      id: cat.id,
+      sort_order: cat.sort_order || 1000,
+      display_priority: cat.display_priority || 0,
+      is_featured: cat.is_featured || false,
+      order_updated_at: new Date().toISOString(),
+      order_updated_by: userId
+    }));
+
+    const { data, error } = await supabase
+      .from('categories')
+      .upsert(updates, { onConflict: 'id' })
+      .select();
+
+    if (error) {
+      logger.error('❌ Error reordering categories:', error);
+      return res.status(500).json({ error: 'Failed to reorder categories' });
+    }
+
+    logger.info(`✅ Categories reordered: ${data.length} categories updated`);
+    return res.json(data);
+  } catch (error) {
+    logger.error('❌ Error in /reorder endpoint:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/order-history', authMiddleware({ requiredPermissions: ['categories:read'] }), async (req: Request, res: Response) => {
+  try {
+    const { page = 1, limit = 50 } = req.query;
+    const offset = (Number(page) - 1) * Number(limit);
+
+    const { data: history, error } = await supabase
+      .from('category_order_history')
+      .select(`
+        *,
+        categories!inner(name)
+      `)
+      .order('changed_at', { ascending: false })
+      .range(offset, offset + Number(limit) - 1);
+
+    if (error) {
+      logger.error('❌ Error fetching order history:', error);
+      return res.status(500).json({ error: 'Failed to fetch order history' });
+    }
+
+    return res.json(history);
+  } catch (error) {
+    logger.error('❌ Error in /order-history endpoint:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
+// Test endpoint to check category order
+router.get('/test/order', async (req: Request, res: Response) => {
+  try {
+    const { data: categories, error } = await supabase
+      .from('categories')
+      .select('id, name, sort_order')
+      .is('parent_id', null)
+      .order('sort_order', { ascending: false });
+
+    if (error) {
+      logger.error('❌ Error fetching category order:', error);
+      return res.status(500).json({ error: 'Failed to fetch category order' });
+    }
+
+    return res.json(categories);
+  } catch (error) {
+    logger.error('❌ Error in test/order endpoint:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Test endpoint to clear cache and get fresh data
+router.get('/test/clear-cache', async (req: Request, res: Response) => {
+  try {
+    console.log('🧹 Cache temizleniyor...');
+    
+    // Import cache manager
+    const cacheManager = require('../services/cacheManager').default;
+    
+    // Clear cache
+    await cacheManager.delete('categories_tree');
+    
+    console.log('✅ Cache temizlendi');
+    
+    // Get fresh data
+    const { data: categories, error } = await supabase
+      .from('categories')
+      .select('id, name, sort_order')
+      .is('parent_id', null)
+      .order('sort_order', { ascending: false });
+
+    if (error) {
+      logger.error('❌ Error fetching category order:', error);
+      return res.status(500).json({ error: 'Failed to fetch category order' });
+    }
+
+    return res.json({
+      message: 'Cache cleared and fresh data fetched',
+      data: categories
+    });
+  } catch (error) {
+    logger.error('❌ Error in test/clear-cache endpoint:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/:id/toggle-featured', authMiddleware({ requiredPermissions: ['categories:edit'] }), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+
+    // Get current featured status
+    const { data: current, error: fetchError } = await supabase
+      .from('categories')
+      .select('is_featured')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      logger.error('❌ Error fetching current category:', fetchError);
+      return res.status(500).json({ error: 'Failed to fetch category' });
+    }
+
+    // Toggle featured status
+    const { data, error } = await supabase
+      .from('categories')
+      .update({
+        is_featured: !current.is_featured,
+        order_updated_at: new Date().toISOString(),
+        order_updated_by: userId
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      logger.error('❌ Error toggling featured status:', error);
+      return res.status(500).json({ error: 'Failed to toggle featured status' });
+    }
+
+    logger.info(`✅ Category featured status toggled: ${data.name} (ID: ${id}) - Featured: ${data.is_featured}`);
+    return res.json(data);
+  } catch (error) {
+    logger.error('❌ Error in /:id/toggle-featured endpoint:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 export { router as categoriesRouter }; 
