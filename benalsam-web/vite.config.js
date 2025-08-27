@@ -1,6 +1,7 @@
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+import { createManualChunks, chunkSizeConfig } from './src/optimization/chunking/manualChunks.js';
 
 // Conditional import for visualizer (only in development)
 const plugins = [react()];
@@ -87,7 +88,7 @@ export default defineConfig({
 	// Cache directory configuration for Docker
 	cacheDir: process.env.VITE_CACHE_DIR || 'node_modules/.vite',
 	build: {
-		chunkSizeWarningLimit: 1000,
+		chunkSizeWarningLimit: chunkSizeConfig.chunkSizeWarningLimit,
 		sourcemap: false,
 		cssCodeSplit: true, // CSS code splitting
 		minify: 'terser', // Better minification
@@ -95,39 +96,36 @@ export default defineConfig({
 			compress: {
 				drop_console: true, // Remove console.log in production
 				drop_debugger: true,
+				pure_funcs: ['console.log', 'console.info', 'console.debug'], // Remove console functions
+				passes: 2, // Multiple compression passes
+			},
+			mangle: {
+				toplevel: true, // Mangle top-level names
 			},
 		},
 		// Bundle preloading optimization
 		assetsInlineLimit: 4096, // Inline small assets
+		target: 'es2015', // Target modern browsers
 		rollupOptions: {
 			output: {
-				// Preload critical chunks
-				manualChunks: (id) => {
-					// CreateListingPage ve ilgili component'ler için özel chunk
-					if (id.includes('CreateListingPage') || id.includes('steps/Step')) {
-						return 'create-listing';
+				// Use optimized manual chunks
+				manualChunks: createManualChunks,
+				// Optimize chunk naming
+				chunkFileNames: (chunkInfo) => {
+					const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
+					return `assets/${facadeModuleId}-[hash].js`;
+				},
+				entryFileNames: 'assets/[name]-[hash].js',
+				assetFileNames: (assetInfo) => {
+					const info = assetInfo.name.split('.');
+					const ext = info[info.length - 1];
+					if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext)) {
+						return `assets/images/[name]-[hash][extname]`;
 					}
-					
-					// Vendor chunks
-					if (id.includes('node_modules')) {
-						if (id.includes('react') || id.includes('react-dom')) {
-							return 'vendor';
-						}
-						if (id.includes('react-router-dom')) {
-							return 'router';
-						}
-						if (id.includes('framer-motion') || id.includes('lucide-react') || id.includes('clsx') || id.includes('tailwind-merge')) {
-							return 'ui';
-						}
-						if (id.includes('@tanstack/react-query')) {
-							return 'query';
-						}
-						if (id.includes('@supabase/supabase-js')) {
-							return 'supabase';
-						}
+					if (/css/i.test(ext)) {
+						return `assets/css/[name]-[hash][extname]`;
 					}
-					
-					return undefined;
+					return `assets/[name]-[hash][extname]`;
 				},
 			}
 		},
