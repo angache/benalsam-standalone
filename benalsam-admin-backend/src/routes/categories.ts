@@ -498,6 +498,8 @@ router.post('/reorder', authMiddleware({ requiredPermissions: ['categories:edit'
     const { categories } = req.body; // Array of {id, sort_order, display_priority, is_featured}
     const userId = req.user?.id;
 
+    console.log('🔄 [BACKEND] POST /reorder called with:', { categoriesCount: categories?.length, userId });
+
     if (!Array.isArray(categories)) {
       return res.status(400).json({ error: 'Categories must be an array' });
     }
@@ -511,19 +513,45 @@ router.post('/reorder', authMiddleware({ requiredPermissions: ['categories:edit'
       order_updated_by: userId
     }));
 
+    console.log('🔄 [BACKEND] Updating categories:', updates.map(u => ({ id: u.id, sort_order: u.sort_order })));
+
     const { data, error } = await supabase
       .from('categories')
       .upsert(updates, { onConflict: 'id' })
       .select();
 
     if (error) {
+      console.log('❌ [BACKEND] Database error:', error);
       logger.error('❌ Error reordering categories:', error);
       return res.status(500).json({ error: 'Failed to reorder categories' });
     }
 
+    console.log('✅ [BACKEND] Database update successful:', data.length, 'categories updated');
     logger.info(`✅ Categories reordered: ${data.length} categories updated`);
-    return res.json(data);
+    
+    // Clear categories cache after batch reorder
+    try {
+      // Clear both cache keys
+      await apiCacheService.invalidateAPICache('categories');
+      
+      // Also clear the specific cache key used by categoryService
+      const cacheManager = require('../services/cacheManager').default;
+      await cacheManager.delete('categories_tree');
+      
+      console.log('🗑️ [BACKEND] Categories cache cleared after batch reorder');
+      logger.info('🗑️ Categories cache cleared after batch reorder');
+    } catch (cacheError) {
+      console.log('⚠️ [BACKEND] Failed to clear cache:', cacheError);
+      logger.warn('⚠️ Failed to clear categories cache:', cacheError);
+    }
+    
+    return res.json({
+      success: true,
+      data,
+      message: `${data.length} kategoriler başarıyla yeniden sıralandı`
+    });
   } catch (error) {
+    console.log('❌ [BACKEND] Unexpected error:', error);
     logger.error('❌ Error in /reorder endpoint:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }

@@ -52,6 +52,17 @@ export const CategoriesPage: React.FC = () => {
   const [currentPath, setCurrentPath] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [sortOrderMode, setSortOrderMode] = useState(false);
+  
+  // Düzenleme modu state'leri
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState<Array<{
+    id: number;
+    sort_order: number;
+    display_priority: number;
+    is_featured: boolean;
+  }>>([]);
+  const [originalCategories, setOriginalCategories] = useState<Category[]>([]);
+  
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -73,7 +84,36 @@ export const CategoriesPage: React.FC = () => {
     },
   });
 
-  // Sort order mutations
+  // Batch reorder mutation (yeni düzenleme modu için)
+  const batchReorderMutation = useMutation({
+    mutationFn: (categories: Array<{
+      id: number;
+      sort_order: number;
+      display_priority: number;
+      is_featured: boolean;
+    }>) => {
+      console.log('🔄 [FRONTEND] batchReorderMutation.mutationFn called with:', { categoriesCount: categories.length });
+      return categoryService.batchReorderCategories(categories);
+    },
+    onSuccess: (data: any) => {
+      console.log('✅ [FRONTEND] batchReorderMutation.onSuccess called with data:', data);
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setSuccessMessage(`${data.data?.length || 0} kategori başarıyla yeniden sıralandı`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+      
+      // Düzenleme modunu kapat
+      setIsEditMode(false);
+      setPendingChanges([]);
+      setOriginalCategories([]);
+    },
+    onError: (error) => {
+      console.log('❌ [FRONTEND] batchReorderMutation.onError called with error:', error);
+      setSuccessMessage('Sıralama güncellenirken hata oluştu');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    },
+  });
+
+  // Eski sort order mutations (geriye uyumluluk için)
   const updateSortOrderMutation = useMutation({
     mutationFn: ({ id, sort_order, display_priority, is_featured }: {
       id: number;
@@ -144,6 +184,156 @@ export const CategoriesPage: React.FC = () => {
 
   const handleToggleFeatured = (categoryId: number) => {
     toggleFeaturedMutation.mutate(categoryId);
+  };
+
+  // Düzenleme modu fonksiyonları
+  const startEditMode = () => {
+    console.log('🔄 [FRONTEND] Düzenleme modu başlatılıyor...');
+    setIsEditMode(true);
+    
+    // Orijinal kategorileri deep copy ile kaydet
+    const originalCategoriesCopy = sortedCategories.map(cat => ({
+      ...cat,
+      sort_order: cat.sort_order,
+      display_priority: cat.display_priority,
+      is_featured: cat.is_featured
+    }));
+    
+    setOriginalCategories(originalCategoriesCopy);
+    setPendingChanges([]);
+    
+    console.log('✅ [FRONTEND] Düzenleme modu başlatıldı, orijinal kategoriler kaydedildi:', originalCategoriesCopy.length);
+  };
+
+  const cancelEditMode = () => {
+    console.log('🔄 [FRONTEND] Düzenleme modu iptal ediliyor...');
+    
+    // Kategorileri orijinal haline döndür
+    if (originalCategories.length > 0) {
+      console.log('🔄 [FRONTEND] Kategoriler orijinal haline döndürülüyor...');
+      queryClient.setQueryData(['categories'], (oldData: any) => {
+        if (!oldData) return oldData;
+        
+        // Orijinal kategorileri geri yükle
+        return oldData.map((cat: Category) => {
+          const originalCat = originalCategories.find(orig => orig.id === cat.id);
+          if (originalCat) {
+            return { ...cat, sort_order: originalCat.sort_order };
+          }
+          return cat;
+        });
+      });
+    }
+    
+    // State'leri temizle
+    setIsEditMode(false);
+    setPendingChanges([]);
+    setOriginalCategories([]);
+    
+    console.log('✅ [FRONTEND] Düzenleme modu iptal edildi, kategoriler orijinal haline döndürüldü');
+  };
+
+  const saveEditMode = () => {
+    console.log('🔄 [FRONTEND] Düzenleme modu kaydediliyor...', pendingChanges);
+    if (pendingChanges.length > 0) {
+      batchReorderMutation.mutate(pendingChanges);
+    } else {
+      setIsEditMode(false);
+      setSuccessMessage('Değişiklik yapılmadı');
+      setTimeout(() => setSuccessMessage(null), 2000);
+    }
+  };
+
+  const handleEditModeMoveUp = (category: Category) => {
+    console.log('🔄 [FRONTEND] Edit mode - handleMoveUp çağrıldı, kategori:', category.name, 'ID:', category.id);
+    
+    const currentIndex = sortedCategories.findIndex(cat => cat.id === category.id);
+    console.log('🔄 [FRONTEND] Current index in sorted list:', currentIndex);
+    
+    if (currentIndex > 0) {
+      const prevCategory = sortedCategories[currentIndex - 1];
+      console.log('📋 [FRONTEND] Previous category:', prevCategory.name, 'ID:', prevCategory.id, 'sort_order:', prevCategory.sort_order);
+      
+      // Swap sort orders
+      const newSortOrder = prevCategory.sort_order;
+      const newSortOrderPrev = category.sort_order;
+      
+      console.log('🔄 [FRONTEND] Swapping sort orders:', {
+        [category.name]: newSortOrder,
+        [prevCategory.name]: newSortOrderPrev
+      });
+      
+      // Update local state immediately for instant UI feedback
+      const updatedCategories = [...sortedCategories];
+      updatedCategories[currentIndex] = { ...category, sort_order: newSortOrder };
+      updatedCategories[currentIndex - 1] = { ...prevCategory, sort_order: newSortOrderPrev };
+      
+      // Update pending changes
+      const newChanges = [
+        { id: category.id, sort_order: newSortOrder, display_priority: category.display_priority, is_featured: category.is_featured },
+        { id: prevCategory.id, sort_order: newSortOrderPrev, display_priority: prevCategory.display_priority, is_featured: prevCategory.is_featured }
+      ];
+      
+      setPendingChanges(prev => [...prev.filter(change => change.id !== category.id && change.id !== prevCategory.id), ...newChanges]);
+      
+      // Force re-render
+      queryClient.setQueryData(['categories'], (oldData: any) => {
+        if (!oldData) return oldData;
+        return oldData.map((cat: Category) => {
+          if (cat.id === category.id) return { ...cat, sort_order: newSortOrder };
+          if (cat.id === prevCategory.id) return { ...cat, sort_order: newSortOrderPrev };
+          return cat;
+        });
+      });
+    } else {
+      console.log('❌ [FRONTEND] Kategori zaten en üstte');
+    }
+  };
+
+  const handleEditModeMoveDown = (category: Category) => {
+    console.log('🔄 [FRONTEND] Edit mode - handleMoveDown çağrıldı, kategori:', category.name, 'ID:', category.id);
+    
+    const currentIndex = sortedCategories.findIndex(cat => cat.id === category.id);
+    console.log('🔄 [FRONTEND] Current index in sorted list:', currentIndex);
+    
+    if (currentIndex < sortedCategories.length - 1) {
+      const nextCategory = sortedCategories[currentIndex + 1];
+      console.log('📋 [FRONTEND] Next category:', nextCategory.name, 'ID:', nextCategory.id, 'sort_order:', nextCategory.sort_order);
+      
+      // Swap sort orders
+      const newSortOrder = nextCategory.sort_order;
+      const newSortOrderNext = category.sort_order;
+      
+      console.log('🔄 [FRONTEND] Swapping sort orders:', {
+        [category.name]: newSortOrder,
+        [nextCategory.name]: newSortOrderNext
+      });
+      
+      // Update local state immediately for instant UI feedback
+      const updatedCategories = [...sortedCategories];
+      updatedCategories[currentIndex] = { ...category, sort_order: newSortOrder };
+      updatedCategories[currentIndex + 1] = { ...nextCategory, sort_order: newSortOrderNext };
+      
+      // Update pending changes
+      const newChanges = [
+        { id: category.id, sort_order: newSortOrder, display_priority: category.display_priority, is_featured: category.is_featured },
+        { id: nextCategory.id, sort_order: newSortOrderNext, display_priority: nextCategory.display_priority, is_featured: nextCategory.is_featured }
+      ];
+      
+      setPendingChanges(prev => [...prev.filter(change => change.id !== category.id && change.id !== nextCategory.id), ...newChanges]);
+      
+      // Force re-render
+      queryClient.setQueryData(['categories'], (oldData: any) => {
+        if (!oldData) return oldData;
+        return oldData.map((cat: Category) => {
+          if (cat.id === category.id) return { ...cat, sort_order: newSortOrder };
+          if (cat.id === nextCategory.id) return { ...cat, sort_order: newSortOrderNext };
+          return cat;
+        });
+      });
+    } else {
+      console.log('❌ [FRONTEND] Kategori zaten en altta');
+    }
   };
 
   const handleMoveUp = (category: Category) => {
@@ -307,35 +497,81 @@ export const CategoriesPage: React.FC = () => {
           flexDirection: { xs: 'column', sm: 'row' },
           width: { xs: '100%', md: 'auto' }
         }}>
-          {!sortOrderMode && (
+          {/* Düzenleme Modu Butonları */}
+          {isEditMode ? (
             <>
               <Button
                 variant="contained"
-                startIcon={<Plus />}
-                onClick={() => navigate('/categories/create')}
+                color="success"
+                onClick={saveEditMode}
+                disabled={batchReorderMutation.isPending}
                 sx={{ 
                   minWidth: { xs: '100%', sm: 'auto' },
                   fontSize: { xs: '0.875rem', sm: '1rem' }
                 }}
               >
-                Yeni Kategori
+                {batchReorderMutation.isPending ? 'Kaydediliyor...' : `Kaydet (${pendingChanges.length} değişiklik)`}
               </Button>
               <Button
                 variant="outlined"
-                startIcon={<RefreshCw />}
-                onClick={() => {
-                  console.log('🔄 Cache temizleniyor...');
-                  queryClient.removeQueries({ queryKey: ['categories'] });
-                  queryClient.invalidateQueries({ queryKey: ['categories'] });
-                  queryClient.refetchQueries({ queryKey: ['categories'] });
-                  console.log('✅ Cache temizlendi ve veriler yeniden yüklendi');
-                }}
+                color="error"
+                onClick={cancelEditMode}
+                disabled={batchReorderMutation.isPending}
                 sx={{ 
                   minWidth: { xs: '100%', sm: 'auto' },
                   fontSize: { xs: '0.875rem', sm: '1rem' }
                 }}
               >
-                Yenile
+                İptal
+              </Button>
+            </>
+          ) : (
+            <>
+              {/* Normal Mod Butonları */}
+              {!sortOrderMode && (
+                <>
+                  <Button
+                    variant="contained"
+                    startIcon={<Plus />}
+                    onClick={() => navigate('/categories/create')}
+                    sx={{ 
+                      minWidth: { xs: '100%', sm: 'auto' },
+                      fontSize: { xs: '0.875rem', sm: '1rem' }
+                    }}
+                  >
+                    Yeni Kategori
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<RefreshCw />}
+                    onClick={() => {
+                      console.log('🔄 Cache temizleniyor...');
+                      queryClient.removeQueries({ queryKey: ['categories'] });
+                      queryClient.invalidateQueries({ queryKey: ['categories'] });
+                      queryClient.refetchQueries({ queryKey: ['categories'] });
+                      console.log('✅ Cache temizlendi ve veriler yeniden yüklendi');
+                    }}
+                    sx={{ 
+                      minWidth: { xs: '100%', sm: 'auto' },
+                      fontSize: { xs: '0.875rem', sm: '1rem' }
+                    }}
+                  >
+                    Yenile
+                  </Button>
+                </>
+              )}
+              
+              {/* Düzenleme Modu Başlat Butonu */}
+              <Button
+                variant="contained"
+                color="warning"
+                onClick={startEditMode}
+                sx={{ 
+                  minWidth: { xs: '100%', sm: 'auto' },
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                }}
+              >
+                📝 Düzenleme Modu
               </Button>
             </>
           )}
@@ -520,14 +756,14 @@ export const CategoriesPage: React.FC = () => {
                 >
                   Liste
                 </Button>
-                {!sortOrderMode && (
+                {/* Düzenleme Modu Butonları */}
+                {!isEditMode && (
                   <Button
                     variant="outlined"
                     startIcon={<ArrowUp size={16} />}
                     onClick={() => {
-                      console.log('SIRALA butonuna tıklandı, mevcut sortOrderMode:', sortOrderMode);
-                      setSortOrderMode(!sortOrderMode);
-                      console.log('Yeni sortOrderMode olacak:', !sortOrderMode);
+                      console.log('📝 Düzenleme modu başlatılıyor...');
+                      startEditMode();
                     }}
                     size="small"
                     color="warning"
@@ -538,16 +774,16 @@ export const CategoriesPage: React.FC = () => {
                       px: { xs: 1, sm: 2 }
                     }}
                   >
-                    Sırala
+                    📝 Düzenle
                   </Button>
                 )}
-                {sortOrderMode && (
+                {isEditMode && (
                   <Button
                     variant="contained"
                     startIcon={<X size={16} />}
                     onClick={() => {
-                      console.log('SIRALA KAPAT butonuna tıklandı');
-                      setSortOrderMode(false);
+                      console.log('❌ Düzenleme modu iptal ediliyor...');
+                      cancelEditMode();
                     }}
                     size="small"
                     color="error"
@@ -558,7 +794,7 @@ export const CategoriesPage: React.FC = () => {
                       px: { xs: 1, sm: 2 }
                     }}
                   >
-                    Sıralamayı Kapat
+                    ❌ İptal
                   </Button>
                 )}
               </Box>
@@ -582,8 +818,9 @@ export const CategoriesPage: React.FC = () => {
               onEditAttributes={handleEditAttributes}
               isLoading={isLoading}
               sortOrderMode={sortOrderMode}
-              onMoveUp={handleMoveUp}
-              onMoveDown={handleMoveDown}
+              isEditMode={isEditMode}
+              onMoveUp={isEditMode ? handleEditModeMoveUp : handleMoveUp}
+              onMoveDown={isEditMode ? handleEditModeMoveDown : handleMoveDown}
               onToggleFeatured={handleToggleFeatured}
             />
           ) : (
@@ -806,8 +1043,49 @@ export const CategoriesPage: React.FC = () => {
                               </>
                             )}
 
-                            {/* Sort Order Buttons */}
-                            {sortOrderMode && (
+                            {/* Düzenleme Modu Butonları */}
+                            {isEditMode && (
+                              <>
+                                <Tooltip title="Yukarı Taşı">
+                                  <IconButton
+                                    size="small"
+                                    color="warning"
+                                    onClick={() => {
+                                      console.log('🔄 Edit mode - YUKARI OK tıklandı, kategori:', category.name);
+                                      handleEditModeMoveUp(category);
+                                    }}
+                                    sx={{ 
+                                      minWidth: { xs: '36px', sm: 'auto' },
+                                      minHeight: { xs: '36px', sm: 'auto' },
+                                      p: { xs: 0.5, sm: 1 }
+                                    }}
+                                  >
+                                    <ArrowUp size={16} />
+                                  </IconButton>
+                                </Tooltip>
+                                
+                                <Tooltip title="Aşağı Taşı">
+                                  <IconButton
+                                    size="small"
+                                    color="warning"
+                                    onClick={() => {
+                                      console.log('🔄 Edit mode - AŞAĞI OK tıklandı, kategori:', category.name);
+                                      handleEditModeMoveDown(category);
+                                    }}
+                                    sx={{ 
+                                      minWidth: { xs: '36px', sm: 'auto' },
+                                      minHeight: { xs: '36px', sm: 'auto' },
+                                      p: { xs: 0.5, sm: 1 }
+                                    }}
+                                  >
+                                    <ArrowDown size={16} />
+                                  </IconButton>
+                                </Tooltip>
+                              </>
+                            )}
+
+                            {/* Eski Sort Order Buttons (geriye uyumluluk için) */}
+                            {sortOrderMode && !isEditMode && (
                               <>
                                 <Tooltip title="Yukarı Taşı">
                                   <IconButton

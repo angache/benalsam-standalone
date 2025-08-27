@@ -111,4 +111,15 @@ export const categoryService = {
     const response = await apiClient.post<Category>(`/categories/${id}/toggle-featured`);
     return response.data;
   },
+
+  // Batch reorder categories (yeni düzenleme modu için)
+  async batchReorderCategories(categories: Array<{
+    id: number;
+    sort_order: number;
+    display_priority: number;
+    is_featured: boolean;
+  }>): Promise<ApiResponse<Category[]>> {
+    const response = await apiClient.post<ApiResponse<Category[]>>('/categories/reorder', { categories });
+    return response.data;
+  },
 }; 

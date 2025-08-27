@@ -40,6 +40,7 @@ interface CategoryMenuProps {
   onEditAttributes?: (path: string) => void;
   isLoading?: boolean;
   sortOrderMode?: boolean;
+  isEditMode?: boolean;
   onMoveUp?: (category: Category) => void;
   onMoveDown?: (category: Category) => void;
   onToggleFeatured?: (categoryId: number) => void;
@@ -56,6 +57,7 @@ export const CategoryMenu: React.FC<CategoryMenuProps> = ({
   onEditAttributes,
   isLoading = false,
   sortOrderMode = false,
+  isEditMode = false,
   onMoveUp,
   onMoveDown,
   onToggleFeatured,
@@ -330,7 +332,7 @@ export const CategoryMenu: React.FC<CategoryMenuProps> = ({
                 )}
 
                 {/* Sort Order Buttons */}
-                {sortOrderMode && (
+                {(sortOrderMode || isEditMode) && (
                   <>
                     {onMoveUp && (
                       <Tooltip title="Yukarı Taşı">
