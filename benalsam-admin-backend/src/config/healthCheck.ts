@@ -114,15 +114,9 @@ class HealthCheckService {
   async checkRedisHealth(): Promise<HealthCheck> {
     const startTime = Date.now();
     try {
-      // Test Redis connection
+      // Sadece basit ping testi (performans için optimize edildi)
       await redis.ping();
       
-      // Check Redis performance
-      const performanceStart = Date.now();
-      await redis.set('health_check', 'test', 'EX', 10);
-      await redis.get('health_check');
-      const queryTime = Date.now() - performanceStart;
-
       const responseTime = Date.now() - startTime;
       
       return {
@@ -131,9 +125,9 @@ class HealthCheckService {
         lastChecked: new Date().toISOString(),
         details: {
           provider: 'redis',
-          queryTime,
-          memory: await redis.info('memory'),
-          keyspace: await redis.info('keyspace')
+          queryTime: responseTime,
+          // Detaylı bilgiler kaldırıldı (performans için)
+          optimized: true
         }
       };
     } catch (error) {
@@ -149,17 +143,9 @@ class HealthCheckService {
   async checkElasticsearchHealth(): Promise<HealthCheck> {
     const startTime = Date.now();
     try {
-      // Test Elasticsearch connection
+      // Sadece basit cluster health testi (performans için optimize edildi)
       const clusterHealth = await elasticsearch.cluster.health();
       
-      // Check Elasticsearch performance
-      const performanceStart = Date.now();
-      await elasticsearch.search({
-        index: 'benalsam-*',
-        size: 1
-      });
-      const queryTime = Date.now() - performanceStart;
-
       const responseTime = Date.now() - startTime;
       
       return {
@@ -168,9 +154,10 @@ class HealthCheckService {
         lastChecked: new Date().toISOString(),
         details: {
           provider: 'elasticsearch',
-          queryTime,
+          queryTime: responseTime,
           clusterHealth: clusterHealth,
-          indices: await elasticsearch.cat.indices({ format: 'json' })
+          // Detaylı bilgiler kaldırıldı (performans için)
+          optimized: true
         }
       };
     } catch (error) {

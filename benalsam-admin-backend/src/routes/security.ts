@@ -5,14 +5,16 @@ import logger from '../config/logger';
 
 const router = express.Router();
 
-// Get security statistics
+// Get security statistics (enterprise optimized)
 router.get('/stats', authenticateToken, async (req, res) => {
   try {
+    const startTime = Date.now();
     const stats = getSecurityStats();
     
     logger.info('Security stats retrieved', {
       endpoint: req.path,
       ip: req.ip,
+      responseTime: Date.now() - startTime,
       stats: {
         totalEvents: stats.totalEvents,
         eventsLast24Hours: stats.eventsLast24Hours,
@@ -23,7 +25,13 @@ router.get('/stats', authenticateToken, async (req, res) => {
 
     res.json({
       success: true,
-      data: stats,
+      data: {
+        ...stats,
+        performance: {
+          responseTime: Date.now() - startTime,
+          optimized: true
+        }
+      },
       timestamp: new Date().toISOString()
     });
   } catch (error) {

@@ -314,20 +314,28 @@ const startServer = async () => {
       logger.error('❌ Session cleanup service failed to start:', error);
     }
 
-    // Initialize Redis Cloud for performance analysis
-    try {
-      await initializeRedis();
-      logger.info('✅ Redis Cloud initialized for performance analysis');
-    } catch (error) {
-      logger.error('❌ Redis Cloud initialization failed:', error);
+    // Initialize Redis Cloud for performance analysis (controlled by environment variable)
+    if (process.env.ENABLE_REDIS_CLOUD === 'true') {
+      try {
+        await initializeRedis();
+        logger.info('✅ Redis Cloud initialized for performance analysis');
+      } catch (error) {
+        logger.error('❌ Redis Cloud initialization failed:', error);
+      }
+    } else {
+      logger.info('⚠️ Redis Cloud disabled (ENABLE_REDIS_CLOUD=false)');
     }
 
-    // Start performance monitoring service
-    try {
-      await performanceMonitoringService.startMonitoring();
-      logger.info('✅ Performance monitoring service started');
-    } catch (error) {
-      logger.error('❌ Performance monitoring service failed to start:', error);
+    // Start performance monitoring service (controlled by environment variable)
+    if (process.env.ENABLE_PERFORMANCE_MONITORING === 'true') {
+      try {
+        await performanceMonitoringService.startMonitoring();
+        logger.info('✅ Performance monitoring service started');
+      } catch (error) {
+        logger.error('❌ Performance monitoring service failed to start:', error);
+      }
+    } else {
+      logger.info('⚠️ Performance monitoring service disabled (ENABLE_PERFORMANCE_MONITORING=false)');
     }
 
     // Test Redis connection

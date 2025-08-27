@@ -10,6 +10,14 @@ const redisCloud = new Redis({
   keepAlive: 30000,
   connectTimeout: 10000,
   commandTimeout: 5000,
+  // ECONNRESET hatası için iyileştirmeler
+  retryStrategy: (times: number) => {
+    const delay = Math.min(times * 50, 2000);
+    console.log(`🔄 Redis Cloud retry attempt ${times}, delay: ${delay}ms`);
+    return delay;
+  },
+  enableOfflineQueue: true, // false'dan true'ya değiştirildi
+  family: 4, // IPv4
 });
 
 // Connection event handlers
@@ -18,7 +26,19 @@ redisCloud.on('connect', () => {
 });
 
 redisCloud.on('error', (error) => {
-  console.error('❌ Redis Cloud connection error:', error);
+  // ECONNRESET hatasını özel olarak handle et
+  if (error.message.includes('ECONNRESET')) {
+    console.warn('⚠️ Redis Cloud connection reset, attempting to reconnect...', {
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  } else {
+    console.error('❌ Redis Cloud connection error:', {
+      error: error.message,
+      stack: error.stack,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 redisCloud.on('ready', () => {
@@ -36,6 +56,29 @@ redisCloud.on('reconnecting', () => {
 // Test connection
 const testConnection = async (): Promise<boolean> => {
   try {
+    // Bağlantının hazır olmasını bekle
+    if (redisCloud.status !== 'ready') {
+      console.log('⏳ Waiting for Redis Cloud connection to be ready...');
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Redis Cloud connection timeout'));
+        }, 10000);
+
+        const checkReady = () => {
+          if (redisCloud.status === 'ready') {
+            clearTimeout(timeout);
+            resolve(true);
+          } else if (redisCloud.status === 'end') {
+            clearTimeout(timeout);
+            reject(new Error('Redis Cloud connection failed'));
+          } else {
+            setTimeout(checkReady, 100);
+          }
+        };
+        checkReady();
+      });
+    }
+
     await redisCloud.ping();
     console.log('✅ Redis Cloud ping successful');
     return true;
@@ -48,10 +91,26 @@ const testConnection = async (): Promise<boolean> => {
 // Initialize connection
 const initializeRedis = async (): Promise<boolean> => {
   try {
-    await testConnection();
-    return true;
+    console.log('🔄 Initializing Redis Cloud connection...');
+    
+    // Bağlantıyı başlat
+    if (redisCloud.status === 'wait') {
+      await redisCloud.connect();
+    }
+    
+    // Test connection
+    const isConnected = await testConnection();
+    
+    if (isConnected) {
+      console.log('✅ Redis Cloud initialization successful');
+      return true;
+    } else {
+      console.warn('⚠️ Redis Cloud initialization failed, but continuing...');
+      return false;
+    }
   } catch (error) {
     console.error('❌ Redis Cloud initialization failed:', error);
+    console.warn('⚠️ Continuing without Redis Cloud...');
     return false;
   }
 };

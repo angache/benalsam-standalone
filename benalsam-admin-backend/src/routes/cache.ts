@@ -73,19 +73,29 @@ router.post('/set', async (req, res) => {
   }
 });
 
-// Cache istatistiklerini al
+// Cache istatistiklerini al (enterprise optimized)
 router.get('/stats', async (req, res) => {
   try {
-    const stats = await cacheService.getCacheStats();
+    const startTime = Date.now();
+    
+    // Parallel execution for cache stats
+    const [cacheStats, healthStatus] = await Promise.all([
+      cacheService.getCacheStats(),
+      cacheService.healthCheck()
+    ]);
+    
+    const stats = {
+      ...cacheStats,
+      health: healthStatus,
+      performance: {
+        responseTime: Date.now() - startTime,
+        optimized: true
+      }
+    };
     
     return res.json({
       success: true,
-      data: {
-        totalKeys: stats.totalKeys,
-        totalSize: stats.totalSize,
-        hitRate: stats.hitRate,
-        health: await cacheService.healthCheck()
-      }
+      data: stats
     });
   } catch (error) {
     logger.error('❌ Cache stats error:', error);

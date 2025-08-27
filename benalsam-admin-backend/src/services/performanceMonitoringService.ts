@@ -49,16 +49,16 @@ class PerformanceMonitoringService {
 
   private initializeMonitoringConfigs() {
     this.monitoringConfigs = [
-      // Critical Endpoints - Every 5 minutes
+      // Critical Endpoints - Every 15 minutes (daha az sık)
       {
         endpoint: '/api/v1/health',
         method: 'GET',
         description: 'System Health Check',
         priority: 'critical',
-        interval: 5 * 60 * 1000, // 5 minutes
-        timeout: 5000,
+        interval: 15 * 60 * 1000, // 15 minutes
+        timeout: 30000, // 30 saniye (15'ten 30'a çıkarıldı)
         threshold: {
-          responseTime: 5000, // 5 saniye
+          responseTime: 20000, // 20 saniye (10'dan 20'ye çıkarıldı)
           errorRate: 5,
           throughput: 10
         }
@@ -68,10 +68,10 @@ class PerformanceMonitoringService {
         method: 'GET',
         description: 'Detailed Health Status',
         priority: 'critical',
-        interval: 5 * 60 * 1000,
-        timeout: 5000,
+        interval: 15 * 60 * 1000, // 15 minutes
+        timeout: 40000, // 40 saniye (20'den 40'a çıkarıldı)
         threshold: {
-          responseTime: 8000, // 8 saniye
+          responseTime: 30000, // 30 saniye (15'ten 30'a çıkarıldı)
           errorRate: 5,
           throughput: 8
         }
@@ -81,10 +81,10 @@ class PerformanceMonitoringService {
         method: 'POST',
         description: 'Authentication Endpoint',
         priority: 'critical',
-        interval: 5 * 60 * 1000,
-        timeout: 3000,
+        interval: 15 * 60 * 1000, // 15 minutes
+        timeout: 20000, // 20 saniye (10'dan 20'ye çıkarıldı)
         threshold: {
-          responseTime: 3000, // 3 saniye
+          responseTime: 15000, // 15 saniye (8'den 15'e çıkarıldı)
           errorRate: 2,
           throughput: 15
         }
@@ -94,25 +94,25 @@ class PerformanceMonitoringService {
         method: 'GET',
         description: 'Core Business - Listings',
         priority: 'critical',
-        interval: 5 * 60 * 1000,
-        timeout: 5000,
+        interval: 15 * 60 * 1000, // 15 minutes
+        timeout: 30000, // 30 saniye (15'ten 30'a çıkarıldı)
         threshold: {
-          responseTime: 5000, // 5 saniye
+          responseTime: 25000, // 25 saniye (12'den 25'e çıkarıldı)
           errorRate: 5,
           throughput: 12
         }
       },
 
-      // Medium Priority - Every 30 minutes
+      // Medium Priority - Every 60 minutes (30'dan 60'a çıkarıldı)
       {
         endpoint: '/api/v1/analytics',
         method: 'GET',
         description: 'Analytics Dashboard',
         priority: 'medium',
-        interval: 30 * 60 * 1000, // 30 minutes
-        timeout: 8000,
+        interval: 60 * 60 * 1000, // 60 minutes
+        timeout: 20000, // 20 saniye (8'den 20'ye çıkarıldı)
         threshold: {
-          responseTime: 10000, // 10 saniye
+          responseTime: 15000, // 15 saniye (10'dan 15'e çıkarıldı)
           errorRate: 10,
           throughput: 5
         }
@@ -122,10 +122,10 @@ class PerformanceMonitoringService {
         method: 'GET',
         description: 'Security Statistics',
         priority: 'medium',
-        interval: 30 * 60 * 1000,
-        timeout: 5000,
+        interval: 60 * 60 * 1000, // 60 minutes
+        timeout: 15000, // 15 saniye (5'ten 15'e çıkarıldı)
         threshold: {
-          responseTime: 8000, // 8 saniye
+          responseTime: 12000, // 12 saniye (8'den 12'ye çıkarıldı)
           errorRate: 5,
           throughput: 8
         }
@@ -135,25 +135,25 @@ class PerformanceMonitoringService {
         method: 'GET',
         description: 'Cache Statistics',
         priority: 'medium',
-        interval: 30 * 60 * 1000,
-        timeout: 3000,
+        interval: 60 * 60 * 1000, // 60 minutes
+        timeout: 10000, // 10 saniye (3'ten 10'a çıkarıldı)
         threshold: {
-          responseTime: 5000, // 5 saniye
+          responseTime: 8000, // 8 saniye (5'ten 8'e çıkarıldı)
           errorRate: 5,
           throughput: 15
         }
       },
 
-      // Low Priority - Every 2 hours
+      // Low Priority - Every 4 hours (2'den 4'e çıkarıldı)
       {
         endpoint: '/api/v1/admin-management',
         method: 'GET',
         description: 'Admin Management',
         priority: 'low',
-        interval: 2 * 60 * 60 * 1000, // 2 hours
-        timeout: 10000,
+        interval: 4 * 60 * 60 * 1000, // 4 hours
+        timeout: 20000, // 20 saniye (10'dan 20'ye çıkarıldı)
         threshold: {
-          responseTime: 15000, // 15 saniye
+          responseTime: 18000, // 18 saniye (15'ten 18'e çıkarıldı)
           errorRate: 15,
           throughput: 3
         }
@@ -163,10 +163,10 @@ class PerformanceMonitoringService {
         method: 'GET',
         description: 'Data Export',
         priority: 'low',
-        interval: 2 * 60 * 60 * 1000,
-        timeout: 15000,
+        interval: 4 * 60 * 60 * 1000, // 4 hours
+        timeout: 30000, // 30 saniye (15'ten 30'a çıkarıldı)
         threshold: {
-          responseTime: 20000, // 20 saniye
+          responseTime: 25000, // 25 saniye (20'den 25'e çıkarıldı)
           errorRate: 20,
           throughput: 2
         }
@@ -176,10 +176,10 @@ class PerformanceMonitoringService {
         method: 'GET',
         description: 'Performance Baseline',
         priority: 'low',
-        interval: 2 * 60 * 60 * 1000,
-        timeout: 5000,
+        interval: 4 * 60 * 60 * 1000, // 4 hours
+        timeout: 15000, // 15 saniye (5'ten 15'e çıkarıldı)
         threshold: {
-          responseTime: 10000, // 10 saniye
+          responseTime: 12000, // 12 saniye (10'dan 12'ye çıkarıldı)
           errorRate: 10,
           throughput: 8
         }

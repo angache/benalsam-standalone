@@ -1,48 +1,20 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Typography,
   Card,
   CardContent,
-  Grid,
-  Chip,
-  Button,
-  TextField,
-  IconButton,
-  Tooltip,
   Alert,
-  Skeleton,
-  Paper,
-  Tabs,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
 } from '@mui/material';
-import {
-  Plus,
-  Edit,
-  Delete,
-  Folder,
-  Search,
-  RefreshCw,
-  Eye,
-  Grid3X3,
-  ListTree,
-  ArrowUp,
-  ArrowDown,
-  Star,
-  X,
-} from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { categoryService, type Category } from '../services/categoryService';
 import { CategoryBreadcrumb } from '../components/CategoryBreadcrumb';
-import { CategoryMenu } from '../components/CategoryMenu';
-import { getIconComponent } from '../utils/iconUtils';
+import { DraggableCategoryList } from '../components/DraggableCategoryList';
+import { DraggableCategoryTable } from '../components/DraggableCategoryTable';
+import { CategoryStats } from '../components/CategoryStats';
+import { CategoryHeader } from '../components/CategoryHeader';
+import { CategorySearchAndControls } from '../components/CategorySearchAndControls';
+import { CategoryTable } from '../components/CategoryTable';
 
 type ViewMode = 'menu' | 'list';
 
@@ -290,6 +262,40 @@ export const CategoriesPage: React.FC = () => {
     }
   };
 
+  // Drag & Drop reorder handler
+  const handleDragReorder = (reorderedCategories: Category[]) => {
+    console.log('🔄 [FRONTEND] Drag & drop reorder:', reorderedCategories.map(cat => ({ id: cat.id, name: cat.name, sort_order: cat.sort_order })));
+    
+    // Update local state immediately for instant UI feedback
+    queryClient.setQueryData(['categories'], (oldData: any) => {
+      if (!oldData) return oldData;
+      
+      // Update sort_order based on new positions
+      const updatedCategories = reorderedCategories.map((cat, index) => ({
+        ...cat,
+        sort_order: (index + 1) * 1000 // Generate new sort_order values
+      }));
+      
+      return oldData.map((existingCat: Category) => {
+        const updatedCat = updatedCategories.find(upd => upd.id === existingCat.id);
+        if (updatedCat) {
+          return { ...existingCat, sort_order: updatedCat.sort_order };
+        }
+        return existingCat;
+      });
+    });
+    
+    // Update pending changes
+    const newChanges = reorderedCategories.map((cat, index) => ({
+      id: cat.id,
+      sort_order: (index + 1) * 1000,
+      display_priority: cat.display_priority,
+      is_featured: cat.is_featured
+    }));
+    
+    setPendingChanges(newChanges);
+  };
+
   const handleEditModeMoveDown = (category: Category) => {
     console.log('🔄 [FRONTEND] Edit mode - handleMoveDown çağrıldı, kategori:', category.name, 'ID:', category.id);
     
@@ -428,8 +434,6 @@ export const CategoriesPage: React.FC = () => {
     return a.name.localeCompare(b.name); // Fallback to alphabetical
   });
 
-
-
   const filteredCategories = sortedCategories.filter(category =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -474,109 +478,14 @@ export const CategoriesPage: React.FC = () => {
       minHeight: '100vh'
     }}>
       {/* Header */}
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: { xs: 'column', md: 'row' },
-        justifyContent: 'space-between', 
-        alignItems: { xs: 'stretch', md: 'center' }, 
-        gap: { xs: 2, md: 0 },
-        mb: { xs: 2, sm: 3 },
-        p: { xs: 1, sm: 0 }
-      }}>
-        <Typography variant="h4" component="h1" sx={{ 
-          textAlign: { xs: 'center', md: 'left' },
-          fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' },
-          mb: { xs: 1, md: 0 }
-        }}>
-          Kategori Yönetimi
-        </Typography>
-        
-        <Box sx={{ 
-          display: 'flex', 
-          gap: { xs: 1, sm: 2 },
-          flexDirection: { xs: 'column', sm: 'row' },
-          width: { xs: '100%', md: 'auto' }
-        }}>
-          {/* Düzenleme Modu Butonları */}
-          {isEditMode ? (
-            <>
-              <Button
-                variant="contained"
-                color="success"
-                onClick={saveEditMode}
-                disabled={batchReorderMutation.isPending}
-                sx={{ 
-                  minWidth: { xs: '100%', sm: 'auto' },
-                  fontSize: { xs: '0.875rem', sm: '1rem' }
-                }}
-              >
-                {batchReorderMutation.isPending ? 'Kaydediliyor...' : `Kaydet (${pendingChanges.length} değişiklik)`}
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={cancelEditMode}
-                disabled={batchReorderMutation.isPending}
-                sx={{ 
-                  minWidth: { xs: '100%', sm: 'auto' },
-                  fontSize: { xs: '0.875rem', sm: '1rem' }
-                }}
-              >
-                İptal
-              </Button>
-            </>
-          ) : (
-            <>
-              {/* Normal Mod Butonları */}
-              {!sortOrderMode && (
-                <>
-                  <Button
-                    variant="contained"
-                    startIcon={<Plus />}
-                    onClick={() => navigate('/categories/create')}
-                    sx={{ 
-                      minWidth: { xs: '100%', sm: 'auto' },
-                      fontSize: { xs: '0.875rem', sm: '1rem' }
-                    }}
-                  >
-                    Yeni Kategori
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<RefreshCw />}
-                    onClick={() => {
-                      console.log('🔄 Cache temizleniyor...');
-                      queryClient.removeQueries({ queryKey: ['categories'] });
-                      queryClient.invalidateQueries({ queryKey: ['categories'] });
-                      queryClient.refetchQueries({ queryKey: ['categories'] });
-                      console.log('✅ Cache temizlendi ve veriler yeniden yüklendi');
-                    }}
-                    sx={{ 
-                      minWidth: { xs: '100%', sm: 'auto' },
-                      fontSize: { xs: '0.875rem', sm: '1rem' }
-                    }}
-                  >
-                    Yenile
-                  </Button>
-                </>
-              )}
-              
-              {/* Düzenleme Modu Başlat Butonu */}
-              <Button
-                variant="contained"
-                color="warning"
-                onClick={startEditMode}
-                sx={{ 
-                  minWidth: { xs: '100%', sm: 'auto' },
-                  fontSize: { xs: '0.875rem', sm: '1rem' }
-                }}
-              >
-                📝 Düzenleme Modu
-              </Button>
-            </>
-          )}
-        </Box>
-      </Box>
+      <CategoryHeader
+        isEditMode={isEditMode}
+        batchReorderMutation={batchReorderMutation}
+        pendingChanges={pendingChanges}
+        startEditMode={startEditMode}
+        saveEditMode={saveEditMode}
+        cancelEditMode={cancelEditMode}
+      />
 
       {/* Success Message */}
       {successMessage && (
@@ -590,77 +499,11 @@ export const CategoriesPage: React.FC = () => {
       )}
 
       {/* Stats Cards */}
-      <Grid container spacing={2} sx={{ mb: { xs: 2, sm: 3 } }}>
-        <Grid item xs={6} sm={6} md={3}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-              <Typography color="text.secondary" gutterBottom sx={{ 
-                fontSize: { xs: '0.75rem', sm: '0.875rem' }
-              }}>
-                Toplam Kategori
-              </Typography>
-              <Typography variant="h4" component="div" sx={{ 
-                fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' }
-              }}>
-                {isLoading ? <Skeleton width={60} /> : allFlattenedCategories.length}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        
-        <Grid item xs={6} sm={6} md={3}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-              <Typography color="text.secondary" gutterBottom sx={{ 
-                fontSize: { xs: '0.75rem', sm: '0.875rem' }
-              }}>
-                Ana Kategoriler
-              </Typography>
-              <Typography variant="h4" component="div" color="primary.main" sx={{ 
-                fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' }
-              }}>
-                {isLoading ? <Skeleton width={60} /> : categories?.length || 0}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        
-        <Grid item xs={6} sm={6} md={3}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-              <Typography color="text.secondary" gutterBottom sx={{ 
-                fontSize: { xs: '0.75rem', sm: '0.875rem' }
-              }}>
-                Son Kategoriler
-              </Typography>
-              <Typography variant="h4" component="div" color="secondary.main" sx={{ 
-                fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' }
-              }}>
-                {isLoading ? <Skeleton width={60} /> : 
-                 allFlattenedCategories.filter(cat => !cat.subcategories || cat.subcategories.length === 0).length}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        
-        <Grid item xs={6} sm={6} md={3}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-              <Typography color="text.secondary" gutterBottom sx={{ 
-                fontSize: { xs: '0.75rem', sm: '0.875rem' }
-              }}>
-                Toplam Özellik
-              </Typography>
-              <Typography variant="h4" component="div" color="success.main" sx={{ 
-                fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' }
-              }}>
-                {isLoading ? <Skeleton width={60} /> : 
-                 allFlattenedCategories.reduce((sum, cat) => sum + (cat.attributes?.length || 0), 0)}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      <CategoryStats
+        categories={categories}
+        allFlattenedCategories={allFlattenedCategories}
+        isLoading={isLoading}
+      />
 
       {/* Breadcrumb */}
       <CategoryBreadcrumb
@@ -669,145 +512,26 @@ export const CategoriesPage: React.FC = () => {
       />
 
       {/* Search and View Mode */}
-      <Card sx={{ mb: { xs: 2, sm: 3 } }}>
-        <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="🔍 Kategori Ara"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Kategori adı yazın..."
-                size="small"
-                InputProps={{
-                  startAdornment: <Search size={20} style={{ marginRight: 8 }} />,
-                }}
-                sx={{
-                  '& .MuiInputBase-input': {
-                    fontSize: { xs: '0.875rem', sm: '1rem' }
-                  }
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={6} md={3}>
-              <Box sx={{ 
-                display: 'flex', 
-                gap: 0.5, 
-                flexWrap: 'wrap',
-                justifyContent: { xs: 'center', md: 'flex-start' }
-              }}>
-                <Chip
-                  label={`📁 ${currentCategories.length}`}
-                  color="primary"
-                  variant="outlined"
-                  size="small"
-                  sx={{ 
-                    fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                    height: { xs: '24px', sm: '32px' }
-                  }}
-                />
-                <Chip
-                  label={`🔍 ${filteredCategories.length}`}
-                  color="secondary"
-                  variant="outlined"
-                  size="small"
-                  sx={{ 
-                    fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                    height: { xs: '24px', sm: '32px' }
-                  }}
-                />
-              </Box>
-            </Grid>
-            
-            <Grid item xs={6} md={3}>
-              <Box sx={{ 
-                display: 'flex', 
-                gap: 0.5,
-                justifyContent: { xs: 'center', md: 'flex-end' },
-                flexWrap: 'wrap'
-              }}>
-                <Button
-                  variant={viewMode === 'menu' ? 'contained' : 'outlined'}
-                  startIcon={<ListTree size={16} />}
-                  onClick={() => setViewMode('menu')}
-                  size="small"
-                  sx={{ 
-                    minWidth: { xs: '70px', sm: 'auto' },
-                    fontSize: { xs: '0.65rem', sm: '0.875rem' },
-                    height: { xs: '32px', sm: 'auto' },
-                    px: { xs: 1, sm: 2 }
-                  }}
-                >
-                  Menü
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'contained' : 'outlined'}
-                  startIcon={<Grid3X3 size={16} />}
-                  onClick={() => setViewMode('list')}
-                  size="small"
-                  sx={{ 
-                    minWidth: { xs: '70px', sm: 'auto' },
-                    fontSize: { xs: '0.65rem', sm: '0.875rem' },
-                    height: { xs: '32px', sm: 'auto' },
-                    px: { xs: 1, sm: 2 }
-                  }}
-                >
-                  Liste
-                </Button>
-                {/* Düzenleme Modu Butonları */}
-                {!isEditMode && (
-                  <Button
-                    variant="outlined"
-                    startIcon={<ArrowUp size={16} />}
-                    onClick={() => {
-                      console.log('📝 Düzenleme modu başlatılıyor...');
-                      startEditMode();
-                    }}
-                    size="small"
-                    color="warning"
-                    sx={{ 
-                      minWidth: { xs: '70px', sm: 'auto' },
-                      fontSize: { xs: '0.65rem', sm: '0.875rem' },
-                      height: { xs: '32px', sm: 'auto' },
-                      px: { xs: 1, sm: 2 }
-                    }}
-                  >
-                    📝 Düzenle
-                  </Button>
-                )}
-                {isEditMode && (
-                  <Button
-                    variant="contained"
-                    startIcon={<X size={16} />}
-                    onClick={() => {
-                      console.log('❌ Düzenleme modu iptal ediliyor...');
-                      cancelEditMode();
-                    }}
-                    size="small"
-                    color="error"
-                    sx={{ 
-                      minWidth: { xs: '70px', sm: 'auto' },
-                      fontSize: { xs: '0.65rem', sm: '0.875rem' },
-                      height: { xs: '32px', sm: 'auto' },
-                      px: { xs: 1, sm: 2 }
-                    }}
-                  >
-                    ❌ İptal
-                  </Button>
-                )}
-              </Box>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+      <CategorySearchAndControls
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        currentCategories={currentCategories}
+        filteredCategories={filteredCategories}
+        isEditMode={isEditMode}
+        batchReorderMutation={batchReorderMutation}
+        pendingChanges={pendingChanges}
+        startEditMode={startEditMode}
+        saveEditMode={saveEditMode}
+        cancelEditMode={cancelEditMode}
+      />
 
       {/* Categories Content */}
       <Card>
         <CardContent>
           {viewMode === 'menu' ? (
-            <CategoryMenu
+            <DraggableCategoryList
               categories={filteredCategories}
               currentPath={currentPath}
               onNavigate={handleNavigate}
@@ -817,339 +541,30 @@ export const CategoriesPage: React.FC = () => {
               onAddSubcategory={handleAddSubcategory}
               onEditAttributes={handleEditAttributes}
               isLoading={isLoading}
-              sortOrderMode={sortOrderMode}
               isEditMode={isEditMode}
               onMoveUp={isEditMode ? handleEditModeMoveUp : handleMoveUp}
               onMoveDown={isEditMode ? handleEditModeMoveDown : handleMoveDown}
               onToggleFeatured={handleToggleFeatured}
+              onReorder={isEditMode ? handleDragReorder : undefined}
             />
           ) : (
-            <TableContainer sx={{ 
-              overflowX: 'auto',
-              '& .MuiTable-root': {
-                minWidth: { xs: 500, sm: 'auto' }
-              }
-            }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ 
-                      minWidth: { xs: 120, sm: 'auto' },
-                      fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
-                      p: { xs: 1, sm: 1.5, md: 2 }
-                    }}>
-                      Kategori
-                    </TableCell>
-                    <TableCell sx={{ 
-                      minWidth: { xs: 60, sm: 'auto' },
-                      fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
-                      p: { xs: 1, sm: 1.5, md: 2 }
-                    }}>
-                      Seviye
-                    </TableCell>
-                    <TableCell sx={{ 
-                      minWidth: { xs: 80, sm: 'auto' },
-                      fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
-                      p: { xs: 1, sm: 1.5, md: 2 }
-                    }}>
-                      Özellikler
-                    </TableCell>
-                    <TableCell sx={{ 
-                      minWidth: { xs: 100, sm: 'auto' },
-                      fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
-                      p: { xs: 1, sm: 1.5, md: 2 }
-                    }}>
-                      Alt Kategoriler
-                    </TableCell>
-                    <TableCell align="right" sx={{ 
-                      minWidth: { xs: 100, sm: 'auto' },
-                      fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
-                      p: { xs: 1, sm: 1.5, md: 2 }
-                    }}>
-                      İşlemler
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredCategories.map((category) => {
-                    const path = currentPath ? `${currentPath}/${category.name}` : category.name;
-                    const hasSubcategories = category.subcategories && category.subcategories.length > 0;
-                    const hasAttributes = category.attributes && category.attributes.length > 0;
-                    const isLeaf = !hasSubcategories;
-
-                    return (
-                      <TableRow key={category.name}>
-                        <TableCell sx={{ p: { xs: 1, sm: 1.5, md: 2 } }}>
-                          <Box sx={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: { xs: 1, sm: 2 },
-                            flexDirection: { xs: 'column', sm: 'row' },
-                            textAlign: { xs: 'center', sm: 'left' }
-                          }}>
-                            <Box
-                              sx={{
-                                width: { xs: 24, sm: 32 },
-                                height: { xs: 24, sm: 32 },
-                                borderRadius: 1,
-                                background: category.color,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white',
-                                fontSize: '0.9rem',
-                              }}
-                            >
-                              <Folder size={16} />
-                            </Box>
-                            <Box>
-                              <Typography variant="body2" fontWeight="medium" sx={{ 
-                                fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' }
-                              }}>
-                                {category.name}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary" sx={{ 
-                                fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                              }}>
-                                {category.icon} • {category.color}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={`Seviye ${currentPath.split('/').length}`}
-                            size="small"
-                            color={currentPath.split('/').length === 0 ? 'primary' : 'secondary'}
-                            variant="outlined"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {hasAttributes && isLeaf ? (
-                            <Chip
-                              label={`${category.attributes!.length} özellik`}
-                              size="small"
-                              color="secondary"
-                              variant="outlined"
-                            />
-                          ) : (
-                            <Typography variant="caption" color="text.secondary">
-                              {isLeaf ? 'Özellik yok' : 'Alt kategoriler var'}
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {hasSubcategories ? (
-                            <Chip
-                              label={`${category.subcategories!.length} alt kategori`}
-                              size="small"
-                              color="info"
-                              variant="outlined"
-                            />
-                          ) : (
-                            <Typography variant="caption" color="text.secondary">
-                              Alt kategori yok
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell align="right" sx={{ p: { xs: 1, sm: 1.5, md: 2 } }}>
-                          <Box sx={{ 
-                            display: 'flex', 
-                            gap: 0.5, 
-                            justifyContent: 'flex-end',
-                            flexWrap: 'wrap'
-                          }}>
-                            {!sortOrderMode && (
-                              <>
-                                <Tooltip title="Görüntüle">
-                                  <IconButton
-                                    size="small"
-                                    color="primary"
-                                    onClick={() => handleView(path)}
-                                    sx={{ 
-                                      minWidth: { xs: '36px', sm: 'auto' },
-                                      minHeight: { xs: '36px', sm: 'auto' },
-                                      p: { xs: 0.5, sm: 1 }
-                                    }}
-                                  >
-                                    <Eye size={16} />
-                                  </IconButton>
-                                </Tooltip>
-                                
-                                <Tooltip title="Düzenle">
-                                  <IconButton
-                                    size="small"
-                                    color="info"
-                                    onClick={() => handleEdit(path)}
-                                    sx={{ 
-                                      minWidth: { xs: '36px', sm: 'auto' },
-                                      minHeight: { xs: '36px', sm: 'auto' },
-                                      p: { xs: 0.5, sm: 1 }
-                                    }}
-                                  >
-                                    <Edit size={16} />
-                                  </IconButton>
-                                </Tooltip>
-                                
-                                {isLeaf && (
-                                  <Tooltip title="Özellikleri Düzenle">
-                                    <IconButton
-                                      size="small"
-                                      color="secondary"
-                                      onClick={() => handleEditAttributes(path)}
-                                      sx={{ 
-                                        minWidth: { xs: '36px', sm: 'auto' },
-                                        minHeight: { xs: '36px', sm: 'auto' },
-                                        p: { xs: 0.5, sm: 1 }
-                                      }}
-                                    >
-                                      <ListTree size={16} />
-                                    </IconButton>
-                                  </Tooltip>
-                                )}
-                                
-                                {!isLeaf && (
-                                  <Tooltip title="Alt Kategori Ekle">
-                                    <IconButton
-                                      size="small"
-                                      color="success"
-                                      onClick={() => handleAddSubcategory(path)}
-                                      sx={{ 
-                                        minWidth: { xs: '36px', sm: 'auto' },
-                                        minHeight: { xs: '36px', sm: 'auto' },
-                                        p: { xs: 0.5, sm: 1 }
-                                      }}
-                                    >
-                                      <Plus size={16} />
-                                    </IconButton>
-                                  </Tooltip>
-                                )}
-                                
-                                <Tooltip title="Sil">
-                                  <IconButton
-                                    size="small"
-                                    color="error"
-                                    onClick={() => handleDelete(path, category.name)}
-                                    disabled={deleteMutation.isPending}
-                                    sx={{ 
-                                      minWidth: { xs: '36px', sm: 'auto' },
-                                      minHeight: { xs: '36px', sm: 'auto' },
-                                      p: { xs: 0.5, sm: 1 }
-                                    }}
-                                  >
-                                    <Delete size={16} />
-                                  </IconButton>
-                                </Tooltip>
-                              </>
-                            )}
-
-                            {/* Düzenleme Modu Butonları */}
-                            {isEditMode && (
-                              <>
-                                <Tooltip title="Yukarı Taşı">
-                                  <IconButton
-                                    size="small"
-                                    color="warning"
-                                    onClick={() => {
-                                      console.log('🔄 Edit mode - YUKARI OK tıklandı, kategori:', category.name);
-                                      handleEditModeMoveUp(category);
-                                    }}
-                                    sx={{ 
-                                      minWidth: { xs: '36px', sm: 'auto' },
-                                      minHeight: { xs: '36px', sm: 'auto' },
-                                      p: { xs: 0.5, sm: 1 }
-                                    }}
-                                  >
-                                    <ArrowUp size={16} />
-                                  </IconButton>
-                                </Tooltip>
-                                
-                                <Tooltip title="Aşağı Taşı">
-                                  <IconButton
-                                    size="small"
-                                    color="warning"
-                                    onClick={() => {
-                                      console.log('🔄 Edit mode - AŞAĞI OK tıklandı, kategori:', category.name);
-                                      handleEditModeMoveDown(category);
-                                    }}
-                                    sx={{ 
-                                      minWidth: { xs: '36px', sm: 'auto' },
-                                      minHeight: { xs: '36px', sm: 'auto' },
-                                      p: { xs: 0.5, sm: 1 }
-                                    }}
-                                  >
-                                    <ArrowDown size={16} />
-                                  </IconButton>
-                                </Tooltip>
-                              </>
-                            )}
-
-                            {/* Eski Sort Order Buttons (geriye uyumluluk için) */}
-                            {sortOrderMode && !isEditMode && (
-                              <>
-                                <Tooltip title="Yukarı Taşı">
-                                  <IconButton
-                                    size="small"
-                                    color="warning"
-                                    onClick={() => {
-                                      console.log('YUKARI OK tıklandı, kategori:', category.name);
-                                      handleMoveUp(category);
-                                    }}
-                                    sx={{ 
-                                      minWidth: { xs: '36px', sm: 'auto' },
-                                      minHeight: { xs: '36px', sm: 'auto' },
-                                      p: { xs: 0.5, sm: 1 }
-                                    }}
-                                  >
-                                    <ArrowUp size={16} />
-                                  </IconButton>
-                                </Tooltip>
-                                
-                                <Tooltip title="Aşağı Taşı">
-                                  <IconButton
-                                    size="small"
-                                    color="warning"
-                                    onClick={() => {
-                                      console.log('AŞAĞI OK tıklandı, kategori:', category.name);
-                                      handleMoveDown(category);
-                                    }}
-                                    sx={{ 
-                                      minWidth: { xs: '36px', sm: 'auto' },
-                                      minHeight: { xs: '36px', sm: 'auto' },
-                                      p: { xs: 0.5, sm: 1 }
-                                    }}
-                                  >
-                                    <ArrowDown size={16} />
-                                  </IconButton>
-                                </Tooltip>
-                                
-                                <Tooltip title={category.is_featured ? "Öne Çıkanı Kaldır" : "Öne Çıkar"}>
-                                  <IconButton
-                                    size="small"
-                                    color={category.is_featured ? "success" : "default"}
-                                    onClick={() => {
-                                      console.log('YILDIZ tıklandı, kategori:', category.name);
-                                      handleToggleFeatured(category.id);
-                                    }}
-                                    sx={{ 
-                                      minWidth: { xs: '36px', sm: 'auto' },
-                                      minHeight: { xs: '36px', sm: 'auto' },
-                                      p: { xs: 0.5, sm: 1 }
-                                    }}
-                                  >
-                                    <Star size={16} />
-                                  </IconButton>
-                                </Tooltip>
-                              </>
-                            )}
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            <CategoryTable
+              filteredCategories={filteredCategories}
+              currentPath={currentPath}
+              sortOrderMode={sortOrderMode}
+              isEditMode={isEditMode}
+              deleteMutation={deleteMutation}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onAddSubcategory={handleAddSubcategory}
+              onEditAttributes={handleEditAttributes}
+              handleMoveUp={handleMoveUp}
+              handleMoveDown={handleMoveDown}
+              handleEditModeMoveUp={handleEditModeMoveUp}
+              handleEditModeMoveDown={handleEditModeMoveDown}
+              handleToggleFeatured={handleToggleFeatured}
+            />
           )}
         </CardContent>
       </Card>
