@@ -17,6 +17,7 @@ import useRoutePerformance from '@/hooks/useRoutePerformance.js';
 import usePerformance from '@/hooks/usePerformance.js';
 import ImageOptimizationDebug from '@/components/ImageOptimizationDebug';
 import PerformanceMonitor from '@/components/PerformanceMonitor';
+import { checkCategoriesVersion } from '@/services/cacheVersionService.js';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -62,6 +63,35 @@ function App() {
     console.log('🔐 Auth Store State:', { currentUser: !!currentUser, loadingAuth });
   }, [currentUser, loadingAuth]);
   
+  // Cache version kontrolü - uygulama başlangıcında
+  useEffect(() => {
+    const checkCacheVersions = async () => {
+      try {
+        console.log('🔄 Checking cache versions on app start...');
+        
+        // Kategori cache version kontrolü
+        const categoriesVersionChanged = await checkCategoriesVersion();
+        
+        if (categoriesVersionChanged) {
+          console.log('🔄 Categories cache invalidated, reloading...');
+          // Kategoriler yeniden yüklenecek
+          toast({
+            title: "Güncelleme",
+            description: "Kategori bilgileri güncellendi.",
+            duration: 3000,
+          });
+        }
+        
+      } catch (error) {
+        console.error('❌ Error checking cache versions:', error);
+      }
+    };
+    
+    // Auth yüklendikten sonra cache kontrolü yap
+    if (!loadingAuth) {
+      checkCacheVersions();
+    }
+  }, [loadingAuth]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);

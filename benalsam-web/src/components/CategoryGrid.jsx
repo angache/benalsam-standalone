@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Smartphone } from 'lucide-react';
 import dynamicCategoryService from '@/services/dynamicCategoryService';
+import { checkCategoriesVersion } from '@/services/cacheVersionService.js';
 
 const CategoryGrid = ({ selectedCategories, onCategorySelect, searchQuery }) => {
   const [categories, setCategories] = useState([]);
@@ -16,6 +17,13 @@ const CategoryGrid = ({ selectedCategories, onCategorySelect, searchQuery }) => 
         setIsLoading(true);
         setError(null);
         console.log('🔄 Loading categories from dynamic service...');
+        
+        // Cache version kontrolü
+        const versionChanged = await checkCategoriesVersion();
+        if (versionChanged) {
+          console.log('🔄 Cache version changed, reloading categories...');
+        }
+        
         const fetchedCategories = await dynamicCategoryService.getCategoryTree();
         console.log('📦 Categories loaded:', fetchedCategories);
         setCategories(fetchedCategories);

@@ -23,6 +23,112 @@ router.get('/', categoriesController.getCategories);
 // Admin endpoint for category management (requires auth)
 router.get('/admin', authMiddleware({ requiredPermissions: ['categories:read'] }), categoriesController.getCategories);
 
+/**
+ * @route GET /api/v1/categories/version
+ * @desc Get current categories version for cache invalidation
+ * @access Public
+ */
+router.get('/version', async (req: Request, res: Response) => {
+  try {
+    logger.info('🔄 Categories version check requested');
+
+    const { data, error } = await supabase
+      .from('system_settings')
+      .select('value, updated_at')
+      .eq('key', 'categories_version')
+      .single();
+    
+    if (error) {
+      logger.error('Error fetching categories version:', error);
+      return res.status(500).json({ 
+        success: false,
+        version: 0,
+        message: 'Failed to fetch version'
+      });
+    }
+    
+    const version = parseInt(data.value) || 0;
+    
+    logger.info(`✅ Categories version returned: ${version}`);
+    
+    return res.json({ 
+      success: true,
+      version,
+      updatedAt: data.updated_at
+    });
+  } catch (error: any) {
+    logger.error('❌ Error in categories version endpoint:', error);
+    return res.status(500).json({ 
+      success: false,
+      version: 0,
+      message: 'Version service error'
+    });
+  }
+});
+
+/**
+ * @route POST /api/v1/categories/version/increment
+ * @desc Manually increment categories version (for testing)
+ * @access Admin only
+ */
+router.post('/version/increment', authMiddleware({ requiredPermissions: ['categories:write'] }), async (req: Request, res: Response) => {
+  try {
+    logger.info('🔄 Manual categories version increment requested');
+
+    // Önce mevcut version'ı al
+    const { data: currentData, error: fetchError } = await supabase
+      .from('system_settings')
+      .select('value')
+      .eq('key', 'categories_version')
+      .single();
+    
+    if (fetchError) {
+      logger.error('Error fetching current version:', fetchError);
+      return res.status(500).json({ 
+        success: false,
+        message: 'Failed to fetch current version'
+      });
+    }
+
+    const currentVersion = parseInt(currentData.value) || 0;
+    const newVersion = currentVersion + 1;
+
+    // Version'ı güncelle
+    const { data: updateData, error: updateError } = await supabase
+      .from('system_settings')
+      .update({
+        value: newVersion.toString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('key', 'categories_version')
+      .select('value, updated_at')
+      .single();
+    
+    if (updateError) {
+      logger.error('Error incrementing categories version:', updateError);
+      return res.status(500).json({ 
+        success: false,
+        message: 'Failed to increment version'
+      });
+    }
+    
+    logger.info(`✅ Categories version incremented to: ${newVersion}`);
+    
+    return res.json({ 
+      success: true,
+      version: newVersion,
+      updatedAt: updateData.updated_at,
+      message: 'Version incremented successfully'
+    });
+  } catch (error: any) {
+    logger.error('❌ Error in categories version increment:', error);
+    return res.status(500).json({ 
+      success: false,
+      message: 'Version increment error'
+    });
+  }
+});
+
 // Get ALL categories (main + subcategories)
 router.get('/all', authMiddleware({ requiredPermissions: ['categories:read'] }), categoriesController.getAllCategories);
 
