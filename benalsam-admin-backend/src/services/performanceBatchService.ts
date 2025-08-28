@@ -1,4 +1,4 @@
-import { redis } from './redisService';
+import { redis } from '../config/redis';
 
 interface PerformanceBatch {
   route: string;

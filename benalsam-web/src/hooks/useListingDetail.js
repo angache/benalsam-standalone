@@ -21,9 +21,20 @@ export const useListingDetail = (listingId, setListings) => {
   const fetchListingDetails = useCallback(async () => {
     setLoading(true);
     
+    // ✅ OPTIMIZED: Single query with all necessary joins
     const { data, error } = await supabase
       .from('listings')
-      .select('*, profiles:profiles!listings_user_id_fkey(id, name, avatar_url, rating, total_ratings, rating_sum)')
+      .select(`
+        *,
+        profiles:profiles!listings_user_id_fkey(
+          id,
+          name,
+          avatar_url,
+          rating,
+          total_ratings,
+          rating_sum
+        )
+      `)
       .eq('id', listingId)
       .single();
 
@@ -55,14 +66,34 @@ export const useListingDetail = (listingId, setListings) => {
     }
 
     if (currentUser && data.user_id === currentUser.id) {
-       const { data: offersData, error: offersError } = await supabase
+      // ✅ OPTIMIZED: Single query with joins for offers
+      const { data: offersData, error: offersError } = await supabase
         .from('offers')
-        .select('*, profiles!offering_user_id(id, name, avatar_url), inventory_items(id, name, category, main_image_url, image_url), conversation_id')
+        .select(`
+          *,
+          profiles:offering_user_id(
+            id,
+            name,
+            avatar_url
+          ),
+          inventory_items(
+            id,
+            name,
+            category,
+            main_image_url,
+            image_url
+          ),
+          conversation_id
+        `)
         .eq('listing_id', fetchedListing.id)
         .order('created_at', { ascending: false });
 
       if (offersError) console.error("Error fetching offers:", offersError);
-      else setOffers(offersData.map(o => ({ ...o, user: o.profiles, offered_item: o.inventory_items })));
+      else setOffers(offersData.map(o => ({ 
+        ...o, 
+        user: o.profiles, 
+        offered_item: o.inventory_items 
+      })));
     } else {
       setOffers([]); 
     }

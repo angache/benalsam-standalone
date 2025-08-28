@@ -2,8 +2,8 @@
 // POPULAR SUGGESTIONS SERVICE
 // ===========================
 
-import { supabase } from '../../config/database';
-import logger from '../../config/logger';
+import { supabase } from '../../../config/database';
+import logger from '../../../config/logger';
 import { AISuggestion } from '../types';
 import { convertPopularSuggestions } from '../utils/suggestionProcessor';
 

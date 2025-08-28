@@ -105,54 +105,54 @@ class CacheManager {
         }
       });
 
-      // Layer 2: Local Redis
-      this.layers.push({
-        name: 'local-redis',
-        priority: 2,
-        get: async (key: string) => {
-          try {
-            return await cacheService.getCachedResponse(key);
-          } catch (error) {
-            logger.error('❌ Local Redis get error:', error);
-            return null;
-          }
-        },
-        set: async (key: string, data: any, ttl?: number, sessionId?: string) => {
-          try {
-            await cacheService.cacheResponse(key, data, 'local-redis', sessionId);
-            return true;
-          } catch (error) {
-            logger.error('❌ Local Redis set error:', error);
-            return false;
-          }
-        },
-        delete: async (key: string) => {
-          try {
-            // Redis doesn't have direct delete in our service, but we can set to null
-            await cacheService.cacheResponse(key, null, 'local-redis');
-            return true;
-          } catch (error) {
-            logger.error('❌ Local Redis delete error:', error);
-            return false;
-          }
-        },
-        healthCheck: async () => {
-          try {
-            return await cacheService.healthCheck();
-          } catch (error) {
-            logger.error('❌ Local Redis health check error:', error);
-            return false;
-          }
-        },
-        getStats: async () => {
-          try {
-            return await cacheService.getCacheStats();
-          } catch (error) {
-            logger.error('❌ Local Redis stats error:', error);
-            return null;
-          }
-        }
-      });
+      // Layer 2: Local Redis DISABLED - Using memory cache only
+      // this.layers.push({
+      //   name: 'local-redis',
+      //   priority: 2,
+      //   get: async (key: string) => {
+      //     try {
+      //       return await cacheService.getCachedResponse(key);
+      //     } catch (error) {
+      //       logger.error('❌ Local Redis get error:', error);
+      //       return null;
+      //     }
+      //   },
+      //   set: async (key: string, data: any, ttl?: number, sessionId?: string) => {
+      //     try {
+      //       await cacheService.cacheResponse(key, data, 'local-redis', sessionId);
+      //       return true;
+      //     } catch (error) {
+      //       logger.error('❌ Local Redis set error:', error);
+      //       return false;
+      //     }
+      //   },
+      //   delete: async (key: string) => {
+      //     try {
+      //       // Redis doesn't have direct delete in our service, but we can set to null
+      //       await cacheService.cacheResponse(key, null, 'local-redis');
+      //       return true;
+      //     } catch (error) {
+      //       logger.error('❌ Local Redis delete error:', error);
+      //       return false;
+      //     }
+      //   },
+      //   healthCheck: async () => {
+      //     try {
+      //       return await cacheService.healthCheck();
+      //     } catch (error) {
+      //       logger.error('❌ Local Redis health check error:', error);
+      //       return false;
+      //     }
+      //   },
+      //   getStats: async () => {
+      //     try {
+      //       return await cacheService.getCacheStats();
+      //     } catch (error) {
+      //       logger.error('❌ Local Redis stats error:', error);
+      //       return null;
+      //     }
+      //   }
+      // });
 
       this.isInitialized = true;
       logger.info('✅ Cache Manager initialized with layers:', this.layers.map(l => l.name));
@@ -162,7 +162,7 @@ class CacheManager {
   }
 
   /**
-   * Get data from cache with intelligent routing
+   * Get data from cache with intelligent routing (Memory only)
    */
   async get(key: string, sessionId?: string): Promise<any | null> {
     if (!this.isInitialized) {
@@ -171,24 +171,11 @@ class CacheManager {
     }
 
     try {
-      // Try memory cache first (fastest)
+      // Try memory cache only (local-redis disabled)
       const memoryResult = await this.layers[0].get(key);
       if (memoryResult !== null) {
         logger.debug('🎯 Memory cache hit for:', key);
         return memoryResult;
-      }
-
-      // Try local Redis
-      const redisResult = await this.layers[1].get(key);
-      if (redisResult !== null) {
-        logger.debug('🎯 Local Redis hit for:', key);
-        
-        // Populate memory cache for faster access next time
-        if (this.strategy.type === 'hybrid') {
-          await this.layers[0].set(key, redisResult, this.strategy.ttl.memory, sessionId);
-        }
-        
-        return redisResult;
       }
 
       logger.debug('❌ Cache miss for:', key);
@@ -200,7 +187,7 @@ class CacheManager {
   }
 
   /**
-   * Set data in cache with intelligent routing
+   * Set data in cache with intelligent routing (Memory only)
    */
   async set(key: string, data: any, ttl?: number, sessionId?: string): Promise<boolean> {
     if (!this.isInitialized) {
@@ -209,23 +196,14 @@ class CacheManager {
     }
 
     try {
-      let success = false;
-
-      // Set in memory cache (fastest access)
+      // Set in memory cache only (local-redis disabled)
       const memorySuccess = await this.layers[0].set(key, data, ttl || this.strategy.ttl.memory, sessionId);
       if (memorySuccess) {
-        success = true;
         logger.debug('💾 Memory cache set for:', key);
+        return true;
       }
 
-      // Set in local Redis (persistent)
-      const redisSuccess = await this.layers[1].set(key, data, ttl || this.strategy.ttl.local, sessionId);
-      if (redisSuccess) {
-        success = true;
-        logger.debug('💾 Local Redis set for:', key);
-      }
-
-      return success;
+      return false;
     } catch (error) {
       logger.error('❌ Cache Manager set error:', error);
       return false;

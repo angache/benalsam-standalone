@@ -99,6 +99,42 @@ class SearchCacheService {
   /**
    * Get cached search results
    */
+  async get(query: string): Promise<any | null> {
+    try {
+      const cacheKey = `${this.CACHE_PREFIX}${this.hashString(query)}`;
+      const cached = await cacheManager.get(cacheKey);
+      
+      if (cached) {
+        logger.debug(`📦 Cache hit for query: ${query}`);
+        this.stats.cacheHits++;
+        return cached;
+      }
+      
+      logger.debug(`❌ Cache miss for query: ${query}`);
+      this.stats.cacheMisses++;
+      return null;
+    } catch (error) {
+      logger.error('❌ Error getting cached search:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Set cached search results
+   */
+  async set(query: string, results: any, ttl: number = this.DEFAULT_TTL): Promise<void> {
+    try {
+      const cacheKey = `${this.CACHE_PREFIX}${this.hashString(query)}`;
+      await cacheManager.set(cacheKey, results, ttl);
+      logger.debug(`💾 Cached search results for query: ${query}`);
+    } catch (error) {
+      logger.error('❌ Error setting cached search:', error);
+    }
+  }
+
+  /**
+   * Get cached search results
+   */
   async getCachedSearch(params: SearchParams, sessionId?: string): Promise<any | null> {
     try {
       const cacheKey = this.generateCacheKey(params);

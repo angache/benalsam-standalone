@@ -170,7 +170,7 @@ export default class UserBehaviorService {
   // Get service configuration
   getConfig(): UserBehaviorServiceConfig {
     const elasticsearchConfig: ElasticsearchConfig = {
-      node: this.client.connectionPool.connections[0]?.url || '',
+      node: this.client.connectionPool.connections[0]?.url?.toString() || '',
       behaviorIndex: this.behaviorIndex,
       analyticsIndex: this.analyticsIndex
     };

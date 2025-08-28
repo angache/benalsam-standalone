@@ -345,6 +345,38 @@ class PerformanceMonitoringService {
     }
   }
 
+  // Track API metrics for middleware
+  async trackAPIMetrics(metrics: any) {
+    try {
+      // Store metrics for analysis
+      const endpoint = metrics.endpoint;
+      const result: MonitoringResult = {
+        endpoint: metrics.endpoint,
+        timestamp: metrics.timestamp,
+        responseTime: metrics.response_time,
+        statusCode: metrics.status_code,
+        success: metrics.status_code < 400,
+        error: metrics.error
+      };
+
+      // Store in monitoring results
+      if (!this.monitoringResults.has(endpoint)) {
+        this.monitoringResults.set(endpoint, []);
+      }
+      this.monitoringResults.get(endpoint)!.push(result);
+
+      // Keep only last 100 results per endpoint
+      const results = this.monitoringResults.get(endpoint)!;
+      if (results.length > 100) {
+        results.splice(0, results.length - 100);
+      }
+
+      logger.debug('API metrics tracked', { endpoint, responseTime: metrics.response_time });
+    } catch (error) {
+      logger.error('Failed to track API metrics', { error });
+    }
+  }
+
   stopMonitoring() {
     this.isRunning = false;
     

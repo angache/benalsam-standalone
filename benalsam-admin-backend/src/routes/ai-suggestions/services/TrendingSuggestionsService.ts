@@ -2,8 +2,8 @@
 // TRENDING SUGGESTIONS SERVICE
 // ===========================
 
-import { supabase } from '../../config/database';
-import logger from '../../config/logger';
+import { supabase } from '../../../config/database';
+import logger from '../../../config/logger';
 import { AISuggestion } from '../types';
 import { convertTrendingSuggestions } from '../utils/suggestionProcessor';
 

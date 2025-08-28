@@ -4,7 +4,7 @@
 
 import { IndexMapping } from '../types';
 
-export function getListingsIndexMapping(): IndexMapping {
+export function getListingsIndexMapping(): any {
   return {
     settings: {
       analysis: {
@@ -159,7 +159,7 @@ export function getListingsIndexMapping(): IndexMapping {
   };
 }
 
-export function getUserBehaviorsIndexMapping(): IndexMapping {
+export function getUserBehaviorsIndexMapping(): any {
   return {
     settings: {
       analysis: {
@@ -244,7 +244,7 @@ export function getUserBehaviorsIndexMapping(): IndexMapping {
   };
 }
 
-export function getAISuggestionsIndexMapping(): IndexMapping {
+export function getAISuggestionsIndexMapping(): any {
   return {
     settings: {
       analysis: {

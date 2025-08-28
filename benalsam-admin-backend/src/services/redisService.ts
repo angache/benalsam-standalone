@@ -5,19 +5,19 @@ const redisCloud = new Redis({
   host: process.env.REDIS_CLOUD_HOST || 'redis-13243.c135.eu-central-1-1.ec2.redns.redis-cloud.com',
   port: parseInt(process.env.REDIS_CLOUD_PORT || '13243'),
   password: process.env.REDIS_CLOUD_PASSWORD,
-  maxRetriesPerRequest: 3,
+  maxRetriesPerRequest: 1, // Retry sayısını azalt
   lazyConnect: true,
   keepAlive: 30000,
   connectTimeout: 10000,
   commandTimeout: 5000,
-  // ECONNRESET hatası için iyileştirmeler
+  // Read-only replica hatası için iyileştirmeler
   retryStrategy: (times: number) => {
     const delay = Math.min(times * 50, 2000);
     console.log(`🔄 Redis Cloud retry attempt ${times}, delay: ${delay}ms`);
     return delay;
   },
-  enableOfflineQueue: true, // false'dan true'ya değiştirildi
-  family: 4, // IPv4
+  enableOfflineQueue: true,
+  family: 4 // IPv4
 });
 
 // Connection event handlers
@@ -26,8 +26,18 @@ redisCloud.on('connect', () => {
 });
 
 redisCloud.on('error', (error) => {
-  // ECONNRESET hatasını özel olarak handle et
-  if (error.message.includes('ECONNRESET')) {
+  // Read-only replica hatasını özel olarak handle et
+  if (error.message.includes('READONLY')) {
+    console.warn('⚠️ Redis Cloud read-only replica detected, attempting to reconnect to master...', {
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+    // Master node'a bağlanmaya çalış
+    redisCloud.disconnect();
+    setTimeout(() => {
+      redisCloud.connect();
+    }, 1000);
+  } else if (error.message.includes('ECONNRESET')) {
     console.warn('⚠️ Redis Cloud connection reset, attempting to reconnect...', {
       error: error.message,
       timestamp: new Date().toISOString()
@@ -116,4 +126,7 @@ const initializeRedis = async (): Promise<boolean> => {
 };
 
 // Export everything
-export { redisCloud as redis, testConnection, initializeRedis };
+// Export local Redis instead of Redis Cloud to avoid read-only errors
+import { redis } from '../config/redis';
+
+export { redis, testConnection, initializeRedis };

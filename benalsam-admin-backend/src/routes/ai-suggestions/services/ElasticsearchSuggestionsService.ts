@@ -2,9 +2,9 @@
 // ELASTICSEARCH SUGGESTIONS SERVICE
 // ===========================
 
-import { AdminElasticsearchService } from '../../elasticsearchService';
-import { supabase } from '../../config/database';
-import logger from '../../config/logger';
+import { AdminElasticsearchService } from '../../../services/elasticsearchService';
+import { supabase } from '../../../config/database';
+import logger from '../../../config/logger';
 import { AISuggestion, CategorySuggestion, ElasticsearchSuggestion, SuggestionQuery } from '../types';
 import { buildElasticsearchQuery } from '../utils/queryBuilder';
 import { combineElasticsearchResults } from '../utils/suggestionProcessor';

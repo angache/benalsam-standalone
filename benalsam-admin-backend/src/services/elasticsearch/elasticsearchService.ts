@@ -187,7 +187,7 @@ export class AdminElasticsearchService {
 
     try {
       const response = await client.indices.stats();
-      return response.body;
+      return response;
     } catch (error) {
       logger.error('Error getting indices stats:', error);
       throw error;
@@ -212,7 +212,7 @@ export class AdminElasticsearchService {
           size: options.size || 10
         }
       });
-      return response.body;
+      return response;
     } catch (error) {
       logger.error('Error in static search:', error);
       throw error;

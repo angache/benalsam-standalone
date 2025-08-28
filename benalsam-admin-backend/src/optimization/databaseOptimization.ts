@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import logger from '../config/logger';
+import { supabase } from '../config/database';
 
 class DatabaseOptimizationService {
   private prisma: PrismaClient;
@@ -29,11 +30,10 @@ class DatabaseOptimizationService {
           skip: offset,
           where: filters,
           include: {
-            category: true,
             user: {
               select: {
                 id: true,
-                username: true,
+                name: true,
                 email: true
               }
             },
@@ -99,9 +99,8 @@ class DatabaseOptimizationService {
         select: {
           id: true,
           email: true,
-          password: true,
-          role: true,
-          isActive: true,
+          name: true,
+          status: true,
           lastLoginAt: true,
           // Don't select unnecessary fields
         }
@@ -202,16 +201,14 @@ class DatabaseOptimizationService {
       }
 
       // Optimized analytics queries
-      const [userCount, listingCount, sessionCount] = await Promise.all([
+      const [userCount, listingCount] = await Promise.all([
         this.prisma.user.count(),
-        this.prisma.listing.count(),
-        this.prisma.session.count()
+        this.prisma.listing.count()
       ]);
 
       const analytics = {
         users: userCount,
         listings: listingCount,
-        sessions: sessionCount,
         timestamp: new Date().toISOString()
       };
 
@@ -260,7 +257,7 @@ class DatabaseOptimizationService {
         CREATE INDEX IF NOT EXISTS idx_listings_user_id ON listings(user_id);
         CREATE INDEX IF NOT EXISTS idx_listings_created_at ON listings(created_at);
         CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-        CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
+
       `;
 
       logger.info('Performance indexes created successfully');

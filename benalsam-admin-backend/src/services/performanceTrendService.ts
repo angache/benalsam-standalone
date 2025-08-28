@@ -1,4 +1,4 @@
-import { redis } from './redisService';
+import { redis } from '../config/redis';
 import performanceMonitoringService from './performanceMonitoringService';
 
 interface PerformanceTrend {

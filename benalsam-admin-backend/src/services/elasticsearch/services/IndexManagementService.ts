@@ -3,7 +3,7 @@
 // ===========================
 
 import { Client } from '@elastic/elasticsearch';
-import logger from '../../config/logger';
+import logger from '../../../config/logger';
 import { IndexMapping, IndexInfo } from '../types';
 import { getListingsIndexMapping, getUserBehaviorsIndexMapping, getAISuggestionsIndexMapping } from '../utils/mappingBuilder';
 
@@ -22,7 +22,7 @@ class IndexManagementService {
       
       await this.client.indices.create({
         index: indexName,
-        body: indexMapping
+        body: indexMapping as any
       });
 
       logger.info(`✅ Index created successfully: ${indexName}`);
@@ -67,7 +67,7 @@ class IndexManagementService {
         index: indexName
       });
       
-      return response.body;
+      return response;
     } catch (error) {
       logger.error(`❌ Error checking index existence ${indexName}:`, error);
       return false;
@@ -80,7 +80,7 @@ class IndexManagementService {
         index: indexName
       });
       
-      return response.body[indexName]?.mappings;
+      return response[indexName]?.mappings;
     } catch (error) {
       logger.error(`❌ Error getting index mapping ${indexName}:`, error);
       return null;
@@ -112,7 +112,7 @@ class IndexManagementService {
         v: true
       });
 
-      return response.body.map((index: any) => ({
+      return response.map((index: any) => ({
         name: index.index,
         health: index.health,
         status: index.status,
@@ -179,7 +179,7 @@ class IndexManagementService {
         index: indexName
       });
       
-      return response.body;
+      return response;
     } catch (error) {
       logger.error('❌ Error getting index stats:', error);
       return null;

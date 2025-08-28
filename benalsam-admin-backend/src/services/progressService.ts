@@ -1,5 +1,5 @@
 import { createClient } from 'redis';
-import { logger } from '../utils/logger';
+import logger from '../config/logger';
 
 export interface OperationProgress {
   id: string;

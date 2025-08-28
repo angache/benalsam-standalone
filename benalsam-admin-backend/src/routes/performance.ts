@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { authenticateToken } from '../middleware/auth';
 import rateLimit from 'express-rate-limit';
-import { redis } from '../services/redisService';
+import { redis } from '../config/redis'; // Local Redis kullanıyoruz, Redis Cloud değil
 
 // Extend Request interface to include user
 interface AuthenticatedRequest extends Request {

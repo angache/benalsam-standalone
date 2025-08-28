@@ -3,7 +3,7 @@
 // ===========================
 
 import { Client } from '@elastic/elasticsearch';
-import logger from '../../config/logger';
+import logger from '../../../config/logger';
 import { ElasticsearchConfig, ConnectionStatus } from '../types';
 
 export class ConnectionManager {

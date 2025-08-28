@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { supabase } from '../config/database';
 import type { AuthenticatedRequest } from '../types';
 import logger from '../config/logger';
+import { User } from '@supabase/supabase-js';
 
 export const listingsController = {
   // Get all listings with filters
@@ -73,28 +74,44 @@ export const listingsController = {
       // Get unique user IDs
       const userIds = [...new Set(listings?.map(l => l.user_id).filter(Boolean) || [])];
 
-      // Get user emails from auth.users
+      // ✅ OPTIMIZED: Batch user fetching instead of N+1 queries
       const userEmails = new Map();
-      for (const userId of userIds) {
+      const profilesMap = new Map();
+      
+      if (userIds.length > 0) {
         try {
-          const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(userId);
-          if (!authError && authUser?.user) {
-            userEmails.set(userId, authUser.user.email || 'Bilinmiyor');
-          } else {
-            userEmails.set(userId, 'Bilinmiyor');
+          // Batch fetch all users from auth.users
+          const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+          
+          if (!authError && authUsers?.users) {
+            // Create email map
+            authUsers.users.forEach((user: User) => {
+              if (userIds.includes(user.id)) {
+                userEmails.set(user.id, user.email || 'Bilinmiyor');
+              }
+            });
           }
+          
+          // Batch fetch all profiles
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, name, avatar_url')
+            .in('id', userIds);
+          
+          if (profiles) {
+            profiles.forEach(profile => {
+              profilesMap.set(profile.id, profile);
+            });
+          }
+          
         } catch (error) {
-          userEmails.set(userId, 'Bilinmiyor');
+          logger.error('Error in batch user fetching:', error);
+          // Fallback: set default values
+          userIds.forEach(userId => {
+            userEmails.set(userId, 'Bilinmiyor');
+          });
         }
       }
-
-      // Get profile info for all users
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, name, avatar_url')
-        .in('id', userIds);
-
-      const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
 
       // Transform data for frontend
       const transformedListings = (listings || []).map(listing => ({

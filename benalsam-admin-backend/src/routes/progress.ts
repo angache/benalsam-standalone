@@ -1,7 +1,7 @@
 import express from 'express';
 import { authenticateToken } from '../middleware/auth';
 import { progressService } from '../services/progressService';
-import { logger } from '../utils/logger';
+import logger from '../config/logger';
 
 const router = express.Router();
 

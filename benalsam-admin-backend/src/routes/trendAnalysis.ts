@@ -2,7 +2,7 @@ import express from 'express';
 import { performanceTrendService } from '../services/performanceTrendService';
 import { authenticateToken } from '../middleware/auth';
 import { rateLimit } from 'express-rate-limit';
-import { redis } from '../services/redisService';
+import { redis } from '../config/redis';
 
 const router = express.Router();
 

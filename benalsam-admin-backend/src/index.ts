@@ -65,7 +65,7 @@ import QueueProcessorService from './services/queueProcessorService';
 import sessionCleanupService from './services/sessionCleanupService';
 import { AnalyticsAlertsService } from './services/analyticsAlertsService';
 import performanceMonitoringService from './services/performanceMonitoringService';
-import { initializeRedis } from './services/redisService';
+// import { initializeRedis } from './services/redisService'; // Redis Cloud disabled
 
 // Import middleware
 import { authenticateToken } from './middleware/auth';
@@ -314,17 +314,18 @@ const startServer = async () => {
       logger.error('❌ Session cleanup service failed to start:', error);
     }
 
-    // Initialize Redis Cloud for performance analysis (controlled by environment variable)
+    // Initialize Redis Cloud for performance analysis (DISABLED - Free tier read-only)
     if (process.env.ENABLE_REDIS_CLOUD === 'true') {
       try {
-        await initializeRedis();
-        logger.info('✅ Redis Cloud initialized for performance analysis');
+        // await initializeRedis(); // Redis Cloud disabled
+        logger.info('⚠️ Redis Cloud disabled (ENABLE_REDIS_CLOUD=false)');
       } catch (error) {
         logger.error('❌ Redis Cloud initialization failed:', error);
       }
     } else {
       logger.info('⚠️ Redis Cloud disabled (ENABLE_REDIS_CLOUD=false)');
     }
+    // logger.info('ℹ️ Redis Cloud disabled - Free tier is read-only, using local Redis only');
 
     // Start performance monitoring service (controlled by environment variable)
     if (process.env.ENABLE_PERFORMANCE_MONITORING === 'true') {

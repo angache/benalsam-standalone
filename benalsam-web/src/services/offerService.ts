@@ -367,7 +367,13 @@ export const fetchReceivedOffers = async (userId: string): Promise<Offer[]> => {
       .from('offers')
       .select(`
         *,
-        profiles:offering_user_id(id, name, avatar_url, rating, total_ratings),
+        profiles:offering_user_id(
+          id,
+          name,
+          avatar_url,
+          rating,
+          total_ratings
+        ),
         listings!offers_listing_id_fkey(
           id,
           title,

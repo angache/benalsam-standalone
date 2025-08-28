@@ -248,26 +248,8 @@ export const fetchConversationDetails = async (
       throw new DatabaseError('Failed to fetch conversation details', convError);
     }
 
-    // If conversation has an offer_id, fetch offer details
-    if (conversation?.offer_id) {
-      const { data: offerData, error: offerError } = await supabase
-        .from('offers')
-        .select(`
-          id, 
-          status,
-          inventory_items!offers_offered_item_id_fkey (
-            id,
-            name,
-            main_image_url
-          )
-        `)
-        .eq('id', conversation.offer_id)
-        .single();
-
-      if (!offerError && offerData) {
-        conversation.offer = offerData;
-      }
-    }
+    // ✅ OPTIMIZED: Offer data already included in the main query
+    // No need for separate offer query anymore
 
     return conversation;
   } catch (error) {

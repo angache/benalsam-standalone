@@ -3,11 +3,11 @@
 // ===========================
 
 import { Client } from '@elastic/elasticsearch';
-import logger from '../../config/logger';
+import logger from '../../../config/logger';
 import { SearchQuery, SearchResponse, SearchOptimizationOptions } from '../types';
 import { SearchOptimizedListing } from 'benalsam-shared-types';
 import { buildSearchQuery } from '../utils/queryBuilder';
-import searchCacheService from '../searchCacheService';
+import searchCacheService from '../../searchCacheService';
 
 class SearchService {
   private client: Client;
@@ -18,7 +18,7 @@ class SearchService {
     this.defaultIndexName = defaultIndexName;
   }
 
-  async search<T = any>(query: SearchQuery, indexName?: string): Promise<SearchResponse<T>> {
+  async search<T = any>(query: SearchQuery, indexName?: string): Promise<any> {
     try {
       const targetIndex = indexName || this.defaultIndexName;
       
@@ -29,7 +29,7 @@ class SearchService {
         body: query
       });
 
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error('❌ Error in search:', error);
@@ -40,7 +40,7 @@ class SearchService {
   async searchOptimized(
     query: string, 
     options: SearchOptimizationOptions = {}
-  ): Promise<SearchOptimizedListing[]> {
+  ): Promise<any[]> {
     try {
       const { useCache = true, cacheTTL = 300 } = options;
 
@@ -90,7 +90,7 @@ class SearchService {
         }
       });
 
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error('❌ Error in static search:', error);
@@ -167,7 +167,7 @@ class SearchService {
         body: operations
       });
 
-      const errors = response.body.items.filter((item: any) => item.index?.error);
+      const errors = response.items.filter((item: any) => item.index?.error);
       
       if (errors.length > 0) {
         logger.warn(`⚠️ ${errors.length} documents failed to index`);
@@ -177,7 +177,7 @@ class SearchService {
       }
 
       logger.info(`✅ Bulk indexed ${documents.length} documents`);
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error('❌ Error in bulk index:', error);
@@ -194,7 +194,7 @@ class SearchService {
         body: query ? { query } : undefined
       });
 
-      return response.body.count;
+      return response.count;
 
     } catch (error) {
       logger.error('❌ Error counting documents:', error);
@@ -209,7 +209,7 @@ class SearchService {
         id
       });
 
-      return response.body._source;
+      return response._source;
 
     } catch (error) {
       logger.error('❌ Error getting document:', error);
@@ -217,7 +217,7 @@ class SearchService {
     }
   }
 
-  private transformSearchResults(response: SearchResponse): SearchOptimizedListing[] {
+  private transformSearchResults(response: SearchResponse): any[] {
     if (!response.hits?.hits) {
       return [];
     }
@@ -238,7 +238,7 @@ class SearchService {
       popularity_score: hit._source.popularity_score,
       user_trust_score: hit._source.user_trust_score,
       search_score: hit._score,
-      highlights: hit.highlight
+      highlights: (hit as any).highlight
     }));
   }
 

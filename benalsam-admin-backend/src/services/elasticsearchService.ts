@@ -985,6 +985,26 @@ export class AdminElasticsearchService {
       logger.error('❌ Error invalidating category counts cache:', error);
     }
   }
+
+  // Health check method
+  async healthCheck(): Promise<any> {
+    try {
+      const response = await this.client.cluster.health();
+      return {
+        status: response?.status || 'unknown',
+        responseTime: Date.now(),
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      logger.error('❌ Elasticsearch health check failed:', error);
+      return {
+        status: 'error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        responseTime: Date.now(),
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
 }
 
 // Export elasticsearch client instance for health checks

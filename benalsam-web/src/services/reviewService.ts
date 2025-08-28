@@ -174,13 +174,29 @@ export const fetchUserReviews = async (userId: string): Promise<Review[]> => {
   if (!userId) return [];
 
   try {
+    // ✅ OPTIMIZED: Single query with all necessary joins
     const { data, error } = await supabase
       .from('user_reviews')
       .select(`
         *,
-        reviewer:profiles!reviewer_id (id, name, avatar_url),
-        reviewee:profiles!reviewee_id (id, name, avatar_url),
-        offers (id, listing_id, listings(id, title))
+        reviewer:profiles!reviewer_id (
+          id,
+          name,
+          avatar_url
+        ),
+        reviewee:profiles!reviewee_id (
+          id,
+          name,
+          avatar_url
+        ),
+        offers (
+          id,
+          listing_id,
+          listings (
+            id,
+            title
+          )
+        )
       `)
       .eq('reviewee_id', userId)
       .order('created_at', { ascending: false });

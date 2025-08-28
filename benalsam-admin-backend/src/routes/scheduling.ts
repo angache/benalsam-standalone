@@ -1,7 +1,7 @@
 import express from 'express';
 import { authenticateToken } from '../middleware/auth';
 import { schedulingService, BackupSchedule } from '../services/schedulingService';
-import { logger } from '../utils/logger';
+import logger from '../config/logger';
 
 const router = express.Router();
 

@@ -4,7 +4,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { createClient } from '@supabase/supabase-js';
-import logger from '../../config/logger';
+import logger from '../../../config/logger';
 import { SyncOptions, SyncResult } from '../types';
 
 class DataSyncService {
@@ -222,7 +222,7 @@ class DataSyncService {
           body: operations
         });
 
-        const batchErrors = response.body.items.filter((item: any) => item.index?.error);
+        const batchErrors = response.items.filter((item: any) => item.index?.error);
         
         totalProcessed += batch.length;
         totalSynced += batch.length - batchErrors.length;
@@ -337,9 +337,9 @@ class DataSyncService {
       ]);
 
       return {
-        listings: listingsCount.body.count,
-        userBehaviors: behaviorsCount.body.count,
-        aiSuggestions: suggestionsCount.body.count,
+        listings: listingsCount.count,
+        userBehaviors: behaviorsCount.count,
+        aiSuggestions: suggestionsCount.count,
         timestamp: new Date().toISOString()
       };
 

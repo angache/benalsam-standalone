@@ -93,7 +93,7 @@ router.get('/', aiSuggestionsLimiter, async (req, res) => {
       data: {
         suggestions: uniqueSuggestions,
         total: uniqueSuggestions.length,
-        query: query || null,
+        query: typeof query === 'string' ? query : null,
         source: query ? 'hybrid' : 'database'
       }
     };

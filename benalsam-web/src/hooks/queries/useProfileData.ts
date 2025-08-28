@@ -112,9 +112,17 @@ export const useProfileData = (userId: string | undefined, currentUserId: string
         queryFn: async () => {
           if (!userId) throw new Error('User ID is required');
           
+          // ✅ OPTIMIZED: Single query with join instead of separate queries
           const { data, error } = await supabase
             .from('listings')
-            .select('*, user:profiles!user_id(id, name, avatar_url, rating)')
+            .select(`
+              *,
+              user:profiles!listings_user_id_fkey(
+                id,
+                name,
+                avatar_url
+              )
+            `)
             .eq('user_id', userId)
             .order('created_at', { ascending: false });
 

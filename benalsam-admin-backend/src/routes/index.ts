@@ -9,7 +9,7 @@ import searchRoutes from './search';
 import elasticsearchRoutes from './elasticsearch';
 import healthRoutes from './health';
 import monitoringRoutes from './monitoring';
-import { twoFactorRouter } from './twoFactor';
+import twoFactorRouter from './twoFactor';
 import trendAnalysisRoutes from './trendAnalysis';
 import aiSuggestionsRoutes from './aiSuggestions';
 

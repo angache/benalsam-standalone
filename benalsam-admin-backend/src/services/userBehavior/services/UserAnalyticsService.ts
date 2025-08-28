@@ -170,8 +170,8 @@ export default class UserAnalyticsService {
         }
       });
 
-      const totalSessions = response.aggregations?.total_sessions?.value || 0;
-      const bouncedSessions = response.aggregations?.bounced_sessions?.doc_count || 0;
+      const totalSessions = (response.aggregations?.total_sessions as any)?.value || 0;
+      const bouncedSessions = (response.aggregations?.bounced_sessions as any)?.doc_count || 0;
 
       return totalSessions > 0 ? (bouncedSessions / totalSessions) * 100 : 0;
     } catch (error) {
@@ -206,7 +206,7 @@ export default class UserAnalyticsService {
         }
       });
 
-      return response.aggregations?.avg_duration?.value || 0;
+      return (response.aggregations?.avg_duration as any)?.value || 0;
     } catch (error) {
       this.logger.error('❌ Error getting average session duration:', error);
       return 0;
@@ -253,7 +253,7 @@ export default class UserAnalyticsService {
         }
       });
 
-      const buckets = response.aggregations?.sections?.section_names?.buckets || [];
+      const buckets = ((response.aggregations?.sections as any)?.section_names as any)?.buckets || [];
       return buckets.map(bucket => ({
         section: bucket.key,
         time_spent: bucket.total_time.value

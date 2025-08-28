@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { createClient } from 'redis';
-import { logger } from '../utils/logger';
+import logger from '../config/logger';
 import BackupService from './backupService';
 
 export interface BackupSchedule {

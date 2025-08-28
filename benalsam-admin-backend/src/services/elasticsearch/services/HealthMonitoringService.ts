@@ -3,7 +3,7 @@
 // ===========================
 
 import { Client } from '@elastic/elasticsearch';
-import logger from '../../config/logger';
+import logger from '../../../config/logger';
 import { HealthStatus, IndexStats } from '../types';
 
 class HealthMonitoringService {
@@ -13,12 +13,12 @@ class HealthMonitoringService {
     this.client = client;
   }
 
-  async healthCheck(): Promise<HealthStatus> {
+  async healthCheck(): Promise<any> {
     try {
       logger.info('🏥 Performing Elasticsearch health check');
 
       const response = await this.client.cluster.health();
-      const health = response.body;
+      const health = response;
 
       logger.info(`✅ Cluster health: ${health.status} (${health.number_of_nodes} nodes)`);
       return health;
@@ -29,7 +29,7 @@ class HealthMonitoringService {
     }
   }
 
-  async getIndexStats(indexName?: string): Promise<IndexStats> {
+  async getIndexStats(indexName?: string): Promise<any> {
     try {
       logger.info(`📊 Getting index stats${indexName ? ` for ${indexName}` : ''}`);
 
@@ -37,7 +37,7 @@ class HealthMonitoringService {
         index: indexName
       });
 
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error('❌ Error getting index stats:', error);
@@ -50,7 +50,7 @@ class HealthMonitoringService {
       logger.info('📊 Getting all indices stats');
 
       const response = await this.client.indices.stats();
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error('❌ Error getting all indices stats:', error);
@@ -63,7 +63,7 @@ class HealthMonitoringService {
       logger.info('ℹ️ Getting cluster info');
 
       const response = await this.client.info();
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error('❌ Error getting cluster info:', error);
@@ -76,7 +76,7 @@ class HealthMonitoringService {
       logger.info('⚙️ Getting cluster settings');
 
       const response = await this.client.cluster.getSettings();
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error('❌ Error getting cluster settings:', error);
@@ -89,7 +89,7 @@ class HealthMonitoringService {
       logger.info('📈 Getting node stats');
 
       const response = await this.client.nodes.stats();
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error('❌ Error getting node stats:', error);
@@ -102,7 +102,7 @@ class HealthMonitoringService {
       logger.info('⏳ Getting pending tasks');
 
       const response = await this.client.cluster.pendingTasks();
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error('❌ Error getting pending tasks:', error);
@@ -115,7 +115,7 @@ class HealthMonitoringService {
       logger.info('🏛️ Getting cluster state');
 
       const response = await this.client.cluster.state();
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error('❌ Error getting cluster state:', error);
@@ -131,7 +131,7 @@ class HealthMonitoringService {
         index: indexName
       });
 
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error(`❌ Error getting index health for ${indexName}:`, error);
@@ -148,7 +148,7 @@ class HealthMonitoringService {
         v: true
       });
 
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error('❌ Error getting shard stats:', error);
@@ -165,7 +165,7 @@ class HealthMonitoringService {
         v: true
       });
 
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error('❌ Error getting aliases:', error);
@@ -178,7 +178,7 @@ class HealthMonitoringService {
       logger.info('📋 Getting index templates');
 
       const response = await this.client.indices.getTemplate();
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error('❌ Error getting templates:', error);
@@ -194,7 +194,7 @@ class HealthMonitoringService {
         index: indexName
       });
 
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error(`❌ Error getting mapping for ${indexName}:`, error);
@@ -210,7 +210,7 @@ class HealthMonitoringService {
         index: indexName
       });
 
-      return response.body;
+      return response;
 
     } catch (error) {
       logger.error(`❌ Error getting settings for ${indexName}:`, error);
@@ -309,9 +309,9 @@ class HealthMonitoringService {
     }, {});
 
     return {
-      totalOperations: totalIndexing.total,
-      totalTimeMs: totalIndexing.time,
-      averageTimeMs: totalIndexing.total > 0 ? totalIndexing.time / totalIndexing.total : 0
+      totalOperations: (totalIndexing as any).total || 0,
+      totalTimeMs: (totalIndexing as any).time || 0,
+      averageTimeMs: (totalIndexing as any).total > 0 ? (totalIndexing as any).time / (totalIndexing as any).total : 0
     };
   }
 
@@ -325,9 +325,9 @@ class HealthMonitoringService {
     }, {});
 
     return {
-      totalQueries: totalSearch.total,
-      totalTimeMs: totalSearch.time,
-      averageTimeMs: totalSearch.total > 0 ? totalSearch.time / totalSearch.total : 0
+      totalQueries: (totalSearch as any).total || 0,
+      totalTimeMs: (totalSearch as any).time || 0,
+      averageTimeMs: (totalSearch as any).total > 0 ? (totalSearch as any).time / (totalSearch as any).total : 0
     };
   }
 
@@ -339,7 +339,7 @@ class HealthMonitoringService {
 
     return {
       totalHeapUsed: totalMemory,
-      averageHeapUsed: nodes.length > 0 ? totalMemory / nodes.length : 0,
+      averageHeapUsed: nodes.length > 0 ? (totalMemory as number) / nodes.length : 0,
       nodeCount: nodes.length
     };
   }
@@ -352,7 +352,7 @@ class HealthMonitoringService {
 
     return {
       totalDiskSpace: totalDisk,
-      averageDiskSpace: nodes.length > 0 ? totalDisk / nodes.length : 0,
+      averageDiskSpace: nodes.length > 0 ? (totalDisk as number) / nodes.length : 0,
       nodeCount: nodes.length
     };
   }

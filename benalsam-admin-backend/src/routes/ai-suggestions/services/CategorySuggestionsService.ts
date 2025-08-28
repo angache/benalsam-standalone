@@ -2,8 +2,8 @@
 // CATEGORY SUGGESTIONS SERVICE
 // ===========================
 
-import { supabase } from '../../config/database';
-import logger from '../../config/logger';
+import { supabase } from '../../../config/database';
+import logger from '../../../config/logger';
 import { AISuggestion, CategorySuggestion } from '../types';
 import { convertCategorySuggestions } from '../utils/suggestionProcessor';
 
