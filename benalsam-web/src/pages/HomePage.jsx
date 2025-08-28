@@ -15,7 +15,9 @@ import { cn } from '@/lib/utils';
 import SEOHead from '@/components/SEOHead';
 import StructuredData from '@/components/StructuredData';
 import { fetchListings } from '@/services/listingService';
-import SkeletonHomePage from '@/components/SkeletonLoading';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { SkeletonCard } from '@/components/ui/skeleton';
+import { EmptyStateList } from '@/components/ui/empty-state';
 
 // Lazy load non-critical components for better LCP
 const AdCard = lazy(() => import('@/components/AdCard'));
@@ -38,10 +40,57 @@ const PersonalizedFeed = lazy(() => import('@/components/PersonalizedFeed'));
 const useGoogleAnalytics = lazy(() => import('@/hooks/useGoogleAnalytics'));
 import AISuggestions from '@/components/AISuggestions.jsx';
 
-// Loading fallback component
+// Modern loading fallback component
 const LoadingFallback = () => (
-  <div className="flex items-center justify-center p-4">
-    <Loader2 className="h-6 w-6 animate-spin" />
+  <div className="flex items-center justify-center p-8">
+    <LoadingSpinner size="lg" />
+    <span className="ml-3 text-muted-foreground">Yükleniyor...</span>
+  </div>
+);
+
+// Modern skeleton component for HomePage
+const HomePageSkeleton = () => (
+  <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-6">
+    <div className="flex flex-col lg:flex-row lg:gap-8">
+      {/* Sidebar Skeleton */}
+      <aside className="hidden lg:block w-full lg:w-1/4 xl:w-1/5 2xl:w-1/6 mb-6 lg:mb-0">
+        <div className="p-4 rounded-lg bg-card border shadow-sm">
+          <div className="h-6 bg-muted rounded w-24 mb-4"></div>
+          <div className="space-y-2">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="flex items-center justify-between py-2 px-3">
+                <div className="h-4 bg-muted rounded w-20"></div>
+                <div className="h-5 bg-muted rounded w-8"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="w-full lg:w-3/4 xl:w-4/5 2xl:w-5/6">
+        {/* Search Bar Skeleton */}
+        <div className="mb-6">
+          <div className="h-12 bg-muted rounded-lg"></div>
+        </div>
+
+        {/* Mobile Category Skeleton */}
+        <div className="lg:hidden mb-4">
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="h-8 bg-muted rounded-full w-20 flex-shrink-0"></div>
+            ))}
+          </div>
+        </div>
+
+        {/* Grid Skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 xl:gap-5 2xl:gap-4">
+          {Array.from({ length: 12 }).map((_, index) => (
+            <SkeletonCard key={index} />
+          ))}
+        </div>
+      </main>
+    </div>
   </div>
 );
 
@@ -350,9 +399,9 @@ const LoadingFallback = () => (
         handleCategorySelect(newPath);
       }, [selectedCategories, handleCategorySelect]);
 
-      // Show skeleton loading for better UX
+      // Show modern skeleton loading for better UX
       if (isLoadingInitial) {
-        return <SkeletonHomePage />;
+        return <HomePageSkeleton />;
       }
 
 
@@ -631,18 +680,29 @@ const LoadingFallback = () => (
               <div className="relative">
                 {isFiltering && (
                   <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg min-h-[300px]">
-                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                    <LoadingSpinner size="xl" />
                   </div>
                 )}
                 <AnimatePresence>
-                  <motion.div
-                    key={viewMode}
-                    className={cn(
-                      viewMode === 'grid'
-                        ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 xl:gap-5 2xl:gap-4'
-                        : 'flex flex-col gap-4'
-                    )}
-                  >
+                  {listingsWithAds.length === 0 ? (
+                    <EmptyStateList 
+                      title="Henüz ilan bulunamadı"
+                      description="Seçtiğiniz kriterlere uygun ilan bulunmuyor. Filtreleri değiştirmeyi deneyin."
+                      action={
+                        <Button onClick={clearFilters} variant="outline">
+                          Filtreleri Temizle
+                        </Button>
+                      }
+                    />
+                  ) : (
+                    <motion.div
+                      key={viewMode}
+                      className={cn(
+                        viewMode === 'grid'
+                          ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 xl:gap-5 2xl:gap-4'
+                          : 'flex flex-col gap-4'
+                      )}
+                    >
                     {listingsWithAds.map((item, index) => (
                       <motion.div
                         key={item.type === 'listing' ? item.data.id : `ad-${item.data.id}-${index}`}
@@ -668,16 +728,11 @@ const LoadingFallback = () => (
                       </motion.div>
                     ))}
                   </motion.div>
+                  )}
                 </AnimatePresence>
               </div>
 
-              {!isFiltering && listingsWithAds.length === 0 && (
-                <div className="text-center py-16 bg-card rounded-lg border">
-                  <h3 className="text-xl font-semibold">Sonuç Bulunamadı</h3>
-                  <p className="text-muted-foreground mt-2 mb-4">Arama kriterlerinizi değiştirmeyi deneyin.</p>
-                  <Button onClick={clearFilters}>Filtreleri Temizle</Button>
-                </div>
-              )}
+
 
               {/* Pagination */}
               {console.log('🔍 Pagination Debug:', { isFiltering, totalPages, totalListingsCount, displayedListingsLength: displayedListings.length, currentPage })}
@@ -685,7 +740,7 @@ const LoadingFallback = () => (
                 <div className="mt-8">
                   {isLoadingPage ? (
                     <div className="flex justify-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      <LoadingSpinner size="lg" />
                     </div>
                   ) : (
                     <div className="flex items-center justify-between">
