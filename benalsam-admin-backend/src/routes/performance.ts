@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { authenticateToken } from '../middleware/auth';
 import rateLimit from 'express-rate-limit';
-import { redis } from '../config/redis'; // Local Redis kullanıyoruz, Redis Cloud değil
+import { redisCloud } from '../services/redisService'; // Redis Cloud kullanıyoruz
 
 // Extend Request interface to include user
 interface AuthenticatedRequest extends Request {
@@ -169,7 +169,7 @@ router.post('/analysis',
 
       // Save to Redis with TTL (30 days)
       const key = `performance:analysis:${userId}:${Date.now()}`;
-      await redis.setex(key, 30 * 24 * 60 * 60, JSON.stringify(analysis));
+      await redisCloud.setex(key, 30 * 24 * 60 * 60, JSON.stringify(analysis));
 
       // Also save to trend analysis format
       const trendData = {
@@ -188,17 +188,17 @@ router.post('/analysis',
       };
 
       // Save current data for trend analysis
-      await redis.setex(`perf:data:${route}`, 3600, JSON.stringify(trendData));
+      await redisCloud.setex(`perf:data:${route}`, 3600, JSON.stringify(trendData));
       
       // Save to history for trend analysis
       const historyKey = `perf:history:${route}:${Date.now()}`;
-      await redis.setex(historyKey, 86400, JSON.stringify(trendData)); // 24 hours
+      await redisCloud.setex(historyKey, 86400, JSON.stringify(trendData)); // 24 hours
 
       // Update daily summary
       const today = new Date().toISOString().split('T')[0];
       const summaryKey = `performance:summary:${userId}:${today}`;
       
-      const existingSummary = await redis.get(summaryKey);
+      const existingSummary = await redisCloud.get(summaryKey);
       let summary = existingSummary ? JSON.parse(existingSummary) : {
         date: today,
         userId,
@@ -215,13 +215,13 @@ router.post('/analysis',
         summary.routes.push(route);
       }
 
-      await redis.setex(summaryKey, 30 * 24 * 60 * 60, JSON.stringify(summary));
+      await redisCloud.setex(summaryKey, 30 * 24 * 60 * 60, JSON.stringify(summary));
 
       // Update route trends
       const routeKey = `performance:route:${userId}:${route}`;
-      await redis.lpush(routeKey, JSON.stringify(analysis));
-      await redis.ltrim(routeKey, 0, 99); // Keep last 100 analyses per route
-      await redis.expire(routeKey, 30 * 24 * 60 * 60);
+      await redisCloud.lpush(routeKey, JSON.stringify(analysis));
+      await redisCloud.ltrim(routeKey, 0, 99); // Keep last 100 analyses per route
+      await redisCloud.expire(routeKey, 30 * 24 * 60 * 60);
 
     return res.json({
       success: true,
@@ -252,12 +252,12 @@ router.get('/analyses',
       if (route) {
         // Get analyses for specific route
         const routeKey = `performance:route:${userId}:${route}`;
-        const routeAnalyses = await redis.lrange(routeKey, offset as number, (offset as number) + (limit as number) - 1);
+        const routeAnalyses = await redisCloud.lrange(routeKey, offset as number, (offset as number) + (limit as number) - 1);
         analyses = routeAnalyses.map((analysis: string) => JSON.parse(analysis));
       } else {
         // Get all analyses for user
         const pattern = `performance:analysis:${userId}:*`;
-        const keys = await redis.keys(pattern);
+        const keys = await redisCloud.keys(pattern);
         
         // Sort by timestamp (newest first)
         const sortedKeys = keys.sort((a: string, b: string) => {
@@ -268,7 +268,7 @@ router.get('/analyses',
 
         const paginatedKeys = sortedKeys.slice(offset as number, (offset as number) + (limit as number));
         const analysisData = await Promise.all(
-          paginatedKeys.map((key: string) => redis.get(key))
+          paginatedKeys.map((key: string) => redisCloud.get(key))
         );
         
         analyses = analysisData
@@ -311,7 +311,7 @@ router.get('/trends',
         const dateStr = date.toISOString().split('T')[0];
         
         const summaryKey = `performance:summary:${userId}:${dateStr}`;
-        const summary = await redis.get(summaryKey);
+        const summary = await redisCloud.get(summaryKey);
         
         if (summary) {
           const summaryData = JSON.parse(summary);
@@ -371,7 +371,7 @@ router.get('/summary',
         const dateStr = date.toISOString().split('T')[0];
         
         const summaryKey = `performance:summary:${userId}:${dateStr}`;
-        const summary = await redis.get(summaryKey);
+        const summary = await redisCloud.get(summaryKey);
         
         if (summary) {
           const summaryData = JSON.parse(summary);
@@ -417,12 +417,12 @@ router.get('/alerts',
       const { limit = 10 } = req.query;
 
       const pattern = `performance:analysis:${userId}:*`;
-      const keys = await redis.keys(pattern);
+      const keys = await redisCloud.keys(pattern);
       
       const criticalAnalyses: any[] = [];
       
       for (const key of keys.slice(0, 100)) { // Check last 100 analyses
-        const analysis = await redis.get(key);
+        const analysis = await redisCloud.get(key);
         if (analysis) {
           const analysisData = JSON.parse(analysis);
           if (analysisData.severity === 'critical' || analysisData.severity === 'high') {
@@ -463,11 +463,11 @@ router.get('/baseline',
       const userId = req.user?.id || 'admin';
       
       // Get baseline data from Redis
-      const baselineKeys = await redis.keys(`performance:baseline:${userId}:*`);
+      const baselineKeys = await redisCloud.keys(`performance:baseline:${userId}:*`);
       const baselines: any[] = [];
       
       for (const key of baselineKeys) {
-        const baseline = await redis.get(key);
+        const baseline = await redisCloud.get(key);
         if (baseline) {
           baselines.push(JSON.parse(baseline));
         }
@@ -598,11 +598,11 @@ router.get('/recommendations',
       const userId = req.user?.id || 'admin';
       
       // Get recent performance data
-      const analysisKeys = await redis.keys(`performance:analysis:${userId}:*`);
+      const analysisKeys = await redisCloud.keys(`performance:analysis:${userId}:*`);
       const recentAnalyses: any[] = [];
       
       for (const key of analysisKeys.slice(-10)) { // Last 10 analyses
-        const analysis = await redis.get(key);
+        const analysis = await redisCloud.get(key);
         if (analysis) {
           recentAnalyses.push(JSON.parse(analysis));
         }
@@ -690,7 +690,7 @@ router.get('/monitoring/status',
       
       // Get monitoring status from Redis
       const statusKey = `performance:monitoring:status:${userId}`;
-      const status = await redis.get(statusKey);
+      const status = await redisCloud.get(statusKey);
       
       const defaultStatus = {
         isActive: false,
@@ -728,11 +728,11 @@ router.get('/monitoring/alerts',
       const { severity } = req.query;
 
       // Get alerts from Redis
-      const alertKeys = await redis.keys(`performance:alert:${userId}:*`);
+      const alertKeys = await redisCloud.keys(`performance:alert:${userId}:*`);
       const alerts: any[] = [];
       
       for (const key of alertKeys) {
-        const alert = await redis.get(key);
+        const alert = await redisCloud.get(key);
         if (alert) {
           const alertData = JSON.parse(alert);
           if (!severity || alertData.severity === severity) {
@@ -797,7 +797,7 @@ router.post('/monitoring/control',
           uptime: Date.now(),
           alerts: 0
         };
-        await redis.set(statusKey, JSON.stringify(status));
+        await redisCloud.set(statusKey, JSON.stringify(status));
       } else if (action === 'stop') {
         const status = {
           isActive: false,
@@ -807,11 +807,11 @@ router.post('/monitoring/control',
           uptime: 0,
           alerts: 0
         };
-        await redis.set(statusKey, JSON.stringify(status));
+        await redisCloud.set(statusKey, JSON.stringify(status));
       } else if (action === 'clear-alerts') {
-        const alertKeys = await redis.keys(`performance:alert:${userId}:*`);
+        const alertKeys = await redisCloud.keys(`performance:alert:${userId}:*`);
         for (const key of alertKeys) {
-          await redis.del(key);
+          await redisCloud.del(key);
         }
       }
 
@@ -890,7 +890,7 @@ router.post('/test/:endpoint(*)',
 
       // Save to Redis
       const baselineKey = `performance:baseline:${userId}:${endpoint}`;
-      await redis.set(baselineKey, JSON.stringify(baseline));
+      await redisCloud.set(baselineKey, JSON.stringify(baseline));
 
       return res.json({
         success: true,
@@ -929,9 +929,9 @@ router.delete('/baseline',
       const userId = req.user?.id || 'admin';
       
       // Clear all baseline data
-      const baselineKeys = await redis.keys(`performance:baseline:${userId}:*`);
+      const baselineKeys = await redisCloud.keys(`performance:baseline:${userId}:*`);
       for (const key of baselineKeys) {
-        await redis.del(key);
+        await redisCloud.del(key);
       }
 
       return res.json({

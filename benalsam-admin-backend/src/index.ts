@@ -65,7 +65,7 @@ import QueueProcessorService from './services/queueProcessorService';
 import sessionCleanupService from './services/sessionCleanupService';
 import { AnalyticsAlertsService } from './services/analyticsAlertsService';
 import performanceMonitoringService from './services/performanceMonitoringService';
-// import { initializeRedis } from './services/redisService'; // Redis Cloud disabled
+import { initializeRedis } from './services/redisService'; // Redis Cloud enabled
 
 // Import middleware
 import { authenticateToken } from './middleware/auth';
@@ -317,8 +317,8 @@ const startServer = async () => {
     // Initialize Redis Cloud for performance analysis (DISABLED - Free tier read-only)
     if (process.env.ENABLE_REDIS_CLOUD === 'true') {
       try {
-        // await initializeRedis(); // Redis Cloud disabled
-        logger.info('⚠️ Redis Cloud disabled (ENABLE_REDIS_CLOUD=false)');
+        await initializeRedis(); // Redis Cloud enabled
+        logger.info('✅ Redis Cloud initialized');
       } catch (error) {
         logger.error('❌ Redis Cloud initialization failed:', error);
       }
