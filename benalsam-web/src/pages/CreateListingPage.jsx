@@ -10,6 +10,7 @@ import { checkListingLimit, incrementUserUsage, showPremiumUpgradeToast } from '
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { SkeletonCard } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
+import { Card, CardContent } from '@/components/ui/card';
 // Lazy load modal components
 const ListingRulesModal = lazy(() => import('@/components/ListingRulesModal.jsx'));
 const StockImageSearchModal = lazy(() => import('@/components/CreateListingPage/StockImageSearchModal.jsx'));
@@ -22,43 +23,49 @@ import { compressImage } from '@/lib/imageUtils';
 
 // Modern skeleton component for create listing page
 const CreateListingSkeleton = () => (
-  <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8">
-    {/* Stepper Skeleton */}
-    <div className="mb-10">
-      <div className="flex items-center justify-center space-x-4">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="flex items-center">
-            <div className="w-8 h-8 bg-muted rounded-full"></div>
-            {index < 4 && <div className="w-16 h-1 bg-muted mx-2"></div>}
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* Category Path Skeleton */}
-    <div className="mb-6 p-3 bg-muted/50 rounded-lg">
-      <div className="h-4 bg-muted rounded w-48"></div>
-    </div>
-
-    {/* Content Skeleton */}
-    <div className="p-6 bg-card rounded-2xl shadow-lg">
-      <div className="space-y-6">
-        <div className="h-8 bg-muted rounded w-32"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="space-y-2">
-              <div className="h-4 bg-muted rounded w-24"></div>
-              <div className="h-10 bg-muted rounded"></div>
+  <div className="mx-auto max-w-4xl px-4 py-6">
+    <div className="space-y-6">
+      {/* Stepper Skeleton */}
+      <div className="mb-6">
+        <div className="flex items-center justify-center space-x-4">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="flex items-center">
+              <div className="w-8 h-8 bg-muted rounded-full"></div>
+              {index < 4 && <div className="w-16 h-1 bg-muted mx-2"></div>}
             </div>
           ))}
         </div>
       </div>
-      
-      {/* Buttons Skeleton */}
-      <div className="flex justify-between mt-8">
-        <div className="h-10 bg-muted rounded w-24"></div>
-        <div className="h-10 bg-muted rounded w-24"></div>
+
+      {/* Category Path Skeleton */}
+      <div className="p-3 bg-muted/50 rounded-lg">
+        <div className="h-4 bg-muted rounded w-48"></div>
       </div>
+
+      {/* Content Skeleton */}
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-6">
+          <div className="space-y-6">
+            <div className="h-8 bg-muted rounded w-32"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="h-4 bg-muted rounded w-24"></div>
+                  <div className="h-10 bg-muted rounded"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Buttons Skeleton */}
+          <div className="mt-8 pt-6 border-t border-border">
+            <div className="flex justify-between">
+              <div className="h-10 bg-muted rounded w-24"></div>
+              <div className="h-10 bg-muted rounded w-24"></div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   </div>
 );
@@ -227,8 +234,10 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
     
       if (loadingAuth) {
         return (
-          <div className="min-h-screen flex items-center justify-center bg-background">
-            <LoadingSpinner size="xl" />
+          <div className="mx-auto max-w-4xl px-4 py-6">
+            <div className="flex items-center justify-center py-12">
+              <LoadingSpinner size="xl" />
+            </div>
           </div>
         );
       }
@@ -315,67 +324,90 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
     
       return (
         <>
-          <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8">
-            <div className="mb-10">
-              <Stepper currentStep={currentStep} steps={steps} />
-            </div>
-            
-            {currentStep > 1 && selectedCategoryPath && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="mb-6 p-3 bg-muted/50 rounded-lg text-sm text-center flex items-center justify-center gap-2"
-              >
-                <Tag className="w-4 h-4 text-primary" />
-                <span className="font-semibold text-muted-foreground">Seçilen Kategori: </span>
-                <span className="font-bold text-primary">{selectedCategoryPath}</span>
-              </motion.div>
-            )}
-    
-            {isUploading && uploadProgress > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6 p-4 bg-primary/10 border border-primary/20 rounded-lg"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-primary">İlan Yükleniyor...</span>
-                  <span className="text-sm text-muted-foreground">{uploadProgress}%</span>
-                </div>
-                <Progress value={uploadProgress} className="h-2" />
-              </motion.div>
-            )}
-
+          <div className="mx-auto max-w-4xl px-4 py-6">
             <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
-              className="p-6 bg-card rounded-2xl shadow-lg"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-6"
             >
-                <AnimatePresence mode="wait">
-                    <motion.div
+              {/* Stepper */}
+              <motion.div 
+                className="mb-6"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Stepper currentStep={currentStep} steps={steps} />
+              </motion.div>
+              
+              {/* Category Path */}
+              {currentStep > 1 && selectedCategoryPath && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="p-3 bg-muted/50 rounded-lg text-sm text-center flex items-center justify-center gap-2"
+                >
+                  <Tag className="w-4 h-4 text-primary" />
+                  <span className="font-semibold text-muted-foreground">Seçilen Kategori: </span>
+                  <span className="font-bold text-primary">{selectedCategoryPath}</span>
+                </motion.div>
+              )}
+
+              {/* Upload Progress */}
+              {isUploading && uploadProgress > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-4 bg-primary/10 border border-primary/20 rounded-lg"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-primary">İlan Yükleniyor...</span>
+                    <span className="text-sm text-muted-foreground">{uploadProgress}%</span>
+                  </div>
+                  <Progress value={uploadProgress} className="h-2" />
+                </motion.div>
+              )}
+
+              {/* Main Content */}
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className="border-0 shadow-sm">
+                  <CardContent className="p-6">
+                    <AnimatePresence mode="wait">
+                      <motion.div
                         key={currentStep}
                         initial={{ opacity: 0, x: 50 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -50 }}
                         transition={{ duration: 0.3 }}
-                    >
+                      >
                         {renderStepContent()}
-                    </motion.div>
-                </AnimatePresence>
-                <StepButtons 
-                    currentStep={currentStep} 
-                    totalSteps={steps.length}
-                    onBack={prevStep} 
-                    onNext={currentStep === steps.length ? handleFinalSubmit : nextStep} 
-                    isSubmitting={isUploading}
-                />
+                      </motion.div>
+                    </AnimatePresence>
+                    
+                    {/* Step Buttons */}
+                    <div className="mt-8 pt-6 border-t border-border">
+                      <StepButtons 
+                        currentStep={currentStep} 
+                        totalSteps={steps.length}
+                        onBack={prevStep} 
+                        onNext={currentStep === steps.length ? handleFinalSubmit : nextStep} 
+                        isSubmitting={isUploading}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </motion.div>
           </div>
-    
+
           <Suspense fallback={null}>
             <StockImageSearchModal
               isOpen={isStockModalOpen}

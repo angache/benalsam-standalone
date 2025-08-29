@@ -7,7 +7,7 @@ const StepButtons = ({ currentStep, totalSteps, onBack, onNext, isSubmitting, is
   const isSubmittingOrUploading = isSubmitting || isUploading;
 
   return (
-    <div className="flex gap-4 pt-6 border-t border-border mt-8">
+    <div className="flex gap-4">
       <Button
         type="button"
         variant="outline"
