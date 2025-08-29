@@ -1,20 +1,21 @@
 import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
 import { Crown, Star, Zap, Eye, MessageSquare, Camera, TrendingUp, FileText, Users, Shield, Sparkles, Check, X, CreditCard, Calendar } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { toast } from '@/components/ui/use-toast';
-import { useAuthStore } from '@/stores';
+import { Button } from '../../components/ui/button';
+import { Badge } from '../../components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Progress } from '../../components/ui/progress';
+import { useToast } from '../../components/ui/use-toast';
+import { useAuthStore } from '../../stores';
 import { 
   getUserActivePlan, 
   getUserMonthlyUsage, 
   getPlanFeatures, 
   createSubscription 
-} from '@/services/premiumService';
+} from '../../services/premiumService';
 
 const PremiumSettings = memo(() => {
   const { currentUser } = useAuthStore();
+  const { toast } = useToast();
   const stableCurrentUser = useMemo(() => currentUser, [currentUser?.id, currentUser?.email]);
   const [userPlan, setUserPlan] = useState(null);
   const [usage, setUsage] = useState(null);

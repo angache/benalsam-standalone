@@ -14,16 +14,27 @@ import {
   Save,
   AlertCircle,
   CheckCircle,
-  Info
+  Info,
+  Loader2,
+  Users,
+  Search,
+  Clock
 } from 'lucide-react';
 import { useHapticFeedback } from '../../hooks/useHapticFeedback';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuthStore } from '../../stores';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Switch } from '../../components/ui/switch';
+import { Badge } from '../../components/ui/badge';
+import { Separator } from '../../components/ui/separator';
+import { useToast } from '../../components/ui/use-toast';
 
 const PrivacyPage = () => {
   const navigate = useNavigate();
   const { triggerHaptic } = useHapticFeedback();
   const { currentUser } = useAuthStore();
+  const { toast } = useToast();
   
   // Privacy preferences state
   const [privacyPreferences, setPrivacyPreferences] = useState({
@@ -97,15 +108,26 @@ const PrivacyPage = () => {
 
       if (error) {
         console.error('Error saving privacy preferences:', error);
-        alert('Gizlilik ayarları kaydedilirken bir hata oluştu.');
+        toast({
+          title: "Hata",
+          description: "Gizlilik ayarları kaydedilirken bir hata oluştu.",
+          variant: "destructive",
+        });
         return;
       }
 
       setHasChanges(false);
-      alert('Gizlilik ayarları başarıyla kaydedildi!');
+      toast({
+        title: "Başarılı!",
+        description: "Gizlilik ayarları başarıyla kaydedildi!",
+      });
     } catch (error) {
       console.error('Error saving privacy preferences:', error);
-      alert('Gizlilik ayarları kaydedilirken bir hata oluştu.');
+      toast({
+        title: "Hata",
+        description: "Gizlilik ayarları kaydedilirken bir hata oluştu.",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -113,63 +135,69 @@ const PrivacyPage = () => {
 
   const handleGoBack = () => {
     if (hasChanges) {
-      const confirmed = confirm('Kaydedilmemiş değişiklikleriniz var. Çıkmak istediğinizden emin misiniz?');
+      const confirmed = window.confirm('Kaydedilmemiş değişiklikleriniz var. Çıkmak istediğinizden emin misiniz?');
       if (!confirmed) return;
     }
     navigate('/ayarlar');
   };
 
-  const renderToggleItem = (title, subtitle, key, icon, description = '') => (
-    <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-      <div className="flex items-center space-x-3">
-        <div className="p-2 bg-primary/10 rounded-lg">
-          {icon}
-        </div>
-        <div className="flex-1">
-          <h3 className="font-medium text-gray-900 dark:text-white">{title}</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>
-          {description && (
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{description}</p>
-          )}
-        </div>
-      </div>
-      <div
-        onClick={() => handleToggle(key)}
-        className={`relative w-11 h-6 rounded-full transition-all duration-200 ease-in-out cursor-pointer ${
-          privacyPreferences[key]
-            ? 'bg-primary'
-            : 'bg-gray-200 dark:bg-gray-700'
-        }`}
-        style={{ minWidth: '44px', minHeight: '24px' }}
-      >
-        <div
-          className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-all duration-200 ease-in-out ${
-            privacyPreferences[key] ? 'translate-x-5' : 'translate-x-0'
-          }`}
-          style={{ minWidth: '20px', minHeight: '20px' }}
-        />
-      </div>
-    </div>
+  const renderToggleItem = (title, subtitle, key, icon, description = '', index) => (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+    >
+      <Card className="border-0 shadow-sm hover:shadow-md transition-all duration-200">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                {icon}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-foreground">{title}</h3>
+                <p className="text-sm text-muted-foreground">{subtitle}</p>
+                {description && (
+                  <p className="text-xs text-muted-foreground/60 mt-1">{description}</p>
+                )}
+              </div>
+            </div>
+            <Switch
+              checked={privacyPreferences[key]}
+              onCheckedChange={() => handleToggle(key)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 
   const renderInfoCard = (title, description, icon) => (
-    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-      <div className="flex items-start space-x-3">
-        <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
-          {icon}
-        </div>
-        <div className="flex-1">
-          <h3 className="font-medium text-blue-900 dark:text-blue-100">{title}</h3>
-          <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{description}</p>
-        </div>
-      </div>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+        <CardContent className="p-4">
+          <div className="flex items-start space-x-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
+              {icon}
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-blue-900 dark:text-blue-100">{title}</h3>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{description}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -182,34 +210,39 @@ const PrivacyPage = () => {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button
+      <motion.div 
+        className="flex items-center justify-between mb-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleGoBack}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="hover:bg-accent"
         >
           <ArrowLeft size={20} />
-        </button>
+        </Button>
         
         <div className="flex-1 text-center">
-          <h1 className="text-xl font-semibold">Gizlilik</h1>
+          <h1 className="text-xl font-semibold text-foreground">Gizlilik</h1>
         </div>
 
-        <button
+        <Button
+          variant={hasChanges && !isSaving ? "default" : "secondary"}
+          size="icon"
           onClick={handleSave}
           disabled={!hasChanges || isSaving}
-          className={`p-2 rounded-lg transition-colors ${
-            hasChanges && !isSaving
-              ? 'bg-primary text-white hover:bg-primary/80'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
-          }`}
+          className="hover:bg-accent"
         >
           {isSaving ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
             <Save size={20} />
           )}
-        </button>
-      </div>
+        </Button>
+      </motion.div>
 
       {/* Info Card */}
       {renderInfoCard(
@@ -219,113 +252,159 @@ const PrivacyPage = () => {
       )}
 
       {/* Privacy Settings */}
-      <div className="space-y-4">
+      <motion.div 
+        className="space-y-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
         {/* Profile Visibility */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center">
-            <User className="w-5 h-5 mr-2 text-primary" />
-            Profil Görünürlüğü
-          </h2>
-          <div className="space-y-3">
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center">
+              <Users className="w-5 h-5 mr-2 text-primary" />
+              Profil Görünürlüğü
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
             {renderToggleItem(
               'Telefon Numarası',
               'Telefon numaranızın diğer kullanıcılara görünürlüğü',
               'show_phone',
               <Phone size={20} className="text-primary" />,
-              'Açıkken telefon numaranız profilinizde görünür'
+              'Açıkken telefon numaranız profilinizde görünür',
+              0
             )}
             {renderToggleItem(
               'Konum Bilgisi',
               'Konumunuzun diğer kullanıcılara görünürlüğü',
               'show_location',
               <MapPin size={20} className="text-primary" />,
-              'Açıkken il/ilçe bilginiz profilinizde görünür'
+              'Açıkken il/ilçe bilginiz profilinizde görünür',
+              1
             )}
             {renderToggleItem(
               'Çevrimiçi Durumu',
               'Çevrimiçi durumunuzun görünürlüğü',
               'show_online_status',
-              <CheckCircle size={20} className="text-primary" />,
-              'Açıkken çevrimiçi olduğunuz görünür'
+              <Clock size={20} className="text-primary" />,
+              'Açıkken çevrimiçi olduğunuz görünür',
+              2
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Communication */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center">
-            <MessageCircle className="w-5 h-5 mr-2 text-primary" />
-            İletişim Ayarları
-          </h2>
-          <div className="space-y-3">
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center">
+              <MessageCircle className="w-5 h-5 mr-2 text-primary" />
+              İletişim Ayarları
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
             {renderToggleItem(
               'Mesajlaşma',
               'Diğer kullanıcıların size mesaj gönderebilmesi',
               'allow_messages',
               <MessageCircle size={20} className="text-primary" />,
-              'Kapalıyken sadece takas yaptığınız kişiler mesaj gönderebilir'
+              'Kapalıyken sadece takas yaptığınız kişiler mesaj gönderebilir',
+              0
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Data & Analytics */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center">
-            <Lock className="w-5 h-5 mr-2 text-primary" />
-            Veri ve Analitik
-          </h2>
-          <div className="space-y-3">
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center">
+              <Lock className="w-5 h-5 mr-2 text-primary" />
+              Veri ve Analitik
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
             {renderToggleItem(
               'Profil Görüntülemeleri',
               'Profilinizin kaç kez görüntülendiğini göster',
               'show_profile_views',
               <Eye size={20} className="text-primary" />,
-              'Açıkken profil görüntüleme sayınızı görebilirsiniz'
+              'Açıkken profil görüntüleme sayınızı görebilirsiniz',
+              0
             )}
             {renderToggleItem(
               'Arama Dizini',
               'Profilinizin arama sonuçlarında görünmesi',
               'allow_search_indexing',
-              <Info size={20} className="text-primary" />,
-              'Kapalıyken arama sonuçlarında görünmezsiniz'
+              <Search size={20} className="text-primary" />,
+              'Kapalıyken arama sonuçlarında görünmezsiniz',
+              1
             )}
-          </div>
-        </div>
-      </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Privacy Tips */}
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800 p-4">
-        <div className="flex items-start space-x-3">
-          <div className="p-2 bg-yellow-100 dark:bg-yellow-800 rounded-lg">
-            <Info size={20} className="text-yellow-600 dark:text-yellow-400" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-medium text-yellow-900 dark:text-yellow-100">Gizlilik İpuçları</h3>
-            <ul className="text-sm text-yellow-700 dark:text-yellow-300 mt-2 space-y-1">
-              <li>• Telefon numaranızı sadece güvendiğiniz kişilerle paylaşın</li>
-              <li>• Konum bilginizi paylaşırken dikkatli olun</li>
-              <li>• Mesajlaşma ayarlarınızı düzenli kontrol edin</li>
-              <li>• Şüpheli aktiviteleri hemen bildirin</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <Card className="border-0 shadow-sm bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20">
+          <CardContent className="p-4">
+            <div className="flex items-start space-x-3">
+              <div className="p-2 bg-yellow-100 dark:bg-yellow-800 rounded-lg">
+                <Info size={20} className="text-yellow-600 dark:text-yellow-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-yellow-900 dark:text-yellow-100">Gizlilik İpuçları</h3>
+                <ul className="text-sm text-yellow-700 dark:text-yellow-300 mt-2 space-y-1">
+                  <li>• Telefon numaranızı sadece güvendiğiniz kişilerle paylaşın</li>
+                  <li>• Konum bilginizi paylaşırken dikkatli olun</li>
+                  <li>• Mesajlaşma ayarlarınızı düzenli kontrol edin</li>
+                  <li>• Şüpheli aktiviteleri hemen bildirin</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Status Indicator */}
       {hasChanges && (
-        <div className="fixed bottom-4 left-4 right-4 bg-yellow-500 text-white p-3 rounded-lg flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <AlertCircle size={20} />
-            <span>Kaydedilmemiş değişiklikler var</span>
-          </div>
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="px-4 py-1 bg-white text-yellow-500 rounded font-medium hover:bg-gray-100 transition-colors"
-          >
-            {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
-          </button>
-        </div>
+        <motion.div 
+          className="fixed bottom-4 left-4 right-4 z-50"
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 100 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-yellow-500 to-amber-500">
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle size={20} className="text-white" />
+                  <span className="text-white font-medium">Kaydedilmemiş değişiklikler var</span>
+                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="bg-white text-yellow-500 hover:bg-gray-100"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Kaydediliyor...
+                    </>
+                  ) : (
+                    'Kaydet'
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
     </motion.div>
   );

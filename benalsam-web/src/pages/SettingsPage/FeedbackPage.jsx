@@ -14,15 +14,25 @@ import {
   AlertCircle,
   Info,
   Upload,
-  X
+  X,
+  Loader2,
+  FileText
 } from 'lucide-react';
 import { useHapticFeedback } from '../../hooks/useHapticFeedback';
 import { useAuthStore } from '../../stores';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Input } from '../../components/ui/input';
+import { Textarea } from '../../components/ui/textarea';
+import { Badge } from '../../components/ui/badge';
+import { Checkbox } from '../../components/ui/checkbox';
+import { useToast } from '../../components/ui/use-toast';
 
 const FeedbackPage = () => {
   const navigate = useNavigate();
   const { triggerHaptic } = useHapticFeedback();
   const { currentUser } = useAuthStore();
+  const { toast } = useToast();
   
   const [formData, setFormData] = useState({
     type: '',
@@ -86,7 +96,11 @@ const FeedbackPage = () => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        alert('Dosya boyutu 10MB\'dan küçük olmalıdır.');
+        toast({
+          title: "Hata",
+          description: "Dosya boyutu 10MB'dan küçük olmalıdır.",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -108,7 +122,11 @@ const FeedbackPage = () => {
     e.preventDefault();
     
     if (!formData.type || !formData.title || !formData.description) {
-      alert('Lütfen gerekli alanları doldurun.');
+      toast({
+        title: "Hata",
+        description: "Lütfen gerekli alanları doldurun.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -131,10 +149,17 @@ const FeedbackPage = () => {
       setScreenshot(null);
       setScreenshotPreview('');
 
-      alert('Geri bildiriminiz başarıyla gönderildi! Teşekkür ederiz.');
+      toast({
+        title: "Başarılı!",
+        description: "Geri bildiriminiz başarıyla gönderildi! Teşekkür ederiz.",
+      });
     } catch (error) {
       console.error('Error sending feedback:', error);
-      alert('Geri bildirim gönderilirken bir hata oluştu. Lütfen tekrar deneyin.');
+      toast({
+        title: "Hata",
+        description: "Geri bildirim gönderilirken bir hata oluştu. Lütfen tekrar deneyin.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -201,17 +226,25 @@ const FeedbackPage = () => {
   };
 
   const renderInfoCard = (title, description, icon) => (
-    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-      <div className="flex items-start space-x-3">
-        <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
-          {icon}
-        </div>
-        <div className="flex-1">
-          <h3 className="font-medium text-blue-900 dark:text-blue-100">{title}</h3>
-          <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{description}</p>
-        </div>
-      </div>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.1 }}
+    >
+      <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+        <CardContent className="p-4">
+          <div className="flex items-start space-x-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
+              {icon}
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-blue-900 dark:text-blue-100">{title}</h3>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{description}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 
   return (
@@ -222,20 +255,27 @@ const FeedbackPage = () => {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button
+      <motion.div 
+        className="flex items-center justify-between mb-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleGoBack}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="hover:bg-accent"
         >
           <ArrowLeft size={20} />
-        </button>
+        </Button>
         
         <div className="flex-1 text-center">
-          <h1 className="text-xl font-semibold">Geri Bildirim</h1>
+          <h1 className="text-xl font-semibold text-foreground">Geri Bildirim</h1>
         </div>
 
         <div className="w-10" /> {/* Spacer for centering */}
-      </div>
+      </motion.div>
 
       {/* Info Card */}
       {renderInfoCard(
@@ -245,24 +285,38 @@ const FeedbackPage = () => {
       )}
 
       {isSubmitted ? (
-        <div className="text-center py-8">
-          <CheckCircle size={48} className="text-green-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Geri Bildiriminiz Gönderildi!</h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            Değerli geri bildiriminiz için teşekkür ederiz. Geliştirme ekibimiz inceleyecektir.
-          </p>
-          <button
-            onClick={() => setIsSubmitted(false)}
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors"
-          >
-            Yeni Geri Bildirim
-          </button>
-        </div>
+        <motion.div 
+          className="text-center py-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-8">
+              <CheckCircle size={48} className="text-green-500 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">Geri Bildiriminiz Gönderildi!</h3>
+              <p className="text-muted-foreground mb-4">
+                Değerli geri bildiriminiz için teşekkür ederiz. Geliştirme ekibimiz inceleyecektir.
+              </p>
+              <Button
+                onClick={() => setIsSubmitted(false)}
+              >
+                Yeni Geri Bildirim
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <motion.form 
+          onSubmit={handleSubmit} 
+          className="space-y-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           {/* Feedback Type Selection */}
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Geri Bildirim Türü</h2>
+            <h2 className="text-lg font-semibold text-foreground">Geri Bildirim Türü</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {feedbackTypes.map(renderFeedbackType)}
             </div>
@@ -270,47 +324,45 @@ const FeedbackPage = () => {
 
           {/* Rating */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="text-sm font-medium text-foreground">
               Genel Değerlendirme
             </label>
             {renderStarRating()}
           </div>
 
           {/* Title */}
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <div className="space-y-2">
+            <label htmlFor="title" className="text-sm font-medium text-foreground">
               Başlık *
             </label>
-            <input
+            <Input
               type="text"
               id="title"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="Geri bildiriminizin kısa başlığı"
               required
             />
           </div>
 
           {/* Description */}
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <div className="space-y-2">
+            <label htmlFor="description" className="text-sm font-medium text-foreground">
               Detaylı Açıklama *
             </label>
-            <textarea
+            <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
               rows={6}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
               placeholder="Geri bildiriminizi detaylı olarak açıklayın..."
               required
             />
           </div>
 
           {/* Screenshot Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">
               Ekran Görüntüsü (İsteğe Bağlı)
             </label>
             <div className="space-y-3">
@@ -323,11 +375,11 @@ const FeedbackPage = () => {
               />
               <label
                 htmlFor="screenshot"
-                className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-primary transition-colors"
+                className="flex items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary transition-colors bg-muted/50"
               >
                 <div className="text-center">
-                  <Upload size={24} className="text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <Upload size={24} className="text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">
                     Ekran görüntüsü yüklemek için tıklayın
                   </p>
                 </div>
@@ -340,13 +392,15 @@ const FeedbackPage = () => {
                     alt="Screenshot preview"
                     className="w-full max-w-md rounded-lg border border-gray-200 dark:border-gray-700"
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="destructive"
+                    size="icon"
                     onClick={removeScreenshot}
-                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                    className="absolute top-2 right-2 h-8 w-8"
                   >
                     <X size={16} />
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -354,72 +408,77 @@ const FeedbackPage = () => {
 
           {/* Contact Back Option */}
           <div className="flex items-center space-x-3">
-            <input
-              type="checkbox"
+            <Checkbox
               id="contactBack"
               checked={formData.contactBack}
-              onChange={(e) => handleInputChange('contactBack', e.target.checked)}
-              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+              onCheckedChange={(checked) => handleInputChange('contactBack', checked)}
             />
-            <label htmlFor="contactBack" className="text-sm text-gray-700 dark:text-gray-300">
+            <label htmlFor="contactBack" className="text-sm text-foreground">
               Size geri dönüş yapmamızı istiyorsanız işaretleyin
             </label>
           </div>
 
           {formData.contactBack && (
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium text-foreground">
                 E-posta Adresiniz
               </label>
-              <input
+              <Input
                 type="email"
                 id="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="Geri dönüş için e-posta adresiniz"
               />
             </div>
           )}
 
           {/* Submit Button */}
-          <button
+          <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full md:w-auto px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            className="w-full md:w-auto"
           >
             {isSubmitting ? (
               <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                 <span>Gönderiliyor...</span>
               </>
             ) : (
               <>
-                <Send size={20} />
+                <Send size={20} className="mr-2" />
                 <span>Geri Bildirim Gönder</span>
               </>
             )}
-          </button>
-        </form>
+          </Button>
+        </motion.form>
       )}
 
       {/* Tips */}
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800 p-4">
-        <div className="flex items-start space-x-3">
-          <div className="p-2 bg-yellow-100 dark:bg-yellow-800 rounded-lg">
-            <Info size={20} className="text-yellow-600 dark:text-yellow-400" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-medium text-yellow-900 dark:text-yellow-100">Geri Bildirim İpuçları</h3>
-            <ul className="text-sm text-yellow-700 dark:text-yellow-300 mt-2 space-y-1">
-              <li>• Spesifik ve detaylı açıklamalar daha faydalıdır</li>
-              <li>• Ekran görüntüsü eklemek sorunu daha iyi anlamamızı sağlar</li>
-              <li>• Özellik önerilerinde kullanım senaryosunu belirtin</li>
-              <li>• Hata bildirimlerinde adımları sırasıyla açıklayın</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <Card className="border-0 shadow-sm bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20">
+          <CardContent className="p-4">
+            <div className="flex items-start space-x-3">
+              <div className="p-2 bg-yellow-100 dark:bg-yellow-800 rounded-lg">
+                <Info size={20} className="text-yellow-600 dark:text-yellow-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-yellow-900 dark:text-yellow-100">Geri Bildirim İpuçları</h3>
+                <ul className="text-sm text-yellow-700 dark:text-yellow-300 mt-2 space-y-1">
+                  <li>• Spesifik ve detaylı açıklamalar daha faydalıdır</li>
+                  <li>• Ekran görüntüsü eklemek sorunu daha iyi anlamamızı sağlar</li>
+                  <li>• Özellik önerilerinde kullanım senaryosunu belirtin</li>
+                  <li>• Hata bildirimlerinde adımları sırasıyla açıklayın</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </motion.div>
   );
 };

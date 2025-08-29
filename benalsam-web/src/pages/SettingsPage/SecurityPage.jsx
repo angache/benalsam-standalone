@@ -12,16 +12,28 @@ import {
   KeyRound,
   Save,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  Loader2,
+  Zap,
+  Users,
+  Settings,
+  RefreshCw
 } from 'lucide-react';
 import { useHapticFeedback } from '../../hooks/useHapticFeedback';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuthStore } from '../../stores';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Input } from '../../components/ui/input';
+import { Badge } from '../../components/ui/badge';
+import { Separator } from '../../components/ui/separator';
+import { useToast } from '../../components/ui/use-toast';
 
 const SecurityPage = () => {
   const navigate = useNavigate();
   const { triggerHaptic } = useHapticFeedback();
   const { currentUser } = useAuthStore();
+  const { toast } = useToast();
   const [userProfile, setUserProfile] = useState(null);
   
   // Refresh user data to get latest 2FA status
@@ -98,7 +110,11 @@ const SecurityPage = () => {
     
     const validation = validatePasswords();
     if (!validation.valid) {
-      alert(validation.message);
+      toast({
+        title: "Hata",
+        description: validation.message,
+        variant: "destructive",
+      });
       return;
     }
 
@@ -110,7 +126,11 @@ const SecurityPage = () => {
       const userEmail = session?.user?.email;
       
       if (!userEmail) {
-        alert('Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+        toast({
+          title: "Hata",
+          description: "Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -121,7 +141,11 @@ const SecurityPage = () => {
       });
 
       if (signInError) {
-        alert('Mevcut şifre yanlış.');
+        toast({
+          title: "Hata",
+          description: "Mevcut şifre yanlış.",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -137,9 +161,16 @@ const SecurityPage = () => {
           message = 'Yeni şifreniz çok zayıf. Lütfen daha güçlü bir şifre seçin.';
         }
         
-        alert(message);
+        toast({
+          title: "Hata",
+          description: message,
+          variant: "destructive",
+        });
       } else {
-        alert('Şifreniz başarıyla güncellendi!');
+        toast({
+          title: "Başarılı!",
+          description: "Şifreniz başarıyla güncellendi!",
+        });
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
@@ -147,7 +178,11 @@ const SecurityPage = () => {
       }
     } catch (error) {
       console.error('Password update error:', error);
-      alert('Şifre güncellenirken bir hata oluştu.');
+      toast({
+        title: "Hata",
+        description: "Şifre güncellenirken bir hata oluştu.",
+        variant: "destructive",
+      });
     } finally {
       setIsUpdatingPassword(false);
     }
@@ -179,125 +214,158 @@ const SecurityPage = () => {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button
+      <motion.div 
+        className="flex items-center justify-between mb-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleGoBack}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="hover:bg-accent"
         >
           <ArrowLeft size={20} />
-        </button>
+        </Button>
         
         <div className="flex-1 text-center">
-          <h1 className="text-xl font-semibold">Güvenlik</h1>
+          <h1 className="text-xl font-semibold text-foreground">Güvenlik</h1>
         </div>
 
         <div className="w-10" /> {/* Spacer for centering */}
-      </div>
+      </motion.div>
 
       {/* Password Change Form */}
-      <div className="space-y-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center">
-            <Lock className="w-5 h-5 mr-2 text-primary" />
-            Şifreyi Değiştir
-          </h2>
+      <motion.div 
+        className="space-y-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center">
+              <Lock className="w-5 h-5 mr-2 text-primary" />
+              Şifreyi Değiştir
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
           
           <form onSubmit={handlePasswordUpdate} className="space-y-4">
             {/* Current Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
                 Mevcut Şifre
               </label>
               <div className="relative">
-                <input
+                <Input
                   type={showCurrentPassword ? 'text' : 'password'}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Mevcut şifrenizi girin"
                   autoComplete="current-password"
                   required
                 />
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8"
                 >
-                  {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
+                  {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </Button>
               </div>
             </div>
 
             {/* New Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
                 Yeni Şifre
               </label>
               <div className="relative">
-                <input
+                <Input
                   type={showNewPassword ? 'text' : 'password'}
                   value={newPassword}
                   onChange={handlePasswordChange}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Yeni şifrenizi girin"
                   autoComplete="new-password"
                   required
                 />
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8"
                 >
-                  {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
+                  {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </Button>
               </div>
               
               {/* Password Strength Indicator */}
               {newPassword && (
-                <div className="mt-2">
+                <motion.div 
+                  className="mt-2"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
                   <div className="flex items-center justify-between text-sm mb-1">
-                    <span className="text-gray-600 dark:text-gray-400">Şifre Gücü:</span>
-                    <span className={passwordStrength >= 75 ? 'text-green-600' : passwordStrength >= 50 ? 'text-yellow-600' : 'text-red-600'}>
+                    <span className="text-muted-foreground">Şifre Gücü:</span>
+                    <Badge 
+                      variant={passwordStrength >= 75 ? "default" : passwordStrength >= 50 ? "secondary" : "destructive"}
+                      className="text-xs"
+                    >
                       {getPasswordStrengthText()}
-                    </span>
+                    </Badge>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div 
+                    <motion.div 
                       className={`h-2 rounded-full transition-all duration-300 ${getPasswordStrengthColor()}`}
-                      style={{ width: `${passwordStrength}%` }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${passwordStrength}%` }}
+                      transition={{ duration: 0.5 }}
                     />
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
 
             {/* Confirm Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
                 Yeni Şifre (Tekrar)
               </label>
               <div className="relative">
-                <input
+                <Input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Yeni şifrenizi tekrar girin"
                   autoComplete="new-password"
                   required
                 />
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8"
                 >
-                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </Button>
               </div>
               
               {/* Password Match Indicator */}
               {confirmPassword && (
-                <div className="mt-2 flex items-center text-sm">
+                <motion.div 
+                  className="mt-2 flex items-center text-sm"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
                   {newPassword === confirmPassword ? (
                     <CheckCircle size={16} className="text-green-500 mr-2" />
                   ) : (
@@ -306,102 +374,125 @@ const SecurityPage = () => {
                   <span className={newPassword === confirmPassword ? 'text-green-600' : 'text-red-600'}>
                     {newPassword === confirmPassword ? 'Şifreler eşleşiyor' : 'Şifreler eşleşmiyor'}
                   </span>
-                </div>
+                </motion.div>
               )}
             </div>
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
               disabled={isUpdatingPassword}
-              className={`w-full p-3 rounded-lg font-medium transition-colors ${
-                isUpdatingPassword
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-primary text-white hover:bg-primary/80'
-              }`}
+              className="w-full"
             >
               {isUpdatingPassword ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Güncelleniyor...
-                </div>
+                </>
               ) : (
-                <div className="flex items-center justify-center">
+                <>
                   <Save size={16} className="mr-2" />
                   Şifreyi Güncelle
-                </div>
+                </>
               )}
-            </button>
-          </form>
-        </div>
+            </Button>
+                      </form>
+          </CardContent>
+        </Card>
 
         {/* Two-Factor Authentication */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center">
-            <Smartphone className="w-5 h-5 mr-2 text-primary" />
-            İki Aşamalı Doğrulama (2FA)
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Hesabınıza ekstra bir güvenlik katmanı ekleyin. Google Authenticator veya benzeri uygulamalarla doğrulama yapabilirsiniz.
-          </p>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className={`w-3 h-3 rounded-full ${userProfile?.is_2fa_enabled ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                {userProfile?.is_2fa_enabled ? '2FA Aktif' : '2FA Pasif'}
-              </span>
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center">
+              <Smartphone className="w-5 h-5 mr-2 text-primary" />
+              İki Aşamalı Doğrulama (2FA)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              Hesabınıza ekstra bir güvenlik katmanı ekleyin. Google Authenticator veya benzeri uygulamalarla doğrulama yapabilirsiniz.
+            </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Badge 
+                  variant={userProfile?.is_2fa_enabled ? "default" : "secondary"}
+                  className="flex items-center space-x-1"
+                >
+                  <div className={`w-2 h-2 rounded-full ${userProfile?.is_2fa_enabled ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                  <span>{userProfile?.is_2fa_enabled ? '2FA Aktif' : '2FA Pasif'}</span>
+                </Badge>
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={refreshUserData}
+                  className="text-xs"
+                >
+                  <RefreshCw size={14} className="mr-1" />
+                  Yenile
+                </Button>
+                <Button
+                  onClick={() => navigate('/ayarlar/guvenlik/2fa-setup')}
+                  size="sm"
+                >
+                  {userProfile?.is_2fa_enabled ? '2FA Ayarlarını Değiştir' : '2FA Kurulumu'}
+                </Button>
+              </div>
             </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={refreshUserData}
-                className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
-              >
-                Yenile
-              </button>
-              <button
-                onClick={() => navigate('/ayarlar/guvenlik/2fa-setup')}
-                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors"
-              >
-                {userProfile?.is_2fa_enabled ? '2FA Ayarlarını Değiştir' : '2FA Kurulumu'}
-              </button>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Active Sessions */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center">
-            <LogOut className="w-5 h-5 mr-2 text-primary" />
-            Aktif Oturumlar
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Diğer cihazlardaki aktif oturumlarınızı görüntüleyin ve yönetin.
-          </p>
-          <button
-            onClick={() => alert('Bu özellik yakında eklenecek!')}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          >
-            Oturumları Yönet (Yakında)
-          </button>
-        </div>
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center">
+              <Users className="w-5 h-5 mr-2 text-primary" />
+              Aktif Oturumlar
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              Diğer cihazlardaki aktif oturumlarınızı görüntüleyin ve yönetin.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => toast({
+                title: "Bilgi",
+                description: "Bu özellik yakında eklenecek!",
+              })}
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Oturumları Yönet (Yakında)
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Login Methods */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center">
-            <Shield className="w-5 h-5 mr-2 text-primary" />
-            Giriş Yöntemleri
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Google, Facebook gibi sosyal medya hesaplarınızla giriş bağlantılarınızı yönetin.
-          </p>
-          <button
-            onClick={() => alert('Bu özellik yakında eklenecek!')}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          >
-            Giriş Yöntemlerini Yönet (Yakında)
-          </button>
-        </div>
-      </div>
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-foreground flex items-center">
+              <Shield className="w-5 h-5 mr-2 text-primary" />
+              Giriş Yöntemleri
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              Google, Facebook gibi sosyal medya hesaplarınızla giriş bağlantılarınızı yönetin.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => toast({
+                title: "Bilgi",
+                description: "Bu özellik yakında eklenecek!",
+              })}
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              Giriş Yöntemlerini Yönet (Yakında)
+            </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
     </motion.div>
   );
 };

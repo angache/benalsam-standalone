@@ -14,9 +14,17 @@ import {
   ExternalLink,
   Info,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  FileText,
+  Users,
+  Shield
 } from 'lucide-react';
 import { useHapticFeedback } from '../../hooks/useHapticFeedback';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Separator } from '../../components/ui/separator';
 
 const HelpPage = () => {
   const navigate = useNavigate();
@@ -184,49 +192,64 @@ const HelpPage = () => {
     return (
       <motion.div
         key={item.id}
-        initial={false}
-        animate={{ height: 'auto' }}
-        className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
       >
-        <button
-          onClick={() => toggleItem(item.id)}
-          className="w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-between"
-        >
-          <span className="font-medium text-gray-900 dark:text-white">{item.question}</span>
-          {isExpanded ? (
-            <ChevronUp size={20} className="text-gray-500" />
-          ) : (
-            <ChevronDown size={20} className="text-gray-500" />
-          )}
-        </button>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="px-4 pb-4"
-          >
-            <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-              {item.answer}
-            </p>
-          </motion.div>
-        )}
+        <Card className="border-0 shadow-sm hover:shadow-md transition-all duration-200">
+          <CardContent className="p-0">
+            <button
+              onClick={() => toggleItem(item.id)}
+              className="w-full p-4 text-left hover:bg-accent/50 transition-colors flex items-center justify-between"
+            >
+              <span className="font-medium text-foreground">{item.question}</span>
+              <motion.div
+                animate={{ rotate: isExpanded ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown size={20} className="text-muted-foreground" />
+              </motion.div>
+            </button>
+            {isExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="px-4 pb-4"
+              >
+                <Separator className="mb-4" />
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {item.answer}
+                </p>
+              </motion.div>
+            )}
+          </CardContent>
+        </Card>
       </motion.div>
     );
   };
 
   const renderInfoCard = (title, description, icon) => (
-    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-      <div className="flex items-start space-x-3">
-        <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
-          {icon}
-        </div>
-        <div className="flex-1">
-          <h3 className="font-medium text-blue-900 dark:text-blue-100">{title}</h3>
-          <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{description}</p>
-        </div>
-      </div>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+        <CardContent className="p-4">
+          <div className="flex items-start space-x-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
+              {icon}
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-blue-900 dark:text-blue-100">{title}</h3>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{description}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 
   return (
@@ -237,20 +260,27 @@ const HelpPage = () => {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button
+      <motion.div 
+        className="flex items-center justify-between mb-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleGoBack}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="hover:bg-accent"
         >
           <ArrowLeft size={20} />
-        </button>
+        </Button>
         
         <div className="flex-1 text-center">
-          <h1 className="text-xl font-semibold">Yardım Merkezi</h1>
+          <h1 className="text-xl font-semibold text-foreground">Yardım Merkezi</h1>
         </div>
 
         <div className="w-10" /> {/* Spacer for centering */}
-      </div>
+      </motion.div>
 
       {/* Info Card */}
       {renderInfoCard(
@@ -260,119 +290,165 @@ const HelpPage = () => {
       )}
 
       {/* Search Bar */}
-      <div className="relative">
+      <motion.div 
+        className="relative"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search size={20} className="text-gray-400" />
+          <Search size={20} className="text-muted-foreground" />
         </div>
-        <input
+        <Input
           type="text"
           placeholder="Sorunuzu arayın..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          className="w-full pl-10 pr-4 py-3 focus:ring-2 focus:ring-primary/20"
         />
-      </div>
+      </motion.div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <button
-          onClick={() => navigate('/ayarlar/iletisim')}
-          className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary transition-colors"
-        >
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <MessageCircle size={20} className="text-primary" />
+      <motion.div 
+        className="grid grid-cols-1 md:grid-cols-3 gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <Card className="border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => navigate('/ayarlar/iletisim')}>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <MessageCircle size={20} className="text-primary" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-medium text-foreground">İletişim</h3>
+                <p className="text-sm text-muted-foreground">Bizimle iletişime geçin</p>
+              </div>
             </div>
-            <div className="text-left">
-              <h3 className="font-medium text-gray-900 dark:text-white">İletişim</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Bizimle iletişime geçin</p>
-            </div>
-          </div>
-        </button>
+          </CardContent>
+        </Card>
 
-        <button
-          onClick={() => navigate('/ayarlar/geri-bildirim')}
-          className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary transition-colors"
-        >
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <BookOpen size={20} className="text-primary" />
+        <Card className="border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => navigate('/ayarlar/geri-bildirim')}>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <BookOpen size={20} className="text-primary" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-medium text-foreground">Geri Bildirim</h3>
+                <p className="text-sm text-muted-foreground">Önerilerinizi paylaşın</p>
+              </div>
             </div>
-            <div className="text-left">
-              <h3 className="font-medium text-gray-900 dark:text-white">Geri Bildirim</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Önerilerinizi paylaşın</p>
-            </div>
-          </div>
-        </button>
+          </CardContent>
+        </Card>
 
-        <a
-          href="tel:+905555555555"
-          className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary transition-colors"
-        >
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Phone size={20} className="text-primary" />
+        <Card className="border-0 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => window.open('tel:+905555555555')}>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Phone size={20} className="text-primary" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-medium text-foreground">Telefon</h3>
+                <p className="text-sm text-muted-foreground">0555 555 55 55</p>
+              </div>
             </div>
-            <div className="text-left">
-              <h3 className="font-medium text-gray-900 dark:text-white">Telefon</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">0555 555 55 55</p>
-            </div>
-          </div>
-        </a>
-      </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* FAQ Sections */}
       {filteredFAQ.length === 0 ? (
-        <div className="text-center py-8">
-          <HelpCircle size={48} className="text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Sonuç Bulunamadı</h3>
-          <p className="text-gray-500 dark:text-gray-400">Arama teriminizle eşleşen soru bulunamadı.</p>
-        </div>
+        <motion.div 
+          className="text-center py-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5, type: "spring" }}
+          >
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-muted/20 flex items-center justify-center">
+              <HelpCircle size={48} className="text-muted-foreground" />
+            </div>
+          </motion.div>
+          <h3 className="text-lg font-medium text-foreground mb-2">Sonuç Bulunamadı</h3>
+          <p className="text-muted-foreground">Arama teriminizle eşleşen soru bulunamadı.</p>
+        </motion.div>
       ) : (
-        <div className="space-y-6">
-          {filteredFAQ.map(category => (
-            <div key={category.id} className="space-y-3">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                <Info size={20} className="mr-2 text-primary" />
-                {category.title}
-              </h2>
+        <motion.div 
+          className="space-y-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          {filteredFAQ.map((category, categoryIndex) => (
+            <motion.div 
+              key={category.id} 
+              className="space-y-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 + categoryIndex * 0.1 }}
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-foreground flex items-center">
+                  <Info size={20} className="mr-2 text-primary" />
+                  {category.title}
+                </h2>
+                <Badge variant="secondary">{category.items.length} soru</Badge>
+              </div>
               <div className="space-y-2">
                 {category.items.map(renderFAQItem)}
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {/* Contact Info */}
-      <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-        <div className="flex items-start space-x-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <AlertCircle size={20} className="text-primary" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-medium text-gray-900 dark:text-white">Hala Yardıma İhtiyacınız Var mı?</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Sorununuzu çözemediysek, destek ekibimizle iletişime geçin. Size en kısa sürede yardımcı olacağız.
-            </p>
-            <div className="flex space-x-4 mt-3">
-              <button
-                onClick={() => navigate('/ayarlar/iletisim')}
-                className="text-sm text-primary hover:underline"
-              >
-                İletişim Formu
-              </button>
-              <a
-                href="mailto:destek@benalsam.com"
-                className="text-sm text-primary hover:underline flex items-center"
-              >
-                <Mail size={16} className="mr-1" />
-                E-posta
-              </a>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <Card className="border-0 shadow-sm bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/20 dark:to-red-950/20">
+          <CardContent className="p-4">
+            <div className="flex items-start space-x-3">
+              <div className="p-2 bg-orange-100 dark:bg-orange-800 rounded-lg">
+                <AlertCircle size={20} className="text-orange-600 dark:text-orange-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-orange-900 dark:text-orange-100">Hala Yardıma İhtiyacınız Var mı?</h3>
+                <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                  Sorununuzu çözemediysek, destek ekibimizle iletişime geçin. Size en kısa sürede yardımcı olacağız.
+                </p>
+                <div className="flex space-x-4 mt-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate('/ayarlar/iletisim')}
+                    className="text-orange-600 border-orange-200 hover:bg-orange-50 dark:text-orange-400 dark:border-orange-800 dark:hover:bg-orange-950/20"
+                  >
+                    İletişim Formu
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open('mailto:destek@benalsam.com')}
+                    className="text-orange-600 border-orange-200 hover:bg-orange-50 dark:text-orange-400 dark:border-orange-800 dark:hover:bg-orange-950/20"
+                  >
+                    <Mail size={16} className="mr-1" />
+                    E-posta
+                  </Button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </motion.div>
   );
 };

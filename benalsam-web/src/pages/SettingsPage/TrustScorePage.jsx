@@ -14,16 +14,26 @@ import {
   Calendar,
   Link,
   Crown,
-  Info
+  Info,
+  Loader2,
+  TrendingUp,
+  Shield,
+  Award
 } from 'lucide-react';
 import { useHapticFeedback } from '../../hooks/useHapticFeedback';
 import { useCurrentUserTrustScore, useTrustScoreActions } from '../../hooks/useTrustScore';
 import { getTrustLevelColor, getTrustLevelDescription } from '../../services/trustScoreService';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Progress } from '../../components/ui/progress';
+import { useToast } from '../../components/ui/use-toast';
 
 const TrustScorePage = () => {
   const navigate = useNavigate();
   const { triggerHaptic } = useHapticFeedback();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { toast } = useToast();
 
   // Gerçek trust score verilerini al
   const { data: trustScoreData, isLoading, error, refetch } = useCurrentUserTrustScore();
@@ -105,9 +115,18 @@ const TrustScorePage = () => {
     
     try {
       await refreshTrustScore();
+      toast({
+        title: 'Güven puanı güncellendi',
+        description: 'Güven puanınız başarıyla yenilendi.',
+      });
       console.log('Trust score refreshed');
     } catch (error) {
       console.error('Error refreshing trust score:', error);
+      toast({
+        title: 'Hata',
+        description: 'Güven puanı güncellenirken bir hata oluştu.',
+        variant: 'destructive',
+      });
     } finally {
       setIsRefreshing(false);
     }
@@ -193,8 +212,8 @@ const TrustScorePage = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500">Güven puanınız hesaplanıyor...</p>
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Güven puanınız hesaplanıyor...</p>
         </div>
       </div>
     );
@@ -204,17 +223,18 @@ const TrustScorePage = () => {
   if (error) {
     return (
       <div className="text-center py-8">
-        <div className="text-red-500 mb-4">
-          <Info size={48} className="mx-auto mb-2" />
-          <p className="text-lg font-semibold">Hata Oluştu</p>
-          <p className="text-sm text-gray-600">Güven puanınız yüklenirken bir hata oluştu.</p>
-        </div>
-        <button
-          onClick={() => refetch()}
-          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors"
-        >
-          Tekrar Dene
-        </button>
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-6">
+            <div className="text-red-500 mb-4">
+              <Info size={48} className="mx-auto mb-2" />
+              <p className="text-lg font-semibold">Hata Oluştu</p>
+              <p className="text-sm text-muted-foreground">Güven puanınız yüklenirken bir hata oluştu.</p>
+            </div>
+            <Button onClick={() => refetch()}>
+              Tekrar Dene
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -223,17 +243,18 @@ const TrustScorePage = () => {
   if (!trustScoreData?.data) {
     return (
       <div className="text-center py-8">
-        <div className="text-gray-500 mb-4">
-          <Info size={48} className="mx-auto mb-2" />
-          <p className="text-lg font-semibold">Veri Bulunamadı</p>
-          <p className="text-sm text-gray-600">Güven puanı verileriniz bulunamadı.</p>
-        </div>
-        <button
-          onClick={() => refetch()}
-          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors"
-        >
-          Tekrar Dene
-        </button>
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-6">
+            <div className="text-muted-foreground mb-4">
+              <Info size={48} className="mx-auto mb-2" />
+              <p className="text-lg font-semibold">Veri Bulunamadı</p>
+              <p className="text-sm text-muted-foreground">Güven puanı verileriniz bulunamadı.</p>
+            </div>
+            <Button onClick={() => refetch()}>
+              Tekrar Dene
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -246,124 +267,165 @@ const TrustScorePage = () => {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button
+      <motion.div 
+        className="flex items-center justify-between mb-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleGoBack}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="hover:bg-accent"
         >
           <ArrowLeft size={20} />
-        </button>
+        </Button>
         
         <div className="flex-1 text-center">
-          <h1 className="text-xl font-semibold">Güven Puanı</h1>
+          <h1 className="text-xl font-semibold text-foreground">Güven Puanı</h1>
         </div>
 
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className={`p-2 rounded-lg transition-colors ${
-            isRefreshing
-              ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-gray-100 dark:hover:bg-gray-800'
-          }`}
+          className="hover:bg-accent"
         >
-          <RefreshCw 
-            size={20} 
-            className={`text-primary ${isRefreshing ? 'animate-spin' : ''}`}
-          />
-        </button>
-      </div>
+          {isRefreshing ? (
+            <Loader2 size={20} className="animate-spin text-primary" />
+          ) : (
+            <RefreshCw size={20} className="text-primary" />
+          )}
+        </Button>
+      </motion.div>
 
       {/* Main Content */}
       <div className="space-y-6">
         {/* Description */}
-        <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-400">
+        <motion.div 
+          className="text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <p className="text-muted-foreground">
             Güven puanınız, platformdaki diğer kullanıcılara ne kadar güvenilir olduğunuzu gösterir. Puanınızı artırmak için aşağıdaki adımları tamamlayabilirsiniz.
           </p>
-        </div>
+        </motion.div>
 
         {/* Trust Score System Info */}
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-3">Güven Puanı Sistemi Nedir?</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Güven puanı sistemi, platformdaki güvenliği artırmak ve güvenilir kullanıcıları ödüllendirmek için tasarlanmıştır. Yüksek güven puanına sahip kullanıcılar:
-          </p>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <CheckCircle size={16} className="text-green-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Daha fazla ilan görüntülenmesi</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle size={16} className="text-green-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Öncelikli destek hizmeti</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle size={16} className="text-green-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Özel rozetler ve tanınırlık</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle size={16} className="text-green-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Daha güvenilir görünme</span>
-            </div>
-          </div>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+            <CardHeader>
+              <CardTitle className="text-foreground flex items-center">
+                <Shield className="w-5 h-5 mr-2 text-primary" />
+                Güven Puanı Sistemi Nedir?
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Güven puanı sistemi, platformdaki güvenliği artırmak ve güvenilir kullanıcıları ödüllendirmek için tasarlanmıştır. Yüksek güven puanına sahip kullanıcılar:
+              </p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-green-500" />
+                  <span className="text-sm text-muted-foreground">Daha fazla ilan görüntülenmesi</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-green-500" />
+                  <span className="text-sm text-muted-foreground">Öncelikli destek hizmeti</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-green-500" />
+                  <span className="text-sm text-muted-foreground">Özel rozetler ve tanınırlık</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle size={16} className="text-green-500" />
+                  <span className="text-sm text-muted-foreground">Daha güvenilir görünme</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Score Display */}
-        <div className="text-center">
-          <h3 className="text-lg font-semibold mb-4">Toplam Puanınız</h3>
+        <motion.div 
+          className="text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <h3 className="text-lg font-semibold mb-4 text-foreground">Toplam Puanınız</h3>
           {renderCircularProgress()}
-        </div>
+        </motion.div>
 
         {/* Criteria List */}
-        <div className="space-y-4">
+        <motion.div 
+          className="space-y-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
           <div className="text-center">
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
               Her satırda soldaki sayı mevcut durumunuzu, sağdaki sayı ise bu kriterden güven puanınıza eklenebilecek maksimum puanı gösterir.
             </p>
           </div>
           
-          {Object.entries(scoreCriteria).map(([key, criteria]) => {
+          {Object.entries(scoreCriteria).map(([key, criteria], index) => {
             const currentScore = trustScoreData.data.breakdown[key] || 0;
             const isCompleted = criteria.maxPoints > 0 && currentScore >= criteria.maxPoints;
             
             return (
               <motion.div
                 key={key}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
                 whileHover={{ scale: 1.02 }}
-                className={`p-4 rounded-lg border transition-all ${
-                  isCompleted 
-                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                }`}
               >
-                <div className="flex items-start gap-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
-                    isCompleted 
-                      ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                  }`}>
-                    {isCompleted ? '✓' : criteria.icon}
-                  </div>
-                  
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium">{criteria.title}</h4>
-                      <span className={`text-sm font-semibold ${
-                        isCompleted ? 'text-green-600 dark:text-green-400' : 'text-primary'
+                <Card className={`transition-all ${
+                  isCompleted 
+                    ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20'
+                    : 'border-border'
+                }`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
+                        isCompleted 
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                          : 'bg-muted text-muted-foreground'
                       }`}>
-                        {currentScore} / {criteria.maxPoints}
-                      </span>
+                        {isCompleted ? <CheckCircle size={20} /> : criteria.icon}
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-foreground">{criteria.title}</h4>
+                          <Badge 
+                            variant={isCompleted ? "default" : "secondary"}
+                            className="text-xs"
+                          >
+                            {currentScore} / {criteria.maxPoints}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {criteria.description}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {criteria.description}
-                    </p>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );

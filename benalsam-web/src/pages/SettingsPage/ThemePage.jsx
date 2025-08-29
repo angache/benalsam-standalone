@@ -11,15 +11,24 @@ import {
   Save,
   AlertCircle,
   Info,
-  Sparkles
+  Sparkles,
+  Loader2,
+  Eye,
+  Zap
 } from 'lucide-react';
 import { useHapticFeedback } from '../../hooks/useHapticFeedback';
 import { useThemeStore } from '../../stores/themeStore';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Separator } from '../../components/ui/separator';
+import { useToast } from '../../components/ui/use-toast';
 
 const ThemePage = () => {
   const navigate = useNavigate();
   const { triggerHaptic } = useHapticFeedback();
   const { themeMode, toggleTheme, setTheme } = useThemeStore();
+  const { toast } = useToast();
   
   const [selectedTheme, setSelectedTheme] = useState(themeMode);
   const [hasChanges, setHasChanges] = useState(false);
@@ -42,16 +51,23 @@ const ThemePage = () => {
       setTheme(selectedTheme);
       setHasChanges(false);
       
-      alert('Tema başarıyla değiştirildi!');
+      toast({
+        title: "Başarılı!",
+        description: "Tema başarıyla değiştirildi!",
+      });
     } catch (error) {
       console.error('Error saving theme:', error);
-      alert('Tema değiştirilirken bir hata oluştu.');
+      toast({
+        title: "Hata",
+        description: "Tema değiştirilirken bir hata oluştu.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleGoBack = () => {
     if (hasChanges) {
-      const confirmed = confirm('Kaydedilmemiş değişiklikleriniz var. Çıkmak istediğinizden emin misiniz?');
+      const confirmed = window.confirm('Kaydedilmemiş değişiklikleriniz var. Çıkmak istediğinizden emin misiniz?');
       if (!confirmed) return;
     }
     navigate('/ayarlar');
@@ -96,68 +112,97 @@ const ThemePage = () => {
     }
   ];
 
-  const renderThemeCard = (themeOption) => {
+  const renderThemeCard = (themeOption, index) => {
     const isSelected = selectedTheme === themeOption.id;
     const IconComponent = themeOption.icon;
 
     return (
       <motion.div
         key={themeOption.id}
-        whileHover={{ scale: 1.02 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: index * 0.1 }}
+        whileHover={{ 
+          scale: 1.02,
+          y: -5,
+          transition: { duration: 0.2 }
+        }}
         whileTap={{ scale: 0.98 }}
         onClick={() => handleThemeSelect(themeOption.id)}
-        className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-          isSelected
-            ? 'border-primary bg-primary/5'
-            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
-        }`}
       >
-        {/* Selection Indicator */}
-        {isSelected && (
-          <div className="absolute top-4 right-4 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-            <Check size={16} className="text-white" />
-          </div>
-        )}
+        <Card className={`relative cursor-pointer transition-all duration-200 ${
+          isSelected
+            ? 'border-primary bg-primary/5 shadow-lg'
+            : 'border-0 shadow-sm hover:shadow-md'
+        }`}>
+          <CardContent className="p-6">
+            {/* Selection Indicator */}
+            {isSelected && (
+              <motion.div 
+                className="absolute top-4 right-4 w-6 h-6 bg-primary rounded-full flex items-center justify-center"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.3, type: "spring" }}
+              >
+                <Check size={16} className="text-white" />
+              </motion.div>
+            )}
 
-        {/* Theme Preview */}
-        <div className={`w-full h-20 rounded-lg mb-4 ${themeOption.preview} flex items-center justify-center`}>
-          <IconComponent size={32} className={themeOption.id === 'auto' ? 'text-gray-600' : 'text-gray-400'} />
-        </div>
-
-        {/* Theme Info */}
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <IconComponent size={20} className="text-primary" />
-            <h3 className="font-semibold text-gray-900 dark:text-white">{themeOption.name}</h3>
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{themeOption.description}</p>
-        </div>
-
-        {/* Features */}
-        <div className="mt-4 space-y-1">
-          {themeOption.features.map((feature, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-              <span className="text-xs text-gray-500 dark:text-gray-400">{feature}</span>
+            {/* Theme Preview */}
+            <div className={`w-full h-20 rounded-lg mb-4 ${themeOption.preview} flex items-center justify-center`}>
+              <IconComponent size={32} className={themeOption.id === 'auto' ? 'text-gray-600' : 'text-gray-400'} />
             </div>
-          ))}
-        </div>
+
+            {/* Theme Info */}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <IconComponent size={20} className="text-primary" />
+                <h3 className="font-semibold text-foreground">{themeOption.name}</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">{themeOption.description}</p>
+            </div>
+
+            {/* Features */}
+            <div className="mt-4 space-y-1">
+              {themeOption.features.map((feature, featureIndex) => (
+                <motion.div 
+                  key={featureIndex} 
+                  className="flex items-center space-x-2"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: featureIndex * 0.1 }}
+                >
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                  <span className="text-xs text-muted-foreground">{feature}</span>
+                </motion.div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
     );
   };
 
   const renderInfoCard = (title, description, icon) => (
-    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-      <div className="flex items-start space-x-3">
-        <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
-          {icon}
-        </div>
-        <div className="flex-1">
-          <h3 className="font-medium text-blue-900 dark:text-blue-100">{title}</h3>
-          <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{description}</p>
-        </div>
-      </div>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+        <CardContent className="p-4">
+          <div className="flex items-start space-x-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
+              {icon}
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-blue-900 dark:text-blue-100">{title}</h3>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{description}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 
   return (
@@ -168,30 +213,35 @@ const ThemePage = () => {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button
+      <motion.div 
+        className="flex items-center justify-between mb-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleGoBack}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="hover:bg-accent"
         >
           <ArrowLeft size={20} />
-        </button>
+        </Button>
         
         <div className="flex-1 text-center">
-          <h1 className="text-xl font-semibold">Tema Seçimi</h1>
+          <h1 className="text-xl font-semibold text-foreground">Tema Seçimi</h1>
         </div>
 
-        <button
+        <Button
+          variant={hasChanges ? "default" : "secondary"}
+          size="icon"
           onClick={handleSave}
           disabled={!hasChanges}
-          className={`p-2 rounded-lg transition-colors ${
-            hasChanges
-              ? 'bg-primary text-white hover:bg-primary/80'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
-          }`}
+          className="hover:bg-accent"
         >
           <Save size={20} />
-        </button>
-      </div>
+        </Button>
+      </motion.div>
 
       {/* Info Card */}
       {renderInfoCard(
@@ -201,65 +251,102 @@ const ThemePage = () => {
       )}
 
       {/* Theme Options */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {themes.map(renderThemeCard)}
-      </div>
+      <motion.div 
+        className="grid grid-cols-1 md:grid-cols-3 gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        {themes.map((theme, index) => renderThemeCard(theme, index))}
+      </motion.div>
 
       {/* Theme Tips */}
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800 p-4">
-        <div className="flex items-start space-x-3">
-          <div className="p-2 bg-yellow-100 dark:bg-yellow-800 rounded-lg">
-            <Sparkles size={20} className="text-yellow-600 dark:text-yellow-400" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-medium text-yellow-900 dark:text-yellow-100">Tema İpuçları</h3>
-            <ul className="text-sm text-yellow-700 dark:text-yellow-300 mt-2 space-y-1">
-              <li>• Açık tema güneşli ortamlarda daha iyi görünür</li>
-              <li>• Koyu tema gece kullanımı için idealdir</li>
-              <li>• Otomatik tema sistem ayarlarınızı takip eder</li>
-              <li>• Tema değişikliği anında uygulanır</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <Card className="border-0 shadow-sm bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20">
+          <CardContent className="p-4">
+            <div className="flex items-start space-x-3">
+              <div className="p-2 bg-yellow-100 dark:bg-yellow-800 rounded-lg">
+                <Sparkles size={20} className="text-yellow-600 dark:text-yellow-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-yellow-900 dark:text-yellow-100">Tema İpuçları</h3>
+                <ul className="text-sm text-yellow-700 dark:text-yellow-300 mt-2 space-y-1">
+                  <li>• Açık tema güneşli ortamlarda daha iyi görünür</li>
+                  <li>• Koyu tema gece kullanımı için idealdir</li>
+                  <li>• Otomatik tema sistem ayarlarınızı takip eder</li>
+                  <li>• Tema değişikliği anında uygulanır</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Current Theme Display */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Palette size={20} className="text-primary" />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Palette size={20} className="text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-foreground">Mevcut Tema</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {themes.find(t => t.id === themeMode)?.name || 'Bilinmeyen Tema'}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <Badge variant="secondary" className="text-primary border-primary/20">
+                  Aktif
+                </Badge>
+                <div className="text-sm font-medium text-primary mt-1">
+                  {themes.find(t => t.id === themeMode)?.name || 'Bilinmeyen'}
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className="font-medium text-gray-900 dark:text-white">Mevcut Tema</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {themes.find(t => t.id === themeMode)?.name || 'Bilinmeyen Tema'}
-              </p>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-xs text-gray-400 dark:text-gray-500">Aktif</div>
-            <div className="text-sm font-medium text-primary">
-              {themes.find(t => t.id === themeMode)?.name || 'Bilinmeyen'}
-            </div>
-          </div>
-        </div>
-      </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Status Indicator */}
       {hasChanges && (
-        <div className="fixed bottom-4 left-4 right-4 bg-yellow-500 text-white p-3 rounded-lg flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <AlertCircle size={20} />
-            <span>Kaydedilmemiş tema değişikliği var</span>
-          </div>
-          <button
-            onClick={handleSave}
-            className="px-4 py-1 bg-white text-yellow-500 rounded font-medium hover:bg-gray-100 transition-colors"
-          >
-            Kaydet
-          </button>
-        </div>
+        <motion.div 
+          className="fixed bottom-4 left-4 right-4 z-50"
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 100 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-yellow-500 to-amber-500">
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <AlertCircle size={20} className="text-white" />
+                  <span className="text-white font-medium">Kaydedilmemiş tema değişikliği var</span>
+                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleSave}
+                  className="bg-white text-yellow-500 hover:bg-gray-100"
+                >
+                  Kaydet
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
     </motion.div>
   );

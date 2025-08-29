@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Check, DollarSign } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Check, 
+  DollarSign, 
+  Loader2,
+  Coins,
+  Info
+} from 'lucide-react';
 import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 import { useHapticFeedback } from '../../hooks/useHapticFeedback';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { useToast } from '../../components/ui/use-toast';
 
 const currencies = [
   { code: 'TRY', name: 'Türk Lirası', symbol: '₺', flag: '🇹🇷' },
@@ -23,21 +34,40 @@ const CurrencyPage = () => {
   const { platformPreferences, updatePlatformPreference } = useUserPreferences();
   const { triggerHaptic } = useHapticFeedback();
   const [selectedCurrency, setSelectedCurrency] = useState(platformPreferences.currency || 'TRY');
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   console.log('🔍 [CurrencyPage] Component rendering...');
   console.log('🔍 [CurrencyPage] platformPreferences:', platformPreferences);
   console.log('🔍 [CurrencyPage] selectedCurrency:', selectedCurrency);
 
-  const handleCurrencySelect = (currencyCode) => {
+  const handleCurrencySelect = async (currencyCode) => {
     console.log('🔍 [CurrencyPage] handleCurrencySelect called with:', currencyCode);
     triggerHaptic();
-    setSelectedCurrency(currencyCode);
-    updatePlatformPreference('currency', currencyCode);
-    
-    // Kısa bir gecikme ile geri dön
-    setTimeout(() => {
-      navigate('/ayarlar');
-    }, 300);
+    setIsLoading(true);
+
+    try {
+      await updatePlatformPreference('currency', currencyCode);
+      setSelectedCurrency(currencyCode);
+      toast({
+        title: 'Para birimi güncellendi',
+        description: 'Varsayılan para biriminiz başarıyla güncellendi.',
+      });
+
+      // Kısa bir gecikme ile geri dön
+      setTimeout(() => {
+        navigate('/ayarlar');
+      }, 300);
+    } catch (error) {
+      console.error('Error updating currency:', error);
+      toast({
+        title: 'Hata',
+        description: 'Para birimi güncellenirken bir hata oluştu.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -48,57 +78,104 @@ const CurrencyPage = () => {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <button
+      <motion.div 
+        className="flex items-center justify-between mb-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => navigate('/ayarlar')}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          disabled={isLoading}
+          className="hover:bg-accent"
         >
           <ArrowLeft size={20} />
-        </button>
-        <div className="flex items-center gap-2">
-          <DollarSign size={24} className="text-primary" />
-          <h1 className="text-xl font-semibold">Para Birimi</h1>
+        </Button>
+        
+        <div className="flex-1 text-center">
+          <h1 className="text-xl font-semibold text-foreground">Para Birimi</h1>
         </div>
-      </div>
+
+        <div className="w-10" /> {/* Spacer for centering */}
+      </motion.div>
 
       {/* Currency List */}
-      <div className="space-y-2">
-        {currencies.map((currency) => (
-          <motion.button
-            key={currency.code}
-            onClick={() => handleCurrencySelect(currency.code)}
-            className={`w-full p-4 rounded-lg border transition-all duration-200 ${
-              selectedCurrency === currency.code
-                ? 'border-primary bg-primary/5 dark:bg-primary/10'
-                : 'border-gray-200 dark:border-gray-700 hover:border-primary/50'
-            }`}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{currency.flag}</span>
-                <div>
-                  <div className="font-medium">{currency.name}</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    {currency.symbol} {currency.code}
+      <motion.div 
+        className="space-y-3"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        {isLoading ? (
+          <div className="flex justify-center items-center h-32">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          currencies.map((currency, index) => (
+            <motion.div
+              key={currency.code}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
+              <Card 
+                className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                  selectedCurrency === currency.code
+                    ? 'border-primary bg-primary/5 dark:bg-primary/10'
+                    : 'border-border hover:border-primary/50'
+                }`}
+                onClick={() => handleCurrencySelect(currency.code)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{currency.flag}</span>
+                      <div>
+                        <div className="font-medium text-foreground">{currency.name}</div>
+                        <Badge variant="outline" className="text-xs">
+                          {currency.symbol} {currency.code}
+                        </Badge>
+                      </div>
+                    </div>
+                    {selectedCurrency === currency.code && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      >
+                        <Check size={20} className="text-primary" />
+                      </motion.div>
+                    )}
                   </div>
-                </div>
-              </div>
-              {selectedCurrency === currency.code && (
-                <Check size={20} className="text-primary" />
-              )}
-            </div>
-          </motion.button>
-        ))}
-      </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))
+        )}
+      </motion.div>
 
       {/* Info */}
-      <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-        <p className="text-sm text-blue-700 dark:text-blue-300">
-          Para birimi değişikliği tüm fiyatlar ve tekliflerde geçerli olacaktır.
-        </p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div className="flex items-center gap-2">
+              <Coins size={20} className="text-primary" />
+              <CardTitle className="text-lg text-blue-900 dark:text-blue-100">Para Birimi Ayarları</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              Para birimi değişikliği tüm fiyatlar ve tekliflerde geçerli olacaktır.
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
     </motion.div>
   );
 };

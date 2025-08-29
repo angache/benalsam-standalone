@@ -13,9 +13,17 @@ import {
   ExternalLink,
   Mail,
   Phone,
-  MapPin
+  MapPin,
+  Star,
+  TrendingUp,
+  Clock,
+  Target
 } from 'lucide-react';
 import { useHapticFeedback } from '../../hooks/useHapticFeedback';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Separator } from '../../components/ui/separator';
 
 const AboutPage = () => {
   const navigate = useNavigate();
@@ -94,88 +102,123 @@ const AboutPage = () => {
     }
   ];
 
-  const renderFeatureCard = (feature) => {
+  const renderFeatureCard = (feature, index) => {
     const IconComponent = feature.icon;
 
     return (
       <motion.div
         key={feature.title}
-        whileHover={{ scale: 1.02 }}
-        className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary transition-colors"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: index * 0.1 }}
+        whileHover={{ 
+          scale: 1.02,
+          y: -5,
+          transition: { duration: 0.2 }
+        }}
       >
-        <div className="flex items-start space-x-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <IconComponent size={20} className="text-primary" />
-          </div>
-          <div>
-            <h3 className="font-medium text-gray-900 dark:text-white">{feature.title}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{feature.description}</p>
-          </div>
-        </div>
+        <Card className="border-0 shadow-sm hover:shadow-md transition-all duration-200">
+          <CardContent className="p-4">
+            <div className="flex items-start space-x-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <IconComponent size={20} className="text-primary" />
+              </div>
+              <div>
+                <h3 className="font-medium text-foreground">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{feature.description}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
     );
   };
 
-  const renderTeamCard = (team) => {
+  const renderTeamCard = (team, index) => {
     const IconComponent = team.icon;
 
     return (
-      <div key={team.name} className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <div className="flex items-start space-x-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <IconComponent size={20} className="text-primary" />
-          </div>
-          <div>
-            <h3 className="font-medium text-gray-900 dark:text-white">{team.name}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{team.description}</p>
-          </div>
-        </div>
-      </div>
+      <motion.div
+        key={team.name}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: index * 0.1 }}
+      >
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-start space-x-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <IconComponent size={20} className="text-primary" />
+              </div>
+              <div>
+                <h3 className="font-medium text-foreground">{team.name}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{team.description}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     );
   };
 
-  const renderContactCard = (contact) => {
+  const renderContactCard = (contact, index) => {
     const IconComponent = contact.icon;
 
     return (
-      <div key={contact.title} className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <div className="flex items-start space-x-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <IconComponent size={20} className="text-primary" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-medium text-gray-900 dark:text-white">{contact.title}</h3>
-            {contact.link ? (
-              <a
-                href={contact.link}
-                className="text-primary hover:underline text-sm flex items-center"
-                target={contact.link.startsWith('http') ? '_blank' : undefined}
-                rel={contact.link.startsWith('http') ? 'noopener noreferrer' : undefined}
-              >
-                {contact.value}
-                <ExternalLink size={14} className="ml-1" />
-              </a>
-            ) : (
-              <p className="text-sm text-gray-500 dark:text-gray-400">{contact.value}</p>
-            )}
-          </div>
-        </div>
-      </div>
+      <motion.div
+        key={contact.title}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: index * 0.1 }}
+      >
+        <Card className="border-0 shadow-sm hover:shadow-md transition-all duration-200">
+          <CardContent className="p-4">
+            <div className="flex items-start space-x-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <IconComponent size={20} className="text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-foreground">{contact.title}</h3>
+                {contact.link ? (
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto text-primary hover:underline text-sm flex items-center"
+                    onClick={() => window.open(contact.link, contact.link.startsWith('http') ? '_blank' : undefined)}
+                  >
+                    {contact.value}
+                    <ExternalLink size={14} className="ml-1" />
+                  </Button>
+                ) : (
+                  <p className="text-sm text-muted-foreground">{contact.value}</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     );
   };
 
   const renderInfoCard = (title, description, icon) => (
-    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-      <div className="flex items-start space-x-3">
-        <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
-          {icon}
-        </div>
-        <div className="flex-1">
-          <h3 className="font-medium text-blue-900 dark:text-blue-100">{title}</h3>
-          <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{description}</p>
-        </div>
-      </div>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className="border-0 shadow-sm bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+        <CardContent className="p-4">
+          <div className="flex items-start space-x-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
+              {icon}
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-blue-900 dark:text-blue-100">{title}</h3>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">{description}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 
   return (
@@ -186,33 +229,57 @@ const AboutPage = () => {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button
+      <motion.div 
+        className="flex items-center justify-between mb-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleGoBack}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="hover:bg-accent"
         >
           <ArrowLeft size={20} />
-        </button>
+        </Button>
         
         <div className="flex-1 text-center">
-          <h1 className="text-xl font-semibold">Hakkında</h1>
+          <h1 className="text-xl font-semibold text-foreground">Hakkında</h1>
         </div>
 
         <div className="w-10" /> {/* Spacer for centering */}
-      </div>
+      </motion.div>
 
       {/* App Info */}
-      <div className="text-center py-8">
-        <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Heart size={40} className="text-primary" />
-        </div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{appInfo.name}</h2>
-        <p className="text-lg text-gray-600 dark:text-gray-400 mb-1">{appInfo.description}</p>
-        <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">{appInfo.tagline}</p>
-        <div className="inline-flex items-center px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
-          v{appInfo.version}
-        </div>
-      </div>
+      <motion.div 
+        className="text-center py-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.5, type: "spring" }}
+        >
+          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Heart size={40} className="text-primary" />
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <h2 className="text-2xl font-bold text-foreground mb-2">{appInfo.name}</h2>
+          <p className="text-lg text-muted-foreground mb-1">{appInfo.description}</p>
+          <p className="text-sm text-muted-foreground mb-4">{appInfo.tagline}</p>
+          <Badge variant="secondary" className="text-primary border-primary/20">
+            v{appInfo.version}
+          </Badge>
+        </motion.div>
+      </motion.div>
 
       {/* Info Card */}
       {renderInfoCard(
@@ -222,75 +289,177 @@ const AboutPage = () => {
       )}
 
       {/* Features */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Özelliklerimiz</h2>
+      <motion.div 
+        className="space-y-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <h2 className="text-lg font-semibold text-foreground flex items-center">
+          <Star className="w-5 h-5 mr-2 text-primary" />
+          Özelliklerimiz
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {features.map(renderFeatureCard)}
+          {features.map((feature, index) => renderFeatureCard(feature, index))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Team */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Ekibimiz</h2>
+      <motion.div 
+        className="space-y-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <h2 className="text-lg font-semibold text-foreground flex items-center">
+          <Users className="w-5 h-5 mr-2 text-primary" />
+          Ekibimiz
+        </h2>
         <div className="space-y-3">
-          {teamInfo.map(renderTeamCard)}
+          {teamInfo.map((team, index) => renderTeamCard(team, index))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Contact */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">İletişim</h2>
+      <motion.div 
+        className="space-y-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+      >
+        <h2 className="text-lg font-semibold text-foreground flex items-center">
+          <Mail className="w-5 h-5 mr-2 text-primary" />
+          İletişim
+        </h2>
         <div className="space-y-3">
-          {contactInfo.map(renderContactCard)}
+          {contactInfo.map((contact, index) => renderContactCard(contact, index))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="text-2xl font-bold text-primary">10K+</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">Aktif Kullanıcı</div>
-        </div>
-        <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="text-2xl font-bold text-primary">50K+</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">Başarılı İşlem</div>
-        </div>
-        <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="text-2xl font-bold text-primary">99%</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">Müşteri Memnuniyeti</div>
-        </div>
-        <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="text-2xl font-bold text-primary">24/7</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">Destek</div>
-        </div>
-      </div>
+      <motion.div 
+        className="grid grid-cols-2 md:grid-cols-4 gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+      >
+        <motion.div 
+          className="text-center"
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="text-2xl font-bold text-primary">10K+</div>
+              <div className="text-sm text-muted-foreground">Aktif Kullanıcı</div>
+            </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div 
+          className="text-center"
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="text-2xl font-bold text-primary">50K+</div>
+              <div className="text-sm text-muted-foreground">Başarılı İşlem</div>
+            </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div 
+          className="text-center"
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="text-2xl font-bold text-primary">99%</div>
+              <div className="text-sm text-muted-foreground">Müşteri Memnuniyeti</div>
+            </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div 
+          className="text-center"
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="text-2xl font-bold text-primary">24/7</div>
+              <div className="text-sm text-muted-foreground">Destek</div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
 
       {/* Mission & Vision */}
-      <div className="space-y-4">
-        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 p-4">
-          <h3 className="font-medium text-green-900 dark:text-green-100 mb-2">Misyonumuz</h3>
-          <p className="text-sm text-green-700 dark:text-green-300">
-            Kullanıcılarımızın güvenle ve kolaylıkla alım-satım yapabilmeleri için en iyi platform deneyimini sunmak.
-          </p>
-        </div>
+      <motion.div 
+        className="space-y-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.7 }}
+      >
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+        >
+          <Card className="border-0 shadow-sm bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
+            <CardContent className="p-4">
+              <div className="flex items-start space-x-3">
+                <div className="p-2 bg-green-100 dark:bg-green-800 rounded-lg">
+                  <Target size={20} className="text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-green-900 dark:text-green-100 mb-2">Misyonumuz</h3>
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    Kullanıcılarımızın güvenle ve kolaylıkla alım-satım yapabilmeleri için en iyi platform deneyimini sunmak.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800 p-4">
-          <h3 className="font-medium text-purple-900 dark:text-purple-100 mb-2">Vizyonumuz</h3>
-          <p className="text-sm text-purple-700 dark:text-purple-300">
-            Türkiye\'nin en güvenilir ve kullanıcı dostu ilan platformu olmak.
-          </p>
-        </div>
-      </div>
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.9 }}
+        >
+          <Card className="border-0 shadow-sm bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20">
+            <CardContent className="p-4">
+              <div className="flex items-start space-x-3">
+                <div className="p-2 bg-purple-100 dark:bg-purple-800 rounded-lg">
+                  <TrendingUp size={20} className="text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-purple-900 dark:text-purple-100 mb-2">Vizyonumuz</h3>
+                  <p className="text-sm text-purple-700 dark:text-purple-300">
+                    Türkiye\'nin en güvenilir ve kullanıcı dostu ilan platformu olmak.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
 
       {/* Footer */}
-      <div className="text-center py-4 border-t border-gray-200 dark:border-gray-700">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+      <motion.div 
+        className="text-center py-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.0 }}
+      >
+        <Separator className="mb-4" />
+        <p className="text-sm text-muted-foreground">
           © 2024 {appInfo.name}. Tüm hakları saklıdır.
         </p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+        <p className="text-xs text-muted-foreground/60 mt-1">
           Güvenle al, güvenle sat
         </p>
-      </div>
+      </motion.div>
     </motion.div>
   );
 };
