@@ -10,6 +10,32 @@ import ListingCard from '@/components/MyListingsPage/ListingCard';
 import EmptyState from '@/components/MyListingsPage/EmptyState';
 import DopingModal from '@/components/MyListingsPage/DopingModal';
 import { statusConfig, getListingStatus, getStatusBadge, getPremiumBadges } from '@/components/MyListingsPage/utils';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { SkeletonCard } from '@/components/ui/skeleton';
+import { EmptyStateList } from '@/components/ui/empty-state';
+import { Button } from '@/components/ui/button';
+
+// Modern skeleton component for my listings page
+const MyListingsSkeleton = () => (
+  <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8">
+    {/* Header Skeleton */}
+    <div className="mb-8">
+      <div className="h-8 bg-muted rounded w-48 mb-4"></div>
+      <div className="flex gap-2 mb-4">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="h-10 bg-muted rounded w-20"></div>
+        ))}
+      </div>
+    </div>
+
+    {/* Grid Skeleton */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 xl:gap-5 2xl:gap-4">
+      {Array.from({ length: 10 }).map((_, index) => (
+        <SkeletonCard key={index} />
+      ))}
+    </div>
+  </div>
+);
 
 const MyListingsPage = () => {
   const navigate = useNavigate();
@@ -182,7 +208,7 @@ const MyListingsPage = () => {
   if (loadingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+        <LoadingSpinner size="xl" />
       </div>
     );
   }
@@ -203,15 +229,21 @@ const MyListingsPage = () => {
       />
 
       {isLoading ? (
-        <div className="text-center py-20">
-          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">İlanlarınız yükleniyor...</p>
-        </div>
+        <MyListingsSkeleton />
       ) : filteredListings.length === 0 ? (
-        <EmptyState
-          selectedStatus={selectedStatus}
-          statusConfig={statusConfig}
-          onCreateClick={() => navigate('/ilan-olustur')}
+        <EmptyStateList
+          title={selectedStatus === 'all' ? 'Henüz ilan oluşturmamışsınız' : `${statusConfig[selectedStatus].label} ilan bulunamadı`}
+          description={selectedStatus === 'all' 
+            ? 'İlk ilanınızı oluşturarak takas yapmaya başlayın!'
+            : 'Bu durumda ilan bulunmuyor. Farklı bir filtre deneyin.'
+          }
+          action={
+            selectedStatus === 'all' && (
+              <Button onClick={() => navigate('/ilan-olustur')} className="btn-primary">
+                İlk İlanını Oluştur
+              </Button>
+            )
+          }
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 xl:gap-5 2xl:gap-4">
