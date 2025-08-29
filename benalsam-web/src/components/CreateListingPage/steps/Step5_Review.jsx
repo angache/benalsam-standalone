@@ -220,7 +220,7 @@ const Step5_Review = ({
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-foreground flex items-center"><CopyCheck className="w-5 h-5 mr-2 text-primary"/>Kurallar ve Onay</h3>
         <div className="items-top flex space-x-3 p-3 bg-input rounded-lg">
-            <Checkbox id="terms" checked={formData.acceptTerms} onCheckedChange={(checked) => handleInputChange('acceptTerms', checked)} className="mt-0.5" />
+            <Checkbox id="terms" checked={formData.acceptTerms} onCheckedChange={(checked) => handleInputChange('acceptTerms', checked)} className="mt-0.5 flex-shrink-0" />
             <div className="grid gap-1.5 leading-none">
                 <label
                     htmlFor="terms"

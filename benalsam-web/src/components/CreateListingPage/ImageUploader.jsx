@@ -5,23 +5,26 @@ import React, { useRef, useState } from 'react';
     import { checkImageLimit, showPremiumUpgradeToast } from '@/services/premiumService';
     import { useAuthStore } from '@/stores';
     import { compressImage } from '@/lib/imageUtils';
-    import ImageEditorModal from '@/components/ImageEditorModal';
-    import OptimizedImage from '@/components/OptimizedImage';
+import ImageEditorModal from '@/components/ImageEditorModal';
+import OptimizedImage from '@/components/OptimizedImage';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { SkeletonCard } from '@/components/ui/skeleton';
     
     const MAX_IMAGES_DEFAULT = 5;
     const MAX_FILE_SIZE_MB_DEFAULT = 2;
     
     const ImageUploader = ({ 
-      images, 
-      onImageChange, 
-      onRemoveImage, 
-      onSetMainImage, 
-      mainImageIndex, 
-      errors, 
-      disabled,
-      maxImages = MAX_IMAGES_DEFAULT,
-      onOpenStockModal
-    }) => {
+  images, 
+  onImageChange, 
+  onRemoveImage, 
+  onSetMainImage, 
+  mainImageIndex, 
+  errors, 
+  disabled,
+  maxImages = MAX_IMAGES_DEFAULT,
+  onOpenStockModal
+}) => {
+  const [isProcessing, setIsProcessing] = useState(false);
       const { currentUser } = useAuthStore();
       const fileInputRef = useRef(null);
       const [editorState, setEditorState] = useState({ isOpen: false, image: null, index: -1 });
@@ -54,6 +57,7 @@ import React, { useRef, useState } from 'react';
         }
         
         if (filesToProcess.length > 0) {
+            setIsProcessing(true);
             toast({ title: "Görseller optimize ediliyor...", description: "Lütfen bekleyin." });
             const compressedFiles = await Promise.all(filesToProcess.map(file => compressImage(file)));
     
@@ -68,6 +72,7 @@ import React, { useRef, useState } from 'react';
                     if (processedCount === compressedFiles.length) {
                         onImageChange(newImagesState);
                         toast({ title: "Görseller eklendi!", description: `${processedCount} görsel başarıyla optimize edildi ve eklendi.` });
+                        setIsProcessing(false);
                     }
                 };
                 reader.readAsDataURL(file);
@@ -138,9 +143,24 @@ import React, { useRef, useState } from 'react';
               </div>
             ))}
             {images.length < userMaxImages && !disabled && (
-              <Button type="button" variant="outline" onClick={() => fileInputRef.current && fileInputRef.current.click()} className="w-full aspect-square flex flex-col items-center justify-center border-dashed border-primary/50 text-primary hover:bg-primary/10">
-                <Upload className="w-6 h-6 mb-1" />
-                <span className="text-xs">Yükle</span>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => fileInputRef.current && fileInputRef.current.click()} 
+                disabled={isProcessing}
+                className="w-full aspect-square flex flex-col items-center justify-center border-dashed border-primary/50 text-primary hover:bg-primary/10"
+              >
+                {isProcessing ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mb-1" />
+                    <span className="text-xs">İşleniyor...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-6 h-6 mb-1" />
+                    <span className="text-xs">Yükle</span>
+                  </>
+                )}
               </Button>
             )}
             {showPremiumHint && (

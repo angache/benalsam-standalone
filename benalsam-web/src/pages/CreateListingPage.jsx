@@ -7,6 +7,9 @@ import { useAuthStore } from '@/stores';
 import { useAppData } from '@/hooks/useAppData';
 import { useCreateListingForm } from '@/components/CreateListingPage/useCreateListingForm.js';
 import { checkListingLimit, incrementUserUsage, showPremiumUpgradeToast } from '@/services/premiumService';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { SkeletonCard } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
 // Lazy load modal components
 const ListingRulesModal = lazy(() => import('@/components/ListingRulesModal.jsx'));
 const StockImageSearchModal = lazy(() => import('@/components/CreateListingPage/StockImageSearchModal.jsx'));
@@ -16,6 +19,66 @@ import StepButtons from '@/components/CreateListingPage/StepButtons.jsx';
 import { turkishProvincesAndDistricts } from '@/config/locations';
 import { urlToBlob } from '@/lib/utils';
 import { compressImage } from '@/lib/imageUtils';
+
+// Modern skeleton component for create listing page
+const CreateListingSkeleton = () => (
+  <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8">
+    {/* Stepper Skeleton */}
+    <div className="mb-10">
+      <div className="flex items-center justify-center space-x-4">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="flex items-center">
+            <div className="w-8 h-8 bg-muted rounded-full"></div>
+            {index < 4 && <div className="w-16 h-1 bg-muted mx-2"></div>}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Category Path Skeleton */}
+    <div className="mb-6 p-3 bg-muted/50 rounded-lg">
+      <div className="h-4 bg-muted rounded w-48"></div>
+    </div>
+
+    {/* Content Skeleton */}
+    <div className="p-6 bg-card rounded-2xl shadow-lg">
+      <div className="space-y-6">
+        <div className="h-8 bg-muted rounded w-32"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="space-y-2">
+              <div className="h-4 bg-muted rounded w-24"></div>
+              <div className="h-10 bg-muted rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {/* Buttons Skeleton */}
+      <div className="flex justify-between mt-8">
+        <div className="h-10 bg-muted rounded w-24"></div>
+        <div className="h-10 bg-muted rounded w-24"></div>
+      </div>
+    </div>
+  </div>
+);
+
+// Modern form field skeleton component
+const FormFieldSkeleton = ({ label, type = "input" }) => (
+  <div className="space-y-2">
+    <div className="h-4 bg-muted rounded w-24"></div>
+    {type === "input" && <div className="h-10 bg-muted rounded"></div>}
+    {type === "textarea" && <div className="h-20 bg-muted rounded"></div>}
+    {type === "select" && <div className="h-10 bg-muted rounded"></div>}
+    {type === "image" && (
+      <div className="grid grid-cols-3 gap-2">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={index} className="aspect-square bg-muted rounded"></div>
+        ))}
+      </div>
+    )}
+  </div>
+);
 
 // Lazy load step components
 const Step1_Category = lazy(() => import('@/components/CreateListingPage/steps/Step1_Category.jsx'));
@@ -165,7 +228,7 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
       if (loadingAuth) {
         return (
           <div className="min-h-screen flex items-center justify-center bg-background">
-            <Loader2 className="w-12 h-12 animate-spin text-primary" />
+            <LoadingSpinner size="xl" />
           </div>
         );
       }
@@ -173,7 +236,7 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
       const renderStepContent = () => {
         const StepLoadingSpinner = () => (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <LoadingSpinner size="lg" />
             <span className="ml-3 text-muted-foreground">Adım yükleniyor...</span>
           </div>
         );
@@ -270,6 +333,20 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
               </motion.div>
             )}
     
+            {isUploading && uploadProgress > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-primary/10 border border-primary/20 rounded-lg"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-primary">İlan Yükleniyor...</span>
+                  <span className="text-sm text-muted-foreground">{uploadProgress}%</span>
+                </div>
+                <Progress value={uploadProgress} className="h-2" />
+              </motion.div>
+            )}
+
             <motion.div
               key={currentStep}
               initial={{ opacity: 0, y: 20 }}
