@@ -17,11 +17,17 @@ import {
 import { useHapticFeedback } from '../../hooks/useHapticFeedback';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuthStore } from '../../stores';
+import { Switch } from '../../components/ui/switch';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Skeleton } from '../../components/ui/skeleton';
+import { useToast } from '../../components/ui/use-toast';
 
 const NotificationPage = () => {
   const navigate = useNavigate();
   const { triggerHaptic } = useHapticFeedback();
   const { currentUser } = useAuthStore();
+  const { toast } = useToast();
   
   // Notification preferences state
   const [notificationPreferences, setNotificationPreferences] = useState({
@@ -133,15 +139,27 @@ const NotificationPage = () => {
 
       if (error) {
         console.error('Error saving notification preferences:', error);
-        alert('Bildirim ayarları kaydedilirken bir hata oluştu.');
+        toast({
+          title: "Hata",
+          description: "Bildirim ayarları kaydedilirken bir hata oluştu.",
+          variant: "destructive"
+        });
         return;
       }
 
       setHasChanges(false);
-      alert('Bildirim ayarları başarıyla kaydedildi!');
+      toast({
+        title: "Başarılı",
+        description: "Bildirim ayarları başarıyla kaydedildi!",
+        variant: "default"
+      });
     } catch (error) {
       console.error('Error saving notification preferences:', error);
-      alert('Bildirim ayarları kaydedilirken bir hata oluştu.');
+      toast({
+        title: "Hata",
+        description: "Bildirim ayarları kaydedilirken bir hata oluştu.",
+        variant: "destructive"
+      });
     } finally {
       setIsSaving(false);
     }
@@ -149,79 +167,121 @@ const NotificationPage = () => {
 
   const handleGoBack = () => {
     if (hasChanges) {
-      const confirmed = confirm('Kaydedilmemiş değişiklikleriniz var. Çıkmak istediğinizden emin misiniz?');
+      const confirmed = window.confirm('Kaydedilmemiş değişiklikleriniz var. Çıkmak istediğinizden emin misiniz?');
       if (!confirmed) return;
     }
     navigate('/ayarlar');
   };
 
   const renderToggleItem = (title, subtitle, key, icon) => (
-    <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-      <div className="flex items-center space-x-3">
-        <div className="p-2 bg-primary/10 rounded-lg">
-          {icon}
-        </div>
-        <div className="flex-1">
-          <h3 className="font-medium text-gray-900 dark:text-white">{title}</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>
-        </div>
-      </div>
-      <div
-        onClick={() => handleToggle(key)}
-        className={`relative w-11 h-6 rounded-full transition-all duration-200 ease-in-out cursor-pointer ${
-          notificationPreferences[key]
-            ? 'bg-primary'
-            : 'bg-gray-200 dark:bg-gray-700'
-        }`}
-        style={{ minWidth: '44px', minHeight: '24px' }}
-      >
-        <div
-          className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-all duration-200 ease-in-out ${
-            notificationPreferences[key] ? 'translate-x-5' : 'translate-x-0'
-          }`}
-          style={{ minWidth: '20px', minHeight: '20px' }}
-        />
-      </div>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                {icon}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-foreground">{title}</h3>
+                <p className="text-sm text-muted-foreground">{subtitle}</p>
+              </div>
+            </div>
+            <Switch
+              checked={notificationPreferences[key]}
+              onCheckedChange={() => handleToggle(key)}
+              className="ml-4"
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 
   const renderSummaryEmailsSelector = () => (
-    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-      <div className="flex items-center space-x-3 mb-3">
-        <div className="p-2 bg-primary/10 rounded-lg">
-          <Mail size={20} className="text-primary" />
-        </div>
-        <div className="flex-1">
-          <h3 className="font-medium text-gray-900 dark:text-white">Özet E-postaları</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Haftalık aktivite özeti</p>
-        </div>
-      </div>
-      <div className="flex space-x-2">
-        {[
-          { value: 'never', label: 'Hiç' },
-          { value: 'weekly', label: 'Haftalık' },
-          { value: 'daily', label: 'Günlük' }
-        ].map((option) => (
-          <button
-            key={option.value}
-            onClick={() => handleSummaryEmailsChange(option.value)}
-            className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-              notificationPreferences.summary_emails === option.value
-                ? 'bg-primary text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex items-center space-x-3 mb-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Mail size={20} className="text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-foreground">Özet E-postaları</h3>
+              <p className="text-sm text-muted-foreground">Haftalık aktivite özeti</p>
+            </div>
+          </div>
+          <div className="flex space-x-2">
+            {[
+              { value: 'never', label: 'Hiç' },
+              { value: 'weekly', label: 'Haftalık' },
+              { value: 'daily', label: 'Günlük' }
+            ].map((option) => (
+              <Button
+                key={option.value}
+                onClick={() => handleSummaryEmailsChange(option.value)}
+                variant={notificationPreferences.summary_emails === option.value ? "default" : "outline"}
+                size="sm"
+                className="rounded-full"
+              >
+                {option.label}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="space-y-6">
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between mb-6">
+          <Skeleton className="w-10 h-10 rounded-lg" />
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="w-10 h-10 rounded-lg" />
+        </div>
+
+        {/* Quick Actions Skeleton */}
+        <div className="flex space-x-2 mb-6">
+          <Skeleton className="h-10 flex-1 rounded-lg" />
+          <Skeleton className="h-10 flex-1 rounded-lg" />
+        </div>
+
+        {/* Content Skeletons */}
+        {[...Array(4)].map((_, sectionIndex) => (
+          <Card key={sectionIndex} className="border-0 shadow-sm">
+            <CardHeader>
+              <div className="flex items-center space-x-2">
+                <Skeleton className="w-5 h-5 rounded" />
+                <Skeleton className="h-6 w-48" />
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {[...Array(2)].map((_, itemIndex) => (
+                <div key={itemIndex} className="flex items-center justify-between p-4">
+                  <div className="flex items-center space-x-3">
+                    <Skeleton className="w-10 h-10 rounded-lg" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-48" />
+                    </div>
+                  </div>
+                  <Skeleton className="w-11 h-6 rounded-full" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        ))}
       </div>
     );
   }
@@ -234,60 +294,80 @@ const NotificationPage = () => {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <button
+      <motion.div 
+        className="flex items-center justify-between mb-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleGoBack}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="hover:bg-accent"
         >
           <ArrowLeft size={20} />
-        </button>
+        </Button>
         
         <div className="flex-1 text-center">
-          <h1 className="text-xl font-semibold">Bildirimler</h1>
+          <h1 className="text-xl font-semibold text-foreground">Bildirimler</h1>
         </div>
 
-        <button
+        <Button
+          variant={hasChanges && !isSaving ? "default" : "secondary"}
+          size="icon"
           onClick={handleSave}
           disabled={!hasChanges || isSaving}
-          className={`p-2 rounded-lg transition-colors ${
-            hasChanges && !isSaving
-              ? 'bg-primary text-white hover:bg-primary/80'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
-          }`}
         >
           {isSaving ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <Save size={20} />
           )}
-        </button>
-      </div>
+        </Button>
+      </motion.div>
 
       {/* Quick Actions */}
-      <div className="flex space-x-2 mb-6">
-        <button
+      <motion.div 
+        className="flex space-x-2 mb-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+      >
+        <Button
           onClick={handleEnableAll}
-          className="flex-1 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
+          variant="default"
+          className="flex-1 bg-green-500 hover:bg-green-600"
         >
+          <CheckCircle size={16} className="mr-2" />
           Tümünü Aç
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={handleDisableAll}
-          className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
+          variant="destructive"
+          className="flex-1"
         >
+          <BellOff size={16} className="mr-2" />
           Tümünü Kapat
-        </button>
-      </div>
+        </Button>
+      </motion.div>
 
       {/* Notification Categories */}
-      <div className="space-y-4">
+      <motion.div 
+        className="space-y-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+      >
         {/* New Offers */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center">
-            <Bell className="w-5 h-5 mr-2 text-primary" />
-            Yeni Teklif Bildirimleri
-          </h2>
-          <div className="space-y-3">
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center text-lg">
+              <Bell className="w-5 h-5 mr-2 text-primary" />
+              Yeni Teklif Bildirimleri
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
             {renderToggleItem(
               'Push Bildirimleri',
               'Mobil uygulama veya tarayıcı bildirimi',
@@ -300,16 +380,18 @@ const NotificationPage = () => {
               'new_offer_email',
               <Mail size={20} className="text-primary" />
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Messages */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center">
-            <MessageCircle className="w-5 h-5 mr-2 text-primary" />
-            Mesaj Bildirimleri
-          </h2>
-          <div className="space-y-3">
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center text-lg">
+              <MessageCircle className="w-5 h-5 mr-2 text-primary" />
+              Mesaj Bildirimleri
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
             {renderToggleItem(
               'Push Bildirimleri',
               'Mobil uygulama veya tarayıcı bildirimi',
@@ -322,16 +404,18 @@ const NotificationPage = () => {
               'new_message_email',
               <Mail size={20} className="text-primary" />
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Reviews */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center">
-            <Star className="w-5 h-5 mr-2 text-primary" />
-            Değerlendirme Bildirimleri
-          </h2>
-          <div className="space-y-3">
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center text-lg">
+              <Star className="w-5 h-5 mr-2 text-primary" />
+              Değerlendirme Bildirimleri
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
             {renderToggleItem(
               'Push Bildirimleri',
               'Mobil uygulama veya tarayıcı bildirimi',
@@ -344,34 +428,46 @@ const NotificationPage = () => {
               'review_email',
               <Mail size={20} className="text-primary" />
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Summary Emails */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center">
-            <Settings className="w-5 h-5 mr-2 text-primary" />
-            Özet E-postaları
-          </h2>
-          {renderSummaryEmailsSelector()}
-        </div>
-      </div>
+        <Card className="border-0 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center text-lg">
+              <Settings className="w-5 h-5 mr-2 text-primary" />
+              Özet E-postaları
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {renderSummaryEmailsSelector()}
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Status Indicator */}
       {hasChanges && (
-        <div className="fixed bottom-4 left-4 right-4 bg-yellow-500 text-white p-3 rounded-lg flex items-center justify-between">
+        <motion.div 
+          className="fixed bottom-4 left-4 right-4 bg-yellow-500 text-white p-3 rounded-lg flex items-center justify-between shadow-lg"
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 100 }}
+          transition={{ duration: 0.3 }}
+        >
           <div className="flex items-center space-x-2">
             <AlertCircle size={20} />
-            <span>Kaydedilmemiş değişiklikler var</span>
+            <span className="font-medium">Kaydedilmemiş değişiklikler var</span>
           </div>
-          <button
+          <Button
             onClick={handleSave}
             disabled={isSaving}
-            className="px-4 py-1 bg-white text-yellow-500 rounded font-medium hover:bg-gray-100 transition-colors"
+            variant="secondary"
+            size="sm"
+            className="bg-white text-yellow-500 hover:bg-gray-100"
           >
             {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
-          </button>
-        </div>
+          </Button>
+        </motion.div>
       )}
     </motion.div>
   );

@@ -33,6 +33,11 @@ import { useUserPreferences } from '../../contexts/UserPreferencesContext';
 import { useHapticFeedback } from '../../hooks/useHapticFeedback';
 import { useAuthStore } from '../../stores';
 import EmailInfo from '../../components/SettingsComponents/EmailInfo';
+import { Switch } from '../../components/ui/switch';
+import { Skeleton } from '../../components/ui/skeleton';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent } from '../../components/ui/card';
+import { Separator } from '../../components/ui/separator';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -187,34 +192,41 @@ const SettingsPage = () => {
         key={item.id}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
       >
-        <button
-          onClick={() => item.path && handleNavigation(item.path)}
-          disabled={!item.path}
-          className={`w-full p-4 bg-card rounded-lg border transition-all duration-200 ${
-            item.path 
-              ? 'border-gray-200 dark:border-gray-700 hover:border-primary/50 hover:bg-gray-50 dark:hover:bg-gray-800'
-              : 'border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed'
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Icon size={20} className="text-primary" />
-              </div>
-              <div className="text-left">
-                <div className="font-medium">{item.title}</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  {item.subtitle}
+        <Card className="border-0 shadow-sm hover:shadow-md transition-all duration-200">
+          <CardContent className="p-0">
+            <button
+              onClick={() => item.path && handleNavigation(item.path)}
+              disabled={!item.path}
+              className={`w-full p-4 transition-all duration-200 ${
+                item.path 
+                  ? 'hover:bg-accent/50 cursor-pointer'
+                  : 'opacity-50 cursor-not-allowed'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Icon size={20} className="text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-medium text-foreground">{item.title}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {item.subtitle}
+                    </div>
+                  </div>
                 </div>
+                {item.path && (
+                  <ChevronRight size={16} className="text-muted-foreground" />
+                )}
               </div>
-            </div>
-            {item.path && (
-              <ChevronRight size={16} className="text-gray-400" />
-            )}
-          </div>
-        </button>
-        {showDivider && <div className="h-px bg-gray-200 dark:bg-gray-700 my-2" />}
+            </button>
+          </CardContent>
+        </Card>
+        {showDivider && <Separator className="my-2" />}
       </motion.div>
     );
   };
@@ -224,31 +236,28 @@ const SettingsPage = () => {
       <motion.div
         key={item.id}
         whileHover={{ scale: 1.02 }}
-        className="w-full p-4 bg-card rounded-lg border border-gray-200 dark:border-gray-700"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <div className="font-medium">{item.title}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {item.subtitle}
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <div className="font-medium text-foreground">{item.title}</div>
+                <div className="text-sm text-muted-foreground">
+                  {item.subtitle}
+                </div>
+              </div>
+              <Switch
+                checked={item.value}
+                onCheckedChange={item.onToggle}
+                className="ml-4"
+              />
             </div>
-          </div>
-          <button
-            onClick={item.onToggle}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              item.value 
-                ? 'bg-primary' 
-                : 'bg-gray-200 dark:bg-gray-700'
-            }`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                item.value ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
-          </button>
-        </div>
-        {showDivider && <div className="h-px bg-gray-200 dark:bg-gray-700 my-2" />}
+          </CardContent>
+        </Card>
+        {showDivider && <Separator className="my-2" />}
       </motion.div>
     );
   };
@@ -257,28 +266,74 @@ const SettingsPage = () => {
   if (!isLoaded || loadingAuth) {
     return (
       <div className="space-y-6">
-        <div className="animate-pulse">
-          <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg mb-6"></div>
-          <div className="space-y-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-            ))}
-          </div>
+        <div className="space-y-4">
+          {/* Email Info Skeleton */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-12 h-12 rounded-full" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-48" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Section Skeletons */}
+          {[...Array(5)].map((_, sectionIndex) => (
+            <div key={sectionIndex} className="space-y-2">
+              <Skeleton className="h-6 w-24 ml-4" />
+              <div className="space-y-1">
+                {[...Array(3)].map((_, itemIndex) => (
+                  <Card key={itemIndex} className="border-0 shadow-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Skeleton className="w-10 h-10 rounded-full" />
+                          <div className="space-y-2">
+                            <Skeleton className="h-4 w-32" />
+                            <Skeleton className="h-3 w-48" />
+                          </div>
+                        </div>
+                        <Skeleton className="w-4 h-4" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div 
+      className="space-y-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* Email Info */}
-      <div className="mb-6">
+      <motion.div 
+        className="mb-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+      >
         <EmailInfo currentUser={currentUser} />
-      </div>
+      </motion.div>
 
       {/* Account Settings */}
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 px-4">
+      <motion.div 
+        className="space-y-2"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+      >
+        <h2 className="text-lg font-semibold text-foreground px-4">
           Hesap
         </h2>
         <div className="space-y-1">
@@ -286,11 +341,16 @@ const SettingsPage = () => {
             renderSettingItem(item, index < accountSettings.length - 1)
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Chat Settings */}
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 px-4">
+      <motion.div 
+        className="space-y-2"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.3 }}
+      >
+        <h2 className="text-lg font-semibold text-foreground px-4">
           Sohbet
         </h2>
         <div className="space-y-1">
@@ -298,11 +358,16 @@ const SettingsPage = () => {
             renderSettingItem(item, index < chatSettings.length - 1)
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* App Settings */}
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 px-4">
+      <motion.div 
+        className="space-y-2"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.4 }}
+      >
+        <h2 className="text-lg font-semibold text-foreground px-4">
           Uygulama
         </h2>
         <div className="space-y-1">
@@ -310,11 +375,16 @@ const SettingsPage = () => {
             renderSettingItem(item, index < appSettings.length - 1)
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* User Preferences */}
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 px-4">
+      <motion.div 
+        className="space-y-2"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.5 }}
+      >
+        <h2 className="text-lg font-semibold text-foreground px-4">
           Görünüm Tercihleri
         </h2>
         <div className="space-y-1">
@@ -322,11 +392,16 @@ const SettingsPage = () => {
             renderToggleItem(item, index < userPreferencesSettings.length - 1)
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Support Settings */}
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 px-4">
+      <motion.div 
+        className="space-y-2"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.6 }}
+      >
+        <h2 className="text-lg font-semibold text-foreground px-4">
           Destek
         </h2>
         <div className="space-y-1">
@@ -334,23 +409,26 @@ const SettingsPage = () => {
             renderSettingItem(item, index < supportSettings.length - 1)
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Logout Button */}
-      <div className="pt-6">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+      <motion.div 
+        className="pt-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.7 }}
+      >
+        <Button
+          variant="destructive"
+          size="lg"
           onClick={handleLogout}
-          className="w-full p-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
+          className="w-full"
         >
-          <div className="flex items-center justify-center gap-2">
-            <LogOut size={20} />
-            Çıkış Yap
-          </div>
-        </motion.button>
-      </div>
-    </div>
+          <LogOut size={20} className="mr-2" />
+          Çıkış Yap
+        </Button>
+      </motion.div>
+    </motion.div>
   );
 };
 
