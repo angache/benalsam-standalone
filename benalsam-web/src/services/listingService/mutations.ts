@@ -11,6 +11,7 @@ const getCategoryIds = (categoryString: string) => {
   if (!categoryString) return { category_id: null, category_path: null };
   
   console.log('🔍 Processing category string:', categoryString);
+  console.log('🔍 categoriesConfig:', categoriesConfig);
   
   // Kategori path'ini parçala
   const pathParts = categoryString.split(' > ');
@@ -104,9 +105,9 @@ export const createListing = async (
       title: listingData.title,
       description: listingData.description,
       category: listingData.category,
-      category_id: category_id, // ✅ Kategori ID eklendi
-      category_path: category_path, // ✅ Kategori path eklendi
-      status: 'pending_approval', // ✅ Status eklendi
+      category_id: category_id,
+      category_path: category_path,
+      status: 'pending_approval',
       budget: listingData.budget,
       location: listingData.location,
       urgency: listingData.urgency,
@@ -120,16 +121,14 @@ export const createListing = async (
       is_featured: listingData.is_featured || false,
       is_urgent_premium: listingData.is_urgent_premium || false,
       is_showcase: listingData.is_showcase || false,
-      geolocation: listingData.geolocation,
+      latitude: listingData.geolocation?.latitude || null,
+      longitude: listingData.geolocation?.longitude || null,
+      geolocation: listingData.geolocation ? `POINT(${listingData.geolocation.longitude} ${listingData.geolocation.latitude})` : null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
 
-    console.log('🔍 Creating listing with category data:', {
-      category: listingData.category,
-      category_id,
-      category_path
-    });
+    console.log('🔍 Creating listing with data:', JSON.stringify(listingToInsert, null, 2));
 
     const { data, error } = await supabase
       .from('listings')

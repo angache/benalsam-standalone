@@ -96,7 +96,85 @@ docker-compose -f docker-compose.dev.yml exec admin-backend curl elasticsearch:9
 
 ## 🐛 **Common Issues**
 
-### **1. Build Issues**
+### **1. Database Trigger Issues**
+
+#### **Problem: `invalid input syntax for type integer: "UUID"` Error**
+**Symptoms:**
+- İlan oluşturma sırasında `invalid input syntax for type integer: "UUID"` hatası
+- `elasticsearch_sync_queue` tablosunda veri tipi uyumsuzluğu
+- `listings_queue_sync` trigger'ı aktifken hata oluşması
+
+**Root Cause:**
+- `elasticsearch_sync_queue.record_id` kolonu `integer` tipinde tanımlanmış
+- `listings.id` kolonu `uuid` tipinde
+- Trigger fonksiyonu UUID değerini integer kolona yazmaya çalışıyor
+
+**Solution:**
+```sql
+-- 1. Elasticsearch sync queue tablosunu düzelt
+ALTER TABLE elasticsearch_sync_queue DROP COLUMN record_id;
+ALTER TABLE elasticsearch_sync_queue ADD COLUMN record_id uuid NOT NULL;
+
+-- 2. Trigger fonksiyonunu yeniden oluştur
+CREATE OR REPLACE FUNCTION add_to_elasticsearch_queue()
+RETURNS TRIGGER AS $$
+DECLARE
+    record_id UUID;
+BEGIN
+    -- Record ID'yi belirle
+    IF TG_OP = 'DELETE' THEN
+        record_id := OLD.id;
+    ELSE
+        record_id := NEW.id;
+    END IF;
+
+    -- Queue'ya ekle
+    INSERT INTO elasticsearch_sync_queue (
+        table_name,
+        operation,
+        record_id,
+        change_data
+    ) VALUES (
+        TG_TABLE_NAME,
+        TG_OP,
+        record_id,
+        CASE 
+            WHEN TG_OP = 'INSERT' THEN to_jsonb(NEW)
+            WHEN TG_OP = 'UPDATE' THEN jsonb_build_object('old', to_jsonb(OLD), 'new', to_jsonb(NEW))
+            WHEN TG_OP = 'DELETE' THEN to_jsonb(OLD)
+        END
+    );
+
+    RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+-- 3. Trigger'ı yeniden etkinleştir
+ALTER TABLE listings ENABLE TRIGGER listings_queue_sync;
+```
+
+**Prevention:**
+- Yeni tablolar oluştururken veri tiplerini dikkatli kontrol et
+- Trigger fonksiyonlarında veri tipi uyumluluğunu test et
+- UUID ve integer tiplerini karıştırmamaya dikkat et
+
+#### **Problem: Frontend `prevListings is not iterable` Error**
+**Symptoms:**
+- İlan oluşturma sonrası frontend'de `prevListings is not iterable` hatası
+- React state güncellemesinde array olmayan değer
+
+**Solution:**
+```javascript
+// useAppData.jsx - Güvenli state güncelleme
+setListings(prevListings => {
+  const currentListings = Array.isArray(prevListings) ? prevListings : [];
+  return [newFullListing, ...currentListings].sort((a, b) => 
+    new Date(b.created_at) - new Date(a.created_at)
+  );
+});
+```
+
+### **2. Build Issues**
 
 #### **Problem: Build Fails**
 ```bash

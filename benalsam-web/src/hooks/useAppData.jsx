@@ -238,7 +238,10 @@ export const useAppData = (openAuthModal) => {
     const newFullListing = await createListingService(newListingData, currentUser.id, handleUploadProgress);
     setIsUploading(false);
     if (newFullListing) {
-      setListings(prevListings => [newFullListing, ...prevListings].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+      setListings(prevListings => {
+        const currentListings = Array.isArray(prevListings) ? prevListings : [];
+        return [newFullListing, ...currentListings].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      });
       toast({ title: "İlan Oluşturuldu! 🎉", description: "İlanınız başarıyla yayınlandı." });
       return newFullListing;
     } else {
