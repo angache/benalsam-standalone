@@ -14,6 +14,9 @@ import { useAuthStore } from '@/stores';
 import TrustScoreModal from '@/components/TrustScoreModal';
 import { useProfileData } from '@/hooks/queries/useProfileData';
 import { useQueryClient } from '@tanstack/react-query';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { SkeletonCard } from '@/components/ui/skeleton';
+import { EmptyStateList } from '@/components/ui/empty-state';
 
 const generateBoringAvatarUrl = (name, userId) => {
   const cleanedName = name ? String(name).replace(/[^a-zA-Z0-9]/g, '') : '';
@@ -21,14 +24,64 @@ const generateBoringAvatarUrl = (name, userId) => {
   return `https://source.boringavatars.com/beam/120/${fallbackName}?colors=ff6b35,f7931e,ff8c42,1a0f0a,2d1810`;
 };
 
+// Modern skeleton component for profile page
+const ProfileSkeleton = () => (
+  <div className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-8">
+    {/* Profile Header Skeleton */}
+    <div className="relative bg-card/80 backdrop-blur-md shadow-xl rounded-2xl overflow-hidden p-6 md:p-8 mb-8">
+      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-br from-primary/70 to-secondary/70 opacity-50 -z-10 transform -skew-y-3"></div>
+      
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 relative z-10">
+        {/* Avatar Skeleton */}
+        <div className="w-32 h-32 md:w-40 md:h-40 bg-muted rounded-full"></div>
+
+        <div className="flex-1 text-center md:text-left">
+          <div className="h-8 bg-muted rounded w-48 mb-2"></div>
+          <div className="h-4 bg-muted rounded w-32 mb-2"></div>
+          <div className="h-4 bg-muted rounded w-40 mb-2"></div>
+          <div className="h-4 bg-muted rounded w-64"></div>
+        </div>
+
+        {/* Button Skeleton */}
+        <div className="h-10 bg-muted rounded w-32"></div>
+      </div>
+      
+      {/* Stats Skeleton */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mt-8 pt-6 border-t border-border/50">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="glass-effect p-4 rounded-lg flex flex-col items-center justify-center text-center">
+            <div className="w-6 h-6 bg-muted rounded mb-2"></div>
+            <div className="h-6 bg-muted rounded w-8 mb-1"></div>
+            <div className="h-3 bg-muted rounded w-16"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Tabs Skeleton */}
+    <div className="mb-8">
+      <div className="flex border-b border-border/50">
+        <div className="h-10 bg-muted rounded w-24 mr-4"></div>
+        <div className="h-10 bg-muted rounded w-24"></div>
+      </div>
+    </div>
+
+    {/* Content Skeleton */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {Array.from({ length: 8 }).map((_, index) => (
+        <SkeletonCard key={index} />
+      ))}
+    </div>
+  </div>
+);
+
 const ProfileReviews = React.memo(({ reviews, currentUserId, onOpenLeaveReviewModal, profileData }) => {
   if (!reviews || reviews.length === 0) {
     return (
-      <div className="text-center py-12 glass-effect rounded-xl">
-        <Award className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-        <h3 className="text-xl font-semibold mb-2">Henüz Yorum Yok</h3>
-        <p className="text-muted-foreground">Bu kullanıcı hakkında henüz bir değerlendirme yapılmamış.</p>
-      </div>
+      <EmptyStateList 
+        title="Henüz Yorum Yok"
+        description="Bu kullanıcı hakkında henüz bir değerlendirme yapılmamış."
+      />
     );
   }
 
@@ -211,32 +264,27 @@ const ProfilePage = ({ onOpenLeaveReviewModal, openAuthModal, onToggleFavorite }
   }, [currentUser, isCurrentUserProfile, followLoading, profile, isFollowing, openAuthModal, queryClient]);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Profil yükleniyor...</p>
-        </div>
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   if (isError) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
-        <h1 className="text-3xl font-bold text-destructive mb-4">Profil Yüklenemedi</h1>
-        <p className="text-muted-foreground mb-6">
-          {error?.message || 'Profil bilgileri yüklenirken bir hata oluştu.'}
-        </p>
-        <div className="space-x-4">
-          <Button onClick={() => refetch()} className="btn-primary">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Tekrar Dene
-          </Button>
-          <Button onClick={() => navigate('/')} variant="outline">
-            Ana Sayfaya Dön
-          </Button>
-        </div>
+        <EmptyStateList 
+          title="Profil Yüklenemedi"
+          description={error?.message || 'Profil bilgileri yüklenirken bir hata oluştu.'}
+          action={
+            <div className="space-x-4">
+              <Button onClick={() => refetch()} className="btn-primary">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Tekrar Dene
+              </Button>
+              <Button onClick={() => navigate('/')} variant="outline">
+                Ana Sayfaya Dön
+              </Button>
+            </div>
+          }
+        />
       </div>
     );
   }
@@ -244,9 +292,15 @@ const ProfilePage = ({ onOpenLeaveReviewModal, openAuthModal, onToggleFavorite }
   if (!profile) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
-        <h1 className="text-3xl font-bold text-destructive mb-4">Profil Bulunamadı</h1>
-        <p className="text-muted-foreground mb-6">Aradığınız kullanıcı profili mevcut değil veya bir hata oluştu.</p>
-        <Button onClick={() => navigate('/')} className="btn-primary">Ana Sayfaya Dön</Button>
+        <EmptyStateList 
+          title="Profil Bulunamadı"
+          description="Aradığınız kullanıcı profili mevcut değil veya bir hata oluştu."
+          action={
+            <Button onClick={() => navigate('/')} className="btn-primary">
+              Ana Sayfaya Dön
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -301,7 +355,7 @@ const ProfilePage = ({ onOpenLeaveReviewModal, openAuthModal, onToggleFavorite }
                 isFollowing ? "btn-secondary-amazon" : "btn-primary"
               )}
             >
-              {followLoading ? <WifiOff className="w-4 h-4 mr-2 animate-ping" /> : (isFollowing ? <UserMinus className="w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />)}
+              {followLoading ? <LoadingSpinner size="sm" className="mr-2" /> : (isFollowing ? <UserMinus className="w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />)}
               {isFollowing ? "Takipten Çık" : "Takip Et"}
             </Button>
           )}
@@ -364,18 +418,17 @@ const ProfilePage = ({ onOpenLeaveReviewModal, openAuthModal, onToggleFavorite }
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 glass-effect rounded-xl">
-            <ImageIcon className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Henüz İlan Yok</h3>
-            <p className="text-muted-foreground">
-              {isCurrentUserProfile ? "İlk ilanınızı oluşturarak başlayın!" : "Bu kullanıcının henüz yayınlanmış bir ilanı bulunmuyor."}
-            </p>
-            {isCurrentUserProfile && (
-              <Button onClick={() => navigate('/ilan-olustur')} className="mt-6 btn-primary">
-                İlan Oluştur
-              </Button>
-            )}
-          </div>
+          <EmptyStateList 
+            title="Henüz İlan Yok"
+            description={isCurrentUserProfile ? "İlk ilanınızı oluşturarak başlayın!" : "Bu kullanıcının henüz yayınlanmış bir ilanı bulunmuyor."}
+            action={
+              isCurrentUserProfile && (
+                <Button onClick={() => navigate('/ilan-olustur')} className="btn-primary">
+                  İlan Oluştur
+                </Button>
+              )
+            }
+          />
         )
       )}
       {activeTab === 'yorumlar' && (
