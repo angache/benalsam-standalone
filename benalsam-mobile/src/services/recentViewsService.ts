@@ -22,6 +22,10 @@ export const getRecentViews = async (
   limit: number = 8
 ): Promise<RecentViewsResponse> => {
   try {
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+    
     console.log('👁️ Getting recent views for user:', userId);
 
     const { data: recentViews, error } = await supabase

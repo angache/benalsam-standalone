@@ -79,8 +79,14 @@ export const trackUserBehavior = async (
   metadata?: Partial<UserBehavior>
 ): Promise<ApiResponse<boolean>> => {
   try {
-    if (!userId || !listingId) {
-      throw new ValidationError('User ID and Listing ID are required');
+    if (!listingId) {
+      throw new ValidationError('Listing ID is required');
+    }
+
+    // Anonymous user'lar için userId kontrolü
+    const isAnonymous = userId.startsWith('anonymous_');
+    if (!userId && !isAnonymous) {
+      throw new ValidationError('User ID is required for authenticated users');
     }
 
     // İlan bilgilerini çek
@@ -116,13 +122,8 @@ export const trackUserBehavior = async (
             action: action,
             timestamp: behavior.timestamp.toISOString()
           },
-          user_profile: {
-            id: userId,
-            email: 'user@example.com', // TODO: Get from auth
-            name: 'User',
-            avatar: null
-          },
-          session_id: `session_${Date.now()}`,
+          user_id: isAnonymous ? undefined : userId, // Anonymous user'lar için user_id gönderme
+          session_id: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           device_info: {
             platform: 'mobile',
             version: '1.0.0'

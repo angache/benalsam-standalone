@@ -62,15 +62,16 @@ export const useTrackUserBehavior = () => {
       action: UserBehavior['action']; 
       metadata?: Partial<UserBehavior>;
     }) => {
-      if (!user?.id) {
-        throw new Error('User not authenticated');
-      }
-      return trackUserBehavior(user.id, listingId, action, metadata);
+      // Anonymous user'lar için session-based tracking
+      const userId = user?.id || `anonymous_${Date.now()}`;
+      return trackUserBehavior(userId, listingId, action, metadata);
     },
     onSuccess: () => {
-      // Invalidate recommendations to refresh them
-      queryClient.invalidateQueries({ queryKey: ['smart-recommendations'] });
-      queryClient.invalidateQueries({ queryKey: ['user-preferences-analysis'] });
+      // Invalidate recommendations to refresh them (sadece authenticated user'lar için)
+      if (user?.id) {
+        queryClient.invalidateQueries({ queryKey: ['smart-recommendations'] });
+        queryClient.invalidateQueries({ queryKey: ['user-preferences-analysis'] });
+      }
     },
     onError: (error) => {
       console.error('Error tracking user behavior:', error);

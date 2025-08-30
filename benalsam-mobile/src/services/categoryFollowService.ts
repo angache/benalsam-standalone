@@ -155,8 +155,8 @@ export const fetchFollowedCategories = async (
 ): Promise<ApiResponse<FollowedCategory[]>> => {
   if (!userId) {
     return {
-      data: null,
-      error: new ValidationError('Missing userId')
+      data: [],
+      error: null // Anonymous user'lar için boş array döndür
     };
   }
   
@@ -190,8 +190,8 @@ export const fetchListingsForFollowedCategories = async (
 ): Promise<ApiResponse<CategoryWithListings[]>> => {
   if (!userId) {
     return {
-      data: null,
-      error: new ValidationError('Missing userId')
+      data: [],
+      error: null // Anonymous user'lar için boş array döndür
     };
   }
   

@@ -10,7 +10,12 @@ export const useRecentViews = (limit = 8) => {
   
   return useQuery({
     queryKey: ['recent-views', user?.id, limit],
-    queryFn: () => getRecentViews(user?.id || '', limit),
+    queryFn: () => {
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
+      return getRecentViews(user.id, limit);
+    },
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000, // 5 dakika
     gcTime: 10 * 60 * 1000, // 10 dakika
