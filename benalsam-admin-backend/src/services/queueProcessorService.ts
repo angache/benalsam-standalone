@@ -380,6 +380,10 @@ export class QueueProcessorService {
           // Yeni listing eklendi
           if (changeData.status === 'active') {
             await this.elasticsearchService.indexDocument(recordId, this.transformListingForElasticsearch(changeData));
+            
+            // Kategori sayıları cache'ini temizle
+            await this.elasticsearchService.invalidateCategoryCountsCache();
+            logger.info(`✅ Category counts cache invalidated after new listing: ${recordId}`);
           }
           break;
 
@@ -391,18 +395,36 @@ export class QueueProcessorService {
           if (newData.status === 'active' && oldData.status !== 'active') {
             // İlan onaylandı - Elasticsearch'e ekle
             await this.elasticsearchService.indexDocument(recordId, this.transformListingForElasticsearch(newData));
+            
+            // Kategori sayıları cache'ini temizle
+            await this.elasticsearchService.invalidateCategoryCountsCache();
+            logger.info(`✅ Category counts cache invalidated after listing approval: ${recordId}`);
           } else if (newData.status === 'active' && oldData.status === 'active') {
             // Aktif ilan güncellendi - Elasticsearch'i güncelle
             await this.elasticsearchService.updateDocument(recordId, this.transformListingForElasticsearch(newData));
+            
+            // Kategori değişmişse cache'i temizle (category_id veya category name)
+            if (newData.category_id !== oldData.category_id || newData.category !== oldData.category) {
+              await this.elasticsearchService.invalidateCategoryCountsCache();
+              logger.info(`✅ Category counts cache invalidated after category change: ${recordId} (${oldData.category} → ${newData.category})`);
+            }
           } else if (newData.status !== 'active' && oldData.status === 'active') {
             // İlan deaktif edildi - Elasticsearch'ten sil
             await this.elasticsearchService.deleteDocument(recordId);
+            
+            // Kategori sayıları cache'ini temizle
+            await this.elasticsearchService.invalidateCategoryCountsCache();
+            logger.info(`✅ Category counts cache invalidated after listing deactivation: ${recordId}`);
           }
           break;
 
         case 'DELETE':
           // Listing silindi
           await this.elasticsearchService.deleteDocument(recordId);
+          
+          // Kategori sayıları cache'ini temizle
+          await this.elasticsearchService.invalidateCategoryCountsCache();
+          logger.info(`✅ Category counts cache invalidated after listing deletion: ${recordId}`);
           break;
 
         default:
@@ -541,11 +563,7 @@ export class QueueProcessorService {
       category_id: listing.category_id,
       category_path: listing.category_path,
       budget: listing.budget,
-      location: listing.location ? {
-        lat: listing.latitude,
-        lon: listing.longitude,
-        text: listing.location
-      } : null,
+      location: listing.location || null,
       urgency: listing.urgency,
       attributes: listing.attributes || {},
       user_id: listing.user_id,
@@ -718,7 +736,7 @@ export class QueueProcessorService {
   /**
    * Queue job'larını getir (filtreli)
    */
-  async getQueueJobs(status?: string, limit: number = 50, offset: number = 0): Promise<any[]> {
+  async getQueueJobs(status?: string, operation?: string, limit: number = 50, offset: number = 0): Promise<any[]> {
     try {
       let query = this.supabase
         .from('elasticsearch_sync_queue')
@@ -728,6 +746,10 @@ export class QueueProcessorService {
 
       if (status) {
         query = query.eq('status', status);
+      }
+
+      if (operation) {
+        query = query.eq('operation', operation);
       }
 
       const { data: jobs, error } = await query;

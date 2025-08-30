@@ -456,31 +456,9 @@ export const listingsController = {
         },
       };
 
-      // ES ve Cache temizleme işlemleri
-      try {
-        const { AdminElasticsearchService } = await import('../services/elasticsearchService');
-        const elasticsearchService = new AdminElasticsearchService();
-        
-        if (status.toLowerCase() === 'inactive') {
-          // İlan yayından kaldırıldığında ES'den sil
-          await elasticsearchService.deleteDocument(id);
-          logger.info(`✅ Elasticsearch'ten ilan silindi: ${id}`);
-          
-          // Kategori sayıları cache'ini temizle
-          await elasticsearchService.invalidateCategoryCountsCache();
-          logger.info(`✅ Kategori sayıları cache temizlendi`);
-        } else if (status.toLowerCase() === 'active') {
-          // İlan yayına alındığında ES'ye ekle
-          await elasticsearchService.indexDocument(id, transformedListing);
-          logger.info(`✅ Elasticsearch'e ilan eklendi: ${id}`);
-          
-          // Kategori sayıları cache'ini temizle
-          await elasticsearchService.invalidateCategoryCountsCache();
-          logger.info(`✅ Kategori sayıları cache temizlendi`);
-        }
-      } catch (cacheError) {
-        logger.warn(`⚠️ ES/Cache işlemlerinde hata:`, cacheError);
-      }
+      // Queue sistemi otomatik olarak Elasticsearch sync'i yapacak
+      // Trigger: listings_queue_sync → elasticsearch_sync_queue → QueueProcessor
+      logger.info(`📋 İlan moderasyonu tamamlandı, queue sync bekleniyor: ${id}`);
 
       res.json({
         success: true,

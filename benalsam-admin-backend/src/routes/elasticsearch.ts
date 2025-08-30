@@ -30,6 +30,7 @@ router.post('/sync/trigger', (req, res) => elasticsearchController.triggerManual
 
 // Queue Management Routes
 router.get('/queue/stats', (req, res) => elasticsearchController.getQueueStats(req, res));
+router.get('/queue/jobs', (req, res) => elasticsearchController.getQueueJobs(req, res));
 router.post('/queue/retry-failed', (req, res) => elasticsearchController.retryFailedJobs(req, res));
 router.post('/queue/clear', (req, res) => elasticsearchController.clearQueue(req, res));
 

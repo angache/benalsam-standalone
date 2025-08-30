@@ -97,7 +97,7 @@ const QueueManagement: React.FC = () => {
 
   const fetchQueueStats = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai-suggestions/queue/stats`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/elasticsearch/queue/stats`);
       const data = await response.json();
       if (data.success) {
         setQueueStats(data.data);
@@ -109,7 +109,7 @@ const QueueManagement: React.FC = () => {
 
   const fetchQueueHealth = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai-suggestions/queue/health`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/elasticsearch/queue/health`);
       const data = await response.json();
       if (data.success) {
         setQueueHealth(data.data);
@@ -125,7 +125,7 @@ const QueueManagement: React.FC = () => {
       if (status) params.append('status', status);
       params.append('limit', '50');
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai-suggestions/queue/jobs?${params}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/elasticsearch/queue/jobs?${params}`);
       const data = await response.json();
       if (data.success) {
         setQueueJobs(data.data);
@@ -140,7 +140,7 @@ const QueueManagement: React.FC = () => {
     setMessage({ text: 'Queue processor başlatılıyor...', type: 'info' });
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai-suggestions/queue/start`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/elasticsearch/queue/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -167,7 +167,7 @@ const QueueManagement: React.FC = () => {
     setMessage({ text: 'Queue processor durduruluyor...', type: 'info' });
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai-suggestions/queue/stop`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/elasticsearch/queue/stop`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -198,7 +198,7 @@ const QueueManagement: React.FC = () => {
     setMessage({ text: 'Başarısız job\'lar yeniden deneniyor...', type: 'info' });
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai-suggestions/queue/retry-failed`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/elasticsearch/queue/retry-failed`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -231,7 +231,7 @@ const QueueManagement: React.FC = () => {
     setMessage({ text: `Queue temizleniyor${statusText}...`, type: 'info' });
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai-suggestions/queue/clear`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/elasticsearch/queue/clear`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
@@ -557,7 +557,11 @@ const QueueManagement: React.FC = () => {
                         <Chip 
                           label={job.operation} 
                           size="small"
-                          color={job.operation === 'INSERT' ? 'success' : 'info'}
+                          color={
+                            job.operation === 'INSERT' ? 'success' :
+                            job.operation === 'DELETE' ? 'error' :
+                            job.operation === 'UPDATE' ? 'warning' : 'info'
+                          }
                         />
                       </TableCell>
                       <TableCell>{job.record_id}</TableCell>

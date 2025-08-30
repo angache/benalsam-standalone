@@ -289,6 +289,35 @@ export class ElasticsearchController {
   }
 
   /**
+   * Get queue jobs
+   */
+  async getQueueJobs(req: Request, res: Response) {
+    try {
+      const { status, operation, limit = 50, offset = 0 } = req.query;
+      
+      const queueJobs = await this.getQueueProcessorService().getQueueJobs(
+        status as string,
+        operation as string,
+        parseInt(limit as string),
+        parseInt(offset as string)
+      );
+      
+      res.json({
+        success: true,
+        data: queueJobs,
+        message: 'Queue jobs retrieved'
+      });
+    } catch (error) {
+      logger.error('❌ Failed to get queue jobs:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get queue jobs',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  /**
    * Retry failed jobs
    */
   async retryFailedJobs(req: Request, res: Response) {

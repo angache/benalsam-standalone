@@ -280,6 +280,11 @@ const ElasticsearchDashboardPage: React.FC = () => {
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
 
+  // Queue jobs state
+  const [queueJobs, setQueueJobs] = useState<any[]>([]);
+  const [loadingQueueJobs, setLoadingQueueJobs] = useState(false);
+  const [queueJobFilter, setQueueJobFilter] = useState<string>('all');
+
   // Mock data for development
   const mockData = {
     healthStatus: {

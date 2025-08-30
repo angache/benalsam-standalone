@@ -1033,6 +1033,18 @@ export const apiService = {
       async cleanupProgress(daysToKeep: number = 7): Promise<any> {
         const response = await apiClient.post('/progress/cleanup', { daysToKeep });
         return response.data;
+      },
+
+      // Queue Jobs API methods
+      async getQueueJobs(params?: { status?: string; operation?: string; limit?: number; offset?: number }): Promise<any> {
+        const queryParams = new URLSearchParams();
+        if (params?.status) queryParams.append('status', params.status);
+        if (params?.operation) queryParams.append('operation', params.operation);
+        if (params?.limit) queryParams.append('limit', params.limit.toString());
+        if (params?.offset) queryParams.append('offset', params.offset.toString());
+        
+        const response = await apiClient.get(`/elasticsearch/queue/jobs?${queryParams.toString()}`);
+        return response.data;
       }
   }; 
 

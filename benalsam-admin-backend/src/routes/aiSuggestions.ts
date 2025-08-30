@@ -897,7 +897,8 @@ router.get('/queue/jobs', async (req, res) => {
     const { status, limit = 50, offset = 0 } = req.query;
     
     const jobs = await queueProcessor.getQueueJobs(
-      status as string, 
+      status as string,
+      undefined, // operation
       parseInt(limit as string), 
       parseInt(offset as string)
     );
