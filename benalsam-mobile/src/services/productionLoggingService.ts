@@ -147,11 +147,27 @@ class ProductionLoggingService {
     try {
       // Sentry'ye gönder (production'da)
       if (this.isProduction) {
-        // Sentry SDK kullan
-        // Sentry.captureException(new Error(logData.message), {
-        //   tags: { session_id: logData.sessionId },
-        //   extra: logData.metadata
-        // });
+        const Sentry = await import('@sentry/react-native');
+        
+        if (logData.level === LogLevel.ERROR) {
+          Sentry.captureException(new Error(logData.message), {
+            tags: { session_id: logData.sessionId },
+            extra: {
+              level: logData.level,
+              context: logData.metadata,
+              timestamp: logData.timestamp
+            }
+          });
+        } else {
+          Sentry.captureMessage(logData.message, {
+            level: logData.level === LogLevel.WARN ? 'warning' : 'info',
+            tags: { session_id: logData.sessionId },
+            extra: {
+              context: logData.metadata,
+              timestamp: logData.timestamp
+            }
+          });
+        }
       }
     } catch (error) {
       console.error('Sentry log failed:', logData);
