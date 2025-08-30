@@ -26,17 +26,23 @@ export const processFetchedListings = async (
   
   let profilesMap = new Map<string, Partial<UserProfile>>();
   if (userIds.length > 0) {
-    const { data: profilesData, error: profilesError } = await supabase
-      .from('profiles')
-      .select('id, name, avatar_url, rating, total_ratings, rating_sum')
-      .in('id', userIds);
+    try {
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, name, avatar_url, rating, total_ratings, rating_sum')
+        .in('id', userIds);
 
-    if (profilesError) {
-      throw new DatabaseError('Failed to fetch profiles for listings', profilesError);
-    }
+      if (profilesError) {
+        console.warn('⚠️ Failed to fetch profiles for listings:', profilesError);
+        // Don't throw error, continue without user profiles
+      }
 
-    if (profilesData) {
-      profilesMap = new Map(profilesData.map(p => [p.id, p]));
+      if (profilesData) {
+        profilesMap = new Map(profilesData.map(p => [p.id, p]));
+      }
+    } catch (profileError) {
+      console.warn('⚠️ Profile fetch error, continuing without user profiles:', profileError);
+      // Continue without user profiles
     }
   }
   

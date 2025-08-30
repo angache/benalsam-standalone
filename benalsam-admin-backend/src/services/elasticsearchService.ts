@@ -745,7 +745,9 @@ export class AdminElasticsearchService {
       const results = response.hits.hits.map((hit: any) => ({
         id: hit._id,
         score: hit._score,
-        ...hit._source
+        ...hit._source,
+        // User bilgisi yoksa user_id'yi koru
+        user_id: hit._source.user_id || hit._source.user?.id
       }));
 
       // Cache the search results

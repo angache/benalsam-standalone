@@ -171,6 +171,89 @@ export const getSimilarListingsByCategory = async (
   try {
     console.log('🔍 Getting similar listings by category:', category);
 
+    // Backend API'yi kullan
+    const backendUrl = process.env.EXPO_PUBLIC_ADMIN_BACKEND_URL;
+    if (!backendUrl) {
+      console.log('⚠️ Backend URL not configured, falling back to Supabase');
+      return await getSimilarListingsByCategoryFromSupabase(category, excludeListingId, limit);
+    }
+
+    console.log('🔍 getSimilarListingsByCategory - Using Backend API:', backendUrl);
+
+    const response = await fetch(`${backendUrl}/api/v1/elasticsearch/search`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: '',
+        filters: {
+          category: category
+        },
+        page: 1,
+        limit: limit,
+        sort: {
+          field: 'views_count',
+          order: 'desc'
+        }
+      }),
+    });
+
+    if (!response.ok) {
+      console.log('⚠️ Backend API failed, falling back to Supabase');
+      return await getSimilarListingsByCategoryFromSupabase(category, excludeListingId, limit);
+    }
+
+    const responseData = await response.json();
+    
+    if (!responseData.success || !responseData.data) {
+      console.log('⚠️ Invalid backend response, falling back to Supabase');
+      return await getSimilarListingsByCategoryFromSupabase(category, excludeListingId, limit);
+    }
+
+    const result = responseData.data;
+    
+    if (!result.hits || result.hits.length === 0) {
+      console.log('⚠️ No hits found in backend API');
+      return {
+        similarListings: [],
+        totalCount: 0,
+      };
+    }
+
+    // Exclude listing if specified
+    let filteredHits = result.hits;
+    if (excludeListingId) {
+      filteredHits = result.hits.filter((hit: any) => hit.id !== excludeListingId);
+    }
+
+    const similarListingsWithScore: SimilarListing[] = filteredHits.map((hit: any) => ({
+      listing: hit as unknown as ListingWithUser,
+      similarityScore: 0.8, // Kategori bazlı olduğu için yüksek skor
+      reason: 'Aynı kategoride',
+    }));
+
+    console.log('🔍 Similar listings by category found from Backend API:', similarListingsWithScore.length);
+
+    return {
+      similarListings: similarListingsWithScore,
+      totalCount: similarListingsWithScore.length,
+    };
+  } catch (error) {
+    console.error('❌ Backend API error, falling back to Supabase:', error);
+    return await getSimilarListingsByCategoryFromSupabase(category, excludeListingId, limit);
+  }
+};
+
+// Fallback function using Supabase
+const getSimilarListingsByCategoryFromSupabase = async (
+  category: string,
+  excludeListingId?: string,
+  limit: number = 8
+): Promise<SimilarListingsResponse> => {
+  try {
+    console.log('🔄 getSimilarListingsByCategory - Using Supabase fallback');
+
     let query = supabase
       .from('listings')
       .select(`
@@ -211,7 +294,7 @@ export const getSimilarListingsByCategory = async (
       .limit(limit);
 
     if (error) {
-      console.error('Error fetching similar listings by category:', error);
+      console.error('❌ Supabase fallback error:', error);
       throw new Error(`Failed to fetch similar listings by category: ${error.message}`);
     }
 
@@ -221,14 +304,14 @@ export const getSimilarListingsByCategory = async (
       reason: 'Aynı kategoride',
     }));
 
-    console.log('🔍 Similar listings by category found:', similarListingsWithScore.length);
+    console.log('🔍 Similar listings by category found from Supabase:', similarListingsWithScore.length);
 
     return {
       similarListings: similarListingsWithScore,
       totalCount: similarListingsWithScore.length,
     };
   } catch (error) {
-    console.error('Error in getSimilarListingsByCategory:', error);
+    console.error('❌ Supabase fallback error:', error);
     throw error;
   }
 }; 
