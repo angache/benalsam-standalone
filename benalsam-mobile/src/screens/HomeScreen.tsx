@@ -53,8 +53,10 @@ import ipChangeDetectionService from '../services/ipChangeDetectionService';
 
 
 // Legacy imports - aşamalı olarak kaldırılacak
-import { categoriesConfig } from '../config/categories-with-attributes';
 import { SearchBar } from '../components/SearchBar';
+
+// Dinamik kategori sistemi
+import { useCategories } from '../hooks/queries/useCategories';
 
 type RootStackParamList = {
   Search: { query?: string; filter?: string };
@@ -585,6 +587,9 @@ const HomeScreen = () => {
   const [categoryPath, setCategoryPath] = useState<string[]>([]);
   const { handleScroll, headerOpacity, headerTranslateY } = useScrollHeader(50);
   
+  // Dinamik kategori yükleme
+  const { data: categories, isLoading: categoriesLoading, error: categoriesError, refetch: refetchCategories } = useCategories();
+  
   // Analytics tracking
   useEffect(() => {
     analyticsService.trackScreenView('HomeScreen');
@@ -597,6 +602,17 @@ const HomeScreen = () => {
     const totalMemory = 4000; // 4GB total
     performanceService.trackMemoryUsage(usedMemory, totalMemory);
   }, []);
+
+  // Kategori yükleme log'ları
+  useEffect(() => {
+    if (categoriesLoading) {
+      console.log('🔄 [HomeScreen] Kategoriler yükleniyor...');
+    } else if (categoriesError) {
+      console.error('❌ [HomeScreen] Kategori yükleme hatası:', categoriesError);
+    } else if (categories) {
+      console.log(`✅ [HomeScreen] ${categories.length} kategori yüklendi:`, categories.map(cat => cat.name));
+    }
+  }, [categories, categoriesLoading, categoriesError]);
   
   // React Query hooks with proper typing
   const { data: listings = [], isLoading: listingsLoading, error: listingsError, refetch: refetchListings } = useListings() as UseQueryResult<ListingWithUser[], Error>;
@@ -652,7 +668,8 @@ const HomeScreen = () => {
         refetchRecommendations(),
         refetchSellerRecommendations(),
         refetchRecentViews(),
-        refetchSimilarListings()
+        refetchSimilarListings(),
+        refetchCategories()
       ]);
       
       // Performance monitoring - API response time tracking
@@ -669,12 +686,12 @@ const HomeScreen = () => {
     } finally {
       setRefreshing(false);
     }
-  }, [refetchListings, refetchPopular, refetchDeals, refetchMostOffered, refetchFollowed, refetchRecommendations, refetchSellerRecommendations, refetchRecentViews, refetchSimilarListings]);
+  }, [refetchListings, refetchPopular, refetchDeals, refetchMostOffered, refetchFollowed, refetchRecommendations, refetchSellerRecommendations, refetchRecentViews, refetchSimilarListings, refetchCategories]);
 
   const isLoading = listingsLoading || popularLoading || dealsLoading || mostOfferedLoading || followedLoading || recommendationsLoading || sellerRecommendationsLoading || recentViewsLoading || similarListingsLoading;
 
   // Individual section loading states
-  const isCategoriesLoading = false; // Categories are static for now
+  const isCategoriesLoading = categoriesLoading; // Dinamik kategori yükleme
   const isMostOfferedLoading = mostOfferedLoading;
   const isPopularLoading = popularLoading;
   const isTodaysDealsLoading = dealsLoading;
@@ -1275,16 +1292,36 @@ const HomeScreen = () => {
 
           {/* Kategoriler */}
           <View style={styles.categorySection}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {getCurrentCategories().map((category: any) => (
-                <CategoryCard
-                  key={category.name}
-                  title={category.name}
-                  onPress={() => handleSubCategoryPress(category)}
-                  icon={category.icon}
-                />
-              ))}
-            </ScrollView>
+            {categoriesLoading ? (
+              <View style={styles.horizontalListContainer}>
+                {[1, 2, 3, 4].map((i) => (
+                  <View key={i} style={[styles.skeletonCard, { width: 120, height: 80, marginRight: 16 }]} />
+                ))}
+              </View>
+            ) : categoriesError ? (
+              <View style={styles.horizontalListContainer}>
+                <Text style={[styles.errorMessage, { color: colors.error }]}>
+                  Kategoriler yüklenemedi
+                </Text>
+              </View>
+            ) : categories && categories.length > 0 ? (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {categories.slice(0, 8).map((category: any) => (
+                  <CategoryCard
+                    key={category.id}
+                    title={category.name}
+                    onPress={() => handleSubCategoryPress(category)}
+                    icon={category.icon || 'Smartphone'}
+                  />
+                ))}
+              </ScrollView>
+            ) : (
+              <View style={styles.horizontalListContainer}>
+                <Text style={[styles.errorMessage, { color: colors.textSecondary }]}>
+                  Kategori bulunamadı
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Günün Fırsatları - PROMOSYONLU İLANLAR */}

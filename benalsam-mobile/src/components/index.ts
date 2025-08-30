@@ -6,6 +6,9 @@ export { default as ListingListItem } from './ListingListItem';
 export { default as SectionHeader } from './SectionHeader';
 export { default as Modal } from './Modal';
 export { default as PopularSearches } from './PopularSearches';
+export { default as CategoryAttributesSelector } from './CategoryAttributesSelector';
+export { CategorySuggestionCard } from './CategorySuggestionCard';
+export { default as LocationSelector } from './LocationSelector';
 
 // UI Components
 export { SearchBar } from './SearchBar';
@@ -15,6 +18,7 @@ export { Button } from './Button';
 export { Input } from './Input';
 export { Card } from './Card';
 export { Avatar } from './Avatar';
+export { Badge } from './Badge';
 
 // Error Handling
 export { ErrorBoundary } from './ErrorBoundary';

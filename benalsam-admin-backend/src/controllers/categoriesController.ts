@@ -67,6 +67,38 @@ export const categoriesController = {
     }
   },
 
+  // Kategori attribute'larını getir - Auth gerektirmeyen versiyon
+  async getCategoryAttributes(req: any, res: Response): Promise<Response | void> {
+    try {
+      const { path } = req.query;
+      
+      if (!path) {
+        return res.status(400).json({
+          success: false,
+          message: 'Kategori path parametresi gerekli',
+        });
+      }
+      
+      logger.info(`Fetching attributes for category path: ${path}`);
+
+      const attributes = await categoryService.getCategoryAttributes(decodeURIComponent(path));
+
+      logger.info(`Fetched ${attributes.length} attributes for category: ${path}`);
+
+      res.json({
+        success: true,
+        data: attributes,
+        message: 'Kategori özellikleri başarıyla getirildi',
+      });
+    } catch (error) {
+      logger.error('Error fetching category attributes:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Kategori özellikleri getirilirken bir hata oluştu',
+      });
+    }
+  },
+
   // Tek kategori getir - Auth gerektirmeyen versiyon
   async getCategory(req: any, res: Response): Promise<Response | void> {
     try {

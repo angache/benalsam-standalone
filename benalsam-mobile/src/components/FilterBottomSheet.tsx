@@ -22,6 +22,9 @@ import {
   Tag
 } from 'lucide-react-native';
 
+// Dinamik kategori sistemi
+import { useCategories } from '../hooks/queries/useCategories';
+
 const { height: screenHeight } = Dimensions.get('window');
 const BOTTOM_SHEET_HEIGHT = screenHeight * 0.8;
 
@@ -61,6 +64,9 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
   const [expandedSections, setExpandedSections] = useState<string[]>(['category']);
   const [selectedFilters, setSelectedFilters] = useState<any>({});
   
+  // Dinamik kategori yükleme
+  const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useCategories();
+  
   // currentFilters değiştiğinde selectedFilters'ı güncelle - Sadece ilk yüklemede
   useEffect(() => {
     if (currentFilters && Object.keys(currentFilters).length > 0 && Object.keys(selectedFilters).length === 0) {
@@ -70,6 +76,17 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
       setSelectedFilters(currentFilters);
     }
   }, [currentFilters]); // selectedFilters dependency'sini kaldırdık
+
+  // Kategori yükleme log'ları
+  useEffect(() => {
+    if (categoriesLoading) {
+      console.log('🔄 [FilterBottomSheet] Kategoriler yükleniyor...');
+    } else if (categoriesError) {
+      console.error('❌ [FilterBottomSheet] Kategori yükleme hatası:', categoriesError);
+    } else if (categories) {
+      console.log(`✅ [FilterBottomSheet] ${categories.length} kategori yüklendi:`, categories.map(cat => cat.name));
+    }
+  }, [categories, categoriesLoading, categoriesError]);
   
   const translateY = useRef(new Animated.Value(screenHeight)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
@@ -240,35 +257,20 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
     return filteredCounts;
   };
 
-  // Tüm kategorileri tanımla (veritabanından alınacak)
-    const ALL_CATEGORIES = [
-    'Elektronik',
-    'Ev Aletleri & Mobilya',
-    'Araç & Vasıta',
-    'Moda',
-    'Spor & Hobi',
-    'Kitap & Müzik',
-    'İş Makinesi',
-    'Bahçe & Tarım',
-    'Sanat & Koleksiyon',
-    'Oyuncak & Hobi',
-    'Sağlık & Güzellik',
-    'Eğitim & Kurs',
-    'Hizmet',
-    'Diğer'
-  ];
-
   // Dinamik kategorileri oluştur - Sadece sonuçlu olanları göster
   const getDynamicCategories = () => {
     const dynamicCounts = getDynamicCategoryCounts();
     
+    // Dinamik kategorileri al
+    const allCategories = categories ? categories.map(cat => cat.name) : [];
+    
     // Eğer arama sonucu varsa, sadece sonuçlu kategorileri göster
     if (searchResults.length > 0) {
-      return ALL_CATEGORIES.filter(category => dynamicCounts[category] > 0);
+      return allCategories.filter(category => dynamicCounts[category] > 0);
     }
     
     // Arama sonucu yoksa tüm kategorileri göster
-    return ALL_CATEGORIES;
+    return allCategories;
   };
 
   const dynamicCategoryCounts = getDynamicCategoryCounts();
@@ -282,7 +284,7 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
       id: 'category',
       title: 'Kategoriler',
       icon: <Tag size={20} color={colors.text} />,
-      options: getDynamicCategories().map(category => {
+      options: categoriesLoading ? [] : getDynamicCategories().map(category => {
         // Debug log kaldırıldı
         return {
           id: category.toLowerCase().replace(/[^a-z0-9]/g, '-'),
@@ -488,7 +490,20 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
 
         {isExpanded && (
           <View style={styles.sectionContent}>
-            {section.options.map(option => {
+            {section.id === 'category' && categoriesLoading ? (
+              <View style={styles.loadingContainer}>
+                <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+                  Kategoriler yükleniyor...
+                </Text>
+              </View>
+            ) : section.id === 'category' && categoriesError ? (
+              <View style={styles.errorContainer}>
+                <Text style={[styles.errorText, { color: colors.error }]}>
+                  Kategoriler yüklenemedi
+                </Text>
+              </View>
+            ) : (
+              section.options.map(option => {
               const isSelected = selectedValues.includes(option.value);
               const hasResults = (option.count || 0) > 0;
               const isDisabled = section.id === 'category' && !hasResults;
@@ -526,9 +541,10 @@ export const FilterBottomSheet: React.FC<FilterBottomSheetProps> = ({
                   {isSelected && (
                     <View style={[styles.checkmark, { backgroundColor: colors.primary }]} />
                   )}
-                </TouchableOpacity>
-              );
-            })}
+                                  </TouchableOpacity>
+                );
+              })
+            )}
           </View>
         )}
       </View>
@@ -818,5 +834,19 @@ const styles = StyleSheet.create({
   applyButtonText: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  loadingContainer: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 14,
+  },
+  errorContainer: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 14,
   },
 }); 

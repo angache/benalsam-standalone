@@ -20,6 +20,9 @@ const router: IRouter = Router();
 // Get all categories - PUBLIC (no auth required)
 router.get('/', categoriesController.getCategories);
 
+// Get category attributes by path - PUBLIC (no auth required)
+router.get('/attributes', categoriesController.getCategoryAttributes);
+
 // Admin endpoint for category management (requires auth)
 router.get('/admin', authMiddleware({ requiredPermissions: ['categories:read'] }), categoriesController.getCategories);
 

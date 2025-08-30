@@ -5,10 +5,12 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useThemeColors } from '../stores';
 import { useCreateListingContext } from '../contexts/CreateListingContext';
 import { useAuthStore } from '../stores';
-import { categoriesConfig } from '../config/categories-with-attributes';
 import { Home, ChevronRight, CheckCircle2, Sparkles } from 'lucide-react-native';
 import CategoryCard from '../components/CategoryCard';
 import { Smartphone, Car, Building, Shirt, Home as HomeIcon, GraduationCap, Briefcase, Dumbbell, Palette, Baby, Gamepad2, Plane, Bitcoin } from 'lucide-react-native';
+
+// Dinamik kategori sistemi
+import { useCategories } from '../hooks/queries/useCategories';
 import { useCreateListingStore } from '../stores';
 
 const steps = [
@@ -56,6 +58,9 @@ const CreateListingCategoryScreen = () => {
   const [search, setSearch] = useState('');
   const [path, setPath] = useState<string[]>([]);
   const [selectionDone, setSelectionDone] = useState(false);
+  
+  // Dinamik kategori yükleme
+  const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useCategories();
 
   // Context'teki tamamlanmış ilan varsa temizle
   React.useEffect(() => {
@@ -87,20 +92,64 @@ const CreateListingCategoryScreen = () => {
     }, [user, loading, navigation])
   );
 
+  // Kategori yükleme log'ları
+  React.useEffect(() => {
+    if (categoriesLoading) {
+      console.log('🔄 [CreateListingCategoryScreen] Kategoriler yükleniyor...');
+    } else if (categoriesError) {
+      console.error('❌ [CreateListingCategoryScreen] Kategori yükleme hatası:', categoriesError);
+    } else if (categories) {
+      console.log(`✅ [CreateListingCategoryScreen] ${categories.length} kategori yüklendi:`, categories.map(cat => cat.name));
+    }
+  }, [categories, categoriesLoading, categoriesError]);
+
   // Ana kategori adı (icon ve renk için)
   const mainCategoryName = path[0] || '';
-  const mainCategory = categoriesConfig.find(cat => cat.name === mainCategoryName);
+  const mainCategory = categories?.find(cat => cat.name === mainCategoryName);
 
   // Şu anki seviyedeki kategoriler
-  const categories = getSubcategories(categoriesConfig, path);
+  const currentCategories = categories ? getSubcategories(categories, path) : [];
   // Arama filtresi
-  const filteredCategories = categories.filter(cat => (cat.name || '').toLowerCase().includes(search.toLowerCase()));
+  const filteredCategories = currentCategories.filter(cat => (cat.name || '').toLowerCase().includes(search.toLowerCase()));
 
   // Her kategori için icon'u belirle
   const getCategoryIcon = (cat: any) => {
+    if (!categories) return Smartphone;
+    
+    // Icon mapping
+    const iconMapping: Record<string, React.ComponentType<any>> = {
+      'Smartphone': Smartphone,
+      'Car': Car,
+      'Building': Building,
+      'Shirt': Shirt,
+      'Home': HomeIcon,
+      'GraduationCap': GraduationCap,
+      'Briefcase': Briefcase,
+      'Dumbbell': Dumbbell,
+      'Palette': Palette,
+      'Baby': Baby,
+      'Gamepad2': Gamepad2,
+      'Plane': Plane,
+      'Bitcoin': Bitcoin
+    };
+    
+    // Eğer icon string ise, mapping'den bul
+    if (typeof cat.icon === 'string') {
+      return iconMapping[cat.icon] || Smartphone;
+    }
+    
+    // Eğer icon React component ise, direkt kullan
     if (cat.icon) return cat.icon;
-    if (mainCategory && mainCategory.icon) return mainCategory.icon;
-    return undefined;
+    
+    // Ana kategori icon'unu kullan
+    if (mainCategory && mainCategory.icon) {
+      if (typeof mainCategory.icon === 'string') {
+        return iconMapping[mainCategory.icon] || Smartphone;
+      }
+      return mainCategory.icon;
+    }
+    
+    return Smartphone;
   };
 
   // Seçim tamamlandığında path'i context'e kaydet
@@ -156,7 +205,7 @@ const CreateListingCategoryScreen = () => {
   const cardWidth = (screenWidth - horizontalPadding - cardGap * (numColumns - 1)) / numColumns;
 
   // Tüm kategorileri düzleştir
-  const allFlatCategories = flattenCategories(categoriesConfig);
+  const allFlatCategories = categories ? flattenCategories(categories) : [];
   // Arama aktifse, tüm seviyelerde arama yap
   const isSearching = search.trim().length > 0;
   const searchResults = isSearching
@@ -220,8 +269,22 @@ const CreateListingCategoryScreen = () => {
           <Text style={{ color: colors.textSecondary, fontSize: 15, textAlign: 'center' }}>Artık bir sonraki adıma geçebilirsiniz.</Text>
         </View>
       )}
+      {/* Loading State */}
+      {categoriesLoading && (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: colors.textSecondary, fontSize: 16 }}>Kategoriler yükleniyor...</Text>
+        </View>
+      )}
+      
+      {/* Error State */}
+      {categoriesError && (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: colors.error, fontSize: 16 }}>Kategoriler yüklenemedi</Text>
+        </View>
+      )}
+      
       {/* Kategori Grid */}
-      {!selectionDone && !isSearching && (
+      {!categoriesLoading && !categoriesError && !selectionDone && !isSearching && (
         <FlatList
           data={filteredCategories}
           keyExtractor={item => item.name}
@@ -242,7 +305,7 @@ const CreateListingCategoryScreen = () => {
         />
       )}
       {/* Arama sonuçları grid */}
-      {!selectionDone && isSearching && (
+      {!categoriesLoading && !categoriesError && !selectionDone && isSearching && (
         <FlatList
           data={searchResults}
           keyExtractor={item => item.path.join('>')}
@@ -252,7 +315,7 @@ const CreateListingCategoryScreen = () => {
               <CategoryCard
                 title={item.name}
                 size="sm"
-                lucideIcon={item.icon}
+                lucideIcon={getCategoryIcon(item)}
                 mainCategory={item.path[0]}
                 onPress={() => {
                   setPath(item.path);
@@ -269,8 +332,8 @@ const CreateListingCategoryScreen = () => {
         />
       )}
       {/* veya arama */}
-      {!selectionDone && <Text style={{ color: colors.textSecondary, textAlign: 'center', marginVertical: 10 }}>veya</Text>}
-      {!selectionDone && <TextInput
+      {!categoriesLoading && !categoriesError && !selectionDone && <Text style={{ color: colors.textSecondary, textAlign: 'center', marginVertical: 10 }}>veya</Text>}
+      {!categoriesLoading && !categoriesError && !selectionDone && <TextInput
         value={search}
         onChangeText={setSearch}
         placeholder="Kategori ara (örn: akıllı telefon)"

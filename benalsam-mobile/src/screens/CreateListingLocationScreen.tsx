@@ -13,10 +13,8 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { useThemeColors } from '../stores';
-import { useCreateListingContext } from '../contexts/CreateListingContext';
 import { useAuthStore } from '../stores';
-import { Button } from '../components';
-import { ChevronLeft, ChevronRight, MapPin, Target } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as Location from 'expo-location';
 import { turkishProvincesAndDistricts, Province } from '../config/locations';

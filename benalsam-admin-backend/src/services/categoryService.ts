@@ -234,6 +234,40 @@ export const categoryService = {
     }
   },
 
+  // Get category attributes by path
+  async getCategoryAttributes(path: string): Promise<CategoryAttribute[]> {
+    try {
+      logger.info(`Fetching attributes for category path: ${path}`);
+      
+      // Önce kategoriyi path ile bul
+      const category = await this.getCategoryByPath(path);
+      
+      if (!category) {
+        logger.warn(`Category not found for path: ${path}`);
+        return [];
+      }
+      
+      // Kategori ID'si ile attribute'ları getir
+      const { data: attributes, error } = await getSupabaseClient()
+        .from('category_attributes')
+        .select('*')
+        .eq('category_id', category.id)
+        .order('sort_order', { ascending: true });
+      
+      if (error) {
+        logger.error('Error fetching category attributes:', error);
+        throw error;
+      }
+      
+      logger.info(`Found ${attributes?.length || 0} attributes for category: ${path}`);
+      
+      return attributes || [];
+    } catch (error) {
+      logger.error('Error in getCategoryAttributes:', error);
+      throw error;
+    }
+  },
+
   // Get category by path
   async getCategoryByPath(path: string): Promise<Category | null> {
     try {

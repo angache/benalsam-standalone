@@ -22,7 +22,9 @@ import {
   Check
 } from 'lucide-react-native';
 import { useThemeColors } from '../stores';
-import { categoriesConfig } from '../config/categories-with-attributes';
+
+// Dinamik kategori sistemi
+import { useCategories } from '../hooks/queries/useCategories';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -56,15 +58,31 @@ export const SearchableCategorySelector: React.FC<SearchableCategorySelectorProp
   const [selectedMain, setSelectedMain] = useState(selectedMainCategory);
   const [selectedSub, setSelectedSub] = useState(selectedSubCategory);
   const [selectedSubSub, setSelectedSubSub] = useState(selectedSubSubCategory);
+  
+  // Dinamik kategori yükleme
+  const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useCategories();
+
+  // Kategori yükleme log'ları
+  React.useEffect(() => {
+    if (categoriesLoading) {
+      console.log('🔄 [SearchableCategorySelector] Kategoriler yükleniyor...');
+    } else if (categoriesError) {
+      console.error('❌ [SearchableCategorySelector] Kategori yükleme hatası:', categoriesError);
+    } else if (categories) {
+      console.log(`✅ [SearchableCategorySelector] ${categories.length} kategori yüklendi:`, categories.map(cat => cat.name));
+    }
+  }, [categories, categoriesLoading, categoriesError]);
 
   // Search functionality
   const filteredCategories = useMemo(() => {
+    if (!categories) return [];
+    
     if (!searchQuery.trim()) {
-      return categoriesConfig;
+      return categories;
     }
 
     const query = searchQuery.toLowerCase().trim();
-    return categoriesConfig.filter(category => {
+    return categories.filter(category => {
       // Search in main category
       if (category.name.toLowerCase().includes(query)) {
         return true;
@@ -81,10 +99,10 @@ export const SearchableCategorySelector: React.FC<SearchableCategorySelectorProp
         );
       });
     });
-  }, [searchQuery]);
+  }, [searchQuery, categories]);
 
   // Get current main category data
-  const currentMainCategory = categoriesConfig.find(cat => cat.name === selectedMain);
+  const currentMainCategory = categories?.find(cat => cat.name === selectedMain);
   const currentSubCategory = currentMainCategory?.subcategories?.find((sub: any) => sub.name === selectedSub);
 
   const handleMainCategorySelect = (categoryName: string) => {
@@ -92,7 +110,7 @@ export const SearchableCategorySelector: React.FC<SearchableCategorySelectorProp
     setSelectedSub('');
     setSelectedSubSub('');
     
-    const category = categoriesConfig.find(cat => cat.name === categoryName);
+    const category = categories?.find(cat => cat.name === categoryName);
     if ((category as any)?.subcategories && (category as any).subcategories.length > 0) {
       setCurrentLevel('sub');
     } else {
@@ -184,11 +202,32 @@ export const SearchableCategorySelector: React.FC<SearchableCategorySelectorProp
     </LinearGradient>
   );
 
-  const renderMainCategories = () => (
-    <FlatList
-      data={filteredCategories}
-      keyExtractor={(item) => item.name}
-      renderItem={({ item }) => {
+  const renderMainCategories = () => {
+    if (categoriesLoading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+            Kategoriler yükleniyor...
+          </Text>
+        </View>
+      );
+    }
+    
+    if (categoriesError) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={[styles.errorText, { color: colors.error }]}>
+            Kategoriler yüklenemedi
+          </Text>
+        </View>
+      );
+    }
+    
+    return (
+      <FlatList
+        data={filteredCategories}
+        keyExtractor={(item) => item.name}
+        renderItem={({ item }) => {
         const hasSubcategories = (item as any).subcategories && (item as any).subcategories.length > 0;
         const isSelected = selectedMain === item.name;
         
@@ -236,7 +275,8 @@ export const SearchableCategorySelector: React.FC<SearchableCategorySelectorProp
       contentContainerStyle={styles.listContent}
       showsVerticalScrollIndicator={false}
     />
-  );
+    );
+  };
 
   const renderSubCategories = () => {
     if (!(currentMainCategory as any)?.subcategories) return null;
@@ -445,6 +485,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
   },
 });
 

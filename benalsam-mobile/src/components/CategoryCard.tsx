@@ -131,8 +131,67 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
 
   const { width, height, fontSize, icon: iconSize } = getSize();
   
-  // Icon'u belirle: önce lucideIcon prop'u, sonra icon prop'u (artık doğrudan bileşen), sonra default
-  let LucideIcon = lucideIcon || icon || DEFAULT_ICON;
+  // Icon'u belirle: önce lucideIcon prop'u, sonra icon prop'u, sonra default
+  let LucideIcon = lucideIcon || DEFAULT_ICON;
+  
+  // Eğer icon prop'u string ise, icon mapping'den bul
+  if (typeof icon === 'string') {
+    const iconMapping: Record<string, React.ComponentType<any>> = {
+      'Smartphone': Smartphone,
+      'Car': Car,
+      'Building': Building,
+      'Shirt': Shirt,
+      'Home': Home,
+      'GraduationCap': GraduationCap,
+      'Briefcase': Briefcase,
+      'Dumbbell': Dumbbell,
+      'Palette': Palette,
+      'Baby': Baby,
+      'Gamepad2': Gamepad2,
+      'Plane': Plane,
+      'Bitcoin': Bitcoin,
+      'Laptop': Laptop,
+      'Camera': Camera,
+      'Tv': Tv,
+      'Gamepad': Gamepad,
+      'Watch': Watch,
+      'Wrench': Wrench,
+      'Monitor': Monitor,
+      'Headphones': Headphones,
+      'Tablet': Tablet,
+      'Printer': Printer,
+      'Heart': Heart,
+      'Stethoscope': Stethoscope,
+      'Scissors': Scissors,
+      'Truck': Truck,
+      'Bus': Bus,
+      'Bike': Bike,
+      'Flower': Flower,
+      'Trees': Trees,
+      'ShoppingBag': ShoppingBag,
+      'ShoppingCart': ShoppingCart,
+      'DollarSign': DollarSign,
+      'Coins': Coins,
+      'TrendingUp': TrendingUp,
+      'Users': Users,
+      'User': User,
+      'UserCheck': UserCheck,
+      'MessageCircle': MessageCircle,
+      'Calendar': Calendar,
+      'Star': Star,
+      'Gift': Gift,
+      'FileText': FileText,
+      'Brush': Brush,
+      'PenTool': PenTool,
+      'Award': Award,
+      'Map': Map,
+      'Music': Music,
+      'Utensils': Utensils
+    };
+    LucideIcon = iconMapping[icon] || DEFAULT_ICON;
+  } else if (icon) {
+    LucideIcon = icon;
+  }
 
   const styles = {
     card: {

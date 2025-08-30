@@ -8,9 +8,17 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useThemeColors } from '../stores/themeStore';
-import { findCategoryAttributes, CategoryAttribute } from '../config/categories-with-attributes';
 
+// Dinamik kategori sistemi
+import { useCategoryAttributes } from '../hooks/queries/useCategories';
 
+interface CategoryAttribute {
+  key: string;
+  label: string;
+  type: 'string' | 'number' | 'boolean' | 'select' | 'array' | 'multiselect';
+  required: boolean;
+  options?: string[];
+}
 
 interface CategoryAttributesSelectorProps {
   categoryPath: string;
@@ -26,31 +34,40 @@ export default function CategoryAttributesSelector({
   maxSelectionsPerAttribute = 5,
 }: CategoryAttributesSelectorProps) {
   const colors = useThemeColors();
-  const [categoryAttributes, setCategoryAttributes] = useState<CategoryAttribute[]>([]);
+  
+  // Dinamik kategori attribute'larını yükle
+  const { data: categoryAttributes = [], isLoading: attributesLoading, error: attributesError } = useCategoryAttributes(categoryPath);
 
+  // Kategori yükleme log'ları
   useEffect(() => {
-    loadCategoryAttributes();
-  }, [categoryPath]);
-
-  const loadCategoryAttributes = async () => {
-    try {
-      console.log('🔍 CategoryAttributesSelector - Loading attributes for path:', categoryPath);
-      // Kategori attribute'larını yükle
-      const attributes = findCategoryAttributes(categoryPath);
-      console.log('📋 Loaded category attributes for path:', categoryPath, attributes);
-      
-      if (attributes && attributes.length > 0) {
-        console.log('✅ Found attributes:', attributes.length, 'attributes');
-        setCategoryAttributes(attributes);
-      } else {
-        console.log('❌ No attributes found for category path:', categoryPath);
-        setCategoryAttributes([]);
-      }
-    } catch (error) {
-      console.error('❌ Error loading category attributes:', error);
-      setCategoryAttributes([]);
+    if (attributesLoading) {
+      console.log('🔄 [CategoryAttributesSelector] Kategori attribute\'ları yükleniyor...');
+    } else if (attributesError) {
+      console.error('❌ [CategoryAttributesSelector] Kategori attribute\'ları yükleme hatası:', attributesError);
+    } else if (categoryAttributes) {
+      console.log(`✅ [CategoryAttributesSelector] ${categoryAttributes.length} attribute yüklendi:`, categoryAttributes.map(attr => attr.label));
     }
-  };
+  }, [categoryAttributes, attributesLoading, attributesError]);
+
+  // const loadCategoryAttributes = async () => { // Bu fonksiyon artık useCategoryAttributes ile yönetiliyor
+  //   try {
+  //     console.log('🔍 CategoryAttributesSelector - Loading attributes for path:', categoryPath);
+  //     // Kategori attribute'larını yükle
+  //     const attributes = findCategoryAttributes(categoryPath);
+  //     console.log('📋 Loaded category attributes for path:', categoryPath, attributes);
+      
+  //     if (attributes && attributes.length > 0) {
+  //       console.log('✅ Found attributes:', attributes.length, 'attributes');
+  //       setCategoryAttributes(attributes);
+  //     } else {
+  //       console.log('❌ No attributes found for category path:', categoryPath);
+  //       setCategoryAttributes([]);
+  //     }
+  //   } catch (error) {
+  //     console.error('❌ Error loading category attributes:', error);
+  //     setCategoryAttributes([]);
+  //   }
+  // };
 
 
 
@@ -92,8 +109,28 @@ export default function CategoryAttributesSelector({
     return `${selected.length} seçenek`;
   };
 
-  console.log('🔍 CategoryAttributesSelector - Rendering with', categoryAttributes.length, 'attributes');
+  // console.log('🔍 CategoryAttributesSelector - Rendering with', categoryAttributes.length, 'attributes'); // Bu kısım artık useCategoryAttributes ile yönetiliyor
   
+  if (attributesLoading) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.noDataText, { color: colors.textSecondary }]}>
+          Yükleniyor...
+        </Text>
+      </View>
+    );
+  }
+
+  if (attributesError) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.noDataText, { color: colors.error }]}>
+          Hata: {attributesError.message}
+        </Text>
+      </View>
+    );
+  }
+
   if (categoryAttributes.length === 0) {
     return (
       <View style={[styles.container, { backgroundColor: colors.surface }]}>
@@ -121,7 +158,7 @@ export default function CategoryAttributesSelector({
 
         {/* Attribute Listesi */}
         <View style={styles.attributesContainer}>
-          {categoryAttributes.map((attribute) => (
+          {categoryAttributes.map((attribute: CategoryAttribute) => (
             <View key={attribute.key} style={styles.attributeSection}>
               <View style={styles.attributeHeader}>
                 <Text style={[styles.attributeLabel, { color: colors.text }]}>
@@ -143,7 +180,7 @@ export default function CategoryAttributesSelector({
               
               {/* Chip Seçenekleri */}
               <View style={styles.chipContainer}>
-                {attribute.options?.map((option) => {
+                {attribute.options?.map((option: string) => {
                   const isSelected = selectedAttributes[attribute.key]?.includes(option) || false;
                   return (
                     <TouchableOpacity

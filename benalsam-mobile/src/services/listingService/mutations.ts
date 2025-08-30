@@ -1,32 +1,21 @@
 import { supabase  } from '../../services/supabaseClient';
 import { processImagesForSupabase } from '../imageService';
-import { Listing, ApiResponse } from '../../types';
+import { ApiResponse } from '../../types';
 import { ValidationError, DatabaseError, handleError } from '../../utils/errors';
+import { 
+  Listing, 
+  ListingStatus, 
+  ListingLocation,
+  ListingBudget 
+} from 'benalsam-shared-types';
+import { categoryService } from '../categoryService';
 
-interface CreateListingData {
-  title: string;
-  description: string;
-  category: string;
-  budget: number;
-  location: string;
-  urgency: 'low' | 'medium' | 'high';
+// CreateListingData interface'ini shared types'dan kullan
+type CreateListingData = Omit<Listing, 'id' | 'created_at' | 'updated_at' | 'status'> & {
   images: string[];
   mainImageIndex: number;
   duration?: number;
-  autoRepublish: boolean;
-  contactPreference: 'email' | 'phone' | 'both';
-  acceptTerms: boolean;
-  is_featured?: boolean;
-  is_urgent_premium?: boolean;
-  is_showcase?: boolean;
-  geolocation?: {
-    latitude: number;
-    longitude: number;
-  };
-  user_id: string;
-  condition: string[];
-  attributes?: Record<string, string[]>; // Category-specific attributes
-}
+};
 
 export const createListing = async (listingData: CreateListingData): Promise<ApiResponse<Listing>> => {
   try {
@@ -64,10 +53,17 @@ export const createListing = async (listingData: CreateListingData): Promise<Api
       }
     }
 
+    // Kategori ID'lerini API'den al
+    const category = await categoryService.getCategoryByPath(listingData.category);
+    const category_id = category?.id || null;
+    const category_path = category ? [category.id] : null;
+
     const listingDataForDb = {
       title: listingData.title,
       description: listingData.description,
       category: listingData.category,
+      category_id: category_id,
+      category_path: category_path,
       budget: listingData.budget,
       location: listingData.location,
       urgency: listingData.urgency,
@@ -76,10 +72,10 @@ export const createListing = async (listingData: CreateListingData): Promise<Api
       additional_image_urls: additionalImageUrls,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      status: 'pending', // İlan durumunu pending olarak ayarla
-      contact_preference: listingData.contactPreference,
-      auto_republish: listingData.autoRepublish,
-      accept_terms: listingData.acceptTerms,
+      status: ListingStatus.PENDING_APPROVAL, // İlan durumunu pending_approval olarak ayarla
+      contact_preference: listingData.contact_preference,
+      auto_republish: listingData.auto_republish,
+      accept_terms: listingData.accept_terms,
       is_featured: listingData.is_featured,
       is_urgent_premium: listingData.is_urgent_premium,
       is_showcase: listingData.is_showcase,
@@ -115,12 +111,10 @@ export const createListing = async (listingData: CreateListingData): Promise<Api
   }
 };
 
-interface UpdateListingData extends Partial<CreateListingData> {
+type UpdateListingData = Partial<Omit<Listing, 'id' | 'created_at' | 'updated_at' | 'status'>> & {
   mainImageUrl?: string;
   additionalImageUrls?: string[];
-  condition?: string[];
-  attributes?: Record<string, string[]>;
-}
+};
 
 export const updateListing = async (
   listingId: string,
@@ -132,16 +126,28 @@ export const updateListing = async (
       throw new ValidationError('Listing ID, updates and user ID are required');
     }
 
+    // Eğer category güncelleniyorsa, category_id ve category_path'i de güncelle
+    let category_id = undefined;
+    let category_path = undefined;
+    
+    if (updates.category) {
+      const category = await categoryService.getCategoryByPath(updates.category);
+      category_id = category?.id || null;
+      category_path = category ? [category.id] : null;
+    }
+
     const dbUpdates: any = {
       title: updates.title,
       description: updates.description,
       category: updates.category,
+      category_id: category_id,
+      category_path: category_path,
       budget: updates.budget,
       location: updates.location,
       urgency: updates.urgency,
-      contact_preference: updates.contactPreference,
-      auto_republish: updates.autoRepublish,
-      accept_terms: updates.acceptTerms,
+      contact_preference: updates.contact_preference,
+      auto_republish: updates.auto_republish,
+      accept_terms: updates.accept_terms,
       is_featured: updates.is_featured,
       is_urgent_premium: updates.is_urgent_premium,
       is_showcase: updates.is_showcase,

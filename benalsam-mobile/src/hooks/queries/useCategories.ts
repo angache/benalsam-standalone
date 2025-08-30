@@ -18,6 +18,201 @@ import {
   fetchFollowers,
 } from '../../services/followService';
 import { ListingWithUser } from '../../services/listingService/core';
+import { categoryService } from '../../services/categoryService';
+import { Category } from '../../types/category';
+import React from 'react';
+
+// Query keys
+export const categoryKeys = {
+  all: ['categories'] as const,
+  lists: () => [...categoryKeys.all, 'list'] as const,
+  list: (filters: string) => [...categoryKeys.lists(), { filters }] as const,
+  details: () => [...categoryKeys.all, 'detail'] as const,
+  detail: (id: string | number) => [...categoryKeys.details(), id] as const,
+  byPath: (path: string) => [...categoryKeys.details(), 'path', path] as const,
+  version: () => [...categoryKeys.all, 'version'] as const,
+};
+
+// Get all categories with tree structure
+export const useCategories = () => {
+  return useQuery({
+    queryKey: categoryKeys.lists(),
+    queryFn: () => categoryService.getCategories(),
+    staleTime: Infinity, // Never stale - only invalidate on version change
+    gcTime: 1000 * 60 * 60 * 24, // Keep in cache for 24 hours
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+};
+
+// Get ALL categories (flat list)
+export const useAllCategories = () => {
+  return useQuery({
+    queryKey: [...categoryKeys.lists(), 'all'],
+    queryFn: () => categoryService.getAllCategories(),
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60 * 24,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+};
+
+// Get single category by ID
+export const useCategory = (id: string | number) => {
+  return useQuery({
+    queryKey: categoryKeys.detail(id),
+    queryFn: () => categoryService.getCategory(id),
+    enabled: !!id,
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60 * 24,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+};
+
+// Get category by path
+export const useCategoryByPath = (path: string) => {
+  return useQuery({
+    queryKey: categoryKeys.byPath(path),
+    queryFn: () => categoryService.getCategoryByPath(path),
+    enabled: !!path,
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60 * 24,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+};
+
+// Get category attributes by path
+export const useCategoryAttributes = (categoryPath: string) => {
+  return useQuery({
+    queryKey: [...categoryKeys.byPath(categoryPath), 'attributes'],
+    queryFn: async () => {
+      const backendUrl = process.env.EXPO_PUBLIC_ADMIN_BACKEND_URL;
+      if (!backendUrl) {
+        throw new Error('EXPO_PUBLIC_ADMIN_BACKEND_URL is not configured');
+      }
+      
+      const response = await fetch(`${backendUrl}/api/v1/categories/attributes?path=${encodeURIComponent(categoryPath)}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.message || 'API returned error');
+      }
+      
+      return result.data || [];
+    },
+    enabled: !!categoryPath,
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60 * 24,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+};
+
+// Check categories version
+export const useCategoriesVersion = () => {
+  return useQuery({
+    queryKey: categoryKeys.version(),
+    queryFn: async () => {
+      const backendUrl = process.env.EXPO_PUBLIC_ADMIN_BACKEND_URL;
+      if (!backendUrl) {
+        throw new Error('EXPO_PUBLIC_ADMIN_BACKEND_URL is not configured');
+      }
+      
+      const response = await fetch(`${backendUrl}/api/v1/categories/version`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.message || 'API returned error');
+      }
+      
+      return result.version || 0;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+};
+
+// Utility hook for category operations
+export const useCategoryUtils = () => {
+  const queryClient = useQueryClient();
+
+  const invalidateCategories = () => {
+    queryClient.invalidateQueries({ queryKey: categoryKeys.all });
+  };
+
+  const clearCategoryCache = async () => {
+    await categoryService.clearCache();
+    queryClient.removeQueries({ queryKey: categoryKeys.all });
+  };
+
+  const prefetchCategories = () => {
+    queryClient.prefetchQuery({
+      queryKey: categoryKeys.lists(),
+      queryFn: () => categoryService.getCategories(),
+    });
+  };
+
+  return {
+    invalidateCategories,
+    clearCategoryCache,
+    prefetchCategories,
+  };
+};
+
+// Hook for category search/filtering
+export const useCategorySearch = (searchTerm: string) => {
+  const { data: categories, isLoading, error } = useCategories();
+
+  const filteredCategories = React.useMemo(() => {
+    if (!categories || !searchTerm) return categories;
+
+    const searchLower = searchTerm.toLowerCase();
+    
+    const filterCategory = (category: Category): Category | null => {
+      // Check if current category matches
+      const matches = category.name.toLowerCase().includes(searchLower);
+      
+      // Filter subcategories
+      const filteredSubcategories = category.subcategories
+        ?.map(filterCategory)
+        .filter(Boolean) as Category[];
+      
+      // Return category if it matches or has matching subcategories
+      if (matches || (filteredSubcategories && filteredSubcategories.length > 0)) {
+        return {
+          ...category,
+          subcategories: filteredSubcategories,
+        };
+      }
+      
+      return null;
+    };
+
+    return categories
+      .map(filterCategory)
+      .filter(Boolean) as Category[];
+  }, [categories, searchTerm]);
+
+  return {
+    categories: filteredCategories,
+    isLoading,
+    error,
+  };
+};
 
 // Types
 interface CategoryWithListings {

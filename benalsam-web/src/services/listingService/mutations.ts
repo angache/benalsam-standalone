@@ -3,6 +3,7 @@ import { toast } from '@/components/ui/use-toast';
 import { addUserActivity } from '@/services/userActivityService';
 import { processImagesForSupabase } from '@/services/imageService';
 import { Listing } from '@/types';
+import { ListingStatus } from 'benalsam-shared-types';
 
 import { categoriesConfig } from '@/config/categories';
 
@@ -71,7 +72,11 @@ const getCategoryIds = (categoryString: string) => {
 
 
 export const createListing = async (
-  listingData: any, 
+  listingData: Omit<Listing, 'id' | 'created_at' | 'updated_at' | 'status'> & {
+    images: string[];
+    mainImageIndex: number;
+    duration?: number;
+  }, 
   currentUserId: string, 
   onProgress?: (progress: number) => void
 ): Promise<Listing | null> => {
@@ -107,7 +112,7 @@ export const createListing = async (
       category: listingData.category,
       category_id: category_id,
       category_path: category_path,
-      status: 'pending_approval',
+      status: ListingStatus.PENDING_APPROVAL,
       budget: listingData.budget,
       location: listingData.location,
       urgency: listingData.urgency,
@@ -115,9 +120,9 @@ export const createListing = async (
       additional_image_urls: additionalImageUrls.length > 0 ? additionalImageUrls : null,
       image_url: mainImageUrl,
       expires_at: expiresAt ? expiresAt.toISOString() : null,
-      auto_republish: listingData.autoRepublish,
-      contact_preference: listingData.contactPreference,
-      accept_terms: listingData.acceptTerms,
+      auto_republish: listingData.auto_republish,
+      contact_preference: listingData.contact_preference,
+      accept_terms: listingData.accept_terms,
       is_featured: listingData.is_featured || false,
       is_urgent_premium: listingData.is_urgent_premium || false,
       is_showcase: listingData.is_showcase || false,
