@@ -98,20 +98,18 @@ export const categoryService = {
       const cachedCategories = await cacheManager.get(cacheKey);
       
       if (cachedCategories) {
-        logger.info('📦 Categories loaded from cache');
+        logger.info('📦 Returning cached categories');
         return cachedCategories;
       }
 
-      logger.info('🔄 Fetching categories from Supabase');
-
+      logger.info('🔄 Fetching categories from database');
+      
       const { data: categories, error } = await getSupabaseClient()
         .from('categories')
         .select(`
           *,
           category_attributes (*)
         `)
-        .eq('is_active', true)
-        .order('level', { ascending: true })
         .order('sort_order', { ascending: true });
 
       if (error) {
@@ -119,19 +117,13 @@ export const categoryService = {
         throw error;
       }
 
-      // Build tree structure
-      const categoryTree = this.buildCategoryTree(categories || []);
-
-      // Add stats to each category
-      const categoriesWithStats = categoryTree.map(category => ({
-        ...category,
-        stats: this.calculateCategoryStats(category)
-      }));
-
-      await cacheManager.set(cacheKey, categoriesWithStats, 5 * 60 * 1000);
-
-      logger.info(`✅ Fetched ${categoriesWithStats.length} main categories`);
-      return categoriesWithStats;
+      const tree = this.buildCategoryTree(categories || []);
+      
+      // Cache for 24 hours
+      await cacheManager.set(cacheKey, tree, 1000 * 60 * 60 * 24);
+      
+      logger.info(`✅ Fetched ${tree.length} main categories`);
+      return tree;
 
     } catch (error) {
       logger.error('Error in getCategories:', error);
@@ -139,19 +131,17 @@ export const categoryService = {
     }
   },
 
-  // Get ALL categories (main + subcategories) as flat list
+  // Get ALL categories (flat list)
   async getAllCategories(): Promise<Category[]> {
     try {
-      logger.info('Fetching ALL categories from Supabase');
-
+      logger.info('🔄 Fetching ALL categories from database');
+      
       const { data: categories, error } = await getSupabaseClient()
         .from('categories')
         .select(`
           *,
           category_attributes (*)
         `)
-        .eq('is_active', true)
-        .order('level', { ascending: true })
         .order('sort_order', { ascending: true });
 
       if (error) {
@@ -159,7 +149,7 @@ export const categoryService = {
         throw error;
       }
 
-      logger.info(`Fetched ${categories?.length || 0} total categories`);
+      logger.info(`✅ Fetched ${categories?.length || 0} total categories`);
       return categories || [];
 
     } catch (error) {
@@ -189,44 +179,12 @@ export const categoryService = {
       }
 
       if (!category) {
+        logger.warn(`Category not found with ID: ${categoryId}`);
         return null;
       }
 
-      // Get subcategories
-      const { data: subcategories } = await getSupabaseClient()
-        .from('categories')
-        .select(`
-          *,
-          category_attributes (*)
-        `)
-        .eq('parent_id', categoryId)
-        .order('sort_order', { ascending: true });
-
-      // Get attributes for the current category
-      const { data: attributes } = await getSupabaseClient()
-        .from('category_attributes')
-        .select('*')
-        .eq('category_id', categoryId)
-        .order('sort_order', { ascending: true });
-
-      // Parse options for attributes
-      const parsedAttributes = (attributes || []).map((attr: any) => ({
-        ...attr,
-        options: attr.options ? JSON.parse(attr.options) : null
-      }));
-
-      const categoryWithSubcategories = {
-        ...category,
-        subcategories: subcategories || [],
-        attributes: parsedAttributes,
-        stats: this.calculateCategoryStats({
-          ...category,
-          subcategories: subcategories || [],
-          attributes: parsedAttributes
-        })
-      };
-
-      return categoryWithSubcategories;
+      logger.info(`Found category: ${category.name} (ID: ${category.id})`);
+      return category;
 
     } catch (error) {
       logger.error('Error in getCategory:', error);
@@ -234,44 +192,14 @@ export const categoryService = {
     }
   },
 
-  // Get category attributes by path
-  async getCategoryAttributes(path: string): Promise<CategoryAttribute[]> {
-    try {
-      logger.info(`Fetching attributes for category path: ${path}`);
-      
-      // Önce kategoriyi path ile bul
-      const category = await this.getCategoryByPath(path);
-      
-      if (!category) {
-        logger.warn(`Category not found for path: ${path}`);
-        return [];
-      }
-      
-      // Kategori ID'si ile attribute'ları getir
-      const { data: attributes, error } = await getSupabaseClient()
-        .from('category_attributes')
-        .select('*')
-        .eq('category_id', category.id)
-        .order('sort_order', { ascending: true });
-      
-      if (error) {
-        logger.error('Error fetching category attributes:', error);
-        throw error;
-      }
-      
-      logger.info(`Found ${attributes?.length || 0} attributes for category: ${path}`);
-      
-      return attributes || [];
-    } catch (error) {
-      logger.error('Error in getCategoryAttributes:', error);
-      throw error;
-    }
-  },
-
-  // Get category by path
+  // Get category by path (supports both slash and arrow separators)
   async getCategoryByPath(path: string): Promise<Category | null> {
     try {
       logger.info(`Fetching category with path: ${path}`);
+      
+      // Convert arrow separators to slash separators
+      const normalizedPath = path.replace(/\s*>\s*/g, '/');
+      logger.info(`Normalized path: ${normalizedPath}`);
 
       const { data: category, error } = await getSupabaseClient()
         .from('categories')
@@ -279,7 +207,7 @@ export const categoryService = {
           *,
           category_attributes (*)
         `)
-        .eq('path', path)
+        .eq('path', normalizedPath)
         .single();
 
       if (error) {
@@ -288,6 +216,7 @@ export const categoryService = {
       }
 
       if (!category) {
+        logger.warn(`Category not found for path: ${normalizedPath}`);
         return null;
       }
 
@@ -325,10 +254,45 @@ export const categoryService = {
         })
       };
 
+      logger.info(`Found category: ${category.name} (ID: ${category.id})`);
       return categoryWithSubcategories;
 
     } catch (error) {
       logger.error('Error in getCategoryByPath:', error);
+      throw error;
+    }
+  },
+
+  // Get category attributes by path
+  async getCategoryAttributes(path: string): Promise<CategoryAttribute[]> {
+    try {
+      logger.info(`Fetching attributes for category path: ${path}`);
+      
+      // Önce kategoriyi path ile bul
+      const category = await this.getCategoryByPath(path);
+      
+      if (!category) {
+        logger.warn(`Category not found for path: ${path}`);
+        return [];
+      }
+      
+      // Kategori ID'si ile attribute'ları getir
+      const { data: attributes, error } = await getSupabaseClient()
+        .from('category_attributes')
+        .select('*')
+        .eq('category_id', category.id)
+        .order('sort_order', { ascending: true });
+      
+      if (error) {
+        logger.error('Error fetching category attributes:', error);
+        throw error;
+      }
+      
+      logger.info(`Found ${attributes?.length || 0} attributes for category: ${path}`);
+      
+      return attributes || [];
+    } catch (error) {
+      logger.error('Error in getCategoryAttributes:', error);
       throw error;
     }
   },
@@ -617,4 +581,4 @@ export const categoryService = {
       logger.error('Error invalidating all category caches:', error);
     }
   }
-}; 
+};
