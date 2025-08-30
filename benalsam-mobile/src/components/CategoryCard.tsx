@@ -54,7 +54,7 @@ import {
   Utensils
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { categoriesConfig } from '../config/categories-with-attributes';
+// Statik kategori sistemi deprecated - artık dinamik sistem kullanılıyor
 
 interface CategoryCardProps {
   title: string;
@@ -114,10 +114,8 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
 }) => {
   const colors = useThemeColors();
 
-  // Kategoriye göre renk bul
-  const categoryNameForColor = mainCategory || title;
-  const category = categoriesConfig.find(cat => cat.name === categoryNameForColor);
-  const gradientColors = category ? parseGradient(category.color) : ['#3b82f6', '#06b6d4'];
+  // Kategoriye göre renk bul - artık dinamik sistem kullanılıyor
+  const gradientColors = ['#3b82f6', '#06b6d4']; // Default gradient
   const iconColor = gradientColors[0];
 
   const getSize = () => {

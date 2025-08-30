@@ -19,7 +19,7 @@ import { Card } from '../components/Card';
 import CategoryAttributesSelector from '../components/CategoryAttributesSelector';
 import { useThemeColors } from '../stores/themeStore';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
-import { findCategoryAttributes } from '../config/categories-with-attributes';
+// Statik kategori sistemi deprecated - artık dinamik sistem kullanılıyor
 
 
 // Durum seçenekleri

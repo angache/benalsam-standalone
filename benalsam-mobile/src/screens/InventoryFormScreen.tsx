@@ -22,7 +22,7 @@ import { Button, Card } from '../components';
 import { Camera } from 'lucide-react-native';
 import { SearchableCategorySelector } from '../components/SearchableCategorySelector';
 import { addInventoryItem, updateInventoryItem, getInventoryItemById } from '../services/inventoryService';
-import { categoriesConfig, getCategoryPath } from '../config/categories-with-attributes';
+// Statik kategori sistemi deprecated - artık dinamik sistem kullanılıyor
 
 const MAX_IMAGES_INVENTORY = 3;
 

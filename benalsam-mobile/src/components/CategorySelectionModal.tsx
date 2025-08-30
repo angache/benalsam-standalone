@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useThemeColors } from '../stores/themeStore';
 import { Home, ChevronRight, Search, X } from 'lucide-react-native';
-import { categoriesConfig } from '../config/categories-with-attributes';
+import { useCategories } from '../hooks/queries/useCategories';
 
 interface CategorySelectionModalProps {
   visible: boolean;
@@ -35,19 +35,24 @@ const CategorySelectionModal: React.FC<CategorySelectionModalProps> = ({
   currentCategory
 }) => {
   const colors = useThemeColors();
+  const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useCategories();
   const [path, setPath] = useState<string[]>([]);
   const [search, setSearch] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
   // Şu anki seviyedeki kategoriler
   const getCurrentCategories = (): CategoryItem[] => {
-    let categories: any[] = categoriesConfig as any[];
+    if (categoriesLoading || categoriesError || !categories.length) {
+      return [];
+    }
+
+    let currentCategories: any[] = categories;
     
     // Path'e göre alt kategorilere in
     for (const pathItem of path) {
-      const found = categories.find((cat: any) => cat.name === pathItem);
+      const found = currentCategories.find((cat: any) => cat.name === pathItem);
       if (found && found.subcategories) {
-        categories = found.subcategories;
+        currentCategories = found.subcategories;
       } else {
         break;
       }
@@ -57,7 +62,7 @@ const CategorySelectionModal: React.FC<CategorySelectionModalProps> = ({
     const leafCategories: CategoryItem[] = [];
     const folderCategories: CategoryItem[] = [];
 
-    categories.forEach((cat: any) => {
+    currentCategories.forEach((cat: any) => {
       const hasSubcategories = !!(cat.subcategories && cat.subcategories.length > 0);
       const hasAttributes = !!(cat.attributes && cat.attributes.length > 0);
       
@@ -113,7 +118,7 @@ const CategorySelectionModal: React.FC<CategorySelectionModalProps> = ({
       }
     };
     
-    searchInCategories(categoriesConfig);
+    searchInCategories(categories);
     return results;
   };
 
@@ -224,11 +229,30 @@ const CategorySelectionModal: React.FC<CategorySelectionModalProps> = ({
           </View>
         )}
 
+        {/* Loading State */}
+        {categoriesLoading && (
+          <View style={styles.loadingContainer}>
+            <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+              Kategoriler yükleniyor...
+            </Text>
+          </View>
+        )}
+
+        {/* Error State */}
+        {categoriesError && (
+          <View style={styles.errorContainer}>
+            <Text style={[styles.errorText, { color: colors.error }]}>
+              Kategoriler yüklenemedi
+            </Text>
+          </View>
+        )}
+
         {/* Categories List */}
-        <FlatList
-          data={currentCategories}
-          keyExtractor={(item) => item.path.join('>')}
-          renderItem={({ item }) => (
+        {!categoriesLoading && !categoriesError && (
+          <FlatList
+            data={currentCategories}
+            keyExtractor={(item) => item.path.join('>')}
+            renderItem={({ item }) => (
             <TouchableOpacity
               style={[
                 styles.categoryItem, 
@@ -276,6 +300,7 @@ const CategorySelectionModal: React.FC<CategorySelectionModalProps> = ({
           )}
           contentContainerStyle={styles.listContainer}
         />
+        )}
 
         {/* Empty State */}
         {isSearching && currentCategories.length === 0 && (
@@ -358,6 +383,26 @@ const styles = StyleSheet.create({
   currentCategoryText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    textAlign: 'center',
   },
   listContainer: {
     paddingBottom: 20,

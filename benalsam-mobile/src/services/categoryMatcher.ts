@@ -1,4 +1,4 @@
-import { categoriesConfig, findCategoryByName } from '../config/categories-with-attributes';
+// Statik kategori sistemi deprecated - artık dinamik sistem kullanılıyor
 
 
 export interface CategoryMatch {

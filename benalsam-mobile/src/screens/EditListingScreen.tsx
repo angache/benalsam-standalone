@@ -39,7 +39,7 @@ import {
   LoadingSpinner, 
   Card
 } from '../components';
-import { categoriesConfig } from '../config/categories-with-attributes';
+// Statik kategori sistemi deprecated - artık dinamik sistem kullanılıyor
 
 const URGENCY_OPTIONS = [
   { value: 'low', label: 'Düşük', color: '#10b981', description: 'Acele etmiyorum' },

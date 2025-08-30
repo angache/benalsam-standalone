@@ -13,7 +13,7 @@ import { useAuthStore } from '../stores';
 import { Header, Card, Button } from '../components';
 import { followCategory } from '../services/categoryFollowService';
 import { ArrowLeft, Plus, Tag } from 'lucide-react-native';
-import { categoriesConfig } from '../config/categories-with-attributes';
+// Statik kategori sistemi deprecated - artık dinamik sistem kullanılıyor
 
 const FollowCategoryScreen = () => {
   const navigation = useNavigation<any>();
