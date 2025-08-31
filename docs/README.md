@@ -78,6 +78,7 @@ API dokümantasyonu:
 - `ELASTICSEARCH_SEARCH_SYSTEM_REPORT.md` - Elasticsearch arama sistemi raporu
 - `ELASTICSEARCH_TURKISH_SEARCH_INTEGRATION.md` - Elasticsearch Türkçe arama entegrasyonu
 - `ELASTICSEARCH_USAGE_EXAMPLES.md` - Elasticsearch kullanım örnekleri
+- `INVENTORY_SYSTEM_DOCUMENTATION.md` - Inventory sistemi dokümantasyonu
 - `TODO_WEB_ADMIN_INTEGRATION.md` - Web admin entegrasyon TODO
 - `WEB_ADMIN_INTEGRATION_DOCUMENTATION.md` - Web admin entegrasyon dokümantasyonu
 

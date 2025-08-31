@@ -96,7 +96,59 @@ docker-compose -f docker-compose.dev.yml exec admin-backend curl elasticsearch:9
 
 ## 🐛 **Common Issues**
 
-### **1. Database Trigger Issues**
+### **1. Inventory System Issues**
+
+#### **"No inventory found" Mesajı**
+**Sorun**: Recommendation service yanlış tablodan veri çekiyor
+**Çözüm**: `listings` yerine `inventory_items` tablosunu kullan
+```typescript
+// Yanlış
+.from('listings')
+
+// Doğru
+.from('inventory_items')
+```
+
+#### **MIME Type Hatası**
+**Sorun**: `mime type application/json, image/jpeg is not supported`
+**Çözüm**: Client-side MIME type detection ve düzeltme
+```typescript
+const getMimeTypeFromExtension = (filename: string): string => {
+  const ext = filename.split('.').pop()?.toLowerCase();
+  switch (ext) {
+    case 'png': return 'image/png';
+    case 'jpg': case 'jpeg': return 'image/jpeg';
+    default: return 'image/jpeg';
+  }
+};
+```
+
+#### **Image Upload Başarısız**
+**Sorun**: Supabase Storage upload hatası
+**Çözüm**: File object'i doğru formatta oluştur
+```typescript
+const fileToUpload = {
+  uri: file.uri,
+  name: file.name,
+  type: mimeType,
+} as any;
+```
+
+#### **Inventory Items Görünmüyor**
+**Sorun**: Backend API bağlantı sorunu
+**Çözüm**: Supabase fallback'e geç
+```typescript
+// Backend API'ye bağlanamadığında Supabase'e geç
+if (!response.ok) {
+  // Fallback to Supabase
+  const { data, error } = await supabase
+    .from('inventory_items')
+    .select('*')
+    .eq('user_id', userId);
+}
+```
+
+### **2. Database Trigger Issues**
 
 #### **Problem: `invalid input syntax for type integer: "UUID"` Error**
 **Symptoms:**
