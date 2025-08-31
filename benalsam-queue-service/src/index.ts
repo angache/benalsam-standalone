@@ -12,6 +12,7 @@ import { connectRedis, disconnectRedis } from './config/redis';
 import jobRoutes from './routes/jobs';
 import queueRoutes from './routes/queues';
 import healthRoutes from './routes/health';
+import adminRoutes from './routes/admin';
 // import queueRoutes from './routes/queues';
 // import healthRoutes from './routes/health';
 
@@ -62,6 +63,9 @@ app.get('/health', (_req, res) => {
 app.use('/api/v1/queue/jobs', jobRoutes);
 app.use('/api/v1/queue/queues', queueRoutes);
 app.use('/api/v1/queue', healthRoutes);
+
+// Admin routes (Bull Board dashboard)
+app.use('/admin', adminRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -156,3 +160,4 @@ startServer().then((httpServer) => {
 });
 
 export default app;
+export { app };

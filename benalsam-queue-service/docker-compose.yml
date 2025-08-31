@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  queue-service:
+    build: .
+    container_name: benalsam-queue-service
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=production
+      - PORT=3004
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - REDIS_DB=0
+      - BULL_PREFIX=benalsam
+      - BULL_CONCURRENCY=3
+      - BULL_RETRY_ATTEMPTS=3
+      - BULL_RETRY_DELAY=5000
+      - LOG_LEVEL=info
+      - CORS_ORIGIN=*
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX_REQUESTS=100
+      - ADMIN_BACKEND_URL=http://admin-backend:3002
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    depends_on:
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3004/api/v1/queue/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - benalsam-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: benalsam-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - benalsam-network
+
+volumes:
+  redis_data:
+
+networks:
+  benalsam-network:
+    driver: bridge

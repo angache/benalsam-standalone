@@ -57,6 +57,7 @@ import securityRoutes from './routes/security';
 import uploadRoutes from './routes/upload';
 import aiSuggestionsRoutes from './routes/aiSuggestions';
 import inventoryRoutes from './routes/inventory';
+import hybridQueueRoutes from './routes/hybridQueue';
 // import seoRoutes from './routes/seo';
 
 // Import services
@@ -263,6 +264,7 @@ app.use('/api/v1/security', securityRoutes); // Security monitoring routes
 app.use('/api/v1/upload', uploadRoutes); // Cloudinary upload routes
 app.use('/api/v1/ai-suggestions', aiSuggestionsRoutes); // AI Suggestions sistemi aktif edildi
 app.use('/api/v1/inventory', inventoryRoutes); // Inventory routes
+app.use('/api/v1/hybrid-queue', hybridQueueRoutes); // Hybrid queue management routes
 
 // SEO routes (no auth required)
 // app.use('/', seoRoutes); // Sitemap and robots.txt
