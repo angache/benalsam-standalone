@@ -102,7 +102,13 @@ export class InventoryController {
         return ApiResponseUtil.badRequest(res, 'Item ID is required');
       }
 
+      logger.info(`🔄 Updating inventory item: ${itemId} for user: ${userId}`);
+      logger.info(`📝 Raw request body:`, req.body);
+      logger.info(`📝 Request headers:`, req.headers);
+      
       const { name, category, description, main_image_url, additional_image_urls } = req.body;
+      
+      logger.info(`📝 Parsed data:`, { name, category, description, main_image_url, additional_image_urls });
 
       // Check if item belongs to user
       const { data: existingItem, error: checkError } = await supabase
@@ -135,10 +141,12 @@ export class InventoryController {
         .single();
 
       if (error) {
-        logger.error('Error updating inventory item:', error);
+        logger.error('❌ Error updating inventory item:', error);
         return ApiResponseUtil.error(res, 'Failed to update inventory item', 500);
       }
 
+      logger.info(`✅ Inventory item updated successfully: ${itemId}`);
+      logger.info(`📊 Updated data:`, data);
       return ApiResponseUtil.success(res, data, 'Inventory item updated successfully');
     } catch (error) {
       logger.error('Unexpected error in updateInventoryItem:', error);
@@ -174,37 +182,19 @@ export class InventoryController {
         return ApiResponseUtil.notFound(res, 'Inventory item not found or access denied');
       }
 
-      // Delete images from Cloudinary if they exist
-      if (existingItem.main_image_url || existingItem.additional_image_urls) {
-        try {
-          const imageUrls = [
-            existingItem.main_image_url,
-            ...(existingItem.additional_image_urls || [])
-          ].filter(Boolean);
-
-          // Extract public IDs from Cloudinary URLs
-          const publicIds = imageUrls
-            .filter(url => url.includes('cloudinary.com'))
-            .map(url => {
-              const urlParts = url.split('/');
-              const uploadIndex = urlParts.findIndex(part => part === 'upload');
-              if (uploadIndex !== -1 && uploadIndex + 2 < urlParts.length) {
-                const publicIdWithExtension = urlParts.slice(uploadIndex + 2).join('/');
-                return publicIdWithExtension.split('.')[0]; // Remove file extension
-              }
-              return null;
-            })
-            .filter(Boolean);
-
-          // Delete images from Cloudinary
-          if (publicIds.length > 0) {
-            logger.info(`🗑️ Deleting ${publicIds.length} images from Cloudinary for inventory item ${itemId}`);
-            await cloudinaryService.deleteMultipleImages(publicIds);
-          }
-        } catch (cloudinaryError) {
-          logger.warn('Failed to delete images from Cloudinary:', cloudinaryError);
-          // Continue with item deletion even if Cloudinary deletion fails
+      // Delete entire folder from Cloudinary (includes all images and transformations)
+      try {
+        logger.info(`🗑️ Deleting inventory folder from Cloudinary for user: ${userId}, item: ${itemId}`);
+        const folderDeleted = await cloudinaryService.deleteInventoryItemFolder(userId, itemId);
+        
+        if (folderDeleted) {
+          logger.info(`✅ Successfully deleted inventory folder from Cloudinary: ${userId}/${itemId}`);
+        } else {
+          logger.warn(`⚠️ Failed to delete inventory folder from Cloudinary: ${userId}/${itemId}`);
         }
+      } catch (cloudinaryError) {
+        logger.warn('Failed to delete inventory folder from Cloudinary:', cloudinaryError);
+        // Continue with item deletion even if Cloudinary deletion fails
       }
 
       const { error } = await supabase
@@ -245,8 +235,11 @@ export class InventoryController {
         });
       }
 
+      // Get itemId from request body or query params
+      const itemId = req.body.itemId || req.query.itemId as string;
+
       const files = req.files as Express.Multer.File[];
-      const results = await cloudinaryService.uploadInventoryImages(files, userId);
+      const results = await cloudinaryService.uploadInventoryImages(files, userId, itemId);
 
       return res.json({
         success: true,

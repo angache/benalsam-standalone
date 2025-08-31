@@ -179,26 +179,36 @@ export const addInventoryItem = async (itemData, currentUserId, onProgress) => {
 
 export const updateInventoryItem = async (itemData, currentUserId, onProgress) => {
   try {
-    // Prepare image URLs
-    const mainImageUrl = itemData.images?.[0]?.url || itemData.images?.[0]?.preview;
-    const additionalImageUrls = itemData.images?.slice(1).map(img => img.url || img.preview).filter(Boolean);
+    // Prepare image URLs - support both images array and direct URL fields
+    const mainImageUrl = itemData.main_image_url || itemData.images?.[0]?.url || itemData.images?.[0]?.preview;
+    const additionalImageUrls = itemData.additional_image_urls || itemData.images?.slice(1).map(img => img.url || img.preview).filter(Boolean);
+    
+    console.log('📦 [InventoryService] itemData:', itemData);
+    console.log('📦 [InventoryService] mainImageUrl:', mainImageUrl);
+    console.log('📦 [InventoryService] additionalImageUrls:', additionalImageUrls);
 
     // Try backend API first
+    const requestBody = {
+      name: itemData.name,
+      category: itemData.category,
+      description: itemData.description,
+      condition: itemData.condition,
+      estimated_value: itemData.estimated_value,
+      tags: itemData.tags,
+      is_available: itemData.is_available,
+      is_featured: itemData.is_featured,
+      main_image_url: mainImageUrl,
+      additional_image_urls: additionalImageUrls,
+    };
+    
+    console.log('📦 [InventoryService] Request body for update:', requestBody);
+    
     const backendResult = await callBackendAPI(`/api/v1/inventory/${itemData.id}`, {
       method: 'PUT',
-      body: JSON.stringify({
-        name: itemData.name,
-        category: itemData.category,
-        description: itemData.description,
-        condition: itemData.condition,
-        estimated_value: itemData.estimated_value,
-        tags: itemData.tags,
-        is_available: itemData.is_available,
-        is_featured: itemData.is_featured,
-        main_image_url: mainImageUrl,
-        additional_image_urls: additionalImageUrls,
-      })
+      body: JSON.stringify(requestBody)
     });
+    
+    console.log('📦 [InventoryService] Backend API response:', backendResult);
     
     if (backendResult && backendResult.success) {
       console.log('📦 [InventoryService] Backend API update successful');
@@ -317,7 +327,7 @@ export const getInventoryItemById = async (itemId) => {
 };
 
 // Image upload to backend API
-export const uploadInventoryImages = async (files, onProgress) => {
+export const uploadInventoryImages = async (files, itemId, onProgress) => {
   try {
     const token = await getAuthToken();
     if (!token) {
@@ -328,6 +338,11 @@ export const uploadInventoryImages = async (files, onProgress) => {
     files.forEach((file) => {
       formData.append('images', file);
     });
+    
+    // Add itemId to formData
+    if (itemId) {
+      formData.append('itemId', itemId);
+    }
 
     const response = await fetch(`${BACKEND_API_URL}/api/v1/inventory/upload-images`, {
       method: 'POST',

@@ -1,4 +1,4 @@
-import { Job } from 'bull';
+// import { Job } from 'bull'; // Unused import
 
 // Job Types
 export enum JobType {
@@ -80,11 +80,11 @@ export interface JobResponse {
   data: any;
   progress?: number;
   createdAt: string;
-  processedAt?: string;
-  error?: string;
+  processedAt?: string | undefined;
+  error?: string | undefined;
   attempts?: number;
   delay?: number;
-  priority?: number;
+  priority?: number | undefined;
 }
 
 // Queue Stats

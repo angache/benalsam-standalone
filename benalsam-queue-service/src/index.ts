@@ -8,10 +8,10 @@ import config from './config';
 import logger from './utils/logger';
 import { connectRedis, disconnectRedis } from './config/redis';
 
-// Import routes (will be created later)
-// import jobRoutes from '@/routes/jobs';
-// import queueRoutes from '@/routes/queues';
-// import healthRoutes from '@/routes/health';
+// Import routes
+import jobRoutes from './routes/jobs';
+// import queueRoutes from './routes/queues';
+// import healthRoutes from './routes/health';
 
 const app = express();
 
@@ -56,8 +56,8 @@ app.get('/health', (_req, res) => {
   });
 });
 
-// API routes (will be added later)
-// app.use('/api/v1/queue/jobs', jobRoutes);
+// API routes
+app.use('/api/v1/queue/jobs', jobRoutes);
 // app.use('/api/v1/queue/queues', queueRoutes);
 // app.use('/api/v1/queue/health', healthRoutes);
 
@@ -117,6 +117,10 @@ const startServer = async () => {
   try {
     // Connect to Redis
     await connectRedis();
+    
+    // Initialize queues and processors
+    const { initializeQueues } = await import('./queues');
+    initializeQueues();
     
     // Start HTTP server
     const server = app.listen(config.port, () => {

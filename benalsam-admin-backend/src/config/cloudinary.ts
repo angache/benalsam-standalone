@@ -35,7 +35,6 @@ export const cloudinaryUploadOptions = {
 
 // Inventory specific upload options
 export const inventoryUploadOptions = {
-  folder: 'benalsam/inventory',
   allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
   transformation: [
     { width: 1200, height: 800, crop: 'fill' },
@@ -43,8 +42,18 @@ export const inventoryUploadOptions = {
   ],
   resource_type: 'image' as const,
   eager: [
-    { width: 400, height: 300, crop: 'fill', quality: 'auto' }, // Thumbnail
-    { width: 800, height: 600, crop: 'fill', quality: 'auto' }  // Medium
+    { 
+      width: 400, 
+      height: 300, 
+      crop: 'fill', 
+      quality: 'auto'
+    },
+    { 
+      width: 800, 
+      height: 600, 
+      crop: 'fill', 
+      quality: 'auto'
+    }
   ],
   eager_async: true,
   eager_notification_url: process.env.CLOUDINARY_WEBHOOK_URL

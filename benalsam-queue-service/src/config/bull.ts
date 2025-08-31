@@ -32,7 +32,7 @@ export const createQueue = (
     redis: {
       host: config.redis.host,
       port: config.redis.port,
-      password: config.redis.password,
+      ...(config.redis.password && { password: config.redis.password }),
       db: config.redis.db,
     },
     prefix: config.bull.prefix,
@@ -110,14 +110,12 @@ export const getQueueStats = async (queue: Queue.Queue) => {
       completed,
       failed,
       delayed,
-      paused,
     ] = await Promise.all([
       queue.getWaiting(),
       queue.getActive(),
       queue.getCompleted(),
       queue.getFailed(),
       queue.getDelayed(),
-      queue.getPaused(),
     ]);
 
     const total = waiting.length + active.length + completed.length + failed.length + delayed.length;
@@ -125,12 +123,12 @@ export const getQueueStats = async (queue: Queue.Queue) => {
     // Calculate average processing time for completed jobs
     let avgProcessingTime = 0;
     if (completed.length > 0) {
-      const processingTimes = completed.map(job => {
+      const processingTimes = completed.map((job: any) => {
         return job.processedOn ? job.processedOn - job.timestamp : 0;
-      }).filter(time => time > 0);
+      }).filter((time: any) => time > 0);
       
       if (processingTimes.length > 0) {
-        avgProcessingTime = processingTimes.reduce((sum, time) => sum + time, 0) / processingTimes.length;
+        avgProcessingTime = processingTimes.reduce((sum: any, time: any) => sum + time, 0) / processingTimes.length;
       }
     }
 
@@ -141,9 +139,9 @@ export const getQueueStats = async (queue: Queue.Queue) => {
       completed: completed.length,
       failed: failed.length,
       delayed: delayed.length,
-      paused: paused.length,
+      // paused: paused.length, // Bull doesn't have getPaused method
       avgProcessingTime,
-      lastProcessedAt: completed.length > 0 ? new Date(completed[0].processedOn || 0).toISOString() : undefined,
+      lastProcessedAt: completed.length > 0 ? new Date(completed[0]?.processedOn || 0).toISOString() : undefined,
     };
   } catch (error) {
     logger.error('❌ Error getting queue stats:', error);

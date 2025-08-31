@@ -22,20 +22,33 @@ export class CloudinaryService {
   /**
    * Upload image to Cloudinary with optimization
    */
-  async uploadImage(file: Express.Multer.File, userId: string, folder?: string): Promise<UploadResult> {
+  async uploadImage(file: Express.Multer.File, userId: string, folder?: string, itemId?: string, imageIndex?: number): Promise<UploadResult> {
     try {
-      logger.info(`📤 Starting Cloudinary upload for user: ${userId}, folder: ${folder || 'default'}`);
+      logger.info(`📤 Starting Cloudinary upload for user: ${userId}, folder: ${folder || 'default'}, itemId: ${itemId || 'N/A'}`);
 
-      // Generate unique filename
-      const timestamp = Date.now();
-      const randomId = Math.random().toString(36).substring(2, 15);
-      const fileName = `${userId}_${timestamp}_${randomId}`;
+      // Generate filename based on itemId and imageIndex
+      let fileName: string;
+      let folderPath: string;
+      let uploadOptions: any;
 
-      // Set folder path
-      const folderPath = folder ? `${folder}/${fileName}` : fileName;
-
-      // Choose upload options based on folder
-      const uploadOptions = folder === 'inventory' ? inventoryUploadOptions : cloudinaryUploadOptions;
+      if (folder === 'inventory' && itemId) {
+        // Inventory: benalsam/inventory/userId/itemId/main.jpg
+        fileName = imageIndex === 0 ? 'main' : `image_${imageIndex}`;
+        folderPath = `benalsam/inventory/${userId}/${itemId}/${fileName}`;
+        uploadOptions = inventoryUploadOptions;
+      } else if (folder === 'listings' && itemId) {
+        // Listings: benalsam/listings/userId/itemId/main.jpg
+        fileName = imageIndex === 0 ? 'main' : `image_${imageIndex}`;
+        folderPath = `benalsam/listings/${userId}/${itemId}/${fileName}`;
+        uploadOptions = cloudinaryUploadOptions;
+      } else {
+        // Fallback: benalsam/general/userId_timestamp_random
+        const timestamp = Date.now();
+        const randomId = Math.random().toString(36).substring(2, 15);
+        fileName = `${userId}_${timestamp}_${randomId}`;
+        folderPath = `benalsam/general/${fileName}`;
+        uploadOptions = cloudinaryUploadOptions;
+      }
 
       let result;
       
@@ -110,11 +123,13 @@ export class CloudinaryService {
   /**
    * Upload inventory images with special optimization
    */
-  async uploadInventoryImages(files: Express.Multer.File[], userId: string): Promise<UploadResult[]> {
+  async uploadInventoryImages(files: Express.Multer.File[], userId: string, itemId?: string): Promise<UploadResult[]> {
     try {
-      logger.info(`📤 Starting inventory image upload for user: ${userId}, count: ${files.length}`);
+      logger.info(`📤 Starting inventory image upload for user: ${userId}, count: ${files.length}, itemId: ${itemId || 'N/A'}`);
 
-      const uploadPromises = files.map(file => this.uploadImage(file, userId, 'inventory'));
+      const uploadPromises = files.map((file, index) => 
+        this.uploadImage(file, userId, 'inventory', itemId, index)
+      );
       const results = await Promise.all(uploadPromises);
 
       logger.info(`✅ Successfully uploaded ${results.length} inventory images`);
@@ -164,6 +179,60 @@ export class CloudinaryService {
     } catch (error) {
       logger.error('❌ Multiple image deletion failed:', error);
       throw new Error(`Multiple image deletion failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Delete folder from Cloudinary
+   */
+  async deleteFolder(folderPath: string): Promise<boolean> {
+    try {
+      logger.info(`🗑️ Deleting folder from Cloudinary: ${folderPath}`);
+
+      // Klasör altındaki tüm dosyaları sil
+      const deleteResult = await cloudinary.api.delete_resources_by_prefix(folderPath, {
+        resource_type: 'image'
+      });
+
+      logger.info(`✅ Successfully deleted resources from folder: ${folderPath}`);
+      logger.info(`📊 Delete result:`, deleteResult);
+
+      // Boş klasörü de sil (UI'de gözükmesin diye)
+      try {
+        await cloudinary.api.delete_folder(folderPath);
+        logger.info(`✅ Successfully deleted empty folder: ${folderPath}`);
+      } catch (folderError) {
+        // Klasör zaten boşsa veya yoksa hata verebilir, bu normal
+        logger.debug(`ℹ️ Folder deletion note: ${folderError instanceof Error ? folderError.message : 'Unknown error'}`);
+      }
+      
+      return true;
+
+    } catch (error) {
+      logger.error('❌ Folder deletion failed:', error);
+      logger.error('❌ Error details:', {
+        folderPath,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      return false; // Don't throw error, just return false
+    }
+  }
+
+  /**
+   * Delete inventory item folder and all its images
+   */
+  async deleteInventoryItemFolder(userId: string, itemId: string): Promise<boolean> {
+    try {
+      const folderPath = `benalsam/inventory/${userId}/${itemId}`;
+      logger.info(`🗑️ Deleting inventory item folder: ${folderPath}`);
+
+      const result = await this.deleteFolder(folderPath);
+      return result;
+
+    } catch (error) {
+      logger.error('❌ Inventory item folder deletion failed:', error);
+      return false;
     }
   }
 

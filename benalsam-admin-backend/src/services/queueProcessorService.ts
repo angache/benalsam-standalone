@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { AdminElasticsearchService } from './elasticsearchService';
+import cloudinaryService from './cloudinaryService';
 import logger from '../config/logger';
 
 interface QueueJob {
@@ -107,7 +108,7 @@ export class QueueProcessorService {
   }
 
   /**
-   * Health check - stuck job'ları tespit et ve düzelt (Enhanced)
+   * Health check - stuck job'ları tespit et ve düzelt (Enhanced with detailed analysis)
    */
   private async healthCheck(): Promise<void> {
     try {
@@ -116,24 +117,63 @@ export class QueueProcessorService {
       if (stuckJobs.length > 0) {
         logger.warn(`⚠️ Found ${stuckJobs.length} stuck jobs, auto-fixing...`);
         
+        // Stuck job'ları analiz et
+        const stuckJobAnalysis = stuckJobs.map(job => {
+          const stuckDuration = Math.round((Date.now() - new Date(job.created_at).getTime()) / 1000 / 60);
+          const dataSize = JSON.stringify(job.change_data).length;
+          return {
+            id: job.id,
+            table: job.table_name,
+            operation: job.operation,
+            record_id: job.record_id,
+            stuckDuration,
+            retryCount: job.retry_count,
+            dataSize,
+            hasLargeData: dataSize > 1000000,
+            hasBase64Data: JSON.stringify(job.change_data).includes('base64')
+          };
+        });
+        
+        logger.warn(`🔍 Stuck jobs analysis:`, stuckJobAnalysis);
+        
         let fixedCount = 0;
         let failedCount = 0;
         
         for (const job of stuckJobs) {
           try {
-            await this.resetStuckJob(job);
-            fixedCount++;
+            // Base64 data içeren job'ları direkt failed yap
+            const changeDataStr = JSON.stringify(job.change_data);
+            if (changeDataStr.includes('base64') && changeDataStr.length > 100000) {
+              logger.warn(`🚫 Base64 job detected - marking as permanently failed: ${job.id}`);
+              await this.updateJobStatus(
+                job.id, 
+                'failed', 
+                'Job contains large base64 data - permanently failed to prevent infinite loops'
+              );
+              failedCount++;
+            } else {
+              await this.resetStuckJob(job);
+              fixedCount++;
+            }
           } catch (error) {
             logger.error(`❌ Failed to reset stuck job ${job.id}:`, error);
             failedCount++;
           }
         }
         
-        logger.info(`✅ Health check completed: ${fixedCount} jobs fixed, ${failedCount} failed`);
+        logger.info(`✅ Health check completed: ${fixedCount} jobs fixed, ${failedCount} failed`, {
+          totalStuckJobs: stuckJobs.length,
+          fixedCount,
+          failedCount,
+          stuckJobAnalysis
+        });
         
         // Eğer çok fazla stuck job varsa uyarı ver
         if (stuckJobs.length > 5) {
-          logger.error(`🚨 CRITICAL: ${stuckJobs.length} stuck jobs detected! Queue processor may have issues.`);
+          logger.error(`🚨 CRITICAL: ${stuckJobs.length} stuck jobs detected! Queue processor may have issues.`, {
+            stuckJobCount: stuckJobs.length,
+            stuckJobAnalysis
+          });
         }
       } else {
         logger.debug('✅ Health check: No stuck jobs found');
@@ -219,29 +259,47 @@ export class QueueProcessorService {
   }
 
   /**
-   * Stuck job'ı reset et (Enhanced)
+   * Stuck job'ı reset et (Enhanced with detailed analysis)
    */
   private async resetStuckJob(job: any): Promise<void> {
     try {
       const stuckDuration = Math.round((Date.now() - new Date(job.created_at).getTime()) / 1000 / 60);
       const retryCount = job.retry_count || 0;
+      const dataSize = JSON.stringify(job.change_data).length;
+      
+      // Job analizi
+      const jobAnalysis = {
+        id: job.id,
+        operation: job.operation,
+        table: job.table_name,
+        record_id: job.record_id,
+        stuckDuration,
+        retryCount,
+        dataSize,
+        hasLargeData: dataSize > 1000000, // 1MB
+        hasBase64Data: JSON.stringify(job.change_data).includes('base64'),
+        created_at: job.created_at
+      };
+      
+      logger.warn(`🔍 Stuck job analysis for job ${job.id}:`, jobAnalysis);
       
       // Eğer çok fazla retry yapmışsa failed olarak işaretle
       if (retryCount >= this.maxRetries) {
-        await this.updateJobStatus(
-          job.id, 
-          'failed', 
-          `Job stuck for ${stuckDuration} minutes and exceeded max retries (${this.maxRetries})`
-        );
-        logger.warn(`❌ Marked stuck job ${job.id} as failed (max retries exceeded)`);
+        const failureReason = jobAnalysis.hasLargeData 
+          ? `Job stuck for ${stuckDuration} minutes with large data (${dataSize} bytes) and exceeded max retries (${this.maxRetries})`
+          : `Job stuck for ${stuckDuration} minutes and exceeded max retries (${this.maxRetries})`;
+          
+        await this.updateJobStatus(job.id, 'failed', failureReason);
+        logger.warn(`❌ Marked stuck job ${job.id} as failed (max retries exceeded)`, jobAnalysis);
       } else {
         // Normal reset
-        await this.updateJobStatus(
-          job.id, 
-          'pending', 
-          `Reset from stuck state (stuck for ${stuckDuration} minutes, retry ${retryCount + 1}/${this.maxRetries})`
-        );
-        logger.info(`🔄 Reset stuck job ${job.id} to pending (stuck for ${stuckDuration} minutes)`);
+        let resetReason = `Reset from stuck state (stuck for ${stuckDuration} minutes, retry ${retryCount + 1}/${this.maxRetries})`;
+        if (jobAnalysis.hasLargeData) {
+          resetReason += `. Large data detected: ${dataSize} bytes`;
+        }
+        
+        await this.updateJobStatus(job.id, 'pending', resetReason);
+        logger.info(`🔄 Reset stuck job ${job.id} to pending (stuck for ${stuckDuration} minutes)`, jobAnalysis);
       }
     } catch (error) {
       logger.error(`❌ Error resetting stuck job ${job.id}:`, error);
@@ -271,6 +329,7 @@ export class QueueProcessorService {
       }
 
       logger.info(`🔄 Processing ${jobs.length} queue jobs (batch ${this.batchSize})...`);
+      logger.info(`📋 Jobs to process:`, jobs.map(job => ({ id: job.id, operation: job.operation, table: job.table_name, record_id: job.record_id })));
 
       // Batch processing
       const promises = jobs.map((job: any) => this.processJobWithTimeout(job));
@@ -293,22 +352,62 @@ export class QueueProcessorService {
   }
 
   /**
-   * Job'ı timeout ile işle
+   * Job'ı timeout ile işle (Enhanced with detailed logging)
    */
   private async processJobWithTimeout(job: QueueJob): Promise<void> {
+    const startTime = Date.now();
+    const jobDetails = {
+      id: job.id,
+      operation: job.operation,
+      table: job.table_name,
+      record_id: job.record_id,
+      retry_count: job.retry_count,
+      data_size: JSON.stringify(job.change_data).length
+    };
+
     try {
+      logger.info(`🔄 Starting job ${job.id}: ${job.operation} on ${job.table_name}:${job.record_id}`, {
+        jobDetails,
+        timeout: this.processingTimeout,
+        maxRetries: this.maxRetries
+      });
+      
+      // Data size kontrolü
+      if (jobDetails.data_size > 1000000) { // 1MB
+        logger.warn(`⚠️ Large job data detected: ${jobDetails.data_size} bytes for job ${job.id}`);
+      }
+      
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Job processing timeout')), this.processingTimeout);
+        setTimeout(() => reject(new Error(`Job processing timeout after ${this.processingTimeout}ms`)), this.processingTimeout);
       });
 
       const jobPromise = this.processJob(job);
 
       await Promise.race([jobPromise, timeoutPromise]);
+      
+      const processingTime = Date.now() - startTime;
+      logger.info(`✅ Job ${job.id} completed successfully in ${processingTime}ms`, {
+        jobDetails,
+        processingTime,
+        dataSize: jobDetails.data_size
+      });
     } catch (error) {
-      logger.error(`❌ Job ${job.id} failed or timed out:`, error);
+      const processingTime = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      logger.error(`❌ Job ${job.id} failed or timed out after ${processingTime}ms:`, {
+        jobDetails,
+        error: errorMessage,
+        processingTime,
+        dataSize: jobDetails.data_size,
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
+      // Detaylı error message oluştur
+      const detailedErrorMessage = `Job failed after ${processingTime}ms: ${errorMessage}. Data size: ${jobDetails.data_size} bytes. Retry: ${job.retry_count}/${this.maxRetries}`;
       
       // Job'ı failed olarak işaretle
-      await this.updateJobStatus(job.id, 'failed', error instanceof Error ? error.message : String(error));
+      await this.updateJobStatus(job.id, 'failed', detailedErrorMessage);
     }
   }
 
@@ -333,18 +432,23 @@ export class QueueProcessorService {
 
       switch (table_name) {
         case 'listings':
+          logger.info(`📝 Processing listing job: ${operation} on ${record_id}`);
           await this.processListingJob(operation, record_id, change_data);
           break;
         case 'profiles':
+          logger.info(`📝 Processing profile job: ${operation} on ${record_id}`);
           await this.processProfileJob(operation, record_id, change_data);
           break;
         case 'categories':
+          logger.info(`📝 Processing category job: ${operation} on ${record_id}`);
           await this.processCategoryJob(operation, record_id, change_data);
           break;
         case 'category_ai_suggestions':
+          logger.info(`📝 Processing AI suggestion job: ${operation} on ${record_id}`);
           await this.processAiSuggestionJob(operation, record_id, change_data);
           break;
         case 'inventory_items':
+          logger.info(`📝 Processing inventory job: ${operation} on ${record_id}`);
           await this.processInventoryJob(operation, record_id, change_data);
           break;
         default:
@@ -423,6 +527,21 @@ export class QueueProcessorService {
 
         case 'DELETE':
           // Listing silindi
+          logger.info(`🗑️ Processing listing DELETE job: ${recordId}`);
+          
+          // Akıllı kontrol: Record'ın gerçekten var olup olmadığını kontrol et
+          const recordExists = await this.checkRecordExists('listings', recordId);
+          
+          if (!recordExists) {
+            logger.warn(`⚠️ Record ${recordId} already deleted or doesn't exist - skipping DELETE job`, {
+              recordId,
+              operation: 'DELETE',
+              table: 'listings'
+            });
+            // Job'ı completed olarak işaretle çünkü zaten silinmiş
+            return;
+          }
+          
           await this.elasticsearchService.deleteDocument(recordId);
           
           // Kategori sayıları cache'ini temizle
@@ -468,14 +587,39 @@ export class QueueProcessorService {
   }
 
   /**
-   * Inventory job'ını işle (Enhanced)
+   * Inventory job'ını işle (Enhanced with detailed logging)
    */
   private async processInventoryJob(operation: string, recordId: string, changeData: any): Promise<void> {
+    const startTime = Date.now();
+    const dataSize = JSON.stringify(changeData).length;
+    
     try {
+      logger.info(`📦 Processing inventory job: ${operation} on ${recordId}`, {
+        operation,
+        recordId,
+        dataSize,
+        hasBase64Data: JSON.stringify(changeData).includes('base64'),
+        hasImages: changeData?.main_image_url || changeData?.additional_image_urls?.length > 0
+      });
+
       switch (operation) {
         case 'INSERT':
           // Yeni inventory item eklendi
-          logger.info(`📦 New inventory item added: ${recordId}`);
+          logger.info(`📦 New inventory item added: ${recordId}`, {
+            recordId,
+            dataSize,
+            hasImages: changeData?.main_image_url || changeData?.additional_image_urls?.length > 0
+          });
+          
+          // Base64 data kontrolü
+          if (JSON.stringify(changeData).includes('base64')) {
+            logger.warn(`⚠️ Base64 image data detected in inventory INSERT job ${recordId}`, {
+              recordId,
+              dataSize,
+              imageCount: changeData?.additional_image_urls?.length || 0
+            });
+          }
+          
           // TODO: Inventory-specific processing (e.g., recommendation updates, analytics)
           break;
 
@@ -484,32 +628,117 @@ export class QueueProcessorService {
           const newData = changeData.new;
           const oldData = changeData.old;
           
-          logger.info(`📦 Inventory item updated: ${recordId}`);
+          logger.info(`📦 Inventory item updated: ${recordId}`, {
+            recordId,
+            dataSize,
+            hasImageChanges: newData.main_image_url !== oldData.main_image_url || 
+                            JSON.stringify(newData.additional_image_urls) !== JSON.stringify(oldData.additional_image_urls)
+          });
           
           // Eğer imaj değişikliği varsa Cloudinary işlemleri
           if (newData.main_image_url !== oldData.main_image_url || 
               JSON.stringify(newData.additional_image_urls) !== JSON.stringify(oldData.additional_image_urls)) {
-            logger.info(`🖼️ Image change detected for inventory item: ${recordId}`);
+            logger.info(`🖼️ Image change detected for inventory item: ${recordId}`, {
+              recordId,
+              oldImageCount: oldData.additional_image_urls?.length || 0,
+              newImageCount: newData.additional_image_urls?.length || 0
+            });
             // TODO: Cloudinary cleanup for old images
           }
           break;
 
         case 'DELETE':
           // Inventory item silindi
-          logger.info(`🗑️ Inventory item deleted: ${recordId}`);
+          logger.info(`🗑️ Processing inventory DELETE job: ${recordId}`, {
+            recordId,
+            dataSize,
+            hasImages: changeData?.main_image_url || changeData?.additional_image_urls?.length > 0,
+            userId: changeData?.user_id
+          });
+          
+          // Akıllı kontrol: Record'ın gerçekten var olup olmadığını kontrol et
+          const recordExists = await this.checkRecordExists('inventory_items', recordId);
+          
+          if (!recordExists) {
+            logger.warn(`⚠️ Record ${recordId} already deleted or doesn't exist - skipping DELETE job`, {
+              recordId,
+              operation: 'DELETE',
+              table: 'inventory_items'
+            });
+            // Job'ı completed olarak işaretle çünkü zaten silinmiş
+            return;
+          }
+          
+          logger.info(`🗑️ Inventory item deleted: ${recordId}`, {
+            recordId,
+            dataSize,
+            hasImages: changeData?.main_image_url || changeData?.additional_image_urls?.length > 0,
+            userId: changeData?.user_id
+          });
           
           // Cloudinary'den imajları sil
           if (changeData && changeData.main_image_url || changeData?.additional_image_urls) {
             await this.cleanupInventoryImages(changeData);
+          }
+          
+          // Cloudinary'den klasörü sil
+          if (changeData && changeData.user_id) {
+            logger.info(`🗑️ Attempting to delete folder for user: ${changeData.user_id}, item: ${recordId}`);
+            await this.cleanupInventoryFolder(changeData.user_id, recordId);
+          } else {
+            logger.warn(`⚠️ Cannot delete folder - missing user_id in changeData for job ${recordId}`);
           }
           break;
 
         default:
           throw new Error(`Unknown operation: ${operation}`);
       }
+      
+      const processingTime = Date.now() - startTime;
+      logger.info(`✅ Inventory job completed: ${operation} on ${recordId} in ${processingTime}ms`, {
+        operation,
+        recordId,
+        processingTime,
+        dataSize
+      });
+      
     } catch (error) {
-      logger.error(`❌ Error processing inventory job:`, error);
+      const processingTime = Date.now() - startTime;
+      logger.error(`❌ Error processing inventory job: ${operation} on ${recordId} after ${processingTime}ms`, {
+        operation,
+        recordId,
+        error: error instanceof Error ? error.message : String(error),
+        processingTime,
+        dataSize,
+        stack: error instanceof Error ? error.stack : undefined
+      });
       throw error;
+    }
+  }
+
+  /**
+   * Record'ın veritabanında var olup olmadığını kontrol et
+   */
+  private async checkRecordExists(tableName: string, recordId: string): Promise<boolean> {
+    try {
+      const { data, error } = await this.supabase
+        .from(tableName)
+        .select('id')
+        .eq('id', recordId)
+        .limit(1);
+
+      if (error) {
+        logger.error(`❌ Error checking record existence: ${tableName}:${recordId}`, error);
+        return false;
+      }
+
+      const exists = data && data.length > 0;
+      logger.debug(`🔍 Record existence check: ${tableName}:${recordId} = ${exists}`);
+      
+      return exists;
+    } catch (error) {
+      logger.error(`❌ Error checking record existence: ${tableName}:${recordId}`, error);
+      return false;
     }
   }
 
@@ -529,12 +758,58 @@ export class QueueProcessorService {
       if (cloudinaryUrls.length > 0) {
         logger.info(`🗑️ Cleaning up ${cloudinaryUrls.length} Cloudinary images for deleted inventory item`);
         
-        // TODO: Cloudinary service ile imajları sil
-        // await cloudinaryService.deleteMultipleImages(publicIds);
+        // URL'lerden public ID'leri çıkar
+        const publicIds = cloudinaryUrls
+          .map(url => cloudinaryService.extractPublicId(url))
+          .filter(Boolean);
+
+        if (publicIds.length > 0) {
+          // Cloudinary'den imajları sil
+          await cloudinaryService.deleteMultipleImages(publicIds);
+          logger.info(`✅ Successfully deleted ${publicIds.length} images from Cloudinary`);
+        }
       }
     } catch (error) {
       logger.error('❌ Error cleaning up inventory images:', error);
       // Don't throw - image cleanup failure shouldn't fail the job
+    }
+  }
+
+  /**
+   * Inventory klasörünü Cloudinary'den temizle
+   */
+  private async cleanupInventoryFolder(userId: string, itemId: string): Promise<void> {
+    try {
+      const folderPath = `benalsam/inventory/${userId}/${itemId}`;
+      logger.info(`🗑️ Cleaning up inventory folder: ${folderPath}`);
+      
+      const result = await cloudinaryService.deleteInventoryItemFolder(userId, itemId);
+      
+      if (result) {
+        logger.info(`✅ Successfully deleted inventory folder from Cloudinary: ${folderPath}`);
+      } else {
+        logger.warn(`⚠️ Failed to delete inventory folder from Cloudinary: ${folderPath}`);
+        
+        // Alternatif yöntem: Manuel olarak klasörü silmeyi dene
+        logger.info(`🔄 Trying alternative deletion method for: ${folderPath}`);
+        const alternativeResult = await cloudinaryService.deleteFolder(folderPath);
+        
+        if (alternativeResult) {
+          logger.info(`✅ Alternative deletion successful for: ${folderPath}`);
+        } else {
+          logger.error(`❌ Alternative deletion also failed for: ${folderPath}`);
+        }
+      }
+    } catch (error) {
+      logger.error('❌ Error cleaning up inventory folder:', error);
+      logger.error('❌ Error details:', {
+        userId,
+        itemId,
+        folderPath: `benalsam/inventory/${userId}/${itemId}`,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      // Don't throw - folder cleanup failure shouldn't fail the job
     }
   }
 
@@ -582,6 +857,21 @@ export class QueueProcessorService {
 
         case 'DELETE':
           // AI suggestion silindi
+          logger.info(`🗑️ Processing AI suggestion DELETE job: ${recordId}`);
+          
+          // Akıllı kontrol: Record'ın gerçekten var olup olmadığını kontrol et
+          const recordExists = await this.checkRecordExists('category_ai_suggestions', recordId);
+          
+          if (!recordExists) {
+            logger.warn(`⚠️ Record ${recordId} already deleted or doesn't exist - skipping DELETE job`, {
+              recordId,
+              operation: 'DELETE',
+              table: 'category_ai_suggestions'
+            });
+            // Job'ı completed olarak işaretle çünkü zaten silinmiş
+            return;
+          }
+          
           await this.elasticsearchService.deleteDocument(`ai_suggestions_${recordId}`, 'ai_suggestions');
           break;
 
@@ -663,7 +953,16 @@ export class QueueProcessorService {
 
       // Retry count'u sadece failed durumunda artır
       if (status === 'failed') {
-        updateData.retry_count = this.supabase.sql`retry_count + 1`;
+        // Önce mevcut retry count'u al
+        const { data: currentJob } = await this.supabase
+          .from('elasticsearch_sync_queue')
+          .select('retry_count')
+          .eq('id', jobId)
+          .single();
+        
+        if (currentJob) {
+          updateData.retry_count = (currentJob.retry_count || 0) + 1;
+        }
       }
 
       const { error } = await this.supabase

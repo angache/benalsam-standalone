@@ -143,23 +143,42 @@ export const useInventoryForm = (itemId) => {
     }
 
     try {
-      // Upload images to backend API first
+      const categoryPath = getCategoryPath(selectedMainCategory, selectedSubCategory, selectedSubSubCategory);
+      
+      // Prepare basic item data (without images first)
+      const basicItemData = { 
+        ...formData, 
+        category: categoryPath,
+        main_image_url: null, // Will be updated after image upload
+        additional_image_urls: []
+      };
+
+      // 1. First create the inventory item to get the real ID
+      const newItem = await addInventoryItem(basicItemData);
+      console.log('📦 [InventoryForm] Item created with ID:', newItem.id);
+
+      // 2. Then upload images with the real item ID
       const imagesToUpload = formData.images.filter(img => !img.isUploaded && img.file);
       let uploadedImages = [];
       
       if (imagesToUpload.length > 0) {
         const files = imagesToUpload.map(img => img.file);
-        uploadedImages = await uploadInventoryImages(files);
+        uploadedImages = await uploadInventoryImages(files, newItem.id);
         console.log('📦 [InventoryForm] Images uploaded to backend:', uploadedImages);
+        console.log('📦 [InventoryForm] Uploaded images structure:', uploadedImages.map(img => ({
+          url: img.url,
+          thumbnailUrl: img.thumbnailUrl,
+          mediumUrl: img.mediumUrl
+        })));
       }
 
-      // Prepare image URLs
-      const finalImages = formData.images.map(img => {
+      // 3. Update the item with image URLs
+      const finalImages = formData.images.map((img, index) => {
         if (img.isUploaded) {
           return img; // Already uploaded image
         } else if (img.file) {
-          // New uploaded image
-          const uploadedImage = uploadedImages.find(uploaded => uploaded.url);
+          // New uploaded image - use index to match with uploadedImages array
+          const uploadedImage = uploadedImages[index];
           return {
             ...img,
             url: uploadedImage?.url || img.preview,
@@ -171,19 +190,32 @@ export const useInventoryForm = (itemId) => {
         return img;
       });
 
-      const categoryPath = getCategoryPath(selectedMainCategory, selectedSubCategory, selectedSubSubCategory);
-      
-      const submittedData = { 
-        ...formData, 
-        category: categoryPath,
-        images: finalImages,
+      // 4. Update the item with final image URLs
+      const updateData = {
+        main_image_url: finalImages[0]?.url || finalImages[0]?.preview,
+        additional_image_urls: finalImages.slice(1).map(img => img.url || img.preview).filter(Boolean)
       };
+
+      console.log('📦 [InventoryForm] Final images:', finalImages);
+      console.log('📦 [InventoryForm] Update data:', updateData);
 
       let result;
       if (isEditMode) {
         result = await updateInventoryItem(submittedData, currentUser.id);
       } else {
-        result = await addInventoryItem(submittedData, currentUser.id);
+        // Update the newly created item with image URLs
+        result = await updateInventoryItem({
+          id: newItem.id,
+          name: formData.name,
+          category: categoryPath,
+          description: formData.description,
+          condition: formData.condition,
+          estimated_value: formData.estimated_value,
+          tags: formData.tags,
+          is_available: formData.is_available,
+          is_featured: formData.is_featured,
+          ...updateData
+        }, currentUser.id);
       }
 
       if (result) {
