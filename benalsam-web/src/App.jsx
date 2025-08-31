@@ -54,7 +54,7 @@ function App() {
   usePerformanceMonitor();
   
   // Route-based performance tracking
-  useRoutePerformance();
+  // useRoutePerformance(); // Temporarily disabled for performance
   
   // Core Web Vitals and performance monitoring
   usePerformance();

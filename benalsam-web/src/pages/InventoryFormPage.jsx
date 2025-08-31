@@ -56,7 +56,7 @@ import React from 'react';
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-12"
+          className="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-12"
         >
           <div className="flex items-center mb-8">
              <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="mr-4 text-muted-foreground hover:text-foreground" disabled={isUploading}>
@@ -65,7 +65,7 @@ import React from 'react';
             <h1 className="text-2xl font-bold text-gradient">{isEditMode ? 'Ürünü Düzenle' : 'Yeni Ürün Ekle'}</h1>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-5 p-6 glass-effect rounded-2xl">
+          <form onSubmit={handleSubmit} className="space-y-6 p-8 glass-effect rounded-2xl max-w-2xl mx-auto">
             <InventoryFormField label="Ürün Adı *" icon={Tag} error={errors.name}>
               <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} placeholder="Örn: Eski Laptop"
                 disabled={isUploading}

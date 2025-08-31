@@ -1,16 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
-import { supabase } from '@/lib/supabaseClient';
 import { categoriesConfig, getCategoryPath } from '@/config/categories';
 import { useAuthStore } from '@/stores';
+import { getInventoryItemById, addInventoryItem, updateInventoryItem, uploadInventoryImages } from '@/services/inventoryBackendService.js';
 
 export const useInventoryForm = (itemId) => {
   const navigate = useNavigate();
   const { 
     currentUser, 
-    handleAddInventoryItem, 
-    handleUpdateInventoryItem, 
     isUploading, 
     uploadProgress 
   } = useAuthStore();
@@ -35,14 +33,9 @@ export const useInventoryForm = (itemId) => {
     if (isEditMode && currentUser) { 
       const fetchItemData = async () => {
         setLoadingInitialData(true);
-        const { data: item, error } = await supabase
-          .from('inventory_items')
-          .select('*')
-          .eq('id', itemId)
-          .eq('user_id', currentUser.id)
-          .single();
+        const item = await getInventoryItemById(itemId);
 
-        if (error || !item) {
+        if (!item) {
           toast({ title: "Ürün Bulunamadı", description: "Düzenlenecek ürün bulunamadı veya size ait değil.", variant: "destructive" });
           navigate('/envanterim');
           return;
@@ -148,24 +141,64 @@ export const useInventoryForm = (itemId) => {
       toast({ title: "Form Hatalı", description: "Lütfen gerekli alanları doldurun, kategori seçimini tamamlayın ve en az bir görsel ekleyin.", variant: "destructive"});
       return;
     }
-    const categoryPath = getCategoryPath(selectedMainCategory, selectedSubCategory, selectedSubSubCategory);
-    
-    const submittedData = { 
-      ...formData, 
-      category: categoryPath,
-    };
 
-    let result;
-    if (isEditMode) {
-      result = await handleUpdateInventoryItem(submittedData);
-    } else {
-      result = await handleAddInventoryItem(submittedData);
-    }
+    try {
+      // Upload images to backend API first
+      const imagesToUpload = formData.images.filter(img => !img.isUploaded && img.file);
+      let uploadedImages = [];
+      
+      if (imagesToUpload.length > 0) {
+        const files = imagesToUpload.map(img => img.file);
+        uploadedImages = await uploadInventoryImages(files);
+        console.log('📦 [InventoryForm] Images uploaded to backend:', uploadedImages);
+      }
 
-    if (result) {
-      navigate('/envanterim');
+      // Prepare image URLs
+      const finalImages = formData.images.map(img => {
+        if (img.isUploaded) {
+          return img; // Already uploaded image
+        } else if (img.file) {
+          // New uploaded image
+          const uploadedImage = uploadedImages.find(uploaded => uploaded.url);
+          return {
+            ...img,
+            url: uploadedImage?.url || img.preview,
+            thumbnailUrl: uploadedImage?.thumbnailUrl,
+            mediumUrl: uploadedImage?.mediumUrl,
+            isUploaded: true
+          };
+        }
+        return img;
+      });
+
+      const categoryPath = getCategoryPath(selectedMainCategory, selectedSubCategory, selectedSubSubCategory);
+      
+      const submittedData = { 
+        ...formData, 
+        category: categoryPath,
+        images: finalImages,
+      };
+
+      let result;
+      if (isEditMode) {
+        result = await updateInventoryItem(submittedData, currentUser.id);
+      } else {
+        result = await addInventoryItem(submittedData, currentUser.id);
+      }
+
+      if (result) {
+        toast({ title: "Başarılı!", description: isEditMode ? "Ürün başarıyla güncellendi." : "Ürün başarıyla eklendi." });
+        navigate('/envanterim');
+      }
+    } catch (error) {
+      console.error('Error submitting inventory item:', error);
+      toast({ 
+        title: "Hata", 
+        description: "Ürün kaydedilirken bir sorun oluştu. Lütfen tekrar deneyin.", 
+        variant: "destructive" 
+      });
     }
-  }, [isUploading, validate, formData, selectedMainCategory, selectedSubCategory, selectedSubSubCategory, isEditMode, handleUpdateInventoryItem, handleAddInventoryItem, navigate]);
+  }, [isUploading, validate, formData, selectedMainCategory, selectedSubCategory, selectedSubSubCategory, isEditMode, currentUser?.id, navigate]);
 
   return {
     formData,

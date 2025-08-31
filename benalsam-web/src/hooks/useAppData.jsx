@@ -6,15 +6,17 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuthStore } from '@/stores';
 import { 
   fetchListings as fetchListingsService, 
-  fetchInventoryItems as fetchInventoryItemsService,
   createListing as createListingService,
-  addInventoryItem as addInventoryItemService,
-  updateInventoryItem as updateInventoryItemService,
-  deleteInventoryItem as deleteInventoryItemService,
   createOffer as createOfferService,
   addFavorite as addFavoriteService,
   removeFavorite as removeFavoriteService
 } from '@/services/supabaseService';
+import { 
+  fetchInventoryItems as fetchInventoryItemsService,
+  addInventoryItem as addInventoryItemService,
+  updateInventoryItem as updateInventoryItemService,
+  deleteInventoryItem as deleteInventoryItemService,
+} from '@/services/inventoryBackendService.js';
 import { getTotalUnreadMessages } from '@/services/conversationService';
 import { seedListings as seedListingsService, clearAllDatabase as clearAllDatabaseService } from '@/lib/seedDatabase'; 
 

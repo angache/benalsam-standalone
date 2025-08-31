@@ -182,13 +182,28 @@ export class InventoryController {
             ...(existingItem.additional_image_urls || [])
           ].filter(Boolean);
 
-          if (imageUrls.length > 0) {
-            await cloudinaryService.deleteMultipleImages(imageUrls);
-            logger.info('Inventory images deleted from Cloudinary:', imageUrls);
+          // Extract public IDs from Cloudinary URLs
+          const publicIds = imageUrls
+            .filter(url => url.includes('cloudinary.com'))
+            .map(url => {
+              const urlParts = url.split('/');
+              const uploadIndex = urlParts.findIndex(part => part === 'upload');
+              if (uploadIndex !== -1 && uploadIndex + 2 < urlParts.length) {
+                const publicIdWithExtension = urlParts.slice(uploadIndex + 2).join('/');
+                return publicIdWithExtension.split('.')[0]; // Remove file extension
+              }
+              return null;
+            })
+            .filter(Boolean);
+
+          // Delete images from Cloudinary
+          if (publicIds.length > 0) {
+            logger.info(`🗑️ Deleting ${publicIds.length} images from Cloudinary for inventory item ${itemId}`);
+            await cloudinaryService.deleteMultipleImages(publicIds);
           }
         } catch (cloudinaryError) {
           logger.warn('Failed to delete images from Cloudinary:', cloudinaryError);
-          // Continue with item deletion even if image deletion fails
+          // Continue with item deletion even if Cloudinary deletion fails
         }
       }
 
@@ -231,7 +246,7 @@ export class InventoryController {
       }
 
       const files = req.files as Express.Multer.File[];
-      const results = await cloudinaryService.uploadMultipleImages(files, userId);
+      const results = await cloudinaryService.uploadInventoryImages(files, userId);
 
       return res.json({
         success: true,

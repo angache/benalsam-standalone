@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import InventoryItemCard from '@/components/InventoryItemCard';
 import { useAuthStore } from '@/stores';
-import { fetchInventoryItems, deleteInventoryItem } from '@/services/supabaseService';
+import { fetchInventoryItems, deleteInventoryItem } from '@/services/inventoryBackendService.js';
 
 
 const InventoryPage = () => { 
@@ -21,25 +21,13 @@ const InventoryPage = () => {
     if (currentUser?.id) {
       setIsFetchingInventory(true);
       
-      // Add timeout to prevent hanging requests
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Inventory fetch timeout')), 10000)
-      );
-      
-      Promise.race([
-        fetchInventoryItems(currentUser.id),
-        timeoutPromise
-      ])
+      fetchInventoryItems(currentUser.id)
         .then(items => {
           setInventoryItems(items || []);
         })
         .catch(error => {
           console.error('Error fetching inventory:', error);
-          if (error.message.includes('timeout')) {
-            toast({ title: "Zaman Aşımı", description: "Envanter yüklenirken zaman aşımı oluştu. Lütfen tekrar deneyin.", variant: "destructive" });
-          } else {
-            toast({ title: "Hata", description: "Envanter yüklenirken bir sorun oluştu.", variant: "destructive" });
-          }
+          toast({ title: "Hata", description: "Envanter yüklenirken bir sorun oluştu.", variant: "destructive" });
         })
         .finally(() => {
           setIsFetchingInventory(false);
@@ -47,13 +35,8 @@ const InventoryPage = () => {
     }
   }, [currentUser?.id]);
 
-  const isLoadingPage = useMemo(() => {
-    return loadingAuth || (currentUser && isFetchingInventory && inventoryItems.length === 0);
-  }, [loadingAuth, currentUser, isFetchingInventory, inventoryItems.length]);
-
-  const showEmptyState = useMemo(() => {
-    return !isLoadingPage && !isFetchingInventory && inventoryItems.length === 0 && !!currentUser;
-  }, [isLoadingPage, isFetchingInventory, inventoryItems.length, currentUser]);
+  const isLoadingPage = loadingAuth || (currentUser && isFetchingInventory && inventoryItems.length === 0);
+  const showEmptyState = !isLoadingPage && !isFetchingInventory && inventoryItems.length === 0 && !!currentUser;
 
 
   if (isLoadingPage) {
@@ -70,7 +53,10 @@ const InventoryPage = () => {
 
   const handleDelete = async (itemId) => {
     try {
-      const success = await deleteInventoryItem(currentUser.id, itemId);
+      console.log('🗑️ [InventoryPage] Deleting item with ID:', itemId);
+      console.log('🗑️ [InventoryPage] Current user ID:', currentUser.id);
+      
+      const success = await deleteInventoryItem(itemId, currentUser.id);
       if (success) {
         setInventoryItems(prev => prev.filter(item => item.id !== itemId));
         toast({ title: "Başarılı", description: "Ürün başarıyla silindi." });

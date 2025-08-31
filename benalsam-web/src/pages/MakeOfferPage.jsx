@@ -5,7 +5,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/stores';
-import { fetchInventoryItems } from '@/services/inventoryService';
+import { fetchInventoryItems } from '@/services/inventoryBackendService.js';
 import { supabase } from '@/lib/supabaseClient';
 import { 
   checkOfferLimit, 
