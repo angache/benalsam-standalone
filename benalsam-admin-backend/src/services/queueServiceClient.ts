@@ -90,9 +90,23 @@ export class QueueServiceClient {
    */
   async addJob(jobData: QueueJobData): Promise<QueueJobResponse> {
     try {
+      // Transform jobData to match queue service format
+      const queueJobData = {
+        type: 'elasticsearch-sync',
+        data: {
+          operation: jobData.operation,
+          table: jobData.table,
+          recordId: jobData.recordId,
+          changeData: jobData.changeData,
+        },
+        priority: jobData.priority || 0,
+        delay: jobData.delay || 0,
+        attempts: jobData.attempts || 3,
+      };
+
       const response = await this.client.post<QueueServiceResponse<QueueJobResponse>>(
         '/api/v1/queue/jobs',
-        jobData
+        queueJobData
       );
 
       if (!response.data.success || !response.data.data) {

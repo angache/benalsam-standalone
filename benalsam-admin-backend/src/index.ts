@@ -57,7 +57,7 @@ import securityRoutes from './routes/security';
 import uploadRoutes from './routes/upload';
 import aiSuggestionsRoutes from './routes/aiSuggestions';
 import inventoryRoutes from './routes/inventory';
-import hybridQueueRoutes from './routes/hybridQueue';
+import newQueueRoutes from './routes/newQueue';
 // import seoRoutes from './routes/seo';
 
 // Import services
@@ -264,7 +264,7 @@ app.use('/api/v1/security', securityRoutes); // Security monitoring routes
 app.use('/api/v1/upload', uploadRoutes); // Cloudinary upload routes
 app.use('/api/v1/ai-suggestions', aiSuggestionsRoutes); // AI Suggestions sistemi aktif edildi
 app.use('/api/v1/inventory', inventoryRoutes); // Inventory routes
-app.use('/api/v1/hybrid-queue', hybridQueueRoutes); // Hybrid queue management routes
+app.use('/api/v1/queue', newQueueRoutes); // New Bull Queue service routes
 
 // SEO routes (no auth required)
 // app.use('/', seoRoutes); // Sitemap and robots.txt
@@ -302,13 +302,14 @@ const startServer = async () => {
       logger.warn('⚠️ Elasticsearch connection failed:', error);
     }
 
-    // Start queue processor
-    try {
-      await queueProcessor.startProcessing(10000); // 10 saniye aralıklarla
-      logger.info('✅ Queue processor started');
-    } catch (error) {
-      logger.error('❌ Queue processor failed to start:', error);
-    }
+    // Start queue processor - DISABLED (migrated to Bull Queue microservice)
+    // try {
+    //   await queueProcessor.startProcessing(10000); // 10 saniye aralıklarla
+    //   logger.info('✅ Queue processor started');
+    // } catch (error) {
+    //   logger.error('❌ Queue processor failed to start:', error);
+    // }
+    logger.info('⚠️ Old queue processor disabled - using Bull Queue microservice');
 
     // Start session cleanup service
     try {
@@ -375,27 +376,11 @@ const startServer = async () => {
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   logger.info('🛑 SIGTERM received, shutting down gracefully...');
-  
-  try {
-    await queueProcessor.stopProcessing();
-    logger.info('✅ Queue processor stopped');
-  } catch (error) {
-    logger.error('❌ Error stopping queue processor:', error);
-  }
-  
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
   logger.info('🛑 SIGINT received, shutting down gracefully...');
-  
-  try {
-    await queueProcessor.stopProcessing();
-    logger.info('✅ Queue processor stopped');
-  } catch (error) {
-    logger.error('❌ Error stopping queue processor:', error);
-  }
-  
   process.exit(0);
 });
 
