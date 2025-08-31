@@ -102,6 +102,15 @@ export interface QueueStats {
   lastProcessedAt?: string;
 }
 
+// Simple Queue Stats (for internal use)
+export interface SimpleQueueStats {
+  waiting: number;
+  active: number;
+  completed: number;
+  failed: number;
+  delayed: number;
+}
+
 // Health Check Response
 export interface HealthCheckResponse {
   status: 'healthy' | 'unhealthy';
@@ -115,6 +124,7 @@ export interface HealthCheckResponse {
   redis: {
     connected: boolean;
     latency?: number;
+    error?: string;
   };
   queues: {
     [key: string]: {
@@ -122,6 +132,14 @@ export interface HealthCheckResponse {
       stats: QueueStats;
     };
   };
+  processors: {
+    [key: string]: {
+      status: 'healthy' | 'unhealthy';
+      timestamp: string;
+      error?: string;
+    };
+  };
+  responseTime: number;
 }
 
 // API Response

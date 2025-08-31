@@ -10,6 +10,8 @@ import { connectRedis, disconnectRedis } from './config/redis';
 
 // Import routes
 import jobRoutes from './routes/jobs';
+import queueRoutes from './routes/queues';
+import healthRoutes from './routes/health';
 // import queueRoutes from './routes/queues';
 // import healthRoutes from './routes/health';
 
@@ -58,8 +60,8 @@ app.get('/health', (_req, res) => {
 
 // API routes
 app.use('/api/v1/queue/jobs', jobRoutes);
-// app.use('/api/v1/queue/queues', queueRoutes);
-// app.use('/api/v1/queue/health', healthRoutes);
+app.use('/api/v1/queue/queues', queueRoutes);
+app.use('/api/v1/queue', healthRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
