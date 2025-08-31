@@ -344,6 +344,9 @@ export class QueueProcessorService {
         case 'category_ai_suggestions':
           await this.processAiSuggestionJob(operation, record_id, change_data);
           break;
+        case 'inventory_items':
+          await this.processInventoryJob(operation, record_id, change_data);
+          break;
         default:
           logger.warn(`⚠️ Unknown table: ${table_name}`);
           await this.updateJobStatus(job.id, 'failed', `Unknown table: ${table_name}`);
@@ -461,6 +464,77 @@ export class QueueProcessorService {
     } catch (error) {
       logger.error(`❌ Error processing category job:`, error);
       throw error;
+    }
+  }
+
+  /**
+   * Inventory job'ını işle (Enhanced)
+   */
+  private async processInventoryJob(operation: string, recordId: string, changeData: any): Promise<void> {
+    try {
+      switch (operation) {
+        case 'INSERT':
+          // Yeni inventory item eklendi
+          logger.info(`📦 New inventory item added: ${recordId}`);
+          // TODO: Inventory-specific processing (e.g., recommendation updates, analytics)
+          break;
+
+        case 'UPDATE':
+          // Inventory item güncellendi
+          const newData = changeData.new;
+          const oldData = changeData.old;
+          
+          logger.info(`📦 Inventory item updated: ${recordId}`);
+          
+          // Eğer imaj değişikliği varsa Cloudinary işlemleri
+          if (newData.main_image_url !== oldData.main_image_url || 
+              JSON.stringify(newData.additional_image_urls) !== JSON.stringify(oldData.additional_image_urls)) {
+            logger.info(`🖼️ Image change detected for inventory item: ${recordId}`);
+            // TODO: Cloudinary cleanup for old images
+          }
+          break;
+
+        case 'DELETE':
+          // Inventory item silindi
+          logger.info(`🗑️ Inventory item deleted: ${recordId}`);
+          
+          // Cloudinary'den imajları sil
+          if (changeData && changeData.main_image_url || changeData?.additional_image_urls) {
+            await this.cleanupInventoryImages(changeData);
+          }
+          break;
+
+        default:
+          throw new Error(`Unknown operation: ${operation}`);
+      }
+    } catch (error) {
+      logger.error(`❌ Error processing inventory job:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Inventory imajlarını Cloudinary'den temizle
+   */
+  private async cleanupInventoryImages(inventoryData: any): Promise<void> {
+    try {
+      const imageUrls = [
+        inventoryData.main_image_url,
+        ...(inventoryData.additional_image_urls || [])
+      ].filter(Boolean);
+
+      // Cloudinary URL'lerini filtrele
+      const cloudinaryUrls = imageUrls.filter(url => url.includes('cloudinary.com'));
+      
+      if (cloudinaryUrls.length > 0) {
+        logger.info(`🗑️ Cleaning up ${cloudinaryUrls.length} Cloudinary images for deleted inventory item`);
+        
+        // TODO: Cloudinary service ile imajları sil
+        // await cloudinaryService.deleteMultipleImages(publicIds);
+      }
+    } catch (error) {
+      logger.error('❌ Error cleaning up inventory images:', error);
+      // Don't throw - image cleanup failure shouldn't fail the job
     }
   }
 

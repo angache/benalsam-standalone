@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS elasticsearch_sync_queue (
 -- ===========================
 
 -- Queue'ya mesaj ekle
-CREATE OR REPLACE FUNCTION add_to_elasticsearch_queue()
+CREATE OR REPLACE FUNCTION add_to_sync_queue()
 RETURNS TRIGGER AS $$
 DECLARE
     record_id UUID;
@@ -149,7 +149,7 @@ DROP TRIGGER IF EXISTS listings_queue_sync ON listings;
 CREATE TRIGGER listings_queue_sync
     AFTER INSERT OR UPDATE OR DELETE ON listings
     FOR EACH ROW
-    EXECUTE FUNCTION add_to_elasticsearch_queue();
+    EXECUTE FUNCTION add_to_sync_queue();
 
 -- Profiles için queue trigger
 DROP TRIGGER IF EXISTS profiles_queue_sync ON profiles;
@@ -157,7 +157,7 @@ DROP TRIGGER IF EXISTS profiles_queue_sync ON profiles;
 CREATE TRIGGER profiles_queue_sync
     AFTER INSERT OR UPDATE OR DELETE ON profiles
     FOR EACH ROW
-    EXECUTE FUNCTION add_to_elasticsearch_queue();
+    EXECUTE FUNCTION add_to_sync_queue();
 
 -- Categories için queue trigger
 DROP TRIGGER IF EXISTS categories_queue_sync ON categories;
@@ -165,7 +165,19 @@ DROP TRIGGER IF EXISTS categories_queue_sync ON categories;
 CREATE TRIGGER categories_queue_sync
     AFTER INSERT OR UPDATE OR DELETE ON categories
     FOR EACH ROW
-    EXECUTE FUNCTION add_to_elasticsearch_queue();
+    EXECUTE FUNCTION add_to_sync_queue();
+
+-- ===========================
+-- INVENTORY ITEMS TABLE TRIGGERS
+-- ===========================
+
+-- Inventory items için queue trigger
+DROP TRIGGER IF EXISTS inventory_items_queue_sync ON inventory_items;
+
+CREATE TRIGGER inventory_items_queue_sync
+    AFTER INSERT OR UPDATE OR DELETE ON inventory_items
+    FOR EACH ROW
+    EXECUTE FUNCTION add_to_sync_queue();
 
 -- ===========================
 -- QUEUE MANAGEMENT FUNCTIONS
@@ -279,7 +291,7 @@ ON elasticsearch_sync_queue(retry_count) WHERE retry_count > 0;
 
 COMMENT ON TABLE elasticsearch_sync_queue IS 'Elasticsearch sync için message queue tablosu';
 COMMENT ON FUNCTION log_elasticsearch_change() IS 'PostgreSQL notify ile real-time sync';
-COMMENT ON FUNCTION add_to_elasticsearch_queue() IS 'Queue tablosuna mesaj ekle';
+COMMENT ON FUNCTION add_to_sync_queue() IS 'Queue tablosuna mesaj ekle';
 COMMENT ON FUNCTION get_next_elasticsearch_job() IS 'Queue''dan sıradaki job''ı al';
 COMMENT ON FUNCTION update_elasticsearch_job_status() IS 'Job status güncelle';
 COMMENT ON FUNCTION cleanup_old_elasticsearch_jobs() IS 'Eski job''ları temizle';
