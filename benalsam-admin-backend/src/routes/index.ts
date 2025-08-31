@@ -12,6 +12,7 @@ import monitoringRoutes from './monitoring';
 import twoFactorRouter from './twoFactor';
 import trendAnalysisRoutes from './trendAnalysis';
 import aiSuggestionsRoutes from './aiSuggestions';
+import inventoryRoutes from './inventory';
 
 const router: IRouter = Router();
 
@@ -56,6 +57,9 @@ router.use('/trends', trendAnalysisRoutes);
 
 // AI Suggestions routes
 router.use('/ai-suggestions', aiSuggestionsRoutes);
+
+// Inventory routes
+router.use('/inventory', inventoryRoutes);
 
 router.get('/reports', (req, res) => {
   res.status(501).json({
