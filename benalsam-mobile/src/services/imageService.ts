@@ -1,5 +1,19 @@
 import { supabase  } from '../services/supabaseClient';
 
+// MIME type helper function
+const getMimeTypeFromExtension = (filename: string): string => {
+  const ext = filename.split('.').pop()?.toLowerCase();
+  switch (ext) {
+    case 'png': return 'image/png';
+    case 'gif': return 'image/gif';
+    case 'webp': return 'image/webp';
+    case 'jpg':
+    case 'jpeg':
+    default:
+      return 'image/jpeg';
+  }
+};
+
 export const uploadImages = async (files: any[], userId: string, bucket: string) => {
   // Authentication kontrolü
   
@@ -196,5 +210,133 @@ export const processImagesForSupabase = async (
     mainImageUrl: orderedUrls[0] || '',
     additionalImageUrls: orderedUrls.slice(1),
     urlsToDelete
+  };
+};
+
+export const processImagesForBackend = async (
+  images: any[], 
+  mainImageIndex: number, 
+  onProgress?: (progress: number) => void
+) => {
+  // Backend API URL
+  const BACKEND_API_URL = process.env.EXPO_PUBLIC_ADMIN_BACKEND_URL || 'http://192.168.1.10:3002';
+  
+  // Mobil için: uri'den dosya objesi oluştur
+  const filesToUpload = images
+    .filter(img => !img.isUploaded && (img.uri || img.file))
+    .map(img => {
+      if (img.uri && img.uri.startsWith('file://')) {
+        // Mobil local dosya - dosya objesi oluştur
+        const fileExt = img.name?.split('.').pop()?.toLowerCase() || 'jpg';
+        const mimeType = getMimeTypeFromExtension(img.name || `image.${fileExt}`);
+        
+        return {
+          uri: img.uri,
+          name: img.name || `image_${Date.now()}.${fileExt}`,
+          type: mimeType
+        };
+      } else if (img.file) {
+        // Web dosyası
+        return img.file;
+      }
+      return null;
+    })
+    .filter(Boolean);
+
+  console.log('🔧 [ProcessImagesForBackend] Files to upload:', filesToUpload.length);
+  
+  // Backend API'ye upload
+  let uploadedImageUrls: string[] = [];
+  let thumbnailUrls: string[] = [];
+  let mediumUrls: string[] = [];
+  
+  if (filesToUpload.length > 0) {
+    try {
+      // FormData oluştur
+      const formData = new FormData();
+      filesToUpload.forEach((file, index) => {
+        formData.append('images', file as any);
+      });
+
+      // Backend API'ye upload
+      const response = await fetch(`${BACKEND_API_URL}/api/v1/inventory/upload-images`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`Backend upload failed: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      // Backend'den dönen image data'larını işle
+      uploadedImageUrls = result.data.images.map((img: any) => img.url);
+      thumbnailUrls = result.data.images.map((img: any) => img.thumbnailUrl || img.url);
+      mediumUrls = result.data.images.map((img: any) => img.mediumUrl || img.url);
+      
+      console.log('✅ [ProcessImagesForBackend] Images uploaded to backend:', uploadedImageUrls.length);
+      console.log('✅ [ProcessImagesForBackend] Thumbnails:', thumbnailUrls.length);
+      console.log('✅ [ProcessImagesForBackend] Medium sizes:', mediumUrls.length);
+    } catch (error) {
+      console.error('❌ [ProcessImagesForBackend] Backend upload failed:', error);
+      throw error;
+    }
+  }
+  
+  // URL'leri orijinal sıraya göre düzenle
+  const finalImageUrls: string[] = [];
+  const finalThumbnailUrls: string[] = [];
+  const finalMediumUrls: string[] = [];
+  let uploadedIndex = 0;
+  
+  images.forEach((img, index) => {
+    if (img.isStockImage && img.uri) {
+      // Stok görsel - URL zaten mevcut
+      finalImageUrls[index] = img.uri;
+      finalThumbnailUrls[index] = img.uri; // Stok görsel için thumbnail yok
+      finalMediumUrls[index] = img.uri; // Stok görsel için medium yok
+    } else if ((img.uri && img.uri.startsWith('file://')) || (img.file && !img.isUploaded)) {
+      // Yeni yüklenen görsel (backend'den)
+      finalImageUrls[index] = uploadedImageUrls[uploadedIndex];
+      finalThumbnailUrls[index] = thumbnailUrls[uploadedIndex];
+      finalMediumUrls[index] = mediumUrls[uploadedIndex];
+      uploadedIndex++;
+    } else {
+      // Mevcut görsel veya başka durum
+      finalImageUrls[index] = img.uri || img.url || '';
+      finalThumbnailUrls[index] = img.thumbnailUrl || img.uri || img.url || '';
+      finalMediumUrls[index] = img.mediumUrl || img.uri || img.url || '';
+    }
+  });
+  
+  // Ana görseli başa al
+  const orderedUrls = [...finalImageUrls];
+  const orderedThumbnails = [...finalThumbnailUrls];
+  const orderedMediums = [...finalMediumUrls];
+  
+  if (mainImageIndex > 0 && orderedUrls[mainImageIndex]) {
+    const mainImage = orderedUrls[mainImageIndex];
+    const mainThumbnail = orderedThumbnails[mainImageIndex];
+    const mainMedium = orderedMediums[mainImageIndex];
+    
+    orderedUrls.splice(mainImageIndex, 1);
+    orderedThumbnails.splice(mainImageIndex, 1);
+    orderedMediums.splice(mainImageIndex, 1);
+    
+    orderedUrls.unshift(mainImage);
+    orderedThumbnails.unshift(mainThumbnail);
+    orderedMediums.unshift(mainMedium);
+  }
+  
+  return {
+    mainImageUrl: orderedUrls[0] || '',
+    additionalImageUrls: orderedUrls.slice(1),
+    thumbnailUrls: orderedThumbnails,
+    mediumUrls: orderedMediums,
+    urlsToDelete: [] // Backend'de silme işlemi yapılacak
   };
 }; 

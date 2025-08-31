@@ -7,7 +7,6 @@ export {
   fetchRecentlyViewedListings,
   fetchListingsMatchingLastSearch,
   fetchFilteredListings,
-  fetchMyListings,
   fetchAttributeStatistics,
   searchByAttributeValues
 } from './fetchers';

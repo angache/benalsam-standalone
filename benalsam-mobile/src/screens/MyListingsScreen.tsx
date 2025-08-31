@@ -17,7 +17,7 @@ import { useThemeColors, useAuthStore } from '../stores';
 import ListingCard from '../components/ListingCard';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Button } from '../components/Button';
-import { fetchMyListings } from '../services/listingService';
+import { supabase } from '../services/supabaseClient';
 import { updateListingStatus, deleteListing } from '../services/listingService/mutations';
 // import { withDataErrorBoundary } from '../utils/errorBoundaryHelpers'; // Geçici olarak devre dışı
 
@@ -259,15 +259,40 @@ const MyListingsScreen = ({ navigation }: any) => {
     
     try {
       setLoading(true);
-      const response = await fetchMyListings(user.id);
-      if (response.error) {
+      console.log('🔍 loadMyListings - Fetching listings for user:', user.id);
+      
+      const { data: listings, error } = await supabase
+        .from('listings')
+        .select(`
+          *,
+          offers:offers(count),
+          favorites:user_favorites(count)
+        `)
+        .eq('user_id', user.id)
+        .order('is_urgent_premium', { ascending: false, nullsLast: true })
+        .order('is_featured', { ascending: false, nullsLast: true })
+        .order('is_showcase', { ascending: false, nullsLast: true })
+        .order('upped_at', { ascending: false, nullsLast: true })
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('❌ Error fetching my listings:', error);
         Alert.alert('Hata', 'İlanlarınız yüklenirken bir hata oluştu.');
         setListings([]);
-      } else {
-        setListings(response.data || []);
+        return;
       }
+
+      const processedListings = listings?.map(listing => ({
+        ...listing,
+        offers_count: listing.offers?.[0]?.count || 0,
+        favorites_count: listing.favorites?.[0]?.count || 0
+      })) || [];
+
+      console.log('✅ loadMyListings - Found', processedListings.length, 'listings');
+      setListings(processedListings);
+      
     } catch (error) {
-      console.error('Error loading my listings:', error);
+      console.error('❌ Error loading my listings:', error);
       Alert.alert('Hata', 'İlanlarınız yüklenirken bir hata oluştu.');
       setListings([]);
     } finally {

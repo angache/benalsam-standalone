@@ -661,6 +661,8 @@ export const fetchAttributeStatistics = async (category?: string): Promise<ApiRe
   }
 };
 
+
+
 // Belirli attribute değerlerine göre arama
 export const searchByAttributeValues = async (
   attributeKey: string,

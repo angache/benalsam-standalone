@@ -235,15 +235,9 @@ const InventoryFormScreen = () => {
       newErrors.name = 'Ürün adı gerekli';
     }
 
-    const mainCat = categoriesConfig.find(cat => cat.name === selectedMainCategory);
-    const subCat = mainCat?.subcategories?.find((sub: any) => sub.name === selectedSubCategory);
-
+    // Basit kategori validasyonu - dinamik sistem için
     if (!selectedMainCategory) {
       newErrors.category = 'Ana kategori seçimi gerekli';
-    } else if ((mainCat as any)?.subcategories && (mainCat as any).subcategories.length > 0 && !selectedSubCategory) {
-      newErrors.category = 'Alt kategori seçimi gerekli';
-    } else if ((subCat as any)?.subcategories && (subCat as any).subcategories.length > 0 && !selectedSubSubCategory) {
-      newErrors.category = 'Detay kategori seçimi gerekli';
     }
 
     if (formData.images.length === 0) {
@@ -274,7 +268,10 @@ const InventoryFormScreen = () => {
     setUploadProgress(0);
 
     try {
-      const categoryPath = getCategoryPath(selectedMainCategory, selectedSubCategory, selectedSubSubCategory);
+      // Kategori path'ini oluştur
+      const categoryPath = [selectedMainCategory, selectedSubCategory, selectedSubSubCategory]
+        .filter(Boolean)
+        .join(' > ');
       
       const submitData = {
         ...formData,

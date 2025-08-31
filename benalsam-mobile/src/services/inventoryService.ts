@@ -4,6 +4,7 @@ import { processImagesForSupabase } from './imageService';
 export const fetchInventoryItems = async (userId: string) => {
   if (!userId) return [];
   try {
+    // Önce Supabase'den inventory'leri getir (güvenilir)
     const { data, error } = await supabase
       .from('inventory_items')
       .select('*')
@@ -11,10 +12,12 @@ export const fetchInventoryItems = async (userId: string) => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching inventory items:', error);
+      console.error('Error fetching inventory items from Supabase:', error);
       return [];
     }
-    return data;
+
+    console.log('📦 [InventoryService] Found inventory items:', data?.length || 0);
+    return data || [];
   } catch (e) {
     console.error('Unexpected error in fetchInventoryItems:', e);
     return [];

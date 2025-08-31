@@ -597,10 +597,9 @@ const getSellerFocusedRecommendations = async (
 
     // 1. Kullanıcının envanterini çek
     const { data: userInventory, error: inventoryError } = await supabase
-      .from('listings')
-      .select('id, category, budget')
-      .eq('user_id', userId)
-      .eq('status', 'active');
+      .from('inventory_items')
+      .select('id, category')
+      .eq('user_id', userId);
 
     if (inventoryError) {
       console.log('🧠 Seller-focused: Inventory error:', inventoryError);
