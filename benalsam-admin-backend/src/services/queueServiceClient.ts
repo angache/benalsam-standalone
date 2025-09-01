@@ -25,7 +25,8 @@ export interface QueueJobResponse {
 }
 
 export interface QueueServiceResponse<T = any> {
-  success: boolean;
+  success?: boolean;
+  status?: string;
   data?: T;
   error?: string;
   message?: string;
@@ -220,10 +221,10 @@ export class QueueServiceClient {
   async checkHealth(): Promise<boolean> {
     try {
       const response = await this.client.get<QueueServiceResponse>(
-        '/api/v1/queue/health'
+        '/health'
       );
 
-      return response.data.success && response.data.data?.status === 'healthy';
+      return response.data.status === 'healthy';
     } catch (error) {
       logger.error('❌ Queue service health check failed:', {
         error: error instanceof Error ? error.message : 'Unknown error',

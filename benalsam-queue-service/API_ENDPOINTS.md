@@ -9,9 +9,12 @@
 ## 📋 **ENDPOINT KATEGORİLERİ**
 
 ### **🏥 HEALTH MONITORING**
-**Base Path:** `/api/v1/health`
+**Base Path:** `/health`
 - `GET /` - Temel sağlık kontrolü
-- `GET /detailed` - Detaylı sağlık kontrolü
+
+**Base Path:** `/api/v1/queue`
+- `GET /health` - Detaylı sağlık kontrolü
+- `GET /metrics` - Sistem metrikleri
 
 ### **🔄 QUEUE MANAGEMENT**
 **Base Path:** `/api/v1/queue`
