@@ -63,7 +63,7 @@ import newQueueRoutes from './routes/newQueue';
 // Import services
 import { AdminElasticsearchService } from './services/elasticsearchService';
 import './config/cloudinary'; // Initialize Cloudinary
-import QueueProcessorService from './services/queueProcessorService';
+import { databaseTriggerBridge } from './services/databaseTriggerBridge';
 import sessionCleanupService from './services/sessionCleanupService';
 import { AnalyticsAlertsService } from './services/analyticsAlertsService';
 import performanceMonitoringService from './services/performanceMonitoringService';
@@ -99,7 +99,7 @@ export const supabase = createClient(
 
 // Initialize services
 const elasticsearchService = new AdminElasticsearchService();
-const queueProcessor = new QueueProcessorService();
+// const queueProcessor = new QueueProcessorService(); // Disabled - using new queue service
 
 // Initialize Analytics Alerts Service
 const analyticsAlertsService = new AnalyticsAlertsService();
@@ -300,6 +300,14 @@ const startServer = async () => {
       logger.info('✅ Elasticsearch connection verified');
     } catch (error) {
       logger.warn('⚠️ Elasticsearch connection failed:', error);
+    }
+
+    // Start database trigger bridge (connects database triggers to new queue service)
+    try {
+      await databaseTriggerBridge.startProcessing(5000); // 5 saniye aralıklarla
+      logger.info('✅ Database trigger bridge started');
+    } catch (error) {
+      logger.error('❌ Database trigger bridge failed to start:', error);
     }
 
     // Start queue processor - DISABLED (migrated to Bull Queue microservice)

@@ -18,7 +18,7 @@ const CategoryAttributesPage = lazy(() => import('./pages/CategoryAttributesPage
 const CategoryEditPage = lazy(() => import('./pages/CategoryEditPage').then(module => ({ default: module.CategoryEditPage })));
 const UsersPage = lazy(() => import('./pages/UsersPage').then(module => ({ default: module.UsersPage })));
 const AdminManagementPage = lazy(() => import('./pages/AdminManagementPage'));
-const ElasticsearchDashboardPage = lazy(() => import('./pages/ElasticsearchDashboardPage'));
+const ElasticsearchDashboardPage = lazy(() => import('./components/ElasticsearchUI').then(module => ({ default: module.default })));
 const RealTimeAnalyticsPage = lazy(() => import('./pages/RealTimeAnalyticsPage'));
 const AnalyticsDashboardPage = lazy(() => import('./pages/AnalyticsDashboardPage'));
 const DataExportPage = lazy(() => import('./pages/DataExportPage'));

@@ -43,7 +43,17 @@ export const createJob = async (req: Request, res: Response): Promise<void> => {
     // Create job based on type
     switch (type) {
       case JobType.ELASTICSEARCH_SYNC:
-        job = await addElasticsearchSyncJob(data, {
+        // Transform data to match ElasticsearchSyncJobData interface
+        const elasticsearchData = {
+          tableName: data.table || data.tableName,
+          operation: data.operation,
+          recordId: data.recordId,
+          changeData: data.changeData,
+          userId: data.userId,
+          timestamp: new Date().toISOString(),
+        };
+        
+        job = await addElasticsearchSyncJob(elasticsearchData, {
           ...(priority !== undefined && { priority }),
           ...(delay !== undefined && { delay }),
           ...(attempts !== undefined && { attempts }),

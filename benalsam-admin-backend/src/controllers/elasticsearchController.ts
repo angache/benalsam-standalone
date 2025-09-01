@@ -1,176 +1,104 @@
 import { Request, Response } from 'express';
-import { 
-  AdminElasticsearchService, 
-  QueueProcessorService
-} from '../services';
+import { AdminElasticsearchService } from '../services/elasticsearchService';
 import logger from '../config/logger';
-import { supabase } from '../config/supabase';
+
+const elasticsearchService = new AdminElasticsearchService();
 
 export class ElasticsearchController {
-  private elasticsearchService: AdminElasticsearchService;
-  private queueProcessorService: QueueProcessorService | null = null;
-
-  constructor() {
-    this.elasticsearchService = new AdminElasticsearchService();
-    // QueueProcessorService'i lazy loading yap - environment variables yüklendikten sonra
-  }
-
   /**
-   * QueueProcessorService'i lazy loading ile başlat
+   * Get all indices
    */
-  private getQueueProcessorService(): QueueProcessorService {
-    if (!this.queueProcessorService) {
-      this.queueProcessorService = new QueueProcessorService();
-    }
-    return this.queueProcessorService;
-  }
-
-  /**
-   * Elasticsearch health check
-   */
-  async getHealth(req: Request, res: Response) {
+  async getIndices(req: Request, res: Response) {
     try {
-      const health = await this.elasticsearchService.getHealth();
+      const indices = await elasticsearchService.getIndices();
+      res.json({
+        success: true,
+        data: indices,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      logger.error('❌ Failed to get indices:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get indices',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  /**
+   * Search documents in an index
+   */
+  async searchDocuments(req: Request, res: Response) {
+    try {
+      const { index } = req.params;
+      const { query, size = 10, from = 0 } = req.query;
       
-      res.json({
-        success: true,
-        data: health,
-        message: 'Elasticsearch health check completed'
-      });
-    } catch (error) {
-      logger.error('❌ Elasticsearch health check failed:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Elasticsearch health check failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Search listings
-   */
-  async searchListings(req: Request, res: Response) {
-    try {
-      const { query, filters, sort, page = 1, limit = 20 } = req.body;
-
-      const searchResult = await this.elasticsearchService.searchListings({
-        query,
-        filters,
-        sort,
-        page: parseInt(page),
-        limit: parseInt(limit)
-      });
-
-      res.json({
-        success: true,
-        data: searchResult,
-        message: 'Search completed successfully'
-      });
-    } catch (error) {
-      logger.error('❌ Search failed:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Search failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Get category counts from Elasticsearch
-   */
-  async getCategoryCounts(req: Request, res: Response) {
-    try {
-      const categoryCounts = await this.elasticsearchService.getCategoryCounts();
-      
-      res.json({
-        success: true,
-        data: categoryCounts,
-        message: 'Category counts retrieved successfully'
-      });
-    } catch (error) {
-      logger.error('❌ Category counts failed:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Category counts failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Invalidate category counts cache
-   */
-  async invalidateCategoryCountsCache(req: Request, res: Response) {
-    try {
-      await this.elasticsearchService.invalidateCategoryCountsCache();
-      
-      res.json({
-        success: true,
-        message: 'Category counts cache invalidated successfully'
-      });
-    } catch (error) {
-      logger.error('❌ Category counts cache invalidation failed:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Category counts cache invalidation failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Search specific index
-   */
-  async searchIndex(req: Request, res: Response) {
-    try {
-      const { index, size = 20 } = req.query;
-
-      if (!index || typeof index !== 'string') {
+      if (!index) {
         return res.status(400).json({
           success: false,
-          message: 'Index parameter is required'
+          error: 'Index name is required',
+          timestamp: new Date().toISOString()
         });
       }
 
-      // Use static method to search index
-      const searchResult = await AdminElasticsearchService.searchIndexStatic(index, {
-        size: parseInt(size as string)
-      });
+      const searchQuery = query && typeof query === 'string' ? query : '*';
+      const searchSize = parseInt(size as string) || 10;
+      const searchFrom = parseInt(from as string) || 0;
 
-      return res.json({
+      const results = await elasticsearchService.searchDocuments(
+        index,
+        searchQuery,
+        searchSize,
+        searchFrom
+      );
+
+      res.json({
         success: true,
-        data: searchResult,
-        message: 'Index search completed successfully'
+        data: results,
+        timestamp: new Date().toISOString()
       });
     } catch (error) {
-      logger.error('❌ Index search failed:', error);
-      return res.status(500).json({
+      logger.error('❌ Failed to search documents:', error);
+      res.status(500).json({
         success: false,
-        message: 'Index search failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Failed to search documents',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
       });
     }
   }
 
   /**
-   * Create index
+   * Get document by ID
    */
-  async createIndex(req: Request, res: Response) {
+  async getDocument(req: Request, res: Response) {
     try {
-      const success = await this.elasticsearchService.createIndex();
+      const { index, id } = req.params;
       
+      if (!index || !id) {
+        return res.status(400).json({
+          success: false,
+          error: 'Index name and document ID are required',
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      const document = await elasticsearchService.getDocument(index, id);
+
       res.json({
-        success,
-        message: success ? 'Index created successfully' : 'Failed to create index'
+        success: true,
+        data: document,
+        timestamp: new Date().toISOString()
       });
     } catch (error) {
-      logger.error('❌ Failed to create index:', error);
+      logger.error('❌ Failed to get document:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to create index',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Failed to get document',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
       });
     }
   }
@@ -180,449 +108,101 @@ export class ElasticsearchController {
    */
   async getIndexStats(req: Request, res: Response) {
     try {
-      // Use static method to get all indices stats
-      const stats = await AdminElasticsearchService.getAllIndicesStats();
+      const { index } = req.params;
       
+      if (!index) {
+        return res.status(400).json({
+          success: false,
+          error: 'Index name is required',
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      const stats = await elasticsearchService.getIndexStatsForIndex(index);
+
       res.json({
         success: true,
         data: stats,
-        message: 'Index statistics retrieved'
+        timestamp: new Date().toISOString()
       });
     } catch (error) {
       logger.error('❌ Failed to get index stats:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to get index statistics',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Failed to get index stats',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
       });
     }
   }
 
   /**
-   * Reindex all listings
+   * Reindex an index
    */
-  async reindexAll(req: Request, res: Response) {
+  async reindex(req: Request, res: Response) {
     try {
-      logger.info('🔄 Manual reindex requested');
+      const { index } = req.params;
       
-      const result = await this.elasticsearchService.reindexAllListings();
-      
+      if (!index) {
+        return res.status(400).json({
+          success: false,
+          error: 'Index name is required',
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      const result = await elasticsearchService.reindexIndex(index);
+
       res.json({
-        success: result.success,
+        success: true,
         data: result,
-        message: result.success ? 'Reindex completed successfully' : 'Reindex failed'
+        message: `Index ${index} reindexed successfully`,
+        timestamp: new Date().toISOString()
       });
     } catch (error) {
-      logger.error('❌ Reindex failed:', error);
+      logger.error('❌ Failed to reindex:', error);
       res.status(500).json({
         success: false,
-        message: 'Reindex failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Failed to reindex',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
       });
     }
   }
 
   /**
-   * Get sync status
+   * Delete an index
    */
-  async getSyncStatus(req: Request, res: Response) {
+  async deleteIndex(req: Request, res: Response) {
     try {
-      res.json({
-        success: true,
-        data: {
-          status: 'active',
-          message: 'Queue processor is running'
-        },
-        message: 'Sync status retrieved'
-      });
-    } catch (error) {
-      logger.error('❌ Failed to get sync status:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to get sync status',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Trigger manual sync
-   */
-  async triggerManualSync(req: Request, res: Response) {
-    try {
-      logger.info('🔧 Manual sync triggered via API');
+      const { index } = req.params;
       
-      res.json({
-        success: true,
-        message: 'Manual sync triggered'
-      });
-    } catch (error) {
-      logger.error('❌ Manual sync failed:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Manual sync failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Get queue statistics
-   */
-  async getQueueStats(req: Request, res: Response) {
-    try {
-      const queueStats = await this.getQueueProcessorService().getQueueStats();
-      
-      res.json({
-        success: true,
-        data: queueStats,
-        message: 'Queue statistics retrieved'
-      });
-    } catch (error) {
-      logger.error('❌ Failed to get queue stats:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to get queue statistics',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Get queue jobs
-   */
-  async getQueueJobs(req: Request, res: Response) {
-    try {
-      const { status, operation, limit = 50, offset = 0 } = req.query;
-      
-      const queueJobs = await this.getQueueProcessorService().getQueueJobs(
-        status as string,
-        operation as string,
-        parseInt(limit as string),
-        parseInt(offset as string)
-      );
-      
-      res.json({
-        success: true,
-        data: queueJobs,
-        message: 'Queue jobs retrieved'
-      });
-    } catch (error) {
-      logger.error('❌ Failed to get queue jobs:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to get queue jobs',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Retry failed jobs
-   */
-  async retryFailedJobs(req: Request, res: Response) {
-    try {
-      const retryCount = await this.getQueueProcessorService().retryFailedJobs();
-      
-      res.json({
-        success: true,
-        data: { retryCount },
-        message: `Retried ${retryCount} failed jobs`
-      });
-    } catch (error) {
-      logger.error('❌ Failed to retry jobs:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to retry jobs',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Clear queue
-   */
-  async clearQueue(req: Request, res: Response) {
-    try {
-      const { queueType = 'completed' } = req.body;
-      
-      res.json({
-        success: true,
-        data: { clearedCount: 0 },
-        message: `Queue clearing not implemented yet`
-      });
-    } catch (error) {
-      logger.error('❌ Failed to clear queue:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to clear queue',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Get sync configuration
-   */
-  async getSyncConfig(req: Request, res: Response) {
-    try {
-      res.json({
-        success: true,
-        data: {
-          enabled: true,
-          interval: 5000
-        },
-        message: 'Sync configuration retrieved'
-      });
-    } catch (error) {
-      logger.error('❌ Failed to get sync config:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to get sync configuration',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Update sync configuration
-   */
-  async updateSyncConfig(req: Request, res: Response) {
-    try {
-      res.json({
-        success: true,
-        message: 'Sync configuration updated'
-      });
-    } catch (error) {
-      logger.error('❌ Failed to update sync config:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to update sync configuration',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Get comprehensive health check
-   */
-  async getHealthCheck(req: Request, res: Response) {
-    try {
-      const health = await this.elasticsearchService.getHealth();
-      
-      res.json({
-        success: true,
-        data: health,
-        message: 'Health check completed'
-      });
-    } catch (error) {
-      logger.error('❌ Health check failed:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Health check failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Test Elasticsearch connection
-   */
-  async testConnection(req: Request, res: Response) {
-    try {
-      await this.elasticsearchService.testConnection();
-      
-      res.json({
-        success: true,
-        message: 'Elasticsearch connection test successful'
-      });
-    } catch (error) {
-      logger.error('❌ Elasticsearch connection test failed:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Elasticsearch connection test failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Test Redis connection
-   */
-  async testRedisConnection(req: Request, res: Response) {
-    try {
-      res.json({
-        success: true,
-        message: 'Redis connection test successful'
-      });
-    } catch (error) {
-      logger.error('❌ Redis connection test failed:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Redis connection test failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Clear search cache (Debug endpoint)
-   */
-  async clearSearchCache(req: Request, res: Response) {
-    try {
-      const searchCacheService = await import('../services/searchCacheService');
-      await searchCacheService.default.clearAll();
-      
-      res.json({
-        success: true,
-        message: 'Search cache cleared successfully'
-      });
-    } catch (error) {
-      logger.error('❌ Clear search cache failed:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Clear search cache failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-
-  /**
-   * Delete Elasticsearch index
-   */
-  async deleteIndex(req: Request, res: Response): Promise<void> {
-    try {
-      logger.info('🗑️ Deleting Elasticsearch index...');
-      
-      const success = await this.elasticsearchService.deleteIndex();
-      
-      if (success) {
-        logger.info('✅ Elasticsearch index deleted successfully');
-        res.json({
-          success: true,
-          message: 'Elasticsearch index deleted successfully'
-        });
-      } else {
-        logger.error('❌ Failed to delete Elasticsearch index');
-        res.status(500).json({
+      if (!index) {
+        return res.status(400).json({
           success: false,
-          message: 'Failed to delete Elasticsearch index'
+          error: 'Index name is required',
+          timestamp: new Date().toISOString()
         });
       }
+
+      const result = await elasticsearchService.deleteIndexByName(index);
+
+      res.json({
+        success: true,
+        data: result,
+        message: `Index ${index} deleted successfully`,
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
-      logger.error('❌ Delete index failed:', error);
+      logger.error('❌ Failed to delete index:', error);
       res.status(500).json({
         success: false,
-        message: 'Delete index failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Failed to delete index',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
       });
     }
   }
+}
 
-  /**
-   * Clear all listings and related data (Debug endpoint)
-   */
-  async clearAllListings(req: Request, res: Response) {
-    try {
-      // 🔒 SECURITY: Only allow in development mode
-      if (process.env.NODE_ENV === 'production') {
-        logger.warn('🚫 Attempted to clear all listings in production environment');
-        return res.status(403).json({
-          success: false,
-          message: 'This operation is not allowed in production environment'
-        });
-      }
-
-      // 🔒 SECURITY: Check for admin authentication (temporarily disabled for development)
-      // if (!req.user || req.user.role !== 'admin') {
-      //   logger.warn('🚫 Unauthorized attempt to clear all listings');
-      //   return res.status(401).json({
-      //     success: false,
-      //     message: 'Admin authentication required'
-      //   });
-      // }
-
-      logger.info('🧹 Starting comprehensive listing cleanup...');
-
-      // Step 1: Get current statistics
-      const { count: listingsCount } = await supabase
-        .from('listings')
-        .select('*', { count: 'exact', head: true });
-
-      const { count: offersCount } = await supabase
-        .from('offers')
-        .select('*', { count: 'exact', head: true });
-
-      const { count: conversationsCount } = await supabase
-        .from('conversations')
-        .select('*', { count: 'exact', head: true });
-
-      logger.info(`📊 Current data counts: Listings=${listingsCount}, Offers=${offersCount}, Conversations=${conversationsCount}`);
-
-      // Step 2: Delete all listings from Supabase (CASCADE will handle related data)
-      const { error: deleteError } = await supabase
-        .from('listings')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
-
-      if (deleteError) {
-        throw new Error(`Failed to delete listings: ${deleteError.message}`);
-      }
-
-      logger.info('✅ All listings deleted from Supabase');
-
-      // Step 3: Clear Elasticsearch index
-      try {
-        await this.elasticsearchService.deleteIndex();
-        logger.info('✅ Elasticsearch index deleted');
-      } catch (esError) {
-        logger.warn(`⚠️ Elasticsearch error: ${esError instanceof Error ? esError.message : 'Unknown error'}`);
-      }
-
-      // Step 4: Recreate Elasticsearch index
-      try {
-        await this.elasticsearchService.createIndex();
-        logger.info('✅ Elasticsearch index recreated');
-      } catch (esError) {
-        logger.warn(`⚠️ Elasticsearch recreation error: ${esError instanceof Error ? esError.message : 'Unknown error'}`);
-      }
-
-      // Step 5: Clear Redis cache
-      try {
-        const searchCacheService = await import('../services/searchCacheService');
-        await searchCacheService.default.clearAll();
-        logger.info('✅ Redis cache cleared');
-      } catch (redisError) {
-        logger.warn(`⚠️ Redis error: ${redisError instanceof Error ? redisError.message : 'Unknown error'}`);
-      }
-
-      // Step 6: Verify cleanup
-      const { count: finalListingsCount } = await supabase
-        .from('listings')
-        .select('*', { count: 'exact', head: true });
-
-      const { count: finalOffersCount } = await supabase
-        .from('offers')
-        .select('*', { count: 'exact', head: true });
-
-      logger.info(`✅ Final verification: Listings=${finalListingsCount}, Offers=${finalOffersCount}`);
-
-      return res.json({
-        success: true,
-        message: 'All listings and related data cleared successfully',
-        data: {
-          before: { listings: listingsCount, offers: offersCount, conversations: conversationsCount },
-          after: { listings: finalListingsCount, offers: finalOffersCount }
-        }
-      });
-
-    } catch (error) {
-      logger.error('❌ Clear all listings failed:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Clear all listings failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  }
-} 
+export const elasticsearchController = new ElasticsearchController(); 

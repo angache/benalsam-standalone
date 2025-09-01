@@ -1007,6 +1007,141 @@ export class AdminElasticsearchService {
       };
     }
   }
+
+  /**
+   * Get all indices
+   */
+  async getIndices() {
+    try {
+      const response = await this.client.cat.indices({ format: 'json' });
+      return response.map((index: any) => ({
+        index: index.index,
+        health: index.health,
+        status: index.status,
+        docs_count: parseInt(index['docs.count'] || '0'),
+        store_size: index['store.size'] || '0b'
+      }));
+    } catch (error) {
+      logger.error('❌ Failed to get indices:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Search documents in an index
+   */
+  async searchDocuments(index: string, query: string, size: number = 10, from: number = 0) {
+    try {
+      const response = await this.client.search({
+        index,
+        body: {
+          query: {
+            query_string: {
+              query: query === '*' ? '*' : `*${query}*`
+            }
+          },
+          size,
+          from
+        }
+      });
+      return response;
+    } catch (error) {
+      logger.error('❌ Failed to search documents:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get document by ID
+   */
+  async getDocument(index: string, id: string) {
+    try {
+      const response = await this.client.get({
+        index,
+        id
+      });
+      return response;
+    } catch (error) {
+      logger.error('❌ Failed to get document:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get index statistics for specific index
+   */
+  async getIndexStatsForIndex(index: string) {
+    try {
+      const response = await this.client.indices.stats({ index });
+      return response;
+    } catch (error) {
+      logger.error('❌ Failed to get index stats:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Reindex an index
+   */
+  async reindexIndex(index: string) {
+    try {
+      const newIndex = `${index}_reindexed_${Date.now()}`;
+      
+      // Get mapping from existing index
+      const mapping = await this.getIndexMapping(index);
+      
+      // Create new index with same mapping
+      await this.client.indices.create({
+        index: newIndex,
+        body: {
+          mappings: mapping
+        }
+      });
+
+      // Reindex data
+      const response = await this.client.reindex({
+        body: {
+          source: { index },
+          dest: { index: newIndex }
+        }
+      });
+
+      return {
+        success: true,
+        newIndex,
+        taskId: response.task
+      };
+    } catch (error) {
+      logger.error('❌ Failed to reindex:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete an index by name
+   */
+  async deleteIndexByName(index: string) {
+    try {
+      const response = await this.client.indices.delete({ index });
+      return response;
+    } catch (error) {
+      logger.error('❌ Failed to delete index:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get index mapping
+   */
+  private async getIndexMapping(index: string) {
+    try {
+      const response = await this.client.indices.getMapping({ index });
+      return response[index].mappings;
+    } catch (error) {
+      logger.error('❌ Failed to get index mapping:', error);
+      throw error;
+    }
+  }
 }
 
 // Export elasticsearch client instance for health checks

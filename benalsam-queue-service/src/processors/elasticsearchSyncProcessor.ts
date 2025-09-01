@@ -2,9 +2,12 @@ import { Job } from 'bull';
 import { JobOperation, ElasticsearchSyncJobData } from '../types/queue';
 import logger from '../utils/logger';
 import config from '../config';
+import { Client } from '@elastic/elasticsearch';
 
-// Elasticsearch client (will be implemented later)
-// import { AdminElasticsearchService } from './elasticsearchService';
+// Elasticsearch client
+const elasticsearchClient = new Client({
+  node: process.env['ELASTICSEARCH_URL'] || 'http://209.227.228.96:9200'
+});
 
 export const processElasticsearchSyncJob = async (job: Job<ElasticsearchSyncJobData>) => {
   const startTime = Date.now();
@@ -99,12 +102,35 @@ export const processElasticsearchSyncJob = async (job: Job<ElasticsearchSyncJobD
 const processInsertOperation = async (data: ElasticsearchSyncJobData) => {
   logger.info(`📝 Processing INSERT operation for ${data.tableName}:${data.recordId}`);
   
-  // TODO: Implement actual Elasticsearch insert
-  // const elasticsearchService = new AdminElasticsearchService();
-  // return await elasticsearchService.indexDocument(data.tableName, data.recordId, data.changeData);
+  // Check if this is a listings table operation
+  if (data.tableName === 'listings') {
+    const changeData = data.changeData;
+    const status = changeData?.status || changeData?.new?.status;
+    
+    // Only index to Elasticsearch if status is 'active'
+    if (status !== 'active') {
+      logger.info(`⏸️ Skipping Elasticsearch indexing for ${data.tableName}:${data.recordId} - status: ${status}`);
+      return {
+        action: 'skipped',
+        reason: 'status_not_active',
+        documentId: data.recordId,
+        index: data.tableName,
+        status: status,
+      };
+    }
+  }
   
-  // Temporary mock implementation
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate processing time
+  // Transform data for Elasticsearch
+  const document = transformDataForElasticsearch(data);
+  
+  // Index to Elasticsearch
+  await elasticsearchClient.index({
+    index: data.tableName,
+    id: data.recordId,
+    body: document
+  });
+  
+  logger.info(`✅ Document indexed to Elasticsearch: ${data.tableName}:${data.recordId}`);
   
   return {
     action: 'inserted',
@@ -117,12 +143,82 @@ const processInsertOperation = async (data: ElasticsearchSyncJobData) => {
 const processUpdateOperation = async (data: ElasticsearchSyncJobData) => {
   logger.info(`🔄 Processing UPDATE operation for ${data.tableName}:${data.recordId}`);
   
-  // TODO: Implement actual Elasticsearch update
-  // const elasticsearchService = new AdminElasticsearchService();
-  // return await elasticsearchService.updateDocument(data.tableName, data.recordId, data.changeData);
+  // Check if this is a listings table operation
+  if (data.tableName === 'listings') {
+    const changeData = data.changeData;
+    const oldStatus = changeData?.old?.status;
+    const newStatus = changeData?.new?.status;
+    
+    logger.info(`🔍 Status check for ${data.tableName}:${data.recordId}`, {
+      oldStatus,
+      newStatus,
+      changeDataKeys: Object.keys(changeData || {}),
+    });
+    
+    // If status changed from 'active' to something else, delete from Elasticsearch
+    if (oldStatus === 'active' && newStatus !== 'active') {
+      logger.info(`🗑️ Removing from Elasticsearch for ${data.tableName}:${data.recordId} - status changed from active to ${newStatus}`);
+      
+      await elasticsearchClient.delete({
+        index: data.tableName,
+        id: data.recordId
+      });
+      
+      return {
+        action: 'deleted',
+        reason: 'status_changed_from_active',
+        documentId: data.recordId,
+        index: data.tableName,
+        oldStatus: oldStatus,
+        newStatus: newStatus,
+      };
+    }
+    
+    // If status changed to 'active', index to Elasticsearch
+    if (oldStatus !== 'active' && newStatus === 'active') {
+      logger.info(`📝 Indexing to Elasticsearch for ${data.tableName}:${data.recordId} - status changed to active`);
+      
+      const document = transformDataForElasticsearch(data);
+      
+      await elasticsearchClient.index({
+        index: data.tableName,
+        id: data.recordId,
+        body: document
+      });
+      
+      return {
+        action: 'inserted',
+        reason: 'status_changed_to_active',
+        documentId: data.recordId,
+        index: data.tableName,
+        oldStatus: oldStatus,
+        newStatus: newStatus,
+      };
+    }
+    
+    // If status is not 'active', skip Elasticsearch operation
+    if (newStatus !== 'active') {
+      logger.info(`⏸️ Skipping Elasticsearch update for ${data.tableName}:${data.recordId} - status: ${newStatus}`);
+      return {
+        action: 'skipped',
+        reason: 'status_not_active',
+        documentId: data.recordId,
+        index: data.tableName,
+        status: newStatus,
+      };
+    }
+  }
   
-  // Temporary mock implementation
-  await new Promise(resolve => setTimeout(resolve, 800)); // Simulate processing time
+  // Update document in Elasticsearch
+  const document = transformDataForElasticsearch(data);
+  
+  await elasticsearchClient.update({
+    index: data.tableName,
+    id: data.recordId,
+    doc: document
+  });
+  
+  logger.info(`✅ Document updated in Elasticsearch: ${data.tableName}:${data.recordId}`);
   
   return {
     action: 'updated',
@@ -135,18 +231,52 @@ const processUpdateOperation = async (data: ElasticsearchSyncJobData) => {
 const processDeleteOperation = async (data: ElasticsearchSyncJobData) => {
   logger.info(`🗑️ Processing DELETE operation for ${data.tableName}:${data.recordId}`);
   
-  // TODO: Implement actual Elasticsearch delete
-  // const elasticsearchService = new AdminElasticsearchService();
-  // return await elasticsearchService.deleteDocument(data.tableName, data.recordId);
+  // Delete from Elasticsearch
+  await elasticsearchClient.delete({
+    index: data.tableName,
+    id: data.recordId
+  });
   
-  // Temporary mock implementation
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate processing time
+  logger.info(`✅ Document deleted from Elasticsearch: ${data.tableName}:${data.recordId}`);
   
   return {
     action: 'deleted',
     documentId: data.recordId,
     index: data.tableName,
   };
+};
+
+// Transform data for Elasticsearch
+const transformDataForElasticsearch = (data: ElasticsearchSyncJobData) => {
+  const changeData = data.changeData;
+  
+  // For listings table
+  if (data.tableName === 'listings') {
+    const listingData = changeData?.new || changeData;
+    
+    return {
+      id: data.recordId,
+      title: listingData?.title || '',
+      description: listingData?.description || '',
+      budget: listingData?.budget || 0,
+      status: listingData?.status || 'pending_approval',
+      category: listingData?.category || '',
+      category_id: listingData?.category_id || 0,
+      location: listingData?.location || {},
+      condition: listingData?.condition || '',
+      urgency: listingData?.urgency || '',
+      main_image_url: listingData?.main_image_url || '',
+      additional_image_urls: listingData?.additional_image_urls || [],
+      attributes: listingData?.attributes || {},
+      user_id: listingData?.user_id || '',
+      created_at: listingData?.created_at || new Date().toISOString(),
+      updated_at: listingData?.updated_at || new Date().toISOString(),
+      search_keywords: `${listingData?.title || ''} ${listingData?.description || ''}`.toLowerCase()
+    };
+  }
+  
+  // For other tables, return the data as is
+  return changeData?.new || changeData;
 };
 
 // Health check for processor
