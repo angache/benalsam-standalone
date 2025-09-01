@@ -202,6 +202,59 @@ Swagger/OpenAPI documentation:
 GET /api/v1/docs
 ```
 
+### 🚨 **ENDPOINT DOKÜMANTASYON KURALLARI**
+
+**Bu kurallar proje kalitesi için kritik öneme sahiptir ve mutlaka uygulanmalıdır:**
+
+#### ✅ **ZORUNLU KURALLAR:**
+
+1. **Endpoint Çalıştırmadan Önce:**
+   - `API_ENDPOINTS.md` dosyasından endpoint'in varlığını kontrol et
+   - Endpoint'in ne yaptığını ve auth gereksinimlerini oku
+   - Dokümantasyonda olmayan endpoint'leri çalıştırma
+
+2. **Yeni Endpoint Eklendiğinde:**
+   - `API_ENDPOINTS.md` dosyasını güncelle
+   - Endpoint'i doğru kategoriye ekle
+   - Auth gereksinimlerini belirt
+   - Changelog'a ekle
+
+3. **Endpoint Kaldırıldığında:**
+   - `API_ENDPOINTS.md` dosyasından kaldır
+   - Changelog'a ekle
+   - Kullanıcıları bilgilendir
+
+4. **Endpoint Değiştirildiğinde:**
+   - `API_ENDPOINTS.md` dosyasını güncelle
+   - Değişiklikleri changelog'a ekle
+   - Breaking change'leri belirt
+
+#### 🚫 **YASAK OLANLAR:**
+
+- ❌ Dokümantasyonda olmayan endpoint'leri çalıştırma
+- ❌ Endpoint ekleme/kaldırma sonrası dokümantasyonu güncellememe
+- ❌ Saçma endpoint'ler çalıştırma
+- ❌ Endpoint'lerin ne yaptığını belirtmeden ekleme
+
+#### 📋 **DOKÜMANTASYON FORMATI:**
+
+```markdown
+### **📋 CATEGORY NAME**
+**Base Path:** `/api/v1/category`
+- `METHOD /endpoint` - Açıklama (Auth gerekli/opsiyonel)
+- `METHOD /endpoint/:param` - Açıklama (Auth gerekli/opsiyonel)
+```
+
+#### 🔄 **GÜNCELLEME SÜRECİ:**
+
+1. Endpoint değişikliği yap
+2. `API_ENDPOINTS.md` dosyasını güncelle
+3. Changelog'a ekle
+4. Commit mesajında belirt
+5. PR açarken dokümantasyon güncellemesini kontrol et
+
+**Bu kurallar her geliştirici için zorunludur ve proje kalitesini garanti eder! 🎯**
+
 ## 🔄 Development Workflow
 
 1. **Feature Branch**: `git checkout -b feature/new-feature`

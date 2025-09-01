@@ -5,6 +5,9 @@ import logger from '../config/logger';
 export class DatabaseTriggerBridge {
   private isProcessing: boolean = false;
   private processingInterval: NodeJS.Timeout | null = null;
+  private lastProcessedAt: Date | null = null;
+  private processedJobsCount: number = 0;
+  private errorCount: number = 0;
 
   /**
    * Database trigger bridge'i başlat
@@ -59,6 +62,7 @@ export class DatabaseTriggerBridge {
 
       if (error) {
         logger.error('❌ Error fetching pending jobs:', error);
+        this.errorCount++;
         return;
       }
 
@@ -74,6 +78,7 @@ export class DatabaseTriggerBridge {
 
     } catch (error) {
       logger.error('❌ Error in processPendingJobs:', error);
+      this.errorCount++;
     }
   }
 
@@ -94,6 +99,10 @@ export class DatabaseTriggerBridge {
       // Job status'unu completed'e güncelle
       await this.updateJobStatus(job.id, 'completed');
 
+      // Stats güncelle
+      this.processedJobsCount++;
+      this.lastProcessedAt = new Date();
+
       logger.info('✅ Job processed successfully', {
         jobId: job.id,
         queueJobId: result.id,
@@ -109,6 +118,7 @@ export class DatabaseTriggerBridge {
 
       // Job status'unu failed'e güncelle
       await this.updateJobStatus(job.id, 'failed', error instanceof Error ? error.message : 'Unknown error');
+      this.errorCount++;
     }
   }
 
@@ -177,11 +187,103 @@ export class DatabaseTriggerBridge {
   /**
    * Bridge durumunu kontrol et
    */
-  async getStatus(): Promise<{ isRunning: boolean; lastProcessed: Date | null }> {
+  async getStatus(): Promise<{ 
+    isRunning: boolean; 
+    lastProcessed: Date | null;
+    processedJobsCount: number;
+    errorCount: number;
+    uptime: number;
+  }> {
     return {
       isRunning: this.isProcessing,
-      lastProcessed: null // TODO: Add last processed tracking
+      lastProcessed: this.lastProcessedAt,
+      processedJobsCount: this.processedJobsCount,
+      errorCount: this.errorCount,
+      uptime: this.isProcessing ? Date.now() - (this.lastProcessedAt?.getTime() || Date.now()) : 0
     };
+  }
+
+  /**
+   * Health check - bridge'in gerçekten çalışıp çalışmadığını test et
+   */
+  async healthCheck(): Promise<{ 
+    healthy: boolean; 
+    message: string; 
+    details: any;
+  }> {
+    try {
+      // 1. Bridge çalışıyor mu?
+      if (!this.isProcessing) {
+        return {
+          healthy: false,
+          message: 'Database trigger bridge is not running',
+          details: { isProcessing: false }
+        };
+      }
+
+      // 2. Database bağlantısı çalışıyor mu?
+      const { data: testQuery, error: dbError } = await supabase
+        .from('elasticsearch_sync_queue')
+        .select('count')
+        .limit(1);
+
+      if (dbError) {
+        return {
+          healthy: false,
+          message: 'Database connection failed',
+          details: { dbError: dbError.message }
+        };
+      }
+
+      // 3. Queue service bağlantısı çalışıyor mu?
+      const queueHealth = await newQueueService.checkHealth();
+      if (!queueHealth) {
+        return {
+          healthy: false,
+          message: 'Queue service connection failed',
+          details: { queueHealth: false }
+        };
+      }
+
+      // 4. Pending job'lar var mı kontrol et
+      const { data: pendingJobs, error: pendingError } = await supabase
+        .from('elasticsearch_sync_queue')
+        .select('id, status, created_at')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: true })
+        .limit(5);
+
+      if (pendingError) {
+        return {
+          healthy: false,
+          message: 'Failed to check pending jobs',
+          details: { pendingError: pendingError.message }
+        };
+      }
+
+      return {
+        healthy: true,
+        message: 'Database trigger bridge is healthy',
+        details: {
+          isProcessing: this.isProcessing,
+          lastProcessed: this.lastProcessedAt,
+          processedJobsCount: this.processedJobsCount,
+          errorCount: this.errorCount,
+          pendingJobsCount: pendingJobs?.length || 0,
+          pendingJobs: pendingJobs?.map(j => ({ id: j.id, created_at: j.created_at })) || []
+        }
+      };
+
+    } catch (error) {
+      return {
+        healthy: false,
+        message: 'Health check failed with error',
+        details: { 
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined
+        }
+      };
+    }
   }
 }
 

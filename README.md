@@ -91,6 +91,57 @@ EXPO_PUBLIC_ADMIN_BACKEND_URL=http://192.168.1.6:3002
 - **🚀 [Deployment](./docs/deployment/)** - Deployment rehberleri
 - **📋 [TODO](./todos/)** - Aktif görevler ve planlar
 
+### 🚨 **ENDPOINT DOKÜMANTASYON KURALLARI**
+
+**Bu kurallar tüm projeler için geçerlidir ve mutlaka uygulanmalıdır:**
+
+#### ✅ **ZORUNLU KURALLAR:**
+
+1. **Endpoint Çalıştırmadan Önce:**
+   - Her projenin kendi `API_ENDPOINTS.md` dosyasından endpoint'in varlığını kontrol et
+   - Endpoint'in ne yaptığını ve auth gereksinimlerini oku
+   - Dokümantasyonda olmayan endpoint'leri çalıştırma
+
+2. **Yeni Endpoint Eklendiğinde:**
+   - İlgili projenin `API_ENDPOINTS.md` dosyasını güncelle
+   - Endpoint'i doğru kategoriye ekle
+   - Auth gereksinimlerini belirt
+   - Changelog'a ekle
+
+3. **Endpoint Kaldırıldığında:**
+   - İlgili projenin `API_ENDPOINTS.md` dosyasından kaldır
+   - Changelog'a ekle
+   - Kullanıcıları bilgilendir
+
+4. **Endpoint Değiştirildiğinde:**
+   - İlgili projenin `API_ENDPOINTS.md` dosyasını güncelle
+   - Değişiklikleri changelog'a ekle
+   - Breaking change'leri belirt
+
+#### 🚫 **YASAK OLANLAR:**
+
+- ❌ Dokümantasyonda olmayan endpoint'leri çalıştırma
+- ❌ Endpoint ekleme/kaldırma sonrası dokümantasyonu güncellememe
+- ❌ Saçma endpoint'ler çalıştırma
+- ❌ Endpoint'lerin ne yaptığını belirtmeden ekleme
+
+#### 📋 **PROJE BAZINDA DOKÜMANTASYON:**
+
+- **Admin Backend**: `admin-backend/API_ENDPOINTS.md`
+- **Queue Service**: `benalsam-queue-service/API_ENDPOINTS.md`
+- **Web App**: `web/API_ENDPOINTS.md` (gerekirse)
+- **Mobile App**: `mobile/API_ENDPOINTS.md` (gerekirse)
+
+#### 🔄 **GÜNCELLEME SÜRECİ:**
+
+1. Endpoint değişikliği yap
+2. İlgili projenin `API_ENDPOINTS.md` dosyasını güncelle
+3. Changelog'a ekle
+4. Commit mesajında belirt
+5. PR açarken dokümantasyon güncellemesini kontrol et
+
+**Bu kurallar her geliştirici için zorunludur ve proje kalitesini garanti eder! 🎯**
+
 ## 🔄 Migration from Monorepo
 
 ### What Changed
