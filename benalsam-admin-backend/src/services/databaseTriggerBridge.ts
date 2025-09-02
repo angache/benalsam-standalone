@@ -1,6 +1,6 @@
 import { supabase } from '../config/supabase';
-import { newQueueService } from './newQueueService';
 import logger from '../config/logger';
+import { rabbitmqService } from './rabbitmqService';
 
 export class DatabaseTriggerBridge {
   private isProcessing: boolean = false;
@@ -20,6 +20,14 @@ export class DatabaseTriggerBridge {
 
     this.isProcessing = true;
     logger.info('🚀 Starting database trigger bridge...');
+
+    // RabbitMQ bağlantısını kontrol et
+    try {
+      await rabbitmqService.connect();
+      logger.info('✅ RabbitMQ connection established');
+    } catch (error) {
+      logger.error('❌ Failed to connect to RabbitMQ:', error);
+    }
 
     this.processingInterval = setInterval(async () => {
       await this.processPendingJobs();
@@ -52,7 +60,7 @@ export class DatabaseTriggerBridge {
    */
   private async processPendingJobs(): Promise<void> {
     try {
-      // Database'den pending job'ları al
+      // Database'den sadece pending job'ları al (processing, sent, completed ve failed olanları alma)
       const { data: pendingJobs, error } = await supabase
         .from('elasticsearch_sync_queue')
         .select('*')
@@ -87,27 +95,57 @@ export class DatabaseTriggerBridge {
    */
   private async processJob(job: any): Promise<void> {
     try {
-      // Job status'unu processing'e güncelle
+      // Job'ı işlemeye başlıyoruz
       await this.updateJobStatus(job.id, 'processing');
 
-      // Job data'sını yeni queue service formatına dönüştür
+      // Job data'sını RabbitMQ formatına dönüştür
       const queueJobData = this.transformJobData(job);
 
-      // Yeni queue service'e gönder
-      const result = await newQueueService.addJob(queueJobData);
+      // RabbitMQ'ya mesajları gönder
+      const messageId = `job_${job.id}_${Date.now()}`;
+      
+      // 1. Elasticsearch sync mesajı
+      const syncRoutingKey = `listing.${job.operation.toLowerCase()}`;
+      const syncPublished = await rabbitmqService.publishToExchange(
+        'benalsam.listings',
+        syncRoutingKey,
+        queueJobData,
+        { messageId: `${messageId}_sync` }
+      );
 
-      // Job status'unu completed'e güncelle
-      await this.updateJobStatus(job.id, 'completed');
+      // 2. Status change mesajı
+      const statusRoutingKey = `listing.status.${job.status.toLowerCase()}`;
+      const statusPublished = await rabbitmqService.publishToExchange(
+        'benalsam.listings',
+        statusRoutingKey,
+        {
+          listingId: job.record_id,
+          status: job.status,
+          timestamp: new Date().toISOString()
+        },
+        { messageId: `${messageId}_status` }
+      );
+
+      const published = syncPublished && statusPublished;
+
+      if (!published) {
+        throw new Error('Failed to publish message to RabbitMQ');
+      }
+
+      // Job'ı sent olarak işaretle (consumer'lar completed yapacak)
+      await this.updateJobStatus(job.id, 'sent');
 
       // Stats güncelle
       this.processedJobsCount++;
       this.lastProcessedAt = new Date();
 
-      logger.info('✅ Job processed successfully', {
+      logger.info('✅ Job sent to RabbitMQ', {
         jobId: job.id,
-        queueJobId: result.id,
+        messageId,
+        syncRoutingKey,
         table: job.table_name,
-        operation: job.operation
+        operation: job.operation,
+        status: 'pending'  // Job hala pending durumunda
       });
 
     } catch (error) {
@@ -235,13 +273,14 @@ export class DatabaseTriggerBridge {
         };
       }
 
-      // 3. Queue service bağlantısı çalışıyor mu?
-      const queueHealth = await newQueueService.checkHealth();
-      if (!queueHealth) {
+      // 3. RabbitMQ bağlantısı çalışıyor mu?
+      try {
+        await rabbitmqService.connect();
+      } catch (error) {
         return {
           healthy: false,
-          message: 'Queue service connection failed',
-          details: { queueHealth: false }
+          message: 'RabbitMQ connection failed',
+          details: { error: error instanceof Error ? error.message : 'Unknown error' }
         };
       }
 
