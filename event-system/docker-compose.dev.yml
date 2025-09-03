@@ -1,6 +1,32 @@
 version: '3.8'
 
 services:
+  elasticsearch-service:
+    build:
+      context: ../benalsam-elasticsearch-service
+      dockerfile: Dockerfile
+    container_name: benalsam-elasticsearch-service-dev
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - ELASTICSEARCH_URL=http://209.227.228.96:9200
+      - RABBITMQ_URL=amqp://benalsam:benalsam123@rabbitmq:5672
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+    volumes:
+      - ../benalsam-elasticsearch-service/logs:/app/logs
+    depends_on:
+      - rabbitmq
+    networks:
+      - benalsam-event-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   rabbitmq:
     image: rabbitmq:management
     container_name: benalsam-rabbitmq-dev
