@@ -63,13 +63,24 @@ RETURNS TRIGGER AS $$
 $$;
 ```
 
-### 3. Elasticsearch Service (Consumer) [Coming Soon]
+### 3. Elasticsearch Service (Consumer)
 - **Role**: Consumes events and updates Elasticsearch
-- **Responsibilities**:
-  - Listen to `elasticsearch.sync` queue
-  - Process listing operations
-  - Update job statuses
-  - Handle errors and retries
+- **Components**:
+  - `QueueConsumer`: Handles RabbitMQ message consumption
+  - `ElasticsearchService`: Manages Elasticsearch operations
+  - `Express API`: Provides health check endpoints
+- **Features**:
+  - Turkish language support with custom analyzer
+  - Automatic retry mechanism
+  - Dead letter exchange support
+  - Health monitoring and metrics
+  - Docker support
+- **Health Checks**:
+  - `GET /health`: Basic health check
+  - `GET /health/detailed`: All components status
+  - `GET /health/elasticsearch`: ES specific check
+  - `GET /health/rabbitmq`: RabbitMQ specific check
+  - `GET /health/database`: Job metrics
 
 ## Message Flow
 
@@ -146,11 +157,16 @@ cd benalsam-admin-backend
 npm run dev
 ```
 
-3. Start Elasticsearch Service (coming soon):
+3. Start Elasticsearch Service:
 ```bash
 cd benalsam-elasticsearch-service
+npm install
 npm run dev
 ```
+
+Service will be available at:
+- API: http://localhost:3003
+- Health Check: http://localhost:3003/health
 
 ## Monitoring
 
@@ -191,9 +207,10 @@ GROUP BY status;
    - Automatic retry via DatabaseTriggerBridge
 
 3. Consumer Processing Fails
-   - Job marked as failed
-   - Error logged with details
-   - Retry mechanism in ES Service (coming soon)
+   - Job marked as failed with error details
+   - Automatic retry up to 3 times
+   - Failed messages sent to dead letter queue
+   - Manual intervention possible via RabbitMQ UI
 
 ## Best Practices
 
