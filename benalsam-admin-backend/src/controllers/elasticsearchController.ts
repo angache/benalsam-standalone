@@ -37,7 +37,7 @@ export class ElasticsearchController {
       
       if (!index) {
         return res.status(400).json({
-          success: false,
+        success: false,
           error: 'Index name is required',
           timestamp: new Date().toISOString()
         });
@@ -53,7 +53,7 @@ export class ElasticsearchController {
         searchSize,
         searchFrom
       );
-
+      
       res.json({
         success: true,
         data: results,
@@ -86,7 +86,7 @@ export class ElasticsearchController {
       }
 
       const document = await elasticsearchService.getDocument(index, id);
-
+      
       res.json({
         success: true,
         data: document,
@@ -119,7 +119,7 @@ export class ElasticsearchController {
       }
 
       const stats = await elasticsearchService.getIndexStatsForIndex(index);
-
+      
       res.json({
         success: true,
         data: stats,
@@ -145,14 +145,14 @@ export class ElasticsearchController {
       
       if (!index) {
         return res.status(400).json({
-          success: false,
+        success: false,
           error: 'Index name is required',
           timestamp: new Date().toISOString()
         });
       }
 
       const result = await elasticsearchService.reindexIndex(index);
-
+      
       res.json({
         success: true,
         data: result,
@@ -179,14 +179,14 @@ export class ElasticsearchController {
       
       if (!index) {
         return res.status(400).json({
-          success: false,
+        success: false,
           error: 'Index name is required',
           timestamp: new Date().toISOString()
         });
       }
 
       const result = await elasticsearchService.deleteIndexByName(index);
-
+      
       res.json({
         success: true,
         data: result,
@@ -203,6 +203,6 @@ export class ElasticsearchController {
       });
     }
   }
-}
+} 
 
 export const elasticsearchController = new ElasticsearchController(); 

@@ -48,6 +48,7 @@ import predictiveCacheRoutes from './routes/predictiveCache';
 import geographicCacheRoutes from './routes/geographicCache';
 import smartInvalidationRoutes from './routes/smartInvalidation';
 import cacheCompressionRoutes from './routes/cacheCompression';
+import triggerTestRoutes from './routes/triggerTest';
 import rateLimitRoutes from './routes/rateLimitRoutes';
 import twoFactorRoutes from './routes/twoFactor';
 import sentryTestRoutes from './routes/sentry-test';
@@ -249,6 +250,7 @@ app.use('/api/v1/predictive-cache', predictiveCacheRoutes); // Predictive Cache 
 app.use('/api/v1/geographic-cache', geographicCacheRoutes); // Geographic Cache sistemi aktif edildi
 app.use('/api/v1/smart-invalidation', smartInvalidationRoutes); // Smart Invalidation sistemi aktif edildi
 app.use('/api/v1/cache-compression', cacheCompressionRoutes); // Cache Compression sistemi aktif edildi
+app.use('/api/v1/trigger-test', triggerTestRoutes); // Trigger Test sistemi aktif edildi
 app.use('/api/v1/rate-limit', rateLimitRoutes);
 app.use('/api/v1/2fa', twoFactorRoutes); // Cross-Platform Rate Limiting sistemi aktif edildi
 app.use('/api/v1/sentry-test', sentryTestRoutes); // Sentry test routes

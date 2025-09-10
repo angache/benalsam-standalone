@@ -1,15 +1,26 @@
 export type Operation = 'INSERT' | 'UPDATE' | 'DELETE';
 export type MessageType = 'ELASTICSEARCH_SYNC';
 
-export interface QueueMessage {
+export interface BaseQueueMessage {
+  messageId?: string;
+  timestamp?: string;
+  traceId?: string;
+}
+
+export interface ElasticsearchSyncMessage extends BaseQueueMessage {
   type: MessageType;
   operation: Operation;
   table: string;
   recordId: string;
   changeData: any;
-  messageId: string;
-  timestamp: string;
 }
+
+export interface StatusChangeMessage extends BaseQueueMessage {
+  listingId: string;
+  status: string;
+}
+
+export type QueueMessage = ElasticsearchSyncMessage | StatusChangeMessage;
 
 export interface MessageOptions {
   messageId: string;

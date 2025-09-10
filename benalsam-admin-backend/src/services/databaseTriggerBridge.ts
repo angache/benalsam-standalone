@@ -2,6 +2,20 @@ import { supabase } from '../config/supabase';
 import logger from '../config/logger';
 import { rabbitmqService } from './rabbitmqService';
 
+interface TraceContext {
+  traceId: string;
+  jobId: number;
+  recordId: string;
+  operation: string;
+}
+
+interface JobStatus {
+  status: string;
+  processed_at?: string;
+  trace_id?: string;
+  error_message?: string;
+}
+
 export class DatabaseTriggerBridge {
   private isProcessing: boolean = false;
   private processingInterval: NodeJS.Timeout | null = null;
@@ -94,34 +108,50 @@ export class DatabaseTriggerBridge {
    * Tek job'ı işle
    */
   private async processJob(job: any): Promise<void> {
-    try {
-      // Job'ı işlemeye başlıyoruz
-      await this.updateJobStatus(job.id, 'processing');
+    const traceId = `job_${job.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const traceContext: TraceContext = {
+      traceId,
+      jobId: job.id,
+      recordId: job.record_id,
+      operation: job.operation
+    };
 
-      // Job data'sını RabbitMQ formatına dönüştür
+    try {
+      logger.info('🔄 Processing job', { ...traceContext, status: 'started' });
+      
+      await this.updateJobStatus(job.id, 'processing', undefined, traceContext);
       const queueJobData = this.transformJobData(job);
 
-      // RabbitMQ'ya mesajları gönder
-      const messageId = `job_${job.id}_${Date.now()}`;
-      
-      // 1. Elasticsearch sync mesajı
+      const messageId = traceId;
       const syncRoutingKey = `listing.${job.operation.toLowerCase()}`;
+      
+      logger.info('📤 Publishing sync message', { 
+        ...traceContext, 
+        routingKey: syncRoutingKey 
+      });
+
       const syncPublished = await rabbitmqService.publishToExchange(
         'benalsam.listings',
         syncRoutingKey,
-        queueJobData,
+        { ...queueJobData, traceId },
         { messageId: `${messageId}_sync` }
       );
 
-      // 2. Status change mesajı
       const statusRoutingKey = `listing.status.${job.status.toLowerCase()}`;
+      
+      logger.info('📤 Publishing status message', { 
+        ...traceContext, 
+        routingKey: statusRoutingKey 
+      });
+
       const statusPublished = await rabbitmqService.publishToExchange(
         'benalsam.listings',
         statusRoutingKey,
         {
           listingId: job.record_id,
           status: job.status,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          traceId
         },
         { messageId: `${messageId}_status` }
       );
@@ -132,30 +162,30 @@ export class DatabaseTriggerBridge {
         throw new Error('Failed to publish message to RabbitMQ');
       }
 
-      // Job'ı sent olarak işaretle (consumer'lar completed yapacak)
-      await this.updateJobStatus(job.id, 'sent');
-
-      // Stats güncelle
+      await this.updateJobStatus(job.id, 'sent', undefined, traceContext);
+      
       this.processedJobsCount++;
       this.lastProcessedAt = new Date();
 
-      logger.info('✅ Job sent to RabbitMQ', {
-        jobId: job.id,
-        messageId,
-        syncRoutingKey,
-        table: job.table_name,
-        operation: job.operation,
-        status: 'pending'  // Job hala pending durumunda
+      logger.info('✅ Job processed successfully', {
+        ...traceContext,
+        status: 'sent'
       });
 
     } catch (error) {
-      logger.error('❌ Error processing job:', {
-        jobId: job.id,
-        error: error instanceof Error ? error.message : 'Unknown error'
+      logger.error('❌ Error processing job', {
+        ...traceContext,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
       });
 
-      // Job status'unu failed'e güncelle
-      await this.updateJobStatus(job.id, 'failed', error instanceof Error ? error.message : 'Unknown error');
+      await this.updateJobStatus(
+        job.id, 
+        'failed',
+        error instanceof Error ? error.message : 'Unknown error',
+        traceContext
+      );
+      
       this.errorCount++;
     }
   }
@@ -197,11 +227,17 @@ export class DatabaseTriggerBridge {
   /**
    * Job status'unu güncelle
    */
-  private async updateJobStatus(jobId: number, status: string, errorMessage?: string): Promise<void> {
+  private async updateJobStatus(
+    jobId: number, 
+    status: string, 
+    errorMessage?: string,
+    traceContext?: TraceContext
+  ): Promise<void> {
     try {
-      const updateData: any = {
+      const updateData: JobStatus = {
         status,
-        processed_at: new Date().toISOString()
+        processed_at: new Date().toISOString(),
+        trace_id: traceContext?.traceId
       };
 
       if (errorMessage) {
@@ -214,11 +250,27 @@ export class DatabaseTriggerBridge {
         .eq('id', jobId);
 
       if (error) {
-        logger.error('❌ Error updating job status:', error);
+        logger.error('❌ Error updating job status', {
+          ...traceContext,
+          error,
+          jobId,
+          status
+        });
+      } else {
+        logger.info('✅ Job status updated', {
+          ...traceContext,
+          jobId,
+          status
+        });
       }
 
     } catch (error) {
-      logger.error('❌ Error updating job status:', error);
+      logger.error('❌ Error updating job status', {
+        ...traceContext,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        jobId,
+        status
+      });
     }
   }
 

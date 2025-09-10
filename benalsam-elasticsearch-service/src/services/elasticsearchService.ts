@@ -1,5 +1,5 @@
 import { Client } from '@elastic/elasticsearch';
-import { elasticsearchConfig, ES_INDEX_SETTINGS, ES_MAPPING } from '../config/elasticsearch';
+import { elasticsearchConfig, ES_SETTINGS, ES_MAPPINGS } from '../config/elasticsearch';
 import { ListingData, ListingSearchParams } from '../types/listing';
 import logger from '../config/logger';
 
@@ -46,8 +46,8 @@ class ElasticsearchService {
         await client.indices.create({
           index: this.indexName,
           body: {
-            settings: ES_INDEX_SETTINGS,
-            mappings: ES_MAPPING
+            settings: ES_SETTINGS,
+            mappings: ES_MAPPINGS
           }
         });
         logger.info(`✅ Created index: ${this.indexName}`);
@@ -55,7 +55,7 @@ class ElasticsearchService {
         // Mapping'i güncelle
         await client.indices.putMapping({
           index: this.indexName,
-          body: ES_MAPPING
+          body: ES_MAPPINGS
         });
         logger.info(`✅ Updated mapping for index: ${this.indexName}`);
       }
@@ -188,7 +188,8 @@ class ElasticsearchService {
       // Hataları kontrol et
       const errors = items.filter(item => {
         const action = Object.keys(item)[0] as 'index' | 'update' | 'delete';
-        return item[action].error;
+        const actionResult = item[action];
+        return actionResult && 'error' in actionResult ? actionResult.error : undefined;
       });
 
       if (errors.length > 0) {
@@ -330,8 +331,8 @@ class ElasticsearchService {
       await client.indices.create({
         index: tempIndex,
         body: {
-          settings: ES_INDEX_SETTINGS,
-          mappings: ES_MAPPING
+                      settings: ES_SETTINGS,
+            mappings: ES_MAPPINGS
         }
       });
 
@@ -391,8 +392,8 @@ class ElasticsearchService {
         healthy: health.status !== 'red',
         details: {
           status: health.status,
-          numberOfDocuments: stats.indices[this.indexName].total.docs.count,
-          sizeInBytes: stats.indices[this.indexName].total.store.size_in_bytes,
+          numberOfDocuments: stats.indices?.[this.indexName]?.total?.docs?.count ?? 0,
+          sizeInBytes: stats.indices?.[this.indexName]?.total?.store?.size_in_bytes ?? 0,
           health
         }
       };

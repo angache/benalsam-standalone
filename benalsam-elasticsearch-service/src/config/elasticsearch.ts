@@ -1,72 +1,81 @@
 import { Client } from '@elastic/elasticsearch';
+import { IndicesCreateRequest, MappingProperty, IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import { SearchOptimizedListing } from 'benalsam-shared-types';
 import logger from './logger';
 
 // Elasticsearch index ayarları
-export const ES_INDEX_SETTINGS = {
-  number_of_shards: 1,
-  number_of_replicas: 1,
+export const ES_SETTINGS: IndicesIndexSettings = {
   analysis: {
     analyzer: {
       turkish_analyzer: {
         type: 'custom',
         tokenizer: 'standard',
-        filter: [
-          'lowercase',
-          'turkish_stemmer',
-          'turkish_stop',
-          'apostrophe',
-          'asciifolding'
-        ]
-      }
-    },
-    filter: {
-      turkish_stop: {
-        type: 'stop',
-        stopwords: '_turkish_'
-      },
-      turkish_stemmer: {
-        type: 'stemmer',
-        language: 'turkish'
+        filter: ['lowercase', 'turkish_stop', 'turkish_lowercase', 'turkish_stemmer']
       }
     }
-  }
+  },
+  number_of_shards: 1,
+  number_of_replicas: 1
 };
 
-// Elasticsearch mapping
-export const ES_MAPPING = {
+// Elasticsearch mapping - SearchOptimizedListing tipine göre
+export const ES_MAPPINGS: { properties: Record<string, MappingProperty> } = {
   properties: {
-    id: { type: 'keyword' },
-    title: {
-      type: 'text',
-      analyzer: 'turkish_analyzer',
-      fields: {
-        keyword: { type: 'keyword' }
-      }
-    },
-    description: {
-      type: 'text',
-      analyzer: 'turkish_analyzer'
-    },
-    price: { type: 'double' },
-    currency: { type: 'keyword' },
-    status: { type: 'keyword' },
-    category_id: { type: 'keyword' },
-    user_id: { type: 'keyword' },
-    attributes: { type: 'object' },
-    images: { type: 'keyword' },
-    location: {
-      properties: {
-        lat: { type: 'double' },
-        lon: { type: 'double' },
-        city: { type: 'keyword' },
-        district: { type: 'keyword' }
-      }
-    },
-    created_at: { type: 'date' },
-    updated_at: { type: 'date' },
-    version: { type: 'long' }
+              // Temel alanlar
+          id: { type: 'keyword' } as MappingProperty,
+          user_id: { type: 'keyword' } as MappingProperty,
+          title: {
+            type: 'text',
+            analyzer: 'turkish_analyzer',
+            fields: {
+              keyword: { type: 'keyword' }
+            }
+          } as MappingProperty,
+          description: {
+            type: 'text',
+            analyzer: 'turkish_analyzer'
+          } as MappingProperty,
+
+          // Kategori alanları
+          category: { type: 'keyword' } as MappingProperty,
+          category_id: { type: 'integer' } as MappingProperty,
+          category_path: { type: 'integer' } as MappingProperty,
+          subcategory: { type: 'keyword' } as MappingProperty,
+
+          // Bütçe alanı
+          budget: { type: 'long' } as MappingProperty,
+
+          // Lokasyon alanları
+          location: { type: 'keyword' } as MappingProperty,
+          province: { type: 'keyword' } as MappingProperty,
+          district: { type: 'keyword' } as MappingProperty,
+          neighborhood: { type: 'keyword' } as MappingProperty,
+          coordinates: { type: 'geo_point' } as MappingProperty,
+
+          // Diğer temel alanlar
+          condition: { type: 'keyword' } as MappingProperty,
+          urgency: { type: 'keyword' } as MappingProperty,
+          main_image_url: { type: 'keyword' } as MappingProperty,
+          additional_image_urls: { type: 'keyword' } as MappingProperty,
+          status: { type: 'keyword' } as MappingProperty,
+          created_at: { type: 'date' } as MappingProperty,
+          updated_at: { type: 'date' } as MappingProperty,
+
+          // Esnek attributes alanı
+          attributes: {
+            type: 'object',
+            dynamic: true
+          } as MappingProperty,
+
+          // Arama optimizasyonu alanları
+          search_keywords: {
+            type: 'text',
+            analyzer: 'turkish_analyzer'
+          } as MappingProperty,
+          popularity_score: { type: 'long' } as MappingProperty, // Changed from float to long
+          user_trust_score: { type: 'long' } as MappingProperty  // Changed from float to long
   }
-};
+} as const;
 
 class ElasticsearchConfig {
   private static instance: ElasticsearchConfig;
@@ -138,18 +147,89 @@ class ElasticsearchConfig {
         await client.indices.create({
           index: indexName,
           body: {
-            settings: ES_INDEX_SETTINGS,
-            mappings: ES_MAPPING
+            settings: {
+              analysis: {
+                filter: {
+                  turkish_lowercase: {
+                    type: "lowercase",
+                    language: "turkish"
+                  },
+                  turkish_stop: {
+                    type: "stop",
+                    stopwords: "_turkish_"
+                  },
+                  turkish_stemmer: {
+                    type: "stemmer",
+                    language: "turkish"
+                  }
+                },
+                analyzer: {
+                  turkish_analyzer: {
+                    type: "custom",
+                    tokenizer: "standard",
+                    filter: [
+                      "turkish_lowercase",
+                      "turkish_stop",
+                      "turkish_stemmer"
+                    ]
+                  }
+                }
+              },
+              number_of_shards: 1,
+              number_of_replicas: 1
+            },
+            mappings: ES_MAPPINGS
           }
         });
         logger.info(`✅ Created index: ${indexName}`);
       } else {
         // Update mapping if index exists
+        await client.indices.close({ index: indexName });
+        
+        // Update settings
+        await client.indices.putSettings({
+          index: indexName,
+          body: {
+            analysis: {
+              filter: {
+                turkish_lowercase: {
+                  type: "lowercase",
+                  language: "turkish"
+                },
+                turkish_stop: {
+                  type: "stop",
+                  stopwords: "_turkish_"
+                },
+                turkish_stemmer: {
+                  type: "stemmer",
+                  language: "turkish"
+                }
+              },
+              analyzer: {
+                turkish_analyzer: {
+                  type: "custom",
+                  tokenizer: "standard",
+                  filter: [
+                    "turkish_lowercase",
+                    "turkish_stop",
+                    "turkish_stemmer"
+                  ]
+                }
+              }
+            }
+          }
+        });
+
+        // Update mapping
         await client.indices.putMapping({
           index: indexName,
-          body: ES_MAPPING
+          body: ES_MAPPINGS
         });
-        logger.info(`✅ Updated mapping for index: ${indexName}`);
+
+        // Open index
+        await client.indices.open({ index: indexName });
+        
+        logger.info(`✅ Updated index settings and mapping: ${indexName}`);
       }
     } catch (error) {
       logger.error(`❌ Failed to initialize index ${indexName}:`, error);

@@ -1,9 +1,15 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '../types/database';
 import logger from './logger';
+
+export type Tables = Database['public']['Tables'];
+export type TableRow<T extends keyof Tables> = Tables[T]['Row'];
+export type TableInsert<T extends keyof Tables> = Tables[T]['Insert'];
+export type TableUpdate<T extends keyof Tables> = Tables[T]['Update'];
 
 class SupabaseConfig {
   private static instance: SupabaseConfig;
-  private client: ReturnType<typeof createClient> | null = null;
+  private client: SupabaseClient | null = null;
 
   private constructor() {}
 
@@ -14,7 +20,7 @@ class SupabaseConfig {
     return SupabaseConfig.instance;
   }
 
-  public getClient(): ReturnType<typeof createClient> {
+  public getClient(): SupabaseClient {
     if (!this.client) {
       const supabaseUrl = process.env.SUPABASE_URL;
       const supabaseKey = process.env.SUPABASE_KEY;
@@ -23,7 +29,7 @@ class SupabaseConfig {
         throw new Error('Supabase URL and key must be provided');
       }
 
-      this.client = createClient(supabaseUrl, supabaseKey, {
+      this.client = createClient<Database>(supabaseUrl, supabaseKey, {
         auth: {
           persistSession: false
         }

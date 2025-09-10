@@ -11,6 +11,7 @@ export interface Job {
   retry_count: number;
   created_at: string;
   processed_at?: string;
+  trace_id?: string;
 }
 
 export interface JobUpdateParams {
@@ -18,6 +19,7 @@ export interface JobUpdateParams {
   error_message?: string;
   retry_count?: number;
   processed_at?: string;
+  trace_id?: string;
 }
 
 export interface JobMetrics {

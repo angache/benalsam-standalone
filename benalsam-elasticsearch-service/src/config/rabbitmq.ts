@@ -3,8 +3,8 @@ import logger from './logger';
 
 class RabbitMQConfig {
   private static instance: RabbitMQConfig;
-  private connection: amqp.Connection | null = null;
-  private channel: amqp.Channel | null = null;
+  private connection: any = null;
+  private channel: any = null;
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private readonly reconnectInterval = 5000; // 5 seconds
 
@@ -17,30 +17,30 @@ class RabbitMQConfig {
     return RabbitMQConfig.instance;
   }
 
-  public async getConnection(): Promise<amqp.Connection> {
+  public async getConnection(): Promise<any> {
     if (!this.connection) {
       await this.connect();
     }
     return this.connection!;
   }
 
-  public async getChannel(): Promise<amqp.Channel> {
+  public async getChannel(): Promise<any> {
     if (!this.channel) {
       const connection = await this.getConnection();
       this.channel = await connection.createChannel();
       
       // Channel error handling
-      this.channel.on('error', (err) => {
+      this.channel!.on('error', (err: Error) => {
         logger.error('❌ RabbitMQ channel error:', err);
         this.channel = null;
       });
 
-      this.channel.on('close', () => {
+      this.channel!.on('close', () => {
         logger.warn('⚠️ RabbitMQ channel closed');
         this.channel = null;
       });
     }
-    return this.channel;
+    return this.channel!;
   }
 
   private async connect(): Promise<void> {
@@ -51,12 +51,12 @@ class RabbitMQConfig {
       logger.info('✅ Connected to RabbitMQ');
 
       // Connection error handling
-      this.connection.on('error', (err) => {
+      this.connection!.on('error', (err: Error) => {
         logger.error('❌ RabbitMQ connection error:', err);
         this.reconnect();
       });
 
-      this.connection.on('close', () => {
+      this.connection!.on('close', () => {
         logger.warn('⚠️ RabbitMQ connection closed');
         this.reconnect();
       });
