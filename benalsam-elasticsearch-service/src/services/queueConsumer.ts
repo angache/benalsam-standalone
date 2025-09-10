@@ -5,6 +5,21 @@ import { elasticsearchConfig } from '../config/elasticsearch';
 import logger from '../config/logger';
 import { QueueMessage, Operation } from '../types/queue';
 import { Job, JobStatus } from '../types/job';
+import type { TableUpdate } from '../config/supabase';
+import { 
+  messageProcessingDuration, 
+  messagesProcessedTotal, 
+  messagesFailedTotal,
+  updateErrorRate 
+} from '../config/metrics';
+
+interface TraceContext {
+  traceId: string;
+  jobId: number;
+  recordId: string;
+  operation: string;
+  messageId?: string;
+}
 
 class QueueConsumer {
   private static instance: QueueConsumer;
@@ -61,13 +76,41 @@ class QueueConsumer {
     }
 
     let job: Job | null = null;
+    let traceContext: TraceContext | undefined;
+    const startTime = Date.now();
 
     try {
       // Mesajı parse et
       const message = this.parseMessage(msg);
       
+      // Status change mesajlarını yoksay
+      if ('status' in message) {
+        const traceId = message.traceId || `status_${message.listingId}_${Date.now()}`;
+        logger.info('📝 Skipping status change message', {
+          traceId,
+          listingId: message.listingId,
+          status: message.status,
+          messageId: msg.properties.messageId
+        });
+        this.channel.ack(msg);
+        return;
+      }
+
+      // Trace context'i oluştur
+      const traceId = message.traceId || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      traceContext = {
+        traceId,
+        jobId: 0, // Job ID'yi sonra güncelleyeceğiz
+        recordId: message.recordId,
+        operation: message.operation,
+        messageId: msg.properties.messageId
+      };
+
+      logger.info('📥 Processing message', { ...traceContext });
+
       // Job ID'yi mesaj içeriğinden al
-      const jobId = this.extractJobId(message);
+      const jobId = await this.extractJobId(message);
+      traceContext.jobId = jobId;
       
       // Job'ı getir
       job = await this.getJob(jobId);
@@ -76,50 +119,78 @@ class QueueConsumer {
       }
 
       // Job durumunu güncelle
-      await this.updateJobStatus(job.id, 'processing');
+      await this.updateJobStatus(job.id, 'processing', undefined, traceContext);
 
       // Mesajı validate et
       this.validateMessage(message);
 
       // Mesajı işle
-      await this.processMessage(message, job);
+      await this.processMessage(message, job, traceContext);
 
       // Başarılı - acknowledge
       this.channel.ack(msg);
 
       // Job durumunu güncelle
-      await this.updateJobStatus(job.id, 'completed');
+      await this.updateJobStatus(job.id, 'completed', undefined, traceContext);
+
+      // Metrics güncelle
+      const duration = (Date.now() - startTime) / 1000;
+      messageProcessingDuration.observe({ operation: message.operation, status: 'completed' }, duration);
+      messagesProcessedTotal.inc({ operation: message.operation, status: 'completed' });
+      updateErrorRate();
 
       logger.info('✅ Message processed successfully', {
-        jobId: job.id,
-        operation: message.operation,
-        recordId: message.recordId
+        ...traceContext,
+        status: 'completed',
+        duration: `${duration}s`
       });
 
     } catch (error) {
-      logger.error('❌ Error processing message:', error);
+      const errorContext = {
+        ...traceContext,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      };
+
+      logger.error('❌ Error processing message:', errorContext);
+
+      // Metrics güncelle
+      const duration = (Date.now() - startTime) / 1000;
+      const operation = traceContext?.operation || 'unknown';
+      messageProcessingDuration.observe({ operation, status: 'failed' }, duration);
+      messagesFailedTotal.inc({ operation, error_type: error instanceof Error ? error.constructor.name : 'UnknownError' });
+      updateErrorRate();
 
       if (job) {
         const retryCount = (job.retry_count || 0) + 1;
         
         if (retryCount <= this.maxRetries) {
           // Retry
-          logger.info(`🔄 Retrying job ${job.id} (attempt ${retryCount}/${this.maxRetries})`);
+          logger.info('🔄 Retrying job', {
+            ...errorContext,
+            retryCount,
+            maxRetries: this.maxRetries
+          });
+
           await this.updateJobStatus(job.id, 'pending', {
             retry_count: retryCount,
             error_message: error instanceof Error ? error.message : 'Unknown error'
-          });
+          }, traceContext);
+
           this.channel.nack(msg, false, true); // Requeue message
         } else {
           // Max retries exceeded
-          logger.error(`❌ Max retries exceeded for job ${job.id}`);
+          logger.error('❌ Max retries exceeded', errorContext);
+
           await this.updateJobStatus(job.id, 'failed', {
             error_message: error instanceof Error ? error.message : 'Unknown error'
-          });
+          }, traceContext);
+
           this.channel.nack(msg, false, false); // Don't requeue
         }
       } else {
         // Job not found - reject message
+        logger.error('❌ Job not found', errorContext);
         this.channel.reject(msg, false);
       }
     }
@@ -131,8 +202,28 @@ class QueueConsumer {
   private parseMessage(msg: ConsumeMessage): QueueMessage {
     try {
       const content = msg.content.toString();
-      return JSON.parse(content);
+      logger.info('📥 Received message:', { content });
+      
+      const message = JSON.parse(content);
+
+      // Status change mesajı kontrolü
+      if ('status' in message && 'listingId' in message) {
+        logger.info('📝 Status change message received:', {
+          listingId: message.listingId,
+          status: message.status
+        });
+        return message;
+      }
+      
+      // Elasticsearch sync mesajı validasyonu
+      if (!message.recordId) {
+        logger.error('❌ Invalid sync message format - missing recordId:', message);
+        throw new Error('Record ID is required in sync message');
+      }
+
+      return message;
     } catch (error) {
+      logger.error('❌ Failed to parse message:', error);
       throw new Error('Invalid message format');
     }
   }
@@ -140,12 +231,41 @@ class QueueConsumer {
   /**
    * Job ID'yi mesajdan çıkar
    */
-  private extractJobId(message: QueueMessage): number {
-    const jobId = message.messageId.split('_')[1];
-    if (!jobId) {
-      throw new Error('Invalid message ID format');
+  private async extractJobId(message: QueueMessage): Promise<number> {
+    try {
+      // Record ID'yi mesaj tipine göre al
+      const recordId = 'recordId' in message ? message.recordId : 
+                      'listingId' in message ? message.listingId : undefined;
+
+      if (!recordId) {
+        logger.error('❌ Record/Listing ID is missing from message:', message);
+        throw new Error('Record/Listing ID is required');
+      }
+
+      // Supabase'den job'ı bul
+      const supabase = supabaseConfig.getClient();
+      const { data, error } = await supabase
+        .from('elasticsearch_sync_queue')
+        .select('id, created_at')
+        .eq('record_id', recordId)
+        .in('status', ['pending', 'processing', 'sent'])
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error(`No job found for record ID: ${recordId}`);
+      }
+
+      // En son oluşturulan job'ı al
+      return data[0].id;
+    } catch (error) {
+      logger.error('❌ Error extracting job ID:', error);
+      throw error;
     }
-    return parseInt(jobId, 10);
   }
 
   /**
@@ -155,7 +275,7 @@ class QueueConsumer {
     const supabase = supabaseConfig.getClient();
     const { data, error } = await supabase
       .from('elasticsearch_sync_queue')
-      .select('*')
+      .select()
       .eq('id', jobId)
       .single();
 
@@ -173,20 +293,48 @@ class QueueConsumer {
   private async updateJobStatus(
     jobId: number, 
     status: JobStatus, 
-    additional: Partial<Job> = {}
+    errorData?: { error_message: string; retry_count?: number },
+    traceContext?: TraceContext
   ): Promise<void> {
-    const supabase = supabaseConfig.getClient();
-    const { error } = await supabase
-      .from('elasticsearch_sync_queue')
-      .update({
+    try {
+      const supabase = supabaseConfig.getClient();
+      const updateData = {
         status,
         processed_at: new Date().toISOString(),
-        ...additional
-      })
-      .eq('id', jobId);
+        trace_id: traceContext?.traceId,
+        ...(errorData?.error_message && { error_message: errorData.error_message }),
+        ...(errorData?.retry_count && { retry_count: errorData.retry_count })
+      } satisfies TableUpdate<'elasticsearch_sync_queue'>;
 
-    if (error) {
-      logger.error('❌ Error updating job status:', error);
+      const { error } = await supabase
+        .from('elasticsearch_sync_queue')
+        .update(updateData)
+        .eq('id', jobId);
+
+      if (error) {
+        logger.error('❌ Error updating job status', {
+          ...traceContext,
+          error,
+          jobId,
+          status
+        });
+        throw error;
+      }
+
+      logger.info('✅ Job status updated', {
+        ...traceContext,
+        jobId,
+        status,
+        ...(errorData && { errorData })
+      });
+
+    } catch (error) {
+      logger.error('❌ Error updating job status', {
+        ...traceContext,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        jobId,
+        status
+      });
       throw error;
     }
   }
@@ -195,7 +343,13 @@ class QueueConsumer {
    * Mesajı validate et
    */
   private validateMessage(message: QueueMessage): void {
-    if (!message.type || message.type !== 'ELASTICSEARCH_SYNC') {
+    // Status change mesajlarını yoksay
+    if ('status' in message) {
+      return;
+    }
+
+    // Elasticsearch sync mesajlarını validate et
+    if (!('type' in message) || message.type !== 'ELASTICSEARCH_SYNC') {
       throw new Error('Invalid message type');
     }
 
@@ -219,42 +373,126 @@ class QueueConsumer {
   /**
    * Mesajı işle
    */
-  private async processMessage(message: QueueMessage, job: Job): Promise<void> {
+  private async processMessage(
+    message: QueueMessage, 
+    job: Job,
+    traceContext?: TraceContext
+  ): Promise<void> {
+    // Status change mesajlarını yoksay
+    if ('status' in message) {
+      logger.info('📝 Skipping status change message', {
+        ...traceContext,
+        listingId: message.listingId,
+        status: message.status
+      });
+      return;
+    }
+
+    // Elasticsearch sync mesajlarını işle
     const client = await elasticsearchConfig.getClient();
     const index = 'benalsam_listings';
 
-    switch (message.operation) {
-      case 'INSERT':
-        await client.index({
-          index,
-          id: message.recordId,
-          body: message.changeData,
-          refresh: true
-        });
-        break;
+    try {
+      logger.info('🔄 Processing Elasticsearch operation', {
+        ...traceContext,
+        operation: message.operation,
+        index
+      });
 
-      case 'UPDATE':
-        await client.update({
-          index,
-          id: message.recordId,
-          body: {
-            doc: message.changeData.new,
-            doc_as_upsert: true
-          },
-          refresh: true
-        });
-        break;
+      switch (message.operation) {
+        case 'INSERT':
+          await client.index({
+            index,
+            id: message.recordId,
+            body: message.changeData,
+            refresh: true
+          });
 
-      case 'DELETE':
-        await client.delete({
-          index,
-          id: message.recordId,
-          refresh: true
-        });
-        break;
+          logger.info('✅ Document indexed', {
+            ...traceContext,
+            operation: 'INSERT'
+          });
+          break;
 
-      default:
-        throw new Error(`Unsupported operation: ${message.operation}`);
+        case 'UPDATE':
+          // Status değişikliğini kontrol et
+          const oldStatus = message.changeData.old?.status;
+          const newStatus = message.changeData.new?.status;
+          
+          // Reddedilen ilanları ES'den sil
+          if (newStatus === 'rejected' || newStatus === 'deleted') {
+            try {
+              await client.delete({
+                index,
+                id: message.recordId,
+                refresh: true
+              });
+              
+              logger.info('🗑️ Document deleted from ES (rejected/deleted status)', {
+                ...traceContext,
+                operation: 'DELETE',
+                oldStatus,
+                newStatus
+              });
+            } catch (deleteError: any) {
+              // Document zaten yoksa hata verme
+              if (deleteError.meta?.statusCode === 404) {
+                logger.info('ℹ️ Document already deleted from ES', {
+                  ...traceContext,
+                  operation: 'DELETE',
+                  oldStatus,
+                  newStatus
+                });
+              } else {
+                throw deleteError;
+              }
+            }
+          } else {
+            // Normal update işlemi
+            await client.update({
+              index,
+              id: message.recordId,
+              body: {
+                doc: message.changeData.new,
+                doc_as_upsert: true
+              },
+              refresh: true
+            });
+
+            logger.info('✅ Document updated', {
+              ...traceContext,
+              operation: 'UPDATE',
+              oldStatus,
+              newStatus
+            });
+          }
+          break;
+
+        case 'DELETE':
+          await client.delete({
+            index,
+            id: message.recordId,
+            refresh: true
+          });
+
+          logger.info('✅ Document deleted', {
+            ...traceContext,
+            operation: 'DELETE'
+          });
+          break;
+
+        default:
+          throw new Error(`Unsupported operation: ${message.operation}`);
+      }
+
+    } catch (error) {
+      logger.error('❌ Elasticsearch operation failed', {
+        ...traceContext,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        operation: message.operation
+      });
+      throw error;
     }
   }
 

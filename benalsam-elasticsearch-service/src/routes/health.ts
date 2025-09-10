@@ -4,6 +4,14 @@ import { queueConsumer } from '../services/queueConsumer';
 import { rabbitmqConfig } from '../config/rabbitmq';
 import { supabaseConfig } from '../config/supabase';
 import logger from '../config/logger';
+import { 
+  elasticsearchHealth, 
+  rabbitmqHealth, 
+  supabaseHealth,
+  queueDepth,
+  activeConsumers,
+  jobStatusCount
+} from '../config/metrics';
 
 const router = Router();
 
@@ -71,6 +79,18 @@ router.get('/detailed', async (req, res) => {
         
         return { data: metrics };
       });
+
+    // Update metrics
+    elasticsearchHealth.set(esHealth.healthy ? 1 : 0);
+    rabbitmqHealth.set(rmqHealth ? 1 : 0);
+    supabaseHealth.set(dbHealth ? 1 : 0);
+    activeConsumers.set({ queue_name: 'elasticsearch.sync' }, consumerStatus ? 1 : 0);
+    
+    // Update job status metrics
+    jobStatusCount.set({ status: 'pending' }, jobMetrics.pending);
+    jobStatusCount.set({ status: 'processing' }, jobMetrics.processing);
+    jobStatusCount.set({ status: 'completed' }, jobMetrics.completed);
+    jobStatusCount.set({ status: 'failed' }, jobMetrics.failed);
 
     const status = {
       service: {
@@ -189,9 +209,9 @@ router.get('/database', async (req, res) => {
       .select(`
         status,
         count(*),
-        avg(EXTRACT(EPOCH FROM (processed_at - created_at))) as avg_processing_time
-      `)
-      .group('status');
+        avg(EXTRACT(EPOCH FROM (processed_at - created_at))) as avg_processing_time,
+        status as _group
+      `);
 
     if (error) {
       throw error;

@@ -1,14 +1,16 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { elasticsearchConfig } from './config/elasticsearch';
 import { queueConsumer } from './services/queueConsumer';
 import healthRoutes from './routes/health';
+import metricsRoutes from './routes/metrics';
 import logger from './config/logger';
 
 // Express uygulamasını oluştur
 const app = express();
-const port = process.env.PORT || 3003;
+const port = process.env.PORT || 3006;
 
 // Middleware'leri ekle
 app.use(helmet());
@@ -43,6 +45,9 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 // Health check route'larını ekle
 app.use('/health', healthRoutes);
 
+// Metrics route'larını ekle
+app.use('/', metricsRoutes);
+
 // Ana endpoint
 app.get('/', (req, res) => {
   res.json({
@@ -56,7 +61,7 @@ app.get('/', (req, res) => {
 async function startServer() {
   try {
     // Elasticsearch index'ini başlat
-    await elasticsearchConfig.initializeIndex();
+    await elasticsearchConfig.initializeIndex('benalsam_listings');
     logger.info('✅ Elasticsearch index initialized');
 
     // Queue consumer'ı başlat
