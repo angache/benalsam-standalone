@@ -46,6 +46,7 @@ const AdminPerformanceDashboard = lazy(() => import('./components/AdminPerforman
 const AISuggestionsManagement = lazy(() => import('./pages/AISuggestionsManagement').then(module => ({ default: module.default })));
 const QueueManagement = lazy(() => import('./pages/QueueManagement').then(module => ({ default: module.default })));
 const MetricsDashboardPage = lazy(() => import('./pages/metrics/MetricsDashboardPage'));
+const HealthDashboardPage = lazy(() => import('./pages/health/HealthDashboardPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -264,6 +265,20 @@ function App() {
                     <Layout>
                       <Suspense fallback={<PageLoadingSpinner />}>
                         <MetricsDashboardPage />
+                      </Suspense>
+                    </Layout>
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/health"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <Layout>
+                      <Suspense fallback={<PageLoadingSpinner />}>
+                        <HealthDashboardPage />
                       </Suspense>
                     </Layout>
                   </ErrorBoundary>

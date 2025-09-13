@@ -12,6 +12,8 @@ import {
   activeConsumers,
   jobStatusCount
 } from '../config/metrics';
+import { getCircuitBreakerStatus } from '../config/circuitBreaker';
+import { healthService } from '../services/healthService';
 
 const router = Router();
 
@@ -92,6 +94,9 @@ router.get('/detailed', async (req, res) => {
     jobStatusCount.set({ status: 'completed' }, jobMetrics.completed);
     jobStatusCount.set({ status: 'failed' }, jobMetrics.failed);
 
+    // Get circuit breaker status
+    const circuitBreakerStatus = getCircuitBreakerStatus();
+
     const status = {
       service: {
         name: 'elasticsearch-service',
@@ -121,7 +126,8 @@ router.get('/detailed', async (req, res) => {
       memory: {
         heap: process.memoryUsage().heapUsed,
         rss: process.memoryUsage().rss
-      }
+      },
+      circuitBreakers: circuitBreakerStatus
     };
 
     // Overall health status
@@ -183,6 +189,90 @@ router.get('/rabbitmq', async (req, res) => {
     logger.error('RabbitMQ health check failed:', error);
     res.status(500).json({
       healthy: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * @route   GET /health/circuit-breakers
+ * @desc    Circuit Breaker status check
+ */
+router.get('/circuit-breakers', async (req, res) => {
+  try {
+    const circuitBreakerStatus = getCircuitBreakerStatus();
+    
+    // Check if any circuit breaker is open (using stats instead of state)
+    const isHealthy = circuitBreakerStatus.elasticsearch.enabled && 
+                     circuitBreakerStatus.rabbitmq.enabled;
+    
+    res.json({
+      healthy: isHealthy,
+      status: isHealthy ? 'all_closed' : 'some_open',
+      details: circuitBreakerStatus
+    });
+  } catch (error) {
+    logger.error('Circuit Breaker health check failed:', error);
+    res.status(500).json({
+      healthy: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * @route   GET /health/comprehensive
+ * @desc    Comprehensive health check with all components
+ */
+router.get('/comprehensive', async (req, res) => {
+  try {
+    const healthResult = await healthService.performHealthCheck();
+    
+    res.status(healthResult.healthy ? 200 : 503).json(healthResult);
+  } catch (error) {
+    logger.error('Comprehensive health check failed:', error);
+    res.status(500).json({
+      healthy: false,
+      status: 'unhealthy',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * @route   GET /health/history
+ * @desc    Get health check history
+ */
+router.get('/history', async (req, res) => {
+  try {
+    const history = healthService.getHealthHistory();
+    const trends = healthService.getHealthTrends();
+    
+    res.json({
+      history,
+      trends,
+      count: history.length
+    });
+  } catch (error) {
+    logger.error('Health history check failed:', error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * @route   GET /health/trends
+ * @desc    Get health trends and statistics
+ */
+router.get('/trends', async (req, res) => {
+  try {
+    const trends = healthService.getHealthTrends();
+    
+    res.json(trends);
+  } catch (error) {
+    logger.error('Health trends check failed:', error);
+    res.status(500).json({
       error: error instanceof Error ? error.message : 'Unknown error'
     });
   }

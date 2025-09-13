@@ -12,6 +12,11 @@ import {
   messagesFailedTotal,
   updateErrorRate 
 } from '../config/metrics';
+import { 
+  elasticsearchCircuitBreaker, 
+  rabbitmqCircuitBreaker,
+  getCircuitBreakerStatus 
+} from '../config/circuitBreaker';
 
 interface TraceContext {
   traceId: string;
@@ -124,8 +129,8 @@ class QueueConsumer {
       // Mesajı validate et
       this.validateMessage(message);
 
-      // Mesajı işle
-      await this.processMessage(message, job, traceContext);
+      // Mesajı işle (Circuit Breaker ile)
+      await this.processMessageWithCircuitBreaker(message, job, traceContext);
 
       // Başarılı - acknowledge
       this.channel.ack(msg);
@@ -371,6 +376,41 @@ class QueueConsumer {
   }
 
   /**
+   * Mesajı Circuit Breaker ile işle
+   */
+  private async processMessageWithCircuitBreaker(
+    message: QueueMessage, 
+    job: Job,
+    traceContext?: TraceContext
+  ): Promise<void> {
+    // Status change mesajlarını yoksay
+    if ('status' in message) {
+      logger.info('📝 Skipping status change message', {
+        ...traceContext,
+        listingId: message.listingId,
+        status: message.status
+      });
+      return;
+    }
+
+    // Circuit Breaker ile Elasticsearch işlemini sarmalayalım
+    try {
+      await elasticsearchCircuitBreaker.fire(
+        message.operation,
+        message,
+        traceContext
+      );
+    } catch (error) {
+      logger.error('❌ Circuit Breaker blocked Elasticsearch operation', {
+        ...traceContext,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        circuitBreakerState: elasticsearchCircuitBreaker.stats
+      });
+      throw error;
+    }
+  }
+
+  /**
    * Mesajı işle
    */
   private async processMessage(
@@ -495,6 +535,7 @@ class QueueConsumer {
       throw error;
     }
   }
+
 
   /**
    * Consumer'ı durdur

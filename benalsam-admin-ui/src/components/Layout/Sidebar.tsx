@@ -137,6 +137,13 @@ const navigationCategories = [
         permission: PERMISSIONS.ANALYTICS_VIEW,
       },
       {
+        id: 'health',
+        title: 'System Health',
+        path: '/health',
+        icon: Heart,
+        permission: PERMISSIONS.ANALYTICS_VIEW,
+      },
+      {
         id: 'session-analytics',
         title: 'Session Analytics',
         path: '/session-analytics',
