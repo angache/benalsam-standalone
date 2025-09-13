@@ -17,6 +17,8 @@ import {
   rabbitmqCircuitBreaker,
   getCircuitBreakerStatus 
 } from '../config/circuitBreaker';
+import { retryService } from './retryService';
+import { dlqService } from './dlqService';
 
 interface TraceContext {
   traceId: string;
@@ -82,11 +84,12 @@ class QueueConsumer {
 
     let job: Job | null = null;
     let traceContext: TraceContext | undefined;
+    let message: any = null; // Move message declaration outside try block
     const startTime = Date.now();
 
     try {
       // Mesajı parse et
-      const message = this.parseMessage(msg);
+      message = this.parseMessage(msg);
       
       // Status change mesajlarını yoksay
       if ('status' in message) {
@@ -170,28 +173,75 @@ class QueueConsumer {
         const retryCount = (job.retry_count || 0) + 1;
         
         if (retryCount <= this.maxRetries) {
-          // Retry
-          logger.info('🔄 Retrying job', {
-            ...errorContext,
-            retryCount,
-            maxRetries: this.maxRetries
-          });
+          // Use retry service for intelligent retry
+          const retryResult = await retryService.executeWithRetry(
+            async () => {
+              // Re-process the message
+              await this.processMessage(message, job!, traceContext);
+            },
+            {
+              maxRetries: 1, // Only one retry per attempt
+              baseDelay: 1000, // 1 second base delay
+              maxDelay: 10000, // 10 seconds max delay
+              backoffMultiplier: 2,
+              jitter: true
+            },
+            {
+              traceId: traceContext?.traceId,
+              operation: 'message_retry'
+            }
+          );
 
-          await this.updateJobStatus(job.id, 'pending', {
-            retry_count: retryCount,
-            error_message: error instanceof Error ? error.message : 'Unknown error'
-          }, traceContext);
+          if (retryResult.success) {
+            // Retry successful
+            logger.info('✅ Retry successful', {
+              ...errorContext,
+              retryCount,
+              attempts: retryResult.attempts,
+              totalDelay: retryResult.totalDelay
+            });
 
-          this.channel.nack(msg, false, true); // Requeue message
+            await this.updateJobStatus(job.id, 'completed', undefined, traceContext);
+            this.channel.ack(msg);
+          } else {
+            // Retry failed, increment retry count
+            logger.warn('⚠️ Retry failed, incrementing retry count', {
+              ...errorContext,
+              retryCount,
+              maxRetries: this.maxRetries,
+              retryError: retryResult.error?.message
+            });
+
+            await this.updateJobStatus(job.id, 'pending', {
+              retry_count: retryCount,
+              error_message: retryResult.error?.message || 'Retry failed'
+            }, traceContext);
+
+            this.channel.nack(msg, false, true); // Requeue message
+          }
         } else {
-          // Max retries exceeded
-          logger.error('❌ Max retries exceeded', errorContext);
+          // Max retries exceeded - send to DLQ
+          logger.error('❌ Max retries exceeded, sending to DLQ', errorContext);
 
-          await this.updateJobStatus(job.id, 'failed', {
-            error_message: error instanceof Error ? error.message : 'Unknown error'
-          }, traceContext);
+          try {
+            await dlqService.sendToDLQ(
+              message,
+              'elasticsearch.sync',
+              error instanceof Error ? error : new Error('Unknown error'),
+              retryCount,
+              traceContext?.traceId,
+              job.id
+            );
 
-          this.channel.nack(msg, false, false); // Don't requeue
+            this.channel.ack(msg); // Acknowledge to remove from queue
+          } catch (dlqError) {
+            logger.error('❌ Failed to send to DLQ, rejecting message', {
+              ...errorContext,
+              dlqError: dlqError instanceof Error ? dlqError.message : 'Unknown DLQ error'
+            });
+
+            this.channel.reject(msg, false); // Reject message
+          }
         }
       } else {
         // Job not found - reject message

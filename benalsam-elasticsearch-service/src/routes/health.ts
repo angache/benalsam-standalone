@@ -14,6 +14,7 @@ import {
 } from '../config/metrics';
 import { getCircuitBreakerStatus } from '../config/circuitBreaker';
 import { healthService } from '../services/healthService';
+import { dlqService } from '../services/dlqService';
 
 const router = Router();
 
@@ -273,6 +274,33 @@ router.get('/trends', async (req, res) => {
   } catch (error) {
     logger.error('Health trends check failed:', error);
     res.status(500).json({
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * @route   GET /health/dlq
+ * @desc    DLQ (Dead Letter Queue) health check
+ */
+router.get('/dlq', async (req, res) => {
+  try {
+    const dlqHealth = await dlqService.getHealthStatus();
+    const dlqStats = await dlqService.getDLQStats();
+    
+    res.json({
+      healthy: dlqHealth.healthy,
+      status: dlqHealth.healthy ? 'operational' : 'error',
+      details: {
+        ...dlqHealth,
+        stats: dlqStats
+      }
+    });
+  } catch (error) {
+    logger.error('DLQ health check failed:', error);
+    res.status(500).json({
+      healthy: false,
+      status: 'error',
       error: error instanceof Error ? error.message : 'Unknown error'
     });
   }

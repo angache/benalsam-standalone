@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { elasticsearchConfig } from './config/elasticsearch';
 import { queueConsumer } from './services/queueConsumer';
+import { dlqService } from './services/dlqService';
 import healthRoutes from './routes/health';
 import metricsRoutes from './routes/metrics';
 import logger from './config/logger';
@@ -64,9 +65,13 @@ async function startServer() {
     await elasticsearchConfig.initializeIndex('benalsam_listings');
     logger.info('✅ Elasticsearch index initialized');
 
-    // Queue consumer'ı başlat
-    await queueConsumer.start();
-    logger.info('✅ Queue consumer started');
+  // DLQ service'i başlat
+  await dlqService.initialize();
+  logger.info('✅ DLQ service initialized');
+
+  // Queue consumer'ı başlat
+  await queueConsumer.start();
+  logger.info('✅ Queue consumer started');
 
     // Express sunucusunu başlat
     app.listen(port, () => {
