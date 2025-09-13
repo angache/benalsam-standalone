@@ -19,6 +19,8 @@ import {
 } from '../config/circuitBreaker';
 import { retryService } from './retryService';
 import { dlqService } from './dlqService';
+import { errorService } from './errorService';
+import { ErrorType } from '../types/errors';
 
 interface TraceContext {
   traceId: string;
@@ -154,99 +156,85 @@ class QueueConsumer {
       });
 
     } catch (error) {
-      const errorContext = {
-        ...traceContext,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      };
+      // Error Service ile hata yönetimi
+      const errorType = errorService.classifyError(error instanceof Error ? error : new Error('Unknown error'));
+      const customError = errorService.createError(
+        errorType,
+        error instanceof Error ? error.message : 'Unknown error',
+        error instanceof Error ? error : undefined,
+        { jobId: job?.id, messageId: traceContext?.messageId, operation: traceContext?.operation },
+        traceContext?.traceId
+      );
 
-      logger.error('❌ Error processing message:', errorContext);
+      // Error Service ile hata işle
+      const recoveryResult = await errorService.handleError(customError, message, job?.retry_count || 0);
 
       // Metrics güncelle
       const duration = (Date.now() - startTime) / 1000;
       const operation = traceContext?.operation || 'unknown';
       messageProcessingDuration.observe({ operation, status: 'failed' }, duration);
-      messagesFailedTotal.inc({ operation, error_type: error instanceof Error ? error.constructor.name : 'UnknownError' });
+      messagesFailedTotal.inc({ operation, error_type: errorType });
       updateErrorRate();
 
       if (job) {
-        const retryCount = (job.retry_count || 0) + 1;
-        
-        if (retryCount <= this.maxRetries) {
-          // Use retry service for intelligent retry
-          const retryResult = await retryService.executeWithRetry(
-            async () => {
-              // Re-process the message
-              await this.processMessage(message, job!, traceContext);
-            },
-            {
-              maxRetries: 1, // Only one retry per attempt
-              baseDelay: 1000, // 1 second base delay
-              maxDelay: 10000, // 10 seconds max delay
-              backoffMultiplier: 2,
-              jitter: true
-            },
-            {
-              traceId: traceContext?.traceId,
-              operation: 'message_retry'
-            }
-          );
+        if (recoveryResult.success) {
+          // Error handled successfully
+          logger.info('✅ Error handled successfully', {
+            errorType,
+            action: recoveryResult.action,
+            jobId: job.id,
+            traceId: traceContext?.traceId
+          });
 
-          if (retryResult.success) {
-            // Retry successful
-            logger.info('✅ Retry successful', {
-              ...errorContext,
-              retryCount,
-              attempts: retryResult.attempts,
-              totalDelay: retryResult.totalDelay
-            });
+          // Job status'u güncelle
+          const jobStatus = recoveryResult.action === 'SKIP' ? 'skipped' : 'completed';
+          await this.updateJobStatus(job.id, jobStatus, undefined, traceContext);
+          
+          // Message'ı acknowledge et
+          this.channel?.ack(msg);
+        } else if (recoveryResult.action === 'RETRY') {
+          // Retry scheduled
+          logger.info('🔄 Retry scheduled', {
+            errorType,
+            retryCount: recoveryResult.retryCount,
+            nextRetryAt: recoveryResult.nextRetryAt,
+            jobId: job.id,
+            traceId: traceContext?.traceId
+          });
 
-            await this.updateJobStatus(job.id, 'completed', undefined, traceContext);
-            this.channel.ack(msg);
-          } else {
-            // Retry failed, increment retry count
-            logger.warn('⚠️ Retry failed, incrementing retry count', {
-              ...errorContext,
-              retryCount,
-              maxRetries: this.maxRetries,
-              retryError: retryResult.error?.message
-            });
-
-            await this.updateJobStatus(job.id, 'pending', {
-              retry_count: retryCount,
-              error_message: retryResult.error?.message || 'Retry failed'
-            }, traceContext);
-
-            this.channel.nack(msg, false, true); // Requeue message
-          }
+          // Job status'u retry olarak güncelle
+          await this.updateJobStatus(job.id, 'retry', {
+            retry_count: recoveryResult.retryCount,
+            error_message: customError.message
+          }, traceContext);
+          
+          // Message'ı reject et (retry için)
+          this.channel?.nack(msg, false, true);
         } else {
-          // Max retries exceeded - send to DLQ
-          logger.error('❌ Max retries exceeded, sending to DLQ', errorContext);
+          // Error handling failed
+          logger.error('❌ Error handling failed', {
+            errorType,
+            action: recoveryResult.action,
+            jobId: job.id,
+            traceId: traceContext?.traceId
+          });
 
-          try {
-            await dlqService.sendToDLQ(
-              message,
-              'elasticsearch.sync',
-              error instanceof Error ? error : new Error('Unknown error'),
-              retryCount,
-              traceContext?.traceId,
-              job.id
-            );
-
-            this.channel.ack(msg); // Acknowledge to remove from queue
-          } catch (dlqError) {
-            logger.error('❌ Failed to send to DLQ, rejecting message', {
-              ...errorContext,
-              dlqError: dlqError instanceof Error ? dlqError.message : 'Unknown DLQ error'
-            });
-
-            this.channel.reject(msg, false); // Reject message
-          }
+          // Job status'u failed olarak güncelle
+          await this.updateJobStatus(job.id, 'failed', {
+            error_message: customError.message,
+            error_type: errorType
+          }, traceContext);
+          
+          // Message'ı acknowledge et
+          this.channel?.ack(msg);
         }
       } else {
         // Job not found - reject message
-        logger.error('❌ Job not found', errorContext);
-        this.channel.reject(msg, false);
+        logger.error('❌ Job not found', {
+          errorType,
+          traceId: traceContext?.traceId
+        });
+        this.channel?.reject(msg, false);
       }
     }
   }
@@ -348,7 +336,7 @@ class QueueConsumer {
   private async updateJobStatus(
     jobId: number, 
     status: JobStatus, 
-    errorData?: { error_message: string; retry_count?: number },
+    errorData?: { error_message: string; error_type?: string; retry_count?: number },
     traceContext?: TraceContext
   ): Promise<void> {
     try {
@@ -358,6 +346,7 @@ class QueueConsumer {
         processed_at: new Date().toISOString(),
         trace_id: traceContext?.traceId,
         ...(errorData?.error_message && { error_message: errorData.error_message }),
+        ...(errorData?.error_type && { error_type: errorData.error_type }),
         ...(errorData?.retry_count && { retry_count: errorData.retry_count })
       } satisfies TableUpdate<'elasticsearch_sync_queue'>;
 

@@ -1,4 +1,4 @@
-export type JobStatus = 'pending' | 'processing' | 'sent' | 'completed' | 'failed';
+export type JobStatus = 'pending' | 'processing' | 'sent' | 'completed' | 'failed' | 'skipped' | 'retry';
 
 export interface Job {
   id: number;
@@ -17,6 +17,7 @@ export interface Job {
 export interface JobUpdateParams {
   status: JobStatus;
   error_message?: string;
+  error_type?: string;
   retry_count?: number;
   processed_at?: string;
   trace_id?: string;

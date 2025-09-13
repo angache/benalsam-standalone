@@ -15,6 +15,7 @@ import {
 import { getCircuitBreakerStatus } from '../config/circuitBreaker';
 import { healthService } from '../services/healthService';
 import { dlqService } from '../services/dlqService';
+import { errorService } from '../services/errorService';
 
 const router = Router();
 
@@ -346,6 +347,41 @@ router.get('/database', async (req, res) => {
     logger.error('Database health check failed:', error);
     res.status(500).json({
       healthy: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * @route   GET /health/errors
+ * @desc    Error metrics and statistics
+ */
+router.get('/errors', async (req, res) => {
+  try {
+    const errorMetrics = errorService.getErrorMetrics();
+    
+    res.json({
+      healthy: errorMetrics.totalErrors < 100, // Threshold for healthy status
+      status: errorMetrics.totalErrors < 100 ? 'healthy' : 'degraded',
+      timestamp: new Date().toISOString(),
+      metrics: errorMetrics,
+      summary: {
+        totalErrors: errorMetrics.totalErrors,
+        retryableErrors: errorMetrics.retryableErrors,
+        nonRetryableErrors: errorMetrics.nonRetryableErrors,
+        dlqMessages: errorMetrics.dlqMessages,
+        alertCount: errorMetrics.alertCount
+      }
+    });
+  } catch (error) {
+    logger.error('❌ Error fetching error metrics:', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    
+    res.status(500).json({
+      healthy: false,
+      status: 'error',
+      timestamp: new Date().toISOString(),
       error: error instanceof Error ? error.message : 'Unknown error'
     });
   }
