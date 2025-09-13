@@ -35,6 +35,7 @@ import {
   ChevronDown,
   ChevronRight,
   Brain,
+  Gauge,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
@@ -126,6 +127,13 @@ const navigationCategories = [
         title: 'Analytics Dashboard',
         path: '/analytics-dashboard',
         icon: BarChart3,
+        permission: PERMISSIONS.ANALYTICS_VIEW,
+      },
+      {
+        id: 'metrics',
+        title: 'System Metrics',
+        path: '/metrics',
+        icon: Gauge,
         permission: PERMISSIONS.ANALYTICS_VIEW,
       },
       {

@@ -173,6 +173,17 @@ Shards: 1
 - **RabbitMQ health**: `GET /health/rabbitmq`
 - **Elasticsearch health**: `GET /health/elasticsearch`
 
+### Admin UI Integration
+- **System Metrics Dashboard**: Real-time monitoring interface
+- **Path**: `/metrics` in Admin UI
+- **Features**:
+  - System health status visualization
+  - Queue depth and consumer monitoring
+  - Message processing statistics
+  - Job status distribution
+  - Real-time metrics updates (30s interval)
+  - Error rate tracking
+
 ## Tested Scenarios
 
 ### ✅ Successfully Tested
@@ -231,6 +242,7 @@ curl -u benalsam:benalsam123 -X DELETE "http://localhost:15672/api/queues/%2F/el
 - **Elasticsearch**: Search engine with Turkish analyzer
 - **Supabase**: Database with job tracking
 - **Trace ID System**: End-to-end message tracking
+- **Admin UI**: System Metrics Dashboard for real-time monitoring
 
 ### 🔧 Current Capabilities
 - Real-time listing synchronization
@@ -239,6 +251,9 @@ curl -u benalsam:benalsam123 -X DELETE "http://localhost:15672/api/queues/%2F/el
 - Comprehensive health monitoring
 - Structured logging with correlation IDs
 - Queue monitoring tools
+- **Admin UI Metrics Dashboard**: Real-time system monitoring
+- **Prometheus Metrics**: Production-ready metrics collection
+- **Visual Health Status**: Intuitive system health visualization
 
 ### 📊 Performance Metrics
 - **Message processing**: < 1 second average
@@ -246,6 +261,40 @@ curl -u benalsam:benalsam123 -X DELETE "http://localhost:15672/api/queues/%2F/el
 - **Consumer status**: 1 active consumer
 - **Error rate**: 0% (after DLQ cleanup)
 - **Uptime**: 100% during testing
+
+## Admin UI Metrics Dashboard
+
+### 🎯 **Dashboard Features**
+- **Real-time System Health**: Visual status indicators for all services
+- **Queue Monitoring**: Live queue depth and consumer count
+- **Message Statistics**: Processed/failed message counters
+- **Performance Metrics**: Processing duration and error rates
+- **Job Status Distribution**: Real-time job status breakdown
+- **Auto-refresh**: 30-second automatic updates
+
+### 📊 **Metrics Displayed**
+- **System Health Status**:
+  - Elasticsearch: Healthy/Unhealthy with color coding
+  - RabbitMQ: Connection status monitoring
+  - Supabase: Database health tracking
+  - Error Rate: Percentage calculation
+
+- **Queue Status**:
+  - Queue Depth: Current message count
+  - Active Consumers: Running consumer count
+
+- **Message Statistics**:
+  - Messages Processed: Total successful operations
+  - Messages Failed: Total failed operations
+
+- **Performance Metrics**:
+  - Average Processing Duration: Time per operation
+  - Job Status Distribution: Status breakdown table
+
+### 🚀 **Access Path**
+- **URL**: `http://localhost:3003/metrics`
+- **Navigation**: Analytics & Monitoring → System Metrics
+- **Icon**: Gauge icon in sidebar
 
 ## Future Improvements
 
@@ -255,5 +304,5 @@ curl -u benalsam:benalsam123 -X DELETE "http://localhost:15672/api/queues/%2F/el
 4. Enhanced monitoring dashboards
 5. Automated failover
 6. Performance tuning based on metrics
-7. Prometheus metrics integration
-8. Grafana dashboards
+7. Grafana dashboards integration
+8. Alert system integration

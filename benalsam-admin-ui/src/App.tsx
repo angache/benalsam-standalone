@@ -45,6 +45,7 @@ const TwoFactorVerifyPage = lazy(() => import('./pages/TwoFactorVerifyPage'));
 const AdminPerformanceDashboard = lazy(() => import('./components/AdminPerformanceDashboard'));
 const AISuggestionsManagement = lazy(() => import('./pages/AISuggestionsManagement').then(module => ({ default: module.default })));
 const QueueManagement = lazy(() => import('./pages/QueueManagement').then(module => ({ default: module.default })));
+const MetricsDashboardPage = lazy(() => import('./pages/metrics/MetricsDashboardPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -249,6 +250,20 @@ function App() {
                     <Layout>
                       <Suspense fallback={<PageLoadingSpinner />}>
                         <ElasticsearchDashboardPage />
+                      </Suspense>
+                    </Layout>
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/metrics"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <Layout>
+                      <Suspense fallback={<PageLoadingSpinner />}>
+                        <MetricsDashboardPage />
                       </Suspense>
                     </Layout>
                   </ErrorBoundary>
