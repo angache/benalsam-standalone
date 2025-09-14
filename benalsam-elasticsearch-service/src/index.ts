@@ -7,6 +7,7 @@ import { queueConsumer } from './services/queueConsumer';
 import { dlqService } from './services/dlqService';
 import healthRoutes from './routes/health';
 import metricsRoutes from './routes/metrics';
+import searchRoutes from './routes/search';
 import logger from './config/logger';
 
 // Express uygulamasını oluştur
@@ -45,6 +46,9 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 
 // Health check route'larını ekle
 app.use('/health', healthRoutes);
+
+// Search route'larını ekle
+app.use('/api/v1/search', searchRoutes);
 
 // Metrics route'larını ekle
 app.use('/', metricsRoutes);

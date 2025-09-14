@@ -359,7 +359,7 @@ router.get('/database', async (req, res) => {
 router.get('/errors', async (req, res) => {
   try {
     const errorMetrics = errorService.getErrorMetrics();
-    
+
     res.json({
       healthy: errorMetrics.totalErrors < 100, // Threshold for healthy status
       status: errorMetrics.totalErrors < 100 ? 'healthy' : 'degraded',
@@ -377,12 +377,84 @@ router.get('/errors', async (req, res) => {
     logger.error('❌ Error fetching error metrics:', {
       error: error instanceof Error ? error.message : 'Unknown error'
     });
-    
+
     res.status(500).json({
       healthy: false,
       status: 'error',
       timestamp: new Date().toISOString(),
       error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * @route   GET /health/jobs
+ * @desc    Get job queue status and recent jobs
+ */
+router.get('/jobs', async (req, res) => {
+  try {
+    const supabase = supabaseConfig.getClient();
+    const { limit = 10, status, operation } = req.query;
+
+    // Build query
+    let query = supabase
+      .from('elasticsearch_sync_queue')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    // Apply filters
+    if (limit) {
+      query = query.limit(parseInt(limit as string));
+    }
+    if (status) {
+      query = query.eq('status', status);
+    }
+    if (operation) {
+      query = query.eq('operation', operation);
+    }
+
+    const { data: jobs, error } = await query;
+
+    if (error) {
+      throw error;
+    }
+
+    // Get job statistics
+    const { data: stats } = await supabase
+      .from('elasticsearch_sync_queue')
+      .select('status')
+      .not('status', 'is', null);
+
+    const jobStats = stats?.reduce((acc: Record<string, number>, job: any) => {
+      acc[job.status] = (acc[job.status] || 0) + 1;
+      return acc;
+    }, {}) || {};
+
+    res.json({
+      success: true,
+      data: {
+        jobs: jobs || [],
+        statistics: {
+          total: jobs?.length || 0,
+          byStatus: jobStats
+        },
+        filters: {
+          limit: parseInt(limit as string) || 10,
+          status: status || null,
+          operation: operation || null
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('❌ Error fetching jobs:', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
     });
   }
 });

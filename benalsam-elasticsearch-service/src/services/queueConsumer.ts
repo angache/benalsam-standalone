@@ -93,15 +93,19 @@ class QueueConsumer {
       // Mesajı parse et
       message = this.parseMessage(msg);
       
-      // Status change mesajlarını yoksay
+      // Status change mesajlarını işle
       if ('status' in message) {
         const traceId = message.traceId || `status_${message.listingId}_${Date.now()}`;
-        logger.info('📝 Skipping status change message', {
+        logger.info('📝 Processing status change message', {
           traceId,
           listingId: message.listingId,
           status: message.status,
           messageId: msg.properties.messageId
         });
+        
+        // Status değişikliğini Elasticsearch'e yansıt
+        await this.handleStatusChange(message, traceId);
+        
         this.channel.ack(msg);
         return;
       }
@@ -575,6 +579,115 @@ class QueueConsumer {
     }
   }
 
+  /**
+   * Status değişikliğini işle
+   */
+  private async handleStatusChange(message: any, traceId: string): Promise<void> {
+    try {
+      const { listingId, status } = message;
+      
+      if (!listingId) {
+        logger.warn('⚠️ Status change message missing listingId', { traceId });
+        return;
+      }
+
+      logger.info('🔄 Processing status change', {
+        traceId,
+        listingId,
+        status
+      });
+
+      // Elasticsearch Service'ten ilanı getir
+      const elasticsearchService = (await import('../services/elasticsearchService')).elasticsearchService;
+      
+      if (status === 'active') {
+        // İlanı Elasticsearch'e ekle/güncelle
+        await this.syncListingToElasticsearch(listingId, traceId);
+      } else if (status === 'rejected' || status === 'deleted') {
+        // İlanı Elasticsearch'ten sil
+        await this.removeListingFromElasticsearch(listingId, traceId);
+      }
+
+      logger.info('✅ Status change processed', {
+        traceId,
+        listingId,
+        status
+      });
+
+    } catch (error) {
+      logger.error('❌ Error processing status change:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        traceId,
+        listingId: message.listingId
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * İlanı Elasticsearch'e senkronize et
+   */
+  private async syncListingToElasticsearch(listingId: string, traceId: string): Promise<void> {
+    try {
+      // Database'den ilanı getir
+      const supabase = supabaseConfig.getClient();
+      const { data: listing, error } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('id', listingId)
+        .single();
+
+      if (error || !listing) {
+        logger.warn('⚠️ Listing not found in database', {
+          traceId,
+          listingId,
+          error: error?.message
+        });
+        return;
+      }
+
+      // Elasticsearch'e ekle/güncelle
+      const elasticsearchService = (await import('../services/elasticsearchService')).elasticsearchService;
+      await elasticsearchService.upsertListing(listing);
+
+      logger.info('✅ Listing synced to Elasticsearch', {
+        traceId,
+        listingId,
+        title: listing.title
+      });
+
+    } catch (error) {
+      logger.error('❌ Error syncing listing to Elasticsearch:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        traceId,
+        listingId
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * İlanı Elasticsearch'ten kaldır
+   */
+  private async removeListingFromElasticsearch(listingId: string, traceId: string): Promise<void> {
+    try {
+      const elasticsearchService = (await import('../services/elasticsearchService')).elasticsearchService;
+      await elasticsearchService.deleteListing(listingId);
+
+      logger.info('✅ Listing removed from Elasticsearch', {
+        traceId,
+        listingId
+      });
+
+    } catch (error) {
+      logger.error('❌ Error removing listing from Elasticsearch:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        traceId,
+        listingId
+      });
+      throw error;
+    }
+  }
 
   /**
    * Consumer'ı durdur

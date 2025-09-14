@@ -6,7 +6,7 @@ import logger from '../config/logger';
 class ElasticsearchService {
   private static instance: ElasticsearchService;
   private client: Client | null = null;
-  private readonly indexName: string = 'benalsam_listings';
+  private readonly indexName: string = 'listings';
   private readonly maxRetries: number = 3;
   private readonly retryDelay: number = 1000; // 1 second
 
@@ -123,26 +123,6 @@ class ElasticsearchService {
     }
   }
 
-  /**
-   * İlan sil
-   */
-  public async deleteListing(id: string): Promise<void> {
-    try {
-      const client = await this.getClient();
-
-      await client.delete({
-        index: this.indexName,
-        id: id,
-        refresh: true,
-        timeout: '30s'
-      });
-
-      logger.info(`✅ Deleted listing: ${id}`);
-    } catch (error) {
-      logger.error(`❌ Failed to delete listing ${id}:`, error);
-      throw error;
-    }
-  }
 
   /**
    * Bulk operasyon
@@ -204,120 +184,6 @@ class ElasticsearchService {
     }
   }
 
-  /**
-   * İlan ara
-   */
-  public async searchListings(params: ListingSearchParams): Promise<{
-    hits: ListingData[];
-    total: number;
-    aggregations?: any;
-  }> {
-    try {
-      const client = await this.getClient();
-
-      // Query body oluştur
-      const body: any = {
-        query: {
-          bool: {
-            must: [],
-            filter: []
-          }
-        },
-        from: (params.page || 0) * (params.limit || 10),
-        size: params.limit || 10
-      };
-
-      // Full text search
-      if (params.query) {
-        body.query.bool.must.push({
-          multi_match: {
-            query: params.query,
-            fields: ['title^2', 'description'],
-            type: 'most_fields',
-            fuzziness: 'AUTO'
-          }
-        });
-      }
-
-      // Kategori filtresi
-      if (params.category) {
-        body.query.bool.filter.push({
-          term: { category_id: params.category }
-        });
-      }
-
-      // Fiyat aralığı
-      if (params.priceRange) {
-        const range: any = {};
-        if (params.priceRange.min !== undefined) {
-          range.gte = params.priceRange.min;
-        }
-        if (params.priceRange.max !== undefined) {
-          range.lte = params.priceRange.max;
-        }
-        if (Object.keys(range).length > 0) {
-          body.query.bool.filter.push({
-            range: { price: range }
-          });
-        }
-      }
-
-      // Lokasyon filtresi
-      if (params.location) {
-        body.query.bool.filter.push({
-          geo_distance: {
-            distance: `${params.location.radius}km`,
-            location: {
-              lat: params.location.lat,
-              lon: params.location.lon
-            }
-          }
-        });
-      }
-
-      // Durum filtresi
-      if (params.status) {
-        body.query.bool.filter.push({
-          term: { status: params.status }
-        });
-      }
-
-      // Özel attribute filtreleri
-      if (params.attributes) {
-        Object.entries(params.attributes).forEach(([key, value]) => {
-          body.query.bool.filter.push({
-            term: { [`attributes.${key}`]: value }
-          });
-        });
-      }
-
-      // Sıralama
-      if (params.sort) {
-        body.sort = [
-          { [params.sort.field]: { order: params.sort.order } }
-        ];
-      }
-
-      // Arama yap
-      const response = await client.search({
-        index: this.indexName,
-        body
-      });
-
-      return {
-        hits: response.hits.hits.map(hit => ({
-          ...hit._source as ListingData,
-          score: hit._score
-        })),
-        total: response.hits.total as number,
-        aggregations: response.aggregations
-      };
-
-    } catch (error) {
-      logger.error('❌ Failed to search listings:', error);
-      throw error;
-    }
-  }
 
   /**
    * Index'i yeniden oluştur
@@ -405,6 +271,203 @@ class ElasticsearchService {
           error: error instanceof Error ? error.message : 'Unknown error'
         }
       };
+    }
+  }
+
+  /**
+   * Search listings
+   */
+  public async searchListings(params: {
+    query: string;
+    size?: number;
+    from?: number;
+    sort?: string;
+    filters?: Record<string, any>;
+  }): Promise<any> {
+    try {
+      const client = await this.getClient();
+      const { query, size = 10, from = 0, sort, filters = {} } = params;
+
+      // Build search query
+      const searchQuery: any = {
+        index: this.indexName,
+        body: {
+          query: query === '*' ? { match_all: {} } : {
+            bool: {
+              must: [
+                {
+                  multi_match: {
+                    query,
+                    fields: ['title^2', 'description', 'search_keywords'],
+                    type: 'best_fields',
+                    fuzziness: 'AUTO'
+                  }
+                }
+              ],
+              filter: []
+            }
+          },
+          size,
+          from,
+          _source: true
+        }
+      };
+
+      // Add filters
+      if (filters.status) {
+        searchQuery.body.query.bool.filter.push({
+          term: { status: filters.status }
+        });
+      }
+      if (filters.category) {
+        searchQuery.body.query.bool.filter.push({
+          term: { category: filters.category }
+        });
+      }
+
+      // Add sorting
+      if (sort) {
+        searchQuery.body.sort = [
+          { [sort]: { order: 'desc' } }
+        ];
+      } else {
+        searchQuery.body.sort = [
+          { _score: { order: 'desc' } }
+        ];
+      }
+
+      const result = await client.search(searchQuery);
+
+      return {
+        took: result.took,
+        timed_out: result.timed_out,
+        _shards: result._shards,
+        hits: {
+          total: result.hits.total,
+          max_score: result.hits.max_score,
+          hits: result.hits.hits
+        }
+      };
+    } catch (error) {
+      logger.error('Elasticsearch search failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get listing by ID
+   */
+  public async getListingById(id: string): Promise<any> {
+    try {
+      const client = await this.getClient();
+      
+      const result = await client.get({
+        index: this.indexName,
+        id
+      });
+
+      return result._source;
+    } catch (error) {
+      if ((error as any).statusCode === 404) {
+        return null;
+      }
+      logger.error('Elasticsearch get listing failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get search statistics
+   */
+  public async getSearchStats(): Promise<any> {
+    try {
+      const client = await this.getClient();
+      
+      const stats = await client.indices.stats({
+        index: this.indexName
+      });
+
+      const health = await client.cluster.health({
+        index: this.indexName
+      });
+
+      return {
+        index: this.indexName,
+        health: health.status,
+        documents: stats.indices?.[this.indexName]?.total?.docs?.count || 0,
+        size: stats.indices?.[this.indexName]?.total?.store?.size_in_bytes || 0,
+        search: {
+          query_total: stats.indices?.[this.indexName]?.total?.search?.query_total || 0,
+          query_time_in_millis: stats.indices?.[this.indexName]?.total?.search?.query_time_in_millis || 0
+        }
+      };
+    } catch (error) {
+      logger.error('Elasticsearch get stats failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * İlanı Elasticsearch'e ekle/güncelle
+   */
+  public async upsertListing(listing: any): Promise<void> {
+    try {
+      const client = await this.getClient();
+      
+      // Search keywords oluştur
+      const searchKeywords = [
+        listing.title,
+        listing.description,
+        listing.category,
+        listing.location
+      ].filter(Boolean).join(' ');
+
+      const listingData = {
+        ...listing,
+        search_keywords: searchKeywords,
+        updated_at: new Date().toISOString()
+      };
+
+      await client.index({
+        index: this.indexName,
+        id: listing.id,
+        body: listingData
+      });
+
+      logger.info('✅ Listing upserted to Elasticsearch', {
+        id: listing.id,
+        title: listing.title
+      });
+
+    } catch (error) {
+      logger.error('❌ Error upserting listing to Elasticsearch:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * İlanı Elasticsearch'ten sil
+   */
+  public async deleteListing(listingId: string): Promise<void> {
+    try {
+      const client = await this.getClient();
+      
+      await client.delete({
+        index: this.indexName,
+        id: listingId
+      });
+
+      logger.info('✅ Listing deleted from Elasticsearch', {
+        id: listingId
+      });
+
+    } catch (error) {
+      if ((error as any).statusCode === 404) {
+        logger.warn('⚠️ Listing not found in Elasticsearch', { id: listingId });
+        return;
+      }
+      logger.error('❌ Error deleting listing from Elasticsearch:', error);
+      throw error;
     }
   }
 }
