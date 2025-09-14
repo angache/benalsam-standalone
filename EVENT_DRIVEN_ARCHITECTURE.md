@@ -223,9 +223,53 @@ curl -u benalsam:benalsam123 "http://localhost:15672/api/queues/%2F/elasticsearc
 
 # Health checks
 curl "http://localhost:3006/health"
+curl "http://localhost:3006/health/detailed"
 curl "http://localhost:3006/health/rabbitmq"
 curl "http://localhost:3006/health/database"
+curl "http://localhost:3006/health/errors"
+
+# Circuit breaker status
+curl "http://localhost:3006/health/circuit-breakers"
+
+# Comprehensive health check
+curl "http://localhost:3006/health/comprehensive"
 ```
+
+## Circuit Breaker System
+
+### 🔄 **Circuit Breaker Protection**
+- **Elasticsearch Circuit Breaker**: Protects against ES service failures
+- **RabbitMQ Circuit Breaker**: Protects against message broker failures
+- **3 States**: CLOSED (normal), OPEN (failing), HALF-OPEN (testing)
+- **Automatic Recovery**: Self-healing when services recover
+- **Fallback Mechanisms**: Graceful degradation during failures
+
+### 🛡️ **Circuit Breaker Configuration**
+- **Error Threshold**: 50% failure rate triggers OPEN state
+- **Timeout**: 5-second operation timeout
+- **Reset Timeout**: 30-second recovery period
+- **Rolling Window**: 10-second error tracking window
+- **Event Logging**: State change notifications
+
+## Advanced Health Check System
+
+### 🏥 **Comprehensive Health Monitoring**
+- **Basic Health**: Service availability check
+- **Detailed Health**: Component-specific status
+- **Circuit Breaker Status**: Protection system state
+- **Health History**: Historical health data tracking
+- **Health Trends**: Performance trend analysis
+- **DLQ Status**: Dead Letter Queue monitoring
+
+### 📊 **Health Check Endpoints**
+- **`/health`**: Basic service status
+- **`/health/detailed`**: Component health with metrics
+- **`/health/circuit-breakers`**: Circuit breaker states
+- **`/health/comprehensive`**: Full system health report
+- **`/health/history`**: Historical health data
+- **`/health/trends`**: Health trend analysis
+- **`/health/dlq`**: DLQ status and statistics
+- **`/health/errors`**: Error metrics and statistics
 
 ### Dead Letter Queue Management
 ```bash
@@ -262,6 +306,65 @@ curl -u benalsam:benalsam123 -X DELETE "http://localhost:15672/api/queues/%2F/el
 - **Error rate**: 0% (after DLQ cleanup)
 - **Uptime**: 100% during testing
 
+## Error Management System
+
+### 🛡️ **Comprehensive Error Handling**
+- **25+ Error Types**: Network, Elasticsearch, RabbitMQ, Database, Validation, Business Logic
+- **4 Severity Levels**: LOW, MEDIUM, HIGH, CRITICAL
+- **6 Recovery Actions**: RETRY, SKIP, DLQ, ALERT, FAIL, IGNORE
+- **Smart Error Classification**: Automatic error type detection
+- **Context Preservation**: Full error context and stack trace tracking
+
+### 🔧 **Error Management Components**
+
+#### **ErrorService**
+- Centralized error management and classification
+- Automatic error type detection from error messages
+- Configurable error behaviors per type
+- Real-time error metrics collection
+- Integration with retry and DLQ systems
+
+#### **Error Configuration**
+- **Network Errors**: RETRY with exponential backoff
+- **Elasticsearch Errors**: RETRY for transient, ALERT for critical
+- **RabbitMQ Errors**: RETRY for connection issues, ALERT for service down
+- **Database Errors**: RETRY for connection, SKIP for query errors
+- **Validation Errors**: SKIP with logging
+- **Business Logic Errors**: SKIP with context preservation
+
+#### **Error Metrics Endpoint**
+- **URL**: `GET /health/errors`
+- **Real-time Error Statistics**:
+  - Total error count
+  - Errors by type and severity
+  - Retryable vs non-retryable errors
+  - DLQ message count
+  - Alert count
+
+### 🧪 **Error Management Testing**
+- **20 Comprehensive Test Cases**:
+  - Error classification testing
+  - Error handling action testing
+  - Error metrics validation
+  - Error context preservation
+  - Retry mechanism testing
+  - DLQ integration testing
+- **All Tests Passing**: ✅ 20/20
+
+### 🔄 **Advanced Retry Mechanism**
+- **Exponential Backoff**: Intelligent retry delays
+- **Jitter**: Randomized retry intervals to prevent thundering herd
+- **Max Retries**: Configurable per error type
+- **Circuit Breaker Integration**: Automatic service protection
+- **DLQ Fallback**: Failed messages sent to Dead Letter Queue
+
+### 📊 **Error Monitoring**
+- **Real-time Error Tracking**: Live error count monitoring
+- **Error Severity Monitoring**: Critical error alerting
+- **Retry Success Rate**: Retry mechanism effectiveness
+- **DLQ Message Tracking**: Failed message monitoring
+- **Alert System Integration**: Critical error notifications
+
 ## Admin UI Metrics Dashboard
 
 ### 🎯 **Dashboard Features**
@@ -296,13 +399,85 @@ curl -u benalsam:benalsam123 -X DELETE "http://localhost:15672/api/queues/%2F/el
 - **Navigation**: Analytics & Monitoring → System Metrics
 - **Icon**: Gauge icon in sidebar
 
+## Comprehensive Monitoring Stack
+
+### 📊 **Production-Ready Monitoring**
+- **Prometheus**: Metrics collection and storage
+- **Grafana**: Advanced visualization and dashboards
+- **AlertManager**: Intelligent alerting system
+- **Loki**: Log aggregation and analysis
+- **Node Exporter**: System metrics collection
+- **Redis Exporter**: Redis metrics monitoring
+- **Promtail**: Log shipping to Loki
+
+### 🚀 **Monitoring Stack Setup**
+```bash
+# Start monitoring stack
+cd monitoring
+./start-monitoring.sh
+
+# Import Grafana dashboards
+./import-dashboards.sh
+```
+
+### 📈 **Grafana Dashboards**
+- **Benalsam System Dashboard**: Comprehensive system overview
+- **Real-time Metrics**: Live system performance data
+- **Error Tracking**: Error rates and patterns
+- **Queue Monitoring**: Message flow and processing
+- **Health Status**: Service availability tracking
+- **Custom Panels**: Tailored visualizations
+
+### 🔔 **Alerting System**
+- **Critical Alerts**: Service down, high error rates
+- **Warning Alerts**: Performance degradation, queue buildup
+- **Email Notifications**: Automated alert delivery
+- **Webhook Integration**: Custom alert handling
+- **Alert Rules**: Configurable threshold-based alerts
+
+### 📝 **Log Management**
+- **Centralized Logging**: All services in one place
+- **Structured Logs**: JSON-formatted log entries
+- **Trace ID Correlation**: End-to-end request tracking
+- **Log Queries**: Powerful search and filtering
+- **Log Retention**: Configurable retention policies
+
+### 🌐 **Monitoring URLs**
+- **Grafana**: http://localhost:3000 (admin/admin123)
+- **Prometheus**: http://localhost:9090
+- **AlertManager**: http://localhost:9093
+- **Loki**: http://localhost:3100
+- **RabbitMQ Management**: http://localhost:15673 (admin/admin123)
+
+## System Status
+
+### ✅ **Completed Features**
+- ✅ **Event-Driven Architecture**: RabbitMQ-based message system
+- ✅ **Trace ID System**: End-to-end request tracking
+- ✅ **Prometheus Metrics**: Production-ready metrics collection
+- ✅ **Health Check System**: Comprehensive service monitoring
+- ✅ **Circuit Breaker**: Service protection and failover
+- ✅ **Retry Mechanism**: Advanced retry with exponential backoff
+- ✅ **Dead Letter Queue**: Failed message handling
+- ✅ **Error Management**: 25+ error types with smart handling
+- ✅ **Admin UI Dashboards**: Real-time system monitoring
+- ✅ **Comprehensive Monitoring Stack**: Grafana, Prometheus, Loki, AlertManager
+- ✅ **Integration Testing**: 20+ test cases with full coverage
+
+### 🚀 **Production Ready**
+- **Error Handling**: Comprehensive error management system
+- **Monitoring**: Full observability with metrics, logs, and alerts
+- **Resilience**: Circuit breakers, retries, and DLQ protection
+- **Testing**: Complete test coverage with integration tests
+- **Documentation**: Comprehensive system documentation
+
 ## Future Improvements
 
-1. Circuit breaker implementation
-2. Message compression
-3. Batch processing optimization
-4. Enhanced monitoring dashboards
-5. Automated failover
-6. Performance tuning based on metrics
-7. Grafana dashboards integration
-8. Alert system integration
+1. **Message Compression**: Reduce network overhead
+2. **Batch Processing**: Optimize bulk operations
+3. **Auto-scaling**: Dynamic resource allocation
+4. **Multi-region**: Geographic distribution
+5. **Advanced Analytics**: Machine learning insights
+6. **API Rate Limiting**: Enhanced API protection
+7. **Message Encryption**: Enhanced security
+8. **Performance Optimization**: Continuous improvement
