@@ -137,11 +137,20 @@ export class DatabaseTriggerBridge {
         { messageId: `${messageId}_sync` }
       );
 
-      const statusRoutingKey = `listing.status.${job.status.toLowerCase()}`;
+      // Status change mesajı için doğru status'u al
+      let listingStatus = 'active'; // Default status
+      if (job.change_data && job.change_data.new && job.change_data.new.status) {
+        listingStatus = job.change_data.new.status.toLowerCase();
+      } else if (job.change_data && job.change_data.status) {
+        listingStatus = job.change_data.status.toLowerCase();
+      }
+      
+      const statusRoutingKey = `listing.status.${listingStatus}`;
       
       logger.info('📤 Publishing status message', { 
         ...traceContext, 
-        routingKey: statusRoutingKey 
+        routingKey: statusRoutingKey,
+        listingStatus
       });
 
       const statusPublished = await rabbitmqService.publishToExchange(
@@ -149,7 +158,7 @@ export class DatabaseTriggerBridge {
         statusRoutingKey,
         {
           listingId: job.record_id,
-          status: job.status,
+          status: listingStatus,
           timestamp: new Date().toISOString(),
           traceId
         },

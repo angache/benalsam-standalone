@@ -56,11 +56,18 @@ class QueueConsumer {
       const channel = await rabbitmqConfig.getChannel();
       this.channel = channel;
 
+      // Exchange'i declare et
+      await channel.assertExchange('benalsam.listings', 'topic', { durable: true });
+      
       // Queue'yu kur
-      await rabbitmqConfig.setupQueue();
-
+      const queueName = 'benalsam.listings.queue';
+      await channel.assertQueue(queueName, { durable: true });
+      
+      // Queue'yu exchange'e bind et
+      await channel.bindQueue(queueName, 'benalsam.listings', 'listing.*');
+      await channel.bindQueue(queueName, 'benalsam.listings', 'listing.status.*');
+      
       // Consumer'ı başlat
-      const queueName = process.env.RABBITMQ_QUEUE || 'elasticsearch.sync';
       await channel.prefetch(1); // Her seferinde bir mesaj işle
 
       await channel.consume(queueName, this.handleMessage.bind(this), {
@@ -94,13 +101,14 @@ class QueueConsumer {
       message = this.parseMessage(msg);
       
       // Status change mesajlarını işle
-      if ('status' in message) {
+      if ('status' in message && 'listingId' in message) {
         const traceId = message.traceId || `status_${message.listingId}_${Date.now()}`;
         logger.info('📝 Processing status change message', {
           traceId,
           listingId: message.listingId,
           status: message.status,
-          messageId: msg.properties.messageId
+          messageId: msg.properties.messageId,
+          routingKey: msg.fields.routingKey
         });
         
         // Status değişikliğini Elasticsearch'e yansıt
@@ -244,12 +252,128 @@ class QueueConsumer {
   }
 
   /**
+   * Status değişikliğini işle
+   */
+  private async handleStatusChange(message: any, traceId: string): Promise<void> {
+    try {
+      const { listingId, status } = message;
+
+      if (!listingId) {
+        logger.warn('⚠️ Status change message missing listingId', { traceId });
+        return;
+      }
+
+      logger.info('🔄 Processing status change', {
+        traceId,
+        listingId,
+        status
+      });
+
+      // Elasticsearch Service'ten ilanı getir
+      const elasticsearchService = (await import('../services/elasticsearchService')).elasticsearchService;
+
+      if (status === 'active') {
+        // İlanı Elasticsearch'e ekle/güncelle
+        await this.syncListingToElasticsearch(listingId, traceId);
+      } else if (status === 'rejected' || status === 'deleted') {
+        // İlanı Elasticsearch'ten sil
+        await this.removeListingFromElasticsearch(listingId, traceId);
+      }
+
+      logger.info('✅ Status change processed', {
+        traceId,
+        listingId,
+        status
+      });
+
+    } catch (error) {
+      logger.error('❌ Error processing status change:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        traceId,
+        listingId: message.listingId
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * İlanı Elasticsearch'e senkronize et
+   */
+  private async syncListingToElasticsearch(listingId: string, traceId: string): Promise<void> {
+    try {
+      // Database'den ilanı getir
+      const supabase = supabaseConfig.getClient();
+      const { data: listing, error } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('id', listingId)
+        .single();
+
+      if (error || !listing) {
+        logger.warn('⚠️ Listing not found in database', {
+          traceId,
+          listingId,
+          error: error?.message
+        });
+        return;
+      }
+
+      // Elasticsearch'e ekle/güncelle
+      const elasticsearchService = (await import('../services/elasticsearchService')).elasticsearchService;
+      await elasticsearchService.upsertListing(listing);
+
+      logger.info('✅ Listing synced to Elasticsearch', {
+        traceId,
+        listingId,
+        title: listing.title
+      });
+
+    } catch (error) {
+      logger.error('❌ Error syncing listing to Elasticsearch:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        traceId,
+        listingId
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * İlanı Elasticsearch'ten kaldır
+   */
+  private async removeListingFromElasticsearch(listingId: string, traceId: string): Promise<void> {
+    try {
+      const elasticsearchService = (await import('../services/elasticsearchService')).elasticsearchService;
+      await elasticsearchService.deleteListing(listingId);
+
+      logger.info('✅ Listing removed from Elasticsearch', {
+        traceId,
+        listingId
+      });
+
+    } catch (error) {
+      logger.error('❌ Error removing listing from Elasticsearch:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        traceId,
+        listingId
+      });
+      throw error;
+    }
+  }
+
+  /**
    * Mesajı parse et
    */
   private parseMessage(msg: ConsumeMessage): QueueMessage {
     try {
       const content = msg.content.toString();
-      logger.info('📥 Received message:', { content });
+      const routingKey = msg.fields.routingKey;
+      
+      logger.info('📥 Received message:', { 
+        content: content.substring(0, 200) + '...', // İlk 200 karakter
+        routingKey,
+        messageId: msg.properties.messageId
+      });
       
       const message = JSON.parse(content);
 
@@ -257,7 +381,8 @@ class QueueConsumer {
       if ('status' in message && 'listingId' in message) {
         logger.info('📝 Status change message received:', {
           listingId: message.listingId,
-          status: message.status
+          status: message.status,
+          routingKey
         });
         return message;
       }
@@ -579,115 +704,6 @@ class QueueConsumer {
     }
   }
 
-  /**
-   * Status değişikliğini işle
-   */
-  private async handleStatusChange(message: any, traceId: string): Promise<void> {
-    try {
-      const { listingId, status } = message;
-      
-      if (!listingId) {
-        logger.warn('⚠️ Status change message missing listingId', { traceId });
-        return;
-      }
-
-      logger.info('🔄 Processing status change', {
-        traceId,
-        listingId,
-        status
-      });
-
-      // Elasticsearch Service'ten ilanı getir
-      const elasticsearchService = (await import('../services/elasticsearchService')).elasticsearchService;
-      
-      if (status === 'active') {
-        // İlanı Elasticsearch'e ekle/güncelle
-        await this.syncListingToElasticsearch(listingId, traceId);
-      } else if (status === 'rejected' || status === 'deleted') {
-        // İlanı Elasticsearch'ten sil
-        await this.removeListingFromElasticsearch(listingId, traceId);
-      }
-
-      logger.info('✅ Status change processed', {
-        traceId,
-        listingId,
-        status
-      });
-
-    } catch (error) {
-      logger.error('❌ Error processing status change:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        traceId,
-        listingId: message.listingId
-      });
-      throw error;
-    }
-  }
-
-  /**
-   * İlanı Elasticsearch'e senkronize et
-   */
-  private async syncListingToElasticsearch(listingId: string, traceId: string): Promise<void> {
-    try {
-      // Database'den ilanı getir
-      const supabase = supabaseConfig.getClient();
-      const { data: listing, error } = await supabase
-        .from('listings')
-        .select('*')
-        .eq('id', listingId)
-        .single();
-
-      if (error || !listing) {
-        logger.warn('⚠️ Listing not found in database', {
-          traceId,
-          listingId,
-          error: error?.message
-        });
-        return;
-      }
-
-      // Elasticsearch'e ekle/güncelle
-      const elasticsearchService = (await import('../services/elasticsearchService')).elasticsearchService;
-      await elasticsearchService.upsertListing(listing);
-
-      logger.info('✅ Listing synced to Elasticsearch', {
-        traceId,
-        listingId,
-        title: listing.title
-      });
-
-    } catch (error) {
-      logger.error('❌ Error syncing listing to Elasticsearch:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        traceId,
-        listingId
-      });
-      throw error;
-    }
-  }
-
-  /**
-   * İlanı Elasticsearch'ten kaldır
-   */
-  private async removeListingFromElasticsearch(listingId: string, traceId: string): Promise<void> {
-    try {
-      const elasticsearchService = (await import('../services/elasticsearchService')).elasticsearchService;
-      await elasticsearchService.deleteListing(listingId);
-
-      logger.info('✅ Listing removed from Elasticsearch', {
-        traceId,
-        listingId
-      });
-
-    } catch (error) {
-      logger.error('❌ Error removing listing from Elasticsearch:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        traceId,
-        listingId
-      });
-      throw error;
-    }
-  }
 
   /**
    * Consumer'ı durdur
