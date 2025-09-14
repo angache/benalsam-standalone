@@ -23,6 +23,10 @@ import { usersRouter } from './routes/users';
 import { categoriesRouter } from './routes/categories';
 import healthRoutes from './routes/health';
 import monitoringRoutes from './routes/monitoring';
+import prometheusRoutes from './routes/prometheus';
+import prometheusTestRoutes from './routes/prometheus-test';
+import simpleTestRoutes from './routes/simple-test';
+import debugTestRoutes from './routes/debug-test';
 import elasticsearchRoutes from './routes/elasticsearch';
 import adminManagementRoutes from './routes/admin-management';
 import analyticsRoutes from './routes/analytics';
@@ -221,6 +225,14 @@ app.get('/health', (req, res) => {
     version: 'v1'
   });
 });
+
+// Debug routes (must be first)
+app.use('/debug', debugTestRoutes); // Debug test endpoint
+
+// Metrics routes (must be first)
+app.use('/simple-metrics', simpleTestRoutes); // Simple test metrics endpoint
+app.use('/metrics', prometheusRoutes); // Prometheus metrics endpoint
+app.use('/test-metrics', prometheusTestRoutes); // Test Prometheus metrics endpoint
 
 // API routes
 app.use('/api/v1/auth', authRoutes);
