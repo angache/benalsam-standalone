@@ -388,6 +388,116 @@ router.get('/errors', async (req, res) => {
 });
 
 /**
+ * @route   GET /health/prometheus
+ * @desc    Health check in Prometheus format
+ */
+router.get('/prometheus', async (req, res) => {
+  try {
+    // Check all components in parallel
+    const [
+      esHealth,
+      rmqHealth,
+      dbHealth,
+      consumerStatus
+    ] = await Promise.all([
+      elasticsearchService.checkHealth(),
+      rabbitmqConfig.checkConnection(),
+      supabaseConfig.checkConnection(),
+      queueConsumer.isRunning()
+    ]);
+
+    // Get job metrics
+    const { data: jobMetrics } = await supabaseConfig.getClient()
+      .from('elasticsearch_sync_queue')
+      .select('status')
+      .then(result => {
+        const metrics = {
+          total: 0,
+          pending: 0,
+          processing: 0,
+          completed: 0,
+          failed: 0
+        };
+        
+        if (result.data) {
+          result.data.forEach(job => {
+            metrics.total++;
+            metrics[job.status as keyof typeof metrics]++;
+          });
+        }
+        
+        return { data: metrics };
+      });
+
+    // Overall health status
+    const isHealthy = esHealth.healthy && 
+                     rmqHealth && 
+                     dbHealth && 
+                     consumerStatus;
+
+    // Generate Prometheus format
+    const prometheusMetrics = `# HELP elasticsearch_service_health Elasticsearch Service health status
+# TYPE elasticsearch_service_health gauge
+elasticsearch_service_health{service="elasticsearch-service"} ${isHealthy ? 1 : 0}
+
+# HELP elasticsearch_service_uptime_seconds Elasticsearch Service uptime in seconds
+# TYPE elasticsearch_service_uptime_seconds counter
+elasticsearch_service_uptime_seconds{service="elasticsearch-service"} ${process.uptime()}
+
+# HELP elasticsearch_service_memory_heap_bytes Elasticsearch Service heap memory usage
+# TYPE elasticsearch_service_memory_heap_bytes gauge
+elasticsearch_service_memory_heap_bytes{service="elasticsearch-service"} ${process.memoryUsage().heapUsed}
+
+# HELP elasticsearch_service_memory_rss_bytes Elasticsearch Service RSS memory usage
+# TYPE elasticsearch_service_memory_rss_bytes gauge
+elasticsearch_service_memory_rss_bytes{service="elasticsearch-service"} ${process.memoryUsage().rss}
+
+# HELP elasticsearch_connection_status Elasticsearch connection status
+# TYPE elasticsearch_connection_status gauge
+elasticsearch_connection_status{service="elasticsearch-service"} ${esHealth.healthy ? 1 : 0}
+
+# HELP rabbitmq_connection_status RabbitMQ connection status
+# TYPE rabbitmq_connection_status gauge
+rabbitmq_connection_status{service="elasticsearch-service"} ${rmqHealth ? 1 : 0}
+
+# HELP database_connection_status Database connection status
+# TYPE database_connection_status gauge
+database_connection_status{service="elasticsearch-service"} ${dbHealth ? 1 : 0}
+
+# HELP queue_consumer_status Queue consumer status
+# TYPE queue_consumer_status gauge
+queue_consumer_status{service="elasticsearch-service",queue="elasticsearch.sync"} ${consumerStatus ? 1 : 0}
+
+# HELP job_queue_total Total number of jobs in queue
+# TYPE job_queue_total gauge
+job_queue_total{service="elasticsearch-service",status="total"} ${jobMetrics.total}
+job_queue_total{service="elasticsearch-service",status="pending"} ${jobMetrics.pending}
+job_queue_total{service="elasticsearch-service",status="processing"} ${jobMetrics.processing}
+job_queue_total{service="elasticsearch-service",status="completed"} ${jobMetrics.completed}
+job_queue_total{service="elasticsearch-service",status="failed"} ${jobMetrics.failed}
+
+# HELP elasticsearch_documents_total Total number of documents in Elasticsearch
+# TYPE elasticsearch_documents_total gauge
+elasticsearch_documents_total{service="elasticsearch-service",index="benalsam_listings"} ${esHealth.details.numberOfDocuments}
+
+# HELP elasticsearch_index_size_bytes Elasticsearch index size in bytes
+# TYPE elasticsearch_index_size_bytes gauge
+elasticsearch_index_size_bytes{service="elasticsearch-service",index="benalsam_listings"} ${esHealth.details.sizeInBytes}
+`;
+
+    res.set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
+    res.send(prometheusMetrics);
+
+  } catch (error) {
+    logger.error('Prometheus health check failed:', error);
+    res.status(500).send(`# HELP elasticsearch_service_health Elasticsearch Service health status
+# TYPE elasticsearch_service_health gauge
+elasticsearch_service_health{service="elasticsearch-service"} 0
+`);
+  }
+});
+
+/**
  * @route   GET /health/jobs
  * @desc    Get job queue status and recent jobs
  */

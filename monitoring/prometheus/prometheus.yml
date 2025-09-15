@@ -50,13 +50,13 @@ scrape_configs:
     scrape_interval: 15s
     scrape_timeout: 10s
 
-  # RabbitMQ Management
-  - job_name: 'rabbitmq'
-    static_configs:
-      - targets: ['rabbitmq-management:15672']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
-    scrape_timeout: 10s
+  # RabbitMQ Management (disabled - no exporter available)
+  # - job_name: 'rabbitmq'
+  #   static_configs:
+  #     - targets: ['rabbitmq-management:15672']
+  #   metrics_path: '/metrics'
+  #   scrape_interval: 30s
+  #   scrape_timeout: 10s
 
   # Health Checks - Admin Backend
   - job_name: 'admin-backend-health'
@@ -70,8 +70,8 @@ scrape_configs:
   - job_name: 'elasticsearch-service-health'
     static_configs:
       - targets: ['host.docker.internal:3006']
-    metrics_path: '/api/v1/health/detailed'
-    scrape_interval: 30s
+    metrics_path: '/api/v1/health/prometheus'
+    scrape_interval: 15s
     scrape_timeout: 10s
     honor_labels: true
     metric_relabel_configs:
