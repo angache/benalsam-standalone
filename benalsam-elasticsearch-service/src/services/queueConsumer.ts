@@ -59,9 +59,18 @@ class QueueConsumer {
       // Exchange'i declare et
       await channel.assertExchange('benalsam.listings', 'topic', { durable: true });
       
-      // Queue'yu kur
-      const queueName = 'benalsam.listings.queue';
-      await channel.assertQueue(queueName, { durable: true });
+      // Queue'yu kur (elasticsearch.sync queue'sunu kullan - aynı parametrelerle)
+      const queueName = 'elasticsearch.sync';
+      const dlx = 'benalsam.listings.dlx';
+      await channel.assertQueue(queueName, {
+        durable: true,
+        arguments: {
+          'x-dead-letter-exchange': dlx,
+          'x-dead-letter-routing-key': 'dead.letter',
+          'x-message-ttl': 1000 * 60 * 60 * 24, // 24 hours
+          'x-max-retries': 3
+        }
+      });
       
       // Queue'yu exchange'e bind et
       await channel.bindQueue(queueName, 'benalsam.listings', 'listing.*');
@@ -275,8 +284,8 @@ class QueueConsumer {
       if (status === 'active') {
         // İlanı Elasticsearch'e ekle/güncelle
         await this.syncListingToElasticsearch(listingId, traceId);
-      } else if (status === 'rejected' || status === 'deleted') {
-        // İlanı Elasticsearch'ten sil
+      } else if (status === 'rejected' || status === 'deleted' || status === 'pending_approval') {
+        // İlanı Elasticsearch'ten sil (rejected, deleted veya pending_approval durumlarında)
         await this.removeListingFromElasticsearch(listingId, traceId);
       }
 
