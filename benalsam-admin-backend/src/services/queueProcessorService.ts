@@ -516,7 +516,7 @@ export class QueueProcessorService {
               logger.info(`✅ Category counts cache invalidated after category change: ${recordId} (${oldData.category} → ${newData.category})`);
             }
           } else if (newData.status !== 'active' && oldData.status === 'active') {
-            // İlan deaktif edildi - Elasticsearch'ten sil
+            // İlan deaktif edildi (inactive, rejected, deleted, pending_approval) - Elasticsearch'ten sil
             await this.elasticsearchService.deleteDocument(recordId);
             
             // Kategori sayıları cache'ini temizle
@@ -953,7 +953,7 @@ export class QueueProcessorService {
 
       // Retry count'u sadece failed durumunda artır
       if (status === 'failed') {
-        // Önce mevcut retry count'u al
+""        // Önce mevcut retry count'u al
         const { data: currentJob } = await this.supabase
           .from('elasticsearch_sync_queue')
           .select('retry_count')

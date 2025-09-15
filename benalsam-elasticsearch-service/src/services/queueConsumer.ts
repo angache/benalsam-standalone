@@ -59,7 +59,7 @@ class QueueConsumer {
       // Exchange'i declare et
       await channel.assertExchange('benalsam.listings', 'topic', { durable: true });
       
-      // Queue'yu kur (elasticsearch.sync queue'sunu kullan - aynı parametrelerle)
+      // Queue'yu kur (elasticsearch.sync queue'sunu kullan - mesajlar oraya gidiyor)
       const queueName = 'elasticsearch.sync';
       const dlx = 'benalsam.listings.dlx';
       await channel.assertQueue(queueName, {
@@ -68,7 +68,8 @@ class QueueConsumer {
           'x-dead-letter-exchange': dlx,
           'x-dead-letter-routing-key': 'dead.letter',
           'x-message-ttl': 1000 * 60 * 60 * 24, // 24 hours
-          'x-max-retries': 3
+          'x-max-retries': 3,
+          'x-queue-type': 'classic'
         }
       });
       
@@ -122,6 +123,24 @@ class QueueConsumer {
         
         // Status değişikliğini Elasticsearch'e yansıt
         await this.handleStatusChange(message, traceId);
+        
+        this.channel.ack(msg);
+        return;
+      }
+
+      // Delete operasyonu mesajlarını işle
+      if (message.operation === 'delete' && 'recordId' in message) {
+        const traceId = message.traceId || `delete_${message.recordId}_${Date.now()}`;
+        logger.info('🗑️ Processing delete message', {
+          traceId,
+          recordId: message.recordId,
+          operation: message.operation,
+          messageId: msg.properties.messageId,
+          routingKey: msg.fields.routingKey
+        });
+        
+        // İlanı Elasticsearch'ten sil
+        await this.handleDelete(message, traceId);
         
         this.channel.ack(msg);
         return;
@@ -261,6 +280,43 @@ class QueueConsumer {
   }
 
   /**
+   * Delete operasyonunu işle
+   */
+  private async handleDelete(message: any, traceId: string): Promise<void> {
+    try {
+      const { recordId } = message;
+
+      if (!recordId) {
+        logger.warn('⚠️ Delete message missing recordId', { traceId });
+        return;
+      }
+
+      logger.info('🗑️ Processing delete operation', {
+        traceId,
+        recordId
+      });
+
+      const elasticsearchService = (await import('../services/elasticsearchService')).elasticsearchService;
+
+      // İlanı Elasticsearch'ten sil
+      await elasticsearchService.deleteListing(recordId);
+      
+      logger.info('✅ Listing deleted from Elasticsearch', {
+        traceId,
+        recordId
+      });
+
+    } catch (error) {
+      logger.error('❌ Error processing delete operation:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        traceId,
+        recordId: message.recordId
+      });
+      throw error;
+    }
+  }
+
+  /**
    * Status değişikliğini işle
    */
   private async handleStatusChange(message: any, traceId: string): Promise<void> {
@@ -284,8 +340,8 @@ class QueueConsumer {
       if (status === 'active') {
         // İlanı Elasticsearch'e ekle/güncelle
         await this.syncListingToElasticsearch(listingId, traceId);
-      } else if (status === 'rejected' || status === 'deleted' || status === 'pending_approval') {
-        // İlanı Elasticsearch'ten sil (rejected, deleted veya pending_approval durumlarında)
+      } else if (status === 'rejected' || status === 'deleted' || status === 'pending_approval' || status === 'inactive') {
+        // İlanı Elasticsearch'ten sil (rejected, deleted, pending_approval veya inactive durumlarında)
         await this.removeListingFromElasticsearch(listingId, traceId);
       }
 
@@ -391,6 +447,16 @@ class QueueConsumer {
         logger.info('📝 Status change message received:', {
           listingId: message.listingId,
           status: message.status,
+          routingKey
+        });
+        return message;
+      }
+      
+      // Delete operasyonu kontrolü
+      if (message.operation === 'delete' && 'recordId' in message) {
+        logger.info('🗑️ Delete message received:', {
+          recordId: message.recordId,
+          operation: message.operation,
           routingKey
         });
         return message;

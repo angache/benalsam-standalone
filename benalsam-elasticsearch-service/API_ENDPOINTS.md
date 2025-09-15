@@ -11,6 +11,8 @@
 ### **🔍 SEARCH & QUERY**
 **Base Path:** `/api/v1/search`
 - `GET /listings` - İlan arama
+- `GET /listings/:id` - Belirli ilanı getir
+- `DELETE /listings/:id` - İlanı sil
 - `GET /stats` - Arama istatistikleri
 - `GET /suggestions` - Arama önerileri
 
@@ -48,6 +50,13 @@
 
 ## 📝 **CHANGELOG**
 
+### **2025-09-15 - v1.2.0**
+- ✅ DELETE /listings/:id endpoint'i eklendi
+- ✅ Silme sistemi tam çalışır hale getirildi
+- ✅ RabbitMQ mesaj işleme düzeltildi
+- ✅ handleDelete fonksiyonu eklendi
+- ✅ parseMessage ve handleMessage'da delete operasyonu desteği
+
 ### **2025-09-15 - v1.1.0**
 - ✅ Prometheus metrics endpoint'leri eklendi (`/api/v1/monitoring/prometheus`)
 - ✅ Prometheus health check endpoint'i eklendi (`/api/v1/health/detailed`)
@@ -79,6 +88,12 @@ curl http://localhost:3006/api/v1/health
 ```bash
 # İlan arama
 curl "http://localhost:3006/api/v1/search/listings?q=nokia"
+
+# Belirli ilanı getir
+curl http://localhost:3006/api/v1/search/listings/aa20f657-c8b1-4003-9e92-2a9b02084a61
+
+# İlanı sil
+curl -X DELETE http://localhost:3006/api/v1/search/listings/aa20f657-c8b1-4003-9e92-2a9b02084a61
 
 # Arama istatistikleri
 curl http://localhost:3006/api/v1/search/stats

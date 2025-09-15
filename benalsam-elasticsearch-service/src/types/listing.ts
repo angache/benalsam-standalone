@@ -20,7 +20,7 @@ export interface ListingData {
   version?: number;
 }
 
-export type ListingStatus = 'draft' | 'pending' | 'active' | 'rejected' | 'deleted';
+export type ListingStatus = 'draft' | 'pending' | 'active' | 'rejected' | 'deleted' | 'inactive';
 
 export interface ListingSearchParams {
   query?: string;

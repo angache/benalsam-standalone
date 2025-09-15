@@ -22,7 +22,7 @@
 - `GET /` - Tüm ilanları listele (Auth gerekli)
 - `GET /:id` - Tek ilan detayı (Auth gerekli)
 - `PUT /:id` - İlan güncelleme (Auth gerekli)
-- `DELETE /:id` - İlan silme (Auth gerekli)
+- `DELETE /:id` - İlan silme (Auth gerekli) - RabbitMQ mesajı gönderir
 - `POST /:id/moderate` - İlan moderasyonu (Auth gerekli)
 - `POST /:id/re-evaluate` - İlanı yeniden değerlendirme (Auth gerekli)
 - `POST /test/create` - Test ilanları oluşturma
@@ -173,6 +173,12 @@
 ---
 
 ## 📝 **CHANGELOG**
+
+### **2025-09-15 - v1.2.0**
+- ✅ DELETE /listings/:id endpoint'i RabbitMQ mesajı gönderir hale getirildi
+- ✅ Silme sistemi tam çalışır hale getirildi
+- ✅ recordId kullanımı düzeltildi (listingId yerine)
+- ✅ Elasticsearch Service ile senkronizasyon sağlandı
 
 ### **2025-09-15 - v1.1.0**
 - ✅ Prometheus metrics endpoint'leri eklendi (`/api/v1/monitoring/prometheus`)

@@ -39,7 +39,17 @@
 - **Message Flow**: ✅ Tam çalışıyor
 - **Elasticsearch Sync**: ✅ Otomatik sync
 
-#### 6. **💾 Git Commit**
+#### 6. **🗑️ Silme Sistemi Düzeltildi**
+- **Sorun**: Admin UI'dan silinen ilanlar ES'den silinmiyordu
+- **Çözüm**: 
+  - Admin Backend'de `deleteListing` fonksiyonuna RabbitMQ mesajı eklendi
+  - `listingId` yerine `recordId` kullanıldı
+  - Elasticsearch Service'de `handleDelete` fonksiyonu eklendi
+  - `parseMessage` ve `handleMessage` fonksiyonlarında `delete` operasyonu için özel kontrol eklendi
+- **Yeni Endpoint**: `DELETE /api/v1/search/listings/:id` - ES Service'de silme endpoint'i
+- **Durum**: ✅ Tam çalışıyor
+
+#### 7. **💾 Git Commit**
 - **Branch**: `feat/rabbitmq-event-system`
 - **Commit**: "feat: Fix RabbitMQ connection and add comprehensive monitoring"
 - **Durum**: ✅ Committed

@@ -174,9 +174,10 @@ export const ListingsPage: React.FC = () => {
     uniqueStatuses: [...new Set(listings.map(l => l.status))]
   });
   
-  const pendingListings = listings.filter(l => l.status === ListingStatus.PENDING_APPROVAL);
-  const activeListings = listings.filter(l => l.status === ListingStatus.ACTIVE);
-  const rejectedListings = listings.filter(l => l.status === ListingStatus.REJECTED);
+  const pendingListings = listings.filter(l => l.status === ListingStatus.PENDING_APPROVAL || l.status === 'PENDING_APPROVAL');
+  const activeListings = listings.filter(l => l.status === ListingStatus.ACTIVE || l.status === 'ACTIVE');
+  const rejectedListings = listings.filter(l => l.status === ListingStatus.REJECTED || l.status === 'REJECTED');
+  const inactiveListings = listings.filter(l => l.status === ListingStatus.INACTIVE || l.status === 'INACTIVE');
   
   console.log('📋 Filtered listings:', {
     pendingCount: pendingListings.length,
@@ -300,7 +301,7 @@ export const ListingsPage: React.FC = () => {
             </IconButton>
           </Tooltip>
           
-          {params.row.status === ListingStatus.PENDING_APPROVAL && (
+          {(params.row.status === ListingStatus.PENDING_APPROVAL || params.row.status === 'PENDING_APPROVAL') && (
             <>
               <Tooltip title="Onayla">
                 <IconButton
@@ -331,7 +332,7 @@ export const ListingsPage: React.FC = () => {
             </>
           )}
           
-          {params.row.status === ListingStatus.ACTIVE && (
+          {(params.row.status === ListingStatus.ACTIVE || params.row.status === 'ACTIVE') && (
             <>
               <Tooltip title="Yayından Kaldır">
                 <IconButton
@@ -362,7 +363,7 @@ export const ListingsPage: React.FC = () => {
             </>
           )}
           
-          {params.row.status === ListingStatus.INACTIVE && (
+          {(params.row.status === ListingStatus.INACTIVE || params.row.status === 'INACTIVE') && (
             <>
               <Tooltip title="Yayına Al">
                 <IconButton
@@ -393,7 +394,7 @@ export const ListingsPage: React.FC = () => {
             </>
           )}
           
-          {params.row.status === ListingStatus.REJECTED && (
+          {(params.row.status === ListingStatus.REJECTED || params.row.status === 'REJECTED') && (
             <Tooltip title="Tekrar Değerlendir">
               <IconButton
                 size="small"
@@ -577,7 +578,7 @@ export const ListingsPage: React.FC = () => {
           >
             <Tab
               label={
-                <Badge badgeContent={pendingListings.length} color="warning">
+                <Badge badgeContent={pendingListings.length} color="primary">
                   Onay Bekleyen
                 </Badge>
               }
@@ -593,6 +594,13 @@ export const ListingsPage: React.FC = () => {
               label={
                 <Badge badgeContent={rejectedListings.length} color="error">
                   Reddedilen
+                </Badge>
+              }
+            />
+            <Tab
+              label={
+                <Badge badgeContent={inactiveListings.length} color="warning">
+                  Yayından Kaldırılanlar
                 </Badge>
               }
             />
@@ -661,6 +669,26 @@ export const ListingsPage: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={3}>
+          <DataGrid
+            rows={inactiveListings}
+            columns={columns}
+            loading={isLoading}
+            autoHeight
+            pageSizeOptions={[10, 25, 50]}
+            initialState={{
+              pagination: { paginationModel: { pageSize: 10 } },
+            }}
+            slots={{ toolbar: GridToolbar }}
+            slotProps={{
+              toolbar: {
+                showQuickFilter: true,
+                quickFilterProps: { debounceMs: 500 },
+              },
+            }}
+          />
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={4}>
           <DataGrid
             rows={listings}
             columns={columns}

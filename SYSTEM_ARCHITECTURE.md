@@ -45,6 +45,12 @@
 Admin Backend → RabbitMQ → Elasticsearch Service → Elasticsearch
 ```
 
+**CRUD Operasyonları:**
+- **CREATE**: İlan oluşturma → ES'e ekleme
+- **UPDATE**: İlan güncelleme → ES'de güncelleme  
+- **DELETE**: İlan silme → ES'den silme
+- **STATUS CHANGE**: Status değişikliği → ES'de güncelleme/silme
+
 ### 📊 PROMETHEUS - Metrics Collection
 
 **Ne işe yarar:**

@@ -295,6 +295,48 @@ export const listingsController = {
         },
       };
 
+      // RabbitMQ mesaj gönder
+      try {
+        const { rabbitmqService } = await import('../services/rabbitmqService');
+        const traceId = `update_${id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Elasticsearch sync mesajı
+        const syncRoutingKey = 'listing.update';
+        await rabbitmqService.publishToExchange(
+          'benalsam.listings',
+          syncRoutingKey,
+          { 
+            listingId: id, 
+            operation: 'update',
+            data: transformedListing,
+            traceId 
+          },
+          { messageId: `${traceId}_sync` }
+        );
+        
+        // Status change mesajı
+        const statusRoutingKey = `listing.status.${listing.status || 'pending_approval'}`;
+        await rabbitmqService.publishToExchange(
+          'benalsam.listings',
+          statusRoutingKey,
+          { 
+            listingId: id, 
+            status: listing.status || 'pending_approval',
+            traceId 
+          },
+          { messageId: `${traceId}_status` }
+        );
+        
+        logger.info('📤 RabbitMQ messages sent for listing update', { 
+          listingId: id, 
+          status: listing.status,
+          traceId 
+        });
+      } catch (mqError) {
+        logger.error('❌ Failed to send RabbitMQ messages for listing update:', mqError);
+        // Mesaj gönderme hatası olsa bile response'u döndür
+      }
+
       res.json({
         success: true,
         data: transformedListing,
@@ -337,15 +379,42 @@ export const listingsController = {
         return;
       }
 
-              // Kategori sayıları cache'ini temizle
-        try {
-          const { AdminElasticsearchService } = await import('../services/elasticsearchService');
-          const elasticsearchService = new AdminElasticsearchService();
-          await elasticsearchService.invalidateCategoryCountsCache();
-          logger.info(`✅ Category counts cache invalidated after deleting listing: ${id}`);
-        } catch (cacheError) {
-          logger.warn(`⚠️ Failed to invalidate category counts cache:`, cacheError);
-        }
+      // RabbitMQ mesaj gönder
+      try {
+        const { rabbitmqService } = await import('../services/rabbitmqService');
+        const traceId = `delete_${id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Elasticsearch sync mesajı
+        const syncRoutingKey = 'listing.delete';
+        await rabbitmqService.publishToExchange(
+          'benalsam.listings',
+          syncRoutingKey,
+          { 
+            recordId: id,  // recordId olarak değiştir
+            operation: 'delete',
+            traceId 
+          },
+          { messageId: `${traceId}_sync` }
+        );
+        
+        logger.info('📤 RabbitMQ message sent for listing deletion', { 
+          listingId: id, 
+          traceId 
+        });
+      } catch (mqError) {
+        logger.error('❌ Failed to send RabbitMQ message for listing deletion:', mqError);
+        // Mesaj gönderme hatası olsa bile response'u döndür
+      }
+
+      // Kategori sayıları cache'ini temizle
+      try {
+        const { AdminElasticsearchService } = await import('../services/elasticsearchService');
+        const elasticsearchService = new AdminElasticsearchService();
+        await elasticsearchService.invalidateCategoryCountsCache();
+        logger.info(`✅ Category counts cache invalidated after deleting listing: ${id}`);
+      } catch (cacheError) {
+        logger.warn(`⚠️ Failed to invalidate category counts cache:`, cacheError);
+      }
 
       res.json({
         success: true,

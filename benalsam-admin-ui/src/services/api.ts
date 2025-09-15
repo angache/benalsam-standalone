@@ -87,8 +87,8 @@ export const apiService = {
     return response.data.data!;
   },
 
-  async moderateListing(id: string, action: 'approve' | 'reject', reason?: string): Promise<void> {
-    const status = action === 'approve' ? 'active' : 'rejected';
+  async moderateListing(id: string, action: 'approve' | 'reject' | 'inactive' | 'active', reason?: string): Promise<void> {
+    const status = action === 'approve' ? 'active' : action === 'reject' ? 'rejected' : action;
     await apiClient.post(`/listings/${id}/moderate`, { status, reason });
   },
 

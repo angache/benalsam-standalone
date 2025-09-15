@@ -137,6 +137,35 @@ router.get('/listings/:id', async (req, res) => {
 });
 
 /**
+ * @route   DELETE /search/listings/:id
+ * @desc    Delete listing by ID
+ */
+router.delete('/listings/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await elasticsearchService.deleteListing(id);
+
+    res.json({
+      success: true,
+      message: 'Listing deleted successfully',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error('❌ Delete listing error:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      id: req.params.id
+    });
+
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+/**
  * @route   GET /search/stats
  * @desc    Get search statistics
  */
