@@ -24,6 +24,9 @@ class RabbitMQService {
       this.connection = await amqp.connect(this.url);
       this.channel = await this.connection.createChannel();
 
+      // Exchange'leri oluştur
+      await this.setupExchanges();
+
       logger.info('🐰 Connected to RabbitMQ');
 
       // Handle connection events
@@ -53,6 +56,24 @@ class RabbitMQService {
         logger.info('Attempting to reconnect to RabbitMQ...');
         await this.connect();
       }, this.reconnectInterval);
+    }
+  }
+
+  /**
+   * Exchange'leri oluştur
+   */
+  private async setupExchanges(): Promise<void> {
+    try {
+      // benalsam.listings exchange'ini oluştur
+      await this.channel.assertExchange('benalsam.listings', 'topic', {
+        durable: true,
+        autoDelete: false
+      });
+
+      logger.info('✅ Exchange created: benalsam.listings');
+    } catch (error) {
+      logger.error('❌ Failed to create exchanges:', error);
+      throw error;
     }
   }
 

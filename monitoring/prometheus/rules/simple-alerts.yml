@@ -1,0 +1,32 @@
+groups:
+  - name: simple-alerts
+    rules:
+      # Servis Durumu
+      - alert: ServiceDown
+        expr: up{job=~"admin-backend|elasticsearch-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Servis çalışmıyor"
+          description: "{{ $labels.job }} servisi {{ $labels.instance }} adresinde çalışmıyor"
+
+      # Yüksek Bellek Kullanımı
+      - alert: HighMemoryUsage
+        expr: health_check_memory_rss_bytes{job="admin-backend-health"} > 100000000
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Yüksek bellek kullanımı"
+          description: "Bellek kullanımı {{ $value | humanize1024 }}B'ye ulaştı"
+
+      # Veritabanı Bağlantısı
+      - alert: DatabaseDown
+        expr: health_check_database_status{job="admin-backend-health"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Veritabanı bağlantısı kesildi"
+          description: "Veritabanı bağlantısı {{ $labels.instance }} adresinde kesildi"

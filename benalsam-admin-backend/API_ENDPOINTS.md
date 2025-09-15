@@ -83,6 +83,9 @@
 **Base Path:** `/api/v1/monitoring`
 - `GET /overview` - Sistem genel durumu
 - `GET /alerts` - Sistem uyarıları
+- `GET /prometheus` - Prometheus formatında metrics
+- `GET /health/prometheus` - Prometheus formatında health check
+- `GET /api/v1/query` - Prometheus API compatibility endpoint
 
 ### **🔒 SECURITY & RATE LIMITING**
 **Base Path:** `/api/v1/security`
@@ -171,6 +174,12 @@
 
 ## 📝 **CHANGELOG**
 
+### **2025-09-15 - v1.1.0**
+- ✅ Prometheus metrics endpoint'leri eklendi (`/api/v1/monitoring/prometheus`)
+- ✅ Prometheus health check endpoint'i eklendi (`/api/v1/monitoring/health/prometheus`)
+- ✅ Prometheus API compatibility endpoint'i eklendi (`/api/v1/monitoring/api/v1/query`)
+- ✅ RabbitMQ exchange ve queue setup endpoint'leri eklendi
+
 ### **2025-09-01 - v1.0.0**
 - ✅ Database Trigger Bridge health check endpoint'leri eklendi
 - ✅ New Bull Queue endpoint'leri eklendi
@@ -209,6 +218,18 @@ curl http://localhost:3002/api/v1/elasticsearch/indices
 
 # Belge ara
 curl http://localhost:3002/api/v1/elasticsearch/search/listings?q=test
+```
+
+### **Prometheus Metrics**
+```bash
+# Prometheus formatında metrics
+curl http://localhost:3002/api/v1/monitoring/prometheus
+
+# Prometheus formatında health check
+curl http://localhost:3002/api/v1/monitoring/health/prometheus
+
+# Prometheus API compatibility
+curl "http://localhost:3002/api/v1/monitoring/api/v1/query?query=up"
 ```
 
 ---

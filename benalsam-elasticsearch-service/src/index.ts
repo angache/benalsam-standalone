@@ -75,6 +75,11 @@ async function startServer() {
   await dlqService.initialize();
   logger.info('✅ DLQ service initialized');
 
+  // RabbitMQ queue'larını kur
+  const { rabbitmqConfig } = await import('./config/rabbitmq');
+  await rabbitmqConfig.setupQueue();
+  logger.info('✅ RabbitMQ queues configured');
+
   // Queue consumer'ı başlat
   await queueConsumer.start();
   logger.info('✅ Queue consumer started');

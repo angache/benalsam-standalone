@@ -7,6 +7,8 @@ global:
 
 rule_files:
   - "rules/*.yml"
+  - "rules/benalsam-alerts.yml"
+  - "rules/simple-alerts.yml"
 
 alerting:
   alertmanagers:

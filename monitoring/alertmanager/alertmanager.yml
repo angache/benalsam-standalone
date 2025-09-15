@@ -3,7 +3,7 @@ global:
   smtp_from: 'alerts@benalsam.com'
 
 route:
-  group_by: ['alertname', 'service']
+  group_by: ['alertname']
   group_wait: 10s
   group_interval: 10s
   repeat_interval: 1h
