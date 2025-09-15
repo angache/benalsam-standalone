@@ -324,7 +324,7 @@ const startServer = async () => {
       logger.error('❌ Database trigger bridge failed to start:', error);
     }
 
-    // Start queue processor - DISABLED (migrated to Bull Queue microservice)
+    // Start queue processor - DISABLED (using RabbitMQ instead)
     // try {
     //   await queueProcessor.startProcessing(10000); // 10 saniye aralıklarla
     //   logger.info('✅ Queue processor started');

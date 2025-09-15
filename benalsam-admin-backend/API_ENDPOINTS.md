@@ -51,12 +51,10 @@
 - `POST /reindex/:index` - İndeksi yeniden oluştur
 - `DELETE /index/:index` - İndeksi sil
 
-### **🔄 QUEUE MANAGEMENT (NEW BULL QUEUE)**
+### **🔄 QUEUE MANAGEMENT (RABBITMQ)**
 **Base Path:** `/api/v1/queue`
 - `GET /health` - Queue servis sağlık kontrolü
 - `GET /stats` - Queue istatistikleri
-- `POST /test/job` - Test job gönder
-- `POST /jobs` - Yeni job ekle
 
 ### **🏥 HEALTH MONITORING**
 **Base Path:** `/api/v1/health`
@@ -188,7 +186,7 @@
 
 ### **2025-09-01 - v1.0.0**
 - ✅ Database Trigger Bridge health check endpoint'leri eklendi
-- ✅ New Bull Queue endpoint'leri eklendi
+- ✅ RabbitMQ queue endpoint'leri eklendi
 - ✅ Elasticsearch management endpoint'leri eklendi
 - ✅ Health monitoring endpoint'leri eklendi
 

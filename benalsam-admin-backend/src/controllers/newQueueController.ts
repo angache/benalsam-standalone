@@ -42,7 +42,7 @@ export class NewQueueController {
         success: true,
         data: {
           healthy: isHealthy,
-          service: 'Bull Queue Microservice',
+          service: 'RabbitMQ Queue Service',
           timestamp: new Date().toISOString(),
         },
         timestamp: new Date().toISOString(),

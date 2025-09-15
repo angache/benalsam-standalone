@@ -10,7 +10,7 @@ Modern, scalable alım ilanları platformu - Monorepo'dan standalone projelere g
 | **🔧 admin-backend/** | Node.js Admin API | 3002 | ✅ Working |
 | **🎛️ admin-ui/** | React Admin Dashboard | 3003 | ✅ Working |
 | **🌐 web/** | React Web Application | 5173 | ✅ Working |
-| **🚀 queue-service/** | Bull Queue Microservice | 3004 | ✅ Working |
+| **🚀 queue-service/** | RabbitMQ Queue Service | 3004 | ✅ Working |
 | **📦 shared-types/** | NPM Package for Shared Types | - | ✅ Published |
 | **🏗️ infrastructure/** | Docker Compose (Redis + ES) | VPS | ✅ Running |
 
