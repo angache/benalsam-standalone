@@ -49,7 +49,13 @@
 - **Yeni Endpoint**: `DELETE /api/v1/search/listings/:id` - ES Service'de silme endpoint'i
 - **Durum**: ✅ Tam çalışıyor
 
-#### 7. **💾 Git Commit**
+#### 7. **🗑️ Bull Queue Kaldırıldı**
+- **Sebep**: RabbitMQ sistemi yeterli ve çalışıyor
+- **Kaldırılan**: `benalsam-queue-service/` klasörü
+- **Sonuç**: Sistem daha basit ve anlaşılır
+- **Durum**: ✅ Tamamlandı
+
+#### 8. **💾 Git Commit**
 - **Branch**: `feat/rabbitmq-event-system`
 - **Commit**: "feat: Fix RabbitMQ connection and add comprehensive monitoring"
 - **Durum**: ✅ Committed
