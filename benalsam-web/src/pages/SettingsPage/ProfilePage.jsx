@@ -39,6 +39,7 @@ import { Separator } from '../../components/ui/separator';
 import { useToast } from '../../components/ui/use-toast';
 import { useAuthStore } from '../../stores';
 import { supabase } from '../../lib/supabaseClient';
+import { uploadService } from '../../services/uploadService';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -187,29 +188,42 @@ const ProfilePage = () => {
 
     setIsUploadingAvatar(true);
     try {
-      // Dosya adını kullanıcı ID'si ile oluştur
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${currentUser.id}/profile.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      // Upload Service'e yükle
+      uploadService.setUserId(currentUser.id);
+      
+      // Check if Upload Service is available
+      const isAvailable = await uploadService.isAvailable();
+      let publicUrl;
+      
+      if (isAvailable) {
+        // Use Upload Service
+        const uploadedImage = await uploadService.uploadSingleImage(file, 'profile');
+        publicUrl = uploadedImage.url;
+      } else {
+        // Fallback to Supabase Storage
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${currentUser.id}/profile.${fileExt}`;
+        const filePath = `avatars/${fileName}`;
 
-      // Supabase storage'a yükle
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, {
-          contentType: file.type,
-          upsert: true,
-          cacheControl: '0',
-        });
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, file, {
+            contentType: file.type,
+            upsert: true,
+            cacheControl: '0',
+          });
 
-      if (uploadError) throw uploadError;
+        if (uploadError) throw uploadError;
 
-      // Dosyanın herkese açık URL'ini al
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      // CDN propagation için kısa bir bekleme
-      await new Promise(resolve => setTimeout(resolve, 1000));
+        const { data: { publicUrl: supabaseUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+        
+        publicUrl = supabaseUrl;
+        
+        // CDN propagation için kısa bir bekleme
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
 
       // Profil bilgisini güncelle
       const { error: profileError } = await supabase

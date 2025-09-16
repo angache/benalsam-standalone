@@ -100,6 +100,19 @@ export const apiService = {
     await apiClient.delete(`/listings/${id}`);
   },
 
+  async createListing(data: {
+    title: string;
+    description: string;
+    price: number;
+    category: string;
+    location?: string;
+    images: string[];
+    status?: string;
+  }): Promise<Listing> {
+    const response = await apiClient.post<ApiResponse<Listing>>('/listings', data);
+    return response.data.data;
+  },
+
   async updateListing(id: string, data: Partial<Listing>): Promise<Listing> {
     const response = await apiClient.put<ApiResponse<Listing>>(`/listings/${id}`, data);
     return response.data.data;

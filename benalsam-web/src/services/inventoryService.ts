@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from '@/components/ui/use-toast';
-import { processImagesForSupabase } from '@/services/imageService';
+import { processImagesForUploadService } from '@/services/uploadService';
 
 // Inventory item interface
 interface InventoryItem {
@@ -81,13 +81,11 @@ export const addInventoryItem = async (
   }
 
   try {
-    const { mainImageUrl, additionalImageUrls } = await processImagesForSupabase(
+    const { mainImageUrl, additionalImageUrls } = await processImagesForUploadService(
       itemData.images || [],
       itemData.mainImageIndex || 0,
-      'item_images',
       'inventory',
       currentUserId,
-      itemData.category || '',
       onProgress
     );
 
@@ -138,15 +136,12 @@ export const updateInventoryItem = async (
   onProgress?: (progress: number) => void
 ): Promise<InventoryItem | null> => {
   try {
-    const { mainImageUrl, additionalImageUrls } = await processImagesForSupabase(
+    const { mainImageUrl, additionalImageUrls } = await processImagesForUploadService(
       itemData.images || [],
       itemData.mainImageIndex || 0,
-      'item_images',
       'inventory',
       currentUserId,
-      itemData.category || '',
-      onProgress,
-      itemData.initialImageUrls
+      onProgress
     );
     
     const itemToUpdate = {

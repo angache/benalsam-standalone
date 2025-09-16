@@ -1,7 +1,8 @@
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from '@/components/ui/use-toast';
 import { addUserActivity } from '@/services/userActivityService';
-import { processImagesForSupabase } from '@/services/imageService';
+import { processImagesForUploadService } from '@/services/uploadService';
+import { createListingWithUploadService, updateListingWithUploadService } from './uploadServiceMutations';
 import { Listing } from '@/types';
 import { ListingStatus } from 'benalsam-shared-types';
 
@@ -80,21 +81,26 @@ export const createListing = async (
   currentUserId: string, 
   onProgress?: (progress: number) => void
 ): Promise<Listing | null> => {
-  if (!listingData || !currentUserId) {
-    toast({ title: "Hata", description: "İlan oluşturmak için eksik bilgi.", variant: "destructive" });
-    return null;
-  }
-
+  // Try Upload Service first, fallback to direct database creation
   try {
-    const { mainImageUrl, additionalImageUrls } = await processImagesForSupabase(
-      listingData.images,
-      listingData.mainImageIndex,
-      'item_images',
-      'listings',
-      currentUserId,
-      listingData.category,
-      onProgress
-    );
+    return await createListingWithUploadService(listingData, currentUserId, onProgress);
+  } catch (error) {
+    console.warn('⚠️ Upload Service failed, falling back to direct database creation:', error);
+    
+    // Fallback to original implementation
+    if (!listingData || !currentUserId) {
+      toast({ title: "Hata", description: "İlan oluşturmak için eksik bilgi.", variant: "destructive" });
+      return null;
+    }
+
+    try {
+      const { mainImageUrl, additionalImageUrls } = await processImagesForUploadService(
+        listingData.images,
+        listingData.mainImageIndex,
+        'listings',
+        currentUserId,
+        onProgress
+      );
 
     let expiresAt = null;
     if (listingData.duration && listingData.duration > 0) {
@@ -168,12 +174,19 @@ export const updateListing = async (
   updates: Partial<Listing>, 
   userId: string
 ): Promise<Listing | null> => {
-  if (!listingId || !updates || !userId) {
-    toast({ title: "Hata", description: "İlan güncellemek için eksik bilgi.", variant: "destructive" });
-    return null;
-  }
-
+  // Try Upload Service first, fallback to direct database update
   try {
+    return await updateListingWithUploadService(listingId, updates, userId);
+  } catch (error) {
+    console.warn('⚠️ Upload Service failed, falling back to direct database update:', error);
+    
+    // Fallback to original implementation
+    if (!listingId || !updates || !userId) {
+      toast({ title: "Hata", description: "İlan güncellemek için eksik bilgi.", variant: "destructive" });
+      return null;
+    }
+
+    try {
     const dbUpdates: any = {
       title: updates.title,
       description: updates.description,

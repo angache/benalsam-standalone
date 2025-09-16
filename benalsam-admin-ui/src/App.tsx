@@ -12,6 +12,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(module => ({ default: module.DashboardPage })));
 const ListingsPage = lazy(() => import('./pages/ListingsPage').then(module => ({ default: module.ListingsPage })));
 const ListingDetailPage = lazy(() => import('./pages/ListingDetailPage').then(module => ({ default: module.ListingDetailPage })));
+const CreateListingPage = lazy(() => import('./pages/CreateListingPage').then(module => ({ default: module.CreateListingPage })));
 const CategoriesPage = lazy(() => import('./pages/CategoriesPage').then(module => ({ default: module.CategoriesPage })));
 const CategoryDetailPage = lazy(() => import('./pages/CategoryDetailPage').then(module => ({ default: module.CategoryDetailPage })));
 const CategoryAttributesPage = lazy(() => import('./pages/CategoryAttributesPage').then(module => ({ default: module.CategoryAttributesPage })));
@@ -125,6 +126,20 @@ function App() {
                     <Layout>
                       <Suspense fallback={<PageLoadingSpinner />}>
                         <ListingsPage />
+                      </Suspense>
+                    </Layout>
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/listings/create"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <Layout>
+                      <Suspense fallback={<PageLoadingSpinner />}>
+                        <CreateListingPage />
                       </Suspense>
                     </Layout>
                   </ErrorBoundary>

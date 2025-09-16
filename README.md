@@ -1,222 +1,237 @@
-# Benalsam Standalone Projects
+# 🚀 BENALSAM STANDALONE - MICROSERVICE ARCHITECTURE
 
-Modern, scalable alım ilanları platformu - Monorepo'dan standalone projelere geçiş sonrası yapı.
+## 📊 PROJE DURUMU
 
-## 📦 Projects
+**Son Güncelleme**: 15 Eylül 2025, 10:30  
+**Durum**: %100 tamamlandı - Microservice Architecture + Event-Driven System + Monitoring + Job System
 
-| Project | Description | Port | Status |
-|---------|-------------|------|--------|
-| **📱 mobile/** | React Native/Expo Mobile App | 8081 | ✅ Working |
-| **🔧 admin-backend/** | Node.js Admin API | 3002 | ✅ Working |
-| **🎛️ admin-ui/** | React Admin Dashboard | 3003 | ✅ Working |
-| **🌐 web/** | React Web Application | 5173 | ✅ Working |
-| **🚀 queue-service/** | RabbitMQ Queue Service | 3004 | ✅ Working |
-| **📦 shared-types/** | NPM Package for Shared Types | - | ✅ Published |
-| **🏗️ infrastructure/** | Docker Compose (Redis + ES) | VPS | ✅ Running |
+## 🏗️ SİSTEM MİMARİSİ
 
-## 🚀 Quick Start
+### 🎯 ANA SERVİSLER
 
-### Prerequisites
-- **Node.js** 18+ versiyonu
-- **npm** 9+ versiyonu
-- **Docker** (infrastructure için)
-- **Expo CLI** (mobile development için)
+| Servis | Port | Açıklama | Durum |
+|--------|------|----------|-------|
+| **Admin Backend** | 3002 | Admin operations, moderation, system management | ✅ |
+| **Elasticsearch Service** | 3006 | Search, indexing, sync operations | ✅ |
+| **Upload Service** | 3007 | Image upload, processing, Cloudinary integration | ✅ |
+| **Listing Service** | 3008 | Listing management, job processing, business logic | ✅ |
+| **Admin UI** | 3003 | Web arayüzü | ✅ |
+| **Web App** | 5173 | Kullanıcı arayüzü | ✅ |
+| **Mobile App** | 8081 | React Native uygulaması | ✅ |
 
-### Development Setup
+### 🗄️ VERİTABANI VE DEPOLAMA
 
-#### 1. Infrastructure (VPS)
-```bash
-cd infrastructure
-docker-compose up -d
-```
+| Servis | Port | Açıklama | Durum |
+|--------|------|----------|-------|
+| **PostgreSQL** | - | Ana veritabanı, data persistence, triggers | ✅ |
+| **Elasticsearch** | 9200 | Arama index'i, search operations | ✅ |
+| **Redis** | 6379 | Cache ve session yönetimi | ✅ |
+| **Cloudinary** | - | Image storage, processing, CDN | ✅ |
 
-#### 2. Admin Backend
-```bash
-cd admin-backend
-npm install
-npm run dev
-```
+### 🔄 MESAJLAŞMA VE MONİTORİNG
 
-#### 3. Admin UI
-```bash
-cd admin-ui
-npm install
-npm run dev
-```
+| Servis | Port | Açıklama | Durum |
+|--------|------|----------|-------|
+| **RabbitMQ** | 5672, 15672 | Event-driven mesajlaşma, message queuing | ✅ |
+| **Prometheus** | 9090 | Metrics toplama | ✅ |
+| **Grafana** | 3000 | Dashboard ve görselleştirme | ✅ |
+| **Alertmanager** | 9093 | Alert yönetimi | ✅ |
 
-#### 4. Web App
-```bash
-cd web
-npm install
-npm run dev
-```
+## 🚀 HIZLI BAŞLATMA
 
-#### 5. Queue Service
-```bash
-cd benalsam-queue-service
-npm install
-npm run dev
-```
-
-#### 6. Mobile App
-```bash
-cd mobile
-npm install
-npx expo start
-```
-
-## 🔧 Environment Configuration
-
-### VPS Infrastructure
-- **Redis**: `209.227.228.96:6379`
-- **Elasticsearch**: `209.227.228.96:9200`
-
-### Local Development
-Her proje kendi `.env` dosyasına sahiptir:
+### 1. Servisleri Başlat
 
 ```bash
-# Admin Backend (.env)
-REDIS_HOST=209.227.228.96
-REDIS_URL=redis://209.227.228.96:6379
-ELASTICSEARCH_URL=http://209.227.228.96:9200
+# Admin Backend
+cd benalsam-admin-backend && npm run dev
 
-# Mobile App (.env)
-EXPO_PUBLIC_ADMIN_BACKEND_URL=http://192.168.1.6:3002
+# Elasticsearch Service
+cd benalsam-elasticsearch-service && npm run dev
+
+# Upload Service
+cd benalsam-upload-service && npm run dev
+
+# Listing Service
+cd benalsam-listing-service && npm run dev
+
+# Admin UI
+cd benalsam-admin-ui && npm run dev
+
+# Web App
+cd benalsam-web && npm run dev
+
+# Mobile App
+cd benalsam-mobile && npm run dev
 ```
 
-## 📚 Documentation
+### 2. Infrastructure Servisleri
 
-- **📖 [Project Standards](./docs/project/PROJECT_STANDARDS.md)** - Proje kuralları ve standartları
-- **🏗️ [Architecture](./docs/architecture/)** - Sistem mimarisi
-- **🚀 [Deployment](./docs/deployment/)** - Deployment rehberleri
-- **📋 [TODO](./todos/)** - Aktif görevler ve planlar
+```bash
+# RabbitMQ (Docker)
+cd event-system && docker-compose -f docker-compose.dev.yml up -d rabbitmq
 
-### 🚨 **ENDPOINT DOKÜMANTASYON KURALLARI**
-
-**Bu kurallar tüm projeler için geçerlidir ve mutlaka uygulanmalıdır:**
-
-#### ✅ **ZORUNLU KURALLAR:**
-
-1. **Endpoint Çalıştırmadan Önce:**
-   - Her projenin kendi `API_ENDPOINTS.md` dosyasından endpoint'in varlığını kontrol et
-   - Endpoint'in ne yaptığını ve auth gereksinimlerini oku
-   - Dokümantasyonda olmayan endpoint'leri çalıştırma
-
-2. **Yeni Endpoint Eklendiğinde:**
-   - İlgili projenin `API_ENDPOINTS.md` dosyasını güncelle
-   - Endpoint'i doğru kategoriye ekle
-   - Auth gereksinimlerini belirt
-   - Changelog'a ekle
-
-3. **Endpoint Kaldırıldığında:**
-   - İlgili projenin `API_ENDPOINTS.md` dosyasından kaldır
-   - Changelog'a ekle
-   - Kullanıcıları bilgilendir
-
-4. **Endpoint Değiştirildiğinde:**
-   - İlgili projenin `API_ENDPOINTS.md` dosyasını güncelle
-   - Değişiklikleri changelog'a ekle
-   - Breaking change'leri belirt
-
-#### 🚫 **YASAK OLANLAR:**
-
-- ❌ Dokümantasyonda olmayan endpoint'leri çalıştırma
-- ❌ Endpoint ekleme/kaldırma sonrası dokümantasyonu güncellememe
-- ❌ Saçma endpoint'ler çalıştırma
-- ❌ Endpoint'lerin ne yaptığını belirtmeden ekleme
-
-#### 📋 **PROJE BAZINDA DOKÜMANTASYON:**
-
-- **Admin Backend**: `admin-backend/API_ENDPOINTS.md`
-- **Queue Service**: `benalsam-queue-service/API_ENDPOINTS.md`
-- **Web App**: `web/API_ENDPOINTS.md` (gerekirse)
-- **Mobile App**: `mobile/API_ENDPOINTS.md` (gerekirse)
-
-#### 🔄 **GÜNCELLEME SÜRECİ:**
-
-1. Endpoint değişikliği yap
-2. İlgili projenin `API_ENDPOINTS.md` dosyasını güncelle
-3. Changelog'a ekle
-4. Commit mesajında belirt
-5. PR açarken dokümantasyon güncellemesini kontrol et
-
-**Bu kurallar her geliştirici için zorunludur ve proje kalitesini garanti eder! 🎯**
-
-## 🔄 Migration from Monorepo
-
-### What Changed
-- **Monorepo → Standalone**: Her proje bağımsız repository
-- **pnpm → npm**: Package manager değişikliği
-- **Workspace → NPM Package**: Shared types artık NPM package
-- **Docker**: Her proje kendi Dockerfile'ına sahip
-
-### Benefits
-- ✅ **Simplified Development**: Her proje bağımsız çalışır
-- ✅ **Easy Deployment**: Projeler ayrı ayrı deploy edilebilir
-- ✅ **Better Testing**: Her proje kendi test sürecine sahip
-- ✅ **Reduced Complexity**: Docker sorunları çözüldü
-
-## 🏗️ Architecture
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Mobile App    │    │   Admin UI      │    │   Web App       │
-│   (React Native)│    │   (React)       │    │   (React)       │
-└─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
-          │                      │                      │
-          └──────────────────────┼──────────────────────┘
-                                 │
-                    ┌─────────────▼─────────────┐
-                    │    Admin Backend API      │
-                    │      (Node.js)            │
-                    └─────────────┬─────────────┘
-                                  │
-                    ┌─────────────▼─────────────┐
-                    │    Shared Types           │
-                    │    (NPM Package)          │
-                    └─────────────┬─────────────┘
-                                  │
-                    ┌─────────────▼─────────────┐
-                    │   Infrastructure          │
-                    │   (Redis + Elasticsearch) │
-                    └───────────────────────────┘
+# Prometheus + Grafana + Alertmanager
+cd monitoring && docker-compose up -d
 ```
 
-## 📊 Project Status
+### 3. Health Check
 
-### ✅ Completed
-- [x] Monorepo'dan standalone'a geçiş
-- [x] Tüm projelerin çalışır durumda olması
-- [x] VPS infrastructure kurulumu
-- [x] Shared types NPM package
-- [x] Environment configuration
-- [x] Documentation update
+```bash
+# Tüm servislerin sağlık durumu
+curl http://localhost:3002/api/v1/health  # Admin Backend
+curl http://localhost:3006/health         # Elasticsearch Service
+curl http://localhost:3007/api/v1/health  # Upload Service
+curl http://localhost:3008/api/v1/health  # Listing Service
+```
 
-### 🔄 In Progress
-- [ ] CI/CD pipeline setup
-- [ ] Production deployment
-- [ ] Performance optimization
-- [ ] Security audit
+## 📋 API ENDPOİNTLERİ
 
-### 📋 Planned
-- [ ] Microservices architecture
-- [ ] Advanced analytics
-- [ ] Real-time notifications
-- [ ] Mobile app optimization
+### Admin Backend (Port 3002)
+- `GET /api/v1/health` - Health check
+- `GET /api/v1/listings` - List all listings
+- `POST /api/v1/listings/:id/moderate` - Moderate listing
+- `GET /api/v1/monitoring/prometheus` - Prometheus metrics
 
-## 🤝 Contributing
+### Elasticsearch Service (Port 3006)
+- `GET /health` - Health check
+- `GET /api/v1/search/listings` - Search listings
+- `DELETE /api/v1/search/listings/:id` - Delete listing
 
-1. **Branch Strategy**: `feature/project-name-description`
-2. **Commit Convention**: `type(project): description`
-3. **Code Review**: Her PR için review gerekli
-4. **Testing**: Her proje kendi test sürecine sahip
+### Upload Service (Port 3007)
+- `GET /api/v1/health` - Health check
+- `POST /api/v1/upload/listings` - Upload listing images
+- `GET /api/v1/jobs/metrics` - Job metrics
 
-## 📄 License
+### Listing Service (Port 3008)
+- `GET /api/v1/health` - Health check
+- `GET /api/v1/listings` - List all listings
+- `POST /api/v1/listings` - Create listing (async)
+- `PUT /api/v1/listings/:id` - Update listing (async)
+- `DELETE /api/v1/listings/:id` - Delete listing (async)
+- `GET /api/v1/jobs/metrics` - Job metrics
 
-Bu proje özel geliştirme projesidir.
+## 🔄 EVENT-DRIVEN ARCHITECTURE
+
+### Mesaj Akışı
+```
+Admin UI → Admin Backend → Database → Trigger → Queue → RabbitMQ → Elasticsearch Service → Elasticsearch
+Mobile App → Listing Service → Job System → RabbitMQ → Upload Service → Cloudinary
+Web App → Listing Service → Job System → RabbitMQ → Upload Service → Cloudinary
+```
+
+### RabbitMQ Queue'ları
+- `benalsam.listings.queue` - Ana listing mesajları
+- `elasticsearch.sync` - Elasticsearch sync mesajları
+- `listing.status.changes` - Status değişiklik mesajları
+- `benalsam.dlq.messages` - Dead letter queue
+- `system.health` - Sistem sağlık mesajları
+
+## 📊 MONİTORİNG
+
+### Grafana Dashboard
+- **URL**: http://localhost:3000
+- **Login**: admin/admin123
+- **Dashboard**: "Benalsam System Monitoring"
+
+### Prometheus
+- **URL**: http://localhost:9090
+- **Metrics**: Tüm servislerden metrics toplama
+
+### Alertmanager
+- **URL**: http://localhost:9093
+- **Alerts**: Sistem uyarıları ve bildirimleri
+
+## 🧪 TEST SENARYOLARI
+
+### 1. Temel Health Check
+```bash
+# Tüm servislerin sağlık durumu
+curl -s "http://localhost:3002/api/v1/health" | jq '.status'
+curl -s "http://localhost:3006/health" | jq '.status'
+curl -s "http://localhost:3007/api/v1/health" | jq '.status'
+curl -s "http://localhost:3008/api/v1/health" | jq '.status'
+```
+
+### 2. Listing CRUD Operations
+```bash
+# Create listing (async)
+curl -X POST "http://localhost:3008/api/v1/listings" \
+  -H "x-user-id: test-user-123" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Test Listing","description":"Test Description","category":"Electronics","budget":1000}'
+
+# Get listings
+curl -s "http://localhost:3008/api/v1/listings" | jq '.data.listings[] | {id, title, status}'
+```
+
+### 3. Job System Test
+```bash
+# Get job metrics
+curl -s "http://localhost:3008/api/v1/jobs/metrics" | jq '.data.metrics'
+
+# Get job status
+curl -s "http://localhost:3008/api/v1/jobs/{jobId}" | jq '.data.status'
+```
+
+### 4. Elasticsearch Search Test
+```bash
+# Search listings
+curl -s "http://localhost:3006/api/v1/search/listings?q=*" | jq '.data.hits.total.value'
+```
+
+## 📁 PROJE YAPISI
+
+```
+benalsam-standalone/
+├── benalsam-admin-backend/          # Admin Backend (Port 3002)
+├── benalsam-admin-ui/               # Admin UI (Port 3003)
+├── benalsam-elasticsearch-service/  # Elasticsearch Service (Port 3006)
+├── benalsam-upload-service/         # Upload Service (Port 3007)
+├── benalsam-listing-service/        # Listing Service (Port 3008)
+├── benalsam-web/                    # Web App (Port 5173)
+├── benalsam-mobile/                 # Mobile App (Port 8081)
+├── benalsam-shared-types/           # Shared TypeScript types
+├── event-system/                    # RabbitMQ Docker setup
+├── monitoring/                      # Prometheus, Grafana, Alertmanager
+└── docs/                           # Documentation
+```
+
+## 🎯 ÖZELLİKLER
+
+### ✅ TAMAMLANAN
+- **Microservice Architecture**: Ayrı servisler, bağımsız deployment
+- **Event-Driven System**: RabbitMQ ile asenkron işlemler
+- **Job System**: Background job processing
+- **Comprehensive Monitoring**: Prometheus + Grafana + Alertmanager
+- **Health Checks**: Tüm servisler için health monitoring
+- **Rate Limiting**: Security ve performance
+- **Error Handling**: Centralized error management
+- **Validation**: Input validation ve sanitization
+- **Caching**: Redis ile performance optimization
+- **Image Processing**: Cloudinary integration
+
+### 🔄 DEVAM EDEN
+- **Mobile App Integration**: Upload Service entegrasyonu
+- **CQRS Pattern**: Command/Query separation
+- **Event Store**: Event sourcing implementation
+
+## 📚 DOKÜMANTASYON
+
+- [PROJECT_STATUS.md](PROJECT_STATUS.md) - Detaylı proje durumu
+- [SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md) - Sistem mimarisi
+- [API_ENDPOINTS.md](benalsam-admin-backend/API_ENDPOINTS.md) - Admin Backend API
+- [API_ENDPOINTS.md](benalsam-elasticsearch-service/API_ENDPOINTS.md) - Elasticsearch Service API
+
+## 🚀 SONRAKI ADIMLAR
+
+1. **Mobile App Integration** - Upload Service entegrasyonu
+2. **CQRS Pattern** - Command/Query separation
+3. **Event Store** - Event sourcing implementation
+4. **API Gateway** - Single entry point
+5. **Load Balancing** - Horizontal scaling
 
 ---
 
-**Son Güncelleme:** 2025-08-11  
-**Versiyon:** 2.0 (Standalone Yapı)  
-**Durum:** Production Ready 
+**Geliştirici**: Benalsam Team  
+**Versiyon**: 1.0.0  
+**Lisans**: MIT

@@ -378,6 +378,151 @@ receivers:
 
 ---
 
-**Son Güncelleme**: 15 Eylül 2025, 09:30
-**Durum**: %100 tamamlandı - Event-Driven Architecture + Monitoring + RabbitMQ Sistemi tam çalışıyor
-**Sonraki Adım**: Sistem optimizasyonu ve performans iyileştirmeleri
+### 🚀 LİSTİNG SERVICE EKLENDİ (15 Eylül 2025, 10:30)
+
+#### 14. **📋 Ayrı Listing Service Oluşturuldu**
+- **Port**: 3008
+- **CRUD Operations**: Create, Read, Update, Delete
+- **Job System**: Async processing
+- **Database**: Supabase integration
+- **RabbitMQ**: Message queuing
+- **Redis**: Caching
+- **Health Checks**: Comprehensive monitoring
+- **Rate Limiting**: Security
+- **Validation**: Input validation
+- **Error Handling**: Centralized error management
+
+#### 15. **🔧 Listing Service Endpoints**
+- **Listings**:
+  - `GET /api/v1/listings` - List all listings
+  - `GET /api/v1/listings/:id` - Get single listing
+  - `POST /api/v1/listings` - Create listing (async)
+  - `PUT /api/v1/listings/:id` - Update listing (async)
+  - `DELETE /api/v1/listings/:id` - Delete listing (async)
+  - `POST /api/v1/listings/:id/moderate` - Moderate listing (async)
+- **Jobs**:
+  - `GET /api/v1/jobs/metrics` - Job metrics
+  - `GET /api/v1/jobs/:id` - Get job details
+  - `DELETE /api/v1/jobs/:id` - Cancel job
+  - `GET /api/v1/jobs/:id/status` - Get job status
+- **Health**:
+  - `GET /api/v1/health` - Basic health check
+  - `GET /api/v1/health/detailed` - Detailed health check
+  - `GET /api/v1/health/database` - Database health
+  - `GET /api/v1/health/redis` - Redis health
+  - `GET /api/v1/health/rabbitmq` - RabbitMQ health
+  - `GET /api/v1/health/jobs` - Job processor health
+
+#### 16. **⚙️ Upload Service Temizlendi**
+- **Kaldırılan**: Listing logic'i Upload Service'ten kaldırıldı
+- **Kalan**: Sadece image upload + processing
+- **Job System**: Sadece image jobs için
+- **Sonuç**: Daha temiz ve odaklanmış servis
+
+#### 17. **🏗️ Microservice Architecture**
+- **Admin Backend**: Port 3002 (CRUD + Admin operations)
+- **Elasticsearch Service**: Port 3006 (Search + Sync)
+- **Upload Service**: Port 3007 (Image upload + processing)
+- **Listing Service**: Port 3008 (Listing management + Job system)
+- **RabbitMQ**: Port 5672 (Message queuing)
+- **Redis**: Port 6379 (Caching)
+- **PostgreSQL**: Supabase (Database)
+
+### 🎯 MEVCUT SİSTEM MİMARİSİ
+
+#### **Event-Driven Architecture**
+```
+Admin UI → Admin Backend → Database → Trigger → Queue → RabbitMQ → Elasticsearch Service → Elasticsearch
+Mobile App → Listing Service → Job System → RabbitMQ → Upload Service → Cloudinary
+Web App → Listing Service → Job System → RabbitMQ → Upload Service → Cloudinary
+```
+
+#### **Service Responsibilities**
+- **Admin Backend**: Admin operations, moderation, system management
+- **Elasticsearch Service**: Search, indexing, sync operations
+- **Upload Service**: Image upload, processing, Cloudinary integration
+- **Listing Service**: Listing CRUD, job processing, business logic
+- **RabbitMQ**: Message queuing, event distribution
+- **Redis**: Caching, session management
+- **PostgreSQL**: Data persistence, triggers
+
+### 📊 SERVİS DURUMLARI
+
+#### Çalışan Servisler
+- ✅ **Admin Backend**: Port 3002 (healthy)
+- ✅ **Elasticsearch Service**: Port 3006 (healthy)
+- ✅ **Upload Service**: Port 3007 (healthy)
+- ✅ **Listing Service**: Port 3008 (healthy)
+- ✅ **RabbitMQ**: Port 5672, 15672 (connected)
+- ✅ **Elasticsearch**: Port 9200 (yellow cluster)
+- ✅ **Redis**: Port 6379 (connected)
+- ✅ **PostgreSQL**: Supabase (connected)
+
+#### Servis Başlatma Komutları
+```bash
+# Admin Backend
+cd benalsam-admin-backend && npm run dev
+
+# Elasticsearch Service
+cd benalsam-elasticsearch-service && npm run dev
+
+# Upload Service
+cd benalsam-upload-service && npm run dev
+
+# Listing Service
+cd benalsam-listing-service && npm run dev
+
+# RabbitMQ (Docker)
+cd event-system && docker-compose -f docker-compose.dev.yml up -d rabbitmq
+```
+
+### 🧪 YENİ TEST SENARYOLARI
+
+#### 1. Listing Service Health Check
+```bash
+curl -s "http://localhost:3008/api/v1/health" | jq '.status'
+curl -s "http://localhost:3008/api/v1/health/detailed" | jq '.status'
+```
+
+#### 2. Listing CRUD Operations
+```bash
+# Create listing (async)
+curl -X POST "http://localhost:3008/api/v1/listings" \
+  -H "x-user-id: test-user-123" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Test Listing","description":"Test Description","category":"Electronics","budget":1000}'
+
+# Get listings
+curl -s "http://localhost:3008/api/v1/listings" | jq '.data.listings[] | {id, title, status}'
+```
+
+#### 3. Job System Test
+```bash
+# Get job metrics
+curl -s "http://localhost:3008/api/v1/jobs/metrics" | jq '.data.metrics'
+
+# Get job status
+curl -s "http://localhost:3008/api/v1/jobs/{jobId}" | jq '.data.status'
+```
+
+### 🎯 HEDEFLER
+
+**Ana Hedef**: ✅ TAMAMLANDI - Microservice architecture kuruldu
+- ✅ Ayrı Listing Service oluşturuldu
+- ✅ Upload Service temizlendi
+- ✅ Job system entegrasyonu
+- ✅ Comprehensive health monitoring
+- ✅ Event-driven architecture
+
+**Başarı Kriteri**: ✅ TAMAMLANDI
+- ✅ Tüm servisler çalışıyor
+- ✅ CRUD operations async processing
+- ✅ Job system çalışıyor
+- ✅ Health monitoring aktif
+- ✅ Microservice separation tamamlandı
+
+---
+
+**Son Güncelleme**: 15 Eylül 2025, 10:30
+**Durum**: %100 tamamlandı - Microservice Architecture + Event-Driven System + Monitoring + Job System tam çalışıyor
+**Sonraki Adım**: Mobile App integration ve CQRS pattern implementation

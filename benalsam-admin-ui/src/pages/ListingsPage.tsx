@@ -439,6 +439,13 @@ export const ListingsPage: React.FC = () => {
         
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate('/listings/create')}
+          >
+            Yeni İlan
+          </Button>
+          <Button
             variant="outlined"
             startIcon={<Download />}
             onClick={() => alert('Export özelliği eklenecek')}

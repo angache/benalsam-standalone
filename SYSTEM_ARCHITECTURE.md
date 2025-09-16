@@ -3,19 +3,22 @@
 ## 📊 MEVCUT SİSTEM BİLEŞENLERİ
 
 ### 1. 🎯 ANA UYGULAMALAR
-- **Admin Backend** (Port 3002) - İlan yönetimi, moderasyon
+- **Admin Backend** (Port 3002) - Admin operations, moderation, system management
 - **Admin UI** (Port 3003) - Web arayüzü
 - **Mobile App** (Port 8081) - React Native uygulaması
 - **Web App** (Port 5173) - Kullanıcı arayüzü
-- **Elasticsearch Service** (Port 3006) - Arama ve sync
+- **Elasticsearch Service** (Port 3006) - Search, indexing, sync operations
+- **Upload Service** (Port 3007) - Image upload, processing, Cloudinary integration
+- **Listing Service** (Port 3008) - Listing management, job processing, business logic
 
 ### 2. 🗄️ VERİTABANI VE DEPOLAMA
-- **PostgreSQL** - Ana veritabanı
-- **Elasticsearch** (Port 9200) - Arama index'i
-- **Redis** - Cache ve session yönetimi
+- **PostgreSQL** (Supabase) - Ana veritabanı, data persistence, triggers
+- **Elasticsearch** (Port 9200) - Arama index'i, search operations
+- **Redis** (Port 6379) - Cache ve session yönetimi
+- **Cloudinary** - Image storage, processing, CDN
 
 ### 3. 🔄 MESAJLAŞMA VE KÜMELENME
-- **RabbitMQ** (Port 5672, 15672) - Event-driven mesajlaşma
+- **RabbitMQ** (Port 5672, 15672) - Event-driven mesajlaşma, message queuing, event distribution
 - **Consul** - Service discovery ve configuration
 
 ### 4. 📈 MONİTORİNG VE OBSERVABILITY
@@ -235,42 +238,54 @@ graph TB
     subgraph "Application Layer"
         D[Admin Backend]
         E[Elasticsearch Service]
+        F[Upload Service]
+        G[Listing Service]
     end
     
     subgraph "Data Layer"
-        F[PostgreSQL]
-        G[Elasticsearch]
-        H[Redis]
+        H[PostgreSQL]
+        I[Elasticsearch]
+        J[Redis]
+        K[Cloudinary]
     end
     
     subgraph "Message Layer"
-        I[RabbitMQ]
+        L[RabbitMQ]
     end
     
     subgraph "Monitoring Layer"
-        J[Prometheus]
-        K[Grafana]
-        L[Alertmanager]
+        M[Prometheus]
+        N[Grafana]
+        O[Alertmanager]
     end
     
     subgraph "Service Management"
-        M[Consul]
+        P[Consul]
     end
     
     A --> D
-    B --> D
-    C --> D
-    D --> F
-    D --> I
-    I --> E
-    E --> G
+    B --> G
+    C --> G
+    G --> L
+    L --> F
+    L --> E
     D --> H
+    D --> L
+    E --> I
+    F --> K
+    G --> H
+    G --> J
     D --> J
-    E --> J
-    J --> K
-    J --> L
-    M --> D
-    M --> E
+    D --> M
+    E --> M
+    F --> M
+    G --> M
+    M --> N
+    M --> O
+    P --> D
+    P --> E
+    P --> F
+    P --> G
 ```
 
 ---
@@ -284,6 +299,12 @@ cd benalsam-admin-backend && npm run dev
 
 # Elasticsearch Service
 cd benalsam-elasticsearch-service && npm run dev
+
+# Upload Service
+cd benalsam-upload-service && npm run dev
+
+# Listing Service
+cd benalsam-listing-service && npm run dev
 
 # Admin UI
 cd benalsam-admin-ui && npm run dev
@@ -319,6 +340,12 @@ curl http://localhost:3002/api/v1/health
 # Elasticsearch Service
 curl http://localhost:3006/health
 
+# Upload Service
+curl http://localhost:3007/api/v1/health
+
+# Listing Service
+curl http://localhost:3008/api/v1/health
+
 # RabbitMQ
 curl http://localhost:15672/api/overview
 
@@ -331,6 +358,8 @@ curl http://localhost:9090/api/v1/query?query=up
 # Prometheus Metrics
 curl http://localhost:3002/metrics
 curl http://localhost:3006/metrics
+curl http://localhost:3007/metrics
+curl http://localhost:3008/metrics
 
 # Grafana Dashboard
 http://localhost:3000
@@ -483,6 +512,6 @@ receivers:
 
 ---
 
-**Son Güncelleme**: 15 Eylül 2025, 09:30
+**Son Güncelleme**: 15 Eylül 2025, 10:30
 **Dosya**: SYSTEM_ARCHITECTURE.md
-**Durum**: Tam sistem mimarisi dokümantasyonu + Monitoring + RabbitMQ test sonuçları
+**Durum**: Tam sistem mimarisi dokümantasyonu + Monitoring + RabbitMQ + Microservice Architecture + Listing Service
