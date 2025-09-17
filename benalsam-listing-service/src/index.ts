@@ -35,7 +35,11 @@ const API_VERSION = process.env['API_VERSION'] || 'v1';
 app.use(helmet());
 app.use(compression());
 app.use(cors({
-  origin: process.env['CORS_ORIGIN']?.split(',') || ['http://localhost:3000'],
+  origin: process.env['CORS_ORIGIN']?.split(',') || [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:3001'
+  ],
   credentials: true
 }));
 

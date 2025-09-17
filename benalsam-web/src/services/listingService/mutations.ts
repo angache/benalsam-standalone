@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { toast } from '@/components/ui/use-toast';
 import { addUserActivity } from '@/services/userActivityService';
 import { listingServiceClient, pollJobStatus } from '@/services/listingServiceClient';
+import { uploadImagesWithProgress } from '@/services/uploadServiceClient';
 import { listingServiceCircuitBreaker } from '@/utils/circuitBreaker';
 import { handleListingServiceError, getUserFriendlyMessage } from '@/utils/errorHandler';
 import { Listing } from '@/types';
@@ -95,7 +96,130 @@ export const createListing = async (
   try {
     console.log('🚀 Creating listing via Listing Service...');
     
-    // Prepare data for Listing Service
+    // Step 1: Upload images to Upload Service
+    let uploadedImages: string[] = [];
+    if (listingData.images && listingData.images.length > 0) {
+      console.log('📤 Uploading images to Upload Service...', { count: listingData.images.length });
+      
+      try {
+        // Debug: Check what's in listingData.images
+        console.log('🔍 Debug - listingData.images:', listingData.images);
+        console.log('🔍 Debug - listingData.images length:', listingData.images.length);
+        console.log('🔍 Debug - listingData.images types:', listingData.images.map((img: any, index: number) => ({
+          index,
+          type: typeof img,
+          isFile: img instanceof File,
+          constructor: img?.constructor?.name,
+          hasFile: !!img?.file,
+          hasUri: !!img?.uri,
+          hasPreview: !!img?.preview,
+          keys: Object.keys(img || {}),
+          fileType: typeof img?.file,
+          fileConstructor: img?.file?.constructor?.name,
+          fileIsFile: img?.file instanceof File,
+          fileKeys: img?.file ? Object.keys(img.file) : 'no file',
+          value: img
+        })));
+        
+        // Check if images are in the old format (with .file property)
+        const hasFileProperty = listingData.images.some((img: any) => img && img.file);
+        console.log('🔍 Debug - hasFileProperty:', hasFileProperty);
+        
+        // listingData.images should contain File objects, not URLs
+        // Filter out any non-File objects and extract File objects
+        const imageFiles: File[] = listingData.images
+          .filter((img: any) => img instanceof File)
+          .map((file: File) => file);
+        
+        console.log('🔍 Debug - filtered File objects:', imageFiles.length);
+        
+        // If no File objects found, check if images have .file property
+        if (imageFiles.length === 0 && hasFileProperty) {
+          console.log('🔍 Debug - Trying to extract files from .file property');
+          
+          // Debug: Check what's in .file property
+          listingData.images.forEach((img: any, index: number) => {
+            if (img && img.file) {
+              console.log(`🔍 Debug - img[${index}].file:`, {
+                type: typeof img.file,
+                constructor: img.file?.constructor?.name,
+                isFile: img.file instanceof File,
+                keys: Object.keys(img.file || {}),
+                value: img.file
+              });
+            }
+          });
+          
+          // Eski sistem gibi: img.file'ı direkt kullan (instanceof File kontrolü yapma)
+          const filesFromProperty = listingData.images
+            .filter((img: any) => img && img.file)
+            .map((img: any) => {
+              // Eğer Blob ise File'a çevir
+              if (img.file instanceof Blob && !(img.file instanceof File)) {
+                const file = new File([img.file], img.name || `image_${Date.now()}.jpg`, {
+                  type: img.file.type || 'image/jpeg'
+                });
+                console.log('🔧 Converted Blob to File:', { 
+                  originalType: img.file.type, 
+                  newType: file.type,
+                  newName: file.name 
+                });
+                return file;
+              }
+              return img.file;
+            });
+          
+          console.log('🔍 Debug - files from .file property:', filesFromProperty.length);
+          
+          if (filesFromProperty.length > 0) {
+            const uploadResult = await uploadImagesWithProgress(
+              filesFromProperty,
+              currentUserId,
+              (progress) => {
+                if (onProgress) {
+                  onProgress(Math.floor(progress * 0.5));
+                }
+              }
+            );
+            
+            uploadedImages = uploadResult.images.map(img => img.url);
+            console.log('✅ Images uploaded successfully from .file property:', uploadedImages);
+          } else {
+            console.warn('No valid File objects found in .file property, using original URLs');
+            uploadedImages = listingData.images.filter((img: any) => typeof img === 'string');
+          }
+        } else if (imageFiles.length === 0) {
+          console.warn('No valid File objects found in images, using original URLs');
+          uploadedImages = listingData.images.filter((img: any) => typeof img === 'string');
+        } else {
+          const uploadResult = await uploadImagesWithProgress(
+            imageFiles,
+            currentUserId,
+            (progress) => {
+              // Update progress for image upload (0-50%)
+              if (onProgress) {
+                onProgress(Math.floor(progress * 0.5));
+              }
+            }
+          );
+          
+          uploadedImages = uploadResult.images.map(img => img.url);
+          console.log('✅ Images uploaded successfully:', uploadedImages);
+        }
+      } catch (error) {
+        console.error('❌ Image upload failed, using original URLs:', error);
+        console.error('❌ Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          error: error
+        });
+        // Fallback: use original image URLs
+        uploadedImages = listingData.images.filter((img: any) => typeof img === 'string');
+        console.log('🔄 Fallback - using original URLs:', uploadedImages);
+      }
+    }
+    
+    // Step 2: Prepare data for Listing Service
     const listingServiceData = {
       title: listingData.title,
       description: listingData.description,
@@ -104,40 +228,47 @@ export const createListing = async (
       location: listingData.location,
       urgency: listingData.urgency || 'medium',
       acceptTerms: listingData.accept_terms || true,
-      images: listingData.images,
+      images: uploadedImages, // Use uploaded image URLs
       mainImageIndex: listingData.mainImageIndex,
       duration: listingData.duration,
       // Add other fields as needed
     };
 
     // Use Circuit Breaker to call Listing Service
-    const { jobId } = await listingServiceCircuitBreaker.execute(
+    const { data: { jobId } } = await listingServiceCircuitBreaker.execute(
       () => listingServiceClient.createListing(listingServiceData, currentUserId)
     );
     
     console.log('📤 Job created with ID:', jobId);
 
-    // Poll job status
-    const result = await pollJobStatus(
-      jobId,
-      currentUserId,
-      onProgress,
-      (completedResult) => {
-        console.log('✅ Listing created successfully:', completedResult);
-        toast({ 
-          title: "İlan Oluşturuldu! 🎉", 
-          description: "İlanınız başarıyla yayınlandı." 
-        });
-      },
-      (error) => {
-        console.error('❌ Listing creation failed:', error);
-        toast({ 
-          title: "İlan Oluşturulamadı", 
-          description: error, 
-          variant: "destructive" 
-        });
-      }
-    );
+          // Step 3: Poll job status for listing creation
+          console.log('🔄 Starting job status polling for jobId:', jobId);
+          const result = await pollJobStatus(
+            jobId,
+            currentUserId,
+            (progress) => {
+              console.log('📊 Job progress:', progress);
+              // Update progress for listing creation (50-100%)
+              if (onProgress) {
+                onProgress(50 + Math.floor(progress * 0.5));
+              }
+            },
+            (completedResult) => {
+              console.log('✅ Listing created successfully:', completedResult);
+              toast({
+                title: "İlan Oluşturuldu! 🎉",
+                description: "İlanınız başarıyla yayınlandı."
+              });
+            },
+            (error) => {
+              console.error('❌ Listing creation failed:', error);
+              toast({
+                title: "İlan Oluşturulamadı",
+                description: error,
+                variant: "destructive"
+              });
+            }
+          );
 
     // Add user activity
     await addUserActivity(

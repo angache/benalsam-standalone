@@ -6,6 +6,7 @@ class ListingServiceClient {
 
   constructor() {
     this.baseUrl = import.meta.env.VITE_LISTING_SERVICE_URL || 'http://localhost:3008/api/v1';
+    console.log('🔗 Listing Service URL:', this.baseUrl);
   }
 
   private async makeRequest<T>(
@@ -99,7 +100,7 @@ export const pollJobStatus = async (
   onProgress?: (progress: number) => void,
   onComplete?: (result: any) => void,
   onError?: (error: string) => void,
-  maxAttempts: number = 30,
+  maxAttempts: number = 60,
   intervalMs: number = 2000
 ): Promise<any> => {
   let attempts = 0;
@@ -108,9 +109,15 @@ export const pollJobStatus = async (
     attempts++;
     
     try {
-      const status = await listingServiceClient.getJobStatus(jobId, userId);
+      const response = await listingServiceClient.getJobStatus(jobId, userId);
       
-      if (onProgress) {
+      console.log('🔍 Job status attempt:', attempts);
+      console.log('🔍 Job status response:', JSON.stringify(response, null, 2));
+      
+      // Extract data from response
+      const status = response.data || response;
+      
+      if (onProgress && status.progress !== undefined) {
         onProgress(status.progress);
       }
 

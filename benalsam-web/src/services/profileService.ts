@@ -152,6 +152,8 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
   }
 
   try {
+    console.log('🔍 Fetching profile for userId:', userId);
+    
     // Add timeout to prevent hanging requests
     const timeoutPromise = new Promise((_, reject) => 
       setTimeout(() => reject(new Error('Profile fetch timeout')), 15000)
@@ -163,7 +165,9 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
       .eq('id', userId)
       .single();
 
+    console.log('🔍 Profile fetch promise created, racing with timeout...');
     const { data, error, status } = await Promise.race([fetchPromise, timeoutPromise]) as any;
+    console.log('🔍 Profile fetch result:', { data: !!data, error: !!error, status });
 
     if (error && status !== 406) { 
       console.error('Error in fetchUserProfile:', { message: error.message, details: error.details, hint: error.hint, code: error.code });
@@ -183,6 +187,11 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
     return data as Profile;
   } catch (error) {
     console.error('Error in fetchUserProfile:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      error: error
+    });
     toast({ title: "Beklenmedik Profil Hatası", description: "Profil yüklenirken beklenmedik bir sorun oluştu.", variant: "destructive" });
     return null;
   }

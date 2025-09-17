@@ -44,6 +44,51 @@ export class CloudinaryService {
   ): Promise<UploadResult> {
     try {
       logger.info(`📤 Starting Cloudinary upload for user: ${userId}, type: ${type}`);
+      logger.info(`📤 File details:`, {
+        mimetype: file.mimetype,
+        size: file.size,
+        hasPath: !!file.path,
+        hasBuffer: !!file.buffer,
+        originalname: file.originalname
+      });
+
+      // Validate file
+      if (!file.mimetype.startsWith('image/')) {
+        throw new Error('File is not an image');
+      }
+      
+      if (file.size < 1000) { // Less than 1KB
+        throw new Error('File is too small to be a valid image');
+      }
+      
+      if (file.size > 10 * 1024 * 1024) { // More than 10MB
+        throw new Error('File is too large');
+      }
+
+      // Check if file path exists and is readable
+      if (file.path) {
+        const fs = require('fs');
+        try {
+          const stats = fs.statSync(file.path);
+          if (stats.size !== file.size) {
+            throw new Error('File size mismatch');
+          }
+          // Read first few bytes to check if it's a valid image
+          const buffer = fs.readFileSync(file.path, { start: 0, end: 10 });
+          const header = buffer.toString('hex');
+          console.log('File header (first 10 bytes):', header);
+          
+          // Check for common image file signatures
+          if (!header.startsWith('ffd8') && // JPEG
+              !header.startsWith('89504e47') && // PNG
+              !header.startsWith('47494638') && // GIF
+              !header.startsWith('52494646')) { // WEBP
+            throw new Error('File does not appear to be a valid image');
+          }
+        } catch (error) {
+          throw new Error(`File validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
 
       // Generate folder path
       const timestamp = Date.now();
@@ -53,7 +98,6 @@ export class CloudinaryService {
       // Upload options based on type
       let uploadOptions: any = {
         folder: folderPath,
-        allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
         transformation: [
           { width: 800, height: 600, crop: 'fill' },
           { quality: 'auto', format: 'auto' }
