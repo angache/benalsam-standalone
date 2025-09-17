@@ -14,17 +14,17 @@
 
 **Süre:** 4 saat
 
-### **1.2 Listing Service'e Görsel Yükleme Ekle**
-- [ ] `listingService.ts`'e görsel yükleme fonksiyonu ekle
-- [ ] Upload Service entegrasyonu
-- [ ] Görsel validasyonu
-- [ ] Error handling
+### **1.2 Web'de Upload Service Entegrasyonu**
+- [ ] Web'de Upload Service client oluştur
+- [ ] Görsel yükleme sonrası Listing Service'e URL gönderme
+- [ ] Error handling ve fallback
+- [ ] Progress tracking
 
 **Dosyalar:**
-- `benalsam-listing-service/src/services/listingService.ts`
-- `benalsam-listing-service/src/services/imageService.ts` (yeni)
+- `benalsam-web/src/services/uploadServiceClient.ts` (yeni)
+- `benalsam-web/src/services/listingService/mutations.ts`
 
-**Süre:** 8 saat
+**Süre:** 6 saat
 
 ### **1.3 Error Handling Standardizasyonu**
 - [ ] Unified error response format
@@ -199,12 +199,12 @@
 
 **Süre:** 4 saat
 
-## **Toplam Süre: 12-15 gün**
+## **Toplam Süre: 10-13 gün**
 
 ## **Başlangıç Adımları:**
 
 1. **Bugün:** Fallback stratejisini düzelt (4 saat)
-2. **Yarın:** Listing Service'e görsel yükleme ekle (8 saat)
+2. **Yarın:** Web'de Upload Service entegrasyonu (6 saat)
 3. **3. Gün:** Error handling standardizasyonu (4 saat)
 4. **4-5. Gün:** Monitoring & Observability (18 saat)
 5. **6-7. Gün:** Security & Validation (10 saat)
@@ -215,7 +215,7 @@
 ## **Başarı Kriterleri:**
 
 - [ ] Tek fallback sistemi
-- [ ] Görsel yükleme Listing Service'te
+- [ ] Web'de Upload Service entegrasyonu
 - [ ] %90+ test coverage
 - [ ] <500ms response time
 - [ ] 99.9% uptime
@@ -224,7 +224,7 @@
 
 ## **Riskler:**
 
-- **Yüksek:** Görsel yükleme entegrasyonu
+- **Yüksek:** Web'de Upload Service entegrasyonu
 - **Orta:** Distributed tracing setup
 - **Düşük:** Documentation updates
 
