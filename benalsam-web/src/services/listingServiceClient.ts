@@ -111,9 +111,6 @@ export const pollJobStatus = async (
     try {
       const response = await listingServiceClient.getJobStatus(jobId, userId);
       
-      console.log('🔍 Job status attempt:', attempts);
-      console.log('🔍 Job status response:', JSON.stringify(response, null, 2));
-      
       // Extract data from response
       const status = response.data || response;
       
