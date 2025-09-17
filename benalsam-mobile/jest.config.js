@@ -1,15 +1,16 @@
 module.exports = {
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
   setupFiles: ['<rootDir>/src/test/jest-setup.js'],
   transformIgnorePatterns: [
-    'node_modules/(?!(@react-native-async-storage|expo-secure-store)/)',
+    'node_modules/(?!(react-native|@react-native|@react-navigation|@testing-library|expo|@expo|react-native-reanimated|react-native-screens|react-native-safe-area-context|@react-native-async-storage|expo-secure-store|expo-splash-screen|expo-font|expo-clipboard|expo-linear-gradient|lucide-react-native)/)',
   ],
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {
       presets: [
         ['@babel/preset-env', { targets: { node: 'current' } }],
-        '@babel/preset-typescript'
+        '@babel/preset-typescript',
+        '@babel/preset-react'
       ]
     }]
   },

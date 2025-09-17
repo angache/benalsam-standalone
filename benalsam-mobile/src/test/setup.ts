@@ -64,6 +64,45 @@ jest.mock('lucide-react-native', () => {
   });
 });
 
+// Mock Supabase client
+jest.mock('../services/supabaseClient', () => ({
+  supabase: {
+    auth: {
+      getSession: jest.fn(() => Promise.resolve({ data: { session: null }, error: null })),
+      signInWithPassword: jest.fn(() => Promise.resolve({ data: { user: null }, error: null })),
+      signUp: jest.fn(() => Promise.resolve({ data: { user: null }, error: null })),
+      signOut: jest.fn(() => Promise.resolve({ error: null })),
+    },
+    from: jest.fn(() => ({
+      select: jest.fn(() => ({
+        eq: jest.fn(() => ({
+          single: jest.fn(() => Promise.resolve({ data: null, error: null })),
+          order: jest.fn(() => ({
+            limit: jest.fn(() => Promise.resolve({ data: [], error: null }))
+          }))
+        })),
+        order: jest.fn(() => ({
+          limit: jest.fn(() => Promise.resolve({ data: [], error: null }))
+        }))
+      })),
+      insert: jest.fn(() => Promise.resolve({ data: null, error: null })),
+      update: jest.fn(() => ({
+        eq: jest.fn(() => Promise.resolve({ data: null, error: null }))
+      })),
+      delete: jest.fn(() => ({
+        eq: jest.fn(() => Promise.resolve({ data: null, error: null }))
+      }))
+    })),
+    storage: {
+      from: jest.fn(() => ({
+        upload: jest.fn(() => Promise.resolve({ data: { path: 'test.jpg' }, error: null })),
+        getPublicUrl: jest.fn(() => ({ data: { publicUrl: 'https://test.com/test.jpg' } })),
+        remove: jest.fn(() => Promise.resolve({ data: null, error: null }))
+      }))
+    }
+  }
+}));
+
 // Mock linear gradient
 jest.mock('expo-linear-gradient', () => {
   const React = require('react');
