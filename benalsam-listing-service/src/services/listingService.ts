@@ -8,7 +8,7 @@
 
 import { supabase } from '../config/database';
 import { logger } from '../config/logger';
-import { Listing, ListingStatusType } from 'benalsam-shared-types';
+import { Listing, ListingStatusType, ListingStatus } from 'benalsam-shared-types';
 
 export interface ListingFilters {
   page: number;
@@ -89,9 +89,8 @@ export class ListingService {
           *,
           profiles!listings_user_id_fkey (
             id,
-            full_name,
-            avatar_url,
-            email
+            name,
+            avatar_url
           )
         `);
 
@@ -164,9 +163,8 @@ export class ListingService {
           *,
           profiles!listings_user_id_fkey (
             id,
-            full_name,
-            avatar_url,
-            email
+            name,
+            avatar_url
           )
         `)
         .eq('id', id);
@@ -226,7 +224,7 @@ export class ListingService {
         geolocation: listingData.geolocation,
         condition: listingData.condition || [],
         attributes: listingData.attributes || {},
-        status: 'PENDING' as ListingStatusType,
+        status: ListingStatus.PENDING_APPROVAL,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -238,9 +236,8 @@ export class ListingService {
           *,
           profiles!listings_user_id_fkey (
             id,
-            full_name,
-            avatar_url,
-            email
+            name,
+            avatar_url
           )
         `)
         .single();
@@ -286,9 +283,8 @@ export class ListingService {
           *,
           profiles!listings_user_id_fkey (
             id,
-            full_name,
-            avatar_url,
-            email
+            name,
+            avatar_url
           )
         `)
         .single();
@@ -379,9 +375,8 @@ export class ListingService {
           *,
           profiles!listings_user_id_fkey (
             id,
-            full_name,
-            avatar_url,
-            email
+            name,
+            avatar_url
           )
         `)
         .single();

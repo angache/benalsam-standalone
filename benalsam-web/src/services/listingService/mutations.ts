@@ -3,6 +3,7 @@ import { toast } from '@/components/ui/use-toast';
 import { addUserActivity } from '@/services/userActivityService';
 import { processImagesForUploadService } from '@/services/uploadService';
 import { createListingWithUploadService, updateListingWithUploadService } from './uploadServiceMutations';
+import { listingServiceClient, pollJobStatus } from '@/services/listingServiceClient';
 import { Listing } from '@/types';
 import { ListingStatus } from 'benalsam-shared-types';
 
@@ -81,13 +82,67 @@ export const createListing = async (
   currentUserId: string, 
   onProgress?: (progress: number) => void
 ): Promise<Listing | null> => {
-  // Try Upload Service first, fallback to direct database creation
+  // Try Listing Service first (new microservice approach)
   try {
-    return await createListingWithUploadService(listingData, currentUserId, onProgress);
-  } catch (error) {
-    console.warn('⚠️ Upload Service failed, falling back to direct database creation:', error);
+    console.log('🚀 Creating listing via Listing Service...');
     
-    // Fallback to original implementation
+    // Prepare data for Listing Service
+    const listingServiceData = {
+      title: listingData.title,
+      description: listingData.description,
+      category: listingData.category,
+      budget: listingData.budget,
+      location: listingData.location,
+      urgency: listingData.urgency || 'medium',
+      acceptTerms: listingData.accept_terms || true,
+      // Add other fields as needed
+    };
+
+    // Create job via Listing Service
+    const { jobId } = await listingServiceClient.createListing(listingServiceData, currentUserId);
+    console.log('📤 Job created with ID:', jobId);
+
+    // Poll job status
+    const result = await pollJobStatus(
+      jobId,
+      currentUserId,
+      onProgress,
+      (completedResult) => {
+        console.log('✅ Listing created successfully:', completedResult);
+        toast({ 
+          title: "İlan Oluşturuldu! 🎉", 
+          description: "İlanınız başarıyla yayınlandı." 
+        });
+      },
+      (error) => {
+        console.error('❌ Listing creation failed:', error);
+        toast({ 
+          title: "İlan Oluşturulamadı", 
+          description: error, 
+          variant: "destructive" 
+        });
+      }
+    );
+
+    // Add user activity
+    await addUserActivity(
+      currentUserId,
+      'listing_created',
+      'Yeni ilan oluşturuldu',
+      `"${listingData.title}" ilanı oluşturuldu`
+    );
+
+    return result;
+  } catch (error) {
+    console.warn('⚠️ Listing Service failed, falling back to Upload Service:', error);
+    
+    // Fallback to Upload Service
+    try {
+      return await createListingWithUploadService(listingData, currentUserId, onProgress);
+    } catch (uploadError) {
+      console.warn('⚠️ Upload Service failed, falling back to direct database creation:', uploadError);
+    
+      // Fallback to original implementation
     if (!listingData || !currentUserId) {
       toast({ title: "Hata", description: "İlan oluşturmak için eksik bilgi.", variant: "destructive" });
       return null;
@@ -162,10 +217,12 @@ export const createListing = async (
     );
 
     return data;
-  } catch (error) {
-    console.error('Error in createListing:', error);
-    toast({ title: "Beklenmedik Hata", description: "İlan oluşturulurken bir sorun oluştu.", variant: "destructive" });
-    return null;
+    } catch (error) {
+      console.error('Error in createListing:', error);
+      toast({ title: "Beklenmedik Hata", description: "İlan oluşturulurken bir sorun oluştu.", variant: "destructive" });
+      return null;
+    }
+    }
   }
 };
 
@@ -235,10 +292,11 @@ export const updateListing = async (
     );
 
     return data;
-  } catch (error) {
-    console.error('Error in updateListing:', error);
-    toast({ title: "Beklenmedik Hata", description: "İlan güncellenirken bir sorun oluştu.", variant: "destructive" });
-    return null;
+    } catch (error) {
+      console.error('Error in updateListing:', error);
+      toast({ title: "Beklenmedik Hata", description: "İlan güncellenirken bir sorun oluştu.", variant: "destructive" });
+      return null;
+    }
   }
 };
 
