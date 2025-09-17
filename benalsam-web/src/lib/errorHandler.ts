@@ -50,11 +50,20 @@ export class ErrorHandler {
    * @deprecated Use errorHandler.handleApiError instead
    */
   handleApiError(error: ApiError | unknown, context?: string): void {
-    // Delegate to unified error handler
-    errorHandler.handleApiError(error, { 
-      component: context || 'unknown',
-      action: 'api_call'
-    });
+    // Direct implementation to avoid circular dependency
+    const message = this.formatErrorMessage(error, context);
+    
+    if (this.options.showToast) {
+      toast({
+        title: "API Hatası",
+        description: message,
+        variant: "destructive",
+      });
+    }
+
+    if (this.options.logToConsole) {
+      console.error(`🔴 API Error${context ? ` (${context})` : ''}:`, error);
+    }
   }
 
   /**

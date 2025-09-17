@@ -1,6 +1,6 @@
 import cacheManager from '../cacheManager';
 import memoryCacheService from '../memoryCacheService';
-import cacheService from '../cacheService';
+import { cacheService } from '../cacheService';
 import logger from '../../config/logger';
 
 // Mock dependencies

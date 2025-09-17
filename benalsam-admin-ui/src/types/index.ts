@@ -31,7 +31,7 @@ export interface User {
   updatedAt: string;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   message?: string;
@@ -57,7 +57,7 @@ export interface AnalyticsEvent {
   id: string;
   type: string;
   userId?: string;
-  data: any;
+  data: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -68,16 +68,16 @@ export type AnalyticsEventType = 'PAGE_VIEW' | 'CLICK' | 'SEARCH' | 'LOGIN' | 'L
 // ===========================
 
 // UI Component Props
-export interface TableColumn<T = any> {
+export interface TableColumn<T = Record<string, unknown>> {
   key: keyof T;
   label: string;
   sortable?: boolean;
-  render?: (value: any, record: T) => React.ReactNode;
+  render?: (value: unknown, record: T) => React.ReactNode;
   width?: string | number;
   align?: 'left' | 'center' | 'right';
 }
 
-export interface TableProps<T = any> {
+export interface TableProps<T = Record<string, unknown>> {
   data: T[];
   columns: TableColumn<T>[];
   loading?: boolean;
@@ -107,8 +107,8 @@ export interface FormField {
 
 export interface FormConfig {
   fields: FormField[];
-  onSubmit: (values: any) => void;
-  initialValues?: any;
+  onSubmit: (values: Record<string, unknown>) => void;
+  initialValues?: Record<string, unknown>;
   submitText?: string;
   loading?: boolean;
 }
@@ -151,7 +151,7 @@ export interface ChartData {
 export interface ChartConfig {
   type: 'line' | 'bar' | 'pie' | 'doughnut';
   data: ChartData;
-  options?: any;
+  options?: Record<string, unknown>;
 }
 
 // Dashboard Widget Types
@@ -159,8 +159,8 @@ export interface DashboardWidget {
   id: string;
   title: string;
   type: 'stat' | 'chart' | 'table' | 'list';
-  data: any;
-  config?: any;
+  data: Record<string, unknown>;
+  config?: Record<string, unknown>;
   size?: 'small' | 'medium' | 'large';
   refreshInterval?: number;
 }
@@ -216,20 +216,20 @@ export interface Theme {
 }
 
 // API Hook Types
-export interface UseApiOptions<T = any> {
+export interface UseApiOptions<T = unknown> {
   url: string;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  data?: any;
+  data?: Record<string, unknown>;
   headers?: Record<string, string>;
   onSuccess?: (data: T) => void;
-  onError?: (error: any) => void;
+  onError?: (error: Error) => void;
   enabled?: boolean;
 }
 
-export interface UseApiResult<T = any> {
+export interface UseApiResult<T = unknown> {
   data: T | null;
   loading: boolean;
-  error: any;
+  error: Error | null;
   refetch: () => void;
   mutate: (data: T) => void;
 }
@@ -245,11 +245,11 @@ export interface UsePermissionsResult {
   hasAnyPermission: (permissions: string[]) => boolean;
   hasAllPermissions: (permissions: string[]) => boolean;
   loading: boolean;
-  error: any;
+  error: Error | null;
 }
 
 // Local Storage Types
-export interface StorageItem<T = any> {
+export interface StorageItem<T = unknown> {
   key: string;
   value: T;
   expiresAt?: number;
@@ -291,17 +291,17 @@ export interface SearchConfig {
 // Export Types
 export interface ExportConfig {
   filename: string;
-  data: any[];
+  data: Record<string, unknown>[];
   columns: {
     key: string;
     label: string;
-    render?: (value: any) => string;
+    render?: (value: unknown) => string;
   }[];
   format: 'csv' | 'excel' | 'pdf';
 }
 
 // Bulk Action Types
-export interface BulkAction<T = any> {
+export interface BulkAction<T = Record<string, unknown>> {
   key: string;
   label: string;
   icon?: React.ReactNode;

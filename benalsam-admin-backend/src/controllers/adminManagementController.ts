@@ -11,6 +11,7 @@ import {
 } from '../types/admin-types';
 import { ApiResponseUtil } from '../utils/response';
 import { PermissionService } from '../services/permissionService';
+import { cache } from '../services/cacheService';
 import bcrypt from 'bcryptjs';
 import logger from '../config/logger';
 
@@ -25,6 +26,35 @@ export class AdminManagementController {
         role = '',
         isActive = ''
       } = req.query;
+
+      // ✅ OPTIMIZED: Create cache key based on query parameters
+      const cacheKey = `admin_users:${page}:${limit}:${search}:${role}:${isActive}`;
+      
+      // Try to get from cache first
+      const cachedResult = await cache.get<{
+        data: AdminUser[];
+        count: number;
+        adminsWithRoles: AdminUser[];
+      }>(cacheKey, { 
+        namespace: 'admin',
+        ttl: 300 // 5 minutes
+      });
+
+      if (cachedResult) {
+        logger.info('Admin users served from cache', { cacheKey });
+        const response: AdminApiResponse<AdminUser[]> = {
+          success: true,
+          data: cachedResult.adminsWithRoles,
+          pagination: {
+            page: Number(page),
+            limit: Number(limit),
+            total: cachedResult.count,
+            totalPages: Math.ceil(cachedResult.count / Number(limit))
+          }
+        };
+        res.json(response);
+        return;
+      }
 
       let query = supabase
         .from('admin_users')
@@ -58,18 +88,47 @@ export class AdminManagementController {
         return;
       }
 
-      // Get role details for each admin
-      const adminsWithRoles = await Promise.all(
-        (admins || []).map(async (admin) => {
-          const roleDetails = await PermissionService.getRoleByName(admin.role);
-          return {
-            ...admin,
-            roleDetails
-          };
-        })
-      );
+      // ✅ OPTIMIZED: Batch fetch role details instead of N+1 queries
+      const uniqueRoles = [...new Set((admins || []).map(admin => admin.role))];
+      const rolesMap = new Map();
+      
+      if (uniqueRoles.length > 0) {
+        try {
+          // Batch fetch all role details
+          const roleDetailsPromises = uniqueRoles.map(role => 
+            PermissionService.getRoleByName(role).then(roleDetails => ({ role, roleDetails }))
+          );
+          
+          const roleDetailsResults = await Promise.all(roleDetailsPromises);
+          roleDetailsResults.forEach(({ role, roleDetails }) => {
+            rolesMap.set(role, roleDetails);
+          });
+        } catch (error) {
+          logger.error('Error fetching role details:', error);
+          // Fallback: set default role details
+          uniqueRoles.forEach(role => {
+            rolesMap.set(role, { name: role, permissions: [] });
+          });
+        }
+      }
+
+      // Map role details to admins
+      const adminsWithRoles = (admins || []).map(admin => ({
+        ...admin,
+        roleDetails: rolesMap.get(admin.role) || { name: admin.role, permissions: [] }
+      }));
 
       const totalPages = Math.ceil((count || 0) / Number(limit));
+
+      // ✅ OPTIMIZED: Cache the result
+      await cache.set(cacheKey, {
+        data: admins || [],
+        count: count || 0,
+        adminsWithRoles
+      }, { 
+        namespace: 'admin',
+        ttl: 300 // 5 minutes
+      });
 
       const response: AdminApiResponse<AdminUser[]> = {
         success: true,
@@ -172,6 +231,10 @@ export class AdminManagementController {
         return;
       }
 
+      // ✅ OPTIMIZED: Invalidate admin cache after creating new admin
+      await cache.invalidatePattern('admin_users:*', { namespace: 'admin' });
+      logger.info('Admin cache invalidated after creating new admin user');
+
       // Grant additional permissions if specified
       if (adminData.permissions && adminData.permissions.length > 0) {
         const currentUser = (req as any).admin;
@@ -238,6 +301,10 @@ export class AdminManagementController {
         return;
       }
 
+      // ✅ OPTIMIZED: Invalidate admin cache after updating admin
+      await cache.invalidatePattern('admin_users:*', { namespace: 'admin' });
+      logger.info('Admin cache invalidated after updating admin user');
+
       // Update user permissions if specified
       if (updateData.permissions) {
         // Remove existing user-specific permissions
@@ -293,6 +360,10 @@ export class AdminManagementController {
         ApiResponseUtil.error(res, 'Failed to delete admin user');
         return;
       }
+
+      // ✅ OPTIMIZED: Invalidate admin cache after deleting admin
+      await cache.invalidatePattern('admin_users:*', { namespace: 'admin' });
+      logger.info('Admin cache invalidated after deleting admin user');
 
       ApiResponseUtil.success(res, null, 'Admin user deleted successfully');
     } catch (error) {

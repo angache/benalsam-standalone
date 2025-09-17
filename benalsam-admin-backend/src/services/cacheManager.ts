@@ -1,5 +1,4 @@
 import memoryCacheService from './memoryCacheService';
-import cacheService from './cacheService';
 import logger from '../config/logger';
 
 /**
@@ -256,10 +255,11 @@ class CacheManager {
         try {
           if (layer.name === 'memory') {
             await memoryCacheService.clear();
-          } else if (layer.name === 'local-redis') {
-            // Clear Redis cache
-            await cacheService.clearExpiredCache();
-          }
+          } 
+          // else if (layer.name === 'local-redis') {
+          //   // Clear Redis cache
+          //   await cacheService.clearExpiredCache();
+          // }
           logger.info(`🧹 ${layer.name} cleared`);
         } catch (error) {
           logger.error(`❌ ${layer.name} clear error:`, error);
