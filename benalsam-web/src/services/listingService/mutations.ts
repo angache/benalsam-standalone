@@ -1,9 +1,9 @@
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from '@/components/ui/use-toast';
 import { addUserActivity } from '@/services/userActivityService';
-import { processImagesForUploadService } from '@/services/uploadService';
-import { createListingWithUploadService, updateListingWithUploadService } from './uploadServiceMutations';
 import { listingServiceClient, pollJobStatus } from '@/services/listingServiceClient';
+import { listingServiceCircuitBreaker } from '@/utils/circuitBreaker';
+import { handleListingServiceError, getUserFriendlyMessage } from '@/utils/errorHandler';
 import { Listing } from '@/types';
 import { ListingStatus } from 'benalsam-shared-types';
 
@@ -82,7 +82,16 @@ export const createListing = async (
   currentUserId: string, 
   onProgress?: (progress: number) => void
 ): Promise<Listing | null> => {
-  // Try Listing Service first (new microservice approach)
+  // Input validation
+  if (!listingData || !currentUserId) {
+    toast({ 
+      title: "Hata", 
+      description: "İlan oluşturmak için eksik bilgi.", 
+      variant: "destructive" 
+    });
+    return null;
+  }
+
   try {
     console.log('🚀 Creating listing via Listing Service...');
     
@@ -95,11 +104,17 @@ export const createListing = async (
       location: listingData.location,
       urgency: listingData.urgency || 'medium',
       acceptTerms: listingData.accept_terms || true,
+      images: listingData.images,
+      mainImageIndex: listingData.mainImageIndex,
+      duration: listingData.duration,
       // Add other fields as needed
     };
 
-    // Create job via Listing Service
-    const { jobId } = await listingServiceClient.createListing(listingServiceData, currentUserId);
+    // Use Circuit Breaker to call Listing Service
+    const { jobId } = await listingServiceCircuitBreaker.execute(
+      () => listingServiceClient.createListing(listingServiceData, currentUserId)
+    );
+    
     console.log('📤 Job created with ID:', jobId);
 
     // Poll job status
@@ -134,95 +149,27 @@ export const createListing = async (
 
     return result;
   } catch (error) {
-    console.warn('⚠️ Listing Service failed, falling back to Upload Service:', error);
+    console.error('❌ Listing Service failed:', error);
     
-    // Fallback to Upload Service
-    try {
-      return await createListingWithUploadService(listingData, currentUserId, onProgress);
-    } catch (uploadError) {
-      console.warn('⚠️ Upload Service failed, falling back to direct database creation:', uploadError);
+    // Handle error with unified error handler
+    const serviceError = handleListingServiceError(error);
+    const userMessage = getUserFriendlyMessage(serviceError);
     
-      // Fallback to original implementation
-    if (!listingData || !currentUserId) {
-      toast({ title: "Hata", description: "İlan oluşturmak için eksik bilgi.", variant: "destructive" });
-      return null;
-    }
+    toast({ 
+      title: "İlan Oluşturulamadı", 
+      description: userMessage, 
+      variant: "destructive" 
+    });
 
-    try {
-      const { mainImageUrl, additionalImageUrls } = await processImagesForUploadService(
-        listingData.images,
-        listingData.mainImageIndex,
-        'listings',
-        currentUserId,
-        onProgress
-      );
+    // Log error for monitoring
+    console.error('Listing Service Error Details:', {
+      code: serviceError.code,
+      message: serviceError.message,
+      details: serviceError.details,
+      timestamp: serviceError.timestamp
+    });
 
-    let expiresAt = null;
-    if (listingData.duration && listingData.duration > 0) {
-      expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + listingData.duration);
-    }
-
-    // Kategori ID'lerini hesapla
-    const { category_id, category_path } = getCategoryIds(listingData.category);
-
-    const listingToInsert = {
-      user_id: currentUserId,
-      title: listingData.title,
-      description: listingData.description,
-      category: listingData.category,
-      category_id: category_id,
-      category_path: category_path,
-      status: ListingStatus.PENDING_APPROVAL,
-      budget: listingData.budget,
-      location: listingData.location,
-      urgency: listingData.urgency,
-      main_image_url: mainImageUrl,
-      additional_image_urls: additionalImageUrls.length > 0 ? additionalImageUrls : null,
-      image_url: mainImageUrl,
-      expires_at: expiresAt ? expiresAt.toISOString() : null,
-      auto_republish: listingData.auto_republish,
-      contact_preference: listingData.contact_preference,
-      accept_terms: listingData.accept_terms,
-      is_featured: listingData.is_featured || false,
-      is_urgent_premium: listingData.is_urgent_premium || false,
-      is_showcase: listingData.is_showcase || false,
-      latitude: listingData.geolocation?.latitude || null,
-      longitude: listingData.geolocation?.longitude || null,
-      geolocation: listingData.geolocation ? `POINT(${listingData.geolocation.longitude} ${listingData.geolocation.latitude})` : null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-
-    console.log('🔍 Creating listing with data:', JSON.stringify(listingToInsert, null, 2));
-
-    const { data, error } = await supabase
-      .from('listings')
-      .insert(listingToInsert)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating listing:', error);
-      toast({ title: "İlan Oluşturulamadı", description: error.message, variant: "destructive" });
-      return null;
-    }
-
-    await addUserActivity(
-      currentUserId,
-      'listing_created',
-      'Yeni ilan oluşturuldu',
-      `"${listingData.title}" ilanı oluşturuldu`,
-      data.id
-    );
-
-    return data;
-    } catch (error) {
-      console.error('Error in createListing:', error);
-      toast({ title: "Beklenmedik Hata", description: "İlan oluşturulurken bir sorun oluştu.", variant: "destructive" });
-      return null;
-    }
-    }
+    return null;
   }
 };
 
@@ -231,19 +178,21 @@ export const updateListing = async (
   updates: Partial<Listing>, 
   userId: string
 ): Promise<Listing | null> => {
-  // Try Upload Service first, fallback to direct database update
-  try {
-    return await updateListingWithUploadService(listingId, updates, userId);
-  } catch (error) {
-    console.warn('⚠️ Upload Service failed, falling back to direct database update:', error);
-    
-    // Fallback to original implementation
-    if (!listingId || !updates || !userId) {
-      toast({ title: "Hata", description: "İlan güncellemek için eksik bilgi.", variant: "destructive" });
-      return null;
-    }
+  // Input validation
+  if (!listingId || !updates || !userId) {
+    toast({ 
+      title: "Hata", 
+      description: "İlan güncellemek için eksik bilgi.", 
+      variant: "destructive" 
+    });
+    return null;
+  }
 
-    try {
+  try {
+    console.log('🚀 Updating listing via Listing Service...');
+    
+    // For now, use direct database update until Listing Service supports updates
+    // TODO: Implement update endpoint in Listing Service
     const dbUpdates: any = {
       title: updates.title,
       description: updates.description,
@@ -279,7 +228,11 @@ export const updateListing = async (
 
     if (error) {
       console.error('Error updating listing:', error);
-      toast({ title: "İlan Güncellenemedi", description: error.message, variant: "destructive" });
+      toast({ 
+        title: "İlan Güncellenemedi", 
+        description: error.message, 
+        variant: "destructive" 
+      });
       return null;
     }
 
@@ -291,12 +244,20 @@ export const updateListing = async (
       data.id
     );
 
+    toast({ 
+      title: "İlan Güncellendi", 
+      description: "İlanınız başarıyla güncellendi." 
+    });
+
     return data;
-    } catch (error) {
-      console.error('Error in updateListing:', error);
-      toast({ title: "Beklenmedik Hata", description: "İlan güncellenirken bir sorun oluştu.", variant: "destructive" });
-      return null;
-    }
+  } catch (error) {
+    console.error('Error in updateListing:', error);
+    toast({ 
+      title: "Beklenmedik Hata", 
+      description: "İlan güncellenirken bir sorun oluştu.", 
+      variant: "destructive" 
+    });
+    return null;
   }
 };
 
