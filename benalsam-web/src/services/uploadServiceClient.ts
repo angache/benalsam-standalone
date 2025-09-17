@@ -123,8 +123,8 @@ class UploadServiceClient {
   }
 
   // Health check
-  async healthCheck(): Promise<{ status: string; details: any }> {
-    return this.makeRequest<{ status: string; details: any }>('/health', {
+  async healthCheck(): Promise<{ status: string; details: unknown }> {
+    return this.makeRequest<{ status: string; details: unknown }>('/health', {
       method: 'GET',
     });
   }

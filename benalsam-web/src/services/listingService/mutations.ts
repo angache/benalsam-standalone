@@ -4,38 +4,81 @@ import { addUserActivity } from '@/services/userActivityService';
 import { listingServiceClient, pollJobStatus } from '@/services/listingServiceClient';
 import { uploadImagesWithProgress } from '@/services/uploadServiceClient';
 import { listingServiceCircuitBreaker } from '@/utils/circuitBreaker';
-import { handleListingServiceError, getUserFriendlyMessage } from '@/utils/errorHandler';
+import { handleError, handleApiError, getUserFriendlyMessage } from '@/utils/errorHandler';
+import { logInfo, logDebug, logError, logWarn } from '@/utils/logger';
 import { Listing } from '@/types';
 import { ListingStatus } from 'benalsam-shared-types';
 
 import { categoriesConfig } from '@/config/categories';
+import { CATEGORY } from '@/config/constants';
+import { 
+  CreateListingRequest, 
+  CreateListingResponse, 
+  ImageFile, 
+  UploadProgressCallback,
+  JobStatusCallbacks,
+  CategoryIds,
+  ListingServiceData
+} from '@/types/listing';
+import { 
+  ValidationError, 
+  UploadError, 
+  ServiceError,
+  ErrorCode 
+} from '@/types/errors';
+import { 
+  LISTING_CONFIG, 
+  UPLOAD_CONFIG, 
+  VALIDATION_CONFIG,
+  ERROR_MESSAGES 
+} from '@/config/listing';
 
 // Kategori path'ini ID'lere çevir
-const getCategoryIds = (categoryString: string) => {
+const getCategoryIds = (categoryString: string): CategoryIds => {
   if (!categoryString) return { category_id: null, category_path: null };
   
-  console.log('🔍 Processing category string:', categoryString);
-  console.log('🔍 categoriesConfig:', categoriesConfig);
+  logDebug('Processing category string', { 
+    component: 'category-matcher', 
+    metadata: {
+      categoryString,
+      categoriesCount: categoriesConfig.length 
+    }
+  });
   
   // Kategori path'ini parçala
   const pathParts = categoryString.split(' > ');
-  console.log('🔍 Path parts:', pathParts);
+  logDebug('Category path parts', { 
+    component: 'category-matcher', 
+    metadata: {
+      pathParts,
+      partsCount: pathParts.length 
+    }
+  });
   
   if (pathParts.length === 0) {
-    console.log('⚠️ No path parts found');
+    logWarn('No path parts found', { component: 'category-matcher' });
     return { category_id: null, category_path: null };
   }
   
   // Ana kategoriyi bul
   const mainCategory = categoriesConfig.find(cat => cat.name === pathParts[0]);
   if (!mainCategory) {
-    console.log('⚠️ Main category not found:', pathParts[0]);
+    logWarn('Main category not found', { 
+      component: 'category-matcher', 
+      metadata: { categoryName: pathParts[0] }
+    });
     return { category_id: null, category_path: null };
   }
   
   // Ana kategori ID'si (1-13 arası)
   const mainCategoryId = categoriesConfig.findIndex(cat => cat.name === pathParts[0]) + 1;
-  console.log('✅ Main category found:', pathParts[0], 'ID:', mainCategoryId);
+  logInfo('Main category found', { 
+    component: 'category-matcher', 
+    metadata: {
+      categoryName: pathParts[0], 
+      categoryId: mainCategoryId 
+    }
+  });
   
   const categoryPath = [mainCategoryId];
   let categoryId = mainCategoryId;
@@ -45,26 +88,44 @@ const getCategoryIds = (categoryString: string) => {
     const subCategory = mainCategory.subcategories.find(sub => sub.name === pathParts[1]);
     if (subCategory) {
       // Alt kategori ID'si (101-1303 arası)
-      const subCategoryId = mainCategoryId * 100 + mainCategory.subcategories.findIndex(sub => sub.name === pathParts[1]) + 1;
+      const subCategoryId = mainCategoryId * CATEGORY.MULTIPLIERS.SUB_CATEGORY + mainCategory.subcategories.findIndex(sub => sub.name === pathParts[1]) + 1;
       categoryPath.push(subCategoryId);
       categoryId = subCategoryId;
-      console.log('✅ Subcategory found:', pathParts[1], 'ID:', subCategoryId);
+      logInfo('Subcategory found', { 
+        component: 'category-matcher', 
+        metadata: {
+          subcategoryName: pathParts[1], 
+          subcategoryId: subCategoryId 
+        }
+      });
       
       // Alt-alt kategori varsa
       if (pathParts.length > 2 && subCategory.subcategories) {
         const subSubCategory = subCategory.subcategories.find(subSub => subSub.name === pathParts[2]);
         if (subSubCategory) {
           // Alt-alt kategori ID'si (1001-9999 arası)
-          const subSubCategoryId = subCategoryId * 10 + subCategory.subcategories.findIndex(subSub => subSub.name === pathParts[2]) + 1;
+          const subSubCategoryId = subCategoryId * CATEGORY.MULTIPLIERS.SUB_SUB_CATEGORY + subCategory.subcategories.findIndex(subSub => subSub.name === pathParts[2]) + 1;
           categoryPath.push(subSubCategoryId);
           categoryId = subSubCategoryId;
-          console.log('✅ Sub-subcategory found:', pathParts[2], 'ID:', subSubCategoryId);
+          logInfo('Sub-subcategory found', { 
+            component: 'category-matcher', 
+            metadata: {
+              subSubcategoryName: pathParts[2], 
+              subSubcategoryId: subSubCategoryId 
+            }
+          });
         }
       }
     }
   }
   
-  console.log('✅ Final result - Category ID:', categoryId, 'Path:', categoryPath);
+  logInfo('Category matching completed', { 
+    component: 'category-matcher', 
+    metadata: {
+      finalCategoryId: categoryId, 
+      categoryPath 
+    }
+  });
   
   return {
     category_id: categoryId,
@@ -75,93 +136,121 @@ const getCategoryIds = (categoryString: string) => {
 
 
 export const createListing = async (
-  listingData: Omit<Listing, 'id' | 'created_at' | 'updated_at' | 'status'> & {
-    images: string[];
-    mainImageIndex: number;
-    duration?: number;
-  }, 
+  listingData: CreateListingRequest, 
   currentUserId: string, 
-  onProgress?: (progress: number) => void
+  onProgress?: UploadProgressCallback
 ): Promise<Listing | null> => {
   // Input validation
   if (!listingData || !currentUserId) {
-    toast({ 
-      title: "Hata", 
-      description: "İlan oluşturmak için eksik bilgi.", 
-      variant: "destructive" 
-    });
-    return null;
+    throw new ValidationError(ERROR_MESSAGES.VALIDATION.TITLE_TOO_SHORT);
+  }
+
+  // Validate required fields
+  if (!listingData.title || listingData.title.length < VALIDATION_CONFIG.TITLE.MIN_LENGTH) {
+    throw new ValidationError(ERROR_MESSAGES.VALIDATION.TITLE_TOO_SHORT);
+  }
+
+  if (listingData.title.length > VALIDATION_CONFIG.TITLE.MAX_LENGTH) {
+    throw new ValidationError(ERROR_MESSAGES.VALIDATION.TITLE_TOO_LONG);
+  }
+
+  if (!listingData.description || listingData.description.length < VALIDATION_CONFIG.DESCRIPTION.MIN_LENGTH) {
+    throw new ValidationError(ERROR_MESSAGES.VALIDATION.DESCRIPTION_TOO_SHORT);
+  }
+
+  if (listingData.description.length > VALIDATION_CONFIG.DESCRIPTION.MAX_LENGTH) {
+    throw new ValidationError(ERROR_MESSAGES.VALIDATION.DESCRIPTION_TOO_LONG);
+  }
+
+  if (listingData.budget < VALIDATION_CONFIG.BUDGET.MIN || listingData.budget > VALIDATION_CONFIG.BUDGET.MAX) {
+    throw new ValidationError(ERROR_MESSAGES.VALIDATION.BUDGET_INVALID);
+  }
+
+  if (!listingData.location || listingData.location.length < VALIDATION_CONFIG.LOCATION.MIN_LENGTH) {
+    throw new ValidationError(ERROR_MESSAGES.VALIDATION.LOCATION_REQUIRED);
+  }
+
+  if (listingData.images.length > VALIDATION_CONFIG.IMAGES.MAX_COUNT) {
+    throw new ValidationError(ERROR_MESSAGES.VALIDATION.IMAGES_TOO_MANY);
   }
 
   try {
-    console.log('🚀 Creating listing via Listing Service...');
+    logInfo('Creating listing via Listing Service', { 
+      component: 'listing-service', 
+      userId: currentUserId,
+      metadata: { title: listingData.title }
+    });
     
     // Step 1: Upload images to Upload Service
     let uploadedImages: string[] = [];
     if (listingData.images && listingData.images.length > 0) {
-      console.log('📤 Uploading images to Upload Service...', { count: listingData.images.length });
+      logInfo('Uploading images to Upload Service', { 
+        component: 'upload-service', 
+        userId: currentUserId,
+        metadata: { imageCount: listingData.images.length }
+      });
       
       try {
-        // Check if images are in the old format (with .file property)
-        const hasFileProperty = listingData.images.some((img: any) => img && img.file);
-        
-        // listingData.images should contain File objects, not URLs
-        // Filter out any non-File objects and extract File objects
-        const imageFiles: File[] = listingData.images
-          .filter((img: any) => img instanceof File)
-          .map((file: File) => file);
-        
-        // If no File objects found, check if images have .file property
-        if (imageFiles.length === 0 && hasFileProperty) {
-          // Eski sistem gibi: img.file'ı direkt kullan (instanceof File kontrolü yapma)
-          const filesFromProperty = listingData.images
-            .filter((img: any) => img && img.file)
-            .map((img: any) => {
-              // Eğer Blob ise File'a çevir
-              if (img.file instanceof Blob && !(img.file instanceof File)) {
-                const file = new File([img.file], img.name || `image_${Date.now()}.jpg`, {
-                  type: img.file.type || 'image/jpeg'
-                });
-                return file;
-              }
-              return img.file;
+        // Validate image files
+        const validImages = listingData.images.filter((file: File) => {
+          if (!(file instanceof File)) {
+            logWarn('Invalid file type detected', { 
+              component: 'upload-service', 
+              metadata: { fileType: typeof file }
             });
-          
-             if (filesFromProperty.length > 0) {
-               const uploadResult = await uploadImagesWithProgress(
-                 filesFromProperty,
-                 currentUserId,
-                 (progress) => {
-                   if (onProgress) {
-                     onProgress(Math.floor(progress * 0.5));
-                   }
-                 }
-               );
-               
-               uploadedImages = uploadResult.data.images.map(img => img.url);
-          } else {
-            uploadedImages = listingData.images.filter((img: any) => typeof img === 'string');
+            return false;
           }
-        } else if (imageFiles.length === 0) {
-          uploadedImages = listingData.images.filter((img: any) => typeof img === 'string');
-           } else {
-             const uploadResult = await uploadImagesWithProgress(
-               imageFiles,
-               currentUserId,
-               (progress) => {
-                 // Update progress for image upload (0-50%)
-                 if (onProgress) {
-                   onProgress(Math.floor(progress * 0.5));
-                 }
-               }
-             );
-             
-             uploadedImages = uploadResult.data.images.map(img => img.url);
+          
+          if (file.size < UPLOAD_CONFIG.VALIDATION.MIN_FILE_SIZE) {
+            logWarn('File too small', { 
+              component: 'upload-service', 
+              metadata: {
+                fileName: file.name, 
+                fileSize: file.size 
+              }
+            });
+            return false;
+          }
+          
+          if (file.size > UPLOAD_CONFIG.VALIDATION.MAX_FILE_SIZE) {
+            throw new UploadError(ERROR_MESSAGES.VALIDATION.IMAGE_TOO_LARGE, { fileName: file.name, size: file.size });
+          }
+          
+          if (!UPLOAD_CONFIG.VALIDATION.ALLOWED_MIME_TYPES.includes(file.type as any)) {
+            throw new UploadError(ERROR_MESSAGES.VALIDATION.INVALID_IMAGE_TYPE, { fileName: file.name, type: file.type });
+          }
+          
+          return true;
+        });
+        
+        if (validImages.length === 0) {
+          throw new UploadError(ERROR_MESSAGES.UPLOAD.INVALID_FILE);
         }
+        
+        // Upload valid images
+        const uploadResult = await uploadImagesWithProgress(
+          validImages,
+          currentUserId,
+          (progress) => {
+            if (onProgress) {
+              onProgress(Math.floor(progress * LISTING_CONFIG.PROGRESS.IMAGE_UPLOAD_RATIO * 100));
+            }
+          }
+        );
+        
+        uploadedImages = uploadResult.images.map(img => img.url);
       } catch (error) {
-        console.error('❌ Image upload failed, using original URLs:', error);
-        // Fallback: use original image URLs
-        uploadedImages = listingData.images.filter((img: any) => typeof img === 'string');
+        logError('Image upload failed', { 
+          component: 'upload-service', 
+          userId: currentUserId,
+          metadata: {
+            error: error instanceof Error ? error.message : 'Unknown error' 
+          }
+        });
+        if (error instanceof UploadError) {
+          throw error;
+        }
+        throw new UploadError(ERROR_MESSAGES.UPLOAD.FAILED, { originalError: error });
       }
     }
     
@@ -169,25 +258,32 @@ export const createListing = async (
     const mainImageUrl = uploadedImages.length > 0 ? uploadedImages[0] : null;
     const additionalImageUrls = uploadedImages.length > 1 ? uploadedImages.slice(1) : [];
     
-    const listingServiceData = {
+    const listingServiceData: CreateListingRequest = {
       title: listingData.title,
       description: listingData.description,
       category: listingData.category,
       budget: listingData.budget,
       location: listingData.location,
       urgency: listingData.urgency || 'medium',
-      acceptTerms: listingData.accept_terms || true,
-      mainImageUrl: mainImageUrl,
-      additionalImageUrls: additionalImageUrls,
+      acceptTerms: listingData.acceptTerms || true,
+      images: listingData.images, // Include images for the request
       mainImageIndex: listingData.mainImageIndex,
       duration: listingData.duration,
-      // Add other fields as needed
+      autoRepublish: listingData.autoRepublish,
+      contactPreference: listingData.contactPreference,
+      isFeatured: listingData.isFeatured,
+      isUrgentPremium: listingData.isUrgentPremium,
+      isShowcase: listingData.isShowcase,
+      geolocation: listingData.geolocation,
+      condition: listingData.condition,
+      attributes: listingData.attributes
     };
 
     // Use Circuit Breaker to call Listing Service
-    const { data: { jobId } } = await listingServiceCircuitBreaker.execute(
+    const response = await listingServiceCircuitBreaker.execute(
       () => listingServiceClient.createListing(listingServiceData, currentUserId)
     );
+    const { jobId } = response.data;
     
     // Step 3: Poll job status for listing creation
     const result = await pollJobStatus(
@@ -196,7 +292,7 @@ export const createListing = async (
       (progress) => {
         // Update progress for listing creation (50-100%)
         if (onProgress) {
-          onProgress(50 + Math.floor(progress * 0.5));
+          onProgress(50 + Math.floor(progress * LISTING_CONFIG.PROGRESS.LISTING_CREATION_RATIO * 100));
         }
       },
       (completedResult) => {
@@ -222,26 +318,49 @@ export const createListing = async (
       `"${listingData.title}" ilanı oluşturuldu`
     );
 
-    return result;
+    return result as Listing;
   } catch (error) {
-    console.error('❌ Listing Service failed:', error);
-    
-    // Handle error with unified error handler
-    const serviceError = handleListingServiceError(error);
-    const userMessage = getUserFriendlyMessage(serviceError);
-    
-    toast({ 
-      title: "İlan Oluşturulamadı", 
-      description: userMessage, 
-      variant: "destructive" 
+    logError('Listing Service failed', { 
+      component: 'listing-service', 
+      userId: currentUserId,
+      metadata: {
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      }
     });
-
-    // Log error for monitoring
-    console.error('Listing Service Error Details:', {
-      code: serviceError.code,
-      message: serviceError.message,
-      details: serviceError.details,
-      timestamp: serviceError.timestamp
+    
+    // Handle different error types
+    if (error instanceof ValidationError) {
+      toast({ 
+        title: "Doğrulama Hatası", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+      return null;
+    }
+    
+    if (error instanceof UploadError) {
+      toast({ 
+        title: "Görsel Yükleme Hatası", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+      return null;
+    }
+    
+    if (error instanceof ServiceError) {
+      toast({ 
+        title: "Servis Hatası", 
+        description: error.message, 
+        variant: "destructive" 
+      });
+      return null;
+    }
+    
+    // Handle unknown errors using unified error handler
+    handleError(error, {
+      component: 'listing-service',
+      action: 'create-listing',
+      userId: currentUserId
     });
 
     return null;

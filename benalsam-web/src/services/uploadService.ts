@@ -204,7 +204,7 @@ export const uploadService = UploadService.getInstance();
  * Upload images with progress tracking (replaces processImagesForSupabase)
  */
 export const processImagesForUploadService = async (
-  images: any[], 
+  images: File[], 
   mainImageIndex: number, 
   type: 'listings' | 'inventory' | 'profile' = 'listings',
   userId: string,

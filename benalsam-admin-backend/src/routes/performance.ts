@@ -1,61 +1,77 @@
 import express, { Request, Response } from 'express';
 import { authenticateToken } from '../middleware/auth';
 import rateLimit from 'express-rate-limit';
-import { redisCloud } from '../services/redisService'; // Redis Cloud kullanıyoruz
+import { redisCloud } from '../services/redisService';
+import { 
+  PerformanceAnalysisRequest, 
+  PerformanceAnalysisResponse, 
+  PerformanceMetrics,
+  CoreWebVitals,
+  PERFORMANCE_THRESHOLDS,
+  PERFORMANCE_SCORE_WEIGHTS,
+  isCoreWebVitals
+} from '../types/performance';
+import { logger } from '../utils/logger';
 
 // Extend Request interface to include user
 interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
-    [key: string]: any;
+    email?: string;
+    role?: string;
   };
 }
 
 const router = express.Router();
 
 // Calculate performance score based on Core Web Vitals
-const calculatePerformanceScore = (metrics: any): number => {
+const calculatePerformanceScore = (metrics: CoreWebVitals): number => {
   let score = 100;
   let metricsCount = 0;
   
-  // LCP scoring (0-2500ms = good, 2500-4000ms = needs-improvement, >4000ms = poor)
+  // LCP scoring
   if (metrics.LCP?.value && metrics.LCP.value > 0) {
     metricsCount++;
-    if (metrics.LCP.value > 4000) score -= 30;
-    else if (metrics.LCP.value > 2500) score -= 15;
-    else if (metrics.LCP.value > 2000) score -= 5;
+    const lcpValue = metrics.LCP.value;
+    if (lcpValue > PERFORMANCE_THRESHOLDS.LCP.poor) score -= 30;
+    else if (lcpValue > PERFORMANCE_THRESHOLDS.LCP.needsImprovement) score -= 15;
+    else if (lcpValue > 2000) score -= 5;
   }
   
-  // FCP scoring (0-1800ms = good, 1800-3000ms = needs-improvement, >3000ms = poor)
+  // FCP scoring
   if (metrics.FCP?.value && metrics.FCP.value > 0) {
     metricsCount++;
-    if (metrics.FCP.value > 3000) score -= 25;
-    else if (metrics.FCP.value > 1800) score -= 12;
-    else if (metrics.FCP.value > 1000) score -= 5;
+    const fcpValue = metrics.FCP.value;
+    if (fcpValue > PERFORMANCE_THRESHOLDS.FCP.poor) score -= 25;
+    else if (fcpValue > PERFORMANCE_THRESHOLDS.FCP.needsImprovement) score -= 12;
+    else if (fcpValue > 1000) score -= 5;
   }
   
-  // CLS scoring (0-0.1 = good, 0.1-0.25 = needs-improvement, >0.25 = poor)
+  // CLS scoring
   if (metrics.CLS?.value && metrics.CLS.value > 0) {
     metricsCount++;
-    if (metrics.CLS.value > 0.25) score -= 25;
-    else if (metrics.CLS.value > 0.1) score -= 12;
-    else if (metrics.CLS.value > 0.05) score -= 5;
+    const clsValue = metrics.CLS.value;
+    if (clsValue > PERFORMANCE_THRESHOLDS.CLS.poor) score -= 25;
+    else if (clsValue > PERFORMANCE_THRESHOLDS.CLS.needsImprovement) score -= 12;
+    else if (clsValue > 0.05) score -= 5;
   }
   
-  // INP scoring (0-200ms = good, 200-500ms = needs-improvement, >500ms = poor)
+  // INP scoring
   if (metrics.INP?.value && metrics.INP.value > 0) {
     metricsCount++;
-    if (metrics.INP.value > 500) score -= 20;
-    else if (metrics.INP.value > 200) score -= 10;
-    else if (metrics.INP.value > 100) score -= 3;
+    const inpValue = metrics.INP.value;
+    if (inpValue > PERFORMANCE_THRESHOLDS.INP.poor) score -= 20;
+    else if (inpValue > PERFORMANCE_THRESHOLDS.INP.needsImprovement) score -= 10;
+    else if (inpValue > 100) score -= 3;
   }
   
-  // TTFB scoring (0-800ms = good, 800-1800ms = needs-improvement, >1800ms = poor)
+  // TTFB scoring
   if (metrics.TTFB?.value && metrics.TTFB.value > 0) {
     metricsCount++;
-    if (metrics.TTFB.value > 1800) score -= 15;
-    else if (metrics.TTFB.value > 800) score -= 8;
-    else if (metrics.TTFB.value > 400) score -= 3;
+    const ttfbValue = metrics.TTFB.value;
+    if (ttfbValue > PERFORMANCE_THRESHOLDS.TTFB.poor) score -= 15;
+    else if (ttfbValue > PERFORMANCE_THRESHOLDS.TTFB.needsImprovement) score -= 8;
+    else if (ttfbValue > 400) score -= 3;
   }
   
   // Eğer hiç metric yoksa varsayılan score döndür
@@ -90,11 +106,21 @@ router.post('/analysis',
       }
 
       // Debug: Log incoming metrics
-      console.log('🔍 Incoming metrics:', JSON.stringify(metrics, null, 2));
+      logger.debug('Incoming performance metrics', {
+        component: 'performance-analysis',
+        action: 'receive-metrics',
+        userId,
+        metadata: { metrics }
+      });
       
       // Calculate performance score
       const calculatedScore = calculatePerformanceScore(metrics);
-      console.log('🔍 Calculated score:', calculatedScore);
+      logger.info('Performance score calculated', {
+        component: 'performance-analysis',
+        action: 'calculate-score',
+        userId,
+        metadata: { calculatedScore, route }
+      });
       
       // Generate AI insights and recommendations
       const aiInsights: string[] = [];

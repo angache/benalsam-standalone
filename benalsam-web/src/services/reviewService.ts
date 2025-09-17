@@ -33,13 +33,15 @@ interface Review {
   };
 }
 
+// Import unified error handler
+import { handleError as unifiedHandleError } from '@/utils/errorHandler';
+import { RATING } from '@/config/constants';
+
 // Error handling helper
-const handleError = (error: any, title: string = "Hata", description: string = "Bir sorun oluştu"): null => {
-  console.error(`Error in ${title}:`, error);
-  toast({ 
-    title: title, 
-    description: error?.message || description, 
-    variant: "destructive" 
+const handleError = (error: unknown, title: string = "Hata", description: string = "Bir sorun oluştu"): null => {
+  unifiedHandleError(error, {
+    component: 'review-service',
+    action: title.toLowerCase().replace(/\s+/g, '-')
   });
   return null;
 };
@@ -108,8 +110,8 @@ export const updateReview = async (
       return null;
     }
 
-    if (rating < 1 || rating > 5) {
-      toast({ title: "Geçersiz Puan", description: "Puan 1 ile 5 arasında olmalıdır.", variant: "destructive" });
+    if (rating < RATING.MIN || rating > RATING.MAX) {
+      toast({ title: "Geçersiz Puan", description: `Puan ${RATING.MIN} ile ${RATING.MAX} arasında olmalıdır.`, variant: "destructive" });
       return null;
     }
 
@@ -343,14 +345,14 @@ export const getUserReviewStats = async (userId: string): Promise<{
       ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
       : 0;
 
-    const ratingDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    const ratingDistribution: Record<number, number> = { ...RATING.DISTRIBUTION };
     reviews.forEach(review => {
       ratingDistribution[review.rating] = (ratingDistribution[review.rating] || 0) + 1;
     });
 
     return {
       totalReviews,
-      averageRating: Math.round(averageRating * 10) / 10,
+      averageRating: Math.round(averageRating * Math.pow(10, RATING.DECIMAL_PLACES)) / Math.pow(10, RATING.DECIMAL_PLACES),
       ratingDistribution
     };
   } catch (error) {

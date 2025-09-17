@@ -810,7 +810,7 @@ router.post('/rebuild-indexes', async (req, res) => {
 
         await aiSuggestionsES.indexDocument(
           `ai_suggestions_${suggestion.id}`,
-          transformedData
+          transformedData as any
         );
         indexedCount++;
       } catch (error) {

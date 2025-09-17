@@ -1,4 +1,16 @@
 import { toast } from '@/components/ui/use-toast';
+import { 
+  CreateListingRequest, 
+  CreateListingResponse, 
+  JobStatusResponse, 
+  JobDetailsResponse, 
+  HealthCheckResponse 
+} from '@/types/listing';
+import { 
+  ServiceError, 
+  NetworkError, 
+  ErrorCode 
+} from '@/types/errors';
 
 // Listing Service API Client
 class ListingServiceClient {
@@ -6,7 +18,6 @@ class ListingServiceClient {
 
   constructor() {
     this.baseUrl = import.meta.env.VITE_LISTING_SERVICE_URL || 'http://localhost:3008/api/v1';
-    console.log('🔗 Listing Service URL:', this.baseUrl);
   }
 
   private async makeRequest<T>(
@@ -44,33 +55,23 @@ class ListingServiceClient {
   }
 
   // Create a new listing
-  async createListing(listingData: any, userId: string): Promise<{ jobId: string }> {
-    return this.makeRequest<{ jobId: string }>('/listings', {
+  async createListing(listingData: CreateListingRequest, userId: string): Promise<CreateListingResponse> {
+    return this.makeRequest<CreateListingResponse>('/listings', {
       method: 'POST',
       body: JSON.stringify(listingData),
     }, userId);
   }
 
   // Get job status
-  async getJobStatus(jobId: string, userId: string): Promise<{
-    status: string;
-    progress: number;
-    result?: any;
-    error?: string;
-  }> {
-    return this.makeRequest<{
-      status: string;
-      progress: number;
-      result?: any;
-      error?: string;
-    }>(`/jobs/${jobId}/status`, {
+  async getJobStatus(jobId: string, userId: string): Promise<JobStatusResponse> {
+    return this.makeRequest<JobStatusResponse>(`/jobs/${jobId}/status`, {
       method: 'GET',
     }, userId);
   }
 
   // Get job details
-  async getJob(jobId: string, userId: string): Promise<any> {
-    return this.makeRequest<any>(`/jobs/${jobId}`, {
+  async getJob(jobId: string, userId: string): Promise<JobDetailsResponse> {
+    return this.makeRequest<JobDetailsResponse>(`/jobs/${jobId}`, {
       method: 'GET',
     }, userId);
   }
@@ -83,8 +84,8 @@ class ListingServiceClient {
   }
 
   // Health check
-  async healthCheck(): Promise<{ status: string; details: any }> {
-    return this.makeRequest<{ status: string; details: any }>('/health', {
+  async healthCheck(): Promise<HealthCheckResponse> {
+    return this.makeRequest<HealthCheckResponse>('/health', {
       method: 'GET',
     });
   }
@@ -98,14 +99,14 @@ export const pollJobStatus = async (
   jobId: string, 
   userId: string, 
   onProgress?: (progress: number) => void,
-  onComplete?: (result: any) => void,
+  onComplete?: (result: unknown) => void,
   onError?: (error: string) => void,
   maxAttempts: number = 60,
   intervalMs: number = 2000
-): Promise<any> => {
+): Promise<unknown> => {
   let attempts = 0;
 
-  const poll = async (): Promise<any> => {
+  const poll = async (): Promise<unknown> => {
     attempts++;
     
     try {

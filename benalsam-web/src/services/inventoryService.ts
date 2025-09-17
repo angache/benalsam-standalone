@@ -24,13 +24,14 @@ interface InventoryItem {
   offer_count?: number;
 }
 
+// Import unified error handler
+import { handleError as unifiedHandleError } from '@/utils/errorHandler';
+
 // Error handling helper
-const handleError = (error: any, title: string = "Hata", description: string = "Bir sorun oluştu"): null => {
-  console.error(`Error in ${title}:`, error);
-  toast({ 
-    title: title, 
-    description: error?.message || description, 
-    variant: "destructive" 
+const handleError = (error: unknown, title: string = "Hata", description: string = "Bir sorun oluştu"): null => {
+  unifiedHandleError(error, {
+    component: 'inventory-service',
+    action: title.toLowerCase().replace(/\s+/g, '-')
   });
   return null;
 };
@@ -72,7 +73,7 @@ export const fetchInventoryItems = async (userId: string): Promise<InventoryItem
 };
 
 export const addInventoryItem = async (
-  itemData: Partial<InventoryItem> & { images?: any[]; mainImageIndex?: number }, 
+  itemData: Partial<InventoryItem> & { images?: File[]; mainImageIndex?: number }, 
   currentUserId: string, 
   onProgress?: (progress: number) => void
 ): Promise<InventoryItem | null> => {
@@ -128,7 +129,7 @@ export const addInventoryItem = async (
 export const updateInventoryItem = async (
   itemData: Partial<InventoryItem> & { 
     id: string; 
-    images?: any[]; 
+    images?: File[]; 
     mainImageIndex?: number; 
     initialImageUrls?: string[] 
   }, 

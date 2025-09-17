@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { FILE_SIZE } from '@/config/constants';
 import { 
   ArrowLeft, 
   Save, 
@@ -177,7 +178,7 @@ const ProfilePage = () => {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    if (file.size > FILE_SIZE.LIMITS.MAX_PROFILE_IMAGE_SIZE) { // 2MB limit
       toast({
         title: "Hata",
         description: "Dosya boyutu 5MB'dan küçük olmalıdır.",

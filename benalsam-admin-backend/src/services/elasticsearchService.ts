@@ -4,12 +4,24 @@ import { SearchOptimizedListing } from 'benalsam-shared-types';
 import searchCacheService from './searchCacheService';
 import { createClient } from '@supabase/supabase-js';
 import cacheManager from './cacheManager';
+import { 
+  SupabaseClient, 
+  ElasticsearchIndexMapping, 
+  SearchQuery, 
+  SearchParameters, 
+  SearchResult, 
+  IndexStats, 
+  HealthCheckResult,
+  ELASTICSEARCH_INDEXES,
+  ELASTICSEARCH_ANALYZERS,
+  ELASTICSEARCH_SORT_OPTIONS
+} from '../types/elasticsearch';
 
 export class AdminElasticsearchService {
   protected client: Client;
   protected defaultIndexName: string;
   protected isConnected: boolean = false;
-  protected supabase: any; // ✅ Supabase client ekle
+  protected supabase: any; // TODO: Fix SupabaseClient type compatibility
 
   constructor(
     node: string = process.env.ELASTICSEARCH_URL || 'http://209.227.228.96:9200',
@@ -33,7 +45,7 @@ export class AdminElasticsearchService {
 
 
 
-  private getListingsIndexMapping() {
+  private getListingsIndexMapping(): ElasticsearchIndexMapping {
     return {
       settings: {
         analysis: {
@@ -327,7 +339,7 @@ export class AdminElasticsearchService {
         sortField = 'createdAt';
       }
       
-      const searchBody: any = {
+      const searchBody: SearchQuery = {
         query: {
           match_all: {}
         }
@@ -429,7 +441,7 @@ export class AdminElasticsearchService {
     }
   }
 
-  async bulkIndex(documents: any[], indexName?: string): Promise<boolean> {
+  async bulkIndex(documents: SearchOptimizedListing[], indexName?: string): Promise<boolean> {
     try {
       const targetIndex = indexName || this.defaultIndexName;
       const operations = documents.flatMap(doc => [
@@ -454,7 +466,7 @@ export class AdminElasticsearchService {
     }
   }
 
-  async indexDocument(id: string, document: any, indexName?: string): Promise<boolean> {
+  async indexDocument(id: string, document: SearchOptimizedListing, indexName?: string): Promise<boolean> {
     try {
       const targetIndex = indexName || this.defaultIndexName;
       await this.client.index({
@@ -469,7 +481,7 @@ export class AdminElasticsearchService {
     }
   }
 
-  async updateDocument(id: string, document: any, indexName?: string): Promise<boolean> {
+  async updateDocument(id: string, document: Partial<SearchOptimizedListing>, indexName?: string): Promise<boolean> {
     try {
       const targetIndex = indexName || this.defaultIndexName;
       await this.client.update({
@@ -546,9 +558,10 @@ export class AdminElasticsearchService {
     try {
       // Supabase'den tüm listings'i çek (debug için status filtresi kaldırıldı)
       logger.info('🔍 Fetching all listings from Supabase...');
-      const { data: listings, error } = await this.supabase
+      const result = await this.supabase
         .from('listings')
         .select('*');
+      const { data: listings, error } = result;
 
       logger.info(`🔍 Found ${listings?.length || 0} listings in Supabase`);
 
@@ -943,10 +956,11 @@ export class AdminElasticsearchService {
       });
 
       // Hiyerarşik sayıları hesapla - Supabase'den kategori yapısını al
-      const { data: categories } = await this.supabase
+      const result = await this.supabase
         .from('categories')
         .select('id, parent_id, name');
 
+      const { data: categories } = result;
       if (categories) {
         // Her leaf kategori için parent'larına sayı ekle
         Object.entries(categoryCounts).forEach(([categoryId, count]) => {

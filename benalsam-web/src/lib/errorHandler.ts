@@ -1,10 +1,13 @@
 /**
  * Global Error Handler
  * Centralized error handling for admin operations
+ * 
+ * @deprecated Use UnifiedErrorHandler from @/utils/errorHandler instead
  */
 
 import { toast } from '@/components/ui/use-toast';
 import { ApiError } from './apiClient';
+import { errorHandler, ErrorContext } from '@/utils/errorHandler';
 
 export interface ErrorHandlerOptions {
   showToast?: boolean;
@@ -44,37 +47,14 @@ export class ErrorHandler {
 
   /**
    * Handle API errors
+   * @deprecated Use errorHandler.handleApiError instead
    */
-  handleApiError(error: ApiError | any, context?: string): void {
-    const errorMessage = this.formatErrorMessage(error, context);
-    
-    if (this.options.logToConsole) {
-      console.error(`❌ API Error${context ? ` (${context})` : ''}:`, error);
-    }
-
-    // Handle specific error types
-    switch (error.status) {
-      case 401:
-        this.handleAuthError(error);
-        break;
-      case 403:
-        this.handlePermissionError(error);
-        break;
-      case 404:
-        this.handleNotFoundError(error);
-        break;
-      case 422:
-        this.handleValidationError(error);
-        break;
-      case 429:
-        this.handleRateLimitError(error);
-        break;
-      case 500:
-        this.handleServerError(error);
-        break;
-      default:
-        this.handleGenericError(error, errorMessage);
-    }
+  handleApiError(error: ApiError | unknown, context?: string): void {
+    // Delegate to unified error handler
+    errorHandler.handleApiError(error, { 
+      component: context || 'unknown',
+      action: 'api_call'
+    });
   }
 
   /**
