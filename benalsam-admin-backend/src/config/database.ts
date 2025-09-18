@@ -22,7 +22,7 @@ const databaseConfig = {
   // Query timeout settings
   query: {
     timeout: 30000,   // Query timeout (30s)
-    slowQueryThreshold: 5000, // Slow query threshold (5s)
+    slowQueryThreshold: 500, // Slow query threshold (0.5s) - baseline için geçici
   },
   
   // Retry settings
