@@ -12,6 +12,7 @@ import {
   isCoreWebVitals
 } from '../types/performance';
 import { logger } from '../utils/logger';
+import prisma, { getConnectionPoolStats, checkDatabaseHealth } from '../config/database';
 
 // Extend Request interface to include user
 interface AuthenticatedRequest extends Request {
@@ -974,5 +975,33 @@ router.delete('/baseline',
     }
   }
 );
+
+// ===== DATABASE PERFORMANCE METRICS =====
+router.get('/db/metrics', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const [dbHealth, poolStats] = await Promise.all([
+      checkDatabaseHealth(),
+      getConnectionPoolStats()
+    ]);
+    return res.json({ success: true, data: { dbHealth, poolStats }, timestamp: new Date().toISOString() });
+  } catch (error) {
+    logger.error('Error getting DB metrics:', error);
+    return res.status(500).json({ success: false, message: 'Failed to get DB metrics' });
+  }
+});
+
+// Top slow queries via pg_stat_statements
+router.get('/db/slow-queries', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const limit = Math.min(parseInt((req.query.limit as string) || '10'), 50);
+    const result = await prisma.$queryRawUnsafe<any[]>(
+      `SELECT query, calls, total_exec_time AS total_ms, mean_exec_time AS mean_ms, min_exec_time AS min_ms, max_exec_time AS max_ms FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT ${limit}`
+    );
+    return res.json({ success: true, data: result, timestamp: new Date().toISOString() });
+  } catch (error) {
+    logger.error('Error fetching slow queries:', error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch slow queries (pg_stat_statements required)' });
+  }
+});
 
 export default router; 
