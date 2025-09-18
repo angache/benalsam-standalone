@@ -20,7 +20,10 @@
     "db:seed": "ts-node src/database/seed.ts",
     "infra:setup": "chmod +x scripts/setup-infrastructure.sh && ./scripts/setup-infrastructure.sh",
     "infra:sync": "node scripts/sync-listings-to-es.js",
-    "infra:reset": "npm run infra:setup && npm run infra:sync"
+    "infra:reset": "npm run infra:setup && npm run infra:sync",
+    "load-test": "node load-testing/load-test.js",
+    "load-test:quick": "artillery run load-testing/artillery-config.yml",
+    "load-test:report": "artillery report load-testing/results/baseline-report.json"
   },
   "keywords": [
     "admin",
@@ -102,6 +105,8 @@
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
+    "artillery": "^2.0.21",
+    "autocannon": "^8.0.0",
     "eslint": "^8.56.0",
     "jest": "^29.7.0",
     "nodemon": "^3.0.3",

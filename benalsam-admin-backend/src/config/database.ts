@@ -8,27 +8,32 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Enterprise level database configuration
+// Enterprise level database configuration - Supabase optimized
 const databaseConfig = {
-  // Connection pool settings
+  // Connection pool settings - Supabase optimized
   pool: {
-    min: 2,           // Minimum connections
-    max: 20,          // Maximum connections (production için)
-    acquire: 60000,   // Connection acquire timeout (60s)
-    idle: 10000,      // Connection idle timeout (10s)
-    evict: 30000,     // Connection eviction interval (30s)
+    min: 1,           // Minimum connections (Supabase managed)
+    max: 10,          // Maximum connections (Supabase limit: 15)
+    acquire: 30000,   // Connection acquire timeout (30s)
+    idle: 5000,       // Connection idle timeout (5s)
+    evict: 15000,     // Connection eviction interval (15s)
+    createTimeoutMillis: 10000,  // Connection creation timeout (10s)
+    destroyTimeoutMillis: 5000,  // Connection destruction timeout (5s)
+    reapIntervalMillis: 1000,    // Connection reaping interval (1s)
+    createRetryIntervalMillis: 200, // Connection retry interval (200ms)
   },
   
   // Query timeout settings
   query: {
-    timeout: 30000,   // Query timeout (30s)
-    slowQueryThreshold: 500, // Slow query threshold (0.5s) - baseline için geçici
+    timeout: 20000,   // Query timeout (20s) - reduced for better UX
+    slowQueryThreshold: 1000, // Slow query threshold (1s) - production ready
   },
   
   // Retry settings
   retry: {
     maxRetries: 3,
     retryDelay: 1000,
+    backoffMultiplier: 2,  // Exponential backoff
   }
 };
 
@@ -101,7 +106,8 @@ process.on('beforeExit', async () => {
 export const checkDatabaseHealth = async () => {
   try {
     const startTime = Date.now();
-    await prisma.$queryRaw`SELECT 1`;
+    // Simple health check
+    await prisma.$executeRaw`SELECT 1`;
     const responseTime = Date.now() - startTime;
     
     return {
@@ -125,20 +131,36 @@ export const checkDatabaseHealth = async () => {
 // Connection pool stats
 export const getConnectionPoolStats = async () => {
   try {
-    // Get connection pool information
-    const stats = await prisma.$queryRaw`
-      SELECT 
+    // Get actual connection pool information from Supabase
+    const stats = await prisma.$queryRawUnsafe<any[]>(
+      `SELECT 
         count(*) as total_connections,
         count(*) FILTER (WHERE state = 'active') as active_connections,
         count(*) FILTER (WHERE state = 'idle') as idle_connections,
-        count(*) FILTER (WHERE state = 'idle in transaction') as idle_in_transaction
+        count(*) FILTER (WHERE state = 'idle in transaction') as idle_in_transaction,
+        count(*) FILTER (WHERE state = 'waiting') as waiting_connections
       FROM pg_stat_activity 
       WHERE datname = current_database()
-    `;
+      AND pid != pg_backend_pid()`
+    );
+    
+    const poolStats = stats[0] || {};
     
     return {
-      ...(stats as any)[0],
-      timestamp: new Date().toISOString()
+      total_connections: parseInt(poolStats.total_connections) || 0,
+      active_connections: parseInt(poolStats.active_connections) || 0,
+      idle_connections: parseInt(poolStats.idle_connections) || 0,
+      idle_in_transaction: parseInt(poolStats.idle_in_transaction) || 0,
+      waiting_connections: parseInt(poolStats.waiting_connections) || 0,
+      pool_config: {
+        min: databaseConfig.pool.min,
+        max: databaseConfig.pool.max,
+        acquire_timeout: databaseConfig.pool.acquire,
+        idle_timeout: databaseConfig.pool.idle,
+        evict_interval: databaseConfig.pool.evict
+      },
+      timestamp: new Date().toISOString(),
+      note: 'Supabase connection pool with Prisma optimization'
     };
   } catch (error) {
     logger.error('Failed to get connection pool stats', {

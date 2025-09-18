@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticateToken, authenticateSupabaseToken } from '../middleware/auth';
 import userBehaviorService from '../services/userBehaviorService';
+import { readThroughCache, cachePresets } from '../middleware/readThroughCache';
 import logger from '../config/logger';
 import { AnalyticsEvent, AnalyticsEventType } from 'benalsam-shared-types';
 
@@ -347,8 +348,14 @@ router.get('/performance-alerts', authenticateToken, async (req, res) => {
   }
 });
 
-// Get comprehensive analytics dashboard (enterprise optimized)
-router.get('/dashboard', authenticateToken, async (req, res) => {
+// Get comprehensive analytics dashboard (enterprise optimized) - Cache for 2 minutes
+router.get('/dashboard', 
+  readThroughCache({
+    ttl: 120,
+    namespace: 'analytics'
+  }),
+  authenticateToken, 
+  async (req, res) => {
   try {
     const { days = 7 } = req.query;
     const startTime = Date.now();

@@ -1,29 +1,55 @@
 import { Router, IRouter } from 'express';
 import { listingsController } from '../controllers/listingsController';
 import { authenticateToken } from '../middleware/auth';
+import { readThroughCache, cachePresets } from '../middleware/readThroughCache';
+import { cacheInvalidation, invalidationPresets } from '../middleware/cacheInvalidation';
 
 const router: IRouter = Router();
 
 // Apply auth middleware to all routes
 router.use(authenticateToken);
 
-// Get all listings with filters
-router.get('/', listingsController.getListings);
+// Get all listings with filters - Cache for 5 minutes
+router.get('/', 
+  readThroughCache({
+    ...cachePresets.mediumTerm,
+    namespace: 'listings'
+  }),
+  listingsController.getListings
+);
 
-// Get single listing
-router.get('/:id', listingsController.getListing);
+// Get single listing - Cache for 10 minutes (rarely changes)
+router.get('/:id', 
+  readThroughCache({
+    ttl: 600,
+    namespace: 'listings'
+  }),
+  listingsController.getListing
+);
 
-// Update listing
-router.put('/:id', listingsController.updateListing);
+// Update listing - Invalidate cache
+router.put('/:id', 
+  cacheInvalidation(invalidationPresets.listings),
+  listingsController.updateListing
+);
 
-// Delete listing
-router.delete('/:id', listingsController.deleteListing);
+// Delete listing - Invalidate cache
+router.delete('/:id', 
+  cacheInvalidation(invalidationPresets.listings),
+  listingsController.deleteListing
+);
 
-// Moderate listing (approve/reject)
-router.post('/:id/moderate', listingsController.moderateListing);
+// Moderate listing (approve/reject) - Invalidate cache
+router.post('/:id/moderate', 
+  cacheInvalidation(invalidationPresets.listings),
+  listingsController.moderateListing
+);
 
-// Re-evaluate listing (move active listing back to pending)
-router.post('/:id/re-evaluate', listingsController.reEvaluateListing);
+// Re-evaluate listing (move active listing back to pending) - Invalidate cache
+router.post('/:id/re-evaluate', 
+  cacheInvalidation(invalidationPresets.listings),
+  listingsController.reEvaluateListing
+);
 
 // Test endpoint - Create test listings (no auth required)
 router.post('/test/create', async (req, res): Promise<void> => {

@@ -5,11 +5,12 @@ import { supabase } from '../config/supabase';
 import Redis from 'ioredis';
 import logger from '../config/logger';
 import { databaseTriggerBridge } from '../services/databaseTriggerBridge';
+import { requestTimeout, timeoutPresets } from '../middleware/timeout';
 
 const router: IRouter = express.Router();
 
-// Ana health check endpoint
-router.get('/', async (req, res) => {
+// Ana health check endpoint - Fast timeout (3 seconds)
+router.get('/', requestTimeout(timeoutPresets.health), async (req, res) => {
   try {
     const healthStatus = {
       status: 'healthy',
@@ -24,40 +25,37 @@ router.get('/', async (req, res) => {
       }
     };
 
-    // Database health check
-    try {
-      const { data, error } = await supabase
+    // ✅ OPTIMIZED: Parallel health checks with timeout
+    const healthChecks = await Promise.allSettled([
+      // Database health check
+      supabase
         .from('admin_users')
         .select('count')
-        .limit(1);
+        .limit(1)
+        .then(({ error }) => {
+          if (error) throw error;
+          return 'healthy';
+        }),
       
-      if (error) throw error;
-      healthStatus.services.database = 'healthy';
-    } catch (error) {
-      healthStatus.services.database = 'unhealthy';
-      healthStatus.status = 'degraded';
-    }
+      // Redis health check
+      redis.ping().then(() => 'healthy'),
+      
+      // Elasticsearch health check
+      elasticsearchClient.cluster.health().then(health => {
+        if (health.status === 'red') throw new Error('Cluster status is red');
+        return 'healthy';
+      })
+    ]);
 
-    // Redis health check
-    try {
-      await redis.ping();
-      healthStatus.services.redis = 'healthy';
-    } catch (error) {
-      healthStatus.services.redis = 'unhealthy';
-      healthStatus.status = 'degraded';
-    }
-
-    // Elasticsearch health check
-    try {
-      const health = await elasticsearchClient.cluster.health();
-      if (health.status === 'red') {
-        healthStatus.services.elasticsearch = 'unhealthy';
-        healthStatus.status = 'degraded';
-      } else {
-        healthStatus.services.elasticsearch = 'healthy';
-      }
-    } catch (error) {
-      healthStatus.services.elasticsearch = 'unhealthy';
+    // Process results
+    const [dbResult, redisResult, esResult] = healthChecks;
+    
+    healthStatus.services.database = dbResult.status === 'fulfilled' ? 'healthy' : 'unhealthy';
+    healthStatus.services.redis = redisResult.status === 'fulfilled' ? 'healthy' : 'unhealthy';
+    healthStatus.services.elasticsearch = esResult.status === 'fulfilled' ? 'healthy' : 'unhealthy';
+    
+    // Set overall status
+    if (dbResult.status === 'rejected' || redisResult.status === 'rejected' || esResult.status === 'rejected') {
       healthStatus.status = 'degraded';
     }
 
@@ -87,8 +85,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Detaylı health check endpoint
-router.get('/detailed', async (req, res) => {
+// Detaylı health check endpoint - Standard timeout (15 seconds)
+router.get('/detailed', requestTimeout(timeoutPresets.standard), async (req, res) => {
   try {
     const detailedHealth = {
       status: 'healthy',
@@ -225,8 +223,8 @@ router.get('/detailed', async (req, res) => {
   }
 });
 
-// Sadece database health check
-router.get('/database', async (req, res) => {
+// Sadece database health check - Fast timeout (5 seconds)
+router.get('/database', requestTimeout(timeoutPresets.fast), async (req, res) => {
   try {
     const start = Date.now();
     const { data, error } = await supabase
@@ -254,8 +252,8 @@ router.get('/database', async (req, res) => {
   }
 });
 
-// Sadece Redis health check
-router.get('/redis', async (req, res) => {
+// Sadece Redis health check - Fast timeout (5 seconds)
+router.get('/redis', requestTimeout(timeoutPresets.fast), async (req, res) => {
   try {
     const start = Date.now();
     const pingResponse = await redis.ping();

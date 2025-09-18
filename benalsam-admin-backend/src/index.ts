@@ -9,6 +9,7 @@ import { Server } from 'socket.io';
 import { initializeSentry, errorHandler as sentryErrorHandler } from './config/sentry';
 import { performanceMiddleware } from './middleware/performanceMonitor';
 import { securityMonitoringMiddleware, trackRateLimitExceeded } from './middleware/securityMonitor';
+import { adaptiveTimeout } from './middleware/timeout';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -201,6 +202,9 @@ app.use('/api/v1/analytics/', analyticsLimiter);
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ✅ OPTIMIZED: Adaptive timeout middleware
+app.use(adaptiveTimeout());
 
 // Security middleware
 app.use(sanitizeInput); // XSS protection
