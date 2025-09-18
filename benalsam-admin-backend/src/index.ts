@@ -11,6 +11,13 @@ import { performanceMiddleware } from './middleware/performanceMonitor';
 import { securityMonitoringMiddleware, trackRateLimitExceeded } from './middleware/securityMonitor';
 import { adaptiveTimeout } from './middleware/timeout';
 import { jwtSecurityService } from './services/jwtSecurityService';
+import { 
+  sqlInjectionProtection, 
+  enhancedXSSProtection, 
+  securityHeaders, 
+  inputLengthValidation,
+  fileUploadValidation 
+} from './middleware/securityMiddleware';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -215,8 +222,13 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // ✅ OPTIMIZED: Adaptive timeout middleware
 app.use(adaptiveTimeout());
 
-// Security middleware
-app.use(sanitizeInput); // XSS protection
+// ✅ ENHANCED: Security middleware stack
+app.use(securityHeaders); // Security headers
+app.use(sqlInjectionProtection); // SQL injection protection
+app.use(enhancedXSSProtection); // Enhanced XSS protection
+app.use(inputLengthValidation); // Input length validation
+app.use(fileUploadValidation); // File upload validation
+app.use(sanitizeInput); // Legacy XSS protection (fallback)
 
 // Request logging middleware
 app.use((req, res, next) => {
