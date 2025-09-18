@@ -230,15 +230,15 @@ const PerformanceBaselinePage: React.FC = () => {
   };
 
   const formatResponseTime = (time: number | null | undefined) => {
-    if (time === null || time === undefined) return 'N/A';
+    if (time === null || time === undefined || isNaN(time)) return 'N/A';
     return `${time.toFixed(2)}ms`;
   };
   const formatThroughput = (throughput: number | null | undefined) => {
-    if (throughput === null || throughput === undefined) return 'N/A';
+    if (throughput === null || throughput === undefined || isNaN(throughput)) return 'N/A';
     return `${throughput.toFixed(2)} req/s`;
   };
   const formatErrorRate = (rate: number | null | undefined) => {
-    if (rate === null || rate === undefined) return 'N/A';
+    if (rate === null || rate === undefined || isNaN(rate)) return 'N/A';
     return `${(rate * 100).toFixed(2)}%`;
   };
 
@@ -283,7 +283,7 @@ const PerformanceBaselinePage: React.FC = () => {
             <Grid item xs={12} md={2}>
               <Box textAlign="center">
                 <Typography variant="h6" color="primary">
-                  {metrics.LCP ? `${metrics.LCP}ms` : 'N/A'}
+                  {metrics.LCP && !isNaN(metrics.LCP) ? `${metrics.LCP}ms` : 'N/A'}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   LCP
@@ -300,7 +300,7 @@ const PerformanceBaselinePage: React.FC = () => {
             <Grid item xs={12} md={2}>
               <Box textAlign="center">
                 <Typography variant="h6" color="primary">
-                  {metrics.INP ? `${metrics.INP}ms` : 'N/A'}
+                  {metrics.INP && !isNaN(metrics.INP) ? `${metrics.INP}ms` : 'N/A'}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   INP
@@ -317,7 +317,7 @@ const PerformanceBaselinePage: React.FC = () => {
             <Grid item xs={12} md={2}>
               <Box textAlign="center">
                 <Typography variant="h6" color="primary">
-                  {metrics.CLS ? metrics.CLS.toFixed(3) : 'N/A'}
+                  {metrics.CLS && !isNaN(metrics.CLS) ? metrics.CLS.toFixed(3) : 'N/A'}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   CLS
@@ -334,7 +334,7 @@ const PerformanceBaselinePage: React.FC = () => {
             <Grid item xs={12} md={2}>
               <Box textAlign="center">
                 <Typography variant="h6" color="primary">
-                  {metrics.FCP ? `${metrics.FCP}ms` : 'N/A'}
+                  {metrics.FCP && !isNaN(metrics.FCP) ? `${metrics.FCP}ms` : 'N/A'}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   FCP
@@ -351,7 +351,7 @@ const PerformanceBaselinePage: React.FC = () => {
             <Grid item xs={12} md={2}>
               <Box textAlign="center">
                 <Typography variant="h6" color="primary">
-                  {metrics.TTFB ? `${metrics.TTFB}ms` : 'N/A'}
+                  {metrics.TTFB && !isNaN(metrics.TTFB) ? `${metrics.TTFB}ms` : 'N/A'}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   TTFB
@@ -418,7 +418,7 @@ const PerformanceBaselinePage: React.FC = () => {
                     <TableRow>
                       <TableCell>LCP (Largest Contentful Paint)</TableCell>
                       <TableCell align="right">
-                        {metrics.LCP ? `${metrics.LCP.toFixed(0)}ms` : 'N/A'}
+                        {metrics.LCP && !isNaN(metrics.LCP) ? `${metrics.LCP.toFixed(0)}ms` : 'N/A'}
                       </TableCell>
                       <TableCell align="center">
                         <Chip
@@ -431,7 +431,7 @@ const PerformanceBaselinePage: React.FC = () => {
                     <TableRow>
                       <TableCell>INP (Interaction to Next Paint)</TableCell>
                       <TableCell align="right">
-                        {metrics.INP ? `${metrics.INP.toFixed(0)}ms` : 'N/A'}
+                        {metrics.INP && !isNaN(metrics.INP) ? `${metrics.INP.toFixed(0)}ms` : 'N/A'}
                       </TableCell>
                       <TableCell align="center">
                         <Chip
@@ -444,7 +444,7 @@ const PerformanceBaselinePage: React.FC = () => {
                     <TableRow>
                       <TableCell>CLS (Cumulative Layout Shift)</TableCell>
                       <TableCell align="right">
-                        {metrics.CLS ? metrics.CLS.toFixed(3) : 'N/A'}
+                        {metrics.CLS && !isNaN(metrics.CLS) ? metrics.CLS.toFixed(3) : 'N/A'}
                       </TableCell>
                       <TableCell align="center">
                         <Chip
@@ -457,7 +457,7 @@ const PerformanceBaselinePage: React.FC = () => {
                     <TableRow>
                       <TableCell>FCP (First Contentful Paint)</TableCell>
                       <TableCell align="right">
-                        {metrics.FCP ? `${metrics.FCP.toFixed(0)}ms` : 'N/A'}
+                        {metrics.FCP && !isNaN(metrics.FCP) ? `${metrics.FCP.toFixed(0)}ms` : 'N/A'}
                       </TableCell>
                       <TableCell align="center">
                         <Chip
@@ -470,7 +470,7 @@ const PerformanceBaselinePage: React.FC = () => {
                     <TableRow>
                       <TableCell>TTFB (Time to First Byte)</TableCell>
                       <TableCell align="right">
-                        {metrics.TTFB ? `${metrics.TTFB.toFixed(0)}ms` : 'N/A'}
+                        {metrics.TTFB && !isNaN(metrics.TTFB) ? `${metrics.TTFB.toFixed(0)}ms` : 'N/A'}
                       </TableCell>
                       <TableCell align="center">
                         <Chip
@@ -838,7 +838,7 @@ const PerformanceBaselinePage: React.FC = () => {
                       {alert.message}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      <strong>Endpoint:</strong> {alert.endpoint} | <strong>Value:</strong> {alert.value ? alert.value.toFixed(2) : 'N/A'} | <strong>Threshold:</strong> {alert.threshold}
+                      <strong>Endpoint:</strong> {alert.endpoint} | <strong>Value:</strong> {alert.value && !isNaN(alert.value) ? alert.value.toFixed(2) : 'N/A'} | <strong>Threshold:</strong> {alert.threshold}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       {new Date(alert.timestamp).toLocaleString()}

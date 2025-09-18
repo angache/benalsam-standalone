@@ -233,13 +233,13 @@ class PerformanceTrendService {
       console.log('🔍 [TrendService] Getting active routes...');
       
       // Önce güncel data key'lerini dene
-      let keys = await redis.keys('perf:data:*');
+      let keys = await redis.keys('performance:analysis:*');
       console.log('🔍 [TrendService] Current data keys:', keys);
       
       // Eğer güncel data yoksa, history key'lerinden route'ları çıkar
       if (keys.length === 0) {
         console.log('🔍 [TrendService] No current data, checking history keys...');
-        const historyKeys = await redis.keys('perf:history:*');
+        const historyKeys = await redis.keys('performance:history:*');
         console.log('🔍 [TrendService] History keys found:', historyKeys.length);
         
         const routeSet = new Set<string>();
@@ -247,7 +247,7 @@ class PerformanceTrendService {
         for (const key of historyKeys) {
           const parts = key.split(':');
           if (parts.length >= 3) {
-            const route = parts[2]; // perf:history:route:timestamp -> parts[2] = route
+            const route = parts[2]; // performance:history:route:timestamp -> parts[2] = route
             if (route && route !== 'history') {
               routeSet.add(route);
             }
@@ -259,7 +259,7 @@ class PerformanceTrendService {
         return routes;
       }
       
-      const routes = keys.map((key: string) => key.replace('perf:data:', ''));
+      const routes = keys.map((key: string) => key.replace('performance:analysis:', ''));
       console.log('🔍 [TrendService] Routes from current data:', routes);
       return routes;
     } catch (error) {
@@ -273,7 +273,7 @@ class PerformanceTrendService {
    */
   private async getCurrentPerformanceData(route: string): Promise<any> {
     try {
-      const data = await redis.get(`perf:data:${route}`);
+      const data = await redis.get(`performance:analysis:${route}`);
       return data ? JSON.parse(data) : null;
     } catch (error) {
       console.error(`${route} güncel data alınamadı:`, error);
@@ -286,7 +286,7 @@ class PerformanceTrendService {
    */
   private async getHistoricalPerformanceData(route: string, period: '1h' | '24h' | '7d' | '30d'): Promise<any[]> {
     try {
-      const keys = await redis.keys(`perf:history:${route}:*`);
+      const keys = await redis.keys(`performance:history:${route}:*`);
       const data: any[] = [];
 
       for (const key of keys) {
@@ -309,7 +309,7 @@ class PerformanceTrendService {
   private async getCurrentPerformanceDataBatch(routes: string[]): Promise<Record<string, any>> {
     try {
       const pipeline = redis.pipeline();
-      const keys = routes.map(route => `perf:data:${route}`);
+      const keys = routes.map(route => `performance:analysis:${route}`);
       
       keys.forEach(key => pipeline.get(key as string));
       
@@ -346,7 +346,7 @@ class PerformanceTrendService {
       
       // Her route için history key'lerini al
       for (const route of routes) {
-        const keys = await redis.keys(`perf:history:${route}:*`);
+        const keys = await redis.keys(`performance:history:${route}:*`);
         routeKeys.push({ route, keys });
         
         // Her key için get komutu ekle

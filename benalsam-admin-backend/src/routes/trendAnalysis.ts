@@ -234,10 +234,10 @@ router.get('/health', async (req, res) => {
  */
 router.get('/debug/keys', authenticateToken, async (req, res) => {
   try {
-    const dataKeys = await redis.keys('perf:data:*');
-    const historyKeys = await redis.keys('perf:history:*');
-    const trendKeys = await redis.keys('perf:trend:*');
-    const alertKeys = await redis.keys('perf:alert:*');
+    const dataKeys = await redis.keys('performance:analysis:*');
+    const historyKeys = await redis.keys('performance:history:*');
+    const trendKeys = await redis.keys('performance:trend:*');
+    const alertKeys = await redis.keys('performance:alert:*');
     
     return res.json({
       success: true,
