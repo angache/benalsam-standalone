@@ -18,6 +18,8 @@ import {
   inputLengthValidation,
   fileUploadValidation 
 } from './middleware/securityMiddleware';
+import apmMiddleware from './middleware/apmMiddleware';
+import enhancedErrorHandler from './middleware/enhancedErrorHandler';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -50,6 +52,7 @@ import analyticsAlertsRoutes from './routes/analyticsAlerts';
 import alertRoutes from './routes/alerts';
 import dataExportRoutes from './routes/dataExport';
 import dataExportV2Routes from './routes/dataExportV2';
+import apmRoutes from './routes/apm';
 import loadTestingRoutes from './routes/loadTesting';
 import sessionManagementRoutes from './routes/sessionManagement';
 import cacheRoutes from './routes/cache';
@@ -102,6 +105,9 @@ initializeSentry(app);
 
 // Performance monitoring middleware (must be early)
 app.use(performanceMiddleware);
+
+// APM middleware (must be early for request tracking)
+app.use(apmMiddleware.middleware);
 
 // Security monitoring middleware (must be early)
 app.use(securityMonitoringMiddleware);
@@ -270,6 +276,7 @@ app.use('/api/v1/elasticsearch', elasticsearchRoutes);
 app.use('/api/v1/admin-management', authenticateToken, adminManagementRoutes);
 app.use('/api/v1/analytics', analyticsRoutes); // Analytics aktif edildi
 app.use('/api/v1/performance', performanceRoutes); // Performance monitoring aktif edildi
+app.use('/api/v1/apm', apmRoutes); // APM (Application Performance Monitoring) sistemi aktif edildi
 app.use('/api/v1/trends', trendAnalysisRoutes); // Trend Analysis sistemi aktif edildi
 app.use('/api/v1/user-journey', userJourneyRoutes); // User Journey tracking aktif edildi
 app.use('/api/v1/analytics-alerts', analyticsAlertsRoutes); // Analytics Alerts sistemi aktif edildi
@@ -312,16 +319,12 @@ app.use('/api/v1/jwt-security', jwtSecurityRoutes); // JWT Security routes
 // Sentry error handler is now integrated into the main error handler
 
 // Global error handler
-app.use(errorHandler);
+app.use(apmMiddleware.errorMiddleware); // APM error tracking
+app.use(enhancedErrorHandler.handle); // Enhanced error handling
+app.use(errorHandler); // Legacy error handler (fallback)
 
 // 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Endpoint not found',
-    path: req.originalUrl
-  });
-});
+app.use('*', enhancedErrorHandler.handleNotFound);
 
 // Start server
 const startServer = async () => {
@@ -420,6 +423,10 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
+// Enhanced error handling for unhandled rejections and exceptions
+process.on('unhandledRejection', enhancedErrorHandler.handleUnhandledRejection);
+process.on('uncaughtException', enhancedErrorHandler.handleUncaughtException);
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {

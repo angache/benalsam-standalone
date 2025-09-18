@@ -3,6 +3,38 @@ import { Request, Response, NextFunction } from 'express';
 import logger from '../config/logger';
 import { trackValidationFailure } from './securityMonitor';
 
+// Generic validation error handler
+export const handleValidationErrors = (req: Request, res: Response, next: NextFunction): void => {
+  const errors = validationResult(req);
+  
+  if (!errors.isEmpty()) {
+    logger.warn('Enhanced validation failed', {
+      endpoint: req.path,
+      method: req.method,
+      errors: errors.array(),
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      timestamp: new Date().toISOString()
+    });
+    
+    // Track validation failure for security monitoring
+    trackValidationFailure(req, errors.array());
+    
+    res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.array().map(error => ({
+        field: error.type === 'field' ? error.path : 'unknown',
+        message: error.msg,
+        value: error.type === 'field' ? error.value : undefined
+      }))
+    });
+    return;
+  }
+  
+  next();
+};
+
 // Enhanced Email Validation
 export const validateEmail = [
   body('email')
@@ -188,38 +220,6 @@ export const validateAdminInput = [
     .withMessage('Soyad 2-50 karakter arasında olmalıdır'),
   handleValidationErrors
 ];
-
-// Generic validation error handler
-export const handleValidationErrors = (req: Request, res: Response, next: NextFunction): void => {
-  const errors = validationResult(req);
-  
-  if (!errors.isEmpty()) {
-    logger.warn('Enhanced validation failed', {
-      endpoint: req.path,
-      method: req.method,
-      errors: errors.array(),
-      ip: req.ip,
-      userAgent: req.get('User-Agent'),
-      timestamp: new Date().toISOString()
-    });
-    
-    // Track validation failure for security monitoring
-    trackValidationFailure(req, errors.array());
-    
-    res.status(400).json({
-      success: false,
-      message: 'Validation failed',
-      errors: errors.array().map(error => ({
-        field: error.type === 'field' ? error.path : 'unknown',
-        message: error.msg,
-        value: error.type === 'field' ? error.value : undefined
-      }))
-    });
-    return;
-  }
-  
-  next();
-};
 
 // Rate limiting validation
 export const validateRateLimit = (req: Request, res: Response, next: NextFunction): void => {

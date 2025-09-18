@@ -169,7 +169,7 @@ export class IndexerService {
     try {
       // Elasticsearch'e bulk index
       const documents = batch.map(job => this.transformJobToDocument(job));
-      const success = await this.elasticsearchService.bulkIndex(documents);
+      const success = await this.elasticsearchService.bulkIndex(documents as any);
 
       if (success) {
         logger.info(`✅ Batch processed successfully: ${batch.length} jobs`);
