@@ -8,21 +8,21 @@ const redisConfig = {
   password: process.env.REDIS_PASSWORD,
   lazyConnect: true,
   enableReadyCheck: true,
-  maxLoadingTimeout: 10000,
-  // Arkadaşının önerdiği iyileştirmeler
+  maxLoadingTimeout: 15000,
+  // Artırımlı geri bekleme ve üst sınır
   retryStrategy: (times: number) => {
-    const delay = Math.min(times * 50, 2000);
-    logger.info(`🔄 Redis retry attempt ${times}, delay: ${delay}ms`);
+    const delay = Math.min(100 * Math.pow(1.3, times), 5000);
+    logger.info(`🔄 Redis retry attempt ${times}, delay: ${Math.round(delay)}ms`);
     return delay;
   },
   // Bağlantı timeout ayarları
-  connectTimeout: 10000,
-  commandTimeout: 5000,
+  connectTimeout: parseInt(process.env.REDIS_CONNECT_TIMEOUT || '15000'),
+  commandTimeout: parseInt(process.env.REDIS_COMMAND_TIMEOUT || '10000'),
   // Keep alive ayarları
-  keepAlive: 30000,
+  keepAlive: parseInt(process.env.REDIS_KEEP_ALIVE || '30000'),
   // Auto reconnect ayarları
-  maxRetriesPerRequest: 3,
-  retryDelayOnFailover: 100,
+  maxRetriesPerRequest: parseInt(process.env.REDIS_MAX_RETRIES || '5'),
+  retryDelayOnFailover: 200,
   // Error handling
   enableOfflineQueue: true, // false'dan true'ya değiştirildi
   // Connection pooling
@@ -37,6 +37,10 @@ export const redis = new Redis(redisConfig);
 // Redis event handlers
 redis.on('connect', () => {
   logger.info('✅ Redis connected');
+});
+
+redis.on('ready', () => {
+  logger.info('✅ Redis ready');
 });
 
 redis.on('error', (error: Error) => {
@@ -63,9 +67,33 @@ redis.on('reconnecting', () => {
   logger.info('🔄 Redis reconnecting...');
 });
 
-redis.on('ready', () => {
-  logger.info('✅ Redis ready');
-});
+// Periyodik ping ile bağlantı sağlığını izle
+try {
+  setInterval(async () => {
+    try {
+      await redis.ping();
+    } catch (err) {
+      logger.warn('⚠️ Redis ping failed', err as Error);
+    }
+  }, 30000);
+} catch {
+  // ignore scheduler errors
+}
+
+// Graceful shutdown
+const shutdown = async () => {
+  try {
+    if ((redis as any).status !== 'end') {
+      await redis.quit();
+      logger.info('✅ Redis disconnected');
+    }
+  } catch (e) {
+    logger.error('❌ Error during Redis disconnect', e as Error);
+  }
+};
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
 
 // Test Redis connection
 export const testRedisConnection = async (): Promise<boolean> => {
