@@ -298,7 +298,7 @@ export class AuthController {
       }
 
       // Verify refresh token
-      const decoded = jwtUtils.verify(refreshToken);
+      const decoded = await jwtUtils.verify(refreshToken);
 
       // Get admin user
       const { data: admin, error } = await supabase

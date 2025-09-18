@@ -36,7 +36,7 @@ export const authenticateToken = async (
     
     // First try to verify as admin token
     try {
-      const decoded = jwtUtils.verify(token);
+      const decoded = await jwtUtils.verify(token);
       console.log('🔐 Token decoded as admin:', decoded);
       
       // Get admin user from Supabase
@@ -236,7 +236,7 @@ export const optionalAuth = async (
     const token = authHeader && authHeader.split(' ')[1];
 
     if (token) {
-      const decoded = jwtUtils.verify(token);
+      const decoded = await jwtUtils.verify(token);
       
       const { data: admin, error } = await supabase
         .from('admin_users')

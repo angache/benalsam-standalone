@@ -10,6 +10,7 @@ import { initializeSentry, errorHandler as sentryErrorHandler } from './config/s
 import { performanceMiddleware } from './middleware/performanceMonitor';
 import { securityMonitoringMiddleware, trackRateLimitExceeded } from './middleware/securityMonitor';
 import { adaptiveTimeout } from './middleware/timeout';
+import { jwtSecurityService } from './services/jwtSecurityService';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -49,6 +50,7 @@ import searchRoutes from './routes/search';
 import apiCacheRoutes from './routes/apiCache';
 import testRoutes from './routes/test';
 import cacheAnalyticsRoutes from './routes/cacheAnalytics';
+import jwtSecurityRoutes from './routes/jwtSecurity';
 import predictiveCacheRoutes from './routes/predictiveCache';
 import geographicCacheRoutes from './routes/geographicCache';
 import smartInvalidationRoutes from './routes/smartInvalidation';
@@ -113,6 +115,13 @@ analyticsAlertsService.initializeIndexes().then(() => {
   logger.info('✅ Analytics Alerts Service initialized');
 }).catch((error) => {
   logger.error('❌ Analytics Alerts Service initialization failed:', error);
+});
+
+// ✅ Initialize JWT Security Service
+jwtSecurityService.initialize().then(() => {
+  logger.info('✅ JWT Security Service initialized');
+}).catch((error) => {
+  logger.error('❌ JWT Security Service initialization failed:', error);
 });
 
 // Security middleware
@@ -282,6 +291,7 @@ app.use('/api/v1/security', securityRoutes); // Security monitoring routes
 app.use('/api/v1/upload', uploadRoutes); // Cloudinary upload routes
 app.use('/api/v1/ai-suggestions', aiSuggestionsRoutes); // AI Suggestions sistemi aktif edildi
 app.use('/api/v1/inventory', inventoryRoutes); // Inventory routes
+app.use('/api/v1/jwt-security', jwtSecurityRoutes); // JWT Security routes
 
 
 // SEO routes (no auth required)
