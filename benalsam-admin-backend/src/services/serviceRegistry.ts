@@ -183,10 +183,22 @@ export class ServiceRegistry {
       };
     } catch (error) {
       const responseTime = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      // Log detailed error for debugging
+      logger.error(`❌ Service health check failed: ${serviceName}`, {
+        serviceName: serviceName,
+        url: config.url,
+        endpoint: config.healthEndpoint,
+        error: errorMessage,
+        responseTime,
+        service: 'admin-backend'
+      });
+      
       return {
         name: serviceName,
         healthy: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
         responseTime
       };
     }
