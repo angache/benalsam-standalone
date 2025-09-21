@@ -41,7 +41,10 @@ export interface IRabbitMQService {
   connect(): Promise<void>;
   disconnect(): Promise<void>;
   publishMessage(queueName: string, message: any): Promise<void>;
+  publishToExchange(exchange: string, routingKey: string, message: any, options?: any): Promise<boolean>;
+  consumeMessages(queueName: string, handler: (message: any) => Promise<void>): Promise<void>;
   isConnected(): boolean;
+  healthCheck(): Promise<{ status: string; responseTime: number }>;
 }
 
 /**

@@ -12,6 +12,7 @@ import { errorHandler } from './middleware/errorHandler';
 import { healthRoutes } from './routes/health';
 import { bridgeRoutes } from './routes/bridge';
 import { databaseTriggerBridge } from './services/databaseTriggerBridge';
+import { rabbitmqService } from './services/rabbitmqService';
 
 const app = express();
 const PORT = process.env['PORT'] || 3012;
@@ -58,35 +59,51 @@ server.listen(PORT, async () => {
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
-  logger.info('SIGTERM received, shutting down gracefully');
+  logger.info('🛑 SIGTERM received, starting graceful shutdown...');
   
-  // Stop database trigger bridge
   try {
+    // Stop accepting new requests
+    server.close(() => {
+      logger.info('✅ HTTP server closed');
+    });
+
+    // Stop database trigger bridge
     await databaseTriggerBridge.stopProcessing();
     logger.info('✅ Database trigger bridge stopped');
-  } catch (error) {
-    logger.error('❌ Error stopping database trigger bridge:', error);
-  }
-  
-  server.close(() => {
-    logger.info('Process terminated');
+
+    // Disconnect from RabbitMQ (this will wait for in-flight messages)
+    await rabbitmqService.disconnect();
+    logger.info('✅ RabbitMQ disconnected');
+
+    logger.info('✅ Graceful shutdown completed');
     process.exit(0);
-  });
+  } catch (error) {
+    logger.error('❌ Error during graceful shutdown:', error);
+    process.exit(1);
+  }
 });
 
 process.on('SIGINT', async () => {
-  logger.info('SIGINT received, shutting down gracefully');
+  logger.info('🛑 SIGINT received, starting graceful shutdown...');
   
-  // Stop database trigger bridge
   try {
+    // Stop accepting new requests
+    server.close(() => {
+      logger.info('✅ HTTP server closed');
+    });
+
+    // Stop database trigger bridge
     await databaseTriggerBridge.stopProcessing();
     logger.info('✅ Database trigger bridge stopped');
-  } catch (error) {
-    logger.error('❌ Error stopping database trigger bridge:', error);
-  }
-  
-  server.close(() => {
-    logger.info('Process terminated');
+
+    // Disconnect from RabbitMQ (this will wait for in-flight messages)
+    await rabbitmqService.disconnect();
+    logger.info('✅ RabbitMQ disconnected');
+
+    logger.info('✅ Graceful shutdown completed');
     process.exit(0);
-  });
+  } catch (error) {
+    logger.error('❌ Error during graceful shutdown:', error);
+    process.exit(1);
+  }
 });
