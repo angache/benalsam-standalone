@@ -20,6 +20,8 @@
 - **benalsam-listing-service** (Port 3008) - İlan yönetimi
 - **benalsam-upload-service** (Port 3007) - Dosya yükleme
 - **benalsam-elasticsearch-service** (Port 3006) - Arama motoru
+- **benalsam-queue-service** (Port 3012) - Queue management ve database triggers
+- **benalsam-backup-service** (Port 3013) - Backup management ve scheduling
 - ~~**services/auth-service** (Port 3001) - Kimlik doğrulama~~ **İPTAL EDİLDİ**
 
 ### **🗄️ ALTYAPI**
@@ -41,6 +43,8 @@
 
 ### **2. Mikroservis Mimarisi Geçişi (Eylül 2025)**
 - **Shared libraries** oluşturuldu (`shared/` klasörü)
+- **Queue Service** ayrı servis olarak çalışıyor (Port 3012) ✅
+- **Backup Service** ayrı servis olarak çalışıyor (Port 3013) ✅
 - ~~**Auth Service** ayrı servis olarak çalışıyor (Port 3001)~~ **İPTAL EDİLDİ**
 - **Consul service discovery** entegrasyonu
 - **Configuration management** sistemi
@@ -128,6 +132,8 @@ CONSUL_PORT=8500
 - **3002** - Admin Backend
 - **3003** - Admin UI
 - **3006** - Elasticsearch Service
+- **3012** - Queue Service ✅
+- **3013** - Backup Service ✅
 - **3007** - Upload Service
 - **3008** - Listing Service
 - **5173** - Web App
@@ -254,6 +260,6 @@ CONSUL_PORT=8500
 
 ---
 
-**📅 Son Güncelleme:** 20 Eylül 2025 (Auth Service İptal Edildi)  
+**📅 Son Güncelleme:** 21 Eylül 2025 (Backup Service Tamamlandı)  
 **👨‍💻 CTO:** Benalsam Team  
-**🔄 Versiyon:** 2.0.1 (Auth Service İptal - Mikroservis Geçişi Devam)
+**🔄 Versiyon:** 2.0.3 (Backup Service Mikroservisi - Scheduling Aktif)
