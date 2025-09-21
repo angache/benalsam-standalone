@@ -76,6 +76,7 @@ import uploadRoutes from './routes/upload';
 import aiSuggestionsRoutes from './routes/aiSuggestions';
 import inventoryRoutes from './routes/inventory';
 import { serviceRegistryRoutes } from './routes/serviceRegistry';
+import cacheDashboardRoutes from './routes/cacheDashboard';
 
 // import seoRoutes from './routes/seo';
 
@@ -289,6 +290,7 @@ app.use('/api/v1/load-testing', loadTestingRoutes); // Load Testing sistemi akti
 app.use('/api/v1/session-management', sessionManagementRoutes); // Session Management sistemi aktif edildi
 app.use('/api/v1/cache', cacheRoutes); // Cache Management sistemi aktif edildi
 app.use('/api/v1/search', searchRoutes);
+app.use('/api/v1', cacheDashboardRoutes); // Temporary cache dashboard endpoints
 // app.use('/api/v1/api-cache', apiCacheRoutes); // Deprecated - moved to Cache Service
 // app.use('/api/v1/test', testRoutes); // Deprecated - moved to Cache Service
 // app.use('/api/v1/cache-analytics', cacheAnalyticsRoutes); // Deprecated - moved to Cache Service
