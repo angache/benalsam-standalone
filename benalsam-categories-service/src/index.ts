@@ -4,9 +4,8 @@ import { config } from 'dotenv';
 config();
 
 import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
 import compression from 'compression';
+import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types';
 import logger from './config/logger';
 import { checkDatabaseHealth } from './config/database';
 import categoriesRoutes from './routes/categories';
@@ -17,27 +16,15 @@ const app = express();
 const PORT = process.env.PORT || 3015;
 const SERVICE_NAME = process.env.SERVICE_NAME || 'categories-service';
 
-// Security middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-    },
-  },
-}));
+// Initialize security middleware
+const environment = process.env.NODE_ENV || 'development';
+const securityConfig = SECURITY_CONFIGS[environment as keyof typeof SECURITY_CONFIGS] || SECURITY_CONFIGS.development;
+const securityMiddleware = createSecurityMiddleware(securityConfig as any);
 
-// CORS configuration
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://admin.benalsam.com', 'https://benalsam.com']
-    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
+// Apply security middleware
+securityMiddleware.getAllMiddleware().forEach(middleware => {
+  app.use(middleware);
+});
 
 // Compression middleware
 app.use(compression());

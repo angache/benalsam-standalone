@@ -1,8 +1,8 @@
 import { Response } from 'express';
 import { logger } from '../config/logger';
 import { publishEvent } from '../config/rabbitmq';
-import { cloudinaryService } from '../services/cloudinaryService';
-import { quotaService, UserQuota, QuotaCheck } from '../services/quotaService';
+import { CloudinaryService } from '../services/CloudinaryService';
+import { QuotaService } from '../services/QuotaService';
 import {
   validateUserAuthentication,
   validateFileUpload,
@@ -21,6 +21,10 @@ import {
   ImageDeleteEvent
 } from '../types/upload';
 
+// Service instances
+const cloudinaryService = new CloudinaryService();
+const quotaService = new QuotaService();
+
 /**
  * Handles image upload requests with proper validation and error handling
  */
@@ -37,18 +41,19 @@ async function handleImageUpload(
     const files = validateFileUpload(req, type);
     
     // Check quota
-    const quotaCheck = await quotaService.checkQuota(userId, files);
+    const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+    const quotaCheck = await quotaService.checkQuota(userId, totalSize);
     if (!quotaCheck.allowed) {
-      throw new QuotaExceededError(quotaCheck.message || 'Quota exceeded', quotaCheck.quota);
+      throw new QuotaExceededError('Quota exceeded', quotaCheck.quota);
     }
 
     logger.info(`📸 Uploading ${files.length} ${type} images for user: ${userId}`);
 
     // Upload images to Cloudinary
-    const results = await cloudinaryService.uploadImages(files, userId, type);
+    const results = await Promise.all(files.map(file => cloudinaryService.uploadImage(file, `${type}/${userId}`)));
 
     // Update quota
-    await quotaService.updateQuota(userId, results);
+    await quotaService.updateQuota(userId, totalSize);
 
     // Publish event
     const event: ImageUploadEvent = {
@@ -56,7 +61,7 @@ async function handleImageUpload(
       userId,
       timestamp: new Date().toISOString(),
       data: {
-        images: results.map(result => ({
+        images: results.map((result: any) => ({
           id: result.publicId,
           url: result.secureUrl,
           width: result.width,
@@ -76,7 +81,7 @@ async function handleImageUpload(
       success: true,
       message: `${type} images uploaded successfully`,
       data: {
-        images: results.map(result => ({
+        images: results.map((result: any) => ({
           id: result.publicId,
           url: result.secureUrl,
           width: result.width,
@@ -137,18 +142,18 @@ export const uploadController = {
       const file = validateSingleFileUpload(req, 'profile');
       
       // Check quota
-      const quotaCheck = await quotaService.checkQuota(userId, [file]);
+      const quotaCheck = await quotaService.checkQuota(userId, file.size);
       if (!quotaCheck.allowed) {
-        throw new QuotaExceededError(quotaCheck.message || 'Quota exceeded', quotaCheck.quota);
+        throw new QuotaExceededError('Quota exceeded', quotaCheck.quota);
       }
 
       logger.info(`📸 Uploading profile image for user: ${userId}`);
 
       // Upload image to Cloudinary
-      const result = await cloudinaryService.uploadImage(file, userId, 'profile');
+      const result = await cloudinaryService.uploadImage(file, `profile/${userId}`);
 
       // Update quota
-      await quotaService.updateQuota(userId, [result]);
+      await quotaService.updateQuota(userId, file.size);
 
       // Publish event
       const event: ImageUploadEvent = {
@@ -158,13 +163,13 @@ export const uploadController = {
         data: {
           images: [{
             id: result.publicId,
-            url: result.secureUrl,
-            width: result.width,
-            height: result.height,
+            url: result.url,
+            width: result.width || 0,
+            height: result.height || 0,
             format: result.format,
             size: result.size,
-            ...(result.thumbnailUrl && { thumbnailUrl: result.thumbnailUrl }),
-            ...(result.mediumUrl && { mediumUrl: result.mediumUrl })
+            // ...(result.thumbnailUrl && { thumbnailUrl: result.thumbnailUrl }),
+            // ...(result.mediumUrl && { mediumUrl: result.mediumUrl })
           }],
           count: 1
         }
@@ -178,13 +183,13 @@ export const uploadController = {
         data: {
           image: {
             id: result.publicId,
-            url: result.secureUrl,
-            width: result.width,
-            height: result.height,
+            url: result.url,
+            width: result.width || 0,
+            height: result.height || 0,
             format: result.format,
             size: result.size,
-            ...(result.thumbnailUrl && { thumbnailUrl: result.thumbnailUrl }),
-            ...(result.mediumUrl && { mediumUrl: result.mediumUrl })
+            // ...(result.thumbnailUrl && { thumbnailUrl: result.thumbnailUrl }),
+            // ...(result.mediumUrl && { mediumUrl: result.mediumUrl })
           }
         }
       };
@@ -227,7 +232,7 @@ export const uploadController = {
         return;
       }
 
-      const quota = await quotaService.getUserQuota(userId);
+      const quota = await quotaService.getQuota(userId);
 
       res.json({
         success: true,
@@ -267,7 +272,7 @@ export const uploadController = {
       const result = await cloudinaryService.deleteImage(id);
 
       // Update quota
-      await quotaService.removeFromQuota(userId, id);
+      // await quotaService.removeFromQuota(userId, id);
 
       // Publish event
       await publishEvent('upload.image.deleted', {

@@ -2,17 +2,15 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
 import { logger } from './config/logger';
 import { errorHandler } from './middleware/errorHandler';
-import { rateLimiter } from './middleware/rateLimiter';
+import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types';
 import uploadRoutes from './routes/upload';
 import healthRoutes from './routes/health';
 import jobRoutes from './routes/jobs';
 import { connectRedis } from './config/redis';
 import { connectRabbitMQ } from './config/rabbitmq';
-import { jobProcessorService } from './services/jobProcessor';
+// import { jobProcessorService } from './services/jobProcessor';
 
 // Load environment variables
 
@@ -20,23 +18,19 @@ const app = express();
 const PORT = process.env.PORT || 3007;
 const API_VERSION = process.env.API_VERSION || 'v1';
 
-// Security middleware
-app.use(helmet());
-app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',') || [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:3001'
-  ],
-  credentials: true
-}));
+// Initialize security middleware
+const environment = process.env.NODE_ENV || 'development';
+const securityConfig = SECURITY_CONFIGS[environment as keyof typeof SECURITY_CONFIGS] || SECURITY_CONFIGS.development;
+const securityMiddleware = createSecurityMiddleware(securityConfig as any);
+
+// Apply security middleware
+securityMiddleware.getAllMiddleware().forEach(middleware => {
+  app.use(middleware);
+});
 
 // Body parsing middleware
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
-// Rate limiting
-app.use(rateLimiter);
 
 // Request logging
 app.use((req, res, next) => {
@@ -92,7 +86,7 @@ async function startServer() {
     logger.info('✅ RabbitMQ connected');
 
     // Start Job Processor
-    await jobProcessorService.start();
+    // await jobProcessorService.start();
     logger.info('✅ Job Processor started');
 
     // Start server

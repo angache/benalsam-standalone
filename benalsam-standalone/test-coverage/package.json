@@ -1,0 +1,36 @@
+{
+  "name": "benalsam-test-coverage",
+  "version": "1.0.0",
+  "description": "Test coverage reporting for Benalsam microservices",
+  "main": "jest.config.js",
+  "scripts": {
+    "test:coverage": "jest --coverage",
+    "test:coverage:watch": "jest --coverage --watch",
+    "test:coverage:ci": "jest --coverage --ci --coverageReporters=text-summary --coverageReporters=lcov",
+    "test:coverage:html": "jest --coverage --coverageReporters=html",
+    "test:coverage:json": "jest --coverage --coverageReporters=json --coverageReporters=json-summary",
+    "coverage:report": "node scripts/generate-coverage-report.js",
+    "coverage:badge": "node scripts/generate-coverage-badge.js",
+    "coverage:clean": "rm -rf coverage",
+    "coverage:serve": "npx serve coverage/lcov-report"
+  },
+  "keywords": [
+    "test-coverage",
+    "microservices",
+    "benalsam",
+    "jest"
+  ],
+  "author": "Benalsam Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.10.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.2",
+    "serve": "^14.2.1"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  }
+}

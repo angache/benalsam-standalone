@@ -1,6 +1,24 @@
 
 // ESM exports
 export * from './types/index';
+export * from './errors/ServiceError';
+export * from './middleware/ErrorHandler';
+export { 
+  SecurityMiddleware, 
+  createSecurityMiddleware, 
+  SECURITY_CONFIGS,
+  type SecurityConfig 
+} from './security/SecurityMiddleware';
+export { 
+  ValidationMiddleware, 
+  createValidationMiddleware,
+  COMMON_SCHEMAS,
+  type ValidationError,
+  type ValidationResult,
+  type ValidationSchema 
+} from './security/ValidationMiddleware';
+export * from './testing/MockFactory';
+export * from './testing/TestHelpers';
 // Eğer search tipi gerekiyorsa:
 // export * from './types/search';
 

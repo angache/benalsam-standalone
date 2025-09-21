@@ -1,6 +1,6 @@
 {
   "name": "benalsam-shared-types",
-  "version": "1.0.4",
+  "version": "1.0.7",
   "description": "Shared TypeScript types and services for Benalsam mobile and web applications",
   "main": "dist/index.js",
   "module": "dist-esm/index.js",
@@ -23,7 +23,8 @@
     "prebuild": "npm run clean",
     "postinstall": "echo 'Skipping build for now'",
     "prepare": "echo 'Skipping prepare for Docker build'",
-    "test": "echo \"No tests specified\" && exit 0"
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "keywords": [
     "typescript",
@@ -34,11 +35,21 @@
   "author": "Benalsam Team",
   "license": "MIT",
   "dependencies": {
-    "@supabase/supabase-js": "^2.50.3"
+    "@supabase/supabase-js": "^2.50.3",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "joi": "^17.11.0"
   },
   "devDependencies": {
     "typescript": "^5.8.3",
-    "@types/node": "^20.8.3"
+    "@types/node": "^20.8.3",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/multer": "^1.4.11",
+    "@types/jest": "^29.5.8",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1"
   },
   "peerDependencies": {
     "react": ">=18.0.0"

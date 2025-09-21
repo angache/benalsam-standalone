@@ -1,8 +1,7 @@
 import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types';
 
 // Load environment variables FIRST
 dotenv.config();
@@ -22,9 +21,17 @@ const PORT = process.env.PORT || 3016;
 const SERVICE_NAME = process.env.SERVICE_NAME || 'search-service';
 const SERVICE_VERSION = process.env.SERVICE_VERSION || '1.0.0';
 
-// Middleware
-app.use(helmet());
-app.use(cors());
+// Initialize security middleware
+const environment = process.env.NODE_ENV || 'development';
+const securityConfig = SECURITY_CONFIGS[environment as keyof typeof SECURITY_CONFIGS] || SECURITY_CONFIGS.development;
+const securityMiddleware = createSecurityMiddleware(securityConfig as any);
+
+// Apply security middleware
+securityMiddleware.getAllMiddleware().forEach(middleware => {
+  app.use(middleware);
+});
+
+// Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
