@@ -15,7 +15,10 @@ const mockRabbitMQService: jest.Mocked<IRabbitMQService> = {
   connect: jest.fn(),
   disconnect: jest.fn(),
   publishMessage: jest.fn(),
-  isConnected: jest.fn()
+  publishToExchange: jest.fn(),
+  consumeMessages: jest.fn(),
+  isConnected: jest.fn(),
+  healthCheck: jest.fn()
 };
 
 const mockLogger: jest.Mocked<ILogger> = {

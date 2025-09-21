@@ -1,6 +1,6 @@
 /**
  * Test Setup Configuration
- * Jest test environment setup
+ * Jest test environment setup for unit and integration tests
  */
 
 // Mock console methods to reduce noise in tests
@@ -22,13 +22,17 @@ afterAll(() => {
   global.console = originalConsole;
 });
 
-// Global test timeout
-jest.setTimeout(10000);
+// Global test timeout (will be overridden by project-specific timeouts)
+jest.setTimeout(30000);
 
 // Mock environment variables
 process.env['NODE_ENV'] = 'test';
 process.env['PORT'] = '3012';
 process.env['SERVICE_NAME'] = 'queue-service-test';
+
+// Testcontainers configuration
+process.env['TESTCONTAINERS_HOST_OVERRIDE'] = 'localhost';
+process.env['TESTCONTAINERS_WAIT_STRATEGY_TIMEOUT'] = '120000';
 
 // Dummy test to satisfy Jest requirement
 describe('Test Setup', () => {

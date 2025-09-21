@@ -14,4 +14,7 @@ module.exports = {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
+  // Testcontainers configuration
+  testTimeout: 120000, // 2 minutes for container startup
+  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
 };
