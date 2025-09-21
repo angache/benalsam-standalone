@@ -1,110 +1,148 @@
 import express from 'express';
-import { authenticateToken } from '../middleware/auth';
-import { schedulingService, BackupSchedule } from '../services/schedulingService';
+import { authenticateToken, AuthenticatedRequest } from '../middleware/auth';
 import logger from '../config/logger';
+import axios from 'axios';
 
 const router = express.Router();
+
+// Backup service base URL
+const BACKUP_SERVICE_URL = process.env.BACKUP_SERVICE_URL || 'http://localhost:3013';
+
+// Helper function to make requests to backup service
+const makeBackupServiceRequest = async (method: string, endpoint: string, data?: any) => {
+  try {
+    const url = `${BACKUP_SERVICE_URL}/api/v1${endpoint}`;
+    const response = await axios({
+      method,
+      url,
+      data,
+      timeout: 30000, // 30 seconds timeout
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Backup service request failed:', {
+      method,
+      endpoint,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    throw error;
+  }
+};
 
 // Apply authentication to all routes
 router.use(authenticateToken);
 
 // Get all schedules
-router.get('/', async (req, res) => {
+router.get('/', async (req: AuthenticatedRequest, res) => {
   try {
-    const schedules = await schedulingService.getAllSchedules();
+    logger.info('Fetching schedules from backup service');
+    
+    const result = await makeBackupServiceRequest('GET', '/scheduling/list');
+    
+    logger.info('Schedules retrieved from backup service', {
+      scheduleCount: result.data?.length || 0
+    });
+    
     res.json({
       success: true,
-      data: schedules,
-      message: 'Schedules retrieved successfully'
+      data: result.data,
+      count: result.count
     });
   } catch (error) {
-    logger.error('Failed to get schedules', { error: error instanceof Error ? error.message : error, stack: error instanceof Error ? error.stack : 'N/A' });
+    logger.error('Failed to get schedules from backup service:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve schedules',
+      message: 'Failed to get schedules',
       error: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
 
 // Get specific schedule
-router.get('/:id', async (req, res) => {
+router.get('/:scheduleId', async (req: AuthenticatedRequest, res) => {
   try {
-    const { id } = req.params;
-    const schedule = await schedulingService.getSchedule(id);
+    const { scheduleId } = req.params;
     
-    if (!schedule) {
+    logger.info('Fetching schedule from backup service', { scheduleId });
+    
+    const result = await makeBackupServiceRequest('GET', `/scheduling/${scheduleId}`);
+    
+    if (!result.success) {
       return res.status(404).json({
         success: false,
         message: 'Schedule not found'
       });
     }
-
-    return res.json({
+    
+    logger.info('Schedule retrieved from backup service', {
+      scheduleId,
+      name: result.data?.name
+    });
+    
+    res.json({
       success: true,
-      data: schedule,
-      message: 'Schedule retrieved successfully'
+      data: result.data
     });
   } catch (error) {
-    logger.error('Failed to get schedule', { scheduleId: req.params.id, error });
-    return res.status(500).json({
+    logger.error('Failed to get schedule from backup service:', error);
+    res.status(500).json({
       success: false,
-      message: 'Failed to retrieve schedule',
+      message: 'Failed to get schedule',
       error: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
 
 // Create new schedule
-router.post('/', async (req, res) => {
+router.post('/', async (req: AuthenticatedRequest, res) => {
   try {
-    const {
-      name,
-      description,
-      cronExpression,
+    const { 
+      name, 
+      description, 
+      cronExpression, 
+      enabled = true,
       backupOptions,
-      timezone,
-      enabled
+      timezone = 'Europe/Istanbul',
+      maxBackups = 10
     } = req.body;
-
-    // Validate required fields
-    if (!name || !cronExpression || !backupOptions || !timezone) {
+    
+    if (!name || !cronExpression) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: name, cronExpression, backupOptions, timezone'
+        message: 'Missing required fields: name, cronExpression'
       });
     }
-
-    // Validate cron expression
-    if (!require('node-cron').validate(cronExpression)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid cron expression'
-      });
-    }
-
-    const schedule = await schedulingService.createSchedule({
+    
+    logger.info('Creating schedule via backup service', {
+      name,
+      cronExpression,
+      enabled,
+      userId: req.admin?.id || req.user?.id
+    });
+    
+    const result = await makeBackupServiceRequest('POST', '/scheduling/create', {
       name,
       description,
       cronExpression,
-      backupOptions: {
-        includeDatabase: backupOptions.includeDatabase ?? true,
-        includeEdgeFunctions: backupOptions.includeEdgeFunctions ?? true,
-        includeMigrations: backupOptions.includeMigrations ?? true,
-        compression: backupOptions.compression ?? true
-      },
-      timezone,
-      enabled: enabled ?? true
+      enabled
     });
-
-    return res.status(201).json({
+    
+    logger.info('Schedule created via backup service', {
+      scheduleId: result.data?.id,
+      name: result.data?.name
+    });
+    
+    res.json({
       success: true,
-      data: schedule,
-      message: 'Schedule created successfully'
+      message: 'Schedule created successfully',
+      data: result.data
     });
   } catch (error) {
-    logger.error('Failed to create schedule', { error, body: req.body });
-    return res.status(500).json({
+    logger.error('Failed to create schedule via backup service:', error);
+    res.status(500).json({
       success: false,
       message: 'Failed to create schedule',
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -113,36 +151,39 @@ router.post('/', async (req, res) => {
 });
 
 // Update schedule
-router.put('/:id', async (req, res) => {
+router.put('/:scheduleId', async (req: AuthenticatedRequest, res) => {
   try {
-    const { id } = req.params;
+    const { scheduleId } = req.params;
     const updates = req.body;
-
-    // Validate cron expression if provided
-    if (updates.cronExpression && !require('node-cron').validate(updates.cronExpression)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid cron expression'
-      });
-    }
-
-    const updatedSchedule = await schedulingService.updateSchedule(id, updates);
     
-    if (!updatedSchedule) {
+    logger.info('Updating schedule via backup service', {
+      scheduleId,
+      updates,
+      userId: req.admin?.id || req.user?.id
+    });
+    
+    const result = await makeBackupServiceRequest('PUT', `/scheduling/${scheduleId}`, updates);
+    
+    if (!result.success) {
       return res.status(404).json({
         success: false,
         message: 'Schedule not found'
       });
     }
-
-    return res.json({
+    
+    logger.info('Schedule updated via backup service', {
+      scheduleId,
+      name: result.data?.name
+    });
+    
+    res.json({
       success: true,
-      data: updatedSchedule,
-      message: 'Schedule updated successfully'
+      message: 'Schedule updated successfully',
+      data: result.data
     });
   } catch (error) {
-    logger.error('Failed to update schedule', { scheduleId: req.params.id, error });
-    return res.status(500).json({
+    logger.error('Failed to update schedule via backup service:', error);
+    res.status(500).json({
       success: false,
       message: 'Failed to update schedule',
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -151,25 +192,35 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete schedule
-router.delete('/:id', async (req, res) => {
+router.delete('/:scheduleId', async (req: AuthenticatedRequest, res) => {
   try {
-    const { id } = req.params;
-    const deleted = await schedulingService.deleteSchedule(id);
+    const { scheduleId } = req.params;
     
-    if (!deleted) {
+    logger.info('Deleting schedule via backup service', {
+      scheduleId,
+      userId: req.admin?.id || req.user?.id
+    });
+    
+    const result = await makeBackupServiceRequest('DELETE', `/scheduling/${scheduleId}`);
+    
+    if (!result.success) {
       return res.status(404).json({
         success: false,
         message: 'Schedule not found'
       });
     }
-
-    return res.json({
+    
+    logger.info('Schedule deleted via backup service', {
+      scheduleId
+    });
+    
+    res.json({
       success: true,
       message: 'Schedule deleted successfully'
     });
   } catch (error) {
-    logger.error('Failed to delete schedule', { scheduleId: req.params.id, error });
-    return res.status(500).json({
+    logger.error('Failed to delete schedule via backup service:', error);
+    res.status(500).json({
       success: false,
       message: 'Failed to delete schedule',
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -177,77 +228,36 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// Get scheduling service health
-router.get('/health/status', async (req, res) => {
+// Trigger schedule manually
+router.post('/:scheduleId/trigger', async (req: AuthenticatedRequest, res) => {
   try {
-    const isHealthy = await schedulingService.isHealthy();
+    const { scheduleId } = req.params;
     
-    res.json({
-      success: true,
-      data: {
-        healthy: isHealthy,
-        timestamp: new Date().toISOString()
-      },
-      message: isHealthy ? 'Scheduling service is healthy' : 'Scheduling service is unhealthy'
+    logger.info('Triggering schedule via backup service', {
+      scheduleId,
+      userId: req.admin?.id || req.user?.id
     });
-  } catch (error) {
-    logger.error('Failed to check scheduling service health', { error });
-    res.status(500).json({
-      success: false,
-      message: 'Failed to check scheduling service health',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
-
-// Get schedule status
-router.get('/:id/status', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const status = await schedulingService.getScheduleStatus(id);
     
-    if (!status) {
-      return res.status(404).json({
-        success: false,
-        message: 'Schedule status not found'
-      });
-    }
-
-    return res.json({
-      success: true,
-      data: status,
-      message: 'Schedule status retrieved successfully'
-    });
-  } catch (error) {
-    logger.error('Failed to get schedule status', { scheduleId: req.params.id, error });
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve schedule status',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
-
-// Manually trigger schedule
-router.post('/:id/trigger', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const triggered = await schedulingService.triggerSchedule(id);
+    const result = await makeBackupServiceRequest('POST', `/scheduling/${scheduleId}/trigger`);
     
-    if (!triggered) {
+    if (!result.success) {
       return res.status(404).json({
         success: false,
         message: 'Schedule not found'
       });
     }
-
-    return res.json({
+    
+    logger.info('Schedule triggered via backup service', {
+      scheduleId
+    });
+    
+    res.json({
       success: true,
       message: 'Schedule triggered successfully'
     });
   } catch (error) {
-    logger.error('Failed to trigger schedule', { scheduleId: req.params.id, error });
-    return res.status(500).json({
+    logger.error('Failed to trigger schedule via backup service:', error);
+    res.status(500).json({
       success: false,
       message: 'Failed to trigger schedule',
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -255,23 +265,24 @@ router.post('/:id/trigger', async (req, res) => {
   }
 });
 
-// Get execution history
-router.get('/:id/history', async (req, res) => {
+// Get schedule status
+router.get('/:scheduleId/status', async (req: AuthenticatedRequest, res) => {
   try {
-    const { id } = req.params;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const history = await schedulingService.getExecutionHistory(id, limit);
-
+    const { scheduleId } = req.params;
+    
+    logger.info('Fetching schedule status from backup service', { scheduleId });
+    
+    const result = await makeBackupServiceRequest('GET', `/scheduling/${scheduleId}/status`);
+    
     res.json({
       success: true,
-      data: history,
-      message: 'Execution history retrieved successfully'
+      data: result.data
     });
   } catch (error) {
-    logger.error('Failed to get execution history', { scheduleId: req.params.id, error });
+    logger.error('Failed to get schedule status from backup service:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve execution history',
+      message: 'Failed to get schedule status',
       error: error instanceof Error ? error.message : 'Unknown error'
     });
   }

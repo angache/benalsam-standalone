@@ -7,6 +7,9 @@ import { jwtUtils } from '../utils/jwt';
 import { PermissionService } from '../services/permissionService';
 import logger from '../config/logger';
 
+// Re-export AuthenticatedRequest for use in routes
+export { AuthenticatedRequest } from '../types';
+
 export interface AuthMiddlewareOptions {
   requiredRole?: AdminRole;
   requiredPermissions?: string[];
