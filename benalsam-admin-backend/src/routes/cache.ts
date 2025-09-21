@@ -1,43 +1,61 @@
 import express, { Router } from 'express';
-import { cacheService, cache } from '../services/cacheService';
-import cacheManager from '../services/cacheManager';
-import memoryCacheService from '../services/memoryCacheService';
+import axios from 'axios';
 import logger from '../config/logger';
+import { authenticateToken } from '../middleware/auth';
+import type { AuthenticatedRequest } from '../types';
 
 const router: Router = express.Router();
 
 /**
- * KVKK COMPLIANCE: Cache API
+ * Cache API Proxy Routes
  * 
- * Cache API endpoints KVKK uyumluluğu için tasarlanmıştır:
- * 
- * ✅ SESSION_BASED - Sadece session_id ile erişim
- * ✅ ANONYMIZED - Kişisel veri döndürülmez
- * ✅ TRANSPARENCY - Cache süreleri açık
- * ✅ MINIMIZATION - Sadece gerekli veriler döndürülür
+ * Bu routes Cache Service'e proxy yapar
  */
 
-// Cache get endpoint
-router.post('/get', async (req, res) => {
+const CACHE_SERVICE_URL = process.env['CACHE_SERVICE_URL'] || 'http://localhost:3014';
+
+/**
+ * Cache Service'e istek yapmak için helper function
+ */
+async function makeCacheServiceRequest(
+  method: 'GET' | 'POST' | 'DELETE',
+  endpoint: string,
+  data?: any,
+  req?: any
+): Promise<any> {
   try {
-    const { key, sessionId } = req.body;
+    const url = `${CACHE_SERVICE_URL}/api/v1/cache${endpoint}`;
     
-    if (!key) {
-      return res.status(400).json({
-        success: false,
-        error: 'Cache key gerekli'
-      });
-    }
-    
-    // Use Cache Manager for intelligent routing
-    const cachedData = await cacheManager.get(key, sessionId);
-    
-    return res.json({
-      success: true,
-      data: cachedData
-    });
+    const config = {
+      method,
+      url,
+      ...(data && { data }),
+      headers: {
+        'Content-Type': 'application/json',
+        ...(req?.headers.authorization && { Authorization: req.headers.authorization })
+      },
+      timeout: 10000
+    };
+
+    const response = await axios(config);
+    return response.data;
   } catch (error) {
-    logger.error('❌ Cache get error:', error);
+    logger.error('Cache Service request failed:', {
+      method,
+      endpoint,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    throw error;
+  }
+}
+
+// Cache get endpoint
+router.post('/get', authenticateToken, async (req: AuthenticatedRequest, res) => {
+  try {
+    const result = await makeCacheServiceRequest('POST', '/get', req.body, req);
+    return res.json(result);
+  } catch (error) {
+    logger.error('Cache get proxy error:', { error });
     return res.status(500).json({
       success: false,
       error: 'Cache verisi alınamadı'
@@ -46,26 +64,12 @@ router.post('/get', async (req, res) => {
 });
 
 // Cache set endpoint
-router.post('/set', async (req, res) => {
+router.post('/set', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
-    const { key, data, sessionId } = req.body;
-    
-    if (!key || !data) {
-      return res.status(400).json({
-        success: false,
-        error: 'Cache key ve data gerekli'
-      });
-    }
-    
-    // Use Cache Manager for intelligent routing
-    const success = await cacheManager.set(key, data, undefined, sessionId);
-    
-    return res.json({
-      success: true,
-      message: success ? 'Cache verisi kaydedildi' : 'Cache verisi kaydedilemedi'
-    });
+    const result = await makeCacheServiceRequest('POST', '/set', req.body, req);
+    return res.json(result);
   } catch (error) {
-    logger.error('❌ Cache set error:', error);
+    logger.error('Cache set proxy error:', { error });
     return res.status(500).json({
       success: false,
       error: 'Cache verisi kaydedilemedi'
@@ -73,32 +77,41 @@ router.post('/set', async (req, res) => {
   }
 });
 
-// Cache istatistiklerini al (enterprise optimized)
-router.get('/stats', async (req, res) => {
+// Cache delete endpoint
+router.delete('/delete', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
-    const startTime = Date.now();
-    
-    // Parallel execution for cache stats
-    const [cacheStats, healthStatus] = await Promise.all([
-      cacheService.getStats(),
-      Promise.resolve(true) // cacheService doesn't have healthCheck, assume healthy
-    ]);
-    
-    const stats = {
-      ...cacheStats,
-      health: healthStatus,
-      performance: {
-        responseTime: Date.now() - startTime,
-        optimized: true
-      }
-    };
-    
-    return res.json({
-      success: true,
-      data: stats
-    });
+    const result = await makeCacheServiceRequest('DELETE', '/delete', req.body, req);
+    return res.json(result);
   } catch (error) {
-    logger.error('❌ Cache stats error:', error);
+    logger.error('Cache delete proxy error:', { error });
+    return res.status(500).json({
+      success: false,
+      error: 'Cache verisi silinemedi'
+    });
+  }
+});
+
+// Cache clear endpoint
+router.post('/clear', authenticateToken, async (req: AuthenticatedRequest, res) => {
+  try {
+    const result = await makeCacheServiceRequest('POST', '/clear', req.body, req);
+    return res.json(result);
+  } catch (error) {
+    logger.error('Cache clear proxy error:', { error });
+    return res.status(500).json({
+      success: false,
+      error: 'Cache temizlenemedi'
+    });
+  }
+});
+
+// Cache stats endpoint
+router.get('/stats', authenticateToken, async (req: AuthenticatedRequest, res) => {
+  try {
+    const result = await makeCacheServiceRequest('GET', '/stats', undefined, req);
+    return res.json(result);
+  } catch (error) {
+    logger.error('Cache stats proxy error:', { error });
     return res.status(500).json({
       success: false,
       error: 'Cache istatistikleri alınamadı'
@@ -106,130 +119,27 @@ router.get('/stats', async (req, res) => {
   }
 });
 
-// Cache temizleme
-router.post('/clear', async (req, res) => {
+// Cache health check endpoint
+router.get('/health', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
-    // Clear all cache using cacheManager
-    await cacheManager.clear();
-    const clearedCount = 1; // cacheManager doesn't return count
-    
-    return res.json({
-      success: true,
-      data: {
-        clearedCount,
-        message: `${clearedCount} adet süresi dolmuş cache temizlendi`
-      }
-    });
+    const result = await makeCacheServiceRequest('GET', '/health', undefined, req);
+    return res.json(result);
   } catch (error) {
-    logger.error('❌ Cache clear error:', error);
+    logger.error('Cache health proxy error:', { error });
     return res.status(500).json({
       success: false,
-      error: 'Cache temizleme başarısız'
+      error: 'Cache sağlık kontrolü yapılamadı'
     });
   }
 });
 
-// Kullanıcı kullanım istatistikleri
-router.get('/usage/:userId', async (req, res) => {
+// Memory cache stats endpoint
+router.get('/memory/stats', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
-    const { userId } = req.params;
-    // getUserUsageStats doesn't exist in new cacheService, return mock data
-    const stats = {
-      attempts: 0,
-      monthlyLimit: 1000,
-      isPremium: false
-    };
-    
-    return res.json({
-      success: true,
-      data: {
-        userId,
-        attempts: stats.attempts,
-        monthlyLimit: stats.monthlyLimit,
-        isPremium: stats.isPremium,
-        remainingAttempts: stats.monthlyLimit === -1 ? 999 : Math.max(0, stats.monthlyLimit - stats.attempts)
-      }
-    });
+    const result = await makeCacheServiceRequest('GET', '/memory/stats', undefined, req);
+    return res.json(result);
   } catch (error) {
-    logger.error('❌ User usage stats error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Kullanıcı istatistikleri alınamadı'
-    });
-  }
-});
-
-// Cache health check
-router.get('/health', async (req, res) => {
-  try {
-    const isHealthy = await cacheManager.healthCheck();
-    
-    return res.json({
-      success: true,
-      data: {
-        healthy: isHealthy,
-        timestamp: new Date().toISOString()
-      }
-    });
-  } catch (error) {
-    logger.error('❌ Cache health check error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Cache health check başarısız'
-    });
-  }
-});
-
-// Cache boyut kontrolü
-router.post('/check-size', async (req, res) => {
-  try {
-    // checkCacheSize doesn't exist in new cacheService, use cacheManager stats
-    const stats = await cacheManager.getStats();
-    
-    return res.json({
-      success: true,
-      data: {
-        message: 'Cache boyut kontrolü tamamlandı'
-      }
-    });
-  } catch (error) {
-    logger.error('❌ Cache size check error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Cache boyut kontrolü başarısız'
-    });
-  }
-});
-
-// Cache Manager stats
-router.get('/manager/stats', async (req, res) => {
-  try {
-    const stats = await cacheManager.getStats();
-    
-    return res.json({
-      success: true,
-      data: stats
-    });
-  } catch (error) {
-    logger.error('❌ Cache manager stats error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Cache manager istatistikleri alınamadı'
-    });
-  }
-});
-
-// Memory cache stats
-router.get('/memory/stats', async (req, res) => {
-  try {
-    const stats = memoryCacheService.getStats();
-    
-    return res.json({
-      success: true,
-      data: stats
-    });
-  } catch (error) {
-    logger.error('❌ Memory cache stats error:', error);
+    logger.error('Memory cache stats proxy error:', { error });
     return res.status(500).json({
       success: false,
       error: 'Memory cache istatistikleri alınamadı'
@@ -237,36 +147,18 @@ router.get('/memory/stats', async (req, res) => {
   }
 });
 
-// Cache warming
-router.post('/warm', async (req, res) => {
+// Redis cache stats endpoint
+router.get('/redis/stats', authenticateToken, async (req: AuthenticatedRequest, res) => {
   try {
-    const { keys, dataProvider } = req.body;
-    
-    if (!keys || !Array.isArray(keys)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Cache warming için keys array gerekli'
-      });
-    }
-    
-    // Simple data provider for testing
-    const simpleDataProvider = (key: string) => Promise.resolve({ key, data: `warmed_${key}` });
-    
-    await cacheManager.warmCache(keys, simpleDataProvider);
-    
-    return res.json({
-      success: true,
-      data: {
-        message: `${keys.length} adet cache key warmed`
-      }
-    });
+    const result = await makeCacheServiceRequest('GET', '/redis/stats', undefined, req);
+    return res.json(result);
   } catch (error) {
-    logger.error('❌ Cache warming error:', error);
+    logger.error('Redis cache stats proxy error:', { error });
     return res.status(500).json({
       success: false,
-      error: 'Cache warming başarısız'
+      error: 'Redis cache istatistikleri alınamadı'
     });
   }
 });
 
-export default router; 
+export { router as cacheRoutes };

@@ -1,6 +1,6 @@
 import { Router, IRouter } from 'express';
 import { SearchController } from '../controllers/searchController';
-import searchCacheService from '../services/searchCacheService';
+// import searchCacheService from '../services/searchCacheService'; // Deprecated - moved to Cache Service
 import rateLimit from 'express-rate-limit';
 
 const router: IRouter = Router();
@@ -52,9 +52,10 @@ router.get('/health', SearchController.healthCheck);
 router.post('/reindex', SearchController.reindex);
 
 /**
- * Search cache endpoints
+ * Search cache endpoints - Deprecated (moved to Cache Service)
  */
 
+/*
 // Get search cache stats
 router.get('/cache/stats', async (req, res) => {
   try {
@@ -132,5 +133,6 @@ router.post('/cache/warm', async (req, res) => {
     });
   }
 });
+*/
 
 export default router; 

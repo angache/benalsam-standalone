@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { searchService, SearchParams } from '../services/searchService';
-import searchCacheService from '../services/searchCacheService';
+// import searchCacheService from '../services/searchCacheService'; // Deprecated - moved to Cache Service
 import logger from '../config/logger';
 
 export class SearchController {

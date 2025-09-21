@@ -1339,10 +1339,17 @@ router.get('/db/n1-analysis', authenticateToken, async (req: AuthenticatedReques
 // Cache Performance Analysis
 router.get('/cache/performance', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { cache } = await import('../services/cacheService');
+    // Get cache statistics from Cache Service
+    const CACHE_SERVICE_URL = process.env['CACHE_SERVICE_URL'] || 'http://localhost:3014';
+    let stats = null;
     
-    // Get cache statistics
-    const stats = await cache.stats();
+    try {
+      const response = await fetch(`${CACHE_SERVICE_URL}/api/v1/cache/stats`);
+      const result = await response.json() as any;
+      stats = result.success ? result.data : null;
+    } catch (error) {
+      logger.warn('Failed to get cache stats from Cache Service', { error });
+    }
     
     // Get cache hit/miss ratios (mock data for now)
     const cacheMetrics = {

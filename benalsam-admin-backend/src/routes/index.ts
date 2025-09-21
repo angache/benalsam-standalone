@@ -3,6 +3,7 @@ import authRoutes from './auth';
 import { listingsRouter } from './listings';
 import { testListingsRouter } from './testListings';
 import { categoriesRouter } from './categories';
+import categoriesProxyRouter from './categoriesProxy';
 import { usersRouter } from './users';
 import adminManagementRoutes from './admin-management';
 import searchRoutes from './search';
@@ -37,8 +38,8 @@ router.use('/test-listings', testListingsRouter);
 // Listings routes
 router.use('/listings', listingsRouter);
 
-// Categories routes
-router.use('/categories', categoriesRouter);
+// Categories routes (proxied to Categories Service)
+router.use('/categories', categoriesProxyRouter);
 
 // Users routes
 router.use('/users', usersRouter);
@@ -46,8 +47,8 @@ router.use('/users', usersRouter);
 // Admin Management routes
 router.use('/admin-management', adminManagementRoutes);
 
-// Search routes
-router.use('/search', searchRoutes);
+// Search routes (deprecated - moved to Cache Service)
+// router.use('/search', searchRoutes);
 
 // Elasticsearch routes
 router.use('/elasticsearch', elasticsearchRoutes);

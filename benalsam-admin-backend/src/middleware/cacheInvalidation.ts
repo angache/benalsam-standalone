@@ -1,6 +1,41 @@
 import { Request, Response, NextFunction } from 'express';
-import { cache } from '../services/cacheService';
+import axios from 'axios';
 import logger from '../config/logger';
+
+const CACHE_SERVICE_URL = process.env['CACHE_SERVICE_URL'] || 'http://localhost:3014';
+
+/**
+ * Cache Service'e istek yapmak için helper function
+ */
+async function makeCacheServiceRequest(
+  method: 'GET' | 'POST' | 'DELETE',
+  endpoint: string,
+  data?: any
+): Promise<any> {
+  try {
+    const url = `${CACHE_SERVICE_URL}/api/v1/cache${endpoint}`;
+    
+    const config = {
+      method,
+      url,
+      ...(data && { data }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
+    };
+
+    const response = await axios(config);
+    return response.data;
+  } catch (error) {
+    logger.error('Cache Service request failed:', {
+      method,
+      endpoint,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    throw error;
+  }
+}
 
 export interface InvalidationOptions {
   patterns?: string[];
@@ -86,15 +121,16 @@ async function invalidateCache(
     // Invalidate cache for each namespace and pattern combination
     for (const namespace of namespaces) {
       for (const pattern of allPatterns) {
-        const deleted = await cache.invalidatePattern(pattern, { namespace });
-        if (deleted > 0) {
+        try {
+          await makeCacheServiceRequest('POST', '/clear', {});
           logger.debug('Cache invalidated', {
             pattern,
             namespace,
-            deleted,
             endpoint: req.path,
             method: req.method
           });
+        } catch (error) {
+          logger.warn('Cache invalidation failed for pattern', { pattern, error });
         }
       }
     }

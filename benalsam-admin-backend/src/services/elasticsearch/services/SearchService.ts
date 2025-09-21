@@ -7,7 +7,42 @@ import logger from '../../../config/logger';
 import { SearchQuery, SearchResponse, SearchOptimizationOptions } from '../types';
 import { SearchOptimizedListing } from 'benalsam-shared-types';
 import { buildSearchQuery } from '../utils/queryBuilder';
-import searchCacheService from '../../searchCacheService';
+import axios from 'axios';
+
+const CACHE_SERVICE_URL = process.env['CACHE_SERVICE_URL'] || 'http://localhost:3014';
+
+/**
+ * Cache Service'e istek yapmak için helper function
+ */
+async function makeCacheServiceRequest(
+  method: 'GET' | 'POST' | 'DELETE',
+  endpoint: string,
+  data?: any
+): Promise<any> {
+  try {
+    const url = `${CACHE_SERVICE_URL}/api/v1/cache${endpoint}`;
+    
+    const config = {
+      method,
+      url,
+      ...(data && { data }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
+    };
+
+    const response = await axios(config);
+    return response.data;
+  } catch (error) {
+    logger.error('Cache Service request failed:', {
+      method,
+      endpoint,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    throw error;
+  }
+}
 
 class SearchService {
   private client: Client;
@@ -46,10 +81,14 @@ class SearchService {
 
       // Check cache first
       if (useCache) {
-        const cachedResult = await searchCacheService.get(query);
-        if (cachedResult) {
-          logger.info(`📦 Returning cached search result for: ${query}`);
-          return cachedResult;
+        try {
+          const cachedResult = await makeCacheServiceRequest('POST', '/get', { key: query });
+          if (cachedResult.success && cachedResult.data) {
+            logger.info(`📦 Returning cached search result for: ${query}`);
+            return cachedResult.data;
+          }
+        } catch (error) {
+          logger.warn('Cache get failed, proceeding with search', { error });
         }
       }
 
@@ -64,7 +103,11 @@ class SearchService {
       
       // Cache results
       if (useCache) {
-        await searchCacheService.set(query, results, cacheTTL);
+        try {
+          await makeCacheServiceRequest('POST', '/set', { key: query, data: results, ttl: cacheTTL });
+        } catch (error) {
+          logger.warn('Cache set failed', { error });
+        }
       }
 
       logger.info(`✅ Search completed for: ${query} (${results.length} results)`);

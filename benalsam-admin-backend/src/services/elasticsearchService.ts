@@ -1,9 +1,43 @@
 import { Client } from '@elastic/elasticsearch';
 import logger from '../config/logger';
 import { SearchOptimizedListing } from 'benalsam-shared-types';
-import searchCacheService from './searchCacheService';
 import { createClient } from '@supabase/supabase-js';
-import cacheManager from './cacheManager';
+import axios from 'axios';
+
+const CACHE_SERVICE_URL = process.env['CACHE_SERVICE_URL'] || 'http://localhost:3014';
+
+/**
+ * Cache Service'e istek yapmak için helper function
+ */
+async function makeCacheServiceRequest(
+  method: 'GET' | 'POST' | 'DELETE',
+  endpoint: string,
+  data?: any
+): Promise<any> {
+  try {
+    const url = `${CACHE_SERVICE_URL}/api/v1/cache${endpoint}`;
+    
+    const config = {
+      method,
+      url,
+      ...(data && { data }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
+    };
+
+    const response = await axios(config);
+    return response.data;
+  } catch (error) {
+    logger.error('Cache Service request failed:', {
+      method,
+      endpoint,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    throw error;
+  }
+}
 import { 
   SupabaseClient, 
   ElasticsearchIndexMapping, 
@@ -763,14 +797,14 @@ export class AdminElasticsearchService {
         user_id: hit._source.user_id || hit._source.user?.id
       }));
 
-      // Cache the search results
-      await searchCacheService.cacheSearchResults(
-        params,
-        results,
-        total,
-        response.aggregations,
-        sessionId
-      );
+      // Cache the search results (moved to Cache Service)
+      // await searchCacheService.cacheSearchResults(
+      //   params,
+      //   results,
+      //   total,
+      //   response.aggregations,
+      //   sessionId
+      // );
 
       return {
         hits: results,
@@ -925,10 +959,14 @@ export class AdminElasticsearchService {
       const cacheTTL = 30 * 60 * 1000; // 30 dakika
       
       // ✅ Cache'den kontrol et
-      const cached = await cacheManager.get(cacheKey);
-      if (cached) {
-        logger.info('📦 Category counts loaded from cache');
-        return cached;
+      try {
+        const cachedResult = await makeCacheServiceRequest('POST', '/get', { key: cacheKey });
+        if (cachedResult.success && cachedResult.data) {
+          logger.info('📦 Category counts loaded from cache');
+          return cachedResult.data;
+        }
+      } catch (error) {
+        logger.warn('Cache get failed, proceeding with database query', { error });
       }
 
       // ✅ Elasticsearch'ten çek - category_id field'ına göre (leaf kategoriler)
@@ -970,7 +1008,11 @@ export class AdminElasticsearchService {
       }
 
       // ✅ Cache'e kaydet
-      await cacheManager.set(cacheKey, categoryCounts, cacheTTL);
+      try {
+        await makeCacheServiceRequest('POST', '/set', { key: cacheKey, data: categoryCounts, ttl: cacheTTL / 1000 });
+      } catch (error) {
+        logger.warn('Cache set failed', { error });
+      }
       
       logger.info(`📊 Retrieved and cached hierarchical category counts for ${Object.keys(categoryCounts).length} categories`);
       return categoryCounts;
@@ -995,7 +1037,11 @@ export class AdminElasticsearchService {
   async invalidateCategoryCountsCache(): Promise<void> {
     try {
       const cacheKey = 'category_counts';
-      await cacheManager.delete(cacheKey);
+      try {
+        await makeCacheServiceRequest('DELETE', '/delete', { key: cacheKey });
+      } catch (error) {
+        logger.warn('Cache delete failed', { error });
+      }
       logger.info('🗑️ Category counts cache invalidated');
     } catch (error) {
       logger.error('❌ Error invalidating category counts cache:', error);

@@ -1,0 +1,19 @@
+import { createClient } from '@supabase/supabase-js';
+import logger from './logger';
+
+const supabaseUrl = process.env['SUPABASE_URL'];
+const supabaseKey = process.env['SUPABASE_ANON_KEY'];
+
+if (!supabaseUrl || !supabaseKey) {
+  logger.error('❌ Supabase configuration missing. Please check SUPABASE_URL and SUPABASE_ANON_KEY environment variables.');
+  throw new Error('Supabase configuration is required');
+}
+
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: false
+  }
+});
+
+logger.info('✅ Supabase client initialized');

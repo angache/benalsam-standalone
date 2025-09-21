@@ -1,6 +1,41 @@
 import { createClient } from '@supabase/supabase-js';
 import logger from '../config/logger';
-import cacheManager from './cacheManager';
+import axios from 'axios';
+
+const CACHE_SERVICE_URL = process.env['CACHE_SERVICE_URL'] || 'http://localhost:3014';
+
+/**
+ * Cache Service'e istek yapmak için helper function
+ */
+async function makeCacheServiceRequest(
+  method: 'GET' | 'POST' | 'DELETE',
+  endpoint: string,
+  data?: any
+): Promise<any> {
+  try {
+    const url = `${CACHE_SERVICE_URL}/api/v1/cache${endpoint}`;
+    
+    const config = {
+      method,
+      url,
+      ...(data && { data }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
+    };
+
+    const response = await axios(config);
+    return response.data;
+  } catch (error) {
+    logger.error('Cache Service request failed:', {
+      method,
+      endpoint,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    throw error;
+  }
+}
 
 // Lazy Supabase client
 let supabase: any = null;
@@ -95,11 +130,15 @@ export const categoryService = {
   async getCategories(): Promise<Category[]> {
     try {
       const cacheKey = 'categories_tree';
-      const cachedCategories = await cacheManager.get(cacheKey);
-      
-      if (cachedCategories) {
-        logger.info('📦 Returning cached categories');
-        return cachedCategories;
+      try {
+        const cachedResult = await makeCacheServiceRequest('POST', '/get', { key: cacheKey });
+        
+        if (cachedResult.success && cachedResult.data) {
+          logger.info('📦 Returning cached categories');
+          return cachedResult.data;
+        }
+      } catch (error) {
+        logger.warn('Cache get failed, proceeding with database query', { error });
       }
 
       logger.info('🔄 Fetching categories from database');
@@ -120,7 +159,11 @@ export const categoryService = {
       const tree = this.buildCategoryTree(categories || []);
       
       // Cache for 24 hours
-      await cacheManager.set(cacheKey, tree, 1000 * 60 * 60 * 24);
+      try {
+        await makeCacheServiceRequest('POST', '/set', { key: cacheKey, data: tree, ttl: 24 * 60 * 60 });
+      } catch (error) {
+        logger.warn('Cache set failed', { error });
+      }
       
       logger.info(`✅ Fetched ${tree.length} main categories`);
       return tree;
@@ -555,7 +598,7 @@ export const categoryService = {
   // Cache invalidation methods
   async invalidateCategoriesCache(): Promise<void> {
     try {
-      await cacheManager.delete('categories_tree');
+      await makeCacheServiceRequest('DELETE', '/delete', { key: 'categories_tree' });
       logger.info('🗑️ Categories cache invalidated');
     } catch (error) {
       logger.error('Error invalidating categories cache:', error);
@@ -564,8 +607,8 @@ export const categoryService = {
 
   async invalidateCategoryCache(categoryId: number): Promise<void> {
     try {
-      await cacheManager.delete(`category_${categoryId}`);
-      await cacheManager.delete('categories_tree');
+      await makeCacheServiceRequest('DELETE', '/delete', { key: `category_${categoryId}` });
+      await makeCacheServiceRequest('DELETE', '/delete', { key: 'categories_tree' });
       logger.info(`🗑️ Category ${categoryId} cache invalidated`);
     } catch (error) {
       logger.error('Error invalidating category cache:', error);
@@ -574,8 +617,8 @@ export const categoryService = {
 
   async invalidateAllCategoryCaches(): Promise<void> {
     try {
-      await cacheManager.delete('categories_tree');
-      await cacheManager.delete('category_counts');
+      await makeCacheServiceRequest('DELETE', '/delete', { key: 'categories_tree' });
+      await makeCacheServiceRequest('DELETE', '/delete', { key: 'category_counts' });
       logger.info('🗑️ All category caches invalidated');
     } catch (error) {
       logger.error('Error invalidating all category caches:', error);

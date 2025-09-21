@@ -1,6 +1,41 @@
 import { Request, Response, NextFunction } from 'express';
-import { cache } from '../services/cacheService';
+import axios from 'axios';
 import logger from '../config/logger';
+
+const CACHE_SERVICE_URL = process.env['CACHE_SERVICE_URL'] || 'http://localhost:3014';
+
+/**
+ * Cache Service'e istek yapmak için helper function
+ */
+async function makeCacheServiceRequest(
+  method: 'GET' | 'POST' | 'DELETE',
+  endpoint: string,
+  data?: any
+): Promise<any> {
+  try {
+    const url = `${CACHE_SERVICE_URL}/api/v1/cache${endpoint}`;
+    
+    const config = {
+      method,
+      url,
+      ...(data && { data }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
+    };
+
+    const response = await axios(config);
+    return response.data;
+  } catch (error) {
+    logger.error('Cache Service request failed:', {
+      method,
+      endpoint,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    throw error;
+  }
+}
 
 export interface CacheOptions {
   ttl?: number; // Time to live in seconds
@@ -39,9 +74,9 @@ export function readThroughCache(options: CacheOptions = {}) {
     
     try {
       // Try to get from cache first
-      const cachedData = await cache.get(cacheKey, { namespace, ttl });
+      const cachedResult = await makeCacheServiceRequest('POST', '/get', { key: cacheKey });
       
-      if (cachedData !== null) {
+      if (cachedResult.success && cachedResult.data !== null) {
         logger.debug('Cache hit', {
           key: cacheKey,
           namespace,
@@ -56,7 +91,7 @@ export function readThroughCache(options: CacheOptions = {}) {
           'X-Cache-TTL': ttl.toString()
         });
         
-        return res.json(cachedData);
+        return res.json(cachedResult.data);
       }
 
       logger.debug('Cache miss', {
@@ -72,7 +107,7 @@ export function readThroughCache(options: CacheOptions = {}) {
         // Check if we should cache this response
         if (cacheCondition(data)) {
           // Store in cache asynchronously (don't wait)
-          cache.set(cacheKey, data, { namespace, ttl }).catch(error => {
+          makeCacheServiceRequest('POST', '/set', { key: cacheKey, data, ttl }).catch(error => {
             logger.error('Cache set failed', {
               key: cacheKey,
               namespace,

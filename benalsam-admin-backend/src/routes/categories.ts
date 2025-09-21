@@ -1,7 +1,43 @@
 import { Router, IRouter } from 'express';
 import { categoriesController } from '../controllers/categoriesController';
 import { authMiddleware } from '../middleware/auth';
-import apiCacheService from '../services/apiCacheService';
+import axios from 'axios';
+// import { apiCacheService } from '../services/apiCacheService'; // Deprecated - moved to Cache Service
+
+const CACHE_SERVICE_URL = process.env['CACHE_SERVICE_URL'] || 'http://localhost:3014';
+
+/**
+ * Cache Service'e istek yapmak için helper function
+ */
+async function makeCacheServiceRequest(
+  method: 'GET' | 'POST' | 'DELETE',
+  endpoint: string,
+  data?: any
+): Promise<any> {
+  try {
+    const url = `${CACHE_SERVICE_URL}/api/v1/cache${endpoint}`;
+    
+    const config = {
+      method,
+      url,
+      ...(data && { data }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
+    };
+
+    const response = await axios(config);
+    return response.data;
+  } catch (error) {
+    console.error('Cache Service request failed:', {
+      method,
+      endpoint,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    throw error;
+  }
+}
 import { supabase } from '../config/database';
 import logger from '../config/logger';
 import { Request, Response } from 'express';
@@ -475,7 +511,7 @@ router.put('/:id/order', authMiddleware({ requiredPermissions: ['categories:edit
     // Clear categories cache after order update
     try {
       // Clear both cache keys
-      await apiCacheService.invalidateAPICache('categories');
+      // await apiCacheService.invalidateAPICache('categories'); // Deprecated - moved to Cache Service
       
       // Also clear the specific cache key used by categoryService
       const cacheManager = require('../services/cacheManager').default;
@@ -535,7 +571,7 @@ router.post('/reorder', authMiddleware({ requiredPermissions: ['categories:edit'
     // Clear categories cache after batch reorder
     try {
       // Clear both cache keys
-      await apiCacheService.invalidateAPICache('categories');
+      // await apiCacheService.invalidateAPICache('categories'); // Deprecated - moved to Cache Service
       
       // Also clear the specific cache key used by categoryService
       const cacheManager = require('../services/cacheManager').default;

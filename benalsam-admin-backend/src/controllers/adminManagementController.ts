@@ -11,9 +11,44 @@ import {
 } from '../types/admin-types';
 import { ApiResponseUtil } from '../utils/response';
 import { PermissionService } from '../services/permissionService';
-import { cache } from '../services/cacheService';
+import axios from 'axios';
 import bcrypt from 'bcryptjs';
 import logger from '../config/logger';
+
+const CACHE_SERVICE_URL = process.env['CACHE_SERVICE_URL'] || 'http://localhost:3014';
+
+/**
+ * Cache Service'e istek yapmak için helper function
+ */
+async function makeCacheServiceRequest(
+  method: 'GET' | 'POST' | 'DELETE',
+  endpoint: string,
+  data?: any
+): Promise<any> {
+  try {
+    const url = `${CACHE_SERVICE_URL}/api/v1/cache${endpoint}`;
+    
+    const config = {
+      method,
+      url,
+      ...(data && { data }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 10000
+    };
+
+    const response = await axios(config);
+    return response.data;
+  } catch (error) {
+    logger.error('Cache Service request failed:', {
+      method,
+      endpoint,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    throw error;
+  }
+}
 
 export class AdminManagementController {
   // Get all admin users with pagination and filters
@@ -31,29 +66,26 @@ export class AdminManagementController {
       const cacheKey = `admin_users:${page}:${limit}:${search}:${role}:${isActive}`;
       
       // Try to get from cache first
-      const cachedResult = await cache.get<{
-        data: AdminUser[];
-        count: number;
-        adminsWithRoles: AdminUser[];
-      }>(cacheKey, { 
-        namespace: 'admin',
-        ttl: 300 // 5 minutes
-      });
-
-      if (cachedResult) {
-        logger.info('Admin users served from cache', { cacheKey });
-        const response: AdminApiResponse<AdminUser[]> = {
-          success: true,
-          data: cachedResult.adminsWithRoles,
-          pagination: {
-            page: Number(page),
-            limit: Number(limit),
-            total: cachedResult.count,
-            totalPages: Math.ceil(cachedResult.count / Number(limit))
-          }
-        };
-        res.json(response);
-        return;
+      try {
+        const cachedResult = await makeCacheServiceRequest('POST', '/get', { key: cacheKey });
+        
+        if (cachedResult.success && cachedResult.data) {
+          logger.info('Admin users served from cache', { cacheKey });
+          const response: AdminApiResponse<AdminUser[]> = {
+            success: true,
+            data: cachedResult.data.adminsWithRoles,
+            pagination: {
+              page: Number(page),
+              limit: Number(limit),
+              total: cachedResult.data.count,
+              totalPages: Math.ceil(cachedResult.data.count / Number(limit))
+            }
+          };
+          res.json(response);
+          return;
+        }
+      } catch (error) {
+        logger.warn('Cache get failed, proceeding with database query', { error });
       }
 
       let query = supabase
@@ -121,14 +153,19 @@ export class AdminManagementController {
       const totalPages = Math.ceil((count || 0) / Number(limit));
 
       // ✅ OPTIMIZED: Cache the result
-      await cache.set(cacheKey, {
-        data: admins || [],
-        count: count || 0,
-        adminsWithRoles
-      }, { 
-        namespace: 'admin',
-        ttl: 300 // 5 minutes
-      });
+      try {
+        await makeCacheServiceRequest('POST', '/set', {
+          key: cacheKey,
+          data: {
+            data: admins || [],
+            count: count || 0,
+            adminsWithRoles
+          },
+          ttl: 300 // 5 minutes
+        });
+      } catch (error) {
+        logger.warn('Cache set failed', { error });
+      }
 
       const response: AdminApiResponse<AdminUser[]> = {
         success: true,
@@ -232,8 +269,12 @@ export class AdminManagementController {
       }
 
       // ✅ OPTIMIZED: Invalidate admin cache after creating new admin
-      await cache.invalidatePattern('admin_users:*', { namespace: 'admin' });
-      logger.info('Admin cache invalidated after creating new admin user');
+      try {
+        await makeCacheServiceRequest('POST', '/clear', {});
+        logger.info('Admin cache invalidated after creating new admin user');
+      } catch (error) {
+        logger.warn('Cache invalidation failed', { error });
+      }
 
       // Grant additional permissions if specified
       if (adminData.permissions && adminData.permissions.length > 0) {
@@ -302,8 +343,12 @@ export class AdminManagementController {
       }
 
       // ✅ OPTIMIZED: Invalidate admin cache after updating admin
-      await cache.invalidatePattern('admin_users:*', { namespace: 'admin' });
-      logger.info('Admin cache invalidated after updating admin user');
+      try {
+        await makeCacheServiceRequest('POST', '/clear', {});
+        logger.info('Admin cache invalidated after updating admin user');
+      } catch (error) {
+        logger.warn('Cache invalidation failed', { error });
+      }
 
       // Update user permissions if specified
       if (updateData.permissions) {
@@ -362,8 +407,12 @@ export class AdminManagementController {
       }
 
       // ✅ OPTIMIZED: Invalidate admin cache after deleting admin
-      await cache.invalidatePattern('admin_users:*', { namespace: 'admin' });
-      logger.info('Admin cache invalidated after deleting admin user');
+      try {
+        await makeCacheServiceRequest('POST', '/clear', {});
+        logger.info('Admin cache invalidated after deleting admin user');
+      } catch (error) {
+        logger.warn('Cache invalidation failed', { error });
+      }
 
       ApiResponseUtil.success(res, null, 'Admin user deleted successfully');
     } catch (error) {

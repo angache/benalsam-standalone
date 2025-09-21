@@ -55,16 +55,16 @@ import dataExportV2Routes from './routes/dataExportV2';
 import apmRoutes from './routes/apm';
 import loadTestingRoutes from './routes/loadTesting';
 import sessionManagementRoutes from './routes/sessionManagement';
-import cacheRoutes from './routes/cache';
+import { cacheRoutes } from './routes/cache';
 import searchRoutes from './routes/search';
-import apiCacheRoutes from './routes/apiCache';
-import testRoutes from './routes/test';
-import cacheAnalyticsRoutes from './routes/cacheAnalytics';
+// import apiCacheRoutes from './routes/apiCache'; // Deprecated - moved to Cache Service
+// import testRoutes from './routes/test'; // Deprecated - moved to Cache Service
+// import cacheAnalyticsRoutes from './routes/cacheAnalytics'; // Deprecated - moved to Cache Service
 import jwtSecurityRoutes from './routes/jwtSecurity';
-import predictiveCacheRoutes from './routes/predictiveCache';
-import geographicCacheRoutes from './routes/geographicCache';
-import smartInvalidationRoutes from './routes/smartInvalidation';
-import cacheCompressionRoutes from './routes/cacheCompression';
+// import predictiveCacheRoutes from './routes/predictiveCache'; // Deprecated - moved to Cache Service
+// import geographicCacheRoutes from './routes/geographicCache'; // Deprecated - moved to Cache Service
+// import smartInvalidationRoutes from './routes/smartInvalidation'; // Deprecated - moved to Cache Service
+// import cacheCompressionRoutes from './routes/cacheCompression'; // Deprecated - moved to Cache Service
 import triggerTestRoutes from './routes/triggerTest';
 import rateLimitRoutes from './routes/rateLimitRoutes';
 import twoFactorRoutes from './routes/twoFactor';
@@ -269,7 +269,7 @@ app.use('/test-metrics', prometheusTestRoutes); // Test Prometheus metrics endpo
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/listings', authenticateToken, listingsRouter);
 app.use('/api/v1/users', authenticateToken, usersRouter);
-app.use('/api/v1/categories', categoriesRouter); // ✅ Auth kaldırıldı
+app.use('/api/v1/categories', categoriesRouter);
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/monitoring', monitoringRoutes);
 app.use('/api/v1/elasticsearch', elasticsearchRoutes);
@@ -286,14 +286,14 @@ app.use('/api/v1/data-export-v2', dataExportV2Routes); // Data Export V2 sistemi
 app.use('/api/v1/load-testing', loadTestingRoutes); // Load Testing sistemi aktif edildi
 app.use('/api/v1/session-management', sessionManagementRoutes); // Session Management sistemi aktif edildi
 app.use('/api/v1/cache', cacheRoutes); // Cache Management sistemi aktif edildi
-app.use('/api/v1/search', searchRoutes); // Search Cache sistemi aktif edildi
-app.use('/api/v1/api-cache', apiCacheRoutes); // API Cache sistemi aktif edildi
-app.use('/api/v1/test', testRoutes); // Test routes aktif edildi
-app.use('/api/v1/cache-analytics', cacheAnalyticsRoutes); // Cache Analytics sistemi aktif edildi
-app.use('/api/v1/predictive-cache', predictiveCacheRoutes); // Predictive Cache sistemi aktif edildi
-app.use('/api/v1/geographic-cache', geographicCacheRoutes); // Geographic Cache sistemi aktif edildi
-app.use('/api/v1/smart-invalidation', smartInvalidationRoutes); // Smart Invalidation sistemi aktif edildi
-app.use('/api/v1/cache-compression', cacheCompressionRoutes); // Cache Compression sistemi aktif edildi
+app.use('/api/v1/search', searchRoutes);
+// app.use('/api/v1/api-cache', apiCacheRoutes); // Deprecated - moved to Cache Service
+// app.use('/api/v1/test', testRoutes); // Deprecated - moved to Cache Service
+// app.use('/api/v1/cache-analytics', cacheAnalyticsRoutes); // Deprecated - moved to Cache Service
+// app.use('/api/v1/predictive-cache', predictiveCacheRoutes); // Deprecated - moved to Cache Service
+// app.use('/api/v1/geographic-cache', geographicCacheRoutes); // Deprecated - moved to Cache Service
+// app.use('/api/v1/smart-invalidation', smartInvalidationRoutes); // Deprecated - moved to Cache Service
+// app.use('/api/v1/cache-compression', cacheCompressionRoutes); // Deprecated - moved to Cache Service
 app.use('/api/v1/trigger-test', triggerTestRoutes); // Trigger Test sistemi aktif edildi
 app.use('/api/v1/rate-limit', rateLimitRoutes);
 app.use('/api/v1/2fa', twoFactorRoutes); // Cross-Platform Rate Limiting sistemi aktif edildi
