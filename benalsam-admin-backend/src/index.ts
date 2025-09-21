@@ -75,6 +75,7 @@ import securityRoutes from './routes/security';
 import uploadRoutes from './routes/upload';
 import aiSuggestionsRoutes from './routes/aiSuggestions';
 import inventoryRoutes from './routes/inventory';
+import { serviceRegistryRoutes } from './routes/serviceRegistry';
 
 // import seoRoutes from './routes/seo';
 
@@ -86,6 +87,7 @@ import sessionCleanupService from './services/sessionCleanupService';
 import { AnalyticsAlertsService } from './services/analyticsAlertsService';
 import performanceMonitoringService from './services/performanceMonitoringService';
 import { initializeRedis } from './services/redisService'; // Redis Cloud enabled
+import { serviceRegistry } from './services/serviceRegistry'; // Service Registry for microservices
 
 // Import middleware
 import { authenticateToken } from './middleware/auth';
@@ -311,6 +313,7 @@ app.use('/api/v1/upload', uploadRoutes); // Cloudinary upload routes
 app.use('/api/v1/ai-suggestions', aiSuggestionsRoutes); // AI Suggestions sistemi aktif edildi
 app.use('/api/v1/inventory', inventoryRoutes); // Inventory routes
 app.use('/api/v1/jwt-security', jwtSecurityRoutes); // JWT Security routes
+app.use('/api/v1/service-registry', serviceRegistryRoutes); // Service Registry routes
 
 
 // SEO routes (no auth required)
@@ -406,11 +409,17 @@ const startServer = async () => {
       logger.warn('⚠️ Redis connection failed:', error);
     }
 
+    // Initialize Service Registry
+    logger.info('🔧 Initializing Service Registry...');
+    const services = serviceRegistry.getServices();
+    logger.info(`✅ Service Registry initialized with services: ${services.join(', ')}`);
+
     app.listen(PORT, () => {
       logger.info(`🚀 Admin Backend API running on port ${PORT}`);
       logger.info(`📊 Environment: ${process.env.NODE_ENV}`);
       logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
       logger.info(`📚 API version: v1`);
+      logger.info(`🔧 Service Registry: ${services.join(', ')}`);
     });
 
   } catch (error) {

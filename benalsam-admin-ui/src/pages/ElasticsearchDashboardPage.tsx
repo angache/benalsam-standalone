@@ -338,10 +338,11 @@ const ElasticsearchDashboardPage: React.FC = () => {
         setIndexerStats(mockData.indexerStats);
       } else {
         // In production, fetch real data
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api/v1';
         const [healthRes, syncRes, queueRes] = await Promise.all([
-          fetch('/api/v1/elasticsearch/health-check'),
-          fetch('/api/v1/elasticsearch/sync/status'),
-          fetch('/api/v1/elasticsearch/queue/stats')
+          fetch(`${API_BASE_URL}/elasticsearch/health-check`),
+          fetch(`${API_BASE_URL}/elasticsearch/sync/status`),
+          fetch(`${API_BASE_URL}/elasticsearch/queue/stats`)
         ]);
 
         if (healthRes.ok) {
@@ -370,7 +371,8 @@ const ElasticsearchDashboardPage: React.FC = () => {
 
   const triggerManualSync = async () => {
     try {
-      const response = await fetch('/api/v1/elasticsearch/sync/trigger', {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api/v1';
+      const response = await fetch(`${API_BASE_URL}/elasticsearch/sync/trigger`, {
         method: 'POST'
       });
       
@@ -385,7 +387,8 @@ const ElasticsearchDashboardPage: React.FC = () => {
 
   const retryFailedJobs = async () => {
     try {
-      const response = await fetch('/api/v1/elasticsearch/queue/retry-failed', {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api/v1';
+      const response = await fetch(`${API_BASE_URL}/elasticsearch/queue/retry-failed`, {
         method: 'POST'
       });
       

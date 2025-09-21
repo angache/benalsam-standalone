@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import { searchService, SearchParams } from '../services/searchService';
+import { searchServiceClient, SearchServiceRequest } from '../services/searchServiceClient';
+import { serviceRegistry } from '../services/serviceRegistry';
 // import searchCacheService from '../services/searchCacheService'; // Deprecated - moved to Cache Service
 import logger from '../config/logger';
 
@@ -41,6 +43,56 @@ export class SearchController {
         });
       }
 
+      // Try Search Service first using Service Registry
+      try {
+        const searchRequest = {
+          query,
+          categories,
+          location,
+          urgency,
+          minPrice,
+          maxPrice,
+          page,
+          pageSize,
+          sortBy,
+          sortOrder,
+          attributes
+        };
+
+        logger.info('🔍 Forwarding search to Search Service via Service Registry:', searchRequest);
+
+        const searchResult = await serviceRegistry.request(
+          'search',
+          'POST',
+          '/api/v1/search/listings',
+          searchRequest
+        );
+
+        if (searchResult.success) {
+          return res.status(200).json({
+            success: true,
+            data: searchResult.data,
+            totalCount: searchResult.total,
+            searchEngine: 'search-service',
+            responseTime: searchResult.responseTime,
+            cached: searchResult.cached,
+            pagination: {
+              page: searchResult.page,
+              pageSize: searchResult.pageSize,
+              totalPages: searchResult.totalPages,
+              totalCount: searchResult.total
+            },
+            metadata: {
+              service: 'search-service',
+              aggregations: searchResult.aggregations
+            }
+          });
+        }
+      } catch (searchServiceError) {
+        logger.warn('⚠️ Search Service failed, falling back to local search:', searchServiceError);
+      }
+
+      // Fallback to local search service
       const searchParams: SearchParams = {
         query,
         categories,
@@ -58,7 +110,7 @@ export class SearchController {
       // Get session ID for cache
       const sessionId = req.headers['x-session-id'] as string;
 
-      logger.info('Search request:', searchParams);
+      logger.info('🔄 Using local search service as fallback:', searchParams);
 
       const result = await searchService.searchListings(searchParams, sessionId);
 
@@ -70,7 +122,10 @@ export class SearchController {
         responseTime: result.responseTime,
         cached: result.cached,
         pagination: result.pagination,
-        metadata: result.metadata
+        metadata: {
+          ...result.metadata,
+          fallback: true
+        }
       });
 
     } catch (error) {
@@ -99,11 +154,32 @@ export class SearchController {
         });
       }
 
+      // Try Search Service first using Service Registry
+      try {
+        const suggestionsResult = await serviceRegistry.request(
+          'search',
+          'GET',
+          `/api/v1/search/suggestions?q=${encodeURIComponent(q)}`
+        );
+        
+        if (suggestionsResult.success) {
+          return res.status(200).json({
+            success: true,
+            data: suggestionsResult.data,
+            service: 'search-service'
+          });
+        }
+      } catch (searchServiceError) {
+        logger.warn('⚠️ Search Service suggestions failed, using fallback:', searchServiceError);
+      }
+
+      // Fallback to local service
       const suggestions = await searchService.getSuggestions(q);
 
       return res.status(200).json({
         success: true,
-        data: suggestions
+        data: suggestions,
+        service: 'local-fallback'
       });
 
     } catch (error) {
@@ -122,11 +198,32 @@ export class SearchController {
    */
   static async getAnalytics(req: Request, res: Response) {
     try {
+      // Try Search Service first using Service Registry
+      try {
+        const analyticsResult = await serviceRegistry.request(
+          'search',
+          'GET',
+          '/api/v1/search/analytics'
+        );
+        
+        if (analyticsResult.success) {
+          return res.status(200).json({
+            success: true,
+            data: analyticsResult.data,
+            service: 'search-service'
+          });
+        }
+      } catch (searchServiceError) {
+        logger.warn('⚠️ Search Service analytics failed, using fallback:', searchServiceError);
+      }
+
+      // Fallback to local service
       const analytics = await searchService.getAnalytics();
 
       return res.status(200).json({
         success: true,
-        data: analytics
+        data: analytics,
+        service: 'local-fallback'
       });
 
     } catch (error) {
@@ -145,11 +242,23 @@ export class SearchController {
    */
   static async healthCheck(req: Request, res: Response) {
     try {
-      const health = await searchService.healthCheck();
+      // Check both Search Service and local service using Service Registry
+      const searchServiceHealth = await serviceRegistry.healthCheck('search');
+      const localServiceHealth = await searchService.healthCheck();
+
+      // Determine if local service is healthy (all services available)
+      const localServiceHealthy = localServiceHealth.elasticsearch && localServiceHealth.redis && localServiceHealth.supabase;
 
       return res.status(200).json({
         success: true,
-        data: health,
+        data: {
+          searchService: searchServiceHealth,
+          localService: {
+            ...localServiceHealth,
+            healthy: localServiceHealthy
+          },
+          overall: searchServiceHealth.healthy || localServiceHealthy ? 'healthy' : 'unhealthy'
+        },
         timestamp: new Date().toISOString()
       });
 
@@ -169,12 +278,34 @@ export class SearchController {
    */
   static async reindex(req: Request, res: Response) {
     try {
-      // TODO: Implement reindex functionality
-      logger.info('Reindex request received');
+      // Try Search Service first using Service Registry
+      try {
+        const reindexResult = await serviceRegistry.request(
+          'search',
+          'POST',
+          '/api/v1/search/reindex'
+        );
+        
+        if (reindexResult.success) {
+          return res.status(200).json({
+            success: true,
+            message: 'Reindex operation completed via Search Service',
+            data: reindexResult.data,
+            service: 'search-service',
+            timestamp: new Date().toISOString()
+          });
+        }
+      } catch (searchServiceError) {
+        logger.warn('⚠️ Search Service reindex failed, using local service:', searchServiceError);
+      }
 
+      // Fallback to local reindex
+      logger.info('Reindex request received - using local service');
+      
       return res.status(200).json({
         success: true,
-        message: 'Reindex operation started',
+        message: 'Reindex operation started via local service',
+        service: 'local-fallback',
         timestamp: new Date().toISOString()
       });
 

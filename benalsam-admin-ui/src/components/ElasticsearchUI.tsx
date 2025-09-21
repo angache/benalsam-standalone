@@ -172,7 +172,8 @@ const ElasticsearchUI: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`/api/v1/elasticsearch/reindex/${indexName}`, {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api/v1';
+      const response = await fetch(`${API_BASE_URL}/elasticsearch/reindex/${indexName}`, {
         method: 'POST'
       });
       const data = await response.json();
