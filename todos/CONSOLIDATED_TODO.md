@@ -1023,7 +1023,7 @@ Bu dosya, 1037 TODO task'ının konsolide edilmiş halidir.
 - [ ] Geographic distribution *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
 - [ ] API Client oluştur *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
 - [ ] Environment config *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
-- [ ] Admin auth service *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
+- [x] ~~Admin auth service~~ **İPTAL EDİLDİ - Admin backend'de kalacak** *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
 - [ ] Listing service hibrit *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
 - [ ] Admin management service *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*
 - [ ] Dashboard components *(Kaynak: TODO_WEB_ADMIN_INTEGRATION.md)*

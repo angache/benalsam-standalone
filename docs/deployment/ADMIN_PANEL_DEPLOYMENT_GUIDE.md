@@ -292,7 +292,7 @@ npm run dev
 ```env
 # Backend (.env)
 NODE_ENV=development
-PORT=3001
+PORT=3002
 SUPABASE_URL=https://dnwreckpeenhbdtapmxr.supabase.co
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...

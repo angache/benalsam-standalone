@@ -195,7 +195,7 @@ src/
 - [ ] Basic error handling
 
 ### **Gün 2: Auth & Services**
-- [ ] Admin auth service
+- [x] ~~Admin auth service~~ **İPTAL EDİLDİ - Admin backend'de kalacak**
 - [ ] Listing service hibrit
 - [ ] Analytics service
 
