@@ -1,8 +1,9 @@
 // Elasticsearch Services
 export { AdminElasticsearchService } from './elasticsearchService';
-export { MessageQueueService, QueueJob } from './messageQueueService';
-export { IndexerService, IndexerConfig, IndexerStats } from './indexerService';
-export { SyncService, SyncConfig, SyncStatus, SyncStats } from './syncService';
+// Queue services moved to queue service (Port 3012)
+// export { MessageQueueService, QueueJob } from './messageQueueService'; // Moved to queue service
+// export { IndexerService, IndexerConfig, IndexerStats } from './indexerService'; // Moved to queue service
+// export { SyncService, SyncConfig, SyncStatus, SyncStats } from './syncService'; // Moved to queue service
 export { QueueProcessorService } from './queueProcessorService';
 
 // Existing Services

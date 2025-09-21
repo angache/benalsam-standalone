@@ -295,47 +295,8 @@ export const listingsController = {
         },
       };
 
-      // RabbitMQ mesaj gönder
-      try {
-        const { rabbitmqService } = await import('../services/rabbitmqService');
-        const traceId = `update_${id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
-        // Elasticsearch sync mesajı
-        const syncRoutingKey = 'listing.update';
-        await rabbitmqService.publishToExchange(
-          'benalsam.listings',
-          syncRoutingKey,
-          { 
-            listingId: id, 
-            operation: 'update',
-            data: transformedListing,
-            traceId 
-          },
-          { messageId: `${traceId}_sync` }
-        );
-        
-        // Status change mesajı
-        const statusRoutingKey = `listing.status.${listing.status || 'pending_approval'}`;
-        await rabbitmqService.publishToExchange(
-          'benalsam.listings',
-          statusRoutingKey,
-          { 
-            listingId: id, 
-            status: listing.status || 'pending_approval',
-            traceId 
-          },
-          { messageId: `${traceId}_status` }
-        );
-        
-        logger.info('📤 RabbitMQ messages sent for listing update', { 
-          listingId: id, 
-          status: listing.status,
-          traceId 
-        });
-      } catch (mqError) {
-        logger.error('❌ Failed to send RabbitMQ messages for listing update:', mqError);
-        // Mesaj gönderme hatası olsa bile response'u döndür
-      }
+      // RabbitMQ messages now handled by queue service (Port 3012)
+      // Database triggers will automatically create sync jobs
 
       res.json({
         success: true,
@@ -379,32 +340,8 @@ export const listingsController = {
         return;
       }
 
-      // RabbitMQ mesaj gönder
-      try {
-        const { rabbitmqService } = await import('../services/rabbitmqService');
-        const traceId = `delete_${id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
-        // Elasticsearch sync mesajı
-        const syncRoutingKey = 'listing.delete';
-        await rabbitmqService.publishToExchange(
-          'benalsam.listings',
-          syncRoutingKey,
-          { 
-            recordId: id,  // recordId olarak değiştir
-            operation: 'delete',
-            traceId 
-          },
-          { messageId: `${traceId}_sync` }
-        );
-        
-        logger.info('📤 RabbitMQ message sent for listing deletion', { 
-          listingId: id, 
-          traceId 
-        });
-      } catch (mqError) {
-        logger.error('❌ Failed to send RabbitMQ message for listing deletion:', mqError);
-        // Mesaj gönderme hatası olsa bile response'u döndür
-      }
+      // RabbitMQ messages now handled by queue service (Port 3012)
+      // Database triggers will automatically create sync jobs
 
       // Kategori sayıları cache'ini temizle
       try {

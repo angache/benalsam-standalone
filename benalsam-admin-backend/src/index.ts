@@ -81,7 +81,7 @@ import inventoryRoutes from './routes/inventory';
 // Import services
 import { AdminElasticsearchService } from './services/elasticsearchService';
 import './config/cloudinary'; // Initialize Cloudinary
-import { databaseTriggerBridge } from './services/databaseTriggerBridge';
+// import { databaseTriggerBridge } from './services/databaseTriggerBridge'; // Moved to queue service
 import sessionCleanupService from './services/sessionCleanupService';
 import { AnalyticsAlertsService } from './services/analyticsAlertsService';
 import performanceMonitoringService from './services/performanceMonitoringService';
@@ -345,13 +345,8 @@ const startServer = async () => {
       logger.warn('⚠️ Elasticsearch connection failed:', error);
     }
 
-    // Start database trigger bridge (connects database triggers to new queue service)
-    try {
-      await databaseTriggerBridge.startProcessing(5000); // 5 saniye aralıklarla
-      logger.info('✅ Database trigger bridge started');
-    } catch (error) {
-      logger.error('❌ Database trigger bridge failed to start:', error);
-    }
+    // Database trigger bridge moved to queue service (Port 3012)
+    logger.info('✅ Database trigger bridge now running in queue service (Port 3012)');
 
     // Start queue processor - DISABLED (using RabbitMQ instead)
     // try {

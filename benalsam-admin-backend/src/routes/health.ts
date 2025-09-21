@@ -4,7 +4,7 @@ import { elasticsearchClient } from '../services/elasticsearchService';
 import { supabase } from '../config/supabase';
 import Redis from 'ioredis';
 import logger from '../config/logger';
-import { databaseTriggerBridge } from '../services/databaseTriggerBridge';
+// import { databaseTriggerBridge } from '../services/databaseTriggerBridge'; // Moved to queue service
 import { requestTimeout, timeoutPresets } from '../middleware/timeout';
 
 const router: IRouter = express.Router();
@@ -737,49 +737,7 @@ router.delete('/test-listings/clear', async (req, res) => {
   }
 });
 
-// Database Trigger Bridge specific health check
-router.get('/database-trigger-bridge', async (req, res) => {
-  try {
-    const health = await databaseTriggerBridge.healthCheck();
-    const status = health.healthy ? 200 : 503;
-    
-    res.status(status).json({
-      timestamp: new Date().toISOString(),
-      service: 'database-trigger-bridge',
-      ...health
-    });
-
-  } catch (error) {
-    logger.error('Database trigger bridge health check error:', error);
-    res.status(500).json({
-      timestamp: new Date().toISOString(),
-      service: 'database-trigger-bridge',
-      healthy: false,
-      message: 'Health check failed with error',
-      details: { error: error instanceof Error ? error.message : 'Unknown error' }
-    });
-  }
-});
-
-// Database Trigger Bridge status
-router.get('/database-trigger-bridge/status', async (req, res) => {
-  try {
-    const status = await databaseTriggerBridge.getStatus();
-    
-    res.json({
-      timestamp: new Date().toISOString(),
-      service: 'database-trigger-bridge',
-      status
-    });
-
-  } catch (error) {
-    logger.error('Database trigger bridge status error:', error);
-    res.status(500).json({
-      timestamp: new Date().toISOString(),
-      service: 'database-trigger-bridge',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
+// Database Trigger Bridge endpoints moved to queue service (Port 3012)
+// Use: http://localhost:3012/api/v1/health for queue service health checks
 
 export default router; 
