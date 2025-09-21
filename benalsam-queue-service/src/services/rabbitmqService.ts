@@ -1,6 +1,7 @@
 import * as amqp from 'amqplib';
 import { IRabbitMQService } from '../interfaces/IDatabaseService';
 import logger from '../config/logger';
+import { metricsService } from './MetricsService';
 
 /**
  * Real RabbitMQ Service Implementation
@@ -53,6 +54,10 @@ export class RabbitMQService implements IRabbitMQService {
       this.reconnectAttempts = 0;
       this.reconnectDelay = 1000;
 
+      // Update metrics
+      metricsService.setConnectionStatus(true);
+      metricsService.recordReconnectionAttempt('success');
+
       logger.info('✅ Real RabbitMQ connection established', {
         host: process.env['RABBITMQ_HOST'] || 'localhost',
         port: process.env['RABBITMQ_PORT'] || '5672'
@@ -104,6 +109,10 @@ export class RabbitMQService implements IRabbitMQService {
       }
       
       this.isConnectedFlag = false;
+      
+      // Update metrics
+      metricsService.setConnectionStatus(false);
+      
       logger.info('✅ RabbitMQ disconnection completed');
       
     } catch (error) {
@@ -145,6 +154,9 @@ export class RabbitMQService implements IRabbitMQService {
       if (!published) {
         throw new Error('Failed to publish message - queue might be full');
       }
+
+      // Update metrics
+      metricsService.recordQueueMessage(queueName, 'published');
 
       logger.debug(`✅ Message published to queue ${queueName}`, {
         messageId: message.id,
@@ -234,7 +246,11 @@ export class RabbitMQService implements IRabbitMQService {
         if (!msg) return;
 
         const messageId = msg.properties.messageId || `msg_${Date.now()}`;
+        const startTime = Date.now();
         this.inFlightMessages.add(messageId);
+
+        // Update in-flight metrics
+        metricsService.setInFlightMessages(queueName, this.inFlightMessages.size);
 
         try {
           const messageContent = JSON.parse(msg.content.toString());
@@ -248,22 +264,41 @@ export class RabbitMQService implements IRabbitMQService {
           // Process message
           await handler(messageContent);
 
+          // Calculate processing duration
+          const processingDuration = (Date.now() - startTime) / 1000;
+
           // Acknowledge successful processing
           this.channel!.ack(msg);
           this.inFlightMessages.delete(messageId);
 
+          // Update metrics for successful processing
+          metricsService.recordMessageProcessed(queueName, 'success', 'consume');
+          metricsService.recordMessageProcessingDuration(queueName, 'consume', processingDuration);
+          metricsService.recordProcessingLatency(queueName, 'consume', processingDuration);
+          metricsService.recordQueueMessage(queueName, 'consumed');
+          metricsService.setInFlightMessages(queueName, this.inFlightMessages.size);
+
           logger.debug(`✅ Message processed successfully`, {
             messageId,
-            queue: queueName
+            queue: queueName,
+            processingDuration: `${processingDuration}s`
           });
 
         } catch (error) {
+          const processingDuration = (Date.now() - startTime) / 1000;
+          const errorType = error instanceof Error ? error.constructor.name : 'UnknownError';
+          
           logger.error(`❌ Error processing message from queue ${queueName}:`, {
             error: error instanceof Error ? error.message : 'Unknown error',
             messageId,
             queue: queueName,
-            retryCount: msg.properties.headers?.['retryCount'] || 0
+            retryCount: msg.properties.headers?.['retryCount'] || 0,
+            processingDuration: `${processingDuration}s`
           });
+
+          // Update error metrics
+          metricsService.recordMessageProcessingError(queueName, errorType, 'consume');
+          metricsService.recordMessageProcessingDuration(queueName, 'consume', processingDuration);
 
           // Check retry count
           const retryCount = msg.properties.headers?.['retryCount'] || 0;
@@ -271,6 +306,11 @@ export class RabbitMQService implements IRabbitMQService {
           if (retryCount < 3) {
             // Retry: requeue with incremented retry count
             this.channel!.nack(msg, false, true); // Requeue for retry
+            
+            // Update retry metrics
+            metricsService.recordMessageRetry(queueName, retryCount + 1);
+            metricsService.recordQueueMessage(queueName, 'requeued');
+            
             logger.warn(`🔄 Message requeued for retry`, {
               messageId,
               queue: queueName,
@@ -279,6 +319,11 @@ export class RabbitMQService implements IRabbitMQService {
           } else {
             // Max retries exceeded: send to DLQ
             this.channel!.nack(msg, false, false); // Send to DLQ
+            
+            // Update DLQ metrics
+            metricsService.recordDLQMessage(queueName, 'max_retries_exceeded');
+            metricsService.recordMessageProcessed(queueName, 'failed', 'consume');
+            
             logger.error(`💀 Message sent to DLQ after max retries`, {
               messageId,
               queue: queueName,
@@ -287,6 +332,7 @@ export class RabbitMQService implements IRabbitMQService {
           }
 
           this.inFlightMessages.delete(messageId);
+          metricsService.setInFlightMessages(queueName, this.inFlightMessages.size);
         }
       }, { 
         noAck: false // CRITICAL: Must be false for proper acknowledgment
@@ -345,6 +391,10 @@ export class RabbitMQService implements IRabbitMQService {
     
     this.isConnectedFlag = false;
     
+    // Update metrics
+    metricsService.setConnectionStatus(false);
+    metricsService.recordConnectionError(error.constructor.name);
+    
     if (!this.isShuttingDown) {
       await this.handleReconnection();
     }
@@ -354,6 +404,10 @@ export class RabbitMQService implements IRabbitMQService {
     logger.warn('⚠️ RabbitMQ connection closed');
     this.isConnectedFlag = false;
     
+    // Update metrics
+    metricsService.setConnectionStatus(false);
+    metricsService.recordConnectionError('connection_closed');
+    
     if (!this.isShuttingDown) {
       await this.handleReconnection();
     }
@@ -362,6 +416,7 @@ export class RabbitMQService implements IRabbitMQService {
   private async handleReconnection(): Promise<void> {
     if (this.isShuttingDown || this.reconnectAttempts >= this.maxReconnectAttempts) {
       logger.error('❌ Max reconnection attempts reached or shutting down');
+      metricsService.recordReconnectionAttempt('failed');
       return;
     }
 
@@ -375,6 +430,7 @@ export class RabbitMQService implements IRabbitMQService {
         await this.connect();
       } catch (error) {
         logger.error('❌ Reconnection attempt failed:', error);
+        metricsService.recordReconnectionAttempt('failed');
       }
     }, delay);
   }

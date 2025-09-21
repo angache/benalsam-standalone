@@ -11,6 +11,7 @@ import logger from './config/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { healthRoutes } from './routes/health';
 import { bridgeRoutes } from './routes/bridge';
+import { metricsRoutes } from './routes/metrics';
 import { databaseTriggerBridge } from './services/databaseTriggerBridge';
 import { rabbitmqService } from './services/rabbitmqService';
 
@@ -37,6 +38,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Routes
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/bridge', bridgeRoutes);
+app.use('/api/v1/metrics', metricsRoutes);
 
 // Error handling
 app.use(errorHandler);
