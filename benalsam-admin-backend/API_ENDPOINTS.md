@@ -104,6 +104,19 @@
 - `GET /status` - API cache durumu
 - `POST /invalidate` - API cache geçersiz kılma
 
+### **📊 CACHE DASHBOARD (TEMPORARY)**
+**Base Path:** `/api/v1/cache-analytics`
+- `GET /dashboard` - Cache analytics dashboard (mock data)
+
+**Base Path:** `/api/v1/geographic-cache`
+- `GET /stats` - Geographic cache statistics (mock data)
+
+**Base Path:** `/api/v1/predictive-cache`
+- `GET /behavior-stats` - Predictive cache behavior stats (mock data)
+
+**Base Path:** `/api/v1/cache-compression`
+- `GET /stats` - Cache compression statistics (mock data)
+
 ### **📤 DATA EXPORT**
 **Base Path:** `/api/v1/data-export`
 - `POST /export` - Veri dışa aktarma
