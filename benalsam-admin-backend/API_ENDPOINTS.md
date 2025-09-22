@@ -1,8 +1,8 @@
 # 🚀 Admin Backend API Endpoints Documentation
 
-**Son Güncelleme:** 2025-09-01  
-**Versiyon:** 1.0.0  
-**Toplam Endpoint Sayısı:** ~150+
+**Son Güncelleme:** 2025-09-22  
+**Versiyon:** 1.3.0  
+**Toplam Endpoint Sayısı:** ~170+
 
 ---
 
@@ -142,6 +142,29 @@
 - `POST /image` - Resim yükleme
 - `POST /document` - Doküman yükleme
 
+### **🖼️ UPLOAD SERVICE (Port 3007)**
+**Base Path:** `/api/v1/upload`
+- `POST /listings` - Listing image'ları yükleme (Cloudinary)
+- `POST /profiles` - Profile image'ları yükleme (Cloudinary)
+- `POST /categories` - Category image'ları yükleme (Cloudinary)
+- `GET /health` - Upload Service sağlık kontrolü
+- `GET /jobs` - Job durumu kontrolü
+
+**Base Path:** `/api/v1/listings`
+- `POST /create` - Listing oluşturma (RabbitMQ job)
+- `PUT /:id` - Listing güncelleme (RabbitMQ job)
+- `GET /status/:jobId` - Job durumu sorgulama
+
+### **📋 LISTING SERVICE (Port 3008)**
+**Base Path:** `/api/v1/listings`
+- `GET /` - Tüm listing'leri listele
+- `GET /:id` - Tek listing detayı
+- `POST /` - Yeni listing oluştur (direct)
+- `PUT /:id` - Listing güncelleme
+- `DELETE /:id` - Listing silme
+- `GET /health` - Listing Service sağlık kontrolü
+- `GET /jobs/metrics` - Job processing metrikleri
+
 ### **🤖 AI SUGGESTIONS**
 **Base Path:** `/api/v1/ai-suggestions`
 - `POST /generate` - AI önerileri oluştur
@@ -184,6 +207,14 @@
 ---
 
 ## 📝 **CHANGELOG**
+
+### **2025-09-22 - v1.3.0**
+- ✅ Upload Service endpoint'leri eklendi (Port 3007)
+- ✅ Listing Service endpoint'leri eklendi (Port 3008)
+- ✅ Image upload flow tamamen entegre edildi
+- ✅ RabbitMQ job processing sistemi çalışır hale getirildi
+- ✅ End-to-end listing creation flow tamamlandı
+- ✅ Cloudinary integration tamamen çalışır durumda
 
 ### **2025-09-15 - v1.2.0**
 - ✅ DELETE /listings/:id endpoint'i RabbitMQ mesajı gönderir hale getirildi
@@ -247,6 +278,39 @@ curl http://localhost:3002/api/v1/monitoring/health/prometheus
 
 # Prometheus API compatibility
 curl "http://localhost:3002/api/v1/monitoring/api/v1/query?query=up"
+```
+
+### **Upload Service (Port 3007)**
+```bash
+# Upload Service sağlık kontrolü
+curl http://localhost:3007/api/v1/health
+
+# Listing image'ları yükleme
+curl -X POST http://localhost:3007/api/v1/upload/listings \
+  -H "x-user-id: dff1eb99-c85e-49e8-81af-2ba72dd54c2b" \
+  -F "images=@/path/to/image.jpg"
+
+# Listing oluşturma (RabbitMQ job)
+curl -X POST http://localhost:3007/api/v1/listings/create \
+  -H "Content-Type: application/json" \
+  -H "x-user-id: dff1eb99-c85e-49e8-81af-2ba72dd54c2b" \
+  -d '{"title":"Test Listing","description":"Test Description","price":100,"category":"Elektronik","location":"İstanbul","images":["https://res.cloudinary.com/classibuy/image/upload/v1758532753/listings/test-user-123/f1dhiwdd06kok5r1oirc.jpg"]}'
+
+# Job durumu sorgulama
+curl http://localhost:3007/api/v1/listings/status/4c9458a4-169f-47be-816c-b823556864fc \
+  -H "x-user-id: dff1eb99-c85e-49e8-81af-2ba72dd54c2b"
+```
+
+### **Listing Service (Port 3008)**
+```bash
+# Listing Service sağlık kontrolü
+curl http://localhost:3008/api/v1/health
+
+# Tüm listing'leri listele
+curl http://localhost:3008/api/v1/listings
+
+# Job processing metrikleri
+curl http://localhost:3008/api/v1/jobs/metrics
 ```
 
 ---
