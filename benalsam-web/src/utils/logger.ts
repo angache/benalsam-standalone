@@ -44,8 +44,8 @@ interface LoggerConfig {
 const DEFAULT_CONFIG: LoggerConfig = {
   minLevel: LogLevel.INFO,
   enableConsole: true,
-  enableExternalService: process.env.NODE_ENV === 'production',
-  enableLocalStorage: process.env.NODE_ENV === 'development',
+  enableExternalService: import.meta.env.MODE === 'production',
+  enableLocalStorage: import.meta.env.MODE === 'development',
   maxLocalStorageEntries: 1000,
   enablePerformanceLogging: true
 };
@@ -128,8 +128,8 @@ export class StructuredLogger {
         timestamp: context.timestamp || new Date()
       },
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development',
-      version: process.env.REACT_APP_VERSION || '1.0.0',
+      environment: import.meta.env.MODE || 'development',
+      version: import.meta.env.VITE_APP_VERSION || '1.0.0',
       userAgent: navigator.userAgent,
       url: window.location.href
     };

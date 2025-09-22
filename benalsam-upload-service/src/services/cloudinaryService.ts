@@ -1,38 +1,25 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { ICloudinaryService, UploadedFile } from '../interfaces/IUploadService';
+import fs from 'fs';
 import logger from '../config/logger';
+import { UploadedFile } from '../interfaces/IUploadService';
 
-/**
- * Cloudinary Service Implementation
- * Cloudinary işlemleri için abstraction
- */
-export class CloudinaryService implements ICloudinaryService {
+export class CloudinaryService {
   private isInitialized: boolean = false;
 
   constructor() {
-    this.initializeClient();
+    this.initialize();
   }
 
-  private initializeClient(): void {
+  private initialize(): void {
     try {
-      const cloudName = process.env['CLOUDINARY_CLOUD_NAME'];
-      const apiKey = process.env['CLOUDINARY_API_KEY'];
-      const apiSecret = process.env['CLOUDINARY_API_SECRET'];
-
-      if (!cloudName || !apiKey || !apiSecret) {
-        logger.warn('Cloudinary credentials not found, service will have limited functionality');
-        return;
-      }
-
       cloudinary.config({
-        cloud_name: cloudName,
-        api_key: apiKey,
-        api_secret: apiSecret,
-        secure: true
+        cloud_name: process.env['CLOUDINARY_CLOUD_NAME']!,
+        api_key: process.env['CLOUDINARY_API_KEY']!,
+        api_secret: process.env['CLOUDINARY_API_SECRET']!
       });
 
       this.isInitialized = true;
-      logger.info('✅ Cloudinary client initialized');
+      logger.info('✅ Cloudinary client initialized', { service: 'upload-service' });
     } catch (error) {
       logger.error('Failed to initialize Cloudinary client:', error);
       this.isInitialized = false;
@@ -51,15 +38,38 @@ export class CloudinaryService implements ICloudinaryService {
         folder 
       });
 
-      const result = await cloudinary.uploader.upload(`data:${file.mimetype};base64,${file.buffer.toString('base64')}`, {
+
+      // Disk storage approach - use file path
+      if (!file.path || !fs.existsSync(file.path)) {
+        throw new Error(`File path not found or file does not exist. Path: ${file.path}`);
+      }
+
+      const uploadSource = file.path;
+
+      logger.info('🚀 Starting Cloudinary upload', {
+        uploadSourceType: typeof uploadSource,
+        uploadSourceLength: uploadSource.length,
+        uploadSourcePreview: uploadSource.substring(0, 100) + '...',
+        folder,
+        filename: file.originalname
+      });
+
+      const result = await cloudinary.uploader.upload(uploadSource, {
         folder,
         resource_type: 'auto',
         quality: 'auto',
         fetch_format: 'auto',
         transformation: [
-          { width: 1920, height: 1080, crop: 'limit' },
+          { width: 1200, height: 1200, crop: 'limit' },
           { quality: 'auto' }
         ]
+      });
+
+      logger.info('✅ Cloudinary upload completed', {
+        publicId: result.public_id,
+        url: result.secure_url,
+        bytes: result.bytes,
+        format: result.format
       });
 
       const uploadedFile: UploadedFile = {
@@ -68,22 +78,50 @@ export class CloudinaryService implements ICloudinaryService {
         filename: result.original_filename || file.originalname,
         url: result.secure_url,
         size: result.bytes,
-        mimeType: file.mimetype,
+        mimeType: result.format,
         width: result.width,
         height: result.height,
         format: result.format,
         publicId: result.public_id,
         folder: result.folder,
-        uploadedAt: new Date().toISOString()
+        uploadedAt: new Date(result.created_at).toISOString()
       };
 
-      logger.info('Image uploaded successfully', { 
+      logger.info('✅ Image uploaded successfully', { 
+        filename: file.originalname,
         publicId: result.public_id,
-        url: result.secure_url 
+        url: result.secure_url
       });
+
+      // Clean up temporary file (only for disk storage)
+      if (file.path && fs.existsSync(file.path)) {
+        try {
+          fs.unlinkSync(file.path);
+          logger.info('🗑️ Temporary file cleaned up', { path: file.path });
+        } catch (cleanupError) {
+          logger.warn('⚠️ Failed to cleanup temporary file', { 
+            path: file.path, 
+            error: cleanupError instanceof Error ? cleanupError.message : String(cleanupError)
+          });
+        }
+      }
 
       return uploadedFile;
     } catch (error) {
+      // Clean up temporary file on error
+      if (file.path && fs.existsSync(file.path)) {
+        try {
+          fs.unlinkSync(file.path);
+          logger.info('🗑️ Temporary file cleaned up after error', { path: file.path });
+        } catch (cleanupError) {
+          logger.warn('⚠️ Failed to cleanup temporary file after error', { 
+            path: file.path, 
+            error: cleanupError instanceof Error ? cleanupError.message : String(cleanupError)
+          });
+        }
+      }
+      
+      
       logger.error('Cloudinary upload failed:', error);
       throw new Error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
@@ -95,18 +133,11 @@ export class CloudinaryService implements ICloudinaryService {
     }
 
     try {
-      logger.info('Deleting image from Cloudinary', { publicId });
-
-      const result = await cloudinary.uploader.destroy(publicId);
-      
-      if (result.result !== 'ok') {
-        throw new Error(`Failed to delete image: ${result.result}`);
-      }
-
-      logger.info('Image deleted successfully', { publicId });
+      await cloudinary.uploader.destroy(publicId);
+      logger.info('✅ Image deleted successfully', { publicId });
     } catch (error) {
-      logger.error('Cloudinary delete failed:', error);
-      throw new Error(`Delete failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      logger.error('Failed to delete image:', error);
+      throw new Error(`Delete failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -116,42 +147,13 @@ export class CloudinaryService implements ICloudinaryService {
     }
 
     try {
-      logger.debug('Getting image info from Cloudinary', { publicId });
-
       const result = await cloudinary.api.resource(publicId);
-      
-      return {
-        publicId: result.public_id,
-        format: result.format,
-        width: result.width,
-        height: result.height,
-        bytes: result.bytes,
-        url: result.secure_url,
-        createdAt: result.created_at
-      };
+      return result;
     } catch (error) {
-      logger.error('Cloudinary get info failed:', error);
-      throw new Error(`Get info failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  async healthCheck(): Promise<{ status: string; responseTime: number }> {
-    const startTime = Date.now();
-    
-    try {
-      if (!this.isInitialized) {
-        return { status: 'unhealthy', responseTime: 0 };
-      }
-
-      // Simple API call to test connection
-      await cloudinary.api.ping();
-      
-      const responseTime = Date.now() - startTime;
-      return { status: 'healthy', responseTime };
-    } catch (error) {
-      const responseTime = Date.now() - startTime;
-      logger.error('Cloudinary health check failed:', error);
-      return { status: 'unhealthy', responseTime };
+      logger.error('Failed to get image info:', error);
+      throw new Error(`Get info failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 }
+
+export default new CloudinaryService();

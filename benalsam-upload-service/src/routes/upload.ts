@@ -14,7 +14,7 @@ if (!fs.existsSync(tempDir)) {
   fs.mkdirSync(tempDir, { recursive: true });
 }
 
-// Configure multer for file uploads
+// Configure multer for file uploads (disk storage - production ready)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, tempDir);

@@ -96,7 +96,7 @@ class RabbitMQConfig {
     try {
       const channel = await this.getChannel();
       const queue = process.env.RABBITMQ_QUEUE || 'upload.events';
-      const exchange = process.env.RABBITMQ_EXCHANGE || 'benalsam.uploads';
+      const exchange = process.env.RABBITMQ_EXCHANGE || 'benalsam.jobs';
       const dlx = process.env.RABBITMQ_DLX || 'benalsam.uploads.dlx';
 
       // Dead Letter Exchange
@@ -156,7 +156,7 @@ class RabbitMQConfig {
   public async publishEvent(routingKey: string, message: any): Promise<void> {
     try {
       const channel = await this.getChannel();
-      const exchange = process.env.RABBITMQ_EXCHANGE || 'benalsam.uploads';
+      const exchange = process.env.RABBITMQ_EXCHANGE || 'benalsam.jobs';
       
       await channel.publish(exchange, routingKey, Buffer.from(JSON.stringify(message)), {
         persistent: true,

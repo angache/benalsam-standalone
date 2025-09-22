@@ -57,8 +57,8 @@ export const searchListingsWithElasticsearch = async (
   try {
     console.log('🔍 Elasticsearch search - Params:', params);
 
-    // Admin-backend'deki Elasticsearch endpoint'ini kullan
-    const response = await fetch(`${ADMIN_BACKEND_URL}/api/v1/elasticsearch/search`, {
+    // Admin-backend'deki Search Service proxy endpoint'ini kullan
+    const response = await fetch(`${ADMIN_BACKEND_URL}/api/v1/search/listings`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -74,13 +74,20 @@ export const searchListingsWithElasticsearch = async (
 
     const responseData = await response.json();
     
-    // Admin-backend response formatını kontrol et
+    // Search Service proxy response formatını kontrol et
     if (!responseData.success || !responseData.data) {
-      console.error('❌ Invalid Elasticsearch response format:', responseData);
+      console.error('❌ Invalid Search Service response format:', responseData);
       return await searchListingsWithSupabase(params, currentUserId);
     }
     
-    const result: ElasticsearchSearchResult = responseData.data;
+    // Search Service proxy response'unu Elasticsearch formatına çevir
+    const result: ElasticsearchSearchResult = {
+      hits: responseData.data,
+      total: responseData.totalCount || responseData.data.length,
+      page: responseData.pagination?.page || 1,
+      limit: responseData.pagination?.pageSize || 20,
+      totalPages: responseData.pagination?.totalPages || 1
+    };
 
     // Elasticsearch sonuçlarını Supabase'den tam listing verilerine çevir
     if (!result.hits || result.hits.length === 0) {
@@ -165,11 +172,11 @@ const searchListingsWithSupabase = async (
  */
 export const checkElasticsearchHealth = async (): Promise<boolean> => {
   try {
-    const response = await fetch(`${ADMIN_BACKEND_URL}/api/v1/elasticsearch/health`);
+    const response = await fetch(`${ADMIN_BACKEND_URL}/api/v1/health`);
     const data = await response.json();
     return data.status === 'healthy';
   } catch (error) {
-    console.error('❌ Elasticsearch health check failed:', error);
+    console.error('❌ Search Service health check failed:', error);
     return false;
   }
 };

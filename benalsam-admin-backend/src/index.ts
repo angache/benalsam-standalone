@@ -8,7 +8,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { initializeSentry, errorHandler as sentryErrorHandler } from './config/sentry';
 import { performanceMiddleware } from './middleware/performanceMonitor';
-import { securityMonitoringMiddleware, trackRateLimitExceeded } from './middleware/securityMonitor';
+import { securityMonitoringMiddleware } from './middleware/securityMonitor';
 import { adaptiveTimeout } from './middleware/timeout';
 import { jwtSecurityService } from './services/jwtSecurityService';
 import { 
@@ -20,10 +20,8 @@ import {
 } from './middleware/securityMiddleware';
 import apmMiddleware from './middleware/apmMiddleware';
 import enhancedErrorHandler from './middleware/enhancedErrorHandler';
-import cors from 'cors';
-import helmet from 'helmet';
+import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types';
 import compression from 'compression';
-import rateLimit from 'express-rate-limit';
 import { createClient } from '@supabase/supabase-js';
 import Redis from 'ioredis';
 
@@ -93,7 +91,6 @@ import { serviceRegistry } from './services/serviceRegistry'; // Service Registr
 // Import middleware
 import { authenticateToken } from './middleware/auth';
 import { errorHandler } from './middleware/errorHandler';
-import { securityConfig } from './config/app';
 import { sanitizeInput } from './middleware/validation';
 
 // Import logger
@@ -140,88 +137,19 @@ jwtSecurityService.initialize().then(() => {
   logger.error('❌ JWT Security Service initialization failed:', error);
 });
 
-// Security middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-    },
-  },
-}));
+// Security middleware using shared types
+const environment = process.env.NODE_ENV || 'development';
+const securityConfig = SECURITY_CONFIGS[environment as keyof typeof SECURITY_CONFIGS] || SECURITY_CONFIGS.development;
+const securityMiddleware = createSecurityMiddleware(securityConfig as any);
 
-// CORS configuration
-const corsOptions = {
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    // Origin yoksa (postman, curl) veya whitelist'te ise izin ver
-    if (!origin || securityConfig.corsOrigin.includes(origin) || origin === undefined) {
-      callback(null, true);
-    } else {
-      console.error('CORS BLOCKED:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
-
-// Rate limiting - Enhanced Security
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 login attempts per 15 minutes
-  message: 'Too many login attempts, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-  skipSuccessfulRequests: true, // Don't count successful requests
-  handler: (req, res) => {
-    // Track rate limit exceeded
-    trackRateLimitExceeded(req);
-    res.status(429).json({
-      success: false,
-      message: 'Too many login attempts, please try again later.'
-    });
-  }
+// Apply security middleware
+securityMiddleware.getAllMiddleware().forEach(middleware => {
+  app.use(middleware);
 });
 
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // limit each IP to 1000 API calls per 15 minutes
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req, res) => {
-    // Track rate limit exceeded
-    trackRateLimitExceeded(req);
-    res.status(429).json({
-      success: false,
-      message: 'Too many requests from this IP, please try again later.'
-    });
-  }
-});
+// CORS is now handled by shared types security middleware
 
-const analyticsLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 300, // limit each IP to 300 analytics requests per minute
-  message: 'Too many analytics requests, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req, res) => {
-    // Track rate limit exceeded
-    trackRateLimitExceeded(req);
-    res.status(429).json({
-      success: false,
-      message: 'Too many analytics requests, please try again later.'
-    });
-  }
-});
-
-// Apply rate limiting
-app.use('/api/v1/auth', authLimiter);
-app.use('/api/v1/', apiLimiter);
-app.use('/api/v1/analytics/', analyticsLimiter);
+// Rate limiting is handled by shared security middleware
 
 // Body parsing middleware
 app.use(compression());

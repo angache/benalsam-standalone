@@ -12,7 +12,7 @@ import { uploadService } from '@/services/uploadService';
 import { Listing } from '@/types';
 import { ListingStatus } from 'benalsam-shared-types';
 
-const UPLOAD_SERVICE_URL = 'http://localhost:3007/api/v1';
+const UPLOAD_SERVICE_URL = import.meta.env.VITE_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1';
 
 /**
  * Create listing using Upload Service with job system
@@ -47,7 +47,77 @@ export const createListingWithUploadService = async (
       imageCount: listingData.images.length
     });
 
-    // Create listing via Upload Service
+    // First, upload images to Upload Service
+    let uploadedImageUrls: string[] = [];
+    if (listingData.images && listingData.images.length > 0) {
+      console.log('📸 Uploading images to Upload Service...');
+      
+      // Convert image data to File objects if needed
+      const imageFiles = await Promise.all(
+        listingData.images.map(async (imageData, index) => {
+          if (typeof imageData === 'string' && imageData.startsWith('blob:')) {
+            // Convert blob URL to File
+            const response = await fetch(imageData);
+            const blob = await response.blob();
+            return new File([blob], `image-${index}.jpg`, { type: blob.type });
+          } else if (imageData instanceof File) {
+            return imageData;
+          } else if (typeof imageData === 'object' && imageData !== null) {
+            // Handle image object with preview blob URL
+            if (imageData.preview && typeof imageData.preview === 'string' && imageData.preview.startsWith('blob:')) {
+              const response = await fetch(imageData.preview);
+              const blob = await response.blob();
+              const fileName = imageData.name || imageData.file?.name || `image-${index}.jpg`;
+              return new File([blob], fileName, { type: blob.type });
+            } else if (imageData.file && imageData.file instanceof File) {
+              return imageData.file;
+            } else {
+              console.warn('Unknown image object structure:', imageData);
+              return null;
+            }
+          } else {
+            // Handle other image data types
+            console.warn('Unknown image data type:', typeof imageData, imageData);
+            return null;
+          }
+        })
+      );
+
+      // Filter out null values
+      const validImageFiles = imageFiles.filter(file => file !== null);
+      
+      if (validImageFiles.length === 0) {
+        throw new Error('No valid image files found');
+      }
+
+      // Upload images to Upload Service
+      const formData = new FormData();
+      validImageFiles.forEach((file, index) => {
+        formData.append('images', file);
+      });
+
+      const uploadResponse = await fetch(`${UPLOAD_SERVICE_URL}/upload/listings`, {
+        method: 'POST',
+        headers: {
+          'x-user-id': currentUserId,
+        },
+        body: formData
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error(`Image upload failed: ${uploadResponse.statusText}`);
+      }
+
+      const uploadResult = await uploadResponse.json();
+      if (!uploadResult.success) {
+        throw new Error(`Image upload failed: ${uploadResult.message}`);
+      }
+
+      uploadedImageUrls = uploadResult.data.images.map((img: any) => img.url);
+      console.log('✅ Images uploaded successfully', { count: uploadedImageUrls.length });
+    }
+
+    // Create listing via Upload Service with uploaded image URLs
     const response = await fetch(`${UPLOAD_SERVICE_URL}/listings/create`, {
       method: 'POST',
       headers: {
@@ -60,7 +130,7 @@ export const createListingWithUploadService = async (
         price: listingData.budget || 0,
         category: listingData.category,
         location: listingData.location,
-        images: listingData.images,
+        images: uploadedImageUrls, // Use uploaded image URLs
         status: ListingStatus.PENDING_APPROVAL,
         metadata: {
           source: 'web',

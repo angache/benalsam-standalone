@@ -49,6 +49,20 @@ async function handleImageUpload(
 
     logger.info(`📸 Uploading ${files.length} ${type} images for user: ${userId}`);
 
+    // Debug file object
+    logger.info('File object debug', { 
+      fileCount: files.length,
+      firstFile: {
+        hasBuffer: !!files[0]?.buffer,
+        hasPath: !!files[0]?.path,
+        path: files[0]?.path,
+        keys: Object.keys(files[0] || {}),
+        mimetype: files[0]?.mimetype,
+        originalname: files[0]?.originalname,
+        size: files[0]?.size
+      }
+    });
+
     // Upload images to Cloudinary
     const results = await Promise.all(files.map(file => cloudinaryService.uploadImage(file, `${type}/${userId}`)));
 
@@ -63,7 +77,7 @@ async function handleImageUpload(
       data: {
         images: results.map((result: any) => ({
           id: result.publicId,
-          url: result.secureUrl,
+          url: result.url,
           width: result.width,
           height: result.height,
           format: result.format,
@@ -83,7 +97,7 @@ async function handleImageUpload(
       data: {
         images: results.map((result: any) => ({
           id: result.publicId,
-          url: result.secureUrl,
+          url: result.url,
           width: result.width,
           height: result.height,
           format: result.format,

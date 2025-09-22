@@ -294,10 +294,13 @@ export const apiService = {
     return response.data;
   },
 
-  async searchElasticsearchIndex(indexName: string, size: number = 20): Promise<any> {
-    console.log('🔍 API Service: Searching index:', indexName, 'size:', size);
-    const response = await apiClient.get<ApiResponse<any>>(`/elasticsearch/search?index=${indexName}&size=${size}`);
-    console.log('📊 API Service: Response:', response.data);
+  async searchElasticsearchIndex(indexName: string, query: string = '*', size: number = 20): Promise<any> {
+    console.log('🔍 API Service: Searching Elasticsearch index via Admin Backend, index:', indexName, 'query:', query, 'size:', size);
+    
+    // Admin Backend Elasticsearch endpoint'ini kullan
+    const response = await apiClient.get<ApiResponse<any>>(`/elasticsearch/search/${indexName}?query=${encodeURIComponent(query)}&size=${size}`);
+    
+    console.log('📊 Admin Backend Elasticsearch Response:', response.data);
     return response.data;
   },
 

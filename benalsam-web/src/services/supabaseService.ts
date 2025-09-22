@@ -43,7 +43,7 @@ import {
 } from '@/services/categoryFollowService';
 import {
     fetchListings as fetchListingsService,
-    createListing as createListingService,
+    createListingWithUploadService as createListingService,
     updateListingStatus as updateListingStatusService,
     deleteListing as deleteListingService
 } from '@/services/listingService';

@@ -8,6 +8,7 @@ import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-type
 import uploadRoutes from './routes/upload';
 import healthRoutes from './routes/health';
 import jobRoutes from './routes/jobs';
+import listingsRoutes from './routes/listings';
 import { connectRedis } from './config/redis';
 import { connectRabbitMQ } from './config/rabbitmq';
 // import { jobProcessorService } from './services/jobProcessor';
@@ -46,6 +47,7 @@ app.use((req, res, next) => {
 app.use(`/api/${API_VERSION}/upload`, uploadRoutes);
 app.use(`/api/${API_VERSION}/health`, healthRoutes);
 app.use(`/api/${API_VERSION}/jobs`, jobRoutes);
+app.use(`/api/${API_VERSION}/listings`, listingsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -57,7 +59,8 @@ app.get('/', (req, res) => {
       endpoints: {
         upload: `/api/${API_VERSION}/upload`,
         health: `/api/${API_VERSION}/health`,
-        jobs: `/api/${API_VERSION}/jobs`
+        jobs: `/api/${API_VERSION}/jobs`,
+        listings: `/api/${API_VERSION}/listings`
       }
   });
 });

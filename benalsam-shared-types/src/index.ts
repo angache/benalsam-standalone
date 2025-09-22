@@ -119,9 +119,11 @@ export const formatPhoneNumber = (phone: string): string => {
 // CJS uyumluluğu için (opsiyonel)
 if (typeof module !== 'undefined' && module.exports) {
   const types = require('./types/index');
+  const security = require('./security/SecurityMiddleware');
   // const searchTypes = require('./types/search');
   module.exports = {
     ...types,
+    ...security,
     // ...searchTypes,
     formatPrice,
     formatDate,

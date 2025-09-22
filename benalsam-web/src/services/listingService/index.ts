@@ -21,6 +21,11 @@ export {
 } from './mutations';
 
 export {
+  createListingWithUploadService,
+  updateListingWithUploadService
+} from './uploadServiceMutations';
+
+export {
   addPremiumSorting,
   processFetchedListings
 } from './core'; 

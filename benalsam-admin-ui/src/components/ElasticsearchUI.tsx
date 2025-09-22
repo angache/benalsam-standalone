@@ -12,10 +12,8 @@ import {
   Alert,
   CircularProgress,
   Paper,
-  Divider,
   IconButton,
   Tooltip,
-  useTheme,
   Table,
   TableBody,
   TableCell,
@@ -27,11 +25,9 @@ import {
   Refresh as RefreshIcon,
   Search as SearchIcon,
   Delete as DeleteIcon,
-  Storage as StorageIcon,
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-  Warning as WarningIcon
+  Storage as StorageIcon
 } from '@mui/icons-material';
+import { apiService } from '../services/api';
 
 interface IndexInfo {
   index: string;
@@ -113,22 +109,13 @@ const ElasticsearchUI: React.FC = () => {
   };
 
   const searchDocuments = async () => {
-    if (!selectedIndex || !searchQuery.trim()) return;
+    if (!selectedIndex) return;
 
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        `http://localhost:3002/api/v1/elasticsearch/search/${selectedIndex}?query=${encodeURIComponent(searchQuery)}&size=20`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      const data = await response.json();
+      const query = searchQuery.trim() || '*';
+      const data = await apiService.searchElasticsearchIndex(selectedIndex, query, 20);
       
       if (data.success) {
         setSearchResults(data.data);
@@ -136,6 +123,7 @@ const ElasticsearchUI: React.FC = () => {
         setError(data.message || 'Failed to search documents');
       }
     } catch (err) {
+      console.error('Search error:', err);
       setError('Failed to search documents');
     } finally {
       setLoading(false);
@@ -214,7 +202,7 @@ const ElasticsearchUI: React.FC = () => {
 
       <Card>
         <CardContent>
-          <Tabs value={selectedTab} onChange={(e, newValue) => setSelectedTab(newValue)} sx={{ mb: 3 }}>
+          <Tabs value={selectedTab} onChange={(_, newValue) => setSelectedTab(newValue)} sx={{ mb: 3 }}>
             <Tab label="Indices" value="indices" />
             <Tab label="Search" value="search" />
           </Tabs>
@@ -320,13 +308,11 @@ const ElasticsearchUI: React.FC = () => {
                     onChange={(e) => setSelectedIndex(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '12px',
-                      border: '1px solid #555',
+                      padding: '8px 12px',
+                      border: '1px solid #ccc',
                       borderRadius: '4px',
                       fontSize: '14px',
-                      backgroundColor: '#2d2d2d',
-                      color: '#ffffff',
-                      outline: 'none'
+                      backgroundColor: 'white'
                     }}
                   >
                     <option value="">Select an index</option>
@@ -338,20 +324,26 @@ const ElasticsearchUI: React.FC = () => {
                   </select>
                 </Box>
                 
-                <TextField
-                  label="Search Query"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Enter search query..."
-                  onKeyPress={(e) => e.key === 'Enter' && searchDocuments()}
-                  sx={{ flex: 1 }}
-                />
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    Search Query
+                  </Typography>
+                  <TextField
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Enter search query (leave empty for all documents)..."
+                    onKeyPress={(e) => e.key === 'Enter' && searchDocuments()}
+                    size="small"
+                    fullWidth
+                  />
+                </Box>
                 
                 <Button
                   variant="contained"
                   onClick={searchDocuments}
-                  disabled={!selectedIndex || !searchQuery.trim() || loading}
+                  disabled={loading || !selectedIndex}
                   startIcon={<SearchIcon />}
+                  sx={{ alignSelf: 'flex-end' }}
                 >
                   Search
                 </Button>

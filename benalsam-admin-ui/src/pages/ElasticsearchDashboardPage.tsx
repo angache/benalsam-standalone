@@ -429,7 +429,7 @@ const ElasticsearchDashboardPage: React.FC = () => {
       setLoadingDocuments(true);
       console.log('🔍 Loading documents for index:', indexName);
       
-      const data = await apiService.searchElasticsearchIndex(indexName, 20);
+      const data = await apiService.searchElasticsearchIndex(indexName, '*', 20);
       console.log('📊 API Response:', data);
       
       console.log('🔍 Checking response structure:');

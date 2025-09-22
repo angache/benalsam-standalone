@@ -49,7 +49,7 @@ export const DEFAULT_SECURITY_CONFIG: SecurityConfig = {
       : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key', 'x-user-id']
   },
   helmet: {
     contentSecurityPolicy: true,
@@ -323,7 +323,7 @@ export const SECURITY_CONFIGS = {
       origin: true, // Allow all origins in development
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key']
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key', 'x-user-id']
     }
   },
   production: {
@@ -338,7 +338,7 @@ export const SECURITY_CONFIGS = {
       origin: ['https://admin.benalsam.com', 'https://benalsam.com'],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key']
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key', 'x-user-id']
     }
   }
 };

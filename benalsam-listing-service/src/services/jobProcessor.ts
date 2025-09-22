@@ -180,10 +180,20 @@ export class JobProcessorService {
       
       // Consume from listing jobs queue
       await channel.consume('listing.jobs', async (msg: ConsumeMessage | null) => {
-        if (!msg) return;
+        if (!msg) {
+          logger.warn('⚠️ Received null message from queue');
+          return;
+        }
+
+        logger.info('📨 Received job message from queue', {
+          routingKey: msg.fields.routingKey,
+          exchange: msg.fields.exchange,
+          messageSize: msg.content.length
+        });
 
         try {
           const job = JSON.parse(msg.content.toString()) as Job;
+          logger.info('🔄 Processing job', { jobId: job.id, type: job.type });
           await this.processJob(job);
           channel.ack(msg);
         } catch (error) {

@@ -29,7 +29,7 @@ interface UploadResponse {
   message?: string;
 }
 
-const UPLOAD_SERVICE_URL = 'http://localhost:3007/api/v1';
+const UPLOAD_SERVICE_URL = import.meta.env.VITE_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1';
 
 export class UploadService {
   private static instance: UploadService;

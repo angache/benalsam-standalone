@@ -8,7 +8,7 @@ export const sqlInjectionProtection = (req: Request, res: Response, next: NextFu
   const sqlPatterns = [
     /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|SCRIPT)\b)/gi,
     /(\b(OR|AND)\s+\d+\s*=\s*\d+)/gi,
-    /('|(\\')|(;)|(--)|(\*)|(\%)|(\+)|(\=))/gi,
+    /('|(\\')|(;)|(--)|(\%)|(\+)|(\=))/gi,
     /(\b(UNION|HAVING|GROUP\s+BY|ORDER\s+BY)\b)/gi
   ];
 
