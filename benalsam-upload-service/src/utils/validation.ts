@@ -62,6 +62,15 @@ function validateFile(file: Express.Multer.File, index: number): void {
     throw new ValidationError(`File at index ${index} is missing`);
   }
   
+  // Debug log for file validation
+  console.log(`🔍 Validating file ${index}:`, {
+    originalname: file.originalname,
+    mimetype: file.mimetype,
+    size: file.size,
+    fieldname: file.fieldname,
+    encoding: file.encoding
+  });
+  
   // Check file size
   const maxSize = parseInt(process.env.RATE_LIMIT_MAX_FILE_SIZE || '10485760'); // 10MB
   if (file.size > maxSize) {
@@ -72,6 +81,11 @@ function validateFile(file: Express.Multer.File, index: number): void {
   
   // Check MIME type
   if (!file.mimetype.startsWith('image/')) {
+    console.error(`❌ Invalid file type detected:`, {
+      index,
+      mimetype: file.mimetype,
+      originalname: file.originalname
+    });
     throw new ValidationError(
       `File at index ${index} is not an image. MIME type: ${file.mimetype}`
     );

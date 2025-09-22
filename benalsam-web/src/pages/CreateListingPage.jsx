@@ -116,9 +116,13 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
         selectedMainCategory, setSelectedMainCategory,
         selectedSubCategory, setSelectedSubCategory,
         selectedSubSubCategory, setSelectedSubSubCategory,
+        handleMainCategoryChange,
+        handleSubCategoryChange,
+        handleSubSubCategoryChange,
         selectedProvince, setSelectedProvince,
         selectedDistrict, setSelectedDistrict,
         handleInputChange, handlePremiumFeatureChange, handleImageArrayChange, handleRemoveImageFromArray,
+        detectLocation,
         validateStep,
       } = useCreateListingForm();
     
@@ -210,9 +214,23 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
       };
     
       const nextStep = () => {
+        console.log('🔍 DEBUG: nextStep called', { currentStep, totalSteps: steps.length });
         const allData = { formData, selectedMainCategory, selectedSubCategory, selectedSubSubCategory, selectedProvince, selectedDistrict };
-        if (currentStep < steps.length && validateStep(currentStep, allData)) {
+        console.log('🔍 DEBUG: allData', allData);
+        
+        const isValid = validateStep(currentStep, allData);
+        console.log('🔍 DEBUG: validation result', { isValid, currentStep });
+        
+        if (currentStep < steps.length && isValid) {
+          console.log('✅ DEBUG: Moving to next step');
           setCurrentStep(prev => prev + 1);
+        } else {
+          console.log('❌ DEBUG: Cannot move to next step', { 
+            currentStep, 
+            totalSteps: steps.length, 
+            isValid,
+            errors 
+          });
         }
       };
     
@@ -256,11 +274,11 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
               <Suspense fallback={<StepLoadingSpinner />}>
                 <Step1_Category 
                   selectedMainCategory={selectedMainCategory} 
-                  onMainChange={setSelectedMainCategory} 
+                  onMainChange={handleMainCategoryChange} 
                   selectedSubCategory={selectedSubCategory} 
-                  onSubChange={setSelectedSubCategory} 
+                  onSubChange={handleSubCategoryChange} 
                   selectedSubSubCategory={selectedSubSubCategory} 
-                  onSubSubChange={setSelectedSubSubCategory} 
+                  onSubSubChange={handleSubSubCategoryChange} 
                   errors={errors} 
                 />
               </Suspense>
@@ -271,7 +289,10 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
                 <Step2_Details 
                   formData={formData} 
                   handleInputChange={handleInputChange} 
-                  errors={errors} 
+                  errors={errors}
+                  selectedMainCategory={selectedMainCategory}
+                  selectedSubCategory={selectedSubCategory}
+                  selectedSubSubCategory={selectedSubSubCategory}
                 />
               </Suspense>
             );
@@ -298,7 +319,8 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
                   setSelectedDistrict={setSelectedDistrict} 
                   formData={formData} 
                   handleInputChange={handleInputChange} 
-                  onLocationDetect={handleLocationDetect} 
+                  onLocationDetect={handleLocationDetect}
+                  detectLocation={detectLocation}
                   errors={errors} 
                 />
               </Suspense>
