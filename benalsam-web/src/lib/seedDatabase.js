@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabaseClient';
 import { fakerTR as faker } from '@faker-js/faker';
-import { categoriesConfig } from '@/config/categories';
+// import { categoriesConfig } from '@/config/categories'; // Removed - using dynamic categories
 import { toast } from '@/components/ui/use-toast';
 
 const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];

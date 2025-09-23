@@ -10,7 +10,8 @@ import ListingCard from '@/components/ListingCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2, LayoutGrid, List, ChevronRight, Search, X, Shield, Zap, Star, Plus, Heart, MessageCircle, Package, Filter, Settings } from 'lucide-react';
-import { categoriesConfig } from '@/config/categories';
+// import { categoriesConfig } from '@/config/categories'; // Removed - using dynamic categories
+import dynamicCategoryService from '@/services/dynamicCategoryService';
 import { cn } from '@/lib/utils';
 import SEOHead from '@/components/SEOHead';
 import StructuredData from '@/components/StructuredData';
@@ -128,6 +129,26 @@ const HomePageSkeleton = () => (
   const [isTabletSidebarOpen, setIsTabletSidebarOpen] = useState(false);
   const [showAISuggestions, setShowAISuggestions] = useState(false);
   const [selectedCategoryForAI, setSelectedCategoryForAI] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  // Load categories dynamically
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        const fetchedCategories = await dynamicCategoryService.getCategories();
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        setCategories([]);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   // Click outside handler for AI suggestions
   useEffect(() => {
@@ -357,17 +378,17 @@ const HomePageSkeleton = () => (
       const handleCategoryClick = useCallback((category, level, fullPath) => {
         const newPath = selectedCategories.slice(0, level);
         
-        // Kategori ID'sini categoriesConfig'den bul
+        // Kategori ID'sini categories'den bul
         let categoryId = null;
         let categoryName = category.name || category;
         
         // Ana kategori ID'sini bul
-        const mainCategory = categoriesConfig.find(cat => cat.name === categoryName);
+        const mainCategory = categories.find(cat => cat.name === categoryName);
         if (mainCategory) {
           categoryId = mainCategory.id;
         } else {
           // Alt kategori ID'sini bul
-          for (const mainCat of categoriesConfig) {
+          for (const mainCat of categories) {
             if (mainCat.subcategories) {
               const subCategory = mainCat.subcategories.find(sub => sub.name === categoryName);
               if (subCategory) {
@@ -589,7 +610,15 @@ const HomePageSkeleton = () => (
                   <div className="mb-8">
                     <h2 className="text-xl font-semibold mb-4">Popüler Kategoriler</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                      {categoriesConfig.slice(0, 6).map((category) => (
+                      {isLoadingCategories ? (
+                        Array.from({ length: 6 }).map((_, index) => (
+                          <div key={index} className="bg-card border rounded-lg p-4 text-center">
+                            <div className="w-12 h-12 mx-auto mb-3 bg-muted rounded-lg animate-pulse"></div>
+                            <div className="h-4 bg-muted rounded animate-pulse"></div>
+                          </div>
+                        ))
+                      ) : (
+                        categories.slice(0, 6).map((category) => (
                         <div
                           key={category.name}
                           onClick={() => handleCategoryClick(category, 0)}
@@ -602,7 +631,8 @@ const HomePageSkeleton = () => (
                             {category.name}
                           </h3>
                         </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   </div>
 

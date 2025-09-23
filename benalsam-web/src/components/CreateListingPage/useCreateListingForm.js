@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
-import { categoriesConfig } from '@/config/categories';
+import dynamicCategoryService from '@/services/dynamicCategoryService';
 import { turkishProvincesAndDistricts } from '@/config/locations';
-import { getCategoryPath } from '@/config/categoryAttributes';
 
 export const useCreateListingForm = () => {
   // Calculate default expires_at (30 days from now)
@@ -44,6 +43,29 @@ export const useCreateListingForm = () => {
   const [selectedDistrict, setSelectedDistrict] = useState('');
 
   const [errors, setErrors] = useState({});
+  const [categories, setCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  // Load categories from dynamic service
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        console.log('🔄 Loading categories for listing form...');
+        
+        const fetchedCategories = await dynamicCategoryService.getCategoryTree();
+        console.log('📦 Categories loaded for form:', fetchedCategories);
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error('Error loading categories for form:', error);
+        setCategories([]);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   // Handle category changes and update category_id and category_path
   const handleMainCategoryChange = useCallback((category) => {
@@ -52,7 +74,6 @@ export const useCreateListingForm = () => {
     setSelectedSubSubCategory('');
     
     // Update category_id and category_path
-    const categoryPath = getCategoryPath(category, '', '');
     const newCategoryId = category; // Use category name as ID for now
     const newCategoryPath = [category];
     
@@ -421,7 +442,7 @@ export const useCreateListingForm = () => {
     switch(step) {
         case 1: {
             console.log('🔍 DEBUG: Validating step 1 - Category');
-            const mainCat = categoriesConfig.find(cat => cat.name === selectedMainCategory);
+            const mainCat = categories.find(cat => cat.name === selectedMainCategory);
             const subCat = mainCat?.subcategories?.find(sub => sub.name === selectedSubCategory);
             if (!selectedMainCategory) newErrors.category = 'Ana kategori seçimi gerekli';
             else if (mainCat?.subcategories?.length > 0 && !selectedSubCategory) newErrors.category = 'Alt kategori seçimi gerekli';
@@ -475,6 +496,8 @@ export const useCreateListingForm = () => {
     handleMainCategoryChange,
     handleSubCategoryChange,
     handleSubSubCategoryChange,
+    categories,
+    isLoadingCategories,
     selectedProvince, setSelectedProvince,
     selectedDistrict, setSelectedDistrict,
     errors, setErrors,

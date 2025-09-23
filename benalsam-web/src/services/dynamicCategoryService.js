@@ -262,24 +262,28 @@ class DynamicCategoryService {
 
   // Kategori ağacı al (hierarchical structure)
   async getCategoryTree() {
-    // Cache'den kontrol et
-    const cached = this.getCachedData(CATEGORY_TREE_CACHE_KEY);
-    if (cached) {
-      console.log('📦 Category tree loaded from cache:', cached);
-      this.categoryTree = cached;
-      return cached;
+    // Direkt flat cache'i kullan (çünkü orada zaten subkategoriler var)
+    const flatCached = this.getCachedData(CATEGORIES_CACHE_KEY);
+    if (flatCached) {
+      console.log('📦 Using flat cache for tree:', flatCached);
+      this.categoryTree = flatCached;
+      return flatCached;
     }
 
+    // Eğer cache yoksa backend'den çek
     const categories = await this.getCategories();
     
     // Flat listeyi tree yapısına çevir
     const tree = this.buildCategoryTree(categories);
     
-    // Cache'e kaydet
-    this.setCachedData(CATEGORY_TREE_CACHE_KEY, tree);
+    // Tree'yi zenginleştir (icon, color ekle)
+    const enrichedTree = this.enrichCategoryData(tree);
     
-    this.categoryTree = tree;
-    return tree;
+    // Cache'e kaydet
+    this.setCachedData(CATEGORY_TREE_CACHE_KEY, enrichedTree);
+    
+    this.categoryTree = enrichedTree;
+    return enrichedTree;
   }
 
   // Flat listeyi tree yapısına çevir
@@ -342,6 +346,57 @@ class DynamicCategoryService {
     this.categories = null;
     this.categoryTree = null;
     console.log('🗑️ Category cache cleared');
+  }
+
+  // Kategori için attributes'ları getir
+  getAttributesForCategory(mainCategory, subCategory, subSubCategory) {
+    try {
+      const categories = this.getCachedData(CATEGORIES_CACHE_KEY) || [];
+      
+      console.log('🔍 DEBUG: getAttributesForCategory called', {
+        mainCategory,
+        subCategory,
+        subSubCategory,
+        categoriesCount: categories.length,
+        firstCategory: categories[0]?.name
+      });
+      
+      // Ana kategoriyi bul
+      const mainCat = categories.find(cat => cat.name === mainCategory);
+      if (!mainCat) {
+        console.log('❌ Main category not found:', mainCategory);
+        return [];
+      }
+
+      // Sub kategoriyi bul
+      let currentCategory = mainCat;
+      if (subCategory) {
+        const subCat = mainCat.subcategories?.find(sub => sub.name === subCategory);
+        if (subCat) {
+          currentCategory = subCat;
+          
+          // Sub-sub kategoriyi bul
+          if (subSubCategory) {
+            const subSubCat = subCat.subcategories?.find(subSub => subSub.name === subSubCategory);
+            if (subSubCat) {
+              currentCategory = subSubCat;
+            }
+          }
+        }
+      }
+
+      // Attributes'ları döndür
+      const attributes = currentCategory.attributes || [];
+      console.log('✅ Attributes found', {
+        categoryName: currentCategory.name,
+        attributesCount: attributes.length,
+        attributes: attributes
+      });
+      return attributes;
+    } catch (error) {
+      console.error('Error getting attributes for category:', error);
+      return [];
+    }
   }
 
   // Cache'i yenile

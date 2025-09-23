@@ -9,7 +9,7 @@ import { logInfo, logDebug, logError, logWarn } from '@/utils/logger';
 import { Listing } from '@/types';
 import { ListingStatus } from 'benalsam-shared-types';
 
-import { categoriesConfig } from '@/config/categories';
+// import { categoriesConfig } from '@/config/categories'; // Removed - using dynamic categories
 import { CATEGORY } from '@/config/constants';
 import { 
   CreateListingRequest, 

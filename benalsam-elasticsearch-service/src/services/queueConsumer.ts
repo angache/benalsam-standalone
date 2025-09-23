@@ -128,8 +128,8 @@ class QueueConsumer {
         return;
       }
 
-      // Delete operasyonu mesajlarını işle
-      if (message.operation === 'delete' && 'recordId' in message) {
+      // Delete operasyonu mesajlarını işle (case-insensitive)
+      if (((message.operation || '') as string).toUpperCase() === 'DELETE' && 'recordId' in message) {
         const traceId = message.traceId || `delete_${message.recordId}_${Date.now()}`;
         logger.info('🗑️ Processing delete message', {
           traceId,
@@ -452,8 +452,8 @@ class QueueConsumer {
         return message;
       }
       
-      // Delete operasyonu kontrolü
-      if (message.operation === 'delete' && 'recordId' in message) {
+      // Delete operasyonu kontrolü (case-insensitive)
+      if (((message.operation || '') as string).toUpperCase() === 'DELETE' && 'recordId' in message) {
         logger.info('🗑️ Delete message received:', {
           recordId: message.recordId,
           operation: message.operation,

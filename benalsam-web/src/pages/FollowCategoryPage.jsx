@@ -6,12 +6,33 @@ import { toast } from '@/components/ui/use-toast.js';
 import { Button } from '@/components/ui/button.jsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.jsx";
 import { followCategory } from '@/services/supabaseService';
-import { categoriesConfig } from '@/config/categories.js';
+// import { categoriesConfig } from '@/config/categories.js'; // Removed - using dynamic categories
 import { useAuthStore } from '@/stores';
+import dynamicCategoryService from '@/services/dynamicCategoryService';
 
 const FollowCategoryPage = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuthStore();
+  const [categories, setCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  // Load categories dynamically
+  React.useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        const fetchedCategories = await dynamicCategoryService.getCategories();
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        setCategories([]);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isFollowing, setIsFollowing] = useState(false);
 
@@ -69,7 +90,11 @@ const FollowCategoryPage = () => {
               <SelectValue placeholder="Kategori Seçin" />
             </SelectTrigger>
             <SelectContent>
-              {renderCategoryOptions(categoriesConfig)}
+              {isLoadingCategories ? (
+                <div className="p-2 text-center text-muted-foreground">Kategoriler yükleniyor...</div>
+              ) : (
+                renderCategoryOptions(categories)
+              )}
             </SelectContent>
           </Select>
         </div>

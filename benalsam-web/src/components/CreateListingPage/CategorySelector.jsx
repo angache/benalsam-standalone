@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { categoriesConfig } from '@/config/categories';
 
-const CategorySelector = ({ selectedMain, onMainChange, selectedSub, onSubChange, selectedSubSub, onSubSubChange, errors, disabled }) => {
+const CategorySelector = ({ categories, selectedMain, onMainChange, selectedSub, onSubChange, selectedSubSub, onSubSubChange, errors, disabled }) => {
   const [subCategories, setSubCategories] = useState([]);
   const [subSubCategories, setSubSubCategories] = useState([]);
 
   useEffect(() => {
-    if (selectedMain) {
-      const mainCat = categoriesConfig.find(cat => cat.name === selectedMain);
+    if (selectedMain && categories.length > 0) {
+      const mainCat = categories.find(cat => cat.name === selectedMain);
       setSubCategories(mainCat?.subcategories || []);
       if (!mainCat?.subcategories?.find(sub => sub.name === selectedSub)) {
         onSubChange(''); 
@@ -17,11 +16,11 @@ const CategorySelector = ({ selectedMain, onMainChange, selectedSub, onSubChange
       setSubCategories([]);
       onSubChange('');
     }
-  }, [selectedMain, onSubChange, selectedSub]);
+  }, [selectedMain, onSubChange, selectedSub, categories]);
 
   useEffect(() => {
-    if (selectedSub) {
-      const mainCat = categoriesConfig.find(cat => cat.name === selectedMain);
+    if (selectedSub && categories.length > 0) {
+      const mainCat = categories.find(cat => cat.name === selectedMain);
       const subCat = mainCat?.subcategories?.find(sub => sub.name === selectedSub);
       setSubSubCategories(subCat?.subcategories || []);
        if (!subCat?.subcategories?.find(sub => sub.name === selectedSubSub)) {
@@ -31,7 +30,7 @@ const CategorySelector = ({ selectedMain, onMainChange, selectedSub, onSubChange
       setSubSubCategories([]);
       onSubSubChange('');
     }
-  }, [selectedSub, selectedMain, onSubSubChange, selectedSubSub]);
+  }, [selectedSub, selectedMain, onSubSubChange, selectedSubSub, categories]);
 
   return (
     <div className="space-y-3">
@@ -40,7 +39,7 @@ const CategorySelector = ({ selectedMain, onMainChange, selectedSub, onSubChange
           <SelectValue placeholder="Ana Kategori Seçin *" />
         </SelectTrigger>
         <SelectContent className="dropdown-content">
-          {categoriesConfig.map(cat => <SelectItem key={cat.name} value={cat.name}>{cat.name}</SelectItem>)}
+          {categories.map(cat => <SelectItem key={cat.name} value={cat.name}>{cat.name}</SelectItem>)}
         </SelectContent>
       </Select>
 

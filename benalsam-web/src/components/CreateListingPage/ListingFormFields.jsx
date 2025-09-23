@@ -74,6 +74,7 @@ const ListingFormFields = ({
   onOpenRulesModal,
   onLocationDetect,
   onOpenStockModal,
+  categories,
 }) => {
   const selectedUrgencyOption = urgencyOptions.find(option => option.value === formData.urgency);
   const urgencyCost = selectedUrgencyOption?.price ? parseInt(selectedUrgencyOption.price.replace('₺', '')) : 0;
@@ -111,6 +112,7 @@ const ListingFormFields = ({
         error={errors.category}
       >
         <CategorySelector
+          categories={categories}
           selectedMain={selectedMainCategory}
           onMainChange={setSelectedMainCategory}
           selectedSub={selectedSubCategory}

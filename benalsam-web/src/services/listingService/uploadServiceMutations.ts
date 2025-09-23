@@ -11,19 +11,20 @@ import { addUserActivity } from '@/services/userActivityService';
 import { uploadService } from '@/services/uploadService';
 import { Listing } from '@/types';
 import { ListingStatus } from 'benalsam-shared-types';
-import { categoriesConfig } from '@/config/categories';
+// import { categoriesConfig } from '@/config/categories'; // Removed - using dynamic categories
 import { CATEGORY } from '@/config/constants';
+import dynamicCategoryService from '../dynamicCategoryService';
 
 const UPLOAD_SERVICE_URL = import.meta.env.VITE_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1';
 
 // Kategori path'ini ID'lere çevir
-const getCategoryIds = (categoryString: string): { category_id: number | null, category_path: number[] | null } => {
+const getCategoryIds = async (categoryString: string): Promise<{ category_id: number | null, category_path: number[] | null }> => {
   if (!categoryString) return { category_id: null, category_path: null };
   
   console.log('Processing category string', { categoryString });
   
-  // Kategori path'ini parçala
-  const pathParts = categoryString.split(' > ');
+  // Kategori path'ini parçala (sadece ' > ' ve ' / ' ayırıcılarını kullan)
+  const pathParts = categoryString.split(/\s*[>\/]\s*/).map(part => part.trim()).filter(part => part);
   console.log('Category path parts', { pathParts });
   
   if (pathParts.length === 0) {
@@ -31,50 +32,49 @@ const getCategoryIds = (categoryString: string): { category_id: number | null, c
     return { category_id: null, category_path: null };
   }
   
-  // Ana kategoriyi bul
-  const mainCategory = categoriesConfig.find(cat => cat.name === pathParts[0]);
-  if (!mainCategory) {
-    console.warn('Main category not found', { categoryName: pathParts[0] });
+  try {
+    // Dinamik kategori servisinden kategorileri al
+    const categories = await dynamicCategoryService.getCategories();
+    console.log('Categories from dynamic service', { categoriesCount: categories.length });
+    
+    // Ana kategoriyi bul
+    const mainCategory = categories.find(cat => cat.name === pathParts[0]);
+    if (!mainCategory) {
+      console.warn('Main category not found', { categoryName: pathParts[0] });
+      return { category_id: null, category_path: null };
+    }
+    
+    console.log('Main category found', { categoryName: pathParts[0], categoryId: mainCategory.id });
+
+    // N-seviye gezinme: her bir path parçasını sırayla subcategories içinde ara
+    const categoryPath: number[] = [];
+    let currentNode: any = mainCategory;
+    
+    // Ana kategoriyi ekle
+    categoryPath.push(currentNode.id);
+    
+    for (let i = 1; i < pathParts.length; i++) {
+      const part = pathParts[i];
+      const children = currentNode?.subcategories || [];
+      console.log('🔍 Traversing category level', { level: i + 1, lookingFor: part, childrenCount: children.length });
+      const next = children.find((c: any) => c.name === part);
+      if (!next) {
+        console.warn('❌ Category level not found', { level: i + 1, part, available: children.map((c: any) => c.name) });
+        break;
+      }
+      categoryPath.push(next.id);
+      currentNode = next;
+    }
+
+    const categoryId = categoryPath[categoryPath.length - 1] || null;
+
+    console.log('Final category IDs', { category_id: categoryId, category_path: categoryPath });
+    return { category_id: categoryId, category_path: categoryPath };
+    
+  } catch (error) {
+    console.error('Error getting category IDs from dynamic service:', error);
     return { category_id: null, category_path: null };
   }
-  
-  // Ana kategori ID'si (1-13 arası)
-  const mainCategoryId = categoriesConfig.findIndex(cat => cat.name === pathParts[0]) + 1;
-  console.log('Main category found', { categoryName: pathParts[0], categoryId: mainCategoryId });
-  
-  const categoryPath = [mainCategoryId];
-  let categoryId = mainCategoryId;
-  
-  // Alt kategori varsa
-  if (pathParts.length > 1 && mainCategory.subcategories) {
-    const subCategory = mainCategory.subcategories.find(sub => sub.name === pathParts[1]);
-    if (subCategory) {
-      // Alt kategori ID'si (101-1303 arası)
-      const subCategoryId = mainCategoryId * CATEGORY.MULTIPLIERS.SUB_CATEGORY + mainCategory.subcategories.findIndex(sub => sub.name === pathParts[1]) + 1;
-      categoryPath.push(subCategoryId);
-      categoryId = subCategoryId;
-      console.log('Subcategory found', { subcategoryName: pathParts[1], subcategoryId: subCategoryId });
-      
-      // Alt-alt kategori varsa
-      if (pathParts.length > 2 && subCategory.subcategories) {
-        const subSubCategory = subCategory.subcategories.find(subSub => subSub.name === pathParts[2]);
-        if (subSubCategory) {
-          // Alt-alt kategori ID'si (1001-9999 arası)
-          const subSubCategoryId = subCategoryId * CATEGORY.MULTIPLIERS.SUB_SUB_CATEGORY + subCategory.subcategories.findIndex(subSub => subSub.name === pathParts[2]) + 1;
-          categoryPath.push(subSubCategoryId);
-          categoryId = subSubCategoryId;
-          console.log('Sub-subcategory found', { subSubcategoryName: pathParts[2], subSubcategoryId: subSubCategoryId });
-        }
-      }
-    }
-  }
-  
-  console.log('Category matching completed', { finalCategoryId: categoryId, categoryPath });
-  
-  return {
-    category_id: categoryId,
-    category_path: categoryPath
-  };
 };
 
 /**
@@ -206,7 +206,7 @@ export const createListingWithUploadService = async (
     }
 
     // Convert category string to numeric IDs
-    const categoryIds = getCategoryIds(listingData.category);
+    const categoryIds = await getCategoryIds(listingData.category);
     console.log('🏷️ Category IDs generated:', {
       category: listingData.category,
       category_id: categoryIds.category_id,

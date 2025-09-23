@@ -124,6 +124,8 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
         handleInputChange, handlePremiumFeatureChange, handleImageArrayChange, handleRemoveImageFromArray,
         detectLocation,
         validateStep,
+        categories,
+        isLoadingCategories,
       } = useCreateListingForm();
     
       const handleLocationDetect = useCallback(({ latitude, longitude, province, district, neighborhood }) => {
@@ -273,6 +275,8 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
             return (
               <Suspense fallback={<StepLoadingSpinner />}>
                 <Step1_Category 
+                  categories={categories}
+                  isLoadingCategories={isLoadingCategories}
                   selectedMainCategory={selectedMainCategory} 
                   onMainChange={handleMainCategoryChange} 
                   selectedSubCategory={selectedSubCategory} 

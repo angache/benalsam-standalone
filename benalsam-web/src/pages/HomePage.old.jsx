@@ -9,7 +9,7 @@ import ListingCard from '@/components/ListingCard';
 import FilterSidebar from '@/components/FilterSidebar';
 import StatsSection from '@/components/StatsSection';
 import { toast } from '@/components/ui/use-toast';
-import { categoriesConfig } from '@/config/categories';
+// import { categoriesConfig } from '@/config/categories'; // Removed - using dynamic categories
 import { useNavigate } from 'react-router-dom';
 import FeaturedListings from '@/components/FeaturedListings';
 import AdBanner from '@/components/AdBanner';

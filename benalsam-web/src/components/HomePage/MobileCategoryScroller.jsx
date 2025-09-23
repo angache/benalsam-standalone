@@ -3,14 +3,31 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Smartphone, ChevronDown, ChevronUp } from 'lucide-react';
-import { categoriesConfig } from '@/config/categories';
+// import { categoriesConfig } from '@/config/categories'; // Removed - using dynamic categories
+import dynamicCategoryService from '@/services/dynamicCategoryService';
 
 const MobileCategoryScroller = ({ selectedCategories, onCategorySelect }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [categories, setCategories] = useState([]);
+
+  // Load categories dynamically
+  React.useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const fetchedCategories = await dynamicCategoryService.getCategories();
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        setCategories([]);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   const displayedCategories = useMemo(() => {
     if (!selectedCategories || selectedCategories.length === 0) {
-      return categoriesConfig;
+      return categories;
     }
     const lastSelected = selectedCategories[selectedCategories.length - 1];
     return lastSelected.subcategories || [];

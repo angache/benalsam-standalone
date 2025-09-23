@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/supabaseClient';
-import { categoriesConfig, getCategoryPath } from '@/config/categories';
+// import { categoriesConfig, getCategoryPath } from '@/config/categories'; // Removed - using dynamic categories
+import dynamicCategoryService from '@/services/dynamicCategoryService';
 import { turkishProvincesAndDistricts } from '@/config/locations';
 import { updateListing } from '@/services/listingService/mutations';
 import { processImagesForSupabase } from '@/services/imageService';
@@ -43,6 +44,22 @@ export const useEditListingForm = (listingId) => {
   const [loadingInitialData, setLoadingInitialData] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [categories, setCategories] = useState([]);
+
+  // Load categories
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const fetchedCategories = await dynamicCategoryService.getCategories();
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        setCategories([]);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   useEffect(() => {
     const fetchListingData = async () => {
@@ -177,7 +194,7 @@ export const useEditListingForm = (listingId) => {
     if (!formData.description.trim()) newErrors.description = "Açıklama gerekli.";
     if (!formData.budget || formData.budget <= 0) newErrors.budget = "Geçerli bir bütçe girin.";
 
-    const mainCat = categoriesConfig.find(cat => cat.name === selectedMainCategory);
+    const mainCat = categories.find(cat => cat.name === selectedMainCategory);
     const subCat = mainCat?.subcategories?.find(sub => sub.name === selectedSubCategory);
 
     if (!selectedMainCategory) newErrors.category = 'Ana kategori seçimi gerekli';
@@ -214,7 +231,7 @@ export const useEditListingForm = (listingId) => {
     setUploadProgress(0);
 
     try {
-      const categoryPath = getCategoryPath(selectedMainCategory, selectedSubCategory, selectedSubSubCategory);
+      const categoryPath = [selectedMainCategory, selectedSubCategory, selectedSubSubCategory].filter(Boolean).join(' / ');
       const locationPath = [selectedProvince, selectedDistrict, formData.neighborhood].filter(Boolean).join(' / ');
 
       let mainImageUrl = null;

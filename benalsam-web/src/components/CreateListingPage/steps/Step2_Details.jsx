@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getAttributesForCategory } from '@/config/categoryAttributes';
+// import { getAttributesForCategory } from '@/config/categoryAttributes'; // Removed - using dynamic attributes
+import dynamicCategoryService from '@/services/dynamicCategoryService';
 
 const urgencyOptions = ['Acil', 'Normal', 'Acil Değil'];
 
@@ -23,8 +24,17 @@ const conditionOptions = [
 ];
 
 const Step2_Details = ({ formData, handleInputChange, errors, selectedMainCategory, selectedSubCategory, selectedSubSubCategory }) => {
-  // Get category-specific attributes
-  const categoryAttributes = getAttributesForCategory(selectedMainCategory, selectedSubCategory, selectedSubSubCategory);
+  // Get category-specific attributes dynamically
+  const categoryAttributes = dynamicCategoryService.getAttributesForCategory(selectedMainCategory, selectedSubCategory, selectedSubSubCategory);
+  
+  // Debug log
+  console.log('🔍 DEBUG: Step2_Details attributes', {
+    selectedMainCategory,
+    selectedSubCategory,
+    selectedSubSubCategory,
+    categoryAttributes,
+    attributesLength: categoryAttributes?.length || 0
+  });
   
   // Handle attribute changes (multiple selection support)
   const handleAttributeChange = (attributeKey, value) => {
@@ -147,7 +157,7 @@ const Step2_Details = ({ formData, handleInputChange, errors, selectedMainCatego
       </FormField>
 
       {/* Category-specific Attributes */}
-      {Object.keys(categoryAttributes).length > 0 && (
+      {categoryAttributes && categoryAttributes.length > 0 && (
         <div className="space-y-6">
           <div className="flex items-center space-x-2">
             <Settings className="h-5 w-5 text-primary" />
@@ -156,9 +166,20 @@ const Step2_Details = ({ formData, handleInputChange, errors, selectedMainCatego
           </div>
           
           <div className="space-y-6">
-            {Object.entries(categoryAttributes).map(([key, attribute]) => (
+            {categoryAttributes.map((attribute) => {
+              const key = attribute.key;
+              // Parse options string to array
+              let options = [];
+              try {
+                options = JSON.parse(attribute.options || '[]');
+              } catch (error) {
+                console.error('Error parsing options:', error, attribute.options);
+                options = [];
+              }
+              
+              return (
               <div key={key} className="space-y-3 p-4 border border-border rounded-lg bg-card/50">
-                {attribute.type === 'select' ? (
+                {attribute.type === 'string' ? (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-semibold text-blue-600 dark:text-blue-400">{attribute.label}</h4>
@@ -168,7 +189,8 @@ const Step2_Details = ({ formData, handleInputChange, errors, selectedMainCatego
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {attribute.options.map((option) => {
+                      {options.map((optionValue) => {
+                        const option = { value: optionValue, label: optionValue };
                         const isSelected = formData.attributes?.[key]?.includes(option.value) || false;
                         return (
                           <button
@@ -211,13 +233,12 @@ const Step2_Details = ({ formData, handleInputChange, errors, selectedMainCatego
                     {formData.attributes?.[key]?.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {formData.attributes[key].map((selectedValue) => {
-                          const option = attribute.options.find(opt => opt.value === selectedValue);
                           return (
                             <span 
                               key={selectedValue}
                               className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20"
                             >
-                              {option?.label}
+                              {selectedValue}
                             </span>
                           );
                         })}
@@ -253,7 +274,8 @@ const Step2_Details = ({ formData, handleInputChange, errors, selectedMainCatego
                   </div>
                 ) : null}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

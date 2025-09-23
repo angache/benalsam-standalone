@@ -17,12 +17,34 @@ import {
   SelectValue,
 } from "@/components/ui/select.jsx";
 import { followCategory } from '@/services/supabaseService';
-import { categoriesConfig } from '@/config/categories.js';
+// import { categoriesConfig } from '@/config/categories.js'; // Removed - using dynamic categories
 import { Loader2, PlusCircle } from 'lucide-react';
-
+import dynamicCategoryService from '@/services/dynamicCategoryService';
 
 const FollowCategoryModal = ({ isOpen, onClose, currentUserId, onCategoryFollowed }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  // Load categories dynamically
+  React.useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        const fetchedCategories = await dynamicCategoryService.getCategories();
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        setCategories([]);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    if (isOpen) {
+      loadCategories();
+    }
+  }, [isOpen]);
   const [isFollowing, setIsFollowing] = useState(false);
 
   const handleFollow = async () => {
@@ -70,7 +92,11 @@ const FollowCategoryModal = ({ isOpen, onClose, currentUserId, onCategoryFollowe
               <SelectValue placeholder="Kategori Seçin" />
             </SelectTrigger>
             <SelectContent>
-              {renderCategoryOptions(categoriesConfig)}
+              {isLoadingCategories ? (
+                <div className="p-2 text-center text-muted-foreground">Kategoriler yükleniyor...</div>
+              ) : (
+                renderCategoryOptions(categories)
+              )}
             </SelectContent>
           </Select>
         </div>
