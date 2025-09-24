@@ -6,7 +6,7 @@ import LocationSelector from '@/components/CreateListingPage/LocationSelector.js
 import MapLocationModal from '@/components/CreateListingPage/MapLocationModal.jsx';
 import { Button } from '@/components/ui/button';
 
-const Step4_Location = ({ 
+const Step5_Location = ({ 
   selectedProvince,
   setSelectedProvince,
   selectedDistrict,
@@ -106,4 +106,4 @@ const Step4_Location = ({
   );
 };
 
-export default Step4_Location;
+export default Step5_Location;

@@ -90,13 +90,15 @@ const FormFieldSkeleton = ({ label, type = "input" }) => (
 // Lazy load step components
 const Step1_Category = lazy(() => import('@/components/CreateListingPage/steps/Step1_Category.jsx'));
 const Step2_Details = lazy(() => import('@/components/CreateListingPage/steps/Step2_Details.jsx'));
-const Step3_Images = lazy(() => import('@/components/CreateListingPage/steps/Step3_Images.jsx'));
-const Step4_Location = lazy(() => import('@/components/CreateListingPage/steps/Step4_Location.jsx'));
-const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Step5_Review.jsx'));
+const Step3_Attributes = lazy(() => import('@/components/CreateListingPage/steps/Step3_Attributes.jsx'));
+const Step4_Images = lazy(() => import('@/components/CreateListingPage/steps/Step4_Images.jsx'));
+const Step5_Location = lazy(() => import('@/components/CreateListingPage/steps/Step5_Location.jsx'));
+const Step6_Review = lazy(() => import('@/components/CreateListingPage/steps/Step6_Review.jsx'));
     
     const steps = [
       { name: 'Kategori' },
       { name: 'Detaylar' },
+      { name: 'Özellikler' },
       { name: 'Görseller' },
       { name: 'Konum' },
       { name: 'Onay' },
@@ -294,16 +296,26 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
                   formData={formData} 
                   handleInputChange={handleInputChange} 
                   errors={errors}
-                  selectedMainCategory={selectedMainCategory}
-                  selectedSubCategory={selectedSubCategory}
-                  selectedSubSubCategory={selectedSubSubCategory}
                 />
               </Suspense>
             );
           case 3:
             return (
               <Suspense fallback={<StepLoadingSpinner />}>
-                <Step3_Images 
+                <Step3_Attributes 
+                  formData={formData} 
+                  handleInputChange={handleInputChange} 
+                  errors={errors}
+                  selectedMainCategory={selectedMainCategory}
+                  selectedSubCategory={selectedSubCategory}
+                  selectedSubSubCategory={selectedSubSubCategory}
+                />
+              </Suspense>
+            );
+          case 4:
+            return (
+              <Suspense fallback={<StepLoadingSpinner />}>
+                <Step4_Images 
                   formData={formData} 
                   handleImageArrayChange={handleImageArrayChange} 
                   handleRemoveImageFromArray={handleRemoveImageFromArray} 
@@ -313,10 +325,10 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
                 />
               </Suspense>
             );
-          case 4:
+          case 5:
             return (
               <Suspense fallback={<StepLoadingSpinner />}>
-                <Step4_Location 
+                <Step5_Location 
                   selectedProvince={selectedProvince} 
                   setSelectedProvince={setSelectedProvince} 
                   selectedDistrict={selectedDistrict} 
@@ -329,10 +341,10 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
                 />
               </Suspense>
             );
-          case 5:
+          case 6:
             return (
               <Suspense fallback={<StepLoadingSpinner />}>
-                <Step5_Review 
+                <Step6_Review 
                   formData={formData} 
                   handleInputChange={handleInputChange} 
                   handlePremiumFeatureChange={handlePremiumFeatureChange} 

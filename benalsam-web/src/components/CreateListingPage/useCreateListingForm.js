@@ -21,7 +21,7 @@ export const useCreateListingForm = () => {
     neighborhood: '',
     latitude: null,
     longitude: null,
-          condition: [], // Ürün durumu (boş başlar, fark etmez otomatik eklenir)
+    	  condition: ['any'], // Varsayılan: Fark Etmez
     attributes: {}, // Kategori-specific özellikler
     category_id: null, // Kategori ID'si
     category_path: [], // Hiyerarşik kategori path'i
@@ -453,30 +453,31 @@ export const useCreateListingForm = () => {
             console.log('🔍 DEBUG: Validating step 2 - Details', { 
               title: formData.title, 
               description: formData.description, 
-              budget: formData.budget,
-              condition: formData.condition 
+              budget: formData.budget
             });
             if (!formData.title.trim()) newErrors.title = 'Başlık gerekli';
             if (formData.title.trim().length < 5) newErrors.title = 'Başlık en az 5 karakter olmalı';
             if (!formData.description.trim()) newErrors.description = 'Açıklama gerekli';
             if (formData.description.trim().length < 10) newErrors.description = 'Açıklama en az 10 karakter olmalı';
             if (!formData.budget || parseInt(formData.budget, 10) <= 0) newErrors.budget = 'Geçerli bir bütçe girin';
-            // Condition is optional for now - remove validation
-            // if (!formData.condition || formData.condition.length === 0) newErrors.condition = 'Ürün durumu seçimi gerekli';
             break;
         case 3:
-            console.log('🔍 DEBUG: Validating step 3 - Images', { imageCount: formData.images.length });
+            console.log('🔍 DEBUG: Validating step 3 - Attributes');
+            // Attributes and condition are optional - no validation needed
+            break;
+        case 4:
+            console.log('🔍 DEBUG: Validating step 4 - Images', { imageCount: formData.images.length });
             if (formData.images.length === 0) newErrors.images = 'En az bir görsel yüklemelisiniz.';
             break;
-        case 4: {
-            console.log('🔍 DEBUG: Validating step 4 - Location', { selectedProvince, selectedDistrict });
+        case 5: {
+            console.log('🔍 DEBUG: Validating step 5 - Location', { selectedProvince, selectedDistrict });
             if (!selectedProvince) newErrors.location = 'İl seçimi gerekli';
             const provinceData = turkishProvincesAndDistricts.find(p=>p.name === selectedProvince);
             if (provinceData?.districts?.length > 0 && !selectedDistrict) newErrors.location = 'İlçe seçimi gerekli';
             break;
         }
-        case 5:
-            console.log('🔍 DEBUG: Validating step 5 - Terms', { acceptTerms: formData.acceptTerms });
+        case 6:
+            console.log('🔍 DEBUG: Validating step 6 - Terms', { acceptTerms: formData.acceptTerms });
              if (!formData.acceptTerms) newErrors.acceptTerms = 'İlan yayınlama kurallarını kabul etmelisiniz.';
             break;
     }
