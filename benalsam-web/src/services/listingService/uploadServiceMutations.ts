@@ -230,10 +230,15 @@ export const createListingWithUploadService = async (
         status: ListingStatus.PENDING_APPROVAL,
         urgency: listingData.urgency || 'medium',
         condition: listingData.condition || [],
-           attributes: listingData.attributes && Object.keys(listingData.attributes).length > 0 ? Object.entries(listingData.attributes).reduce((acc, [key, value]) => {
-             acc[key] = [value];
-             return acc;
-           }, {} as Record<string, string[]>) : null,
+        // Normalize attributes to { key: ["value"] } without double arrays
+        attributes: listingData.attributes && Object.keys(listingData.attributes).length > 0
+          ? Object.entries(listingData.attributes).reduce((acc, [key, value]) => {
+              const normalized = Array.isArray(value) ? value : [value];
+              // Ensure all values are strings for ES mapping consistency
+              acc[key] = normalized.map((v: any) => String(v));
+              return acc;
+            }, {} as Record<string, string[]>)
+          : null,
         category_id: categoryIds.category_id, // Use numeric ID
         category_path: categoryIds.category_path, // Use numeric array
         expires_at: listingData.expires_at || null,
