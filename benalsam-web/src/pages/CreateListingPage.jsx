@@ -11,6 +11,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { SkeletonCard } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 // Lazy load modal components
 const ListingRulesModal = lazy(() => import('@/components/ListingRulesModal.jsx'));
 const StockImageSearchModal = lazy(() => import('@/components/CreateListingPage/StockImageSearchModal.jsx'));
@@ -112,6 +113,10 @@ const Step6_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
       const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
       const [isStockModalOpen, setIsStockModalOpen] = useState(false);
       const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  // Progress modal state (enterprise-grade UX: non-dismissable until finished)
+  const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
+  const [progressPhase, setProgressPhase] = useState('idle'); // idle | uploading | creating | processing | success | error
+  const [progressMessage, setProgressMessage] = useState('');
     
       const {
         formData, setFormData, errors, setErrors,
@@ -196,7 +201,7 @@ const Step6_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
           return;
         }
     
-        const listingData = {
+    const listingData = {
           ...formData,
           budget: parseInt(formData.budget),
           duration: parseInt(formData.duration),
@@ -208,13 +213,41 @@ const Step6_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
           acceptTerms: formData.acceptTerms,
           ...formData.premiumFeatures
         };
-        
-        const createdListing = await handleCreateListing(listingData);
-        if (createdListing) {
-          await incrementUserUsage(currentUser.id, 'listing');
-          toast({ title: "Başarıyla Gönderildi!", description: "İlanınız incelenmek üzere ekibimize gönderildi.", duration: 7000 });
-          navigate(`/profil/${currentUser.id}`);
+    // Open progress modal and run phases
+    setIsProgressModalOpen(true);
+    setProgressPhase('uploading');
+    setProgressMessage('Görseller yükleniyor...');
+
+    try {
+      // Phase 1: Upload images (with progress tracking)
+      const createdListing = await handleCreateListing(listingData, (progress) => {
+        // Upload progress callback - this will update uploadProgress state
+        if (progress >= 100) {
+          // Upload completed, move to creating phase
+          setTimeout(() => {
+            setProgressPhase('creating');
+            setProgressMessage('İlan kaydediliyor...');
+          }, 500);
         }
+      });
+
+      // Phase 2: Listing creation completed
+      if (createdListing) {
+        await incrementUserUsage(currentUser.id, 'listing');
+
+        // Phase 2: Success (directly after creating)
+        setTimeout(() => {
+          setProgressPhase('success');
+          setProgressMessage('İlan başarıyla oluşturuldu. Onaylandıktan sonra yayına alınacak.');
+        }, 500);
+      } else {
+        setProgressPhase('error');
+        setProgressMessage('İlan oluşturma tamamlanamadı. Lütfen tekrar deneyin.');
+      }
+    } catch (e) {
+      setProgressPhase('error');
+      setProgressMessage('Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.');
+    }
       };
     
       const nextStep = () => {
@@ -443,6 +476,86 @@ const Step6_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
                   </CardContent>
                 </Card>
               </motion.div>
+
+              {/* Non-dismissable Progress Modal */}
+              {isProgressModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm" role="dialog" aria-modal="true">
+                  <div className="w-full max-w-lg rounded-xl bg-card border border-border shadow-2xl p-6">
+                    <div className="flex items-center gap-3 mb-5">
+                      {progressPhase !== 'success' && progressPhase !== 'error' ? (
+                        <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                      ) : (
+                        <div className="w-5 h-5 text-primary">✓</div>
+                      )}
+                      <h3 className="text-lg font-semibold">İlan Gönderimi</h3>
+                    </div>
+
+                    <ol className="space-y-4">
+                      <li className="flex items-center gap-3">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${progressPhase === 'uploading' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>1</div>
+                        <div className="flex-1">
+                          <div className={`text-sm ${progressPhase === 'uploading' ? 'text-primary font-medium' : 'text-muted-foreground'}`}>Görseller yükleniyor</div>
+                          <Progress value={progressPhase === 'uploading' ? uploadProgress : progressPhase !== 'idle' ? 100 : 0} className="h-2 mt-2" />
+                        </div>
+                        <span className="ml-2 text-xs text-muted-foreground">{progressPhase === 'uploading' ? `${uploadProgress}%` : progressPhase !== 'idle' ? 'Tamamlandı' : ''}</span>
+                      </li>
+
+                      <li className="flex items-center gap-3">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${progressPhase === 'creating' ? 'bg-primary text-white' : progressPhase === 'success' ? 'bg-primary/80 text-white' : 'bg-muted text-muted-foreground'}`}>2</div>
+                        <div className="flex-1">
+                          <div className={`text-sm ${progressPhase === 'creating' ? 'text-primary font-medium' : 'text-muted-foreground'}`}>İlan kaydediliyor</div>
+                          {progressPhase === 'creating' ? (
+                            <div className="h-2 w-full bg-muted rounded mt-2 relative overflow-hidden">
+                              <div className="h-full bg-primary rounded animate-pulse" style={{ width: '60%' }} />
+                            </div>
+                          ) : (
+                            <div className="h-2 w-full bg-muted rounded mt-2" />
+                          )}
+                        </div>
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          {progressPhase === 'creating' ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : progressPhase === 'success' ? 'Tamamlandı' : ''}
+                        </span>
+                      </li>
+                    </ol>
+
+                    <p className="mt-5 text-sm text-muted-foreground">{progressMessage}</p>
+
+                    {progressPhase === 'success' && (
+                      <div className="mt-4 space-y-3">
+                        <div className="text-xs text-muted-foreground">
+                          İlanınız onaylandıktan sonra arama sonuçlarında görüntülenecektir.
+                        </div>
+                        <Button 
+                          onClick={() => {
+                            setIsProgressModalOpen(false);
+                            toast({ title: 'İlan Gönderildi', description: 'Onaylandıktan sonra arama sonuçlarında görünecek.' });
+                            navigate(`/profil/${currentUser.id}`);
+                          }}
+                          className="w-full"
+                        >
+                          İlanlarıma Git
+                        </Button>
+                      </div>
+                    )}
+
+                    {progressPhase === 'error' && (
+                      <div className="mt-4 space-y-3">
+                        <Button 
+                          onClick={() => {
+                            setIsProgressModalOpen(false);
+                          }}
+                          variant="outline"
+                          className="w-full"
+                        >
+                          Kapat
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </motion.div>
           </div>
 

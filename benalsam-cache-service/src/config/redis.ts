@@ -6,12 +6,14 @@ const redisConfig = {
   port: parseInt(process.env['REDIS_PORT'] || '6379'),
   ...(process.env['REDIS_PASSWORD'] && { password: process.env['REDIS_PASSWORD'] }),
   db: parseInt(process.env['REDIS_DB'] || '0'),
-  retryDelayOnFailover: 100,
-  maxRetriesPerRequest: 3,
+  retryDelayOnFailover: 1000,
+  maxRetriesPerRequest: 5,
   lazyConnect: true,
   keepAlive: 30000,
-  connectTimeout: 10000,
-  commandTimeout: 5000,
+  connectTimeout: 30000, // 30 saniye
+  commandTimeout: 15000, // 15 saniye
+  retryDelayOnClusterDown: 300,
+  enableOfflineQueue: false,
 };
 
 export const redis = new Redis(redisConfig);

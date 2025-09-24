@@ -229,7 +229,7 @@ export const useAppData = (openAuthModal) => {
       .eq('is_read', false);
   }, [currentUser?.id]);
 
-  const handleCreateListing = useCallback(async (newListingData) => {
+  const handleCreateListing = useCallback(async (newListingData, onProgress) => {
     if (!currentUser) {
       toast({ title: "Giriş Yapmalısınız!", description: "İlan oluşturmak için lütfen giriş yapın.", variant: "destructive" });
       if (typeof openAuthModal === 'function') openAuthModal('login');
@@ -238,8 +238,14 @@ export const useAppData = (openAuthModal) => {
     setIsUploading(true);
     setUploadProgress(0);
     
+    // Combined progress callback that updates both states
+    const combinedProgressCallback = (progress) => {
+      setUploadProgress(progress);
+      if (onProgress) onProgress(progress);
+    };
+    
     try {
-      const newFullListing = await createListingService(newListingData, currentUser.id, handleUploadProgress);
+      const newFullListing = await createListingService(newListingData, currentUser.id, combinedProgressCallback);
       
       if (newFullListing) {
         setListings(prevListings => {
