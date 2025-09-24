@@ -246,7 +246,7 @@ const Step6_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
       };
     
       const handleFinalSubmit = () => {
-        if (validateStep(5, { formData })) {
+        if (validateStep(6, { formData })) {
             handleSubmit();
         }
       };
