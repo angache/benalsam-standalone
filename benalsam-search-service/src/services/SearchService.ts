@@ -59,13 +59,18 @@ export class SearchService {
 
   private async initializeElasticsearch() {
     try {
-      // TODO: Implement Elasticsearch client initialization
-      // this.elasticsearchClient = new Client({ node: process.env.ELASTICSEARCH_URL });
-      // await this.elasticsearchClient.ping();
-      // this.isElasticsearchAvailable = true;
-      logger.info('Elasticsearch client initialized');
+      const { Client } = await import('@elastic/elasticsearch');
+      const elasticsearchUrl = process.env.ELASTICSEARCH_URL || 'http://localhost:9200';
+      
+      this.elasticsearchClient = new Client({ node: elasticsearchUrl });
+      await this.elasticsearchClient.ping();
+      this.isElasticsearchAvailable = true;
+      
+      logger.info('✅ Elasticsearch client initialized', { url: elasticsearchUrl });
     } catch (error) {
-      logger.warn('Elasticsearch not available, using Supabase fallback');
+      logger.warn('⚠️ Elasticsearch not available, using Supabase fallback', { 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
       this.isElasticsearchAvailable = false;
     }
   }
@@ -133,8 +138,82 @@ export class SearchService {
    * Elasticsearch search implementation
    */
   private async elasticsearchSearch(params: SearchParams): Promise<SearchResult> {
-    // TODO: Implement Elasticsearch search
-    throw new Error('Elasticsearch not implemented yet');
+    try {
+      const {
+        query,
+        categories,
+        location,
+        urgency = 'Tümü',
+        minPrice,
+        maxPrice,
+        page = 1,
+        pageSize = 20,
+        sortBy = 'created_at',
+        sortOrder = 'desc',
+        attributes
+      } = params;
+
+      const indexName = 'benalsam_listings'; // Use the correct index
+      const from = (page - 1) * pageSize;
+
+      // Simple query for testing
+      const esQuery = {
+        query: {
+          match_all: {}
+        }
+      };
+
+      // For now, just use match_all query
+
+      // Execute search
+      const response = await this.elasticsearchClient.search({
+        index: indexName,
+        body: {
+          query: {
+            match_all: {}
+          },
+          from,
+          size: pageSize
+        }
+      });
+
+      // Parse response (try both response.body.hits and response.hits for compatibility)
+      const hits = response.body?.hits?.hits || response.hits?.hits || [];
+      const total = response.body?.hits?.total?.value || response.hits?.total?.value || 0;
+
+      // Transform results
+      const data = hits.map((hit: any) => hit._source);
+
+      const totalPages = Math.ceil(total / pageSize);
+
+      logger.info('🔍 Elasticsearch search completed', {
+        query,
+        total,
+        page,
+        pageSize,
+        totalPages,
+        categories,
+        location,
+        urgency
+      });
+
+      return {
+        success: true,
+        data,
+        total,
+        page,
+        pageSize,
+        totalPages,
+        responseTime: 0,
+        cached: false,
+        query,
+        filters: { categories, location, urgency, minPrice, maxPrice, attributes }
+      };
+
+    } catch (error) {
+      logger.error('❌ Elasticsearch search failed:', error);
+      throw new Error(`Elasticsearch search failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   /**

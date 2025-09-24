@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
-import { categoriesConfig, getCategoryPath } from '@/config/categories';
+// import { categoriesConfig, getCategoryPath } from '@/config/categories'; // Removed - using dynamic categories
 import { useAuthStore } from '@/stores';
 import { getInventoryItemById, addInventoryItem, updateInventoryItem, uploadInventoryImages } from '@/services/inventoryBackendService.js';
 

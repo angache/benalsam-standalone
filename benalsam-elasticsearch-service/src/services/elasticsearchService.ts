@@ -6,7 +6,7 @@ import logger from '../config/logger';
 class ElasticsearchService {
   private static instance: ElasticsearchService;
   private client: Client | null = null;
-  private readonly indexName: string = 'listings';
+  private readonly indexName: string = 'benalsam_listings';
   private readonly maxRetries: number = 3;
   private readonly retryDelay: number = 1000; // 1 second
 

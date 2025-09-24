@@ -432,7 +432,7 @@ export class AdminElasticsearchService {
       // Use enhanced mapping based on index name
       let enhancedMapping = mapping;
       if (!mapping) {
-        if (targetIndex === 'benalsam_listings') {
+        if (targetIndex === 'listings') {
           enhancedMapping = this.getListingsIndexMapping();
         } else if (targetIndex === 'user_behaviors') {
           enhancedMapping = this.getUserBehaviorsIndexMapping();

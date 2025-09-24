@@ -121,14 +121,25 @@ export class DatabaseTriggerBridgeRefactored {
       // Job'ı processing olarak işaretle
       await this.databaseService.markJobAsProcessing(job.id, traceId);
 
-      // RabbitMQ'ya mesaj gönder
-      await this.rabbitmqService.publishMessage('elasticsearch_sync', {
-        jobId: job.id,
+      // RabbitMQ'ya mesaj gönder (exchange + routing key ile)
+      const opUpper = (job.operation || '').toUpperCase();
+      const routingKey = opUpper === 'DELETE' ? 'listing.delete' : 'listing.update';
+      const message = {
+        type: 'ELASTICSEARCH_SYNC',
+        operation: opUpper,
+        table: 'listings',
         recordId: job.record_id,
-        operation: job.operation,
+        changeData: job.change_data || { old: null, new: null },
         traceId,
-        timestamp: new Date().toISOString()
-      });
+        timestamp: new Date().toISOString(),
+      };
+
+      await this.rabbitmqService.publishToExchange(
+        process.env.RABBITMQ_EXCHANGE || 'benalsam.jobs',
+        routingKey,
+        message,
+        { messageId: `job_${job.id}_${Date.now()}_${Math.random().toString(36).slice(2)}` }
+      );
 
       // Job'ı completed olarak işaretle
       await this.databaseService.markJobAsCompleted(job.id, traceId);

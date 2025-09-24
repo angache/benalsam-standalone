@@ -108,7 +108,7 @@ interface ElasticsearchDocument {
 // Helper functions for data formatting
 const formatEventData = (source: any, indexName: string) => {
   // Check if this is a listing document
-  if (indexName === 'benalsam_listings') {
+  if (indexName === 'listings') {
     return formatListingData(source);
   }
   
@@ -1048,7 +1048,7 @@ const ElasticsearchDashboardPage: React.FC = () => {
                                           onClick={() => handleDetailsClick(doc, index.name)}
                                         >
                                           <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                                            {index.name === 'benalsam_listings' 
+                                            {index.name === 'listings' 
                                               ? formattedData.details?.title || 'Başlıksız İlan'
                                               : formattedData.eventType === 'view'
                                                 ? `${formattedData.details?.screen || 'Bilinmeyen'} Ekranı`

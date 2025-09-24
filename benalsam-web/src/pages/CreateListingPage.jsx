@@ -90,13 +90,15 @@ const FormFieldSkeleton = ({ label, type = "input" }) => (
 // Lazy load step components
 const Step1_Category = lazy(() => import('@/components/CreateListingPage/steps/Step1_Category.jsx'));
 const Step2_Details = lazy(() => import('@/components/CreateListingPage/steps/Step2_Details.jsx'));
-const Step3_Images = lazy(() => import('@/components/CreateListingPage/steps/Step3_Images.jsx'));
-const Step4_Location = lazy(() => import('@/components/CreateListingPage/steps/Step4_Location.jsx'));
-const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Step5_Review.jsx'));
+const Step3_Attributes = lazy(() => import('@/components/CreateListingPage/steps/Step3_Attributes.jsx'));
+const Step4_Images = lazy(() => import('@/components/CreateListingPage/steps/Step4_Images.jsx'));
+const Step5_Location = lazy(() => import('@/components/CreateListingPage/steps/Step5_Location.jsx'));
+const Step6_Review = lazy(() => import('@/components/CreateListingPage/steps/Step6_Review.jsx'));
     
     const steps = [
       { name: 'Kategori' },
       { name: 'Detaylar' },
+      { name: 'Özellikler' },
       { name: 'Görseller' },
       { name: 'Konum' },
       { name: 'Onay' },
@@ -116,10 +118,16 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
         selectedMainCategory, setSelectedMainCategory,
         selectedSubCategory, setSelectedSubCategory,
         selectedSubSubCategory, setSelectedSubSubCategory,
+        handleMainCategoryChange,
+        handleSubCategoryChange,
+        handleSubSubCategoryChange,
         selectedProvince, setSelectedProvince,
         selectedDistrict, setSelectedDistrict,
         handleInputChange, handlePremiumFeatureChange, handleImageArrayChange, handleRemoveImageFromArray,
+        detectLocation,
         validateStep,
+        categories,
+        isLoadingCategories,
       } = useCreateListingForm();
     
       const handleLocationDetect = useCallback(({ latitude, longitude, province, district, neighborhood }) => {
@@ -210,9 +218,23 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
       };
     
       const nextStep = () => {
+        console.log('🔍 DEBUG: nextStep called', { currentStep, totalSteps: steps.length });
         const allData = { formData, selectedMainCategory, selectedSubCategory, selectedSubSubCategory, selectedProvince, selectedDistrict };
-        if (currentStep < steps.length && validateStep(currentStep, allData)) {
+        console.log('🔍 DEBUG: allData', allData);
+        
+        const isValid = validateStep(currentStep, allData);
+        console.log('🔍 DEBUG: validation result', { isValid, currentStep });
+        
+        if (currentStep < steps.length && isValid) {
+          console.log('✅ DEBUG: Moving to next step');
           setCurrentStep(prev => prev + 1);
+        } else {
+          console.log('❌ DEBUG: Cannot move to next step', { 
+            currentStep, 
+            totalSteps: steps.length, 
+            isValid,
+            errors 
+          });
         }
       };
     
@@ -224,7 +246,7 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
       };
     
       const handleFinalSubmit = () => {
-        if (validateStep(5, { formData })) {
+        if (validateStep(6, { formData })) {
             handleSubmit();
         }
       };
@@ -255,12 +277,14 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
             return (
               <Suspense fallback={<StepLoadingSpinner />}>
                 <Step1_Category 
+                  categories={categories}
+                  isLoadingCategories={isLoadingCategories}
                   selectedMainCategory={selectedMainCategory} 
-                  onMainChange={setSelectedMainCategory} 
+                  onMainChange={handleMainCategoryChange} 
                   selectedSubCategory={selectedSubCategory} 
-                  onSubChange={setSelectedSubCategory} 
+                  onSubChange={handleSubCategoryChange} 
                   selectedSubSubCategory={selectedSubSubCategory} 
-                  onSubSubChange={setSelectedSubSubCategory} 
+                  onSubSubChange={handleSubSubCategoryChange} 
                   errors={errors} 
                 />
               </Suspense>
@@ -271,14 +295,27 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
                 <Step2_Details 
                   formData={formData} 
                   handleInputChange={handleInputChange} 
-                  errors={errors} 
+                  errors={errors}
                 />
               </Suspense>
             );
           case 3:
             return (
               <Suspense fallback={<StepLoadingSpinner />}>
-                <Step3_Images 
+                <Step3_Attributes 
+                  formData={formData} 
+                  handleInputChange={handleInputChange} 
+                  errors={errors}
+                  selectedMainCategory={selectedMainCategory}
+                  selectedSubCategory={selectedSubCategory}
+                  selectedSubSubCategory={selectedSubSubCategory}
+                />
+              </Suspense>
+            );
+          case 4:
+            return (
+              <Suspense fallback={<StepLoadingSpinner />}>
+                <Step4_Images 
                   formData={formData} 
                   handleImageArrayChange={handleImageArrayChange} 
                   handleRemoveImageFromArray={handleRemoveImageFromArray} 
@@ -288,25 +325,26 @@ const Step5_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
                 />
               </Suspense>
             );
-          case 4:
+          case 5:
             return (
               <Suspense fallback={<StepLoadingSpinner />}>
-                <Step4_Location 
+                <Step5_Location 
                   selectedProvince={selectedProvince} 
                   setSelectedProvince={setSelectedProvince} 
                   selectedDistrict={selectedDistrict} 
                   setSelectedDistrict={setSelectedDistrict} 
                   formData={formData} 
                   handleInputChange={handleInputChange} 
-                  onLocationDetect={handleLocationDetect} 
+                  onLocationDetect={handleLocationDetect}
+                  detectLocation={detectLocation}
                   errors={errors} 
                 />
               </Suspense>
             );
-          case 5:
+          case 6:
             return (
               <Suspense fallback={<StepLoadingSpinner />}>
-                <Step5_Review 
+                <Step6_Review 
                   formData={formData} 
                   handleInputChange={handleInputChange} 
                   handlePremiumFeatureChange={handlePremiumFeatureChange} 

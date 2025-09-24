@@ -4,11 +4,26 @@ import { Tag, XCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button.jsx';
 import ListingCard from '@/components/ListingCard.jsx';
 import { unfollowCategory } from '@/services/supabaseService';
-import { findCategoryByName } from '@/config/categories.js';
+import dynamicCategoryService from '@/services/dynamicCategoryService';
 
 const CategoryFollowCard = ({ category, listings, currentUserId, onUnfollowCategory, onToggleFavorite }) => {
   const [isUnfollowing, setIsUnfollowing] = useState(false);
-  const categoryDetails = findCategoryByName(category.category_name);
+  const [categoryDetails, setCategoryDetails] = useState(null);
+  
+  // Load category details dynamically
+  React.useEffect(() => {
+    const loadCategoryDetails = async () => {
+      try {
+        const categories = await dynamicCategoryService.getCategories();
+        const found = dynamicCategoryService.findCategoryByName(categories, category.category_name);
+        setCategoryDetails(found);
+      } catch (error) {
+        console.error('Error loading category details:', error);
+      }
+    };
+    loadCategoryDetails();
+  }, [category.category_name]);
+  
   const IconComponent = categoryDetails?.icon || Tag;
 
   const handleUnfollow = async () => {

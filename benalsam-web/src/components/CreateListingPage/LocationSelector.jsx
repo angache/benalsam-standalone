@@ -11,6 +11,7 @@ const LocationSelector = ({
   selectedDistrict, onDistrictChange, 
   neighborhood, onNeighborhoodChange,
   onLocationDetect,
+  onMapLocationSelect,
   errors, 
   disabled 
 }) => {
@@ -75,9 +76,9 @@ const LocationSelector = ({
 
   return (
     <div className="space-y-3">
-      <Button type="button" onClick={handleGeolocate} disabled={disabled || isLocating} className="w-full btn-secondary">
-        {isLocating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MapPin className="mr-2 h-4 w-4" />}
-        {isLocating ? 'Konum Bulunuyor...' : 'Haritadan Konumumu Bul'}
+      <Button type="button" onClick={onMapLocationSelect} disabled={disabled} className="w-full btn-secondary">
+        <MapPin className="mr-2 h-4 w-4" />
+        Haritadan Konumumu Bul
       </Button>
       <Select value={selectedProvince} onValueChange={onProvinceChange} disabled={disabled}>
         <SelectTrigger className={`w-full bg-input border-border text-foreground ${errors?.location && !selectedProvince ? 'border-destructive' : ''}`}>

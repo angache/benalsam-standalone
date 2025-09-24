@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const urgencyOptions = ['Acil', 'Normal', 'Acil Değil'];
 
 const Step2_Details = ({ formData, handleInputChange, errors }) => {
+
   return (
     <motion.div 
       initial={{ opacity: 0, x: 50 }} 

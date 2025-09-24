@@ -5,6 +5,15 @@ import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
 const StepButtons = ({ currentStep, totalSteps, onBack, onNext, isSubmitting, isUploading }) => {
   const isLastStep = currentStep === totalSteps;
   const isSubmittingOrUploading = isSubmitting || isUploading;
+  
+  console.log('🔍 DEBUG: StepButtons render', { 
+    currentStep, 
+    totalSteps, 
+    isLastStep, 
+    isSubmitting, 
+    isUploading, 
+    isSubmittingOrUploading 
+  });
 
   return (
     <div className="flex gap-4">
@@ -20,7 +29,10 @@ const StepButtons = ({ currentStep, totalSteps, onBack, onNext, isSubmitting, is
       </Button>
       <Button
         type="button"
-        onClick={onNext}
+        onClick={() => {
+          console.log('🔍 DEBUG: Next button clicked', { currentStep, isSubmittingOrUploading });
+          onNext();
+        }}
         disabled={isSubmittingOrUploading}
         className="flex-1 btn-primary"
       >

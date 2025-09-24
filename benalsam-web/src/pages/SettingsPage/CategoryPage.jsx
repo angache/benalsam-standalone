@@ -14,7 +14,8 @@ import {
 import { useHapticFeedback } from '../../hooks/useHapticFeedback';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuthStore } from '../../stores';
-import { categoriesConfig } from '../../config/categories';
+// import { categoriesConfig } from '../../config/categories'; // Removed - using dynamic categories
+import dynamicCategoryService from '../../services/dynamicCategoryService';
 
 const CategoryPage = () => {
   const navigate = useNavigate();
@@ -26,10 +27,22 @@ const CategoryPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     loadDefaultCategory();
+    loadCategories();
   }, []);
+
+  const loadCategories = async () => {
+    try {
+      const fetchedCategories = await dynamicCategoryService.getCategories();
+      setCategories(fetchedCategories);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      setCategories([]);
+    }
+  };
 
   const loadDefaultCategory = async () => {
     try {
@@ -125,9 +138,9 @@ const CategoryPage = () => {
   };
 
   // Filter categories based on search term
-  const filteredCategories = categoriesConfig.filter(category => {
+  const filteredCategories = categories.filter(category => {
     const matchesSearch = category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         category.subcategories.some(sub => 
+                         category.subcategories?.some(sub => 
                            sub.name.toLowerCase().includes(searchTerm.toLowerCase())
                          );
     return matchesSearch;

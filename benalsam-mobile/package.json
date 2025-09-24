@@ -41,7 +41,7 @@
     "@types/crypto-js": "^4.2.2",
     "axios": "^1.10.0",
     "babel-preset-expo": "~54.0.0",
-    "benalsam-shared-types": "^1.0.5",
+    "benalsam-shared-types": "^1.0.10",
     "buffer": "^6.0.3",
     "cheerio": "^1.1.0",
     "crypto-js": "^4.2.0",

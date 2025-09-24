@@ -199,7 +199,14 @@ export class ListingService {
    */
   async createListing(listingData: any): Promise<Listing> {
     try {
-      logger.info('🚀 Creating listing', { title: listingData.title, userId: listingData.user_id });
+      logger.info('🚀 Creating listing', { 
+        title: listingData.title, 
+        userId: listingData.user_id,
+        category_id: listingData.category_id,
+        category_path: listingData.category_path,
+        attributes: listingData.attributes,
+        attributesType: typeof listingData.attributes
+      });
 
       const listingToInsert = {
         user_id: listingData.user_id,
@@ -223,7 +230,7 @@ export class ListingService {
         is_showcase: listingData.is_showcase || false,
         geolocation: listingData.geolocation,
         condition: listingData.condition || [],
-        attributes: listingData.attributes || {},
+        attributes: listingData.attributes || null,
         status: ListingStatus.PENDING_APPROVAL,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()

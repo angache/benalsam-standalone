@@ -1,7 +1,7 @@
 # 🔍 Elasticsearch Service API Endpoints Documentation
 
-**Son Güncelleme:** 2025-09-15  
-**Versiyon:** 1.1.0  
+**Son Güncelleme:** 2025-09-23  
+**Versiyon:** 1.2.1  
 **Toplam Endpoint Sayısı:** ~20+
 
 ---
@@ -49,6 +49,10 @@
 ---
 
 ## 📝 **CHANGELOG**
+
+### **2025-09-23 - v1.2.1**
+- ✅ Queue Service, ES sync mesajlarını `benalsam.jobs` exchange ve `listing.update|listing.delete` routing key'leri ile yayınlıyor
+- ✅ Admin Backend, silme sonrası ES DELETE sync job enqueue ediyor
 
 ### **2025-09-15 - v1.2.0**
 - ✅ DELETE /listings/:id endpoint'i eklendi

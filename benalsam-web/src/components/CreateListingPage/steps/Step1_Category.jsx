@@ -1,12 +1,72 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { categoriesConfig, findCategoryByName } from '@/config/categories';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, ChevronRight, CheckCircle, Home, Box } from 'lucide-react';
+import { Search, ChevronRight, CheckCircle, Home, Box, Loader2, Smartphone, Laptop, Gamepad2, Camera, Music, Wrench, Car, Building, Shirt, Dumbbell, GraduationCap, Briefcase, Palette, Baby, Heart, Plane, Bitcoin, Star, Utensils, Book } from 'lucide-react';
+
+// Icon mapping for categories
+const ICON_MAPPING = {
+  'Elektronik': Smartphone,
+  'Telefon': Smartphone,
+  'Bilgisayar': Laptop,
+  'Oyun Konsolu': Gamepad2,
+  'Kamera & Fotoğraf': Camera,
+  'TV & Ses Sistemleri': Music,
+  'Diğer Elektronik': Wrench,
+  'Araç & Vasıta': Car,
+  'Otomobil': Car,
+  'Motosiklet': Car,
+  'Bisiklet': Car,
+  'Ticari Araçlar': Car,
+  'Yedek Parça & Aksesuar': Wrench,
+  'Emlak': Building,
+  'Konut': Home,
+  'Ticari': Building,
+  'Arsa': Building,
+  'Bina': Building,
+  'Turistik Tesis': Building,
+  'Moda': Shirt,
+  'Giyim': Shirt,
+  'Ayakkabı': Shirt,
+  'Aksesuar': Shirt,
+  'Ev & Yaşam': Home,
+  'Mobilya': Home,
+  'Dekorasyon': Home,
+  'Ev Aletleri': Wrench,
+  'Spor & Outdoor': Dumbbell,
+  'Eğitim & Kitap': GraduationCap,
+  'Hizmetler': Briefcase,
+  'Sanat & Hobi': Palette,
+  'Anne & Bebek': Baby,
+  'Oyun & Eğlence': Gamepad2,
+  'Sağlık & Güzellik': Heart,
+  'İş & Endüstri': Briefcase,
+  'Seyahat': Plane,
+  'Kripto & Finans': Bitcoin,
+  'Koleksiyon & Değerli Eşyalar': Star,
+  'Yemek & İçecek': Utensils,
+  'Hayvanlar': Heart,
+  'Bahçe & Tarım': Home,
+  'Teknoloji': Smartphone,
+  'Müzik': Music,
+  'Kitap': Book,
+  'Film & TV': Camera,
+};
+
+// Helper function to find category by name
+const findCategoryByName = (categories, name) => {
+  for (const cat of categories) {
+    if (cat.name === name) return cat;
+    if (cat.subcategories) {
+      const found = findCategoryByName(cat.subcategories, name);
+      if (found) return found;
+    }
+  }
+  return null;
+};
 
 const CategoryCard = ({ category, onClick, parentCategory }) => {
-  const Icon = category.icon || parentCategory?.icon || Box;
+  const Icon = ICON_MAPPING[category.name] || Box;
   const color = category.color || parentCategory?.color || 'from-slate-400 to-slate-500';
 
   return (
@@ -28,17 +88,31 @@ const CategoryCard = ({ category, onClick, parentCategory }) => {
 };
 
 const Step1_Category = ({
+  categories,
+  isLoadingCategories,
   selectedMainCategory, onMainChange,
   selectedSubCategory, onSubChange,
   selectedSubSubCategory, onSubSubChange,
   errors
 }) => {
   const [history, setHistory] = useState([]);
-  const [currentCategories, setCurrentCategories] = useState(categoriesConfig);
+  const [currentCategories, setCurrentCategories] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   const parentPath = useMemo(() => history.map(h => h.name).join(' > '), [history]);
-  const parentCategory = useMemo(() => (parentPath ? findCategoryByName(parentPath) : null), [parentPath]);
+  const parentCategory = useMemo(() => (parentPath ? findCategoryByName(categories, parentPath) : null), [parentPath, categories]);
+
+  // Update current categories when categories prop changes
+  useEffect(() => {
+    if (categories.length > 0) {
+      console.log('🔍 DEBUG: Categories loaded', { 
+        categoriesCount: categories.length,
+        firstCategory: categories[0],
+        firstCategorySubcategories: categories[0]?.subcategories 
+      });
+      setCurrentCategories(categories);
+    }
+  }, [categories]);
 
   const allCategoryPaths = useMemo(() => {
     const paths = [];
@@ -55,9 +129,9 @@ const Step1_Category = ({
         }
       });
     };
-    recurse(categoriesConfig);
+    recurse(categories);
     return paths;
-  }, []);
+  }, [categories]);
   
   const filteredCategories = useMemo(() => {
     if (!searchQuery) return [];
@@ -65,6 +139,12 @@ const Step1_Category = ({
   }, [searchQuery, allCategoryPaths]);
 
   const selectCategory = (category) => {
+    console.log('🔍 DEBUG: selectCategory called', { 
+      categoryName: category.name, 
+      hasSubcategories: !!category.subcategories,
+      subcategories: category.subcategories 
+    });
+    
     const newHistory = [...history, { name: category.name, list: currentCategories }];
     setHistory(newHistory);
     const path = newHistory.map(h => h.name);
@@ -97,7 +177,7 @@ const Step1_Category = ({
     const newHistory = history.slice(0, index);
     const lastState = newHistory[newHistory.length - 1];
     setHistory(newHistory);
-    setCurrentCategories(lastState ? lastState.list.find(c => c.name === lastState.name)?.subcategories : categoriesConfig);
+    setCurrentCategories(lastState ? lastState.list.find(c => c.name === lastState.name)?.subcategories : categories);
     const path = newHistory.map(h => h.name);
     onMainChange(path[0] || '');
     onSubChange(path[1] || '');
@@ -107,6 +187,18 @@ const Step1_Category = ({
   const fullSelectedPath = [selectedMainCategory, selectedSubCategory, selectedSubSubCategory].filter(Boolean);
   const hasSubcategories = currentCategories && currentCategories.length > 0;
   const isSelectionComplete = fullSelectedPath.length > 0 && !hasSubcategories;
+
+  if (isLoadingCategories) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+        <h2 className="text-2xl font-bold text-center">İlanınız için bir kategori seçin</h2>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <span className="ml-2 text-muted-foreground">Kategoriler yükleniyor...</span>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">

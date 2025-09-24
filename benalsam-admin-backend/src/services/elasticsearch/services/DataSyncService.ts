@@ -59,7 +59,7 @@ class DataSyncService {
       }
 
       const documents = listings.map(listing => ({
-        index: 'listings',
+        index: 'benalsam_listings',
         document: this.transformListingForES(listing),
         id: listing.id
       }));
@@ -310,7 +310,7 @@ class DataSyncService {
     };
   }
 
-  async refreshIndices(indices: string[] = ['listings', 'user_behaviors', 'ai_suggestions']): Promise<void> {
+  async refreshIndices(indices: string[] = ['benalsam_listings', 'user_behaviors', 'ai_suggestions']): Promise<void> {
     try {
       logger.info('🔄 Refreshing indices');
 
@@ -331,7 +331,7 @@ class DataSyncService {
   async getSyncStatus(): Promise<any> {
     try {
       const [listingsCount, behaviorsCount, suggestionsCount] = await Promise.all([
-        this.client.count({ index: 'listings' }),
+        this.client.count({ index: 'benalsam_listings' }),
         this.client.count({ index: 'user_behaviors' }),
         this.client.count({ index: 'ai_suggestions' })
       ]);

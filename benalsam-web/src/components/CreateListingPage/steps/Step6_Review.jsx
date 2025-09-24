@@ -55,7 +55,7 @@ const ReviewItem = ({ icon: Icon, label, value, isImage = false, children }) => 
   </div>
 );
 
-const Step5_Review = ({ 
+const Step6_Review = ({ 
   formData, 
   handleInputChange,
   handlePremiumFeatureChange,
@@ -239,4 +239,4 @@ const Step5_Review = ({
   );
 };
 
-export default Step5_Review;
+export default Step6_Review;

@@ -121,6 +121,8 @@ router.post('/', asyncHandler(async (req: AuthenticatedRequest, res: Response) =
     geolocation,
     condition = [],
     attributes = {},
+    category_id,
+    category_path,
     duration
   } = req.body;
 
@@ -141,7 +143,7 @@ router.post('/', asyncHandler(async (req: AuthenticatedRequest, res: Response) =
     return;
   }
 
-  logger.info('🚀 Creating listing', { userId, title, category });
+  logger.info('🚀 Creating listing', { userId, title, category, category_id, category_path });
 
   // Create listing via job system
   const jobId = await jobProcessorService.createJob({
@@ -169,6 +171,8 @@ router.post('/', asyncHandler(async (req: AuthenticatedRequest, res: Response) =
         geolocation,
         condition,
         attributes,
+        category_id,
+        category_path,
         duration
       },
       metadata: {

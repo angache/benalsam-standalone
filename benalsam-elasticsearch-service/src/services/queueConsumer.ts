@@ -56,8 +56,9 @@ class QueueConsumer {
       const channel = await rabbitmqConfig.getChannel();
       this.channel = channel;
 
-      // Exchange'i declare et
-      await channel.assertExchange('benalsam.listings', 'topic', { durable: true });
+      // Exchange'i declare et (Queue Service ile aynı exchange)
+      const exchange = process.env.RABBITMQ_EXCHANGE || 'benalsam.jobs';
+      await channel.assertExchange(exchange, 'topic', { durable: true });
       
       // Queue'yu kur (elasticsearch.sync queue'sunu kullan - mesajlar oraya gidiyor)
       const queueName = 'elasticsearch.sync';
@@ -74,8 +75,8 @@ class QueueConsumer {
       });
       
       // Queue'yu exchange'e bind et
-      await channel.bindQueue(queueName, 'benalsam.listings', 'listing.*');
-      await channel.bindQueue(queueName, 'benalsam.listings', 'listing.status.*');
+      await channel.bindQueue(queueName, exchange, 'listing.*');
+      await channel.bindQueue(queueName, exchange, 'listing.status.*');
       
       // Consumer'ı başlat
       await channel.prefetch(1); // Her seferinde bir mesaj işle
@@ -128,8 +129,8 @@ class QueueConsumer {
         return;
       }
 
-      // Delete operasyonu mesajlarını işle
-      if (message.operation === 'delete' && 'recordId' in message) {
+      // Delete operasyonu mesajlarını işle (case-insensitive)
+      if (((message.operation || '') as string).toUpperCase() === 'DELETE' && 'recordId' in message) {
         const traceId = message.traceId || `delete_${message.recordId}_${Date.now()}`;
         logger.info('🗑️ Processing delete message', {
           traceId,
@@ -452,8 +453,8 @@ class QueueConsumer {
         return message;
       }
       
-      // Delete operasyonu kontrolü
-      if (message.operation === 'delete' && 'recordId' in message) {
+      // Delete operasyonu kontrolü (case-insensitive)
+      if (((message.operation || '') as string).toUpperCase() === 'DELETE' && 'recordId' in message) {
         logger.info('🗑️ Delete message received:', {
           recordId: message.recordId,
           operation: message.operation,

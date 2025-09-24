@@ -340,8 +340,25 @@ export const listingsController = {
         return;
       }
 
-      // RabbitMQ messages now handled by queue service (Port 3012)
-      // Database triggers will automatically create sync jobs
+      // Elasticsearch senkronizasyonu için job oluştur (manuel enqueue)
+      try {
+        await supabase
+          .from('elasticsearch_sync_queue')
+          .insert({
+            type: 'ELASTICSEARCH_SYNC',
+            operation: 'DELETE',
+            table: 'listings',
+            record_id: id,
+            change_data: { old: listing, new: null },
+            status: 'pending',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            trace_id: req.headers['x-trace-id'] as string || `delete_${id}_${Date.now()}`
+          });
+        logger.info(`✅ ES sync job enqueued after deletion`, { id, operation: 'DELETE' });
+      } catch (enqueueError) {
+        logger.warn('⚠️ Failed to enqueue ES sync job after deletion', enqueueError);
+      }
 
       // Kategori sayıları cache'ini temizle
       try {
@@ -462,9 +479,26 @@ export const listingsController = {
         },
       };
 
-      // Queue sistemi otomatik olarak Elasticsearch sync'i yapacak
-      // Trigger: listings_queue_sync → elasticsearch_sync_queue → QueueProcessor
-      logger.info(`📋 İlan moderasyonu tamamlandı, queue sync bekleniyor: ${id}`);
+      // Elasticsearch senkronizasyonu için job oluştur (manuel enqueue)
+      try {
+        const operation = (listing.status === 'rejected' || listing.status === 'deleted') ? 'DELETE' : 'UPDATE';
+        await supabase
+          .from('elasticsearch_sync_queue')
+          .insert({
+            type: 'ELASTICSEARCH_SYNC',
+            operation,
+            table: 'listings',
+            record_id: listing.id,
+            change_data: { new: listing, old: null },
+            status: 'pending',
+            created_at: new Date().toISOString()
+          });
+        logger.info(`✅ ES sync job enqueued after moderation`, { id: listing.id, operation });
+      } catch (enqueueError) {
+        logger.warn('⚠️ Failed to enqueue ES sync job after moderation', enqueueError);
+      }
+
+      logger.info(`📋 İlan moderasyonu tamamlandı ve ES job kuyruğa eklendi: ${id}`);
 
       res.json({
         success: true,

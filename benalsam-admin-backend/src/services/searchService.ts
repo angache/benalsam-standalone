@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { Client } from '@elastic/elasticsearch';
 import logger from '../config/logger';
 
 // Types
@@ -64,13 +65,13 @@ export class SearchService {
 
   private async initializeElasticsearch() {
     try {
-      // TODO: Implement Elasticsearch client initialization
-      // this.elasticsearchClient = new Client({ node: process.env.ELASTICSEARCH_URL });
-      // await this.elasticsearchClient.ping();
-      // this.isElasticsearchAvailable = true;
-      logger.info('Elasticsearch client initialized');
+      const elasticsearchUrl = process.env.ELASTICSEARCH_URL || 'http://localhost:9200';
+      this.elasticsearchClient = new Client({ node: elasticsearchUrl });
+      await this.elasticsearchClient.ping();
+      this.isElasticsearchAvailable = true;
+      logger.info('✅ Elasticsearch client initialized', { url: elasticsearchUrl });
     } catch (error) {
-      logger.warn('Elasticsearch not available, using Supabase fallback');
+      logger.warn('⚠️ Elasticsearch not available, using Supabase fallback', { error: error instanceof Error ? error.message : 'Unknown error' });
       this.isElasticsearchAvailable = false;
     }
   }
@@ -138,8 +139,175 @@ export class SearchService {
    * Elasticsearch search implementation
    */
   private async elasticsearchSearch(params: SearchParams): Promise<SearchResult> {
-    // TODO: Implement Elasticsearch search
-    throw new Error('Elasticsearch not implemented yet');
+    try {
+      const {
+        query,
+        categories,
+        location,
+        urgency = 'Tümü',
+        minPrice,
+        maxPrice,
+        page = 1,
+        pageSize = 20,
+        sortBy = 'created_at',
+        sortOrder = 'desc',
+        attributes
+      } = params;
+
+      const index = process.env.ELASTICSEARCH_INDEX || 'benalsam_listings';
+      const from = (page - 1) * pageSize;
+
+      // Build Elasticsearch query
+      const esQuery: any = {
+        bool: {
+          must: [
+            { term: { status: 'active' } }
+          ],
+          filter: []
+        }
+      };
+
+      // Text search
+      if (query && query.trim()) {
+        esQuery.bool.must.push({
+          multi_match: {
+            query: query.trim(),
+            fields: ['title^3', 'description^2', 'search_keywords'],
+            type: 'best_fields',
+            fuzziness: 'AUTO'
+          }
+        });
+      }
+
+      // Category filter
+      if (categories && categories.length > 0) {
+        esQuery.bool.filter.push({
+          terms: { category_id: categories.map(Number) }
+        });
+      }
+
+      // Location filter
+      if (location) {
+        esQuery.bool.filter.push({
+          match: { 'location.province': location }
+        });
+      }
+
+      // Urgency filter
+      if (urgency && urgency !== 'Tümü') {
+        esQuery.bool.filter.push({
+          term: { urgency: urgency }
+        });
+      }
+
+      // Price range filter
+      if (minPrice || maxPrice) {
+        const priceRange: any = {};
+        if (minPrice) priceRange.gte = minPrice;
+        if (maxPrice) priceRange.lte = maxPrice;
+        esQuery.bool.filter.push({
+          range: { budget: priceRange }
+        });
+      }
+
+      // Attributes filter
+      if (attributes && Object.keys(attributes).length > 0) {
+        Object.entries(attributes).forEach(([key, values]) => {
+          if (values && values.length > 0) {
+            esQuery.bool.filter.push({
+              terms: { [`attributes.${key}`]: values }
+            });
+          }
+        });
+      }
+
+      // Sort
+      const sort: any[] = [];
+      if (sortBy === 'created_at') {
+        sort.push({ created_at: { order: sortOrder } });
+      } else if (sortBy === 'budget') {
+        sort.push({ budget: { order: sortOrder } });
+      } else if (sortBy === 'popularity_score') {
+        sort.push({ popularity_score: { order: sortOrder } });
+      } else {
+        sort.push({ created_at: { order: 'desc' } });
+      }
+
+      // Execute search
+      const response = await this.elasticsearchClient.search({
+        index,
+        body: {
+          query: esQuery,
+          sort,
+          from,
+          size: pageSize,
+          _source: [
+            'id', 'title', 'description', 'category', 'category_id', 'category_path',
+            'budget', 'location', 'urgency', 'attributes', 'user_id', 'status',
+            'created_at', 'updated_at', 'popularity_score', 'main_image_url'
+          ]
+        }
+      });
+
+      const hits = response.body.hits.hits;
+      const total = response.body.hits.total.value;
+
+      // Transform results
+      const data = hits.map((hit: any) => ({
+        id: hit._source.id,
+        title: hit._source.title,
+        description: hit._source.description,
+        category: hit._source.category,
+        category_id: hit._source.category_id,
+        category_path: hit._source.category_path,
+        budget: hit._source.budget,
+        location: hit._source.location,
+        urgency: hit._source.urgency,
+        attributes: hit._source.attributes,
+        user_id: hit._source.user_id,
+        status: hit._source.status,
+        created_at: hit._source.created_at,
+        updated_at: hit._source.updated_at,
+        popularity_score: hit._source.popularity_score || 0,
+        main_image_url: hit._source.main_image_url,
+        _score: hit._score
+      }));
+
+      const totalPages = Math.ceil(total / pageSize);
+
+      logger.info('🔍 Elasticsearch search completed', {
+        query,
+        total,
+        page,
+        pageSize,
+        totalPages,
+        categories,
+        location,
+        urgency
+      });
+
+      return {
+        data,
+        totalCount: total,
+        searchEngine: 'elasticsearch',
+        responseTime: 0,
+        cached: false,
+        pagination: {
+          page,
+          pageSize,
+          totalPages
+        },
+        metadata: {
+          query,
+          filters: { categories, location, urgency, minPrice, maxPrice, attributes },
+          timestamp: new Date().toISOString()
+        }
+      };
+
+    } catch (error) {
+      logger.error('❌ Elasticsearch search failed:', error);
+      throw new Error(`Elasticsearch search failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   /**

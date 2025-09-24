@@ -6,7 +6,7 @@ import ImageUploader from '@/components/CreateListingPage/ImageUploader.jsx';
 
 const MAX_IMAGES_LISTING = 5;
 
-const Step3_Images = ({ 
+const Step4_Images = ({ 
   formData, 
   handleImageArrayChange, 
   handleRemoveImageFromArray, 
@@ -40,4 +40,4 @@ const Step3_Images = ({
   );
 };
 
-export default Step3_Images;
+export default Step4_Images;

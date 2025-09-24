@@ -11,18 +11,91 @@ import { addUserActivity } from '@/services/userActivityService';
 import { uploadService } from '@/services/uploadService';
 import { Listing } from '@/types';
 import { ListingStatus } from 'benalsam-shared-types';
+// import { categoriesConfig } from '@/config/categories'; // Removed - using dynamic categories
+import { CATEGORY } from '@/config/constants';
+import dynamicCategoryService from '../dynamicCategoryService';
 
 const UPLOAD_SERVICE_URL = import.meta.env.VITE_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1';
+
+// Kategori path'ini ID'lere çevir
+const getCategoryIds = async (categoryString: string): Promise<{ category_id: number | null, category_path: number[] | null }> => {
+  if (!categoryString) return { category_id: null, category_path: null };
+  
+  console.log('Processing category string', { categoryString });
+  
+  // Kategori path'ini parçala (sadece ' > ' ve ' / ' ayırıcılarını kullan)
+  const pathParts = categoryString.split(/\s*[>\/]\s*/).map(part => part.trim()).filter(part => part);
+  console.log('Category path parts', { pathParts });
+  
+  if (pathParts.length === 0) {
+    console.warn('No path parts found');
+    return { category_id: null, category_path: null };
+  }
+  
+  try {
+    // Dinamik kategori servisinden kategorileri al
+    const categories = await dynamicCategoryService.getCategories();
+    console.log('Categories from dynamic service', { categoriesCount: categories.length });
+    
+    // Ana kategoriyi bul
+    const mainCategory = categories.find(cat => cat.name === pathParts[0]);
+    if (!mainCategory) {
+      console.warn('Main category not found', { categoryName: pathParts[0] });
+      return { category_id: null, category_path: null };
+    }
+    
+    console.log('Main category found', { categoryName: pathParts[0], categoryId: mainCategory.id });
+
+    // N-seviye gezinme: her bir path parçasını sırayla subcategories içinde ara
+    const categoryPath: number[] = [];
+    let currentNode: any = mainCategory;
+    
+    // Ana kategoriyi ekle
+    categoryPath.push(currentNode.id);
+    
+    for (let i = 1; i < pathParts.length; i++) {
+      const part = pathParts[i];
+      const children = currentNode?.subcategories || [];
+      console.log('🔍 Traversing category level', { level: i + 1, lookingFor: part, childrenCount: children.length });
+      const next = children.find((c: any) => c.name === part);
+      if (!next) {
+        console.warn('❌ Category level not found', { level: i + 1, part, available: children.map((c: any) => c.name) });
+        break;
+      }
+      categoryPath.push(next.id);
+      currentNode = next;
+    }
+
+    const categoryId = categoryPath[categoryPath.length - 1] || null;
+
+    console.log('Final category IDs', { category_id: categoryId, category_path: categoryPath });
+    return { category_id: categoryId, category_path: categoryPath };
+    
+  } catch (error) {
+    console.error('Error getting category IDs from dynamic service:', error);
+    return { category_id: null, category_path: null };
+  }
+};
 
 /**
  * Create listing using Upload Service with job system
  */
+type WebCreateListingInput = Omit<Listing, 'id' | 'created_at' | 'updated_at' | 'status'> & {
+  images: string[];
+  mainImageIndex: number;
+  duration?: number;
+  acceptTerms?: boolean;
+  autoRepublish?: boolean;
+  contactPreference?: 'site_message' | 'phone' | 'both';
+  premiumFeatures?: {
+    is_featured?: boolean;
+    is_urgent_premium?: boolean;
+    is_showcase?: boolean;
+  };
+};
+
 export const createListingWithUploadService = async (
-  listingData: Omit<Listing, 'id' | 'created_at' | 'updated_at' | 'status'> & {
-    images: string[];
-    mainImageIndex: number;
-    duration?: number;
-  }, 
+  listingData: WebCreateListingInput, 
   currentUserId: string, 
   onProgress?: (progress: number) => void
 ): Promise<Listing | null> => {
@@ -38,12 +111,38 @@ export const createListingWithUploadService = async (
       console.warn('⚠️ Upload Service not available, falling back to direct database creation');
       // Fallback to direct database creation
       const { createListing } = await import('./mutations');
-      return createListing(listingData, currentUserId, onProgress);
+      // Normalize camelCase vs snake_case from shared Listing type
+      const acceptTerms = (listingData as any).acceptTerms ?? (listingData as any).accept_terms ?? true;
+      const autoRepublish = (listingData as any).autoRepublish ?? (listingData as any).auto_republish;
+      const contactPreference = (listingData as any).contactPreference ?? (listingData as any).contact_preference;
+      const fallbackData: any = {
+        title: listingData.title,
+        description: listingData.description,
+        category: listingData.category,
+        budget: Number(listingData.budget),
+        location: listingData.location,
+        urgency: listingData.urgency || 'medium',
+        acceptTerms,
+        images: listingData.images,
+        mainImageIndex: listingData.mainImageIndex,
+        duration: listingData.duration,
+        autoRepublish,
+        contactPreference,
+        isFeatured: listingData.premiumFeatures?.is_featured,
+        isUrgentPremium: listingData.premiumFeatures?.is_urgent_premium,
+        isShowcase: listingData.premiumFeatures?.is_showcase,
+        geolocation: listingData.geolocation,
+        condition: listingData.condition,
+        attributes: listingData.attributes
+      };
+      return createListing(fallbackData, currentUserId, onProgress);
     }
 
     console.log('🚀 Creating listing via Upload Service job system', {
       title: listingData.title,
       category: listingData.category,
+      category_id: listingData.category_id,
+      category_path: listingData.category_path,
       imageCount: listingData.images.length
     });
 
@@ -53,24 +152,41 @@ export const createListingWithUploadService = async (
       console.log('📸 Uploading images to Upload Service...');
       
       // Convert image data to File objects if needed
+      const isFileLike = (obj: any): obj is File => {
+        return !!obj && typeof obj === 'object' && 'name' in obj && 'size' in obj && 'type' in obj;
+      };
       const imageFiles = await Promise.all(
         listingData.images.map(async (imageData, index) => {
           if (typeof imageData === 'string' && imageData.startsWith('blob:')) {
             // Convert blob URL to File
             const response = await fetch(imageData);
             const blob = await response.blob();
-            return new File([blob], `image-${index}.jpg`, { type: blob.type });
-          } else if (imageData instanceof File) {
+            // Ensure proper MIME type for images
+            const mimeType = blob.type || 'image/jpeg';
+            return new File([blob], `image-${index}.jpg`, { type: mimeType });
+          } else if (isFileLike(imageData)) {
+            // Ensure File has proper MIME type
+            if (!imageData.type || !imageData.type.startsWith('image/')) {
+              // Create new File with proper MIME type
+              return new File([imageData], imageData.name, { type: 'image/jpeg' });
+            }
             return imageData;
           } else if (typeof imageData === 'object' && imageData !== null) {
             // Handle image object with preview blob URL
-            if (imageData.preview && typeof imageData.preview === 'string' && imageData.preview.startsWith('blob:')) {
-              const response = await fetch(imageData.preview);
+            const imgObj = imageData as { preview?: string; name?: string; file?: File };
+            if (imgObj.preview && typeof imgObj.preview === 'string' && imgObj.preview.startsWith('blob:')) {
+              const response = await fetch(imgObj.preview);
               const blob = await response.blob();
-              const fileName = imageData.name || imageData.file?.name || `image-${index}.jpg`;
-              return new File([blob], fileName, { type: blob.type });
-            } else if (imageData.file && imageData.file instanceof File) {
-              return imageData.file;
+              const fileName = imgObj.name || imgObj.file?.name || `image-${index}.jpg`;
+              // Ensure proper MIME type
+              const mimeType = blob.type || 'image/jpeg';
+              return new File([blob], fileName, { type: mimeType });
+            } else if (imgObj.file && isFileLike(imgObj.file)) {
+              // Ensure File has proper MIME type
+              if (!imgObj.file.type || !imgObj.file.type.startsWith('image/')) {
+                return new File([imgObj.file], imgObj.file.name, { type: 'image/jpeg' });
+              }
+              return imgObj.file as File;
             } else {
               console.warn('Unknown image object structure:', imageData);
               return null;
@@ -83,12 +199,22 @@ export const createListingWithUploadService = async (
         })
       );
 
-      // Filter out null values
-      const validImageFiles = imageFiles.filter(file => file !== null);
-      
-      if (validImageFiles.length === 0) {
-        throw new Error('No valid image files found');
-      }
+        // Filter out null values
+        const validImageFiles = imageFiles.filter((file): file is File => file !== null);
+        
+        // Debug log for file types
+        validImageFiles.forEach((file: File, index: number) => {
+          console.log(`📁 File ${index}:`, {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            lastModified: file.lastModified
+          });
+        });
+        
+        if (validImageFiles.length === 0) {
+          throw new Error('No valid image files found');
+        }
 
       // Upload images to Upload Service
       const formData = new FormData();
@@ -117,6 +243,14 @@ export const createListingWithUploadService = async (
       console.log('✅ Images uploaded successfully', { count: uploadedImageUrls.length });
     }
 
+    // Convert category string to numeric IDs
+    const categoryIds = await getCategoryIds(listingData.category);
+    console.log('🏷️ Category IDs generated:', {
+      category: listingData.category,
+      category_id: categoryIds.category_id,
+      category_path: categoryIds.category_path
+    });
+
     // Create listing via Upload Service with uploaded image URLs
     const response = await fetch(`${UPLOAD_SERVICE_URL}/listings/create`, {
       method: 'POST',
@@ -132,6 +266,24 @@ export const createListingWithUploadService = async (
         location: listingData.location,
         images: uploadedImageUrls, // Use uploaded image URLs
         status: ListingStatus.PENDING_APPROVAL,
+        urgency: listingData.urgency || 'medium',
+        condition: listingData.condition || [],
+        // Normalize attributes to { key: ["value"] } without double arrays
+        attributes: listingData.attributes && Object.keys(listingData.attributes).length > 0
+          ? Object.entries(listingData.attributes).reduce((acc, [key, value]) => {
+              const normalized = Array.isArray(value) ? value : [value];
+              // Ensure all values are strings for ES mapping consistency
+              acc[key] = normalized.map((v: any) => String(v));
+              return acc;
+            }, {} as Record<string, string[]>)
+          : null,
+        category_id: categoryIds.category_id, // Use numeric ID
+        category_path: categoryIds.category_path, // Use numeric array
+        expires_at: listingData.expires_at || null,
+        is_featured: listingData.premiumFeatures?.is_featured ?? false,
+        is_urgent_premium: listingData.premiumFeatures?.is_urgent_premium ?? false,
+        is_showcase: listingData.premiumFeatures?.is_showcase ?? false,
+        geolocation: listingData.geolocation || null,
         metadata: {
           source: 'web',
           userAgent: navigator.userAgent,
@@ -230,7 +382,6 @@ export const updateListingWithUploadService = async (
         price: updates.budget,
         category: updates.category,
         location: updates.location,
-        images: updates.images,
         status: updates.status,
         metadata: {
           source: 'web',

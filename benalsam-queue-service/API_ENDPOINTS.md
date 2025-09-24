@@ -206,11 +206,11 @@ All endpoints return consistent error responses:
 
 ### **Database Triggers**
 - Automatically processes `elasticsearch_sync_queue` table
-- Publishes messages to RabbitMQ exchange `benalsam.listings`
-- Handles INSERT, UPDATE, DELETE operations
+- Publishes messages to RabbitMQ exchange `benalsam.jobs`
+- Handles UPDATE, DELETE operations (routing keys: `listing.update`, `listing.delete`)
 
 ### **RabbitMQ Exchanges**
-- **Exchange:** `benalsam.listings`
+- **Exchange:** `benalsam.jobs`
 - **Routing Keys:**
   - `listing.insert`
   - `listing.update`

@@ -27,6 +27,8 @@ interface CreateListingRequest {
   };
   condition?: string[];
   attributes?: Record<string, string[]>;
+  category_id?: string | null;
+  category_path?: string[];
   contactPreference?: 'email' | 'phone' | 'both';
   acceptTerms?: boolean;
   isFeatured?: boolean;
@@ -70,6 +72,8 @@ router.post('/create', uploadRateLimiter, asyncHandler(async (req: Request<{}, {
     geolocation,
     condition,
     attributes,
+    category_id,
+    category_path,
     contactPreference,
     acceptTerms,
     isFeatured,
@@ -92,6 +96,8 @@ router.post('/create', uploadRateLimiter, asyncHandler(async (req: Request<{}, {
     userId, 
     title, 
     category,
+    category_id,
+    category_path,
     imageCount: images.length 
   });
 
@@ -125,6 +131,8 @@ router.post('/create', uploadRateLimiter, asyncHandler(async (req: Request<{}, {
           geolocation,
           condition: condition || [],
           attributes: attributes || {},
+          category_id: category_id || null,
+          category_path: category_path || [],
           duration: duration || metadata.duration || 30
         },
         metadata: {

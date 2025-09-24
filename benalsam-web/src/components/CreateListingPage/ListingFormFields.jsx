@@ -46,6 +46,15 @@ const contactOptions = [
     { value: 'phone', label: 'Telefon ve Mesaj', icon: Phone },
 ];
 
+const conditionOptions = [
+    { value: 'new', label: 'Yeni', description: 'Hiç kullanılmamış, orijinal ambalajında' },
+    { value: 'like_new', label: 'Sıfır Gibi', description: 'Çok az kullanılmış, neredeyse yeni' },
+    { value: 'good', label: 'İyi Durumda', description: 'Normal kullanım izleri var, çalışır durumda' },
+    { value: 'fair', label: 'Orta Durumda', description: 'Kullanım izleri belirgin, çalışır durumda' },
+    { value: 'poor', label: 'Kötü Durumda', description: 'Hasarlı veya çalışmayan' },
+    { value: 'for_parts', label: 'Parça İçin', description: 'Sadece parça olarak kullanılabilir' }
+];
+
 const MAX_IMAGES_LISTING = 5;
 
 const ListingFormFields = ({
@@ -65,6 +74,7 @@ const ListingFormFields = ({
   onOpenRulesModal,
   onLocationDetect,
   onOpenStockModal,
+  categories,
 }) => {
   const selectedUrgencyOption = urgencyOptions.find(option => option.value === formData.urgency);
   const urgencyCost = selectedUrgencyOption?.price ? parseInt(selectedUrgencyOption.price.replace('₺', '')) : 0;
@@ -102,6 +112,7 @@ const ListingFormFields = ({
         error={errors.category}
       >
         <CategorySelector
+          categories={categories}
           selectedMain={selectedMainCategory}
           onMainChange={setSelectedMainCategory}
           selectedSub={selectedSubCategory}
@@ -247,6 +258,63 @@ const ListingFormFields = ({
         </div>
       </FormField>
 
+      <FormField label="Ürün Durumu (Opsiyonel)" icon={ShieldCheck} error={errors.condition}>
+        <div className="space-y-3">
+          <Select
+            value={formData.condition?.[0] || ''}
+            onValueChange={(value) => handleInputChange("condition", [value])}
+            disabled={isUploading}
+          >
+            <SelectTrigger className="w-full bg-input border-border text-foreground">
+              <SelectValue placeholder="Ürün durumunu seçin" />
+            </SelectTrigger>
+            <SelectContent className="dropdown-content">
+              {conditionOptions.map((option) => (
+                <SelectItem
+                  key={option.value}
+                  value={option.value}
+                  className="py-3"
+                >
+                  <div className="flex flex-col items-start">
+                    <span className="font-medium">{option.label}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {option.description}
+                    </span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          {formData.condition?.[0] && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20">
+                <CardContent className="p-3">
+                  <div className="flex items-start gap-3">
+                    <div className="p-1.5 bg-blue-100 dark:bg-blue-900/40 rounded-full">
+                      <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm text-blue-800 dark:text-blue-200">
+                        {conditionOptions.find(opt => opt.value === formData.condition[0])?.label}
+                      </p>
+                      <p className="text-xs text-blue-700 dark:text-blue-300">
+                        {conditionOptions.find(opt => opt.value === formData.condition[0])?.description}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </div>
+      </FormField>
+
       <FormField
         label={`İlan Görselleri (En az 1, En fazla ${MAX_IMAGES_LISTING}) *`}
         icon={ImageIcon}
@@ -371,6 +439,146 @@ const ListingFormFields = ({
             disabled={isUploading}
           />
         </div>
+      </div>
+
+      <div className="border-t border-border/50 pt-6 space-y-6">
+        <h3 className="text-lg font-semibold text-foreground flex items-center">
+          <Zap className="w-5 h-5 mr-2 text-yellow-500" />
+          Premium Özellikler
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className={`p-4 transition-all duration-200 ${
+            formData.premiumFeatures.is_featured 
+              ? 'border-yellow-300 bg-yellow-50 dark:border-yellow-700 dark:bg-yellow-900/20' 
+              : 'border-border bg-input'
+          }`}>
+            <div className="flex items-center space-x-3">
+              <Switch
+                id="is-featured"
+                checked={formData.premiumFeatures.is_featured}
+                onCheckedChange={(checked) =>
+                  handleInputChange("premiumFeatures", {
+                    ...formData.premiumFeatures,
+                    is_featured: checked
+                  })
+                }
+                disabled={isUploading}
+              />
+              <div className="flex-1">
+                <Label htmlFor="is-featured" className="font-medium cursor-pointer">
+                  Öne Çıkan İlan
+                </Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  İlanınız ana sayfada öne çıkar
+                </p>
+                <Badge variant="secondary" className="mt-2">
+                  ₺25
+                </Badge>
+              </div>
+            </div>
+          </Card>
+
+          <Card className={`p-4 transition-all duration-200 ${
+            formData.premiumFeatures.is_urgent_premium 
+              ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20' 
+              : 'border-border bg-input'
+          }`}>
+            <div className="flex items-center space-x-3">
+              <Switch
+                id="is-urgent-premium"
+                checked={formData.premiumFeatures.is_urgent_premium}
+                onCheckedChange={(checked) =>
+                  handleInputChange("premiumFeatures", {
+                    ...formData.premiumFeatures,
+                    is_urgent_premium: checked
+                  })
+                }
+                disabled={isUploading}
+              />
+              <div className="flex-1">
+                <Label htmlFor="is-urgent-premium" className="font-medium cursor-pointer">
+                  Premium Acil
+                </Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Kırmızı etiket + öne çıkarma
+                </p>
+                <Badge variant="destructive" className="mt-2">
+                  ₺35
+                </Badge>
+              </div>
+            </div>
+          </Card>
+
+          <Card className={`p-4 transition-all duration-200 ${
+            formData.premiumFeatures.is_showcase 
+              ? 'border-purple-300 bg-purple-50 dark:border-purple-700 dark:bg-purple-900/20' 
+              : 'border-border bg-input'
+          }`}>
+            <div className="flex items-center space-x-3">
+              <Switch
+                id="is-showcase"
+                checked={formData.premiumFeatures.is_showcase}
+                onCheckedChange={(checked) =>
+                  handleInputChange("premiumFeatures", {
+                    ...formData.premiumFeatures,
+                    is_showcase: checked
+                  })
+                }
+                disabled={isUploading}
+              />
+              <div className="flex-1">
+                <Label htmlFor="is-showcase" className="font-medium cursor-pointer">
+                  Vitrin İlanı
+                </Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Özel vitrin bölümünde gösterim
+                </p>
+                <Badge variant="outline" className="mt-2 border-purple-300 text-purple-700">
+                  ₺50
+                </Badge>
+              </div>
+            </div>
+          </Card>
+        </div>
+        
+        {/* Premium Features Cost Summary */}
+        {(formData.premiumFeatures.is_featured || formData.premiumFeatures.is_urgent_premium || formData.premiumFeatures.is_showcase) && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-100 dark:bg-yellow-900/40 rounded-full">
+                  <DollarSign className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-yellow-800 dark:text-yellow-200">
+                    Premium Özellikler Toplamı
+                  </p>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                    Seçilen premium özellikler için
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                  ₺{(() => {
+                    let total = 0;
+                    if (formData.premiumFeatures.is_featured) total += 25;
+                    if (formData.premiumFeatures.is_urgent_premium) total += 35;
+                    if (formData.premiumFeatures.is_showcase) total += 50;
+                    return total;
+                  })()}
+                </p>
+                <p className="text-xs text-yellow-500 dark:text-yellow-400">
+                  Tek seferlik ücret
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
 
       <div className="border-t border-border/50 pt-6 space-y-4">
