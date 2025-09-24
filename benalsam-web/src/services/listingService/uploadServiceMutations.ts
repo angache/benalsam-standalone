@@ -80,12 +80,22 @@ const getCategoryIds = async (categoryString: string): Promise<{ category_id: nu
 /**
  * Create listing using Upload Service with job system
  */
+type WebCreateListingInput = Omit<Listing, 'id' | 'created_at' | 'updated_at' | 'status'> & {
+  images: string[];
+  mainImageIndex: number;
+  duration?: number;
+  acceptTerms?: boolean;
+  autoRepublish?: boolean;
+  contactPreference?: 'site_message' | 'phone' | 'both';
+  premiumFeatures?: {
+    is_featured?: boolean;
+    is_urgent_premium?: boolean;
+    is_showcase?: boolean;
+  };
+};
+
 export const createListingWithUploadService = async (
-  listingData: Omit<Listing, 'id' | 'created_at' | 'updated_at' | 'status'> & {
-    images: string[];
-    mainImageIndex: number;
-    duration?: number;
-  }, 
+  listingData: WebCreateListingInput, 
   currentUserId: string, 
   onProgress?: (progress: number) => void
 ): Promise<Listing | null> => {
@@ -101,7 +111,31 @@ export const createListingWithUploadService = async (
       console.warn('⚠️ Upload Service not available, falling back to direct database creation');
       // Fallback to direct database creation
       const { createListing } = await import('./mutations');
-      return createListing(listingData, currentUserId, onProgress);
+      // Normalize camelCase vs snake_case from shared Listing type
+      const acceptTerms = (listingData as any).acceptTerms ?? (listingData as any).accept_terms ?? true;
+      const autoRepublish = (listingData as any).autoRepublish ?? (listingData as any).auto_republish;
+      const contactPreference = (listingData as any).contactPreference ?? (listingData as any).contact_preference;
+      const fallbackData: any = {
+        title: listingData.title,
+        description: listingData.description,
+        category: listingData.category,
+        budget: Number(listingData.budget),
+        location: listingData.location,
+        urgency: listingData.urgency || 'medium',
+        acceptTerms,
+        images: listingData.images,
+        mainImageIndex: listingData.mainImageIndex,
+        duration: listingData.duration,
+        autoRepublish,
+        contactPreference,
+        isFeatured: listingData.premiumFeatures?.is_featured,
+        isUrgentPremium: listingData.premiumFeatures?.is_urgent_premium,
+        isShowcase: listingData.premiumFeatures?.is_showcase,
+        geolocation: listingData.geolocation,
+        condition: listingData.condition,
+        attributes: listingData.attributes
+      };
+      return createListing(fallbackData, currentUserId, onProgress);
     }
 
     console.log('🚀 Creating listing via Upload Service job system', {
@@ -118,6 +152,9 @@ export const createListingWithUploadService = async (
       console.log('📸 Uploading images to Upload Service...');
       
       // Convert image data to File objects if needed
+      const isFileLike = (obj: any): obj is File => {
+        return !!obj && typeof obj === 'object' && 'name' in obj && 'size' in obj && 'type' in obj;
+      };
       const imageFiles = await Promise.all(
         listingData.images.map(async (imageData, index) => {
           if (typeof imageData === 'string' && imageData.startsWith('blob:')) {
@@ -127,7 +164,7 @@ export const createListingWithUploadService = async (
             // Ensure proper MIME type for images
             const mimeType = blob.type || 'image/jpeg';
             return new File([blob], `image-${index}.jpg`, { type: mimeType });
-          } else if (imageData instanceof File) {
+          } else if (isFileLike(imageData)) {
             // Ensure File has proper MIME type
             if (!imageData.type || !imageData.type.startsWith('image/')) {
               // Create new File with proper MIME type
@@ -136,19 +173,20 @@ export const createListingWithUploadService = async (
             return imageData;
           } else if (typeof imageData === 'object' && imageData !== null) {
             // Handle image object with preview blob URL
-            if (imageData.preview && typeof imageData.preview === 'string' && imageData.preview.startsWith('blob:')) {
-              const response = await fetch(imageData.preview);
+            const imgObj = imageData as { preview?: string; name?: string; file?: File };
+            if (imgObj.preview && typeof imgObj.preview === 'string' && imgObj.preview.startsWith('blob:')) {
+              const response = await fetch(imgObj.preview);
               const blob = await response.blob();
-              const fileName = imageData.name || imageData.file?.name || `image-${index}.jpg`;
+              const fileName = imgObj.name || imgObj.file?.name || `image-${index}.jpg`;
               // Ensure proper MIME type
               const mimeType = blob.type || 'image/jpeg';
               return new File([blob], fileName, { type: mimeType });
-            } else if (imageData.file && imageData.file instanceof File) {
+            } else if (imgObj.file && isFileLike(imgObj.file)) {
               // Ensure File has proper MIME type
-              if (!imageData.file.type || !imageData.file.type.startsWith('image/')) {
-                return new File([imageData.file], imageData.file.name, { type: 'image/jpeg' });
+              if (!imgObj.file.type || !imgObj.file.type.startsWith('image/')) {
+                return new File([imgObj.file], imgObj.file.name, { type: 'image/jpeg' });
               }
-              return imageData.file;
+              return imgObj.file as File;
             } else {
               console.warn('Unknown image object structure:', imageData);
               return null;
@@ -162,10 +200,10 @@ export const createListingWithUploadService = async (
       );
 
         // Filter out null values
-        const validImageFiles = imageFiles.filter(file => file !== null);
+        const validImageFiles = imageFiles.filter((file): file is File => file !== null);
         
         // Debug log for file types
-        validImageFiles.forEach((file, index) => {
+        validImageFiles.forEach((file: File, index: number) => {
           console.log(`📁 File ${index}:`, {
             name: file.name,
             type: file.type,
@@ -242,9 +280,9 @@ export const createListingWithUploadService = async (
         category_id: categoryIds.category_id, // Use numeric ID
         category_path: categoryIds.category_path, // Use numeric array
         expires_at: listingData.expires_at || null,
-        is_featured: listingData.premiumFeatures?.is_featured || false,
-        is_urgent_premium: listingData.premiumFeatures?.is_urgent_premium || false,
-        is_showcase: listingData.premiumFeatures?.is_showcase || false,
+        is_featured: listingData.premiumFeatures?.is_featured ?? false,
+        is_urgent_premium: listingData.premiumFeatures?.is_urgent_premium ?? false,
+        is_showcase: listingData.premiumFeatures?.is_showcase ?? false,
         geolocation: listingData.geolocation || null,
         metadata: {
           source: 'web',
@@ -344,7 +382,6 @@ export const updateListingWithUploadService = async (
         price: updates.budget,
         category: updates.category,
         location: updates.location,
-        images: updates.images,
         status: updates.status,
         metadata: {
           source: 'web',
