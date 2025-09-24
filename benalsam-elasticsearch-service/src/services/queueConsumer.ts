@@ -56,8 +56,9 @@ class QueueConsumer {
       const channel = await rabbitmqConfig.getChannel();
       this.channel = channel;
 
-      // Exchange'i declare et
-      await channel.assertExchange('benalsam.listings', 'topic', { durable: true });
+      // Exchange'i declare et (Queue Service ile aynı exchange)
+      const exchange = process.env.RABBITMQ_EXCHANGE || 'benalsam.jobs';
+      await channel.assertExchange(exchange, 'topic', { durable: true });
       
       // Queue'yu kur (elasticsearch.sync queue'sunu kullan - mesajlar oraya gidiyor)
       const queueName = 'elasticsearch.sync';
@@ -74,8 +75,8 @@ class QueueConsumer {
       });
       
       // Queue'yu exchange'e bind et
-      await channel.bindQueue(queueName, 'benalsam.listings', 'listing.*');
-      await channel.bindQueue(queueName, 'benalsam.listings', 'listing.status.*');
+      await channel.bindQueue(queueName, exchange, 'listing.*');
+      await channel.bindQueue(queueName, exchange, 'listing.status.*');
       
       // Consumer'ı başlat
       await channel.prefetch(1); // Her seferinde bir mesaj işle

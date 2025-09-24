@@ -134,7 +134,7 @@ export class SearchServiceRefactored implements ISearchService {
 
   private async elasticsearchSearch(params: SearchParams): Promise<SearchResult> {
     try {
-      const indexName = process.env['ELASTICSEARCH_DEFAULT_INDEX'] || 'listings';
+      const indexName = this.elasticsearchService.getDefaultIndexName();
       
       // Simple query for testing
       const query = {

@@ -35,31 +35,36 @@ export const DEFAULT_SECURITY_CONFIG = {
  */
 export class SecurityMiddleware {
     constructor(config = DEFAULT_SECURITY_CONFIG) {
+        this.rateLimitInstance = null;
         this.config = config;
     }
     /**
      * Rate Limiting Middleware
      */
     getRateLimit() {
-        return rateLimit({
-            windowMs: this.config.rateLimit.windowMs,
-            max: this.config.rateLimit.max,
-            message: {
-                error: 'Rate limit exceeded',
-                message: this.config.rateLimit.message,
-                retryAfter: Math.ceil(this.config.rateLimit.windowMs / 1000)
-            },
-            standardHeaders: this.config.rateLimit.standardHeaders,
-            legacyHeaders: this.config.rateLimit.legacyHeaders,
-            handler: (req, res) => {
-                res.status(429).json({
+        // Create rate limiter only once and cache it
+        if (!this.rateLimitInstance) {
+            this.rateLimitInstance = rateLimit({
+                windowMs: this.config.rateLimit.windowMs,
+                max: this.config.rateLimit.max,
+                message: {
                     error: 'Rate limit exceeded',
                     message: this.config.rateLimit.message,
-                    retryAfter: Math.ceil(this.config.rateLimit.windowMs / 1000),
-                    timestamp: new Date().toISOString()
-                });
-            }
-        });
+                    retryAfter: Math.ceil(this.config.rateLimit.windowMs / 1000)
+                },
+                standardHeaders: this.config.rateLimit.standardHeaders,
+                legacyHeaders: this.config.rateLimit.legacyHeaders,
+                handler: (req, res) => {
+                    res.status(429).json({
+                        error: 'Rate limit exceeded',
+                        message: this.config.rateLimit.message,
+                        retryAfter: Math.ceil(this.config.rateLimit.windowMs / 1000),
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            });
+        }
+        return this.rateLimitInstance;
     }
     /**
      * CORS Middleware
@@ -241,6 +246,8 @@ export class SecurityMiddleware {
      */
     updateConfig(newConfig) {
         this.config = { ...this.config, ...newConfig };
+        // Reset rate limiter instance when config changes
+        this.rateLimitInstance = null;
     }
 }
 /**

@@ -1,8 +1,8 @@
 import { Listing, ApiResponse, QueryFilters } from '@/types';
 import { supabase } from '@/lib/supabaseClient';
 
-// Admin backend üzerinden Elasticsearch API endpoint'i
-const ADMIN_BACKEND_URL = import.meta.env.VITE_ADMIN_BACKEND_URL || 'http://localhost:3002';
+// Search Service API endpoint'i
+const SEARCH_SERVICE_URL = import.meta.env.VITE_SEARCH_SERVICE_URL || 'http://localhost:3016';
 
 export interface ElasticsearchSearchParams {
   query?: string;
@@ -57,8 +57,8 @@ export const searchListingsWithElasticsearch = async (
   try {
     console.log('🔍 Elasticsearch search - Params:', params);
 
-    // Admin-backend'deki Search Service proxy endpoint'ini kullan
-    const response = await fetch(`${ADMIN_BACKEND_URL}/api/v1/search/listings`, {
+    // Search Service endpoint'ini kullan
+    const response = await fetch(`${SEARCH_SERVICE_URL}/api/v1/search/listings`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -74,16 +74,16 @@ export const searchListingsWithElasticsearch = async (
 
     const responseData = await response.json();
     
-    // Search Service proxy response formatını kontrol et
+    // Search Service response formatını kontrol et
     if (!responseData.success || !responseData.data) {
       console.error('❌ Invalid Search Service response format:', responseData);
       return await searchListingsWithSupabase(params, currentUserId);
     }
     
-    // Search Service proxy response'unu Elasticsearch formatına çevir
+    // Search Service response'unu Elasticsearch formatına çevir
     const result: ElasticsearchSearchResult = {
       hits: responseData.data,
-      total: responseData.totalCount || responseData.data.length,
+      total: responseData.pagination?.total || responseData.data.length,
       page: responseData.pagination?.page || 1,
       limit: responseData.pagination?.pageSize || 20,
       totalPages: responseData.pagination?.totalPages || 1
@@ -172,7 +172,7 @@ const searchListingsWithSupabase = async (
  */
 export const checkElasticsearchHealth = async (): Promise<boolean> => {
   try {
-    const response = await fetch(`${ADMIN_BACKEND_URL}/api/v1/health`);
+    const response = await fetch(`${SEARCH_SERVICE_URL}/api/v1/health`);
     const data = await response.json();
     return data.status === 'healthy';
   } catch (error) {

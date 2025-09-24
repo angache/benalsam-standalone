@@ -6,7 +6,7 @@ import { FormatterConfig, FormattedDocument, EventDetails } from '../types';
 
 export const formatEventData = (source: any, indexName: string): FormattedDocument => {
   // Check if this is a listing document
-  if (indexName === 'benalsam_listings') {
+  if (indexName === 'listings') {
     return formatListingData(source);
   }
   
@@ -114,7 +114,7 @@ export const formatListingData = (source: any): FormattedDocument => {
 export const formatDocument = (config: FormatterConfig): FormattedDocument => {
   const { indexName, source } = config;
   
-  if (indexName === 'benalsam_listings') {
+  if (indexName === 'listings') {
     return formatListingData(source);
   }
   

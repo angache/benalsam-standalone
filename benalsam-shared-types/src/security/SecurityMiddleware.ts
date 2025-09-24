@@ -63,6 +63,7 @@ export const DEFAULT_SECURITY_CONFIG: SecurityConfig = {
  */
 export class SecurityMiddleware {
   private config: SecurityConfig;
+  private rateLimitInstance: any = null;
 
   constructor(config: SecurityConfig = DEFAULT_SECURITY_CONFIG) {
     this.config = config;
@@ -72,25 +73,29 @@ export class SecurityMiddleware {
    * Rate Limiting Middleware
    */
   getRateLimit() {
-    return rateLimit({
-      windowMs: this.config.rateLimit.windowMs,
-      max: this.config.rateLimit.max,
-      message: {
-        error: 'Rate limit exceeded',
-        message: this.config.rateLimit.message,
-        retryAfter: Math.ceil(this.config.rateLimit.windowMs / 1000)
-      },
-      standardHeaders: this.config.rateLimit.standardHeaders,
-      legacyHeaders: this.config.rateLimit.legacyHeaders,
-      handler: (req: Request, res: Response) => {
-        res.status(429).json({
+    // Create rate limiter only once and cache it
+    if (!this.rateLimitInstance) {
+      this.rateLimitInstance = rateLimit({
+        windowMs: this.config.rateLimit.windowMs,
+        max: this.config.rateLimit.max,
+        message: {
           error: 'Rate limit exceeded',
           message: this.config.rateLimit.message,
-          retryAfter: Math.ceil(this.config.rateLimit.windowMs / 1000),
-          timestamp: new Date().toISOString()
-        });
-      }
-    });
+          retryAfter: Math.ceil(this.config.rateLimit.windowMs / 1000)
+        },
+        standardHeaders: this.config.rateLimit.standardHeaders,
+        legacyHeaders: this.config.rateLimit.legacyHeaders,
+        handler: (req: Request, res: Response) => {
+          res.status(429).json({
+            error: 'Rate limit exceeded',
+            message: this.config.rateLimit.message,
+            retryAfter: Math.ceil(this.config.rateLimit.windowMs / 1000),
+            timestamp: new Date().toISOString()
+          });
+        }
+      });
+    }
+    return this.rateLimitInstance;
   }
 
   /**
@@ -296,6 +301,8 @@ export class SecurityMiddleware {
    */
   updateConfig(newConfig: Partial<SecurityConfig>) {
     this.config = { ...this.config, ...newConfig };
+    // Reset rate limiter instance when config changes
+    this.rateLimitInstance = null;
   }
 }
 

@@ -36,11 +36,12 @@ export declare const DEFAULT_SECURITY_CONFIG: SecurityConfig;
  */
 export declare class SecurityMiddleware {
     private config;
+    private rateLimitInstance;
     constructor(config?: SecurityConfig);
     /**
      * Rate Limiting Middleware
      */
-    getRateLimit(): import("express-rate-limit").RateLimitRequestHandler;
+    getRateLimit(): any;
     /**
      * CORS Middleware
      */
@@ -76,7 +77,7 @@ export declare class SecurityMiddleware {
     /**
      * Health Check Bypass Middleware
      */
-    getHealthCheckBypass(): (req: Request, res: Response, next: NextFunction) => void;
+    getHealthCheckBypass(): (req: Request, res: Response, next: NextFunction) => any;
     /**
      * Get all security middleware as array
      */

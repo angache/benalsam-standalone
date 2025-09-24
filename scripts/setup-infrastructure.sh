@@ -63,7 +63,7 @@ setup_elasticsearch() {
     # Listings index'ini oluştur
     log "📝 Listings index oluşturuluyor..."
     
-    curl -X PUT "$ELASTICSEARCH_URL/listings" \
+    curl -X PUT "$ELASTICSEARCH_URL/benalsam_listings" \
         -H "Content-Type: application/json" \
         -d '{
             "settings": {
@@ -148,19 +148,7 @@ setup_elasticsearch() {
     fi
     
     # Index alias oluştur
-    log "🏷️ Index alias oluşturuluyor..."
-    curl -X PUT "$ELASTICSEARCH_URL/_aliases" \
-        -H "Content-Type: application/json" \
-        -d '{
-            "actions": [
-                {
-                    "add": {
-                        "index": "listings",
-                        "alias": "listings_current"
-                    }
-                }
-            ]
-        }'
+    # Alias kullanmıyoruz; doğrudan benalsam_listings kullanılacak
     
     log "✅ Elasticsearch kurulumu tamamlandı"
     
@@ -342,7 +330,7 @@ health_check() {
     fi
     
     # Index count check
-    INDEX_COUNT=$(curl -s "$ELASTICSEARCH_URL/listings/_count" | jq -r '.count')
+    INDEX_COUNT=$(curl -s "$ELASTICSEARCH_URL/benalsam_listings/_count" | jq -r '.count')
     log "📊 Listings index'inde $INDEX_COUNT doküman var"
     
     AI_SUGGESTIONS_COUNT=$(curl -s "$ELASTICSEARCH_URL/ai_suggestions/_count" | jq -r '.count')
