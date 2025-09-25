@@ -28,7 +28,16 @@ const redisConfig = {
   // Connection pooling
   family: 4, // IPv4
   // TLS ayarları (eğer gerekirse)
-  tls: process.env.REDIS_TLS === 'true' ? {} : undefined
+  tls: process.env.REDIS_TLS === 'true' ? {} : undefined,
+  // ECONNRESET için ek resilience
+  reconnectOnError: (err: Error) => {
+    const targetError = 'READONLY';
+    return err.message.includes(targetError);
+  },
+  // Connection health monitoring (maxLoadingTimeout already defined above)
+  // Auto reconnect settings
+  autoResubscribe: true,
+  autoResendUnfulfilledCommands: true
 };
 
 // Create Redis client
@@ -43,18 +52,26 @@ redis.on('ready', () => {
   logger.info('✅ Redis ready');
 });
 
-redis.on('error', (error: Error) => {
+redis.on('error', (error: any) => {
   // ECONNRESET hatasını özel olarak handle et
-  if (error.message.includes('ECONNRESET')) {
+  if (error.code === 'ECONNRESET' || error.message.includes('ECONNRESET')) {
     logger.warn('⚠️ Redis connection reset, attempting to reconnect...', {
       error: error.message,
-      timestamp: new Date().toISOString()
+      code: error.code,
+      errno: error.errno,
+      syscall: error.syscall,
+      timestamp: new Date().toISOString(),
+      service: 'admin-backend'
     });
   } else {
     logger.error('❌ Redis connection error:', {
       error: error.message,
+      code: error.code,
+      errno: error.errno,
+      syscall: error.syscall,
       stack: error.stack,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      service: 'admin-backend'
     });
   }
 });

@@ -211,6 +211,18 @@ export class RabbitMQService implements IRabbitMQService {
         routingKey,
         message
       });
+      
+      // Retry mechanism for failed publishes
+      if (this.isConnectedFlag) {
+        logger.info(`🔄 Retrying message publish to ${exchange}...`);
+        try {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+          return await this.publishToExchange(exchange, routingKey, message, options);
+        } catch (retryError) {
+          logger.error(`❌ Retry failed for exchange ${exchange}:`, retryError);
+        }
+      }
+      
       return false;
     }
   }

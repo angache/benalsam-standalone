@@ -98,9 +98,12 @@ class ElasticsearchConfig {
           username: process.env.ELASTICSEARCH_USERNAME || '',
           password: process.env.ELASTICSEARCH_PASSWORD || ''
         },
-        maxRetries: 3,
-        requestTimeout: 10000,
-        sniffOnStart: false
+        maxRetries: 5,
+        requestTimeout: 30000, // 30 saniye
+        pingTimeout: 10000, // 10 saniye
+        sniffOnStart: false,
+        sniffOnConnectionFault: false,
+        resurrectStrategy: 'ping'
       });
 
       try {

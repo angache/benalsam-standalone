@@ -137,7 +137,9 @@ const HomePageSkeleton = () => (
     const loadCategories = async () => {
       try {
         setIsLoadingCategories(true);
-        const fetchedCategories = await dynamicCategoryService.getCategories();
+        console.log('🔄 Loading categories from dynamic service...');
+        const fetchedCategories = await dynamicCategoryService.getCategoryTree();
+        console.log('📦 Categories loaded:', fetchedCategories);
         setCategories(fetchedCategories);
       } catch (error) {
         console.error('Error loading categories:', error);
@@ -418,7 +420,7 @@ const HomePageSkeleton = () => (
         
         newPath.push(categoryObj);
         handleCategorySelect(newPath);
-      }, [selectedCategories, handleCategorySelect]);
+      }, [selectedCategories, handleCategorySelect, categories]);
 
       // Show modern skeleton loading for better UX
       if (isLoadingInitial) {
@@ -506,6 +508,103 @@ const HomePageSkeleton = () => (
                   <Filter className="w-4 h-4" />
                   Filtreler
                 </Button>
+              </div>
+
+              {/* Kategori Filtreleme Bar - Ana Sayfada Görünür */}
+              <div className="mb-6">
+                <div className="bg-card border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <Filter className="w-5 h-5 text-primary" />
+                      Kategori Filtreleme
+                    </h3>
+                    {selectedCategories.length > 0 && (
+                      <Button
+                        onClick={() => handleCategorySelect([])}
+                        variant="ghost"
+                        size="sm"
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="w-4 h-4 mr-1" />
+                        Temizle
+                      </Button>
+                    )}
+                  </div>
+                  
+                  {/* Seçili Kategori Yolu */}
+                  {selectedCategories.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span className="cursor-pointer hover:text-primary" onClick={() => handleCategorySelect([])}>
+                          Ana Sayfa
+                        </span>
+                        {selectedCategories.map((category, index) => (
+                          <React.Fragment key={category.id}>
+                            <ChevronRight className="w-4 h-4" />
+                            <span
+                              className="cursor-pointer hover:text-primary"
+                              onClick={() => handleCategorySelect(selectedCategories.slice(0, index + 1))}
+                            >
+                              {category.name}
+                            </span>
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Popüler Kategoriler */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-muted-foreground">Popüler Kategoriler</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {isLoadingCategories ? (
+                        Array.from({ length: 6 }).map((_, index) => (
+                          <div key={index} className="h-8 w-20 bg-muted rounded animate-pulse"></div>
+                        ))
+                      ) : (
+                        categories.slice(0, 8).map((category) => (
+                          <Button
+                            key={category.id}
+                            onClick={() => handleCategoryClick(category, 0)}
+                            variant={selectedCategories.length > 0 && selectedCategories[0].id === category.id ? "default" : "outline"}
+                            size="sm"
+                            className="text-xs"
+                          >
+                            {category.icon && <category.icon className="w-3 h-3 mr-1" />}
+                            {category.name}
+                          </Button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Alt Kategoriler (Eğer ana kategori seçilmişse) */}
+                  {selectedCategories.length > 0 && selectedCategories[0] && (
+                    <div className="mt-4 space-y-3">
+                      <h4 className="text-sm font-medium text-muted-foreground">
+                        {selectedCategories[0].name} Alt Kategorileri
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {(() => {
+                          const selectedMainCategory = categories.find(cat => cat.id === selectedCategories[0].id);
+                          if (!selectedMainCategory || !selectedMainCategory.subcategories) return null;
+                          
+                          return selectedMainCategory.subcategories.slice(0, 6).map((subCategory) => (
+                            <Button
+                              key={subCategory.id}
+                              onClick={() => handleCategoryClick(subCategory, 1)}
+                              variant={selectedCategories.length > 1 && selectedCategories[1].id === subCategory.id ? "default" : "outline"}
+                              size="sm"
+                              className="text-xs"
+                            >
+                              {subCategory.name}
+                            </Button>
+                          ));
+                        })()}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="mb-4">

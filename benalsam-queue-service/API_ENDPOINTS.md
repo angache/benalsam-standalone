@@ -21,18 +21,42 @@ GET /api/v1/health
   "success": true,
   "data": {
     "status": "healthy",
-    "timestamp": "2025-09-21T08:33:20.370Z",
+    "timestamp": "2025-09-25T18:41:51.283Z",
     "service": "queue-service",
     "version": "1.0.0",
-    "uptime": 302.236195667,
+    "uptime": 60.835640667,
     "memory": {
-      "rss": 63082496,
-      "heapTotal": 164155392,
-      "heapUsed": 159753848,
-      "external": 9862763,
-      "arrayBuffers": 5905789
+      "rss": 66715648,
+      "heapTotal": 182321152,
+      "heapUsed": 177735728,
+      "external": 9036391,
+      "arrayBuffers": 5060619
     },
-    "environment": "development"
+    "environment": "development",
+    "architecture": "enterprise-polling",
+    "queue": {
+      "pending": 0,
+      "processing": 7,
+      "completed": 214,
+      "failed": 3,
+      "debug": 252,
+      "sent": 38,
+      "skipped": 30,
+      "stuckJobs": 0,
+      "isHealthy": true
+    },
+    "circuitBreaker": {
+      "state": "CLOSED",
+      "failureCount": 0,
+      "successCount": 0,
+      "isHealthy": true
+    },
+    "realtime": {
+      "isConnected": false,
+      "reconnectAttempts": 0,
+      "maxReconnectAttempts": 5,
+      "mode": "fallback-polling"
+    }
   }
 }
 ```
@@ -74,6 +98,28 @@ Content-Type: application/json
 ```http
 POST /api/v1/queue/retry-failed
 ```
+
+### **🧹 Enterprise Stuck Job Cleanup**
+```http
+POST /api/v1/health/cleanup-stuck-jobs
+```
+
+**Description:** Manually clean up stuck processing jobs (5+ minutes old)
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Cleanup completed: 3 jobs cleaned, 0 failed",
+  "data": {
+    "totalStuckJobs": 3,
+    "cleanedJobs": 3,
+    "failedJobs": 0
+  }
+}
+```
+
+**Auto Cleanup:** Runs automatically every 5 polling cycles (25 seconds)
 
 ---
 
@@ -202,6 +248,37 @@ All endpoints return consistent error responses:
 
 ---
 
+## 🏢 **ENTERPRISE FEATURES**
+
+### **🛡️ Circuit Breaker Pattern**
+- **Purpose:** Prevents cascading failures during database issues
+- **Configuration:** 10 failure threshold, 15s recovery timeout
+- **Monitoring:** Available in health check endpoint
+
+### **🧹 Stuck Job Management**
+- **Auto Cleanup:** Every 5 polling cycles (25 seconds)
+- **Timeout:** 5 minutes for processing jobs
+- **Retry Logic:** Max 3 retries before marking as failed
+- **Manual Cleanup:** Available via API endpoint
+
+### **📊 Real-time Monitoring**
+- **Queue Statistics:** Live job counts by status
+- **Stuck Job Detection:** Automatic identification and cleanup
+- **Health Status:** Degraded when stuck jobs detected
+- **Architecture Mode:** Event-driven vs Enterprise-polling
+
+### **⚡ Performance Optimizations**
+- **Batch Processing:** 20 jobs per batch (increased from 5)
+- **Connection Pooling:** Supabase connection optimization
+- **Timeout Management:** 30s database query timeout
+- **Graceful Shutdown:** 5s cleanup period
+
+### **🔄 Architecture Modes**
+- **Event-Driven:** Zero-polling with Supabase Realtime (currently disabled)
+- **Enterprise-Polling:** 5-second interval with stuck job cleanup (active)
+
+---
+
 ## 🔄 **INTEGRATION NOTES**
 
 ### **Database Triggers**
@@ -227,6 +304,7 @@ All endpoints return consistent error responses:
 
 ---
 
-**📅 Last Updated:** 21 Eylül 2025  
-**🔄 Version:** 1.0.0  
-**👨‍💻 Service:** benalsam-queue-service
+**📅 Last Updated:** 25 Eylül 2025  
+**🔄 Version:** 1.1.0 (Enterprise Edition)  
+**👨‍💻 Service:** benalsam-queue-service  
+**🏢 Features:** Circuit Breaker, Stuck Job Cleanup, Real-time Monitoring

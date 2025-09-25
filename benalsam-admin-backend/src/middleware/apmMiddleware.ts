@@ -300,20 +300,27 @@ class APMMiddleware {
 
   private logPerformanceMetrics(metrics: APMMetrics): void {
     if (this.config.enableDetailedMetrics) {
-      logger.info('APM: Request completed', {
-        requestId: metrics.requestId,
-        endpoint: metrics.endpoint,
-        method: metrics.method,
-        statusCode: metrics.statusCode,
-        duration: metrics.duration,
-        responseSize: metrics.responseSize,
-        queryCount: metrics.queryCount,
-        cacheHits: metrics.cacheHits,
-        cacheMisses: metrics.cacheMisses,
-        memoryUsage: metrics.memoryUsage,
-        cpuUsage: metrics.cpuUsage,
-        timestamp: new Date().toISOString()
-      });
+      // Prometheus endpoint'lerini log'dan hariç tut
+      const isPrometheusEndpoint = metrics.endpoint.includes('/prometheus') || 
+                                   metrics.endpoint.includes('/metrics') ||
+                                   metrics.endpoint.includes('/monitoring/prometheus');
+      
+      if (!isPrometheusEndpoint) {
+        logger.info('APM: Request completed', {
+          requestId: metrics.requestId,
+          endpoint: metrics.endpoint,
+          method: metrics.method,
+          statusCode: metrics.statusCode,
+          duration: metrics.duration,
+          responseSize: metrics.responseSize,
+          queryCount: metrics.queryCount,
+          cacheHits: metrics.cacheHits,
+          cacheMisses: metrics.cacheMisses,
+          memoryUsage: metrics.memoryUsage,
+          cpuUsage: metrics.cpuUsage,
+          timestamp: new Date().toISOString()
+        });
+      }
     }
   }
 

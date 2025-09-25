@@ -27,8 +27,8 @@ export class CircuitBreaker {
 
   constructor(config: Partial<CircuitBreakerConfig> = {}) {
     this.config = {
-      failureThreshold: 5,      // 5 failures
-      recoveryTimeout: 30000,   // 30 seconds
+      failureThreshold: 10,     // 10 failures (increased from 5)
+      recoveryTimeout: 15000,   // 15 seconds (reduced from 30)
       monitoringPeriod: 60000,  // 1 minute window
       successThreshold: 3,      // 3 successes to close
       ...config

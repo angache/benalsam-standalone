@@ -62,7 +62,15 @@ export class SearchService {
       const { Client } = await import('@elastic/elasticsearch');
       const elasticsearchUrl = process.env.ELASTICSEARCH_URL || 'http://localhost:9200';
       
-      this.elasticsearchClient = new Client({ node: elasticsearchUrl });
+      this.elasticsearchClient = new Client({ 
+        node: elasticsearchUrl,
+        maxRetries: 5,
+        requestTimeout: 30000, // 30 saniye
+        pingTimeout: 10000, // 10 saniye
+        sniffOnStart: false,
+        sniffOnConnectionFault: false,
+        resurrectStrategy: 'ping'
+      });
       await this.elasticsearchClient.ping();
       this.isElasticsearchAvailable = true;
       
@@ -156,25 +164,87 @@ export class SearchService {
       const indexName = 'benalsam_listings'; // Use the correct index
       const from = (page - 1) * pageSize;
 
-      // Simple query for testing
-      const esQuery = {
+      // Build Elasticsearch query with filters
+      const mustQueries = [];
+      const filterQueries = [];
+
+      // Text search query
+      if (query && query.trim()) {
+        mustQueries.push({
+          multi_match: {
+            query: query,
+            fields: ['title^2', 'description', 'location'],
+            type: 'best_fields',
+            fuzziness: 'AUTO'
+          }
+        });
+      }
+
+      // Category filter
+      if (categories && categories.length > 0) {
+        filterQueries.push({
+          terms: {
+            category: categories
+          }
+        });
+      }
+
+      // Location filter
+      if (location && location.trim()) {
+        filterQueries.push({
+          match: {
+            location: location
+          }
+        });
+      }
+
+      // Urgency filter
+      if (urgency && urgency !== 'Tümü') {
+        filterQueries.push({
+          term: {
+            urgency: urgency
+          }
+        });
+      }
+
+      // Price range filter
+      if (minPrice !== undefined || maxPrice !== undefined) {
+        const priceRange: any = {};
+        if (minPrice !== undefined) priceRange.gte = minPrice;
+        if (maxPrice !== undefined) priceRange.lte = maxPrice;
+        
+        filterQueries.push({
+          range: {
+            budget: priceRange
+          }
+        });
+      }
+
+      // Build final query
+      const esQuery: any = {
         query: {
-          match_all: {}
-        }
+          bool: {
+            must: mustQueries.length > 0 ? mustQueries : [{ match_all: {} }],
+            filter: filterQueries
+          }
+        },
+        from,
+        size: pageSize
       };
 
-      // For now, just use match_all query
+      // Add sorting
+      if (sortBy && sortOrder) {
+        esQuery.sort = [{
+          [sortBy]: {
+            order: sortOrder
+          }
+        }];
+      }
 
       // Execute search
       const response = await this.elasticsearchClient.search({
         index: indexName,
-        body: {
-          query: {
-            match_all: {}
-          },
-          from,
-          size: pageSize
-        }
+        body: esQuery
       });
 
       // Parse response (try both response.body.hits and response.hits for compatibility)

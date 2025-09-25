@@ -8,12 +8,14 @@ router.get('/', async (_req: Request, res: Response) => {
   try {
     // Redis bağlantı durumunu kontrol et
     let redisStatus = 'disconnected';
+    let redisError = null;
     try {
       await redis.ping();
       redisStatus = 'connected';
-    } catch (redisError) {
-      logger.warn('Redis ping failed:', { error: redisError, service: 'cache-service' });
+    } catch (error) {
+      logger.warn('Redis ping failed:', { error, service: 'cache-service' });
       redisStatus = 'error';
+      redisError = error instanceof Error ? error.message : 'Unknown error';
     }
 
     const healthCheck = {
@@ -27,7 +29,9 @@ router.get('/', async (_req: Request, res: Response) => {
       redis: {
         status: redisStatus,
         host: process.env['REDIS_HOST'] || 'localhost',
-        port: process.env['REDIS_PORT'] || '6379'
+        port: process.env['REDIS_PORT'] || '6379',
+        error: redisError,
+        connectionState: redis.status
       }
     };
 

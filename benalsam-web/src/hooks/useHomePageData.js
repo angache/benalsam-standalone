@@ -100,19 +100,15 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
           // Elasticsearch ile arama yap
           const searchParams = {
             query: '',
-            filters: {
-              category_id: selectedCategories.length > 0 ? selectedCategories[selectedCategories.length - 1].id : undefined,
-              location: filters.location,
-              minBudget: filters.priceRange[0],
-              maxBudget: filters.priceRange[1],
-              urgency: filters.urgency
-            },
-            sort: {
-              field: 'created_at',
-              order: 'desc'
-            },
+            categories: selectedCategories.length > 0 ? selectedCategories.map(cat => cat.name) : undefined,
+            location: filters.location,
+            minPrice: filters.priceRange[0],
+            maxPrice: filters.priceRange[1],
+            urgency: filters.urgency,
+            sortBy: 'created_at',
+            sortOrder: 'desc',
             page: 1,
-            limit: PAGE_SIZE
+            pageSize: PAGE_SIZE
           };
 
           const result = await searchListingsWithElasticsearch(searchParams, currentUser?.id);

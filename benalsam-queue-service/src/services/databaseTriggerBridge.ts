@@ -72,9 +72,18 @@ export class DatabaseTriggerBridge {
    */
   private startPolling(): void {
     this.processingInterval = setInterval(async () => {
+      // Önce stuck job'ları temizle (her 5 döngüde bir)
+      if (this.processedJobsCount % 5 === 0) {
+        await this.cleanupStuckJobs();
+      }
+      
+      // Sonra pending job'ları işle
       await this.processPendingJobs();
+      
+      // Counter'ı artır
+      this.processedJobsCount++;
     }, this.interval);
-    logger.info('📊 Polling mode started');
+    logger.info('📊 Polling mode started with stuck job cleanup');
   }
 
   /**
@@ -119,10 +128,70 @@ export class DatabaseTriggerBridge {
       logger.info('✅ Polling interval stopped');
     }
 
-    // Wait for any ongoing operations to complete
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Wait for any ongoing operations to complete (increased from 1 to 5 seconds)
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     logger.info('✅ Database trigger bridge stopped gracefully');
+  }
+
+  /**
+   * Stuck processing job'ları temizle (Enterprise Safety)
+   */
+  private async cleanupStuckJobs(): Promise<void> {
+    try {
+      // 5 dakikadan eski processing job'ları bul
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      
+      const { data: stuckJobs, error } = await supabase
+        .from('elasticsearch_sync_queue')
+        .select('id, retry_count, created_at, processed_at')
+        .eq('status', 'processing')
+        .lt('processed_at', fiveMinutesAgo);
+
+      if (error) {
+        logger.error('❌ Error fetching stuck jobs:', error);
+        return;
+      }
+
+      if (stuckJobs && stuckJobs.length > 0) {
+        logger.warn(`🧹 Found ${stuckJobs.length} stuck processing jobs, cleaning up...`);
+        
+        for (const job of stuckJobs) {
+          // Retry count'u artır ve pending'e çevir
+          const newRetryCount = (job.retry_count || 0) + 1;
+          
+          if (newRetryCount >= 3) {
+            // Max retry'e ulaştı, failed yap
+            await this.updateJobStatus(
+              job.id, 
+              'failed', 
+              'Job stuck in processing state for too long',
+              { traceId: `cleanup_${job.id}_${Date.now()}`, jobId: job.id, recordId: '', operation: 'cleanup' }
+            );
+            logger.warn(`❌ Job ${job.id} marked as failed (max retries reached)`);
+          } else {
+            // Pending'e çevir ve retry count artır
+            const { error: updateError } = await supabase
+              .from('elasticsearch_sync_queue')
+              .update({ 
+                status: 'pending', 
+                retry_count: newRetryCount,
+                processed_at: null,
+                error_message: null
+              })
+              .eq('id', job.id);
+
+            if (updateError) {
+              logger.error(`❌ Error cleaning up stuck job ${job.id}:`, updateError);
+            } else {
+              logger.info(`✅ Stuck job ${job.id} reset to pending (retry ${newRetryCount}/3)`);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      logger.error('❌ Error in cleanupStuckJobs:', error);
+    }
   }
 
   /**
@@ -135,7 +204,7 @@ export class DatabaseTriggerBridge {
         async () => {
           // Timeout ile database sorgusu
           const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('Database query timeout')), 5000); // 5 saniye timeout
+            setTimeout(() => reject(new Error('Database query timeout')), 30000); // 30 saniye timeout
           });
 
           const queryPromise = supabase
@@ -144,7 +213,7 @@ export class DatabaseTriggerBridge {
             .eq('status', 'pending')
             .lt('retry_count', 3) // Max 3 retry
             .order('created_at', { ascending: true })
-            .limit(5); // Smaller batch for better performance
+            .limit(20); // Increased batch size for better throughput
 
           return await Promise.race([queryPromise, timeoutPromise]) as any;
         },
@@ -181,19 +250,9 @@ export class DatabaseTriggerBridge {
       }
       this.errorCount++;
       
-      // Eğer çok fazla hata varsa, interval'ı artır
+      // Log error count but don't change interval (fixed interval approach)
       if (this.errorCount > 3) {
-        const newInterval = Math.min(this.interval * 2, 60000); // Max 60 saniye
-        logger.warn(`⚠️ Too many errors (${this.errorCount}), increasing interval to ${newInterval}ms`);
-        this.interval = newInterval;
-        
-        // Restart interval with new timing
-        if (this.processingInterval) {
-          clearInterval(this.processingInterval);
-          this.processingInterval = setInterval(async () => {
-            await this.processPendingJobs();
-          }, this.interval);
-        }
+        logger.warn(`⚠️ Error count: ${this.errorCount}, but keeping fixed interval for consistency`);
       }
     }
   }
