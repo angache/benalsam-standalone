@@ -88,7 +88,7 @@ export class CircuitBreaker {
   /**
    * Handle failed operation
    */
-  private onFailure(operationName: string, error: any): void {
+  private onFailure(operationName: string, _error: any): void {
     this.failureCount++;
     this.lastFailureTime = Date.now();
 
