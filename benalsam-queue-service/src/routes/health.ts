@@ -1,18 +1,27 @@
 import { Router, Request, Response } from 'express';
 import logger from '../config/logger';
+import { databaseCircuitBreaker } from '../utils/circuitBreaker';
 
 const router = Router();
 
 router.get('/', async (_req: Request, res: Response) => {
   try {
+    const circuitBreakerMetrics = databaseCircuitBreaker.getMetrics();
+    
     const healthCheck = {
-      status: 'healthy',
+      status: circuitBreakerMetrics.isHealthy ? 'healthy' : 'degraded',
       timestamp: new Date().toISOString(),
       service: 'queue-service',
       version: process.env['npm_package_version'] || '1.0.0',
       uptime: process.uptime(),
       memory: process.memoryUsage(),
-      environment: process.env['NODE_ENV']
+      environment: process.env['NODE_ENV'],
+      circuitBreaker: {
+        state: circuitBreakerMetrics.state,
+        failureCount: circuitBreakerMetrics.failureCount,
+        successCount: circuitBreakerMetrics.successCount,
+        isHealthy: circuitBreakerMetrics.isHealthy
+      }
     };
 
     logger.info('Health check requested', { healthCheck });

@@ -1,6 +1,7 @@
 import { supabase } from '../config/supabase';
 import logger from '../config/logger';
 import { rabbitmqService } from './rabbitmqService';
+import { databaseCircuitBreaker } from '../utils/circuitBreaker';
 
 interface TraceContext {
   traceId: string;
@@ -76,20 +77,26 @@ export class DatabaseTriggerBridge {
    */
   private async processPendingJobs(): Promise<void> {
     try {
-      // Timeout ile database sorgusu
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Database query timeout')), 5000); // 5 saniye timeout
-      });
+      // Circuit breaker ile database sorgusu
+      const { data: pendingJobs, error } = await databaseCircuitBreaker.execute(
+        async () => {
+          // Timeout ile database sorgusu
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Database query timeout')), 5000); // 5 saniye timeout
+          });
 
-      const queryPromise = supabase
-        .from('elasticsearch_sync_queue')
-        .select('id, table_name, operation, record_id, change_data, status, retry_count, created_at, trace_id')
-        .eq('status', 'pending')
-        .lt('retry_count', 3) // Max 3 retry
-        .order('created_at', { ascending: true })
-        .limit(5); // Smaller batch for better performance
+          const queryPromise = supabase
+            .from('elasticsearch_sync_queue')
+            .select('id, table_name, operation, record_id, change_data, status, retry_count, created_at, trace_id')
+            .eq('status', 'pending')
+            .lt('retry_count', 3) // Max 3 retry
+            .order('created_at', { ascending: true })
+            .limit(5); // Smaller batch for better performance
 
-      const { data: pendingJobs, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+          return await Promise.race([queryPromise, timeoutPromise]) as any;
+        },
+        'fetch-pending-jobs'
+      );
 
       if (error) {
         logger.error('❌ Error fetching pending jobs:', error);

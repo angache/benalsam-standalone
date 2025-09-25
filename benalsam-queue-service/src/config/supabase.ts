@@ -11,7 +11,7 @@ if (!supabaseUrl || !supabaseKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
-    autoRefreshToken: true,
+    autoRefreshToken: false,  // Disable for better performance
     persistSession: false
   },
   db: {
@@ -19,8 +19,13 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
   },
   global: {
     headers: {
-      'X-Client-Info': 'benalsam-queue-service'
+      'X-Client-Info': 'benalsam-queue-service',
+      'Connection': 'keep-alive'  // Enable connection pooling
     }
+  },
+  // Enterprise connection settings
+  realtime: {
+    enabled: false  // Disable realtime for queue service
   }
 });
 
