@@ -22,6 +22,7 @@ export class DatabaseTriggerBridge {
   private lastProcessedAt: Date | null = null;
   private processedJobsCount: number = 0;
   private errorCount: number = 0;
+  private interval: number = 5000; // Default 5 saniye
 
   /**
    * Database trigger bridge'i başlat
@@ -33,6 +34,7 @@ export class DatabaseTriggerBridge {
     }
 
     this.isProcessing = true;
+    this.interval = intervalMs;
     logger.info('🚀 Starting database trigger bridge...');
 
     // RabbitMQ bağlantısını kontrol et
@@ -45,7 +47,7 @@ export class DatabaseTriggerBridge {
 
     this.processingInterval = setInterval(async () => {
       await this.processPendingJobs();
-    }, intervalMs);
+    }, this.interval);
 
     logger.info('✅ Database trigger bridge started');
   }
