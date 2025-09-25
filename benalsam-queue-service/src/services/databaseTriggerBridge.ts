@@ -94,22 +94,35 @@ export class DatabaseTriggerBridge {
   }
 
   /**
-   * Bridge'i durdur
+   * Bridge'i durdur (Graceful Shutdown)
    */
   async stopProcessing(): Promise<void> {
     if (!this.isProcessing) {
       return;
     }
 
-    logger.info('🛑 Stopping database trigger bridge...');
+    logger.info('🛑 Starting graceful shutdown of database trigger bridge...');
     this.isProcessing = false;
 
+    // Stop realtime subscription gracefully
+    try {
+      await realtimeSubscriptionService.stop();
+      logger.info('✅ Realtime subscription stopped gracefully');
+    } catch (error) {
+      logger.error('❌ Error stopping realtime subscription:', error);
+    }
+
+    // Stop polling interval
     if (this.processingInterval) {
       clearInterval(this.processingInterval);
       this.processingInterval = null;
+      logger.info('✅ Polling interval stopped');
     }
 
-    logger.info('✅ Database trigger bridge stopped');
+    // Wait for any ongoing operations to complete
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    logger.info('✅ Database trigger bridge stopped gracefully');
   }
 
   /**

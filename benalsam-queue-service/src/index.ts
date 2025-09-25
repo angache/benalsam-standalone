@@ -59,53 +59,49 @@ server.listen(PORT, async () => {
   }
 });
 
-// Graceful shutdown
-process.on('SIGTERM', async () => {
-  logger.info('🛑 SIGTERM received, starting graceful shutdown...');
+// Enterprise Graceful Shutdown Handler
+const gracefulShutdown = async (signal: string) => {
+  logger.info(`🛑 ${signal} received, starting enterprise graceful shutdown...`);
   
   try {
     // Stop accepting new requests
     server.close(() => {
-      logger.info('✅ HTTP server closed');
+      logger.info('✅ HTTP server closed gracefully');
     });
 
-    // Stop database trigger bridge
+    // Stop database trigger bridge with timeout
+    const shutdownTimeout = setTimeout(() => {
+      logger.warn('⚠️ Shutdown timeout reached, forcing exit');
+      process.exit(1);
+    }, 10000); // 10 second timeout
+
     await databaseTriggerBridge.stopProcessing();
-    logger.info('✅ Database trigger bridge stopped');
+    logger.info('✅ Database trigger bridge stopped gracefully');
 
     // Disconnect from RabbitMQ (this will wait for in-flight messages)
     await rabbitmqService.disconnect();
-    logger.info('✅ RabbitMQ disconnected');
+    logger.info('✅ RabbitMQ disconnected gracefully');
 
-    logger.info('✅ Graceful shutdown completed');
+    clearTimeout(shutdownTimeout);
+    logger.info('✅ Enterprise graceful shutdown completed successfully');
     process.exit(0);
   } catch (error) {
     logger.error('❌ Error during graceful shutdown:', error);
     process.exit(1);
   }
+};
+
+// Handle different shutdown signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  logger.error('❌ Uncaught Exception:', error);
+  gracefulShutdown('UNCAUGHT_EXCEPTION');
 });
 
-process.on('SIGINT', async () => {
-  logger.info('🛑 SIGINT received, starting graceful shutdown...');
-  
-  try {
-    // Stop accepting new requests
-    server.close(() => {
-      logger.info('✅ HTTP server closed');
-    });
-
-    // Stop database trigger bridge
-    await databaseTriggerBridge.stopProcessing();
-    logger.info('✅ Database trigger bridge stopped');
-
-    // Disconnect from RabbitMQ (this will wait for in-flight messages)
-    await rabbitmqService.disconnect();
-    logger.info('✅ RabbitMQ disconnected');
-
-    logger.info('✅ Graceful shutdown completed');
-    process.exit(0);
-  } catch (error) {
-    logger.error('❌ Error during graceful shutdown:', error);
-    process.exit(1);
-  }
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  gracefulShutdown('UNHANDLED_REJECTION');
 });
