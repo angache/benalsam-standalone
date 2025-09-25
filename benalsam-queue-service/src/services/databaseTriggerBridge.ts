@@ -22,12 +22,12 @@ export class DatabaseTriggerBridge {
   private lastProcessedAt: Date | null = null;
   private processedJobsCount: number = 0;
   private errorCount: number = 0;
-  private interval: number = 5000; // Default 5 saniye
+  private interval: number = 15000; // Default 15 saniye
 
   /**
    * Database trigger bridge'i başlat
    */
-  async startProcessing(intervalMs: number = 5000): Promise<void> {
+  async startProcessing(intervalMs: number = 15000): Promise<void> {
     if (this.isProcessing) {
       logger.warn('⚠️ Database trigger bridge already running');
       return;
@@ -78,15 +78,16 @@ export class DatabaseTriggerBridge {
     try {
       // Timeout ile database sorgusu
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Database query timeout')), 10000); // 10 saniye timeout
+        setTimeout(() => reject(new Error('Database query timeout')), 5000); // 5 saniye timeout
       });
 
       const queryPromise = supabase
         .from('elasticsearch_sync_queue')
-        .select('*')
+        .select('id, table_name, operation, record_id, change_data, status, retry_count, created_at, trace_id')
         .eq('status', 'pending')
+        .lt('retry_count', 3) // Max 3 retry
         .order('created_at', { ascending: true })
-        .limit(10);
+        .limit(5); // Smaller batch for better performance
 
       const { data: pendingJobs, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
 
@@ -106,6 +107,12 @@ export class DatabaseTriggerBridge {
         await this.processJob(job);
       }
 
+      // Reset error count on successful processing
+      if (this.errorCount > 0) {
+        logger.info(`✅ Processing successful, resetting error count from ${this.errorCount} to 0`);
+        this.errorCount = 0;
+      }
+
     } catch (error) {
       if (error instanceof Error && error.message === 'Database query timeout') {
         logger.warn('⏰ Database query timeout - will retry on next cycle');
@@ -115,9 +122,18 @@ export class DatabaseTriggerBridge {
       this.errorCount++;
       
       // Eğer çok fazla hata varsa, interval'ı artır
-      if (this.errorCount > 5) {
-        logger.warn(`⚠️ Too many errors (${this.errorCount}), increasing interval to 60s`);
-        this.interval = 60000; // 60 saniye
+      if (this.errorCount > 3) {
+        const newInterval = Math.min(this.interval * 2, 60000); // Max 60 saniye
+        logger.warn(`⚠️ Too many errors (${this.errorCount}), increasing interval to ${newInterval}ms`);
+        this.interval = newInterval;
+        
+        // Restart interval with new timing
+        if (this.processingInterval) {
+          clearInterval(this.processingInterval);
+          this.processingInterval = setInterval(async () => {
+            await this.processPendingJobs();
+          }, this.interval);
+        }
       }
     }
   }
