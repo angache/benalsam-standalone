@@ -100,7 +100,11 @@ const Step1_Category = ({
   const [searchQuery, setSearchQuery] = useState('');
 
   const parentPath = useMemo(() => history.map(h => h.name).join(' > '), [history]);
-  const parentCategory = useMemo(() => (parentPath ? findCategoryByName(categories, parentPath) : null), [parentPath, categories]);
+  // Use last selected name to get parent category instead of full path string
+  const parentCategory = useMemo(() => {
+    const last = history[history.length - 1];
+    return last ? findCategoryByName(categories, last.name) : null;
+  }, [history, categories]);
 
   // Update current categories when categories prop changes
   useEffect(() => {
@@ -160,14 +164,17 @@ const Step1_Category = ({
     onSubSubChange(pathArray[2] || '');
     setSearchQuery('');
 
-    let currentLevel = categoriesConfig;
+    // Traverse provided dynamic categories tree instead of deleted static config
+    let currentLevel = categories;
     const newHistory = [];
     for (const catName of pathArray) {
-        const cat = currentLevel.find(c => c.name === catName);
-        if (cat) {
-            newHistory.push({ name: cat.name, list: currentLevel });
-            currentLevel = cat.subcategories || [];
-        }
+      const cat = currentLevel.find(c => c.name === catName);
+      if (cat) {
+        newHistory.push({ name: cat.name, list: currentLevel });
+        currentLevel = cat.subcategories || [];
+      } else {
+        break;
+      }
     }
     setHistory(newHistory);
     setCurrentCategories(currentLevel);

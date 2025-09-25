@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import FormField from '../FormField';
 import { Checkbox } from '@/components/ui/checkbox';
 import PremiumFeaturesSelector from '@/components/CreateListingPage/PremiumFeaturesSelector';
+import { Settings } from 'lucide-react';
 
 const durationOptions = [
   { value: '7', label: '7 Gün' },
@@ -99,6 +100,31 @@ const Step6_Review = ({
           <ReviewItem icon={Text} label="Açıklama" value={formData.description} />
           <ReviewItem icon={DollarSign} label="Bütçe" value={`${formData.budget} ₺`} />
           <ReviewItem icon={MapPin} label="Konum" value={selectedLocationPath} />
+          <ReviewItem icon={ShieldCheck} label="Kabul Ettiğim Durumlar">
+            <div className="flex flex-wrap gap-2 mt-1">
+              {(!formData.condition || formData.condition.length === 0 || (formData.condition.length === 1 && formData.condition[0] === 'any')) ? (
+                <Badge className="bg-primary/10 text-primary border border-primary/20">Fark Etmez</Badge>
+              ) : (
+                formData.condition.filter(c => c !== 'any').map((c) => (
+                  <Badge key={c} className="bg-primary/10 text-primary border border-primary/20">{c}</Badge>
+                ))
+              )}
+            </div>
+          </ReviewItem>
+          <ReviewItem icon={Settings} label="Seçili Özellikler">
+            <div className="flex flex-wrap gap-2 mt-1">
+              {formData.attributes && Object.keys(formData.attributes).length > 0 ? (
+                Object.entries(formData.attributes).flatMap(([k, vals]) => {
+                  const arr = Array.isArray(vals) ? vals : [vals];
+                  return arr.map((v, idx) => (
+                    <Badge key={`${k}-${idx}`} className="bg-primary/10 text-primary border border-primary/20">{k}: {v}</Badge>
+                  ));
+                })
+              ) : (
+                <span className="text-sm text-muted-foreground">Seçili özellik yok</span>
+              )}
+            </div>
+          </ReviewItem>
           <ReviewItem icon={Clock} label="Aciliyet">
             <div className="flex items-center gap-2">
               <span className="font-semibold">{formData.urgency}</span>

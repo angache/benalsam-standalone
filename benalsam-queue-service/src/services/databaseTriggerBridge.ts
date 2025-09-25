@@ -24,13 +24,13 @@ export class DatabaseTriggerBridge {
   private lastProcessedAt: Date | null = null;
   private processedJobsCount: number = 0;
   private errorCount: number = 0;
-  private interval: number = 15000; // Default 15 saniye
-  private useRealtime: boolean = true; // Enable realtime by default
+  private interval: number = 5000; // Default 5 saniye for faster processing
+  private useRealtime: boolean = false; // Disable realtime temporarily due to timeout issues
 
   /**
    * Database trigger bridge'i başlat (Event-Driven Architecture)
    */
-  async startProcessing(intervalMs: number = 15000): Promise<void> {
+  async startProcessing(intervalMs: number = 5000): Promise<void> {
     if (this.isProcessing) {
       logger.warn('⚠️ Database trigger bridge already running');
       return;

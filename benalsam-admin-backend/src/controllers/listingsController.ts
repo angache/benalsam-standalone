@@ -17,13 +17,27 @@ export const listingsController = {
         userId,
         sortBy = 'created_at',
         sortOrder = 'desc',
+        filters,
       } = req.query;
+
+      // Parse filters object if it exists
+      let parsedFilters: any = {};
+      if (filters && typeof filters === 'string') {
+        try {
+          parsedFilters = JSON.parse(filters);
+        } catch (error) {
+          logger.warn('Failed to parse filters:', error);
+        }
+      }
+
+      // Use filters.status if available, otherwise use direct status parameter
+      const finalStatus = parsedFilters?.status || status;
 
       const pageNum = parseInt(page as string);
       const limitNum = parseInt(limit as string);
       const offset = (pageNum - 1) * limitNum;
 
-      logger.info(`Fetching listings with filters:`, { page: pageNum, limit: limitNum, search, status, category });
+      logger.info(`Fetching listings with filters:`, { page: pageNum, limit: limitNum, search, status: finalStatus, category });
       console.log('🔍 Fetching listings from Supabase...');
 
       // Build Supabase query
@@ -36,9 +50,9 @@ export const listingsController = {
         query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
       }
       
-              if (status && typeof status === 'string') {
-          query = query.eq('status', status.toLowerCase());
-        }
+      if (finalStatus && typeof finalStatus === 'string') {
+        query = query.eq('status', finalStatus.toLowerCase());
+      }
       
       if (category) {
         query = query.eq('category', category);
@@ -485,13 +499,11 @@ export const listingsController = {
         await supabase
           .from('elasticsearch_sync_queue')
           .insert({
-            type: 'ELASTICSEARCH_SYNC',
+            table_name: 'listings',
             operation,
-            table: 'listings',
             record_id: listing.id,
             change_data: { new: listing, old: null },
-            status: 'pending',
-            created_at: new Date().toISOString()
+            status: 'pending'
           });
         logger.info(`✅ ES sync job enqueued after moderation`, { id: listing.id, operation });
       } catch (enqueueError) {

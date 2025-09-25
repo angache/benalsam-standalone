@@ -77,6 +77,10 @@ const statusColors = {
   [ListingStatus.PENDING_APPROVAL]: 'warning',
   [ListingStatus.REJECTED]: 'error',
   'PENDING': 'warning', // Backend'den gelen status
+  'active': 'success',
+  'inactive': 'default',
+  'pending_approval': 'warning',
+  'rejected': 'error',
 } as const;
 
 const statusLabels = {
@@ -85,6 +89,10 @@ const statusLabels = {
   [ListingStatus.PENDING_APPROVAL]: 'Onay Bekliyor',
   [ListingStatus.REJECTED]: 'Reddedildi',
   'PENDING': 'Onay Bekliyor', // Backend'den gelen status
+  'active': 'Aktif',
+  'inactive': 'Pasif',
+  'pending_approval': 'Onay Bekliyor',
+  'rejected': 'Reddedildi',
 } as const;
 
 export const ListingsPage: React.FC = () => {
@@ -92,7 +100,7 @@ export const ListingsPage: React.FC = () => {
   
   const [tabValue, setTabValue] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>(ListingStatus.PENDING_APPROVAL); // İlk tab için PENDING_APPROVAL
+  const [statusFilter, setStatusFilter] = useState<string>('pending_approval'); // İlk tab için pending_approval
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [moderationDialog, setModerationDialog] = useState(false);
   const [moderationAction, setModerationAction] = useState<'approve' | 'reject' | 're-evaluate' | 'deactivate' | 'activate'>('approve');
@@ -544,10 +552,10 @@ export const ListingsPage: React.FC = () => {
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
                   <MenuItem value="ALL">Tümü</MenuItem>
-                  <MenuItem value="ACTIVE">Aktif</MenuItem>
-                  <MenuItem value="PENDING_APPROVAL">Onay Bekleyen</MenuItem>
-                  <MenuItem value="INACTIVE">Pasif</MenuItem>
-                  <MenuItem value="REJECTED">Reddedilen</MenuItem>
+                  <MenuItem value="active">Aktif</MenuItem>
+                  <MenuItem value="pending_approval">Onay Bekleyen</MenuItem>
+                  <MenuItem value="inactive">Pasif</MenuItem>
+                  <MenuItem value="rejected">Reddedilen</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

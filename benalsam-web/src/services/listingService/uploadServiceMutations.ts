@@ -476,25 +476,36 @@ async function pollListingJobStatus(
 
       if (status === 'completed') {
         console.log('✅ Listing job completed successfully', { jobId });
-        
-        if (jobResult && jobResult.listingId) {
-          // Fetch the created/updated listing from database
+
+        const listingId = jobResult?.listingId;
+        if (!listingId) {
+          return null;
+        }
+
+        try {
+          // Try to fetch the created/updated listing from database for UX; tolerate 406 / no-row
           const { supabase } = await import('@/lib/supabaseClient');
-          const { data: listing, error: fetchError } = await supabase
+          const { data: listing, error: fetchError, status: httpStatus } = await supabase
             .from('listings')
             .select('*')
-            .eq('id', jobResult.listingId)
+            .eq('id', listingId)
             .single();
 
           if (fetchError) {
-            console.error('❌ Failed to fetch created listing:', fetchError);
-            return null;
+            // Treat 406 (Not Acceptable) or no-row as acceptable; return minimal object
+            console.warn('⚠️ Could not fetch created listing; proceeding with minimal result.', {
+              listingId,
+              httpStatus,
+              error: fetchError.message
+            });
+            return { id: listingId } as unknown as Listing;
           }
 
-          return listing;
+          return listing as Listing;
+        } catch (fetchErr) {
+          console.warn('⚠️ Listing fetch threw; proceeding with minimal result.', { listingId, error: String(fetchErr) });
+          return { id: listingId } as unknown as Listing;
         }
-        
-        return null;
       } else if (status === 'failed') {
         throw new Error(error || 'Listing job failed');
       }
