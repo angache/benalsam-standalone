@@ -2,6 +2,7 @@ import { supabase } from '../config/supabase';
 import logger from '../config/logger';
 import { rabbitmqService } from './rabbitmqService';
 import { databaseCircuitBreaker } from '../utils/circuitBreaker';
+import { realtimeSubscriptionService } from './realtimeSubscriptionService';
 
 interface TraceContext {
   traceId: string;
@@ -24,9 +25,10 @@ export class DatabaseTriggerBridge {
   private processedJobsCount: number = 0;
   private errorCount: number = 0;
   private interval: number = 15000; // Default 15 saniye
+  private useRealtime: boolean = true; // Enable realtime by default
 
   /**
-   * Database trigger bridge'i başlat
+   * Database trigger bridge'i başlat (Event-Driven Architecture)
    */
   async startProcessing(intervalMs: number = 15000): Promise<void> {
     if (this.isProcessing) {
@@ -36,7 +38,7 @@ export class DatabaseTriggerBridge {
 
     this.isProcessing = true;
     this.interval = intervalMs;
-    logger.info('🚀 Starting database trigger bridge...');
+    logger.info('🚀 Starting database trigger bridge (Event-Driven Architecture)...');
 
     // RabbitMQ bağlantısını kontrol et
     try {
@@ -46,11 +48,49 @@ export class DatabaseTriggerBridge {
       logger.error('❌ Failed to connect to RabbitMQ:', error);
     }
 
+    // Try realtime subscription first
+    if (this.useRealtime) {
+      try {
+        await realtimeSubscriptionService.start();
+        logger.info('✅ Realtime subscription started - Zero polling mode active');
+        
+        // Start fallback polling as backup
+        this.startFallbackPolling();
+      } catch (error) {
+        logger.error('❌ Failed to start realtime subscription, falling back to polling:', error);
+        this.startPolling();
+      }
+    } else {
+      this.startPolling();
+    }
+
+    logger.info('✅ Database trigger bridge started');
+  }
+
+  /**
+   * Start traditional polling
+   */
+  private startPolling(): void {
     this.processingInterval = setInterval(async () => {
       await this.processPendingJobs();
     }, this.interval);
+    logger.info('📊 Polling mode started');
+  }
 
-    logger.info('✅ Database trigger bridge started');
+  /**
+   * Start fallback polling (backup for realtime)
+   */
+  private startFallbackPolling(): void {
+    // Fallback polling with longer interval (60 seconds)
+    setTimeout(() => {
+      this.processingInterval = setInterval(async () => {
+        const realtimeStatus = realtimeSubscriptionService.getStatus();
+        if (!realtimeStatus.isConnected) {
+          logger.warn('⚠️ Realtime disconnected, processing pending jobs via fallback polling');
+          await this.processPendingJobs();
+        }
+      }, 60000); // 60 seconds fallback
+    }, 30000); // Start fallback after 30 seconds
   }
 
   /**

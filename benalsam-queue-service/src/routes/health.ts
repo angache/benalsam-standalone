@@ -1,26 +1,35 @@
 import { Router, Request, Response } from 'express';
 import logger from '../config/logger';
 import { databaseCircuitBreaker } from '../utils/circuitBreaker';
+import { realtimeSubscriptionService } from '../services/realtimeSubscriptionService';
 
 const router = Router();
 
 router.get('/', async (_req: Request, res: Response) => {
   try {
     const circuitBreakerMetrics = databaseCircuitBreaker.getMetrics();
+    const realtimeStatus = realtimeSubscriptionService.getStatus();
     
     const healthCheck = {
-      status: circuitBreakerMetrics.isHealthy ? 'healthy' : 'degraded',
+      status: circuitBreakerMetrics.isHealthy && realtimeStatus.isConnected ? 'healthy' : 'degraded',
       timestamp: new Date().toISOString(),
       service: 'queue-service',
       version: process.env['npm_package_version'] || '1.0.0',
       uptime: process.uptime(),
       memory: process.memoryUsage(),
       environment: process.env['NODE_ENV'],
+      architecture: realtimeStatus.isConnected ? 'event-driven' : 'enterprise-polling',
       circuitBreaker: {
         state: circuitBreakerMetrics.state,
         failureCount: circuitBreakerMetrics.failureCount,
         successCount: circuitBreakerMetrics.successCount,
         isHealthy: circuitBreakerMetrics.isHealthy
+      },
+      realtime: {
+        isConnected: realtimeStatus.isConnected,
+        reconnectAttempts: realtimeStatus.reconnectAttempts,
+        maxReconnectAttempts: realtimeStatus.maxReconnectAttempts,
+        mode: realtimeStatus.isConnected ? 'zero-polling' : 'fallback-polling'
       }
     };
 
