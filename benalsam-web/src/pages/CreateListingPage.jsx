@@ -477,55 +477,169 @@ const Step6_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
                 </Card>
               </motion.div>
 
-              {/* Non-dismissable Progress Modal */}
+              {/* Animated Timeline Progress Modal */}
               {isProgressModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm" role="dialog" aria-modal="true">
-                  <div className="w-full max-w-lg rounded-xl bg-card border border-border shadow-2xl p-6">
-                    <div className="flex items-center gap-3 mb-5">
-                      {progressPhase !== 'success' && progressPhase !== 'error' ? (
-                        <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                      ) : (
-                        <div className="w-5 h-5 text-primary">✓</div>
-                      )}
-                      <h3 className="text-lg font-semibold">İlan Gönderimi</h3>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-md" role="dialog" aria-modal="true">
+                  <div className="w-full max-w-md rounded-2xl bg-card border border-border shadow-2xl p-8">
+                    {/* Header */}
+                    <div className="text-center mb-8">
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                        {progressPhase === 'success' ? (
+                          <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        ) : progressPhase === 'error' ? (
+                          <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </div>
+                        ) : (
+                          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                        )}
+                      </div>
+                      <h3 className="text-xl font-bold text-foreground mb-2">
+                        {progressPhase === 'success' ? '🎉 İlan Hazır!' : 
+                         progressPhase === 'error' ? '❌ Hata Oluştu' : 
+                         '🎯 İlanınız Yayına Hazırlanıyor'}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">{progressMessage}</p>
                     </div>
 
-                    <ol className="space-y-4">
-                      <li className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${progressPhase === 'uploading' ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>1</div>
-                        <div className="flex-1">
-                          <div className={`text-sm ${progressPhase === 'uploading' ? 'text-primary font-medium' : 'text-muted-foreground'}`}>Görseller yükleniyor</div>
-                          <Progress value={progressPhase === 'uploading' ? uploadProgress : progressPhase !== 'idle' ? 100 : 0} className="h-2 mt-2" />
+                    {/* Animated Timeline */}
+                    <div className="space-y-6">
+                      {/* Step 1: Image Upload */}
+                      <div className="flex items-center gap-4">
+                        <div className="flex-shrink-0">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 ${
+                            progressPhase === 'uploading' ? 'bg-primary text-white scale-110' :
+                            progressPhase === 'creating' || progressPhase === 'success' ? 'bg-green-500 text-white' :
+                            'bg-muted text-muted-foreground'
+                          }`}>
+                            {progressPhase === 'uploading' ? (
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : progressPhase === 'creating' || progressPhase === 'success' ? (
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            ) : (
+                              <span className="text-sm font-semibold">1</span>
+                            )}
+                          </div>
                         </div>
-                        <span className="ml-2 text-xs text-muted-foreground">{progressPhase === 'uploading' ? `${uploadProgress}%` : progressPhase !== 'idle' ? 'Tamamlandı' : ''}</span>
-                      </li>
-
-                      <li className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${progressPhase === 'creating' ? 'bg-primary text-white' : progressPhase === 'success' ? 'bg-primary/80 text-white' : 'bg-muted text-muted-foreground'}`}>2</div>
                         <div className="flex-1">
-                          <div className={`text-sm ${progressPhase === 'creating' ? 'text-primary font-medium' : 'text-muted-foreground'}`}>İlan kaydediliyor</div>
-                          {progressPhase === 'creating' ? (
-                            <div className="h-2 w-full bg-muted rounded mt-2 relative overflow-hidden">
-                              <div className="h-full bg-primary rounded animate-pulse" style={{ width: '60%' }} />
+                          <div className={`font-medium transition-colors duration-300 ${
+                            progressPhase === 'uploading' ? 'text-primary' :
+                            progressPhase === 'creating' || progressPhase === 'success' ? 'text-green-600' :
+                            'text-muted-foreground'
+                          }`}>
+                            Görseller yükleniyor...
+                          </div>
+                          {progressPhase === 'uploading' && (
+                            <div className="mt-2">
+                              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-300 ease-out"
+                                  style={{ width: `${uploadProgress}%` }}
+                                />
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">{uploadProgress}% tamamlandı</div>
                             </div>
-                          ) : (
-                            <div className="h-2 w-full bg-muted rounded mt-2" />
                           )}
                         </div>
-                        <span className="ml-2 text-xs text-muted-foreground">
+                        <div className="flex-shrink-0">
+                          {progressPhase === 'uploading' ? (
+                            <span className="text-xs text-primary font-medium">🔄</span>
+                          ) : progressPhase === 'creating' || progressPhase === 'success' ? (
+                            <span className="text-xs text-green-600 font-medium">✅</span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">⏳</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Connecting Line */}
+                      <div className="ml-5 w-px h-6 bg-gradient-to-b from-primary/30 to-muted/30"></div>
+
+                      {/* Step 2: Saving */}
+                      <div className="flex items-center gap-4">
+                        <div className="flex-shrink-0">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 ${
+                            progressPhase === 'creating' ? 'bg-primary text-white scale-110' :
+                            progressPhase === 'success' ? 'bg-green-500 text-white' :
+                            'bg-muted text-muted-foreground'
+                          }`}>
+                            {progressPhase === 'creating' ? (
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : progressPhase === 'success' ? (
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            ) : (
+                              <span className="text-sm font-semibold">2</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <div className={`font-medium transition-colors duration-300 ${
+                            progressPhase === 'creating' ? 'text-primary' :
+                            progressPhase === 'success' ? 'text-green-600' :
+                            'text-muted-foreground'
+                          }`}>
+                            İlan kaydediliyor...
+                          </div>
+                          {progressPhase === 'creating' && (
+                            <div className="mt-2">
+                              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                <div className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full animate-pulse" style={{ width: '70%' }} />
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">Veritabanına kaydediliyor</div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-shrink-0">
                           {progressPhase === 'creating' ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : progressPhase === 'success' ? 'Tamamlandı' : ''}
-                        </span>
-                      </li>
-                    </ol>
+                            <span className="text-xs text-primary font-medium">🔄</span>
+                          ) : progressPhase === 'success' ? (
+                            <span className="text-xs text-green-600 font-medium">✅</span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">⏳</span>
+                          )}
+                        </div>
+                      </div>
 
-                    <p className="mt-5 text-sm text-muted-foreground">{progressMessage}</p>
+                      {/* Overall Progress */}
+                      <div className="mt-6 pt-4 border-t border-border">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium">Genel İlerleme</span>
+                          <span className="text-sm text-muted-foreground">
+                            {progressPhase === 'uploading' ? `${Math.round(uploadProgress / 2)}%` :
+                             progressPhase === 'creating' ? '75%' :
+                             progressPhase === 'success' ? '100%' : '0%'}
+                          </span>
+                        </div>
+                        <div className="h-3 bg-muted rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-primary via-primary/80 to-green-500 rounded-full transition-all duration-1000 ease-out"
+                            style={{ 
+                              width: progressPhase === 'uploading' ? `${uploadProgress / 2}%` :
+                                     progressPhase === 'creating' ? '75%' :
+                                     progressPhase === 'success' ? '100%' : '0%'
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
 
+                    {/* Action Buttons */}
                     {progressPhase === 'success' && (
-                      <div className="mt-4 space-y-3">
-                        <div className="text-xs text-muted-foreground">
-                          İlanınız onaylandıktan sonra arama sonuçlarında görüntülenecektir.
+                      <div className="mt-8 space-y-4">
+                        <div className="text-center">
+                          <div className="text-sm text-muted-foreground mb-2">
+                            İlanınız onaylandıktan sonra arama sonuçlarında görüntülenecektir.
+                          </div>
                         </div>
                         <Button 
                           onClick={() => {
@@ -533,15 +647,15 @@ const Step6_Review = lazy(() => import('@/components/CreateListingPage/steps/Ste
                             toast({ title: 'İlan Gönderildi', description: 'Onaylandıktan sonra arama sonuçlarında görünecek.' });
                             navigate(`/profil/${currentUser.id}`);
                           }}
-                          className="w-full"
+                          className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
                         >
-                          İlanlarıma Git
+                          🎉 İlanlarıma Git
                         </Button>
                       </div>
                     )}
 
                     {progressPhase === 'error' && (
-                      <div className="mt-4 space-y-3">
+                      <div className="mt-8 space-y-4">
                         <Button 
                           onClick={() => {
                             setIsProgressModalOpen(false);
