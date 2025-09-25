@@ -74,13 +74,19 @@ export class DatabaseTriggerBridge {
    */
   private async processPendingJobs(): Promise<void> {
     try {
-      // Database'den sadece pending job'ları al (processing, sent, completed ve failed olanları alma)
-      const { data: pendingJobs, error } = await supabase
+      // Timeout ile database sorgusu
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Database query timeout')), 10000); // 10 saniye timeout
+      });
+
+      const queryPromise = supabase
         .from('elasticsearch_sync_queue')
         .select('*')
         .eq('status', 'pending')
         .order('created_at', { ascending: true })
         .limit(10);
+
+      const { data: pendingJobs, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
 
       if (error) {
         logger.error('❌ Error fetching pending jobs:', error);
@@ -99,8 +105,18 @@ export class DatabaseTriggerBridge {
       }
 
     } catch (error) {
-      logger.error('❌ Error in processPendingJobs:', error);
+      if (error instanceof Error && error.message === 'Database query timeout') {
+        logger.warn('⏰ Database query timeout - will retry on next cycle');
+      } else {
+        logger.error('❌ Error in processPendingJobs:', error);
+      }
       this.errorCount++;
+      
+      // Eğer çok fazla hata varsa, interval'ı artır
+      if (this.errorCount > 5) {
+        logger.warn(`⚠️ Too many errors (${this.errorCount}), increasing interval to 60s`);
+        this.interval = 60000; // 60 saniye
+      }
     }
   }
 
