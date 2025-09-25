@@ -22,10 +22,6 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
       'X-Client-Info': 'benalsam-queue-service',
       'Connection': 'keep-alive'  // Enable connection pooling
     }
-  },
-  // Enterprise connection settings
-  realtime: {
-    enabled: false  // Disable realtime for queue service
   }
 });
 
