@@ -52,8 +52,8 @@ app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/search', searchRoutes);
 
 // Metrics route'larını ekle
-app.use('/metrics', metricsRoutes);
-app.use('/api/v1/metrics', metricsRoutes);
+app.use('/', metricsRoutes);
+app.use('/api/v1', metricsRoutes);
 
 // Ana endpoint
 app.get('/', (req, res) => {

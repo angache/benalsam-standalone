@@ -36,7 +36,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Routes
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/cache', cacheRoutes);
-app.use('/api/v1/metrics', metricsRoutes);
+app.use('/api/v1', metricsRoutes);
 
 // Error handling
 app.use(errorHandler);

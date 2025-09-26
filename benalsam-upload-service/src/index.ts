@@ -49,7 +49,7 @@ app.use(`/api/${API_VERSION}/upload`, uploadRoutes);
 app.use(`/api/${API_VERSION}/health`, healthRoutes);
 app.use(`/api/${API_VERSION}/jobs`, jobRoutes);
 app.use(`/api/${API_VERSION}/listings`, listingsRoutes);
-app.use(`/api/${API_VERSION}/metrics`, metricsRoutes);
+app.use(`/api/${API_VERSION}`, metricsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

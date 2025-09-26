@@ -70,7 +70,7 @@ app.use((req, _res, next) => {
 app.use(`/api/${API_VERSION}/listings`, authMiddleware, listingRoutes);
 app.use(`/api/${API_VERSION}/jobs`, authMiddleware, jobRoutes);
 app.use(`/api/${API_VERSION}/health`, healthRoutes);
-app.use(`/api/${API_VERSION}/metrics`, metricsRoutes);
+app.use(`/api/${API_VERSION}`, metricsRoutes);
 
 // Root endpoint
 app.get('/', (_req, res) => {

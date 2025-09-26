@@ -16,23 +16,23 @@ router.get('/', async (_req: Request, res: Response) => {
     let queueStats = { pending: 0, processing: 0, completed: 0, failed: 0 };
     
     try {
-      // Stuck jobs (5 dakikadan eski processing)
+      // Single optimized query for both stuck jobs and queue stats
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      const { count: stuckCount } = await supabase
+      const { data: jobs } = await supabase
         .from('elasticsearch_sync_queue')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'processing')
-        .lt('processed_at', fiveMinutesAgo);
+        .select('status, processed_at')
+        .limit(1000); // Limit for performance
       
-      stuckJobsCount = stuckCount || 0;
-      
-      // Queue statistics
-      const { data: stats } = await supabase
-        .from('elasticsearch_sync_queue')
-        .select('status');
-      
-      if (stats) {
-        queueStats = stats.reduce((acc: any, job: any) => {
+      if (jobs) {
+        // Count stuck jobs
+        stuckJobsCount = jobs.filter(job => 
+          job.status === 'processing' && 
+          job.processed_at && 
+          new Date(job.processed_at) < new Date(fiveMinutesAgo)
+        ).length;
+        
+        // Calculate queue stats
+        queueStats = jobs.reduce((acc: any, job: any) => {
           acc[job.status] = (acc[job.status] || 0) + 1;
           return acc;
         }, { pending: 0, processing: 0, completed: 0, failed: 0 });

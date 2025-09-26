@@ -25,26 +25,35 @@ router.get('/', requestTimeout(timeoutPresets.health), async (req, res) => {
       }
     };
 
-    // ✅ OPTIMIZED: Parallel health checks with timeout
+    // ✅ OPTIMIZED: Parallel health checks with individual timeouts
     const healthChecks = await Promise.allSettled([
-      // Database health check
-      supabase
-        .from('admin_users')
-        .select('count')
-        .limit(1)
-        .then(({ error }) => {
-          if (error) throw error;
+      // Database health check (1 second timeout)
+      Promise.race([
+        supabase
+          .from('admin_users')
+          .select('count')
+          .limit(1)
+          .then(({ error }) => {
+            if (error) throw error;
+            return 'healthy';
+          }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Database timeout')), 1000))
+      ]),
+      
+      // Redis health check (500ms timeout)
+      Promise.race([
+        redis.ping().then(() => 'healthy'),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Redis timeout')), 500))
+      ]),
+      
+      // Elasticsearch health check (1 second timeout)
+      Promise.race([
+        elasticsearchClient.cluster.health().then(health => {
+          if (health.status === 'red') throw new Error('Cluster status is red');
           return 'healthy';
         }),
-      
-      // Redis health check
-      redis.ping().then(() => 'healthy'),
-      
-      // Elasticsearch health check
-      elasticsearchClient.cluster.health().then(health => {
-        if (health.status === 'red') throw new Error('Cluster status is red');
-        return 'healthy';
-      })
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Elasticsearch timeout')), 1000))
+      ])
     ]);
 
     // Process results

@@ -41,27 +41,31 @@ router.get('/detailed', async (req, res) => {
       }
     };
 
-    // Check Redis
-    try {
-      const redisClient = getRedisClient();
-      await redisClient.ping();
-      health.dependencies.redis = 'healthy';
-    } catch (error) {
-      health.dependencies.redis = 'unhealthy';
-      health.status = 'degraded';
-    }
+    // ✅ OPTIMIZED: Parallel health checks with timeouts
+    const healthChecks = await Promise.allSettled([
+      // Redis health check (500ms timeout)
+      Promise.race([
+        getRedisClient().ping().then(() => 'healthy'),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Redis timeout')), 500))
+      ]),
+      
+      // RabbitMQ health check (500ms timeout)
+      Promise.race([
+        Promise.resolve().then(() => {
+          const channel = getChannel();
+          return channel ? 'healthy' : 'unhealthy';
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('RabbitMQ timeout')), 500))
+      ])
+    ]);
 
-    // Check RabbitMQ
-    try {
-      const channel = getChannel();
-      if (channel) {
-        health.dependencies.rabbitmq = 'healthy';
-      } else {
-        health.dependencies.rabbitmq = 'unhealthy';
-        health.status = 'degraded';
-      }
-    } catch (error) {
-      health.dependencies.rabbitmq = 'unhealthy';
+    // Process results
+    const [redisResult, rabbitmqResult] = healthChecks;
+    
+    health.dependencies.redis = redisResult.status === 'fulfilled' ? 'healthy' : 'unhealthy';
+    health.dependencies.rabbitmq = rabbitmqResult.status === 'fulfilled' ? 'healthy' : 'unhealthy';
+    
+    if (health.dependencies.redis !== 'healthy' || health.dependencies.rabbitmq !== 'healthy') {
       health.status = 'degraded';
     }
 

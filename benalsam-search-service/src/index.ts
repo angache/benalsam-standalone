@@ -68,7 +68,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/search', searchRoutes);
-app.use('/api/v1/metrics', metricsRoutes);
+app.use('/api/v1', metricsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

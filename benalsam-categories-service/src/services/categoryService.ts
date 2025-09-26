@@ -23,26 +23,26 @@ export class CategoryService {
    * Get all categories with tree structure
    */
   async getCategories(): Promise<Category[]> {
-    return await databaseCircuitBreaker.execute(async () => {
-      try {
-        // Try cache first
-        const cachedResult = await cacheCircuitBreaker.execute(async () => {
-          return await CacheService.get(CacheService.getKeys.categories());
-        }, 'cache-get-categories');
-        
-        if (cachedResult) {
-          logger.info('📦 Returning cached categories', { service: 'categories-service' });
-          return cachedResult;
-        }
+    try {
+      // Try cache first (without circuit breaker for speed)
+      const cachedResult = await CacheService.get(CacheService.getKeys.categories());
+      
+      if (cachedResult) {
+        logger.info('📦 Returning cached categories', { service: 'categories-service' });
+        return cachedResult;
+      }
 
-        logger.info('🔄 Fetching categories from database', { service: 'categories-service' });
-        
+      logger.info('🔄 Fetching categories from database', { service: 'categories-service' });
+      
+      // Use circuit breaker only for database operations
+      return await databaseCircuitBreaker.execute(async () => {
         const { data: categories, error } = await supabase
           .from('categories')
           .select(`
             *,
             category_attributes (*)
           `)
+          .eq('is_active', true) // Only active categories
           .order('sort_order', { ascending: true });
 
         if (error) {
@@ -52,19 +52,19 @@ export class CategoryService {
 
         const tree = this.buildCategoryTree(categories || []);
         
-        // Cache for 24 hours
-        await cacheCircuitBreaker.execute(async () => {
-          await CacheService.set(CacheService.getKeys.categories(), tree, 24 * 60 * 60);
-        }, 'cache-set-categories');
+        // Cache for 24 hours (async, don't wait)
+        CacheService.set(CacheService.getKeys.categories(), tree, 24 * 60 * 60).catch(err => {
+          logger.warn('Failed to cache categories:', { error: err, service: 'categories-service' });
+        });
         
         logger.info(`✅ Fetched ${tree.length} main categories`, { service: 'categories-service' });
         return tree;
+      }, 'get-categories');
 
-      } catch (error) {
-        logger.error('Error in getCategories:', { error, service: 'categories-service' });
-        throw error;
-      }
-    }, 'get-categories');
+    } catch (error) {
+      logger.error('Error in getCategories:', { error, service: 'categories-service' });
+      throw error;
+    }
   }
 
   /**

@@ -21,7 +21,7 @@ async function makeCacheServiceRequest(
       headers: {
         'Content-Type': 'application/json'
       },
-      timeout: 10000
+      timeout: 1000 // 1 second timeout for better performance
     };
 
     const response = await axios(config);
