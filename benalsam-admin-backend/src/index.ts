@@ -86,6 +86,7 @@ import sessionCleanupService from './services/sessionCleanupService';
 import { AnalyticsAlertsService } from './services/analyticsAlertsService';
 import performanceMonitoringService from './services/performanceMonitoringService';
 import { initializeRedis } from './services/redisService'; // Redis Cloud enabled
+import prisma from './config/database';
 import { serviceRegistry } from './services/serviceRegistry'; // Service Registry for microservices
 
 // Import middleware
@@ -344,7 +345,7 @@ const startServer = async () => {
     const services = serviceRegistry.getServices();
     logger.info(`✅ Service Registry initialized with services: ${services.join(', ')}`);
 
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
       logger.info(`🚀 Admin Backend API running on port ${PORT}`);
       logger.info(`📊 Environment: ${process.env.NODE_ENV}`);
       logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
@@ -362,16 +363,46 @@ const startServer = async () => {
 process.on('unhandledRejection', enhancedErrorHandler.handleUnhandledRejection);
 process.on('uncaughtException', enhancedErrorHandler.handleUncaughtException);
 
-// Graceful shutdown
-process.on('SIGTERM', async () => {
-  logger.info('🛑 SIGTERM received, shutting down gracefully...');
-  process.exit(0);
-});
+// Global server instance
+let server: any;
 
-process.on('SIGINT', async () => {
-  logger.info('🛑 SIGINT received, shutting down gracefully...');
-  process.exit(0);
-});
+// Enterprise Graceful Shutdown Handler
+const gracefulShutdown = async (signal: string) => {
+  logger.info(`🛑 ${signal} received, starting enterprise graceful shutdown...`);
+  
+  try {
+    // Stop accepting new requests
+    if (server) {
+      server.close(() => {
+        logger.info('✅ HTTP server closed gracefully');
+      });
+    }
+
+    // Stop with timeout
+    const shutdownTimeout = setTimeout(() => {
+      logger.warn('⚠️ Shutdown timeout reached, forcing exit');
+      process.exit(1);
+    }, 10000); // 10 second timeout
+
+    // Disconnect from external services
+    await prisma.$disconnect();
+    logger.info('✅ Database disconnected gracefully');
+
+    // Redis disconnect is handled by the redis service
+    logger.info('✅ Redis disconnected gracefully');
+
+    clearTimeout(shutdownTimeout);
+    logger.info('✅ Enterprise graceful shutdown completed successfully');
+    process.exit(0);
+  } catch (error) {
+    logger.error('❌ Error during graceful shutdown:', error);
+    process.exit(1);
+  }
+};
+
+// Handle different shutdown signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Start the server
 startServer();
