@@ -2,8 +2,8 @@
 
 ## 📊 PROJE DURUMU
 
-**Son Güncelleme**: 22 Eylül 2025, 01:30  
-**Durum**: %95 tamamlandı - Production-ready microservice architecture with comprehensive testing, monitoring, and security
+**Son Güncelleme**: 26 Eylül 2025, 18:45  
+**Durum**: %98 tamamlandı - Production-ready microservice architecture with comprehensive testing, monitoring, security, and enterprise patterns
 
 ## 🏗️ SİSTEM MİMARİSİ
 
@@ -94,10 +94,13 @@ curl http://localhost:3008/api/v1/health  # Listing Service
 - `GET /api/v1/health` - Health check
 - `GET /api/v1/listings` - List all listings
 - `POST /api/v1/listings/:id/moderate` - Moderate listing
-- `GET /api/v1/monitoring/prometheus` - Prometheus metrics
+- `GET /metrics` - Prometheus metrics (direct access)
+- `GET /api/v1/metrics` - Prometheus metrics (API versioned)
 
 ### Elasticsearch Service (Port 3006)
 - `GET /health` - Health check
+- `GET /metrics` - Prometheus metrics (direct access)
+- `GET /api/v1/metrics` - Prometheus metrics (API versioned)
 - `GET /api/v1/search/listings` - Search listings
 - `DELETE /api/v1/search/listings/:id` - Delete listing
 
@@ -105,6 +108,7 @@ curl http://localhost:3008/api/v1/health  # Listing Service
 - `GET /api/v1/health` - Health check
 - `POST /api/v1/upload/listings` - Upload listing images
 - `GET /api/v1/jobs/metrics` - Job metrics
+- `GET /api/v1/metrics` - Prometheus metrics
 
 ### Listing Service (Port 3008)
 - `GET /api/v1/health` - Health check
@@ -113,6 +117,23 @@ curl http://localhost:3008/api/v1/health  # Listing Service
 - `PUT /api/v1/listings/:id` - Update listing (async)
 - `DELETE /api/v1/listings/:id` - Delete listing (async)
 - `GET /api/v1/jobs/metrics` - Job metrics
+- `GET /api/v1/metrics` - Prometheus metrics
+
+### Queue Service (Port 3012)
+- `GET /api/v1/health` - Health check
+- `GET /api/v1/metrics` - Prometheus metrics
+
+### Cache Service (Port 3014)
+- `GET /api/v1/health` - Health check
+- `GET /api/v1/metrics` - Prometheus metrics
+
+### Categories Service (Port 3015)
+- `GET /api/v1/health` - Health check
+- `GET /api/v1/metrics` - Prometheus metrics
+
+### Search Service (Port 3016)
+- `GET /api/v1/health` - Health check
+- `GET /api/v1/metrics` - Prometheus metrics
 
 ## 🔄 EVENT-DRIVEN ARCHITECTURE
 
@@ -140,6 +161,15 @@ Web App → Listing Service → Job System → RabbitMQ → Upload Service → C
 ### Prometheus
 - **URL**: http://localhost:9090
 - **Metrics**: Tüm servislerden metrics toplama
+- **Direct Metrics Access**:
+  - Admin Backend: `http://localhost:3002/metrics`
+  - Elasticsearch Service: `http://localhost:3006/metrics`
+  - Upload Service: `http://localhost:3007/api/v1/metrics`
+  - Listing Service: `http://localhost:3008/api/v1/metrics`
+  - Queue Service: `http://localhost:3012/api/v1/metrics`
+  - Cache Service: `http://localhost:3014/api/v1/metrics`
+  - Categories Service: `http://localhost:3015/api/v1/metrics`
+  - Search Service: `http://localhost:3016/api/v1/metrics`
 
 ### Alertmanager
 - **URL**: http://localhost:9093
@@ -154,6 +184,19 @@ curl -s "http://localhost:3002/api/v1/health" | jq '.status'
 curl -s "http://localhost:3006/health" | jq '.status'
 curl -s "http://localhost:3007/api/v1/health" | jq '.status'
 curl -s "http://localhost:3008/api/v1/health" | jq '.status'
+```
+
+### 1.1. Prometheus Metrics Test
+```bash
+# Tüm servislerin Prometheus metrics'leri
+curl -s "http://localhost:3002/metrics" | head -5
+curl -s "http://localhost:3006/metrics" | head -5
+curl -s "http://localhost:3007/api/v1/metrics" | head -5
+curl -s "http://localhost:3008/api/v1/metrics" | head -5
+curl -s "http://localhost:3012/api/v1/metrics" | head -5
+curl -s "http://localhost:3014/api/v1/metrics" | head -5
+curl -s "http://localhost:3015/api/v1/metrics" | head -5
+curl -s "http://localhost:3016/api/v1/metrics" | head -5
 ```
 
 ### 2. Listing CRUD Operations

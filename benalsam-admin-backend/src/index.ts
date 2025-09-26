@@ -220,6 +220,8 @@ app.use('/api/v1/session-management', sessionManagementRoutes); // Session Manag
 app.use('/api/v1/cache', cacheRoutes); // Cache Management sistemi aktif edildi
 app.use('/api/v1/search', searchRoutes);
 app.use('/api/v1', cacheDashboardRoutes); // Temporary cache dashboard endpoints
+app.use('/', prometheusRoutes); // Prometheus metrics endpoint (mounts /metrics)
+app.use('/api/v1', prometheusRoutes); // Prometheus metrics endpoint (mounts /api/v1/metrics)
 // app.use('/api/v1/api-cache', apiCacheRoutes); // Deprecated - moved to Cache Service
 // app.use('/api/v1/test', testRoutes); // Deprecated - moved to Cache Service
 // app.use('/api/v1/cache-analytics', cacheAnalyticsRoutes); // Deprecated - moved to Cache Service
