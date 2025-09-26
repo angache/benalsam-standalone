@@ -1,0 +1,124 @@
+groups:
+  - name: benalsam_services
+    rules:
+      # Service Down Alert
+      - alert: ServiceDown
+        expr: up{job="benalsam-services"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.instance }} is down"
+          description: "Service {{ $labels.instance }} has been down for more than 1 minute."
+
+      # High Error Rate Alert
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{job="benalsam-services",status_code=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate for {{ $labels.instance }}"
+          description: "Error rate for {{ $labels.instance }} is {{ $value }} errors per second."
+
+      # High Response Time Alert
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="benalsam-services"}[5m])) > 1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time for {{ $labels.instance }}"
+          description: "95th percentile response time for {{ $labels.instance }} is {{ $value }} seconds."
+
+      # High Memory Usage Alert
+      - alert: HighMemoryUsage
+        expr: process_memory_usage_bytes{job="benalsam-services",type="rss"} > 500000000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage for {{ $labels.instance }}"
+          description: "Memory usage for {{ $labels.instance }} is {{ $value }} bytes."
+
+      # High CPU Usage Alert
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total{job="benalsam-services"}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage for {{ $labels.instance }}"
+          description: "CPU usage for {{ $labels.instance }} is {{ $value }}%."
+
+      # Circuit Breaker Open Alert
+      - alert: CircuitBreakerOpen
+        expr: circuit_breaker_state{job="benalsam-services"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Circuit breaker open for {{ $labels.instance }}"
+          description: "Circuit breaker {{ $labels.breaker_name }} is open for {{ $labels.instance }}."
+
+      # Queue Backlog Alert
+      - alert: QueueBacklog
+        expr: queue_jobs_total{job="benalsam-queue-service",status="pending"} > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High queue backlog"
+          description: "Queue has {{ $value }} pending jobs."
+
+      # Failed Jobs Alert
+      - alert: HighFailedJobs
+        expr: rate(queue_jobs_total{job="benalsam-queue-service",status="failed"}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High failed job rate"
+          description: "Failed job rate is {{ $value }} jobs per second."
+
+  - name: infrastructure
+    rules:
+      # Node Exporter Down
+      - alert: NodeExporterDown
+        expr: up{job="node-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Node exporter is down"
+          description: "Node exporter has been down for more than 1 minute."
+
+      # High Disk Usage
+      - alert: HighDiskUsage
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk usage"
+          description: "Disk usage is {{ $value }}% full."
+
+      # High Memory Usage (System)
+      - alert: HighSystemMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High system memory usage"
+          description: "System memory usage is {{ $value }}%."
+
+      # Redis Down
+      - alert: RedisDown
+        expr: up{job="redis-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis has been down for more than 1 minute."

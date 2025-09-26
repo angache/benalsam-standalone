@@ -1,9 +1,52 @@
 global:
   scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "benalsam_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
 
 scrape_configs:
-  - job_name: 'elasticsearch-service'
+  - job_name: 'prometheus'
     static_configs:
-      - targets: ['localhost:3006']
+      - targets: ['localhost:9090']
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  - job_name: 'benalsam-services'
+    static_configs:
+      - targets: 
+        - 'host.docker.internal:3002'  # Admin Backend
+        - 'host.docker.internal:3006'  # Elasticsearch Service
+        - 'host.docker.internal:3007'  # Upload Service
+        - 'host.docker.internal:3008'  # Listing Service
+        - 'host.docker.internal:3012'  # Queue Service
+        - 'host.docker.internal:3014'  # Cache Service
+        - 'host.docker.internal:3015'  # Categories Service
+        - 'host.docker.internal:3016'  # Search Service
+    metrics_path: '/api/v1/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  - job_name: 'benalsam-admin-backend-metrics'
+    static_configs:
+      - targets: ['host.docker.internal:3002']
     metrics_path: '/metrics'
-    scrape_interval: 5s
+    scrape_interval: 30s
+
+  - job_name: 'benalsam-elasticsearch-service-metrics'
+    static_configs:
+      - targets: ['host.docker.internal:3006']
+    metrics_path: '/api/v1/metrics'
+    scrape_interval: 30s
