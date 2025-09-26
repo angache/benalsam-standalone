@@ -105,10 +105,14 @@ export const formatPhoneNumber = (phone) => {
 // CJS uyumluluğu için (opsiyonel)
 if (typeof module !== 'undefined' && module.exports) {
     const types = require('./types/index');
+    const errors = require('./errors/ServiceError');
+    const middleware = require('./middleware/ErrorHandler');
     const security = require('./security/SecurityMiddleware');
     // const searchTypes = require('./types/search');
     module.exports = {
         ...types,
+        ...errors,
+        ...middleware,
         ...security,
         // ...searchTypes,
         formatPrice,

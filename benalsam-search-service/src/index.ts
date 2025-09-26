@@ -13,6 +13,7 @@ import { logger } from './config/logger';
 // Import routes
 import healthRoutes from './routes/health';
 import searchRoutes from './routes/search';
+import metricsRoutes from './routes/metrics';
 
 // Environment variables already loaded above
 
@@ -67,6 +68,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/search', searchRoutes);
+app.use('/api/v1/metrics', metricsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -99,7 +101,7 @@ async function startServer() {
     }
 
     // Start server
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
       logger.info(`🚀 ${SERVICE_NAME} started on port ${PORT}`, {
         version: SERVICE_VERSION,
         port: PORT,
@@ -121,15 +123,53 @@ async function startServer() {
   }
 }
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM received, shutting down gracefully');
-  process.exit(0);
+// Global server instance
+let server: any;
+
+// Enterprise Graceful Shutdown Handler
+const gracefulShutdown = async (signal: string) => {
+  logger.info(`🛑 ${signal} received, starting enterprise graceful shutdown...`, { version: SERVICE_VERSION });
+  
+  try {
+    // Stop accepting new requests
+    if (server) {
+      server.close(() => {
+        logger.info('✅ HTTP server closed gracefully', { version: SERVICE_VERSION });
+      });
+    }
+
+    // Stop with timeout
+    const shutdownTimeout = setTimeout(() => {
+      logger.warn('⚠️ Shutdown timeout reached, forcing exit', { version: SERVICE_VERSION });
+      process.exit(1);
+    }, 10000); // 10 second timeout
+
+    // Disconnect from Elasticsearch
+    await elasticsearchConfig.closeConnection();
+    logger.info('✅ Elasticsearch connection closed gracefully', { version: SERVICE_VERSION });
+
+    clearTimeout(shutdownTimeout);
+    logger.info('✅ Enterprise graceful shutdown completed successfully', { version: SERVICE_VERSION });
+    process.exit(0);
+  } catch (error) {
+    logger.error('❌ Error during graceful shutdown:', error, { version: SERVICE_VERSION });
+    process.exit(1);
+  }
+};
+
+// Handle different shutdown signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  logger.error('❌ Uncaught Exception:', error, { version: SERVICE_VERSION });
+  gracefulShutdown('UNCAUGHT_EXCEPTION');
 });
 
-process.on('SIGINT', () => {
-  logger.info('SIGINT received, shutting down gracefully');
-  process.exit(0);
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('❌ Unhandled Rejection at:', promise, 'reason:', reason, { version: SERVICE_VERSION });
+  gracefulShutdown('UNHANDLED_REJECTION');
 });
 
 // Start the server

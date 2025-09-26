@@ -56,6 +56,20 @@ redis.on('close', () => {
   logger.warn('⚠️ Redis connection closed', { service: 'cache-service' });
 });
 
+/**
+ * Disconnect from Redis
+ */
+export async function disconnectRedis(): Promise<void> {
+  try {
+    if (redis.status === 'ready') {
+      await redis.quit();
+      logger.info('✅ Redis disconnected gracefully', { service: 'cache-service' });
+    }
+  } catch (error) {
+    logger.error('❌ Error disconnecting from Redis:', error, { service: 'cache-service' });
+  }
+}
+
 // Circuit breaker wrapped Redis operations
 export const redisWithCircuitBreaker = {
   async ping(): Promise<string> {

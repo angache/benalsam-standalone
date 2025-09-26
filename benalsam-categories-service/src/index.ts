@@ -7,9 +7,12 @@ import express from 'express';
 import compression from 'compression';
 import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types';
 import { logger } from './config/logger';
-import { checkDatabaseHealth } from './config/database';
+import { checkDatabaseHealth, disconnectDatabase } from './config/database';
+import { disconnectRedis } from './config/redis';
 import categoriesRoutes from './routes/categories';
 import healthRoutes from './routes/health';
+import metricsRoutes from './routes/metrics';
+import { errorHandler } from './middleware/errorHandler';
 
 // Create Express app
 const app = express();
@@ -56,6 +59,7 @@ app.use((req, res, next) => {
 // API routes
 app.use('/api/v1/categories', categoriesRoutes);
 app.use('/api/v1/health', healthRoutes);
+app.use('/api/v1/metrics', metricsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -84,25 +88,7 @@ app.use('*', (req, res) => {
 });
 
 // Error handling middleware
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error('Unhandled error:', {
-    error: error.message,
-    stack: error.stack,
-    url: req.url,
-    method: req.method,
-    service: SERVICE_NAME
-  });
-  
-  res.status(500).json({
-    success: false,
-    error: 'Internal server error',
-    message: process.env.NODE_ENV === 'production' 
-      ? 'An unexpected error occurred' 
-      : error.message,
-    service: SERVICE_NAME,
-    timestamp: new Date().toISOString()
-  });
-});
+app.use(errorHandler);
 
 // Start server
 const startServer = async () => {
@@ -119,7 +105,7 @@ const startServer = async () => {
     logger.info('✅ Database connection verified', { service: SERVICE_NAME });
     
     // Start server
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
       logger.info(`🚀 ${SERVICE_NAME} started on port ${PORT}`, {
         port: PORT,
         environment: process.env.NODE_ENV || 'development',
@@ -140,35 +126,65 @@ const startServer = async () => {
   }
 };
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM received, shutting down gracefully', { service: SERVICE_NAME });
-  process.exit(0);
-});
+// Global server instance
+let server: any;
 
-process.on('SIGINT', () => {
-  logger.info('SIGINT received, shutting down gracefully', { service: SERVICE_NAME });
-  process.exit(0);
-});
+// Enterprise Graceful Shutdown Handler
+const gracefulShutdown = async (signal: string) => {
+  logger.info(`🛑 ${signal} received, starting enterprise graceful shutdown...`, { service: SERVICE_NAME });
+  
+  try {
+    // Stop accepting new requests
+    if (server) {
+      server.close(() => {
+        logger.info('✅ HTTP server closed gracefully', { service: SERVICE_NAME });
+      });
+    }
+
+    // Stop with timeout
+    const shutdownTimeout = setTimeout(() => {
+      logger.warn('⚠️ Shutdown timeout reached, forcing exit', { service: SERVICE_NAME });
+      process.exit(1);
+    }, 10000); // 10 second timeout
+
+    // Disconnect from external services
+    await disconnectDatabase();
+    logger.info('✅ Database disconnected gracefully', { service: SERVICE_NAME });
+
+    await disconnectRedis();
+    logger.info('✅ Redis disconnected gracefully', { service: SERVICE_NAME });
+
+    clearTimeout(shutdownTimeout);
+    logger.info('✅ Enterprise graceful shutdown completed successfully', { service: SERVICE_NAME });
+    process.exit(0);
+  } catch (error) {
+    logger.error('❌ Error during graceful shutdown:', error, { service: SERVICE_NAME });
+    process.exit(1);
+  }
+};
+
+// Handle different shutdown signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-  logger.error('Uncaught Exception:', {
+  logger.error('❌ Uncaught Exception:', {
     error: error.message,
     stack: error.stack,
     service: SERVICE_NAME
   });
-  process.exit(1);
+  gracefulShutdown('UNCAUGHT_EXCEPTION');
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:', {
+  logger.error('❌ Unhandled Rejection at:', {
     promise,
     reason,
     service: SERVICE_NAME
   });
-  process.exit(1);
+  gracefulShutdown('UNHANDLED_REJECTION');
 });
 
 // Start the server

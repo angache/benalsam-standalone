@@ -101,6 +101,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
           const searchParams = {
             query: '',
             categories: selectedCategories.length > 0 ? selectedCategories.map(cat => cat.name) : undefined,
+            categoryIds: selectedCategories.length > 0 ? selectedCategories.map(cat => cat.id) : undefined,
             location: filters.location,
             minPrice: filters.priceRange[0],
             maxPrice: filters.priceRange[1],

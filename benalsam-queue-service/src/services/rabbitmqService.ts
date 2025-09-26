@@ -2,6 +2,7 @@ import * as amqp from 'amqplib';
 import { IRabbitMQService } from '../interfaces/IDatabaseService';
 import logger from '../config/logger';
 import { metricsService } from './MetricsService';
+// import { MessageProcessingError } from '../middleware/errorHandler';
 
 /**
  * Real RabbitMQ Service Implementation

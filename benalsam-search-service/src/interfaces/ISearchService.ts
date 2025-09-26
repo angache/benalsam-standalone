@@ -35,6 +35,7 @@ export interface IElasticsearchService {
   isAvailable(): boolean;
   search(index: string, query: any): Promise<any>;
   healthCheck(): Promise<{ status: string; responseTime: number }>;
+  getDefaultIndexName(): string;
 }
 
 export interface IRedisService {

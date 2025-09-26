@@ -109,6 +109,22 @@ class ElasticsearchConfig {
     const defaultIndex = process.env.ELASTICSEARCH_DEFAULT_INDEX || 'listings';
     return `${prefix}_${defaultIndex}`;
   }
+
+  /**
+   * Close Elasticsearch connection
+   */
+  async closeConnection(): Promise<void> {
+    try {
+      if (this.client) {
+        await this.client.close();
+        this.client = null;
+        this.isConnected = false;
+        logger.info('✅ Elasticsearch connection closed gracefully');
+      }
+    } catch (error) {
+      logger.error('❌ Error closing Elasticsearch connection:', error);
+    }
+  }
 }
 
 export const elasticsearchConfig = new ElasticsearchConfig();

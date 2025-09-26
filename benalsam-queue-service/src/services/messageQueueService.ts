@@ -1,5 +1,6 @@
 import Redis from 'ioredis';
 import logger from '../config/logger';
+import { QueueProcessingError, JobNotFoundError } from '../middleware/errorHandler';
 
 export interface QueueJob {
   id: string;
@@ -160,7 +161,7 @@ export class MessageQueueService {
   async failJob(jobId: string, error: string, maxRetries: number = 3): Promise<void> {
     try {
       if (!this.isConnected) {
-        throw new Error('Redis not connected');
+        throw new QueueProcessingError('Redis not connected', jobId);
       }
 
       // Processing queue'dan job'ı bul
@@ -192,7 +193,7 @@ export class MessageQueueService {
           }
         }
       } else {
-        logger.warn(`⚠️ Job not found in processing queue: ${jobId}`);
+        throw new JobNotFoundError(jobId);
       }
     } catch (error) {
       logger.error('❌ Error failing job:', error);

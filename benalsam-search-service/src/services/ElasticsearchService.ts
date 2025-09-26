@@ -64,4 +64,8 @@ export class ElasticsearchService implements IElasticsearchService {
       return { status: 'unhealthy', responseTime };
     }
   }
+
+  getDefaultIndexName(): string {
+    return elasticsearchConfig.getDefaultIndexName();
+  }
 }

@@ -717,9 +717,9 @@ const HomePageSkeleton = () => (
                           </div>
                         ))
                       ) : (
-                        categories.slice(0, 6).map((category) => (
+                        categories.slice(0, 6).map((category, index) => (
                         <div
-                          key={category.name}
+                          key={category.id || category.name || `category-${index}`}
                           onClick={() => handleCategoryClick(category, 0)}
                           className="group cursor-pointer bg-card border rounded-lg p-4 text-center hover:border-primary/50 hover:shadow-md transition-all duration-200"
                         >
@@ -834,7 +834,10 @@ const HomePageSkeleton = () => (
                     >
                     {listingsWithAds.map((item, index) => (
                       <motion.div
-                        key={item.type === 'listing' ? item.data.id : `ad-${item.data.id}-${index}`}
+                        key={item.type === 'listing' ? 
+                          (item.data.id || `listing-${index}`) : 
+                          `ad-${item.data.id || index}-${index}`
+                        }
                         layout
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}

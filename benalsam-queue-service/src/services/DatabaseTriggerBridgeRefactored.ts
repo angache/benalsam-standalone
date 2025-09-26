@@ -135,7 +135,7 @@ export class DatabaseTriggerBridgeRefactored {
       };
 
       await this.rabbitmqService.publishToExchange(
-        process.env.RABBITMQ_EXCHANGE || 'benalsam.jobs',
+        process.env['RABBITMQ_EXCHANGE'] || 'benalsam.jobs',
         routingKey,
         message,
         { messageId: `job_${job.id}_${Date.now()}_${Math.random().toString(36).slice(2)}` }

@@ -90,4 +90,17 @@ export const getConnectionPoolStats = async () => {
   }
 };
 
+/**
+ * Disconnect from database
+ */
+export async function disconnectDatabase(): Promise<void> {
+  try {
+    // Supabase client doesn't need explicit disconnection
+    // It manages connections automatically
+    logger.info('✅ Database disconnected gracefully', { service: 'categories-service' });
+  } catch (error) {
+    logger.error('❌ Error disconnecting from database:', error, { service: 'categories-service' });
+  }
+}
+
 export default supabase;

@@ -9,8 +9,9 @@ import uploadRoutes from './routes/upload';
 import healthRoutes from './routes/health';
 import jobRoutes from './routes/jobs';
 import listingsRoutes from './routes/listings';
-import { connectRedis } from './config/redis';
-import { connectRabbitMQ } from './config/rabbitmq';
+import metricsRoutes from './routes/metrics';
+import { connectRedis, disconnectRedis } from './config/redis';
+import { connectRabbitMQ, disconnectRabbitMQ } from './config/rabbitmq';
 // import { jobProcessorService } from './services/jobProcessor';
 
 // Load environment variables
@@ -48,6 +49,7 @@ app.use(`/api/${API_VERSION}/upload`, uploadRoutes);
 app.use(`/api/${API_VERSION}/health`, healthRoutes);
 app.use(`/api/${API_VERSION}/jobs`, jobRoutes);
 app.use(`/api/${API_VERSION}/listings`, listingsRoutes);
+app.use(`/api/${API_VERSION}/metrics`, metricsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -60,7 +62,8 @@ app.get('/', (req, res) => {
         upload: `/api/${API_VERSION}/upload`,
         health: `/api/${API_VERSION}/health`,
         jobs: `/api/${API_VERSION}/jobs`,
-        listings: `/api/${API_VERSION}/listings`
+        listings: `/api/${API_VERSION}/listings`,
+        metrics: `/api/${API_VERSION}/metrics`
       }
   });
 });
@@ -93,7 +96,7 @@ async function startServer() {
     logger.info('✅ Job Processor started');
 
     // Start server
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
       logger.info(`🚀 Upload Service running on port ${PORT}`);
       logger.info(`📚 API version: ${API_VERSION}`);
       logger.info(`🔗 Health check: http://localhost:${PORT}/api/${API_VERSION}/health`);
@@ -105,15 +108,56 @@ async function startServer() {
   }
 }
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM received, shutting down gracefully');
-  process.exit(0);
+// Global server instance
+let server: any;
+
+// Enterprise Graceful Shutdown Handler
+const gracefulShutdown = async (signal: string) => {
+  logger.info(`🛑 ${signal} received, starting enterprise graceful shutdown...`);
+  
+  try {
+    // Stop accepting new requests
+    if (server) {
+      server.close(() => {
+        logger.info('✅ HTTP server closed gracefully');
+      });
+    }
+
+    // Stop with timeout
+    const shutdownTimeout = setTimeout(() => {
+      logger.warn('⚠️ Shutdown timeout reached, forcing exit');
+      process.exit(1);
+    }, 10000); // 10 second timeout
+
+    // Disconnect from external services
+    await disconnectRabbitMQ();
+    logger.info('✅ RabbitMQ disconnected gracefully');
+
+    await disconnectRedis();
+    logger.info('✅ Redis disconnected gracefully');
+
+    clearTimeout(shutdownTimeout);
+    logger.info('✅ Enterprise graceful shutdown completed successfully');
+    process.exit(0);
+  } catch (error) {
+    logger.error('❌ Error during graceful shutdown:', error);
+    process.exit(1);
+  }
+};
+
+// Handle different shutdown signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  logger.error('❌ Uncaught Exception:', error);
+  gracefulShutdown('UNCAUGHT_EXCEPTION');
 });
 
-process.on('SIGINT', () => {
-  logger.info('SIGINT received, shutting down gracefully');
-  process.exit(0);
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  gracefulShutdown('UNHANDLED_REJECTION');
 });
 
 // Start the server

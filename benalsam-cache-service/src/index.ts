@@ -9,8 +9,10 @@ import compression from 'compression';
 import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types';
 import { logger } from './config/logger';
 import { errorHandler } from './middleware/errorHandler';
+import { disconnectRedis } from './config/redis';
 import { healthRoutes } from './routes/health';
 import { cacheRoutes } from './routes/cache';
+import metricsRoutes from './routes/metrics';
 
 const app = express();
 const PORT = process.env['PORT'] || 3014;
@@ -34,6 +36,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Routes
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/cache', cacheRoutes);
+app.use('/api/v1/metrics', metricsRoutes);
 
 // Error handling
 app.use(errorHandler);
@@ -46,19 +49,47 @@ server.listen(PORT, () => {
   logger.info(`📊 Health check: http://localhost:${PORT}/api/v1/health`, { service: 'cache-service' });
 });
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM received, shutting down gracefully', { service: 'cache-service' });
-  server.close(() => {
-    logger.info('Process terminated', { service: 'cache-service' });
+// Enterprise Graceful Shutdown Handler
+const gracefulShutdown = async (signal: string) => {
+  logger.info(`🛑 ${signal} received, starting enterprise graceful shutdown...`, { service: 'cache-service' });
+  
+  try {
+    // Stop accepting new requests
+    server.close(() => {
+      logger.info('✅ HTTP server closed gracefully', { service: 'cache-service' });
+    });
+
+    // Stop with timeout
+    const shutdownTimeout = setTimeout(() => {
+      logger.warn('⚠️ Shutdown timeout reached, forcing exit', { service: 'cache-service' });
+      process.exit(1);
+    }, 10000); // 10 second timeout
+
+    // Disconnect from Redis
+    await disconnectRedis();
+    logger.info('✅ Redis disconnected gracefully', { service: 'cache-service' });
+
+    clearTimeout(shutdownTimeout);
+    logger.info('✅ Enterprise graceful shutdown completed successfully', { service: 'cache-service' });
     process.exit(0);
-  });
+  } catch (error) {
+    logger.error('❌ Error during graceful shutdown:', error, { service: 'cache-service' });
+    process.exit(1);
+  }
+};
+
+// Handle different shutdown signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  logger.error('❌ Uncaught Exception:', error, { service: 'cache-service' });
+  gracefulShutdown('UNCAUGHT_EXCEPTION');
 });
 
-process.on('SIGINT', () => {
-  logger.info('SIGINT received, shutting down gracefully', { service: 'cache-service' });
-  server.close(() => {
-    logger.info('Process terminated', { service: 'cache-service' });
-    process.exit(0);
-  });
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('❌ Unhandled Rejection at:', promise, 'reason:', reason, { service: 'cache-service' });
+  gracefulShutdown('UNHANDLED_REJECTION');
 });
+

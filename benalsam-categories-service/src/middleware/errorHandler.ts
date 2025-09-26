@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
 import { ServiceError, ErrorCode } from 'benalsam-shared-types';
 
 export interface AppError extends Error {
@@ -10,39 +10,7 @@ export interface AppError extends Error {
 export class CustomError extends ServiceError {
   constructor(message: string, code: ErrorCode = ErrorCode.INTERNAL_ERROR, statusCode: number = 500, context: any = {}) {
     super(message, code, statusCode, {
-      service: 'queue-service',
-      ...context
-    });
-  }
-}
-
-// Queue-specific error classes
-export class QueueProcessingError extends ServiceError {
-  constructor(message: string, jobId?: string, context: any = {}) {
-    super(message, ErrorCode.INTERNAL_ERROR, 500, {
-      service: 'queue-service',
-      jobId,
-      ...context
-    });
-  }
-}
-
-export class JobNotFoundError extends ServiceError {
-  constructor(jobId: string, context: any = {}) {
-    super(`Job not found: ${jobId}`, ErrorCode.NOT_FOUND, 404, {
-      service: 'queue-service',
-      jobId,
-      ...context
-    });
-  }
-}
-
-export class MessageProcessingError extends ServiceError {
-  constructor(message: string, messageId?: string, queueName?: string, context: any = {}) {
-    super(message, ErrorCode.INTERNAL_ERROR, 500, {
-      service: 'queue-service',
-      messageId,
-      queueName,
+      service: 'categories-service',
       ...context
     });
   }
@@ -52,7 +20,7 @@ export const errorHandler = (
   error: AppError | ServiceError,
   req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ): void => {
   // Handle ServiceError instances
   if (error instanceof ServiceError) {
@@ -114,7 +82,7 @@ export const errorHandler = (
     success: false,
     message: isOperational ? message : 'Internal server error',
     code: 'LEGACY_ERROR',
-    service: 'queue-service',
+    service: 'categories-service',
     timestamp: new Date().toISOString(),
     ...(process.env['NODE_ENV'] === 'development' && {
       stack: error.stack,
