@@ -1,5 +1,6 @@
 import Redis from 'ioredis';
-import logger from './logger';
+import { logger } from './logger';
+import { redisCircuitBreaker } from '../utils/circuitBreaker';
 
 const redisConfig = {
   host: process.env['REDIS_HOST'] || 'localhost',
@@ -54,5 +55,76 @@ redis.on('error', (error: any) => {
 redis.on('close', () => {
   logger.warn('⚠️ Redis connection closed', { service: 'cache-service' });
 });
+
+// Circuit breaker wrapped Redis operations
+export const redisWithCircuitBreaker = {
+  async ping(): Promise<string> {
+    return await redisCircuitBreaker.execute(async () => {
+      return await redis.ping();
+    }, 'redis-ping');
+  },
+
+  async get(key: string): Promise<string | null> {
+    return await redisCircuitBreaker.execute(async () => {
+      return await redis.get(key);
+    }, 'redis-get');
+  },
+
+  async set(key: string, value: string, ttl?: number): Promise<'OK'> {
+    return await redisCircuitBreaker.execute(async () => {
+      if (ttl) {
+        return await redis.setex(key, ttl, value);
+      } else {
+        return await redis.set(key, value);
+      }
+    }, 'redis-set');
+  },
+
+  async del(key: string): Promise<number> {
+    return await redisCircuitBreaker.execute(async () => {
+      return await redis.del(key);
+    }, 'redis-del');
+  },
+
+  async exists(key: string): Promise<number> {
+    return await redisCircuitBreaker.execute(async () => {
+      return await redis.exists(key);
+    }, 'redis-exists');
+  },
+
+  async expire(key: string, seconds: number): Promise<number> {
+    return await redisCircuitBreaker.execute(async () => {
+      return await redis.expire(key, seconds);
+    }, 'redis-expire');
+  },
+
+  async ttl(key: string): Promise<number> {
+    return await redisCircuitBreaker.execute(async () => {
+      return await redis.ttl(key);
+    }, 'redis-ttl');
+  },
+
+  async keys(pattern: string): Promise<string[]> {
+    return await redisCircuitBreaker.execute(async () => {
+      return await redis.keys(pattern);
+    }, 'redis-keys');
+  },
+
+  async flushdb(): Promise<'OK'> {
+    return await redisCircuitBreaker.execute(async () => {
+      return await redis.flushdb();
+    }, 'redis-flushdb');
+  },
+
+  async info(section?: string): Promise<string> {
+    return await redisCircuitBreaker.execute(async () => {
+      if (section) {
+        return await redis.info(section);
+      } else {
+        return await redis.info();
+      }
+    }, 'redis-info');
+  }
+};
 
 export default redis;

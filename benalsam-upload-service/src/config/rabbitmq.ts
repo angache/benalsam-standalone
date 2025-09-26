@@ -1,5 +1,6 @@
 import * as amqp from 'amqplib';
 import { logger } from './logger';
+import { rabbitmqCircuitBreaker } from '../utils/circuitBreaker';
 
 class RabbitMQConfig {
   private static instance: RabbitMQConfig;
@@ -44,34 +45,36 @@ class RabbitMQConfig {
   }
 
   private async connect(): Promise<void> {
-    try {
-      const url = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
-      this.connection = await amqp.connect(url);
-      
-      logger.info('✅ Connected to RabbitMQ');
+    return await rabbitmqCircuitBreaker.execute(async () => {
+      try {
+        const url = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
+        this.connection = await amqp.connect(url);
+        
+        logger.info('✅ Connected to RabbitMQ');
 
-      // Connection error handling
-      this.connection!.on('error', (err: Error) => {
-        logger.error('❌ RabbitMQ connection error:', err);
+        // Connection error handling
+        this.connection!.on('error', (err: Error) => {
+          logger.error('❌ RabbitMQ connection error:', err);
+          this.reconnect();
+        });
+
+        this.connection!.on('close', () => {
+          logger.warn('⚠️ RabbitMQ connection closed');
+          this.reconnect();
+        });
+
+        // Clear reconnect timeout if it exists
+        if (this.reconnectTimeout) {
+          clearTimeout(this.reconnectTimeout);
+          this.reconnectTimeout = null;
+        }
+
+      } catch (error) {
+        logger.error('❌ Failed to connect to RabbitMQ:', error);
         this.reconnect();
-      });
-
-      this.connection!.on('close', () => {
-        logger.warn('⚠️ RabbitMQ connection closed');
-        this.reconnect();
-      });
-
-      // Clear reconnect timeout if it exists
-      if (this.reconnectTimeout) {
-        clearTimeout(this.reconnectTimeout);
-        this.reconnectTimeout = null;
+        throw error;
       }
-
-    } catch (error) {
-      logger.error('❌ Failed to connect to RabbitMQ:', error);
-      this.reconnect();
-      throw error;
-    }
+    }, 'rabbitmq-connect');
   }
 
   private reconnect(): void {

@@ -8,6 +8,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { logger } from './logger';
+import { databaseCircuitBreaker } from '../utils/circuitBreaker';
 
 const supabaseUrl = process.env['SUPABASE_URL'];
 const supabaseServiceKey = process.env['SUPABASE_SERVICE_ROLE_KEY'];
@@ -28,10 +29,10 @@ export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 let isConnected = false;
 
 /**
- * Test database connection
+ * Test database connection with circuit breaker protection
  */
 export async function testConnection(): Promise<boolean> {
-  try {
+  return await databaseCircuitBreaker.execute(async () => {
     const { error } = await supabase
       .from('listings')
       .select('count')
@@ -39,15 +40,12 @@ export async function testConnection(): Promise<boolean> {
 
     if (error) {
       logger.error('❌ Database connection test failed:', error);
-      return false;
+      throw new Error(`Database connection test failed: ${error.message}`);
     }
 
     logger.info('✅ Database connection test successful');
     return true;
-  } catch (error) {
-    logger.error('❌ Database connection test error:', error);
-    return false;
-  }
+  }, 'database-connection-test');
 }
 
 /**
@@ -78,7 +76,7 @@ export function getConnectionStatus(): boolean {
 }
 
 /**
- * Health check for database
+ * Health check for database with circuit breaker metrics
  */
 export async function healthCheck(): Promise<{
   status: 'healthy' | 'unhealthy';
@@ -87,8 +85,14 @@ export async function healthCheck(): Promise<{
     responseTime: number;
     error?: string;
   };
+  circuitBreaker: {
+    state: string;
+    failureCount: number;
+    isHealthy: boolean;
+  };
 }> {
   const startTime = Date.now();
+  const circuitBreakerMetrics = databaseCircuitBreaker.getMetrics();
   
   try {
     const connected = await testConnection();
@@ -99,6 +103,11 @@ export async function healthCheck(): Promise<{
       details: {
         connected,
         responseTime
+      },
+      circuitBreaker: {
+        state: circuitBreakerMetrics.state,
+        failureCount: circuitBreakerMetrics.failureCount,
+        isHealthy: circuitBreakerMetrics.isHealthy
       }
     };
   } catch (error) {
@@ -110,6 +119,11 @@ export async function healthCheck(): Promise<{
         connected: false,
         responseTime,
         error: error instanceof Error ? error.message : 'Unknown error'
+      },
+      circuitBreaker: {
+        state: circuitBreakerMetrics.state,
+        failureCount: circuitBreakerMetrics.failureCount,
+        isHealthy: circuitBreakerMetrics.isHealthy
       }
     };
   }

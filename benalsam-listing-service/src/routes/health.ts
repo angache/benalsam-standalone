@@ -13,6 +13,7 @@ import { healthCheck as databaseHealthCheck } from '../config/database';
 import { redisHealthCheck } from '../config/redis';
 import { rabbitmqHealthCheck } from '../config/rabbitmq';
 import { logger } from '../config/logger';
+import { databaseCircuitBreaker, externalServiceCircuitBreaker, fileOperationCircuitBreaker } from '../utils/circuitBreaker';
 
 const router = Router();
 
@@ -33,7 +34,12 @@ router.get('/', async (_req: Request, res: Response) => {
       uptime: process.uptime(),
       memory: process.memoryUsage(),
       serviceStatus,
-      jobMetrics
+      jobMetrics,
+      circuitBreakers: {
+        database: databaseCircuitBreaker.getMetrics(),
+        externalService: externalServiceCircuitBreaker.getMetrics(),
+        fileOperation: fileOperationCircuitBreaker.getMetrics()
+      }
     };
 
     res.json(health);

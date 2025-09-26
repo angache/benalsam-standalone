@@ -1,5 +1,6 @@
 import { Client } from '@elastic/elasticsearch';
-import logger from './logger';
+import { logger } from './logger';
+import { elasticsearchCircuitBreaker } from '../utils/circuitBreaker';
 
 class ElasticsearchConfig {
   private client: Client | null = null;
@@ -44,25 +45,27 @@ class ElasticsearchConfig {
       throw new Error('Elasticsearch client not initialized');
     }
 
-    try {
-      // Use info() instead of ping() for better compatibility
-      const response = await this.client.info();
-      this.isConnected = true;
-      
-      logger.info('✅ Elasticsearch connection verified', {
-        connected: this.isConnected,
-        clusterName: response.cluster_name,
-        version: response.version?.number
-      });
-      
-      return true;
-    } catch (error) {
-      this.isConnected = false;
-      logger.error('❌ Elasticsearch connection failed:', {
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-      return false;
-    }
+    return await elasticsearchCircuitBreaker.execute(async () => {
+      try {
+        // Use info() instead of ping() for better compatibility
+        const response = await this.client!.info();
+        this.isConnected = true;
+        
+        logger.info('✅ Elasticsearch connection verified', {
+          connected: this.isConnected,
+          clusterName: response.cluster_name,
+          version: response.version?.number
+        });
+        
+        return true;
+      } catch (error) {
+        this.isConnected = false;
+        logger.error('❌ Elasticsearch connection failed:', {
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+        throw error;
+      }
+    }, 'elasticsearch-connect');
   }
 
   getClient(): Client {
@@ -76,23 +79,29 @@ class ElasticsearchConfig {
     return this.isConnected;
   }
 
-  async healthCheck(): Promise<{ status: string; responseTime: number }> {
+  async healthCheck(): Promise<{ status: string; responseTime: number; circuitBreaker?: any }> {
     if (!this.client) {
       return { status: 'unhealthy', responseTime: 0 };
     }
 
-    const startTime = Date.now();
-    try {
-      await this.client.info();
-      const responseTime = Date.now() - startTime;
-      return { status: 'healthy', responseTime };
-    } catch (error) {
-      const responseTime = Date.now() - startTime;
-      logger.error('Elasticsearch health check failed:', {
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-      return { status: 'unhealthy', responseTime };
-    }
+    return await elasticsearchCircuitBreaker.execute(async () => {
+      const startTime = Date.now();
+      try {
+        await this.client!.info();
+        const responseTime = Date.now() - startTime;
+        return { 
+          status: 'healthy', 
+          responseTime,
+          circuitBreaker: elasticsearchCircuitBreaker.getMetrics()
+        };
+      } catch (error) {
+        const responseTime = Date.now() - startTime;
+        logger.error('Elasticsearch health check failed:', {
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+        throw error;
+      }
+    }, 'elasticsearch-health-check');
   }
 
   getDefaultIndexName(): string {

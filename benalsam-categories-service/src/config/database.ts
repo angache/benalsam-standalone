@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import logger from './logger';
+import { logger } from './logger';
+import { databaseCircuitBreaker } from '../utils/circuitBreaker';
 
 // Supabase client configuration
 const supabaseUrl = process.env.SUPABASE_URL || '';
@@ -40,7 +41,7 @@ const databaseConfig = {
 
 // Health check function
 export const checkDatabaseHealth = async () => {
-  try {
+  return await databaseCircuitBreaker.execute(async () => {
     const startTime = Date.now();
     
     // Simple health check query
@@ -59,22 +60,10 @@ export const checkDatabaseHealth = async () => {
       status: 'healthy',
       responseTime,
       timestamp: new Date().toISOString(),
-      service: 'categories-service'
+      service: 'categories-service',
+      circuitBreaker: databaseCircuitBreaker.getMetrics()
     };
-  } catch (error) {
-    logger.error('Database health check failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      service: 'categories-service'
-    });
-    
-    return {
-      status: 'unhealthy',
-      responseTime: 0,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: new Date().toISOString(),
-      service: 'categories-service'
-    };
-  }
+  }, 'database-health-check');
 };
 
 // Connection pool stats (Supabase managed)

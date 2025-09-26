@@ -6,6 +6,7 @@
 export interface SearchParams {
   query?: string;
   categories?: string[];
+  categoryIds?: number[];
   location?: string;
   urgency?: string;
   minPrice?: number;

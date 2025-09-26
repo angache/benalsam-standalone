@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
-import logger from '../config/logger';
-import redis from '../config/redis';
+import { logger } from '../config/logger';
+import { redisWithCircuitBreaker, redis } from '../config/redis';
+import { redisCircuitBreaker, memoryCacheCircuitBreaker, supabaseCircuitBreaker, cacheOperationCircuitBreaker } from '../utils/circuitBreaker';
 
 const router = Router();
 
@@ -10,7 +11,7 @@ router.get('/', async (_req: Request, res: Response) => {
     let redisStatus = 'disconnected';
     let redisError = null;
     try {
-      await redis.ping();
+      await redisWithCircuitBreaker.ping();
       redisStatus = 'connected';
     } catch (error) {
       logger.warn('Redis ping failed:', { error, service: 'cache-service' });
@@ -32,6 +33,12 @@ router.get('/', async (_req: Request, res: Response) => {
         port: process.env['REDIS_PORT'] || '6379',
         error: redisError,
         connectionState: redis.status
+      },
+      circuitBreakers: {
+        redis: redisCircuitBreaker.getMetrics(),
+        memoryCache: memoryCacheCircuitBreaker.getMetrics(),
+        supabase: supabaseCircuitBreaker.getMetrics(),
+        cacheOperation: cacheOperationCircuitBreaker.getMetrics()
       }
     };
 

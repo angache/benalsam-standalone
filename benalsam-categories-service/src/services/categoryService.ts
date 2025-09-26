@@ -1,6 +1,7 @@
 import { supabase } from '../config/database';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
 import CacheService from '../utils/cacheService';
+import { databaseCircuitBreaker, cacheCircuitBreaker } from '../utils/circuitBreaker';
 import {
   Category,
   CategoryAttribute,
@@ -22,41 +23,48 @@ export class CategoryService {
    * Get all categories with tree structure
    */
   async getCategories(): Promise<Category[]> {
-    try {
-      // Try cache first
-      const cachedResult = await CacheService.get(CacheService.getKeys.categories());
-      if (cachedResult) {
-        logger.info('📦 Returning cached categories', { service: 'categories-service' });
-        return cachedResult;
-      }
+    return await databaseCircuitBreaker.execute(async () => {
+      try {
+        // Try cache first
+        const cachedResult = await cacheCircuitBreaker.execute(async () => {
+          return await CacheService.get(CacheService.getKeys.categories());
+        }, 'cache-get-categories');
+        
+        if (cachedResult) {
+          logger.info('📦 Returning cached categories', { service: 'categories-service' });
+          return cachedResult;
+        }
 
-      logger.info('🔄 Fetching categories from database', { service: 'categories-service' });
-      
-      const { data: categories, error } = await supabase
-        .from('categories')
-        .select(`
-          *,
-          category_attributes (*)
-        `)
-        .order('sort_order', { ascending: true });
+        logger.info('🔄 Fetching categories from database', { service: 'categories-service' });
+        
+        const { data: categories, error } = await supabase
+          .from('categories')
+          .select(`
+            *,
+            category_attributes (*)
+          `)
+          .order('sort_order', { ascending: true });
 
-      if (error) {
-        logger.error('Error fetching categories:', { error, service: 'categories-service' });
+        if (error) {
+          logger.error('Error fetching categories:', { error, service: 'categories-service' });
+          throw error;
+        }
+
+        const tree = this.buildCategoryTree(categories || []);
+        
+        // Cache for 24 hours
+        await cacheCircuitBreaker.execute(async () => {
+          await CacheService.set(CacheService.getKeys.categories(), tree, 24 * 60 * 60);
+        }, 'cache-set-categories');
+        
+        logger.info(`✅ Fetched ${tree.length} main categories`, { service: 'categories-service' });
+        return tree;
+
+      } catch (error) {
+        logger.error('Error in getCategories:', { error, service: 'categories-service' });
         throw error;
       }
-
-      const tree = this.buildCategoryTree(categories || []);
-      
-      // Cache for 24 hours
-      await CacheService.set(CacheService.getKeys.categories(), tree, 24 * 60 * 60);
-      
-      logger.info(`✅ Fetched ${tree.length} main categories`, { service: 'categories-service' });
-      return tree;
-
-    } catch (error) {
-      logger.error('Error in getCategories:', { error, service: 'categories-service' });
-      throw error;
-    }
+    }, 'get-categories');
   }
 
   /**

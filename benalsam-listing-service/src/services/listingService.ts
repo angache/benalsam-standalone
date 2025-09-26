@@ -9,6 +9,7 @@
 import { supabase } from '../config/database';
 import { logger } from '../config/logger';
 import { Listing, ListingStatusType, ListingStatus } from 'benalsam-shared-types';
+import { databaseCircuitBreaker } from '../utils/circuitBreaker';
 
 export interface ListingFilters {
   page: number;
@@ -76,7 +77,7 @@ export class ListingService {
    * Get listings with filters
    */
   async getListings(filters: ListingFilters): Promise<ListingResult> {
-    try {
+    return await databaseCircuitBreaker.execute(async () => {
       const { page, limit, search, status, category, userId, sortBy, sortOrder } = filters;
       const offset = (page - 1) * limit;
 
@@ -143,11 +144,7 @@ export class ListingService {
         total,
         hasMore
       };
-
-    } catch (error) {
-      logger.error('❌ Error in getListings:', error);
-      throw error;
-    }
+    }, 'get-listings');
   }
 
   /**

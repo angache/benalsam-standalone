@@ -1,10 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
+import { elasticsearchCircuitBreaker, supabaseCircuitBreaker, cacheCircuitBreaker } from '../utils/circuitBreaker';
 
 // Types
 export interface SearchParams {
   query?: string;
   categories?: string[];
+  categoryIds?: number[];
   location?: string;
   urgency?: string;
   minPrice?: number;
@@ -102,7 +104,10 @@ export class SearchService {
     
     try {
       // Check cache first
-      const cached = await this.getCachedResult(params, sessionId);
+      const cached = await cacheCircuitBreaker.execute(async () => {
+        return await this.getCachedResult(params, sessionId);
+      }, 'cache-get-search-result');
+      
       if (cached) {
         return {
           ...cached,
@@ -114,8 +119,14 @@ export class SearchService {
       // Try Elasticsearch first
       if (this.isElasticsearchAvailable) {
         try {
-          const result = await this.elasticsearchSearch(params);
-          await this.cacheResult(params, result);
+          const result = await elasticsearchCircuitBreaker.execute(async () => {
+            return await this.elasticsearchSearch(params);
+          }, 'elasticsearch-search');
+          
+          await cacheCircuitBreaker.execute(async () => {
+            await this.cacheResult(params, result);
+          }, 'cache-set-search-result');
+          
           return {
             ...result,
             responseTime: Date.now() - startTime,
@@ -127,8 +138,13 @@ export class SearchService {
       }
 
       // Fallback to Supabase
-      const result = await this.supabaseSearch(params);
-      await this.cacheResult(params, result, sessionId);
+      const result = await supabaseCircuitBreaker.execute(async () => {
+        return await this.supabaseSearch(params);
+      }, 'supabase-search');
+      
+      await cacheCircuitBreaker.execute(async () => {
+        await this.cacheResult(params, result, sessionId);
+      }, 'cache-set-search-result');
       
       return {
         ...result,
@@ -150,6 +166,7 @@ export class SearchService {
       const {
         query,
         categories,
+        categoryIds,
         location,
         urgency = 'Tümü',
         minPrice,
@@ -180,11 +197,38 @@ export class SearchService {
         });
       }
 
-      // Category filter
-      if (categories && categories.length > 0) {
-        filterQueries.push({
+      // Category filter using category_path for efficient filtering
+      if (categoryIds && categoryIds.length > 0) {
+        // Use category_path to match any of the selected category IDs
+        // This allows filtering by parent categories (e.g., if user selects "Emlak", 
+        // it will match all listings with "Emlak" in their category_path)
+        const categoryPathFilters = categoryIds.map(categoryId => ({
           terms: {
-            category: categories
+            category_path: [categoryId]
+          }
+        }));
+
+        filterQueries.push({
+          bool: {
+            should: categoryPathFilters,
+            minimum_should_match: 1
+          }
+        });
+      } else if (categories && categories.length > 0) {
+        // Fallback to category name matching if categoryIds not provided
+        const categoryFilters = categories.map(categoryName => ({
+          wildcard: {
+            category: {
+              value: `*${categoryName}*`,
+              case_insensitive: true
+            }
+          }
+        }));
+
+        filterQueries.push({
+          bool: {
+            should: categoryFilters,
+            minimum_should_match: 1
           }
         });
       }

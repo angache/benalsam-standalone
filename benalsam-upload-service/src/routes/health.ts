@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { getRedisClient } from '../config/redis';
 import { getChannel } from '../config/rabbitmq';
 import { logger } from '../config/logger';
+import { cloudinaryCircuitBreaker, redisCircuitBreaker, rabbitmqCircuitBreaker, fileOperationCircuitBreaker } from '../utils/circuitBreaker';
 
 const router = Router();
 
@@ -14,7 +15,13 @@ router.get('/', (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     memory: process.memoryUsage(),
-    version: '1.0.0'
+    version: '1.0.0',
+    circuitBreakers: {
+      cloudinary: cloudinaryCircuitBreaker.getMetrics(),
+      redis: redisCircuitBreaker.getMetrics(),
+      rabbitmq: rabbitmqCircuitBreaker.getMetrics(),
+      fileOperation: fileOperationCircuitBreaker.getMetrics()
+    }
   });
 });
 

@@ -1,6 +1,7 @@
 import { Router, IRouter, Request, Response } from 'express';
 import elasticsearchConfig from '../config/elasticsearch';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
+import { elasticsearchCircuitBreaker, supabaseCircuitBreaker, cacheCircuitBreaker } from '../utils/circuitBreaker';
 
 const router: IRouter = Router();
 
@@ -38,6 +39,11 @@ router.get('/', async (req: Request, res: Response) => {
       elasticsearch: {
         status: esHealth.status,
         responseTime: esHealth.responseTime || 0
+      },
+      circuitBreakers: {
+        elasticsearch: elasticsearchCircuitBreaker.getMetrics(),
+        supabase: supabaseCircuitBreaker.getMetrics(),
+        cache: cacheCircuitBreaker.getMetrics()
       }
     };
     

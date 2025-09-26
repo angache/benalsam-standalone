@@ -7,7 +7,7 @@ import express from 'express';
 import { createServer } from 'http';
 import compression from 'compression';
 import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types';
-import logger from './config/logger';
+import { logger } from './config/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { healthRoutes } from './routes/health';
 import { cacheRoutes } from './routes/cache';

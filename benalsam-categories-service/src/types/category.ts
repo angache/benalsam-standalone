@@ -130,4 +130,30 @@ export interface ServiceHealth {
     status: 'healthy' | 'unhealthy';
     responseTime: number;
   };
+  circuitBreakers?: {
+    database: {
+      state: string;
+      failureCount: number;
+      successCount: number;
+      lastFailureTime: number;
+      nextAttemptTime: number;
+      isHealthy: boolean;
+    };
+    cache: {
+      state: string;
+      failureCount: number;
+      successCount: number;
+      lastFailureTime: number;
+      nextAttemptTime: number;
+      isHealthy: boolean;
+    };
+    externalService: {
+      state: string;
+      failureCount: number;
+      successCount: number;
+      lastFailureTime: number;
+      nextAttemptTime: number;
+      isHealthy: boolean;
+    };
+  };
 }

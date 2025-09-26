@@ -1,41 +1,44 @@
 import { createClient } from 'redis';
 import { logger } from './logger';
+import { redisCircuitBreaker } from '../utils/circuitBreaker';
 
 let redisClient: ReturnType<typeof createClient> | null = null;
 
 export const connectRedis = async (): Promise<void> => {
-  try {
-    const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
-    
-    redisClient = createClient({
-      url: redisUrl,
-      socket: {
-        connectTimeout: 10000
-      }
-    });
+  return await redisCircuitBreaker.execute(async () => {
+    try {
+      const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+      
+      redisClient = createClient({
+        url: redisUrl,
+        socket: {
+          connectTimeout: 10000
+        }
+      });
 
-    redisClient.on('error', (err) => {
-      logger.error('Redis Client Error:', err);
-    });
+      redisClient.on('error', (err) => {
+        logger.error('Redis Client Error:', err);
+      });
 
-    redisClient.on('connect', () => {
-      logger.info('Redis Client Connected');
-    });
+      redisClient.on('connect', () => {
+        logger.info('Redis Client Connected');
+      });
 
-    redisClient.on('ready', () => {
-      logger.info('Redis Client Ready');
-    });
+      redisClient.on('ready', () => {
+        logger.info('Redis Client Ready');
+      });
 
-    redisClient.on('end', () => {
-      logger.info('Redis Client Disconnected');
-    });
+      redisClient.on('end', () => {
+        logger.info('Redis Client Disconnected');
+      });
 
-    await redisClient.connect();
-    
-  } catch (error) {
-    logger.error('Failed to connect to Redis:', error);
-    throw error;
-  }
+      await redisClient.connect();
+      
+    } catch (error) {
+      logger.error('Failed to connect to Redis:', error);
+      throw error;
+    }
+  }, 'redis-connect');
 };
 
 export const getRedisClient = () => {

@@ -1,8 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { checkDatabaseHealth } from '../config/database';
 import CacheService from '../utils/cacheService';
-import logger from '../config/logger';
+import { logger } from '../config/logger';
 import { ServiceHealth } from '../types/category';
+import { databaseCircuitBreaker, cacheCircuitBreaker, externalServiceCircuitBreaker } from '../utils/circuitBreaker';
 
 const router = Router();
 
@@ -45,6 +46,11 @@ router.get('/', async (req: Request, res: Response) => {
       cache: {
         status: cacheHealth.status as 'healthy' | 'unhealthy',
         responseTime: cacheHealth.responseTime || 0
+      },
+      circuitBreakers: {
+        database: databaseCircuitBreaker.getMetrics(),
+        cache: cacheCircuitBreaker.getMetrics(),
+        externalService: externalServiceCircuitBreaker.getMetrics()
       }
     };
     

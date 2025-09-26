@@ -8,7 +8,7 @@ dotenv.config();
 
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import elasticsearchConfig from './config/elasticsearch';
-import logger from './config/logger';
+import { logger } from './config/logger';
 
 // Import routes
 import healthRoutes from './routes/health';
