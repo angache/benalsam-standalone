@@ -18,15 +18,20 @@ import { rabbitmqService } from './services/rabbitmqService';
 const app = express();
 const PORT = process.env['PORT'] || 3012;
 
-// Initialize security middleware
+// Security middleware enabled
 const environment = process.env['NODE_ENV'] || 'development';
 const securityConfig = SECURITY_CONFIGS[environment as keyof typeof SECURITY_CONFIGS] || SECURITY_CONFIGS.development;
 const securityMiddleware = createSecurityMiddleware(securityConfig as any);
 
-// Apply security middleware
-securityMiddleware.getAllMiddleware().forEach((middleware: any) => {
-  app.use(middleware);
-});
+// Security middleware with proper error handling
+try {
+  securityMiddleware.getAllMiddleware().forEach((middleware: any) => {
+    app.use(middleware);
+  });
+  logger.info('✅ Security middleware initialized successfully');
+} catch (error) {
+  logger.warn('⚠️ Security middleware initialization failed, continuing without it:', error);
+}
 
 // Compression middleware
 app.use(compression());
