@@ -173,6 +173,10 @@ upstream queue_service {
     server 127.0.0.1:3012;
 }
 
+upstream backup_service {
+    server 127.0.0.1:3013;
+}
+
 upstream cache_service {
     server 127.0.0.1:3014;
 }
@@ -498,10 +502,11 @@ cat > health-check.sh << 'EOF'
 
 SERVICES=(
     "http://localhost:3002/api/v1/health"
-    "http://localhost:3006/health"
+    "http://localhost:3006/api/v1/health"
     "http://localhost:3007/api/v1/health"
     "http://localhost:3008/api/v1/health"
     "http://localhost:3012/api/v1/health"
+    "http://localhost:3013/api/v1/health"
     "http://localhost:3014/api/v1/health"
     "http://localhost:3015/api/v1/health"
     "http://localhost:3016/api/v1/health"
@@ -620,6 +625,7 @@ scrape_configs:
         - 'localhost:3007'  # Upload Service
         - 'localhost:3008'  # Listing Service
         - 'localhost:3012'  # Queue Service
+        - 'localhost:3013'  # Backup Service
         - 'localhost:3014'  # Cache Service
         - 'localhost:3015'  # Categories Service
         - 'localhost:3016'  # Search Service

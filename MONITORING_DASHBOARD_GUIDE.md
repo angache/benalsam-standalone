@@ -25,11 +25,12 @@ Benalsam platformu için kapsamlı monitoring dashboard'u, tüm mikroservislerin
 |------|--------|----------|
 | 3002 | Admin Backend | Admin paneli yönetimi, kullanıcı yetkilendirme |
 | 3006 | Elasticsearch Service | Arama motoru, ilan indeksleme |
-| 3007 | Queue Service | İş kuyruğu, background job processing |
+| 3007 | Upload Service | Dosya yükleme, resim işleme |
 | 3008 | Listing Service | İlan CRUD işlemleri, ilan yönetimi |
-| 3012 | Categories Service | Kategori yönetimi, hiyerarşi |
+| 3012 | Queue Service | İş kuyruğu, background job processing |
+| 3013 | Backup Service | Data backup, recovery operations |
 | 3014 | Cache Service | Redis cache, memory cache yönetimi |
-| 3015 | Upload Service | Dosya yükleme, resim işleme |
+| 3015 | Categories Service | Kategori yönetimi, hiyerarşi |
 | 3016 | Search Service | Arama API'si, search queries |
 
 ### Servis Detayları
@@ -44,30 +45,35 @@ Benalsam platformu için kapsamlı monitoring dashboard'u, tüm mikroservislerin
 - **Özellikler**: İlan indeksleme, full-text search, filtreleme
 - **Kritik Metrikler**: Index size, search latency, query performance
 
-#### Queue Service (3007)
-- **Görev**: İş kuyruğu
-- **Özellikler**: Background job processing, Elasticsearch sync, email notifications
-- **Kritik Metrikler**: Queue length, job processing time, failed jobs
+#### Upload Service (3007)
+- **Görev**: Dosya yükleme
+- **Özellikler**: Resim işleme, file storage, media management
+- **Kritik Metrikler**: Upload success rate, file size, processing time
 
 #### Listing Service (3008)
 - **Görev**: İlan yönetimi
 - **Özellikler**: İlan CRUD, ilan detayları, listeleme
 - **Kritik Metrikler**: Request rate, response time, database connections
 
-#### Categories Service (3012)
-- **Görev**: Kategori yönetimi
-- **Özellikler**: Kategori hiyerarşisi, filtreleme, özellikler
-- **Kritik Metrikler**: Cache hit ratio, response time, category tree depth
+#### Queue Service (3012)
+- **Görev**: İş kuyruğu
+- **Özellikler**: Background job processing, Elasticsearch sync, email notifications
+- **Kritik Metrikler**: Queue length, job processing time, failed jobs
+
+#### Backup Service (3013)
+- **Görev**: Data backup
+- **Özellikler**: Backup operations, recovery, data protection
+- **Kritik Metrikler**: Backup success rate, recovery time, data integrity
 
 #### Cache Service (3014)
 - **Görev**: Cache yönetimi
 - **Özellikler**: Redis cache, memory cache, invalidation
 - **Kritik Metrikler**: Cache hit ratio, memory usage, eviction rate
 
-#### Upload Service (3015)
-- **Görev**: Dosya yükleme
-- **Özellikler**: Resim işleme, file storage, media management
-- **Kritik Metrikler**: Upload success rate, file size, processing time
+#### Categories Service (3015)
+- **Görev**: Kategori yönetimi
+- **Özellikler**: Kategori hiyerarşisi, filtreleme, özellikler
+- **Kritik Metrikler**: Cache hit ratio, response time, category tree depth
 
 #### Search Service (3016)
 - **Görev**: Arama API'si
