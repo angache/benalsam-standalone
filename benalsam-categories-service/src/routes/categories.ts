@@ -50,6 +50,20 @@ router.get('/all', categoryController.getAllCategories);
 router.get('/stats', categoryController.getCategoryStats);
 
 /**
+ * @route GET /api/v1/categories/counts
+ * @desc Get category listing counts
+ * @access Public
+ */
+router.get('/counts', categoryController.getCategoryCounts);
+
+/**
+ * @route GET /api/v1/categories/popular
+ * @desc Get popular categories
+ * @access Public
+ */
+router.get('/popular', categoryController.getPopularCategories);
+
+/**
  * @route GET /api/v1/categories/path/:path
  * @desc Get category by path
  * @access Public

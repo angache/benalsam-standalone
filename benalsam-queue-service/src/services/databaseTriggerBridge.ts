@@ -291,11 +291,6 @@ export class DatabaseTriggerBridge {
       );
 
       // Status change mesajı için doğru status'u al
-      logger.info('🔍 Job change_data debug', { 
-        ...traceContext, 
-        changeData: JSON.stringify(job.change_data, null, 2)
-      });
-      
       let listingStatus = 'active'; // Default status
       if (job.change_data && job.change_data.new && job.change_data.new.status) {
         listingStatus = job.change_data.new.status.toLowerCase();

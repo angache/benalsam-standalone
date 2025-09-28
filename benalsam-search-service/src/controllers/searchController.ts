@@ -13,6 +13,7 @@ export class SearchController {
       const {
         query,
         categories,
+        categoryIds,
         location,
         urgency,
         minPrice,
@@ -44,6 +45,7 @@ export class SearchController {
       const searchParams: SearchParams = {
         query,
         categories,
+        categoryIds,
         location,
         urgency,
         minPrice,
@@ -59,7 +61,8 @@ export class SearchController {
         query: searchParams.query,
         page: searchParams.page,
         pageSize: searchParams.pageSize,
-        categories: searchParams.categories?.length || 0
+        categories: searchParams.categories?.length || 0,
+        categoryIds: searchParams.categoryIds?.length || 0
       });
 
       const result = await searchService.searchListings(searchParams);

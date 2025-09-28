@@ -367,8 +367,11 @@ export const fetchFilteredListings = async (
     const rpcParams = {
       search_query: filterParams.search || null,
       p_categories: filterParams.selectedCategories && filterParams.selectedCategories.length > 0 
-        ? [filterParams.selectedCategories.map(cat => cat.name).join(' > ')] 
-        : filterParams.category ? [filterParams.category] : null,
+        ? (() => {
+            const lastCategoryId = filterParams.selectedCategories[filterParams.selectedCategories.length - 1].id;
+            return lastCategoryId && lastCategoryId !== null ? [lastCategoryId] : null;
+          })()
+        : null,
       p_location: filterParams.location || null,
       p_urgency: filterParams.urgency || 'Tümü',
       min_price: filterParams.minBudget || null,
@@ -379,6 +382,14 @@ export const fetchFilteredListings = async (
       sort_key: filterParams.sortBy || 'created_at',
       sort_direction: filterParams.sortOrder || 'desc'
     };
+
+    console.log('🔍 fetchFilteredListings - RPC category params:', {
+      selectedCategories: filterParams.selectedCategories,
+      lastCategoryId: filterParams.selectedCategories && filterParams.selectedCategories.length > 0 
+        ? filterParams.selectedCategories[filterParams.selectedCategories.length - 1].id
+        : null,
+      p_categories: rpcParams.p_categories
+    });
 
     console.log('🔍 fetchFilteredListings - RPC params:', rpcParams);
 
@@ -432,15 +443,30 @@ const fetchFilteredListingsFallback = async (
       query = query.or(`title.ilike.%${filterParams.search}%,description.ilike.%${filterParams.search}%`);
     }
 
-    // Apply category filter
+    // Apply category filter - use ONLY category_id for exact match
     if (filterParams.selectedCategories && filterParams.selectedCategories.length > 0) {
-      const categoryNames = filterParams.selectedCategories.map(cat => cat.name);
-      // Veritabanında kategori "Ana > Alt" formatında saklanıyor
-      // Seçilen kategori path'ini kullanarak filtreleme yap
-      const categoryPath = categoryNames.join(' > ');
-      query = query.ilike('category', `%${categoryPath}%`);
+      const lastCategory = filterParams.selectedCategories[filterParams.selectedCategories.length - 1];
+      console.log('🔍 Category filtering - selectedCategories:', {
+        selectedCategories: filterParams.selectedCategories,
+        lastCategory,
+        lastCategoryId: lastCategory?.id,
+        lastCategoryName: lastCategory?.name
+      });
+      
+      // Use ONLY category_id for exact match
+      if (lastCategory.id && lastCategory.id !== null) {
+        console.log('🔍 Category filtering - using ONLY category_id:', lastCategory.id);
+        query = query.eq('category_id', lastCategory.id);
+      } else {
+        console.log('⚠️ Category filtering - lastCategory.id is null or undefined:', lastCategory.id);
+      }
     } else if (filterParams.category) {
-      query = query.ilike('category', `%${filterParams.category}%`);
+      // Fallback for single category string - try to find category_id first
+      console.log('🔍 Category filtering - fallback category:', filterParams.category);
+      // For now, skip category filtering if only category name is provided
+      console.log('⚠️ Category name filtering skipped - need category_id for exact match');
+    } else {
+      console.log('🔍 Category filtering - no category filters applied');
     }
 
     // Apply location filter

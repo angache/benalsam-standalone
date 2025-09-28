@@ -96,7 +96,8 @@ export const searchListingsFullText = async (
       const { category, location, minBudget, maxBudget, status } = options.filters;
 
       if (category) {
-        query = query.eq('category', category);
+        // Use category_path for hierarchical filtering instead of category field
+        query = query.ilike('category_path', `%${category}%`);
       }
       if (location) {
         query = query.eq('location', location);

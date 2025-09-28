@@ -3,7 +3,7 @@
  * Backend'den kategorileri çeker ve cache'ler
  */
 
-const ADMIN_BACKEND_URL = import.meta.env.VITE_ADMIN_BACKEND_URL || 'http://localhost:3002';
+const CATEGORIES_SERVICE_URL = import.meta.env.VITE_CATEGORIES_SERVICE_URL || 'http://localhost:3015';
 
 // Cache keys
 const CATEGORIES_CACHE_KEY = 'dynamic_categories_cache_v1';
@@ -165,7 +165,7 @@ class DynamicCategoryService {
     try {
       console.log(`📥 Fetching categories from backend... (attempt ${retryCount + 1}/${MAX_RETRIES})`);
       
-      const response = await fetch(`${ADMIN_BACKEND_URL}/api/v1/categories`);
+      const response = await fetch(`${CATEGORIES_SERVICE_URL}/api/v1/categories`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

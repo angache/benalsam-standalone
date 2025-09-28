@@ -55,7 +55,7 @@ const MobileCategoryScroller = ({ selectedCategories, onCategorySelect }) => {
       {selectedCategories.length > 0 && (
         <div className="mb-3 px-2 sm:px-0 flex items-center flex-wrap text-xs text-muted-foreground">
           {selectedCategories.map((cat, index) => (
-            <React.Fragment key={cat.name}>
+            <React.Fragment key={`mobile-breadcrumb-${cat.id || cat.name}-${index}`}>
               <span
                 className={`cursor-pointer hover:text-primary transition-colors ${
                   index === selectedCategories.length - 1 ? 'text-primary font-semibold' : ''
@@ -80,7 +80,7 @@ const MobileCategoryScroller = ({ selectedCategories, onCategorySelect }) => {
             return (
               <motion.div
                 layout
-                key={category.name}
+                key={`mobile-category-${category.id || category.name}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}

@@ -727,6 +727,142 @@ export class CategoryService {
   }
 
   /**
+   * Get category listing counts
+   */
+  async getCategoryCounts(): Promise<Record<string, number>> {
+    try {
+      logger.info('🔄 Fetching category listing counts', { service: 'categories-service' });
+      
+      // Use circuit breaker for database operations
+      return await databaseCircuitBreaker.execute(async () => {
+        const { data: counts, error } = await supabase
+          .from('listings')
+          .select('category_id, status')
+          .eq('status', 'active'); // Only count active listings
+
+        if (error) {
+          logger.error('Error fetching category counts:', { error, service: 'categories-service' });
+          throw error;
+        }
+
+        // Count listings per category
+        const categoryCounts: Record<string, number> = {};
+        
+        // Initialize all categories with 0
+        const { data: categories } = await supabase
+          .from('categories')
+          .select('id')
+          .eq('is_active', true);
+        
+        categories?.forEach(cat => {
+          categoryCounts[cat.id.toString()] = 0;
+        });
+
+        // Count actual listings
+        counts?.forEach(listing => {
+          if (listing.category_id) {
+            const categoryId = listing.category_id.toString();
+            categoryCounts[categoryId] = (categoryCounts[categoryId] || 0) + 1;
+          }
+        });
+
+        // Add total count for "all categories"
+        const totalCount = counts?.length || 0;
+        categoryCounts['all'] = totalCount;
+
+        logger.info('✅ Category counts calculated', { 
+          totalCategories: Object.keys(categoryCounts).length - 1, // -1 for 'all'
+          totalListings: totalCount,
+          service: 'categories-service' 
+        });
+
+        return categoryCounts;
+      });
+    } catch (error) {
+      logger.error('Error in getCategoryCounts:', { error, service: 'categories-service' });
+      throw error;
+    }
+  }
+
+  /**
+   * Get popular categories based on listing count
+   */
+  async getPopularCategories(limit: number = 10): Promise<Category[]> {
+    try {
+      logger.info('🔄 Fetching popular categories', { limit, service: 'categories-service' });
+      
+      // Use circuit breaker for database operations
+      return await databaseCircuitBreaker.execute(async () => {
+        const { data: popularCategories, error } = await supabase
+          .from('categories')
+          .select(`
+            *,
+            listings!inner(count)
+          `)
+          .eq('is_active', true)
+          .eq('listings.status', 'active')
+          .order('listings.count', { ascending: false })
+          .limit(limit);
+
+        if (error) {
+          logger.error('Error fetching popular categories:', { error, service: 'categories-service' });
+          throw error;
+        }
+
+        // Alternative approach: Get categories with listing counts
+        const { data: categoryCounts, error: countError } = await supabase
+          .from('listings')
+          .select('category_id')
+          .eq('status', 'active');
+
+        if (countError) {
+          logger.error('Error fetching category counts for popularity:', { error: countError, service: 'categories-service' });
+          throw countError;
+        }
+
+        // Count listings per category
+        const counts: Record<number, number> = {};
+        categoryCounts?.forEach(listing => {
+          if (listing.category_id) {
+            counts[listing.category_id] = (counts[listing.category_id] || 0) + 1;
+          }
+        });
+
+        // Get categories with their counts
+        const { data: categories, error: categoriesError } = await supabase
+          .from('categories')
+          .select('*')
+          .eq('is_active', true)
+          .in('id', Object.keys(counts).map(Number));
+
+        if (categoriesError) {
+          logger.error('Error fetching categories for popularity:', { error: categoriesError, service: 'categories-service' });
+          throw categoriesError;
+        }
+
+        // Sort by count and limit
+        const sortedCategories = categories
+          ?.map(category => ({
+            ...category,
+            listing_count: counts[category.id] || 0
+          }))
+          .sort((a, b) => b.listing_count - a.listing_count)
+          .slice(0, limit) || [];
+
+        logger.info('✅ Popular categories retrieved', { 
+          count: sortedCategories.length,
+          service: 'categories-service' 
+        });
+
+        return sortedCategories;
+      });
+    } catch (error) {
+      logger.error('Error in getPopularCategories:', { error, service: 'categories-service' });
+      throw error;
+    }
+  }
+
+  /**
    * Invalidate category cache
    */
   private async invalidateCategoryCache(): Promise<void> {

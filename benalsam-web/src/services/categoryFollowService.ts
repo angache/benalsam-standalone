@@ -139,7 +139,7 @@ export const fetchListingsForFollowedCategories = async (userId: string, limitPe
         const { data: listingsData, error: listingsError } = await supabase
           .from('listings')
           .select('*, profiles (id, name, avatar_url, rating, total_ratings, rating_sum)')
-          .ilike('category', `${fc.category_name}%`) // Kategori ve alt kategorilerini de alır
+          .ilike('category_path', `${fc.category_name}%`) // Kategori ve alt kategorilerini de alır
           .order('created_at', { ascending: false })
           .limit(limitPerCategory);
 

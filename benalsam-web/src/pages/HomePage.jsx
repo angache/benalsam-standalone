@@ -380,47 +380,24 @@ const HomePageSkeleton = () => (
       const handleCategoryClick = useCallback((category, level, fullPath) => {
         const newPath = selectedCategories.slice(0, level);
         
-        // Kategori ID'sini categories'den bul
-        let categoryId = null;
-        let categoryName = category.name || category;
-        
-        // Ana kategori ID'sini bul
-        const mainCategory = categories.find(cat => cat.name === categoryName);
-        if (mainCategory) {
-          categoryId = mainCategory.id;
-        } else {
-          // Alt kategori ID'sini bul
-          for (const mainCat of categories) {
-            if (mainCat.subcategories) {
-              const subCategory = mainCat.subcategories.find(sub => sub.name === categoryName);
-              if (subCategory) {
-                categoryId = subCategory.id;
-                break;
-              }
-              // Alt-alt kategori ID'sini bul
-              if (subCategory && subCategory.subcategories) {
-                const subSubCategory = subCategory.subcategories.find(subSub => subSub.name === categoryName);
-                if (subSubCategory) {
-                  categoryId = subSubCategory.id;
-                  break;
-                }
-              }
-            }
-          }
-        }
-        
-        // Kategori objesi {id, name} yapısında olmalı
+        // CategoryItem'dan gelen kategori objesi zaten {id, name} yapısında
         const categoryObj = {
-          id: categoryId,
-          name: categoryName
+          id: category.id,
+          name: category.name
         };
         
         console.log('🔍 Category click - Category:', category, 'Level:', level, 'FullPath:', fullPath);
         console.log('🔍 Category obj created:', categoryObj);
         
+        // ID yoksa hata ver
+        if (!categoryObj.id) {
+          console.error('❌ Category ID is missing!', category);
+          return;
+        }
+        
         newPath.push(categoryObj);
         handleCategorySelect(newPath);
-      }, [selectedCategories, handleCategorySelect, categories]);
+      }, [selectedCategories, handleCategorySelect]);
 
       // Show modern skeleton loading for better UX
       if (isLoadingInitial) {
@@ -471,7 +448,7 @@ const HomePageSkeleton = () => (
             className="mx-auto w-full max-w-[1600px] 2xl:max-w-[1920px] px-1 sm:px-2 lg:px-4 xl:px-6 py-6"
           >
           <div className="flex flex-col lg:flex-row lg:gap-8">
-            <aside className="hidden lg:block w-full lg:w-1/4 xl:w-1/5 2xl:w-1/6 mb-6 lg:mb-0 lg:sticky lg:top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto sidebar-scroll">
+            <aside className="hidden lg:block w-full lg:w-1/4 xl:w-1/5 2xl:w-1/6 mb-6 lg:mb-0 lg:sticky lg:top-24 self-start max-h-[calc(100vh-8rem)] overflow-y-auto sidebar-scroll scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
               <Suspense fallback={<LoadingFallback />}>
                 <SidebarContent
                   selectedCategories={selectedCategories}
@@ -539,7 +516,7 @@ const HomePageSkeleton = () => (
                           Ana Sayfa
                         </span>
                         {selectedCategories.map((category, index) => (
-                          <React.Fragment key={category.id}>
+                          <React.Fragment key={`breadcrumb-${category.id}-${index}`}>
                             <ChevronRight className="w-4 h-4" />
                             <span
                               className="cursor-pointer hover:text-primary"
@@ -564,7 +541,7 @@ const HomePageSkeleton = () => (
                       ) : (
                         categories.slice(0, 8).map((category) => (
                           <Button
-                            key={category.id}
+                            key={`popular-${category.id}`}
                             onClick={() => handleCategoryClick(category, 0)}
                             variant={selectedCategories.length > 0 && selectedCategories[0].id === category.id ? "default" : "outline"}
                             size="sm"
@@ -719,7 +696,7 @@ const HomePageSkeleton = () => (
                       ) : (
                         categories.slice(0, 6).map((category, index) => (
                         <div
-                          key={category.id || category.name || `category-${index}`}
+                          key={`main-category-${category.id || category.name || index}`}
                           onClick={() => handleCategoryClick(category, 0)}
                           className="group cursor-pointer bg-card border rounded-lg p-4 text-center hover:border-primary/50 hover:shadow-md transition-all duration-200"
                         >
@@ -767,7 +744,7 @@ const HomePageSkeleton = () => (
                    <div className="hidden lg:flex text-sm text-muted-foreground items-center gap-1">
                     <span className="cursor-pointer hover:text-primary" onClick={() => handleCategorySelect([])}>Ana Sayfa</span>
                     {selectedCategoryPath.map((catName, index) => (
-                      <React.Fragment key={catName}>
+                      <React.Fragment key={`${catName}-${index}`}>
                         <ChevronRight className="w-4 h-4" />
                         <span
                           className="cursor-pointer hover:text-primary"

@@ -16,22 +16,21 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
     keywords: '',
   });
 
-  const [displayedListings, setDisplayedListings] = useState(() => initialListings || []);
+  const [displayedListings, setDisplayedListings] = useState([]);
+  const [totalListings, setTotalListings] = useState(0);
+  const [isFiltering, setIsFiltering] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isAnyFilterActive, setIsAnyFilterActive] = useState(false);
+  const debounceTimeoutRef = useRef(null);
   
-  // initialListings değiştiğinde displayedListings'i güncelle
+  // initialListings'i sadece ilk yüklemede kullan
   useEffect(() => {
     if (initialListings && initialListings.length > 0) {
       setDisplayedListings(initialListings);
     }
   }, [initialListings]);
-  const [totalListings, setTotalListings] = useState(0);
-  const [isFiltering, setIsFiltering] = useState(false);
-  const debounceTimeoutRef = useRef(null);
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [isAnyFilterActive, setIsAnyFilterActive] = useState(false);
   
   const [nativeAds, setNativeAds] = useState([]);
 
@@ -101,7 +100,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
           const searchParams = {
             query: '',
             categories: selectedCategories.length > 0 ? selectedCategories.map(cat => cat.name) : undefined,
-            categoryIds: selectedCategories.length > 0 ? selectedCategories.map(cat => cat.id) : undefined,
+            categoryIds: selectedCategories.length > 0 ? selectedCategories.map(cat => cat.id).filter(id => id !== null) : undefined,
             location: filters.location,
             minPrice: filters.priceRange[0],
             maxPrice: filters.priceRange[1],
@@ -112,52 +111,31 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
             pageSize: PAGE_SIZE
           };
 
+          console.log('🔍 HomePage filtering - Elasticsearch params:', searchParams);
+          console.log('🔍 HomePage filtering - Selected categories:', {
+            selectedCategories,
+            categoryNames: selectedCategories.map(cat => cat.name),
+            categoryIds: selectedCategories.map(cat => cat.id)
+          });
+
           const result = await searchListingsWithElasticsearch(searchParams, currentUser?.id);
           
-          if (result.data) {
-            setDisplayedListings(result.data);
-            setTotalListings(result.total || result.data.length);
-            setHasMore(result.data.length === PAGE_SIZE);
-          } else {
-            // Fallback to Supabase
-            const allFilters = {
-              search: '',
-              selectedCategories: selectedCategories,
-              location: filters.location,
-              minBudget: filters.priceRange[0],
-              maxBudget: filters.priceRange[1],
-              urgency: filters.urgency,
-              sortBy: 'created_at',
-              sortOrder: 'desc'
-            };
-            const { listings, totalCount } = await fetchFilteredListings(allFilters, currentUser?.id, 1, PAGE_SIZE);
-            setDisplayedListings(listings);
-            setTotalListings(totalCount || listings.length);
-            setHasMore((1 * PAGE_SIZE) < totalCount);
-          }
+          // Basit çözüm: Sadece Elasticsearch sonuçları
+          setDisplayedListings(result.data || []);
+          setTotalListings(result.total || 0);
+          setHasMore((result.data || []).length === PAGE_SIZE);
         } catch (error) {
           console.error('Error in search:', error);
-          // Fallback to Supabase
-          const allFilters = {
-            search: '',
-            selectedCategories: selectedCategories,
-            location: filters.location,
-            minBudget: filters.priceRange[0],
-            maxBudget: filters.priceRange[1],
-            urgency: filters.urgency,
-            sortBy: 'created_at',
-            sortOrder: 'desc'
-          };
-          const { listings, totalCount } = await fetchFilteredListings(allFilters, currentUser?.id, 1, PAGE_SIZE);
-          setDisplayedListings(listings);
-          setTotalListings(totalCount || listings.length);
-          setHasMore((1 * PAGE_SIZE) < totalCount);
+          setDisplayedListings([]);
+          setTotalListings(0);
+          setHasMore(false);
         }
         setIsFiltering(false);
       }, 500);
     } else {
       setIsFiltering(false);
-      setDisplayedListings(initialListings || []);
+      setDisplayedListings([]);
+      setTotalListings(0);
       setHasMore(false);
     }
 

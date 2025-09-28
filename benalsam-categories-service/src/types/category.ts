@@ -91,7 +91,7 @@ export interface CategoryStats {
 
 export interface CategoryResponse {
   success: boolean;
-  data?: Category | Category[] | CategoryTree | CategoryStats | CategoryAttribute[] | CategoryAttribute;
+  data?: Category | Category[] | CategoryTree | CategoryStats | CategoryAttribute[] | CategoryAttribute | Record<string, number>;
   error?: string;
   message?: string;
   timestamp: string;

@@ -542,6 +542,70 @@ export class CategoryController {
       res.status(500).json(response);
     }
   }
+
+  /**
+   * Get category listing counts
+   * GET /api/v1/categories/counts
+   */
+  async getCategoryCounts(req: Request, res: Response): Promise<void> {
+    try {
+      logger.info('Getting category listing counts', { service: 'categories-service' });
+      
+      const counts = await categoryService.getCategoryCounts();
+      
+      const response: CategoryResponse = {
+        success: true,
+        data: counts,
+        message: 'Category listing counts retrieved successfully',
+        timestamp: new Date().toISOString()
+      };
+      
+      res.json(response);
+    } catch (error) {
+      logger.error('Error in getCategoryCounts:', { error, service: 'categories-service' });
+      
+      const response: CategoryResponse = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      };
+      
+      res.status(500).json(response);
+    }
+  }
+
+  /**
+   * Get popular categories
+   * GET /api/v1/categories/popular
+   */
+  async getPopularCategories(req: Request, res: Response): Promise<void> {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      
+      logger.info('Getting popular categories', { limit, service: 'categories-service' });
+      
+      const popularCategories = await categoryService.getPopularCategories(limit);
+      
+      const response: CategoryResponse = {
+        success: true,
+        data: popularCategories,
+        message: `Found ${popularCategories.length} popular categories`,
+        timestamp: new Date().toISOString()
+      };
+      
+      res.json(response);
+    } catch (error) {
+      logger.error('Error in getPopularCategories:', { error, service: 'categories-service' });
+      
+      const response: CategoryResponse = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      };
+      
+      res.status(500).json(response);
+    }
+  }
 }
 
 export default new CategoryController();
