@@ -58,7 +58,23 @@ export class FirebaseEventListener {
       // 🔒 authSecret'i jobData'dan çıkar (güvenlik için)
       const { authSecret, ...safeJobData } = jobData;
       
+      // ✅ Idempotency check - Skip if already completed or processing
+      if (jobData.status === 'completed') {
+        logger.info(`⏭️ Job already completed, skipping: ${jobId}`);
+        return;
+      }
+      
+      if (jobData.status === 'processing') {
+        logger.info(`⏭️ Job already processing, skipping: ${jobId}`);
+        return;
+      }
+      
       logger.info(`📨 Processing job: ${jobId}`, safeJobData);
+      
+      // 🔄 Update job status to 'processing'
+      await this.updateJobStatus(jobId, 'processing', {
+        processedAt: new Date().toISOString()
+      });
 
       // RabbitMQ mesajı oluştur
       const rabbitmqMessage = {
@@ -86,15 +102,44 @@ export class FirebaseEventListener {
       // RabbitMQ'ya gönder
       await rabbitmqService.sendMessage('elasticsearch.sync', rabbitmqMessage);
 
+      // 🔄 Update job status to 'completed'
+      await this.updateJobStatus(jobId, 'completed', {
+        completedAt: new Date().toISOString(),
+        queuedAt: new Date().toISOString()
+      });
+
       // Push notification gönder (opsiyonel)
-      if (safeJobData.status === 'active') {
+      if (safeJobData.listingStatus === 'active') {
         await this.sendPushNotification(safeJobData.listingId, 'active');
       }
 
-      logger.info(`✅ Job processed: ${jobId} for listing ${safeJobData.listingId} → ${safeJobData.status}`);
+      logger.info(`✅ Job processed: ${jobId} for listing ${safeJobData.listingId} → ${safeJobData.listingStatus || safeJobData.status}`);
 
     } catch (error) {
       logger.error(`❌ Error processing job ${jobId}:`, error);
+      
+      // 🔄 Update job status to 'failed'
+      await this.updateJobStatus(jobId, 'failed', {
+        failedAt: new Date().toISOString(),
+        error: error instanceof Error ? error.message : 'Unknown error',
+        retryCount: (jobData.retryCount || 0) + 1
+      });
+      
+      // 🔄 Retry logic - if retries remaining, set back to pending
+      const maxRetries = jobData.maxRetries || 3;
+      const currentRetries = (jobData.retryCount || 0) + 1;
+      
+      if (currentRetries < maxRetries) {
+        logger.info(`🔄 Scheduling retry ${currentRetries}/${maxRetries} for job: ${jobId}`);
+        // Wait 5 seconds before retry
+        setTimeout(async () => {
+          await this.updateJobStatus(jobId, 'pending', {
+            retryCount: currentRetries
+          });
+        }, 5000);
+      } else {
+        logger.error(`❌ Max retries (${maxRetries}) reached for job: ${jobId}`);
+      }
     }
   }
 
@@ -105,6 +150,28 @@ export class FirebaseEventListener {
       logger.info(`📱 Push notification sent for listing ${listingId} with status ${status}`);
     } catch (error) {
       logger.error('❌ Error sending push notification:', error);
+    }
+  }
+
+  /**
+   * Update job status in Firebase
+   */
+  private async updateJobStatus(
+    jobId: string, 
+    status: 'pending' | 'processing' | 'completed' | 'failed',
+    additionalData: Record<string, any> = {}
+  ): Promise<void> {
+    try {
+      const updates = {
+        status,
+        ...additionalData
+      };
+      
+      await this.firebaseService.updateJob(jobId, updates);
+      logger.info(`🔄 Job status updated: ${jobId} → ${status}`);
+    } catch (error) {
+      logger.error(`❌ Error updating job status for ${jobId}:`, error);
+      throw error;
     }
   }
 

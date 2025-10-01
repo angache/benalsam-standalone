@@ -133,6 +133,53 @@ export class FirebaseService {
       throw error;
     }
   }
+
+  /**
+   * Update job in Firebase
+   */
+  async updateJob(jobId: string, updates: Record<string, any>): Promise<void> {
+    try {
+      const path = `jobs/${jobId}`;
+      await this.updateData(path, updates);
+      logger.info(`✅ Job updated: ${jobId}`, { updates });
+    } catch (error) {
+      logger.error(`❌ Job update failed: ${jobId}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete old completed jobs (older than specified days)
+   */
+  async deleteOldJobs(olderThanDays: number = 7): Promise<number> {
+    try {
+      const jobs = await this.readData('jobs');
+      if (!jobs) return 0;
+
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
+      const cutoffTimestamp = cutoffDate.toISOString();
+
+      let deletedCount = 0;
+
+      for (const [jobId, jobData] of Object.entries(jobs)) {
+        const job = jobData as any;
+        
+        // Delete if completed and older than cutoff date
+        if (job.status === 'completed' && job.completedAt && job.completedAt < cutoffTimestamp) {
+          await this.deleteData(`jobs/${jobId}`);
+          deletedCount++;
+          logger.info(`🗑️ Deleted old job: ${jobId}`);
+        }
+      }
+
+      logger.info(`✅ Deleted ${deletedCount} old jobs (older than ${olderThanDays} days)`);
+      return deletedCount;
+    } catch (error) {
+      logger.error('❌ Delete old jobs failed:', error);
+      throw error;
+    }
+  }
 }
 
 export default new FirebaseService();

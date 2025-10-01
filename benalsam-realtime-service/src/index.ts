@@ -12,8 +12,10 @@ import rateLimit from 'express-rate-limit';
 import logger from './config/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { healthRoutes } from './routes/health';
+import { cleanupRoutes } from './routes/cleanup';
 import './config/firebase'; // Initialize Firebase
 import firebaseEventListener from './services/firebaseEventListener';
+import jobCleanupService from './services/jobCleanupService';
 
 const app = express();
 const PORT = process.env['PORT'] || 3007;
@@ -40,6 +42,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Routes
 app.use('/api/v1/health', healthRoutes);
+app.use('/api/v1/cleanup', cleanupRoutes);
 
 // Error handling
 app.use(errorHandler);
@@ -58,12 +61,21 @@ server.listen(PORT, async () => {
   } catch (error) {
     logger.error('❌ Failed to start Firebase event listener:', error);
   }
+  
+  // Job cleanup scheduler'ı başlat (Her gün saat 02:00'de çalışır)
+  try {
+    jobCleanupService.start('0 2 * * *', 7); // Daily at 2 AM, delete jobs older than 7 days
+    logger.info('✅ Job cleanup scheduler started (daily at 02:00, 7+ days old jobs)');
+  } catch (error) {
+    logger.error('❌ Failed to start job cleanup scheduler:', error);
+  }
 });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
   logger.info('SIGTERM received, shutting down gracefully');
   firebaseEventListener.stopListening();
+  jobCleanupService.stop();
   server.close(() => {
     logger.info('Process terminated');
     process.exit(0);
@@ -73,6 +85,7 @@ process.on('SIGTERM', () => {
 process.on('SIGINT', () => {
   logger.info('SIGINT received, shutting down gracefully');
   firebaseEventListener.stopListening();
+  jobCleanupService.stop();
   server.close(() => {
     logger.info('Process terminated');
     process.exit(0);

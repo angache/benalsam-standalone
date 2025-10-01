@@ -169,10 +169,13 @@ serve(async (req) => {
       id: jobId,
       listingId: listingId,
       type: jobType,
-      status: status,
+      status: 'pending',           // Initial status (will be updated by realtime service)
+      listingStatus: status,        // Actual listing status
       timestamp: new Date().toISOString(),
       source: 'supabase',
-      authSecret: firebaseAuthSecret  // Rules'da kontrol edilecek
+      authSecret: firebaseAuthSecret,  // Rules'da kontrol edilecek
+      retryCount: 0,
+      maxRetries: 3
     };
     
     const requestUrl = `${FIREBASE_DATABASE_URL}/jobs/${jobId}.json`;

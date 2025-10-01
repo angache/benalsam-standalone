@@ -15,10 +15,34 @@
           ".validate": "newData.isString()"
         },
         "status": {
-          ".validate": "newData.isString()"
+          ".validate": "newData.isString() && (newData.val() === 'pending' || newData.val() === 'processing' || newData.val() === 'completed' || newData.val() === 'failed')"
+        },
+        "listingStatus": {
+          ".validate": "!newData.exists() || newData.isString()"
         },
         "timestamp": {
           ".validate": "newData.isString()"
+        },
+        "processedAt": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "queuedAt": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "completedAt": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "failedAt": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "retryCount": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "maxRetries": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "error": {
+          ".validate": "!newData.exists() || newData.isString()"
         },
         "source": {
           ".validate": "newData.isString()"
