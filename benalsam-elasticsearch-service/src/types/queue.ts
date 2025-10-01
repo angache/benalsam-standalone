@@ -20,7 +20,30 @@ export interface StatusChangeMessage extends BaseQueueMessage {
   status: string;
 }
 
-export type QueueMessage = ElasticsearchSyncMessage | StatusChangeMessage;
+export interface FirebaseEventMessage extends BaseQueueMessage {
+  id: string; // Firebase job ID
+  type: string; // 'status_change' | 'listing_change'
+  action: string; // 'update' | 'insert' | 'delete'
+  recordId: string; // Listing ID
+  source: string; // 'firebase_realtime' | 'supabase'
+  data: {
+    listingId: string;
+    jobId: string;
+    change: {
+      field: string;
+      newValue: any;
+      oldValue?: any;
+      changedAt: string;
+    };
+    source: {
+      database: string;
+      table: string;
+      id: string;
+    };
+  };
+}
+
+export type QueueMessage = ElasticsearchSyncMessage | StatusChangeMessage | FirebaseEventMessage;
 
 export interface MessageOptions {
   messageId: string;

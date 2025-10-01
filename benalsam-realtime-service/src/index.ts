@@ -13,6 +13,8 @@ import logger from './config/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { healthRoutes } from './routes/health';
 import { cleanupRoutes } from './routes/cleanup';
+import { testRoutes } from './routes/test';
+import { statusChangeRoutes } from './routes/statusChange';
 import './config/firebase'; // Initialize Firebase
 import firebaseEventListener from './services/firebaseEventListener';
 import jobCleanupService from './services/jobCleanupService';
@@ -43,6 +45,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Routes
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/cleanup', cleanupRoutes);
+app.use('/api/v1/status-change', statusChangeRoutes);
+app.use('/test', testRoutes);
 
 // Error handling
 app.use(errorHandler);

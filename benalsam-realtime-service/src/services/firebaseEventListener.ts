@@ -83,6 +83,7 @@ export class FirebaseEventListener {
         action: 'update',
         timestamp: safeJobData.timestamp || new Date().toISOString(),
         source: safeJobData.source || 'firebase_realtime',
+        recordId: safeJobData.listingId, // ✅ Elasticsearch Service için gerekli
         data: {
           listingId: safeJobData.listingId,
           jobId: jobId,

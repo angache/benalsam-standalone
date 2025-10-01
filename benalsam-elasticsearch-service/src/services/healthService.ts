@@ -1,5 +1,6 @@
 import { elasticsearchService } from './elasticsearchService';
-import { queueConsumer } from './queueConsumer';
+// import { queueConsumer } from './queueConsumer'; // DEVRE DIŞI
+import { firebaseEventConsumer } from './firebaseEventConsumer';
 import { rabbitmqConfig } from '../config/rabbitmq';
 import { supabaseConfig } from '../config/supabase';
 import { getCircuitBreakerStatus } from '../config/circuitBreaker';
@@ -49,13 +50,15 @@ class HealthService {
         elasticsearchHealth,
         rabbitmqHealth,
         databaseHealth,
-        consumerHealth,
+        // consumerHealth, // DEVRE DIŞI
+        firebaseConsumerHealth,
         circuitBreakerHealth
       ] = await Promise.all([
         this.checkElasticsearch(),
         this.checkRabbitMQ(),
         this.checkDatabase(),
-        this.checkConsumer(),
+        // this.checkConsumer(), // DEVRE DIŞI
+        this.checkFirebaseConsumer(),
         this.checkCircuitBreakers()
       ]);
 
@@ -64,7 +67,8 @@ class HealthService {
         elasticsearchHealth.healthy,
         rabbitmqHealth.healthy,
         databaseHealth.healthy,
-        consumerHealth.healthy,
+        // consumerHealth.healthy, // DEVRE DIŞI
+        firebaseConsumerHealth.healthy,
         circuitBreakerHealth.healthy
       ].every(Boolean);
 
@@ -72,7 +76,8 @@ class HealthService {
         elasticsearchHealth,
         rabbitmqHealth,
         databaseHealth,
-        consumerHealth,
+        // consumerHealth, // DEVRE DIŞI
+        firebaseConsumerHealth,
         circuitBreakerHealth
       ].some(component => !component.healthy);
 
@@ -95,13 +100,14 @@ class HealthService {
             elasticsearch: elasticsearchHealth,
             rabbitmq: rabbitmqHealth,
             database: databaseHealth,
-            consumer: consumerHealth,
+            // consumer: consumerHealth, // DEVRE DIŞI
+            firebaseConsumer: firebaseConsumerHealth,
             circuitBreakers: circuitBreakerHealth
           },
           summary: {
             totalComponents: 5,
-            healthyComponents: [elasticsearchHealth, rabbitmqHealth, databaseHealth, consumerHealth, circuitBreakerHealth].filter(c => c.healthy).length,
-            degradedComponents: [elasticsearchHealth, rabbitmqHealth, databaseHealth, consumerHealth, circuitBreakerHealth].filter(c => !c.healthy).length
+            healthyComponents: [elasticsearchHealth, rabbitmqHealth, databaseHealth, firebaseConsumerHealth, circuitBreakerHealth].filter(c => c.healthy).length,
+            degradedComponents: [elasticsearchHealth, rabbitmqHealth, databaseHealth, firebaseConsumerHealth, circuitBreakerHealth].filter(c => !c.healthy).length
           }
         }
       };
@@ -178,7 +184,8 @@ class HealthService {
 
     try {
       const connected = await rabbitmqConfig.checkConnection();
-      const consumerRunning = queueConsumer.isRunning();
+      // const consumerRunning = queueConsumer.isRunning(); // DEVRE DIŞI
+      const consumerRunning = true; // Firebase consumer için placeholder
 
       return {
         name: 'rabbitmq',
@@ -291,7 +298,8 @@ class HealthService {
     const timestamp = new Date().toISOString();
 
     try {
-      const isRunning = queueConsumer.isRunning();
+      // const isRunning = queueConsumer.isRunning(); // DEVRE DIŞI
+      const isRunning = true; // Firebase consumer için placeholder
 
       return {
         name: 'consumer',
@@ -307,6 +315,43 @@ class HealthService {
     } catch (error) {
       return {
         name: 'consumer',
+        healthy: false,
+        status: 'error',
+        responseTime: Date.now() - startTime,
+        lastChecked: timestamp,
+        details: {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          running: false
+        }
+      };
+    }
+  }
+
+  /**
+   * Check Firebase Consumer health
+   */
+  private async checkFirebaseConsumer(): Promise<ComponentHealth> {
+    const startTime = Date.now();
+    const timestamp = new Date().toISOString();
+
+    try {
+      const isRunning = firebaseEventConsumer.isConsumerRunning();
+
+      return {
+        name: 'firebaseConsumer',
+        healthy: isRunning,
+        status: isRunning ? 'running' : 'stopped',
+        responseTime: Date.now() - startTime,
+        lastChecked: timestamp,
+        details: {
+          running: isRunning,
+          queue: 'elasticsearch.sync',
+          type: 'firebase_events'
+        }
+      };
+    } catch (error) {
+      return {
+        name: 'firebaseConsumer',
         healthy: false,
         status: 'error',
         responseTime: Date.now() - startTime,

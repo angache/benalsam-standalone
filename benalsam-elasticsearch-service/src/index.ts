@@ -3,7 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { elasticsearchConfig } from './config/elasticsearch';
-import { queueConsumer } from './services/queueConsumer';
+// import { queueConsumer } from './services/queueConsumer'; // DEVRE DIŞI
+import { firebaseEventConsumer } from './services/firebaseEventConsumer';
 import { dlqService } from './services/dlqService';
 import healthRoutes from './routes/health';
 import metricsRoutes from './routes/metrics';
@@ -80,9 +81,13 @@ async function startServer() {
   await rabbitmqConfig.setupQueue();
   logger.info('✅ RabbitMQ queues configured');
 
-  // Queue consumer'ı başlat
-  await queueConsumer.start();
-  logger.info('✅ Queue consumer started');
+  // Queue consumer'ı başlat (eski sistem için) - DEVRE DIŞI
+  // await queueConsumer.start();
+  // logger.info('✅ Queue consumer started');
+
+  // Firebase Event Consumer'ı başlat (yeni sistem için)
+  await firebaseEventConsumer.start();
+  logger.info('✅ Firebase Event Consumer started');
 
     // Express sunucusunu başlat
     app.listen(port, () => {
@@ -102,9 +107,13 @@ process.on('SIGTERM', async () => {
   logger.info('SIGTERM received. Starting graceful shutdown...');
   
   try {
-    // Queue consumer'ı durdur
-    await queueConsumer.stop();
-    logger.info('✅ Queue consumer stopped');
+    // Queue consumer'ı durdur - DEVRE DIŞI
+    // await queueConsumer.stop();
+    // logger.info('✅ Queue consumer stopped');
+
+    // Firebase Event Consumer'ı durdur
+    await firebaseEventConsumer.stop();
+    logger.info('✅ Firebase Event Consumer stopped');
 
     // Elasticsearch bağlantısını kapat
     await elasticsearchConfig.closeConnection();

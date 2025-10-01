@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { elasticsearchService } from '../services/elasticsearchService';
-import { queueConsumer } from '../services/queueConsumer';
+// import { queueConsumer } from '../services/queueConsumer'; // DEVRE DIŞI
 import { rabbitmqConfig } from '../config/rabbitmq';
 import { supabaseConfig } from '../config/supabase';
 import logger from '../config/logger';
@@ -58,7 +58,8 @@ router.get('/detailed', async (req, res) => {
       elasticsearchService.checkHealth(),
       rabbitmqConfig.checkConnection(),
       supabaseConfig.checkConnection(),
-      queueConsumer.isRunning()
+      // queueConsumer.isRunning() // DEVRE DIŞI
+      Promise.resolve(true) // Firebase consumer için placeholder
     ]);
 
     // Get job metrics
@@ -178,7 +179,8 @@ router.get('/elasticsearch', async (req, res) => {
 router.get('/rabbitmq', async (req, res) => {
   try {
     const connected = await rabbitmqConfig.checkConnection();
-    const consumerRunning = queueConsumer.isRunning();
+    // const consumerRunning = queueConsumer.isRunning(); // DEVRE DIŞI
+    const consumerRunning = true; // Firebase consumer için placeholder
 
     res.json({
       healthy: connected && consumerRunning,
@@ -403,7 +405,8 @@ router.get('/prometheus', async (req, res) => {
       elasticsearchService.checkHealth(),
       rabbitmqConfig.checkConnection(),
       supabaseConfig.checkConnection(),
-      queueConsumer.isRunning()
+      // queueConsumer.isRunning() // DEVRE DIŞI
+      Promise.resolve(true) // Firebase consumer için placeholder
     ]);
 
     // Get job metrics

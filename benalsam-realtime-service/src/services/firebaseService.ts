@@ -44,6 +44,20 @@ export class FirebaseService {
   }
 
   /**
+   * Create a job in Firebase Realtime Database
+   */
+  async createJob(jobData: any): Promise<void> {
+    try {
+      const jobPath = `jobs/${jobData.id}`;
+      await this.writeData(jobPath, jobData);
+      logger.info(`✅ Job created in Firebase: ${jobData.id}`, { jobData });
+    } catch (error) {
+      logger.error(`❌ Failed to create job in Firebase: ${jobData.id}`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Update data in Firebase Realtime Database
    */
   async updateData(path: string, data: any): Promise<void> {
