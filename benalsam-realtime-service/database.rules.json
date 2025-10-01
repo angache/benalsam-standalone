@@ -1,0 +1,42 @@
+{
+  "rules": {
+    "jobs": {
+      ".read": true,
+      "$jobId": {
+        ".write": "newData.child('authSecret').val() === 'benalsam_super_secret_2025'",
+        ".validate": "newData.hasChildren(['id', 'listingId', 'type', 'status', 'timestamp', 'source', 'authSecret'])",
+        "id": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "listingId": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "type": {
+          ".validate": "newData.isString()"
+        },
+        "status": {
+          ".validate": "newData.isString()"
+        },
+        "timestamp": {
+          ".validate": "newData.isString()"
+        },
+        "source": {
+          ".validate": "newData.isString()"
+        },
+        "authSecret": {
+          ".validate": "newData.isString() && newData.val() === 'benalsam_super_secret_2025'"
+        }
+      }
+    },
+    "test": {
+      ".read": true,
+      "$listingId": {
+        ".write": "newData.child('authSecret').val() === 'benalsam_super_secret_2025'",
+        ".validate": "newData.hasChildren(['id', 'status', 'timestamp', 'authSecret'])",
+        "authSecret": {
+          ".validate": "newData.isString() && newData.val() === 'benalsam_super_secret_2025'"
+        }
+      }
+    }
+  }
+}

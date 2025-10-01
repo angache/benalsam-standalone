@@ -1,0 +1,14 @@
+../database.rules.json
+../firebase.json
+../serviceAccountKey.json
+../node_modules
+../.env
+../dist
+../logs
+../test-security.js
+../README.md
+../SECURITY.md
+../API_ENDPOINTS.md
+../src
+../docs
+
