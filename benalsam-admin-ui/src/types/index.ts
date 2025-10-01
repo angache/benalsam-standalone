@@ -1,5 +1,3 @@
-import type { Listing, ListingStatusType } from 'benalsam-shared-types';
-
 // ===========================
 // ADMIN-UI SPECIFIC TYPES
 // ===========================
@@ -15,11 +13,59 @@ export interface Admin {
   updatedAt: string;
 }
 
-// Listing interface'ını shared-types'dan import ediyoruz
-// export interface Listing { ... } - KALDIRILDI
+// ===========================
+// LISTING TYPES (Local)
+// ===========================
 
-// ListingStatus type'ını shared-types'dan import ediyoruz
-// export type ListingStatus = ... - KALDIRILDI
+export const ListingStatus = {
+  ACTIVE: 'active',
+  INACTIVE: 'inactive',
+  PENDING_APPROVAL: 'pending_approval',
+  REJECTED: 'rejected',
+  SOLD: 'sold',
+  DELETED: 'deleted',
+  EXPIRED: 'expired'
+} as const;
+
+export type ListingStatusType = typeof ListingStatus[keyof typeof ListingStatus];
+
+export interface Listing {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  category: string;
+  category_id?: number;
+  category_path?: number[];
+  budget: number;
+  location: string;
+  urgency: 'low' | 'medium' | 'high';
+  main_image_url: string;
+  additional_image_urls?: string[];
+  image_url: string;
+  expires_at?: string;
+  auto_republish: boolean;
+  contact_preference: 'email' | 'phone' | 'both';
+  accept_terms: boolean;
+  is_featured: boolean;
+  is_urgent_premium: boolean;
+  is_showcase: boolean;
+  geolocation?: {
+    latitude: number;
+    longitude: number;
+  };
+  created_at: string;
+  updated_at: string;
+  status: ListingStatusType;
+  is_favorited?: boolean;
+  user?: {
+    id: string;
+    full_name: string;
+    avatar_url?: string;
+  };
+  condition: string[];
+  attributes?: Record<string, string[]>;
+}
 
 export interface User {
   id: string;
@@ -53,6 +99,10 @@ export interface QueryFilters {
   dateTo?: string;
 }
 
+// ===========================
+// ANALYTICS TYPES
+// ===========================
+
 export interface AnalyticsEvent {
   id: string;
   type: string;
@@ -62,6 +112,84 @@ export interface AnalyticsEvent {
 }
 
 export type AnalyticsEventType = 'PAGE_VIEW' | 'CLICK' | 'SEARCH' | 'LOGIN' | 'LOGOUT';
+
+// ===========================
+// API TYPES
+// ===========================
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  success: boolean;
+  data: {
+    token: string;
+    user: Admin;
+  };
+  message?: string;
+}
+
+export interface GetListingsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  category?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  permissions: Permission[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  resource: string;
+  action: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AnalyticsData {
+  totalUsers: number;
+  totalListings: number;
+  activeListings: number;
+  pendingListings: number;
+  rejectedListings: number;
+  totalRevenue: number;
+  monthlyRevenue: number;
+  userGrowth: number;
+  listingGrowth: number;
+  topCategories: Array<{
+    category: string;
+    count: number;
+  }>;
+  recentActivity: Array<{
+    id: string;
+    type: string;
+    description: string;
+    timestamp: string;
+  }>;
+}
 
 // ===========================
 // ADMIN-UI SPECIFIC TYPES

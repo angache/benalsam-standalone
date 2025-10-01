@@ -64,7 +64,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      'benalsam-shared-types': path.resolve(__dirname, '../benalsam-shared-types/dist-esm'),
+      // 'benalsam-shared-types': path.resolve(__dirname, '../benalsam-shared-types/dist-esm'), // Frontend'de kullanılmamalı
     },
   },
   // Cache directory configuration for Docker

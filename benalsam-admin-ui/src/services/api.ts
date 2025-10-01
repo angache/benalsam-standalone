@@ -12,7 +12,7 @@ import type {
   Role, 
   Permission, 
   AnalyticsData 
-} from 'benalsam-shared-types';
+} from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || config.apiUrl;
 console.log('🔧 API_BASE_URL:', API_BASE_URL);

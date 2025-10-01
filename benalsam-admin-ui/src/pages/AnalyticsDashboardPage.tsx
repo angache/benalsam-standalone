@@ -55,7 +55,7 @@ import {
 } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import { apiService } from '../services/api';
-import type { AnalyticsEvent, AnalyticsEventType } from 'benalsam-shared-types';
+import type { AnalyticsEvent, AnalyticsEventType } from '../types';
 
 // Session-based analytics interfaces
 interface SessionAnalyticsSummary {
