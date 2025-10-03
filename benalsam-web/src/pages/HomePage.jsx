@@ -9,9 +9,71 @@ import { toast } from '@/components/ui/use-toast';
 import ListingCard from '@/components/ListingCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2, LayoutGrid, List, ChevronRight, Search, X, Shield, Zap, Star, Plus, Heart, MessageCircle, Package, Filter, Settings } from 'lucide-react';
+import { 
+  Loader2, 
+  LayoutGrid, 
+  List, 
+  ChevronRight, 
+  Search, 
+  X, 
+  Shield, 
+  Zap, 
+  Star, 
+  Plus, 
+  Heart, 
+  MessageCircle, 
+  Package, 
+  Filter, 
+  Settings,
+  Smartphone,
+  Laptop,
+  Gamepad2,
+  Camera,
+  Music,
+  Wrench,
+  Car,
+  Building,
+  Home,
+  Shirt,
+  Dumbbell,
+  GraduationCap,
+  Briefcase,
+  Palette,
+  Baby,
+  Plane,
+  Bitcoin,
+  Utensils,
+  Book,
+  MoreHorizontal
+} from 'lucide-react';
 // import { categoriesConfig } from '@/config/categories'; // Removed - using dynamic categories
 import dynamicCategoryService from '@/services/dynamicCategoryService';
+
+// Icon mapping
+const ICON_COMPONENTS = {
+  'Smartphone': Smartphone,
+  'Laptop': Laptop,
+  'Gamepad2': Gamepad2,
+  'Camera': Camera,
+  'Music': Music,
+  'Wrench': Wrench,
+  'Car': Car,
+  'Building': Building,
+  'Home': Home,
+  'Shirt': Shirt,
+  'Dumbbell': Dumbbell,
+  'GraduationCap': GraduationCap,
+  'Briefcase': Briefcase,
+  'Palette': Palette,
+  'Baby': Baby,
+  'Heart': Heart,
+  'Plane': Plane,
+  'Bitcoin': Bitcoin,
+  'Star': Star,
+  'Utensils': Utensils,
+  'Book': Book,
+  'MoreHorizontal': MoreHorizontal
+};
 import { cn } from '@/lib/utils';
 import SEOHead from '@/components/SEOHead';
 import StructuredData from '@/components/StructuredData';
@@ -547,7 +609,10 @@ const HomePageSkeleton = () => (
                             size="sm"
                             className="text-xs"
                           >
-                            {category.icon && <category.icon className="w-3 h-3 mr-1" />}
+                            {(() => {
+                              const IconComponent = category.icon && ICON_COMPONENTS[category.icon];
+                              return IconComponent ? <IconComponent className="w-3 h-3 mr-1" /> : null;
+                            })()}
                             {category.name}
                           </Button>
                         ))
@@ -701,7 +766,10 @@ const HomePageSkeleton = () => (
                           className="group cursor-pointer bg-card border rounded-lg p-4 text-center hover:border-primary/50 hover:shadow-md transition-all duration-200"
                         >
                           <div className="w-12 h-12 mx-auto mb-3 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                            {category.icon && <category.icon className="w-6 h-6 text-primary" />}
+                            {(() => {
+                              const IconComponent = category.icon && ICON_COMPONENTS[category.icon];
+                              return IconComponent ? <IconComponent className="w-6 h-6 text-primary" /> : null;
+                            })()}
                           </div>
                           <h3 className="font-medium text-sm group-hover:text-primary transition-colors">
                             {category.name}

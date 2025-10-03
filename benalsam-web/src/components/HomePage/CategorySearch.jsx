@@ -1,33 +1,58 @@
 import React, { useState, useMemo } from 'react';
-import { Search, X, MoreHorizontal } from 'lucide-react';
+import { 
+  Search, 
+  X, 
+  Smartphone, 
+  Laptop, 
+  Gamepad2, 
+  Camera, 
+  Music, 
+  Wrench, 
+  Car, 
+  Building, 
+  Home, 
+  Shirt, 
+  Dumbbell, 
+  GraduationCap, 
+  Briefcase, 
+  Palette, 
+  Baby, 
+  Heart, 
+  Plane, 
+  Bitcoin, 
+  Star, 
+  Utensils, 
+  Book, 
+  MoreHorizontal 
+} from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-// Icon mapping - dinamik olarak yükle
+// Icon mapping - normal import
 const ICON_COMPONENTS = {
-  'Smartphone': React.lazy(() => import('lucide-react').then(module => ({ default: module.Smartphone }))),
-  'Laptop': React.lazy(() => import('lucide-react').then(module => ({ default: module.Laptop }))),
-  'Gamepad2': React.lazy(() => import('lucide-react').then(module => ({ default: module.Gamepad2 }))),
-  'Camera': React.lazy(() => import('lucide-react').then(module => ({ default: module.Camera }))),
-  'Music': React.lazy(() => import('lucide-react').then(module => ({ default: module.Music }))),
-  'Wrench': React.lazy(() => import('lucide-react').then(module => ({ default: module.Wrench }))),
-  'Car': React.lazy(() => import('lucide-react').then(module => ({ default: module.Car }))),
-  'Building': React.lazy(() => import('lucide-react').then(module => ({ default: module.Building }))),
-  'Home': React.lazy(() => import('lucide-react').then(module => ({ default: module.Home }))),
-  'Shirt': React.lazy(() => import('lucide-react').then(module => ({ default: module.Shirt }))),
-  'Dumbbell': React.lazy(() => import('lucide-react').then(module => ({ default: module.Dumbbell }))),
-  'GraduationCap': React.lazy(() => import('lucide-react').then(module => ({ default: module.GraduationCap }))),
-  'Briefcase': React.lazy(() => import('lucide-react').then(module => ({ default: module.Briefcase }))),
-  'Palette': React.lazy(() => import('lucide-react').then(module => ({ default: module.Palette }))),
-  'Baby': React.lazy(() => import('lucide-react').then(module => ({ default: module.Baby }))),
-  'Heart': React.lazy(() => import('lucide-react').then(module => ({ default: module.Heart }))),
-  'Plane': React.lazy(() => import('lucide-react').then(module => ({ default: module.Plane }))),
-  'Bitcoin': React.lazy(() => import('lucide-react').then(module => ({ default: module.Bitcoin }))),
-  'Star': React.lazy(() => import('lucide-react').then(module => ({ default: module.Star }))),
-  'Utensils': React.lazy(() => import('lucide-react').then(module => ({ default: module.Utensils }))),
-  'Book': React.lazy(() => import('lucide-react').then(module => ({ default: module.Book }))),
-  'MoreHorizontal': React.lazy(() => import('lucide-react').then(module => ({ default: module.MoreHorizontal })))
+  'Smartphone': Smartphone,
+  'Laptop': Laptop,
+  'Gamepad2': Gamepad2,
+  'Camera': Camera,
+  'Music': Music,
+  'Wrench': Wrench,
+  'Car': Car,
+  'Building': Building,
+  'Home': Home,
+  'Shirt': Shirt,
+  'Dumbbell': Dumbbell,
+  'GraduationCap': GraduationCap,
+  'Briefcase': Briefcase,
+  'Palette': Palette,
+  'Baby': Baby,
+  'Heart': Heart,
+  'Plane': Plane,
+  'Bitcoin': Bitcoin,
+  'Star': Star,
+  'Utensils': Utensils,
+  'Book': Book,
+  'MoreHorizontal': MoreHorizontal
 };
 
 const CategorySearch = ({ categories, onSelect, selectedPath = [], getCategoryCount, isLoadingCounts }) => {
@@ -128,9 +153,7 @@ const CategorySearch = ({ categories, onSelect, selectedPath = [], getCategoryCo
                     )}
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <React.Suspense fallback={<MoreHorizontal className="w-4 h-4 flex-shrink-0" />}>
-                        <IconComponent className="w-4 h-4 flex-shrink-0" />
-                      </React.Suspense>
+                      <IconComponent className="w-4 h-4 flex-shrink-0" />
                       <span className="truncate">{category.fullPath}</span>
                     </div>
                     {getCategoryCount && (
