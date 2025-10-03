@@ -1,6 +1,7 @@
 import amqp from 'amqplib';
 import { elasticsearchConfig } from '../config/elasticsearch';
 import logger from '../config/logger';
+import { createClient } from '@supabase/supabase-js';
 
 /**
  * Firebase Event Consumer - Firebase Realtime Service'ten gelen event'leri işler
@@ -11,6 +12,7 @@ export class FirebaseEventConsumer {
   private channel: any = null;
   private isConnected: boolean = false;
   private isRunning: boolean = false;
+  private supabase: any = null;
 
   async connect(): Promise<void> {
     try {
@@ -19,6 +21,17 @@ export class FirebaseEventConsumer {
       this.connection = await amqp.connect(rabbitmqUrl);
       this.channel = await this.connection.createChannel();
       this.isConnected = true;
+
+      // Supabase client'ı initialize et
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_ANON_KEY;
+      
+      if (supabaseUrl && supabaseKey) {
+        this.supabase = createClient(supabaseUrl, supabaseKey);
+        logger.info('✅ Supabase client initialized for Firebase Event Consumer');
+      } else {
+        logger.warn('⚠️ Supabase credentials not found, will use minimal data');
+      }
 
       logger.info('✅ Firebase Event Consumer connected to RabbitMQ');
 
@@ -199,7 +212,7 @@ export class FirebaseEventConsumer {
   }
 
   /**
-   * Status değişikliği işle
+   * Status değişikliği işle - Sadece active ilanlar ES'de kalır
    */
   private async handleStatusChange(client: any, index: string, recordId: string, message: any): Promise<void> {
     const newStatus = message.data?.change?.newValue;
@@ -212,65 +225,35 @@ export class FirebaseEventConsumer {
       newStatus
     });
 
-    // Reddedilen veya silinen ilanları ES'den sil
-    if (newStatus === 'rejected' || newStatus === 'deleted') {
+    // Sadece active ilanlar ES'de kalır, diğerleri silinir
+    if (newStatus === 'active') {
+      // Active ilan - Supabase'den tam veriyi çek ve ES'de tut/oluştur
       try {
-        await client.delete({
-          index,
-          id: recordId,
-          refresh: true
-        });
+        const listingData = await this.fetchListingFromSupabase(recordId);
         
-        logger.info('🗑️ Document deleted from ES (rejected/deleted status)', {
-          messageId: message.id,
-          recordId,
-          oldStatus,
-          newStatus
-        });
-      } catch (deleteError: any) {
-        // Document zaten yoksa hata verme
-        if (deleteError.meta?.statusCode === 404) {
-          logger.info('ℹ️ Document already deleted from ES', {
-            messageId: message.id,
-            recordId,
-            oldStatus,
-            newStatus
-          });
-        } else {
-          throw deleteError;
-        }
-      }
-    } else {
-      // Normal status güncelleme - sadece status alanını güncelle
-      try {
-        await client.update({
-          index,
-          id: recordId,
-          body: {
-            doc: {
+        if (listingData) {
+          await client.index({
+            index,
+            id: recordId,
+            body: {
+              ...listingData,
               status: newStatus,
               updated_at: new Date().toISOString()
             },
-            doc_as_upsert: true
-          },
-          refresh: true
-        });
-
-        logger.info('✅ Document status updated in ES', {
-          messageId: message.id,
-          recordId,
-          oldStatus,
-          newStatus
-        });
-      } catch (updateError: any) {
-        // Document yoksa oluştur
-        if (updateError.meta?.statusCode === 404) {
-          logger.info('📄 Document not found, creating new one', {
-            messageId: message.id,
-            recordId,
-            newStatus
+            refresh: true
           });
 
+          logger.info('✅ Active document with full data indexed in ES', {
+            messageId: message.id,
+            recordId,
+            oldStatus,
+            newStatus,
+            action: 'INDEX_WITH_FULL_DATA',
+            index: 'benalsam_listings',
+            fieldsCount: Object.keys(listingData).length
+          });
+        } else {
+          // Supabase'de veri yoksa sadece status ile oluştur
           await client.index({
             index,
             id: recordId,
@@ -283,15 +266,102 @@ export class FirebaseEventConsumer {
             refresh: true
           });
 
-          logger.info('✅ New document created in ES', {
+          logger.info('✅ Active document created with minimal data in ES', {
             messageId: message.id,
             recordId,
-            newStatus
+            newStatus,
+            action: 'CREATE_MINIMAL',
+            index: 'benalsam_listings'
+          });
+        }
+      } catch (error: any) {
+        logger.error('❌ Failed to index active document:', {
+          messageId: message.id,
+          recordId,
+          error: error.message
+        });
+        throw error;
+      }
+    } else {
+      // Active olmayan ilan - ES'den sil
+      try {
+        await client.delete({
+          index,
+          id: recordId,
+          refresh: true
+        });
+        
+        logger.info('🗑️ Non-active document deleted from ES', {
+          messageId: message.id,
+          recordId,
+          oldStatus,
+          newStatus,
+          action: 'DELETE',
+          index: 'benalsam_listings'
+        });
+      } catch (deleteError: any) {
+        // Document zaten yoksa hata verme
+        if (deleteError.meta?.statusCode === 404) {
+          logger.info('ℹ️ Document already deleted from ES', {
+            messageId: message.id,
+            recordId,
+            oldStatus,
+            newStatus,
+            action: 'ALREADY_DELETED',
+            index: 'benalsam_listings'
           });
         } else {
-          throw updateError;
+          throw deleteError;
         }
       }
+    }
+  }
+
+  /**
+   * Supabase'den ilan verisini çek
+   */
+  private async fetchListingFromSupabase(listingId: string): Promise<any | null> {
+    if (!this.supabase) {
+      logger.warn('⚠️ Supabase client not initialized, cannot fetch listing data');
+      return null;
+    }
+
+    try {
+      // Önce basit query ile test edelim
+      const { data, error } = await this.supabase
+        .from('listings')
+        .select('*')
+        .eq('id', listingId)
+        .single();
+
+      if (error) {
+        logger.error('❌ Failed to fetch listing from Supabase:', {
+          listingId,
+          error: error.message
+        });
+        return null;
+      }
+
+      if (!data) {
+        logger.warn('⚠️ Listing not found in Supabase:', { listingId });
+        return null;
+      }
+
+      logger.info('✅ Listing data fetched from Supabase', {
+        listingId,
+        fieldsCount: Object.keys(data).length,
+        fields: Object.keys(data),
+        data: data
+      });
+
+      return data;
+
+    } catch (error) {
+      logger.error('❌ Error fetching listing from Supabase:', {
+        listingId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      return null;
     }
   }
 

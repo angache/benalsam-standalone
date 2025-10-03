@@ -89,7 +89,7 @@ export class FirebaseEventListener {
           jobId: jobId,
           change: {
             field: 'status',
-            newValue: safeJobData.status,
+            newValue: safeJobData.listingStatus || safeJobData.status,
             changedAt: safeJobData.timestamp
           },
           source: {
