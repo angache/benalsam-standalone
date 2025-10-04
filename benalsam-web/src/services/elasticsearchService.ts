@@ -95,7 +95,15 @@ export const searchListingsWithElasticsearch = async (
       return { data: [] };
     }
     
-    const listingIds = result.hits.map(hit => hit.id);
+    const listingIds = result.hits
+      .map(hit => hit.id)
+      .filter(id => id && id !== 'undefined' && id !== undefined); // undefined değerleri filtrele
+    
+    if (listingIds.length === 0) {
+      console.log('⚠️ No valid listing IDs found in Elasticsearch hits');
+      return { data: [] };
+    }
+    
     const { data: listings, error } = await supabase
       .from('listings')
       .select('*')

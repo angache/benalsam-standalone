@@ -1,24 +1,10 @@
 import { Router } from 'express';
 import categoryController from '../controllers/categoryController';
-import rateLimit from 'express-rate-limit';
 
 const router = Router();
 
-// Rate limiting for categories endpoints
-const categoriesRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // IP başına max 100 istek
-  message: {
-    success: false,
-    message: 'Çok fazla kategori isteği gönderildi. Lütfen daha sonra tekrar deneyin.',
-    error: 'CATEGORIES_RATE_LIMIT_EXCEEDED'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// Apply rate limiting to all category endpoints
-router.use(categoriesRateLimit);
+// Rate limiting is now handled by the main security middleware in index.ts
+// No need for additional rate limiting here
 
 /**
  * @route GET /api/v1/categories
