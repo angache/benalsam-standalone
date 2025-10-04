@@ -1,6 +1,7 @@
 import { database } from '../config/firebase';
 import logger from '../config/logger';
 import { Database } from 'firebase-admin/database';
+import { EnterpriseJobData } from '../types/job';
 
 export interface FirebaseEvent {
   id: string;
@@ -44,15 +45,37 @@ export class FirebaseService {
   }
 
   /**
-   * Create a job in Firebase Realtime Database
+   * Create an enterprise job in Firebase Realtime Database
    */
-  async createJob(jobData: any): Promise<void> {
+  async createJob(jobData: EnterpriseJobData): Promise<void> {
     try {
       const jobPath = `jobs/${jobData.id}`;
       await this.writeData(jobPath, jobData);
-      logger.info(`✅ Job created in Firebase: ${jobData.id}`, { jobData });
+      logger.info(`✅ Enterprise job created in Firebase: ${jobData.id}`, { 
+        jobId: jobData.id,
+        type: jobData.type,
+        status: jobData.status,
+        source: jobData.source
+      });
     } catch (error) {
-      logger.error(`❌ Failed to create job in Firebase: ${jobData.id}`, error);
+      logger.error(`❌ Failed to create enterprise job in Firebase: ${jobData.id}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update job status and performance metrics
+   */
+  async updateJobStatus(jobId: string, updates: Partial<EnterpriseJobData>): Promise<void> {
+    try {
+      const jobPath = `jobs/${jobId}`;
+      await this.updateData(jobPath, updates);
+      logger.info(`✅ Job status updated: ${jobId}`, { 
+        jobId,
+        updates: Object.keys(updates)
+      });
+    } catch (error) {
+      logger.error(`❌ Failed to update job status: ${jobId}`, error);
       throw error;
     }
   }

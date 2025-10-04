@@ -4,29 +4,38 @@
       ".read": true,
       "$jobId": {
         ".write": "newData.child('authSecret').val() === 'benalsam_super_secret_2025'",
-        ".validate": "newData.hasChildren(['id', 'listingId', 'type', 'status', 'timestamp', 'source', 'authSecret'])",
+        ".validate": "newData.hasChildren(['id', 'type', 'status', 'timestamp', 'source', 'authSecret'])",
+        
+        // Basic Job Info
         "id": {
           ".validate": "newData.isString() && newData.val().length > 0"
         },
-        "listingId": {
-          ".validate": "newData.isString() && newData.val().length > 0"
-        },
         "type": {
-          ".validate": "newData.isString()"
+          ".validate": "newData.isString() && (newData.val() === 'status_change' || newData.val() === 'listing_change' || newData.val() === 'bulk_operation' || newData.val() === 'system_maintenance')"
         },
         "status": {
-          ".validate": "newData.isString() && (newData.val() === 'pending' || newData.val() === 'processing' || newData.val() === 'completed' || newData.val() === 'failed')"
+          ".validate": "newData.isString() && (newData.val() === 'pending' || newData.val() === 'processing' || newData.val() === 'completed' || newData.val() === 'failed' || newData.val() === 'retrying' || newData.val() === 'cancelled')"
+        },
+        
+        // Business Data
+        "listingId": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0)"
         },
         "listingStatus": {
           ".validate": "!newData.exists() || newData.isString()"
         },
+        "userId": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        
+        // Timestamps
         "timestamp": {
           ".validate": "newData.isString()"
         },
-        "processedAt": {
+        "queuedAt": {
           ".validate": "!newData.exists() || newData.isString()"
         },
-        "queuedAt": {
+        "processedAt": {
           ".validate": "!newData.exists() || newData.isString()"
         },
         "completedAt": {
@@ -35,18 +44,88 @@
         "failedAt": {
           ".validate": "!newData.exists() || newData.isString()"
         },
-        "retryCount": {
-          ".validate": "!newData.exists() || newData.isNumber()"
+        "lastErrorAt": {
+          ".validate": "!newData.exists() || newData.isString()"
         },
+        
+        // Retry Logic
         "maxRetries": {
           ".validate": "!newData.exists() || newData.isNumber()"
         },
-        "error": {
+        "retryCount": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "retryAfter": {
           ".validate": "!newData.exists() || newData.isString()"
         },
+        
+        // Source & Context
         "source": {
-          ".validate": "newData.isString()"
+          ".validate": "newData.isString() && (newData.val() === 'supabase' || newData.val() === 'firebase_realtime' || newData.val() === 'api' || newData.val() === 'system' || newData.val() === 'manual')"
         },
+        "serviceName": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "version": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "environment": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        
+        // Performance Tracking
+        "processingDuration": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "queueWaitTime": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        "totalDuration": {
+          ".validate": "!newData.exists() || newData.isNumber()"
+        },
+        
+        // Error Handling
+        "errorMessage": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "errorCode": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "errorStack": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        
+        // Compliance & Audit
+        "ipAddress": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "userAgent": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "requestId": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "correlationId": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        
+        // Job Relationships
+        "parentJobId": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "childJobIds": {
+          ".validate": "!newData.exists() || newData.hasChildren()"
+        },
+        "dependsOn": {
+          ".validate": "!newData.exists() || newData.hasChildren()"
+        },
+        
+        // Metadata
+        "metadata": {
+          ".validate": "!newData.exists() || newData.hasChildren()"
+        },
+        
+        // Security
         "authSecret": {
           ".validate": "newData.isString() && newData.val() === 'benalsam_super_secret_2025'"
         }

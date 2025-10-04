@@ -1,6 +1,7 @@
 import { FirebaseService } from './firebaseService';
 import rabbitmqService from './rabbitmqService';
 import logger from '../config/logger';
+import { EnterpriseJobData } from '../types/job';
 
 
 export class FirebaseEventListener {
@@ -53,10 +54,12 @@ export class FirebaseEventListener {
   }
 
 
-  private async processJob(jobId: string, jobData: any): Promise<void> {
+  private async processJob(jobId: string, jobData: EnterpriseJobData): Promise<void> {
+    const startTime = Date.now();
+    
     try {
-      // 🔒 authSecret'i jobData'dan çıkar (güvenlik için)
-      const { authSecret, ...safeJobData } = jobData;
+      // 🔒 authSecret'i jobData'dan çıkar (güvenlik için) - legacy support
+      const { authSecret, ...safeJobData } = jobData as any;
       
       // ✅ Idempotency check - Skip if already completed or processing
       if (jobData.status === 'completed') {
@@ -69,11 +72,23 @@ export class FirebaseEventListener {
         return;
       }
       
-      logger.info(`📨 Processing job: ${jobId}`, safeJobData);
+      logger.info(`📨 Processing enterprise job: ${jobId}`, {
+        jobId,
+        type: safeJobData.type,
+        status: safeJobData.status,
+        source: safeJobData.source,
+        listingId: safeJobData.listingId
+      });
       
-      // 🔄 Update job status to 'processing'
+      // 🔄 Update job status to 'processing' with performance tracking
+      const processedAt = new Date().toISOString();
+      const queueWaitTime = jobData.queuedAt ? 
+        new Date(processedAt).getTime() - new Date(jobData.queuedAt).getTime() : 0;
+      
       await this.updateJobStatus(jobId, 'processing', {
-        processedAt: new Date().toISOString()
+        processedAt,
+        queueWaitTime,
+        status: 'processing'
       });
 
       // RabbitMQ mesajı oluştur
@@ -103,28 +118,57 @@ export class FirebaseEventListener {
       // RabbitMQ'ya gönder
       await rabbitmqService.sendMessage('elasticsearch.sync', rabbitmqMessage);
 
-      // 🔄 Update job status to 'completed'
+      // 🔄 Update job status to 'completed' with performance metrics
+      const completedAt = new Date().toISOString();
+      const processingDuration = Date.now() - startTime;
+      const totalDuration = jobData.queuedAt ? 
+        new Date(completedAt).getTime() - new Date(jobData.queuedAt).getTime() : processingDuration;
+      
       await this.updateJobStatus(jobId, 'completed', {
-        completedAt: new Date().toISOString(),
-        queuedAt: new Date().toISOString()
+        completedAt,
+        processingDuration,
+        totalDuration,
+        status: 'completed'
       });
 
       // Push notification gönder (opsiyonel)
-      if (safeJobData.listingStatus === 'active') {
+      if (safeJobData.listingStatus === 'active' && safeJobData.listingId) {
         await this.sendPushNotification(safeJobData.listingId, 'active');
       }
 
       logger.info(`✅ Job processed: ${jobId} for listing ${safeJobData.listingId} → ${safeJobData.listingStatus || safeJobData.status}`);
 
     } catch (error) {
-      logger.error(`❌ Error processing job ${jobId}:`, error);
+      const errorTime = Date.now();
+      const processingDuration = errorTime - startTime;
       
-      // 🔄 Update job status to 'failed'
-      await this.updateJobStatus(jobId, 'failed', {
-        failedAt: new Date().toISOString(),
+      logger.error(`❌ Error processing enterprise job ${jobId}:`, {
+        jobId,
         error: error instanceof Error ? error.message : 'Unknown error',
-        retryCount: (jobData.retryCount || 0) + 1
+        processingDuration: `${processingDuration}ms`,
+        stack: error instanceof Error ? error.stack : undefined
       });
+      
+      // 🔄 Update job status to 'failed' with error details
+      const failedAt = new Date().toISOString();
+      const newRetryCount = (jobData.retryCount || 0) + 1;
+      
+      const errorUpdates: Partial<EnterpriseJobData> = {
+        failedAt,
+        processingDuration,
+        status: 'failed',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        errorCode: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
+        lastErrorAt: failedAt,
+        retryCount: newRetryCount
+      };
+      
+      // Add error stack only if it exists
+      if (error instanceof Error && error.stack) {
+        errorUpdates.errorStack = error.stack;
+      }
+      
+      await this.updateJobStatus(jobId, 'failed', errorUpdates);
       
       // 🔄 Retry logic - if retries remaining, set back to pending
       const maxRetries = jobData.maxRetries || 3;
@@ -155,20 +199,20 @@ export class FirebaseEventListener {
   }
 
   /**
-   * Update job status in Firebase
+   * Update job status in Firebase with enterprise tracking
    */
   private async updateJobStatus(
     jobId: string, 
-    status: 'pending' | 'processing' | 'completed' | 'failed',
-    additionalData: Record<string, any> = {}
+    status: 'pending' | 'processing' | 'completed' | 'failed' | 'retrying',
+    additionalData: Partial<EnterpriseJobData> = {}
   ): Promise<void> {
     try {
-      const updates = {
+      const updates: Partial<EnterpriseJobData> = {
         status,
         ...additionalData
       };
       
-      await this.firebaseService.updateJob(jobId, updates);
+      await this.firebaseService.updateJobStatus(jobId, updates);
       logger.info(`🔄 Job status updated: ${jobId} → ${status}`);
     } catch (error) {
       logger.error(`❌ Error updating job status for ${jobId}:`, error);

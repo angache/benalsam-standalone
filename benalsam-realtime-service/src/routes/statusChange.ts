@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { FirebaseService } from '../services/firebaseService';
 import logger from '../config/logger';
+import { EnterpriseJobData } from '../types/job';
 
 const router = Router();
 const firebaseService = new FirebaseService();
@@ -24,19 +25,34 @@ router.post('/', async (req, res) => {
     // Job ID oluştur
     const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    // Firebase job verisi oluştur
-    const jobData = {
+    // Enterprise job verisi oluştur
+    const now = new Date().toISOString();
+    const jobData: EnterpriseJobData = {
       id: jobId,
       listingId: listingId,
       listingStatus: newStatus,
       type: 'status_change',
       source: source || 'edge_function',
       status: 'pending',
-      timestamp: timestamp || new Date().toISOString(),
+      timestamp: timestamp || now,
+      queuedAt: now,
       maxRetries: 3,
       retryCount: 0,
+      
+      // Enterprise fields
+      serviceName: 'realtime-service',
+      version: process.env['SERVICE_VERSION'] || '1.0.0',
+      environment: process.env['NODE_ENV'] || 'development',
+      
+      // Compliance & Audit
+      userId: userId,
+      ipAddress: req.ip || 'unknown',
+      userAgent: req.get('user-agent') || 'unknown',
+      requestId: req.headers['x-request-id'] as string || `req_${Date.now()}`,
+      correlationId: req.headers['x-correlation-id'] as string || `corr_${Date.now()}`,
+      
+      // Metadata
       metadata: {
-        userId: userId,
         oldStatus: oldStatus,
         newStatus: newStatus,
         ...metadata
