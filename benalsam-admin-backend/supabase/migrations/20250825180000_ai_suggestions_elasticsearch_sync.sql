@@ -7,13 +7,12 @@
 -- AI SUGGESTIONS QUEUE TRIGGER
 -- ===========================
 
--- AI suggestions için queue trigger
-DROP TRIGGER IF EXISTS category_ai_suggestions_queue_sync ON category_ai_suggestions;
-
-CREATE TRIGGER category_ai_suggestions_queue_sync
-    AFTER INSERT OR UPDATE OR DELETE ON category_ai_suggestions
-    FOR EACH ROW
-    EXECUTE FUNCTION add_to_elasticsearch_queue();
+-- AI suggestions için queue trigger - DISABLED (legacy queue system removed)
+-- DROP TRIGGER IF EXISTS category_ai_suggestions_queue_sync ON category_ai_suggestions;
+-- CREATE TRIGGER category_ai_suggestions_queue_sync
+--     AFTER INSERT OR UPDATE OR DELETE ON category_ai_suggestions
+--     FOR EACH ROW
+--     EXECUTE FUNCTION add_to_elasticsearch_queue();
 
 -- ===========================
 -- AI SUGGESTIONS SYNC FUNCTION
@@ -63,53 +62,53 @@ BEGIN
         );
     END IF;
 
-    -- Queue'ya ekle
-    INSERT INTO elasticsearch_sync_queue (
-        table_name,
-        operation,
-        record_id,
-        change_data
-    ) VALUES (
-        TG_TABLE_NAME,
-        TG_OP,
-        record_id::UUID,
-        CASE 
-            WHEN TG_OP = 'INSERT' THEN suggestion_doc
-            WHEN TG_OP = 'UPDATE' THEN jsonb_build_object(
-                'old', jsonb_build_object(
-                    'id', OLD.id,
-                    'category_id', OLD.category_id,
-                    'category_name', category_data->>'name',
-                    'category_path', category_data->>'path',
-                    'suggestion_type', OLD.suggestion_type,
-                    'suggestion_data', OLD.suggestion_data,
-                    'confidence_score', OLD.confidence_score,
-                    'is_approved', OLD.is_approved,
-                    'created_at', OLD.created_at,
-                    'updated_at', OLD.updated_at,
-                    'search_boost', COALESCE(OLD.search_boost, 1.0),
-                    'usage_count', COALESCE(OLD.usage_count, 0),
-                    'last_used_at', OLD.last_used_at
-                ),
-                'new', suggestion_doc
-            )
-            WHEN TG_OP = 'DELETE' THEN jsonb_build_object(
-                'id', OLD.id,
-                'category_id', OLD.category_id,
-                'category_name', category_data->>'name',
-                'category_path', category_data->>'path',
-                'suggestion_type', OLD.suggestion_type,
-                'suggestion_data', OLD.suggestion_data,
-                'confidence_score', OLD.confidence_score,
-                'is_approved', OLD.is_approved,
-                'created_at', OLD.created_at,
-                'updated_at', OLD.updated_at,
-                'search_boost', COALESCE(OLD.search_boost, 1.0),
-                'usage_count', COALESCE(OLD.usage_count, 0),
-                'last_used_at', OLD.last_used_at
-            )
-        END
-    );
+    -- Queue'ya ekle - DISABLED (legacy queue system removed)
+    -- INSERT INTO elasticsearch_sync_queue (
+    --     table_name,
+    --     operation,
+    --     record_id,
+    --     change_data
+    -- ) VALUES (
+    --     TG_TABLE_NAME,
+    --     TG_OP,
+    --     record_id::UUID,
+    --     CASE 
+    --         WHEN TG_OP = 'INSERT' THEN suggestion_doc
+    --         WHEN TG_OP = 'UPDATE' THEN jsonb_build_object(
+    --             'old', jsonb_build_object(
+    --                 'id', OLD.id,
+    --                 'category_id', OLD.category_id,
+    --                 'category_name', category_data->>'name',
+    --                 'category_path', category_data->>'path',
+    --                 'suggestion_type', OLD.suggestion_type,
+    --                 'suggestion_data', OLD.suggestion_data,
+    --                 'confidence_score', OLD.confidence_score,
+    --                 'is_approved', OLD.is_approved,
+    --                 'created_at', OLD.created_at,
+    --                 'updated_at', OLD.updated_at,
+    --                 'search_boost', COALESCE(OLD.search_boost, 1.0),
+    --                 'usage_count', COALESCE(OLD.usage_count, 0),
+    --                 'last_used_at', OLD.last_used_at
+    --             ),
+    --             'new', suggestion_doc
+    --         )
+    --         WHEN TG_OP = 'DELETE' THEN jsonb_build_object(
+    --             'id', OLD.id,
+    --             'category_id', OLD.category_id,
+    --             'category_name', category_data->>'name',
+    --             'category_path', category_data->>'path',
+    --             'suggestion_type', OLD.suggestion_type,
+    --             'suggestion_data', OLD.suggestion_data,
+    --             'confidence_score', OLD.confidence_score,
+    --             'is_approved', OLD.is_approved,
+    --             'created_at', OLD.created_at,
+    --             'updated_at', OLD.updated_at,
+    --             'search_boost', COALESCE(OLD.search_boost, 1.0),
+    --             'usage_count', COALESCE(OLD.usage_count, 0),
+    --             'last_used_at', OLD.last_used_at
+    --         )
+    --     END
+    -- );
 
     RETURN COALESCE(NEW, OLD);
 END;
