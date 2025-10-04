@@ -1,3 +1,0 @@
-user_id,session_id,page_views,session_duration,conversion_rate,drop_off_point,start_time,end_time
-"test_user_1","session_1",5,300,0.2,"checkout","2025-07-29T10:00:00Z","2025-07-29T10:05:00Z"
-"test_user_2","session_2",3,180,0.1,"product_page","2025-07-29T11:00:00Z","2025-07-29T11:03:00Z"
