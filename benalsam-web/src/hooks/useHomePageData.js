@@ -133,9 +133,11 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
         setIsFiltering(false);
       }, 500);
     } else {
+      // No filters active → show initial listings
       setIsFiltering(false);
-      setDisplayedListings([]);
-      setTotalListings(0);
+      const base = initialListings || [];
+      setDisplayedListings(base);
+      setTotalListings(base.length || 0);
       setHasMore(false);
     }
 

@@ -1,8 +1,10 @@
 import { Listing, ApiResponse, QueryFilters } from '@/types';
 import { supabase } from '@/lib/supabaseClient';
+import { incrementSourceCount } from '@/lib/debugSource';
 
 // Search Service API endpoint'i
 const SEARCH_SERVICE_URL = import.meta.env.VITE_SEARCH_SERVICE_URL || 'http://localhost:3016';
+const ELASTICSEARCH_PUBLIC_URL = import.meta.env.VITE_ELASTICSEARCH_PUBLIC_URL || 'http://localhost:3006';
 
 export interface ElasticsearchSearchParams {
   query?: string;
@@ -58,22 +60,18 @@ export const searchListingsWithElasticsearch = async (
     // Convert frontend params to Search Service expected payload
     const page = params.page || 1;
     const limit = params.limit || 20;
-    const from = (page - 1) * limit;
-    const query = (params.query && params.query.trim().length > 0) ? params.query : '*';
-    const sortField = params.sort?.field || 'created_at';
-    // Default to only active listings on homepage
-    const filters = {
-      ...(params.filters || {}),
-      status: (params.filters as any)?.status || 'active'
-    } as Record<string, any>;
+    const query = params.query || '';
+    const sortBy = params.sort?.field || 'created_at';
+    const sortOrder = params.sort?.order || 'desc';
 
+    // Search Service expected payload
     const servicePayload = {
       query,
-      size: limit,
-      from,
-      sort: sortField,
-      filters
-    };
+      page,
+      pageSize: limit,
+      sortBy,
+      sortOrder
+    } as any;
 
     console.log('🔍 Elasticsearch search - Payload:', servicePayload);
 
@@ -100,64 +98,29 @@ export const searchListingsWithElasticsearch = async (
       return await searchListingsWithSupabase(params, currentUserId);
     }
 
-    // Normalize to hits array
-    let esHits: any[] = [];
-    let total = 0;
-    if (Array.isArray(responseData.data)) {
-      // Some wrappers may return an array of docs directly
-      esHits = responseData.data;
-      total = responseData.pagination?.total || esHits.length || 0;
-    } else if (responseData.data?.hits?.hits) {
-      esHits = responseData.data.hits.hits;
-      // ES 7 returns total as object or number
-      const totalObj = responseData.data.hits.total;
-      total = typeof totalObj === 'number' ? totalObj : (totalObj?.value ?? esHits.length);
-    } else {
-      console.warn('⚠️ Unknown Search Service data shape. Falling back.');
-      return await searchListingsWithSupabase(params, currentUserId);
-    }
+    // Search Service returns full listing objects directly
+    const docs: Listing[] = responseData.data as Listing[];
+    const total = responseData.pagination?.total || docs.length || 0;
 
-    // Convert to listing IDs
-    if (!esHits || esHits.length === 0) {
+    if (!docs || docs.length === 0) {
       console.log('⚠️ No hits found in Elasticsearch');
       return { data: [] };
     }
 
-    const listingIds = esHits
-      .map((hit: any) => hit.id || hit._id || hit._source?.id)
-      .filter(id => id && id !== 'undefined' && id !== undefined); // undefined değerleri filtrele
-    
-    if (listingIds.length === 0) {
-      console.log('⚠️ No valid listing IDs found in Elasticsearch hits');
-      return { data: [] };
-    }
-    
-    const { data: listings, error } = await supabase
-      .from('listings')
-      .select('*')
-      .in('id', listingIds)
-      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
+    const sortedListings = docs;
 
-    if (error) {
-      console.error('❌ Error fetching listings from Supabase:', error);
-      return { data: [] };
+    // Mark source for debug (only used in development)
+    if (import.meta.env.MODE !== 'production') {
+      sortedListings.forEach((l: any) => { try { l.__src = 'E'; } catch (_) {} });
+      incrementSourceCount('E', sortedListings.length);
     }
-
-    // Preserve ES order
-    const sortedListings = listingIds
-      .map(id => listings?.find(listing => listing.id === id))
-      .filter(Boolean) as Listing[];
 
     console.log('✅ Elasticsearch search completed:', {
-      hits: result.hits.length,
-      total: result.total,
-      listings: sortedListings.length
+      returned: sortedListings.length,
+      total
     });
 
-    return {
-      data: sortedListings,
-      total
-    };
+    return { data: sortedListings, total };
 
   } catch (error) {
     console.error('❌ Unexpected error in Elasticsearch search:', error);
@@ -214,5 +177,24 @@ export const checkElasticsearchHealth = async (): Promise<boolean> => {
   } catch (error) {
     console.error('❌ Search Service health check failed:', error);
     return false;
+  }
+};
+
+/**
+ * Fetch single listing by id directly from Elasticsearch Service
+ */
+export const fetchListingByIdFromES = async (listingId: string): Promise<Listing | null> => {
+  try {
+    const res = await fetch(`${ELASTICSEARCH_PUBLIC_URL}/api/v1/search/listings/${listingId}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const doc = data?.data;
+    if (!doc) return null;
+    if (import.meta.env.MODE !== 'production') {
+      try { (doc as any).__src = 'E'; incrementSourceCount('E', 1); } catch (_) {}
+    }
+    return doc as Listing;
+  } catch {
+    return null;
   }
 };

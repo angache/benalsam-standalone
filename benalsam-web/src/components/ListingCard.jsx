@@ -26,6 +26,16 @@ const ListingCard = ({ listing, size = 'normal', onToggleFavorite, currentUser, 
   const cardImageUrl = listing.main_image_url || listing.image_url || `https://source.unsplash.com/random/400x300/?${listing.category?.split(' > ')[0].replace(/\s/g, '+') || 'product'}&sig=${listing.id}`;
   
   const isSmall = size === 'small';
+
+  // Safe date formatting for ES/Supabase differences
+  let createdAtDisplay = '';
+  try {
+    if (listing?.created_at) {
+      createdAtDisplay = formatDate(listing.created_at);
+    }
+  } catch (_) {
+    createdAtDisplay = '';
+  }
   
   const isFavorited = isFavoritedOverride !== null ? isFavoritedOverride : listing.is_favorited;
 
@@ -108,6 +118,15 @@ const ListingCard = ({ listing, size = 'normal', onToggleFavorite, currentUser, 
             <ImageIcon className={`text-muted-foreground ${isSmall ? 'w-8 h-8 sm:w-12 sm:h-12' : 'w-12 h-12 sm:w-16 sm:h-16'}`} />
           </div>
         )}
+
+        {/* Data source badge (dev only) */}
+        {import.meta.env.MODE !== 'production' && listing.__src && (
+          <div className="absolute top-2 left-2 z-20">
+            <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${listing.__src === 'E' ? 'bg-emerald-600 text-white' : 'bg-sky-600 text-white'}`}>
+              {listing.__src}
+            </span>
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10"></div>
         
         <div className="absolute top-1 sm:top-2 left-1 sm:left-2 flex flex-wrap gap-1 z-10">
@@ -187,7 +206,7 @@ const ListingCard = ({ listing, size = 'normal', onToggleFavorite, currentUser, 
           </div>
           <div className="flex items-center ml-2 flex-shrink-0">
             <Clock className={`${isSmall ? 'w-3 h-3' : 'w-3 h-3 sm:w-3.5 sm:h-3.5'} mr-1 text-primary/80`} />
-            <span>{formatDate(listing.created_at)}</span>
+            {createdAtDisplay && <span>{createdAtDisplay}</span>}
           </div>
         </div>
 

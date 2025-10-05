@@ -825,7 +825,12 @@ const HomePageSkeleton = () => (
                   </div>
                   <h2 className="text-2xl font-bold text-gradient">{selectedCategoryPath.length > 0 ? selectedCategoryPath[selectedCategoryPath.length - 1] : "Tüm İlanlar"}</h2>
                 </div>
-                <div className="flex items-center gap-2 self-end lg:self-center">
+    <div className="flex items-center gap-2 self-end lg:self-center">
+      {import.meta.env.MODE !== 'production' && (
+        <span className="text-[11px] px-2 py-0.5 rounded bg-muted text-muted-foreground mr-2">
+          Src: E {window.__srcStats?.E || 0} | S {window.__srcStats?.S || 0}
+        </span>
+      )}
                   <Select value={sortOption} onValueChange={setSortOption}>
                     <SelectTrigger className="w-[160px] xs:w-[180px]">
                       <SelectValue placeholder="Sırala" />

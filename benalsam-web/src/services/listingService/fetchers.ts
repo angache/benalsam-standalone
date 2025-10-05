@@ -3,7 +3,8 @@ import { toast } from '@/components/ui/use-toast';
 import { addPremiumSorting, processFetchedListings } from './core';
 import { getListingHistory, getLastSearch } from '@/services/userActivityService';
 import { Listing, ApiResponse, QueryFilters } from '@/types';
-import { searchListingsWithElasticsearch } from '@/services/elasticsearchService';
+import { searchListingsWithElasticsearch, fetchListingByIdFromES } from '@/services/elasticsearchService';
+import { incrementSourceCount } from '@/lib/debugSource';
 
 export const fetchListings = async (
   currentUserId: string | null = null, 
@@ -70,6 +71,11 @@ export const fetchListings = async (
     }
 
     const processedListings = await processFetchedListings(listingsData, currentUserId);
+    // Mark source for debug (only used in development)
+    if (import.meta.env.MODE !== 'production') {
+      (processedListings as any[]).forEach(l => { try { (l as any).__src = 'S'; } catch (_) {} });
+      incrementSourceCount('S', (processedListings as any[]).length);
+    }
     
     return {
       listings: processedListings,
@@ -86,6 +92,13 @@ export const fetchListings = async (
 
 export const fetchSingleListing = async (listingId: string, currentUserId: string | null = null): Promise<Listing | null> => {
   try {
+    // Try Elasticsearch first
+    const esDoc = await fetchListingByIdFromES(listingId);
+    if (esDoc) {
+      const processed = await processFetchedListings([esDoc], currentUserId);
+      return processed[0] || null;
+    }
+
     const { data: listing, error } = await supabase
       .from('listings')
       .select('*')
@@ -114,24 +127,22 @@ export const fetchSingleListing = async (listingId: string, currentUserId: strin
 
 export const fetchPopularListings = async (currentUserId: string | null = null): Promise<Listing[]> => {
   try {
-    let query = supabase
-      .from('listings')
-      .select('*')
-      .eq('status', 'active')
-      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
-      .gt('popularity_score', 0)
-      .limit(10);
+    const es = await searchListingsWithElasticsearch({
+      query: '',
+      sort: { field: 'popularity_score', order: 'desc' },
+      page: 1,
+      limit: 10
+    }, currentUserId);
 
-    query = addPremiumSorting(query).order('popularity_score', { ascending: false, nullsFirst: false });
-    
-    const { data, error } = await query;
-    
-    if (error) {
-      console.error('Error fetching popular listings:', error);
-      toast({ title: "Popüler İlanlar Yüklenemedi", description: error.message, variant: "destructive" });
-      return [];
+    const docs = es.data || [];
+    if (import.meta.env.MODE !== 'production') {
+      (docs as any[]).forEach(d => { try { (d as any).__src = 'E'; } catch (_) {} });
     }
-    return await processFetchedListings(data, currentUserId);
+    const processed = await processFetchedListings(docs, currentUserId);
+    if (import.meta.env.MODE !== 'production') {
+      (processed as any[]).forEach(d => { try { (d as any).__src = 'E'; } catch (_) {} });
+    }
+    return processed;
   } catch (e) {
     console.error('Unexpected error in fetchPopularListings:', e);
     toast({ title: "Beklenmedik Hata", description: "Popüler ilanlar yüklenirken bir sorun oluştu.", variant: "destructive" });
@@ -215,27 +226,23 @@ export const fetchMostOfferedListings = async (currentUserId: string | null = nu
 
 export const fetchTodaysDeals = async (currentUserId: string | null = null): Promise<Listing[]> => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    let query = supabase
-      .from('listings')
-      .select('*')
-      .eq('status', 'active')
-      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
-      .gte('created_at', today.toISOString())
-      .limit(10);
+    // Approximation: latest created listings as today's deals
+    const es = await searchListingsWithElasticsearch({
+      query: '',
+      sort: { field: 'created_at', order: 'desc' },
+      page: 1,
+      limit: 10
+    }, currentUserId);
 
-    query = addPremiumSorting(query).order('budget', { ascending: true, nullsFirst: false });
-      
-    const { data, error } = await query;
-      
-    if (error) {
-      console.error('Error fetching today\'s deals:', error);
-      toast({ title: "Günün Fırsatları Yüklenemedi", description: error.message, variant: "destructive" });
-      return [];
+    const docs = es.data || [];
+    if (import.meta.env.MODE !== 'production') {
+      (docs as any[]).forEach(d => { try { (d as any).__src = 'E'; } catch (_) {} });
     }
-    return await processFetchedListings(data, currentUserId);
+    const processed = await processFetchedListings(docs, currentUserId);
+    if (import.meta.env.MODE !== 'production') {
+      (processed as any[]).forEach(d => { try { (d as any).__src = 'E'; } catch (_) {} });
+    }
+    return processed;
   } catch (e) {
     console.error('Unexpected error in fetchTodaysDeals:', e);
     toast({ title: "Beklenmedik Hata", description: "Günün fırsatları yüklenirken bir sorun oluştu.", variant: "destructive" });
@@ -250,26 +257,16 @@ export const fetchRecentlyViewedListings = async (currentUserId: string): Promis
   }
 
   try {
-    let query = supabase
-      .from('listings')
-      .select('*')
-      .in('id', history)
-      .eq('status', 'active')
-      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
-
-    query = addPremiumSorting(query);
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Error fetching recently viewed listings:', error);
-      return [];
+    // Fetch each id from ES (keeps order by history)
+    const docs = (await Promise.all(history.map(id => fetchListingByIdFromES(id)))).filter(Boolean) as Listing[];
+    if (import.meta.env.MODE !== 'production') {
+      (docs as any[]).forEach(d => { try { (d as any).__src = 'E'; } catch (_) {} });
     }
-
-    const listingsMap = new Map(data.map(l => [l.id, l]));
-    const orderedListingsData = history.map(id => listingsMap.get(id)).filter(Boolean);
-
-    return await processFetchedListings(orderedListingsData, currentUserId);
+    const processed = await processFetchedListings(docs, currentUserId);
+    if (import.meta.env.MODE !== 'production') {
+      (processed as any[]).forEach(d => { try { (d as any).__src = 'E'; } catch (_) {} });
+    }
+    return processed;
   } catch (e) {
     console.error('Unexpected error in fetchRecentlyViewedListings:', e);
     return [];
