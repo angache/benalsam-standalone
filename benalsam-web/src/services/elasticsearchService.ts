@@ -55,15 +55,35 @@ export const searchListingsWithElasticsearch = async (
   currentUserId: string | null = null
 ): Promise<ApiResponse<Listing[]>> => {
   try {
-    console.log('🔍 Elasticsearch search - Params:', params);
+    // Convert frontend params to Search Service expected payload
+    const page = params.page || 1;
+    const limit = params.limit || 20;
+    const from = (page - 1) * limit;
+    const query = (params.query && params.query.trim().length > 0) ? params.query : '*';
+    const sortField = params.sort?.field || 'created_at';
+    // Default to only active listings on homepage
+    const filters = {
+      ...(params.filters || {}),
+      status: (params.filters as any)?.status || 'active'
+    } as Record<string, any>;
 
-    // Search Service endpoint'ini kullan
+    const servicePayload = {
+      query,
+      size: limit,
+      from,
+      sort: sortField,
+      filters
+    };
+
+    console.log('🔍 Elasticsearch search - Payload:', servicePayload);
+
+    // Call Search Service
     const response = await fetch(`${SEARCH_SERVICE_URL}/api/v1/search/listings`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(params),
+      body: JSON.stringify(servicePayload),
     });
 
     if (!response.ok) {
@@ -73,30 +93,38 @@ export const searchListingsWithElasticsearch = async (
     }
 
     const responseData = await response.json();
-    
-    // Search Service response formatını kontrol et
+
+    // Validate response
     if (!responseData.success || !responseData.data) {
       console.error('❌ Invalid Search Service response format:', responseData);
       return await searchListingsWithSupabase(params, currentUserId);
     }
-    
-    // Search Service response'unu Elasticsearch formatına çevir
-    const result: ElasticsearchSearchResult = {
-      hits: responseData.data,
-      total: responseData.pagination?.total || responseData.data.length,
-      page: responseData.pagination?.page || 1,
-      limit: responseData.pagination?.pageSize || 20,
-      totalPages: responseData.pagination?.totalPages || 1
-    };
 
-    // Elasticsearch sonuçlarını Supabase'den tam listing verilerine çevir
-    if (!result.hits || result.hits.length === 0) {
+    // Normalize to hits array
+    let esHits: any[] = [];
+    let total = 0;
+    if (Array.isArray(responseData.data)) {
+      // Some wrappers may return an array of docs directly
+      esHits = responseData.data;
+      total = responseData.pagination?.total || esHits.length || 0;
+    } else if (responseData.data?.hits?.hits) {
+      esHits = responseData.data.hits.hits;
+      // ES 7 returns total as object or number
+      const totalObj = responseData.data.hits.total;
+      total = typeof totalObj === 'number' ? totalObj : (totalObj?.value ?? esHits.length);
+    } else {
+      console.warn('⚠️ Unknown Search Service data shape. Falling back.');
+      return await searchListingsWithSupabase(params, currentUserId);
+    }
+
+    // Convert to listing IDs
+    if (!esHits || esHits.length === 0) {
       console.log('⚠️ No hits found in Elasticsearch');
       return { data: [] };
     }
-    
-    const listingIds = result.hits
-      .map(hit => hit.id)
+
+    const listingIds = esHits
+      .map((hit: any) => hit.id || hit._id || hit._source?.id)
       .filter(id => id && id !== 'undefined' && id !== undefined); // undefined değerleri filtrele
     
     if (listingIds.length === 0) {
@@ -115,7 +143,7 @@ export const searchListingsWithElasticsearch = async (
       return { data: [] };
     }
 
-    // Elasticsearch'teki sıralamayı koru
+    // Preserve ES order
     const sortedListings = listingIds
       .map(id => listings?.find(listing => listing.id === id))
       .filter(Boolean) as Listing[];
@@ -126,9 +154,9 @@ export const searchListingsWithElasticsearch = async (
       listings: sortedListings.length
     });
 
-    return { 
+    return {
       data: sortedListings,
-      total: result.total 
+      total
     };
 
   } catch (error) {
