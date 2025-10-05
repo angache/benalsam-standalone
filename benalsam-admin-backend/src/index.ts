@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import compression from 'compression';
-import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types/server';
+import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types/dist/server';
 import { errorHandler } from './middleware/errorHandler';
 import routes from './routes';
 

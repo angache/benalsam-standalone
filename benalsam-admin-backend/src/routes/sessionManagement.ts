@@ -2,7 +2,7 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth';
 import sessionCleanupService from '../services/sessionCleanupService';
 import logger from '../config/logger';
-import { supabase } from '../index';
+import { supabase } from '../config/supabase';
 
 const router: express.Router = express.Router();
 

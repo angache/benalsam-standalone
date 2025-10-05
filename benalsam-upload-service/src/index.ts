@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
-import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types/server';
+import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types/dist/server';
 import fileUpload from 'express-fileupload';
 import listingsRouter from './routes/listings';
 import { errorHandler } from './middleware/errorHandler';

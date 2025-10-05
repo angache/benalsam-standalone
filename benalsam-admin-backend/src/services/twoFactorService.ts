@@ -1,7 +1,7 @@
 import { authenticator } from 'otplib';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
-import { supabase } from '../index';
+import { supabase } from '../config/supabase';
 import logger from '../config/logger';
 
 export interface TwoFactorSetup {
@@ -240,7 +240,7 @@ export class TwoFactorService {
   }
 
   /**
-   * Generate new backup codes
+   * Regenerate backup codes
    */
   async regenerateBackupCodes(userId: string): Promise<string[]> {
     try {
@@ -258,7 +258,7 @@ export class TwoFactorService {
   }
 
   /**
-   * Check if user has 2FA enabled
+   * Check if 2FA is enabled
    */
   async isTwoFactorEnabled(userId: string): Promise<boolean> {
     try {
@@ -292,7 +292,7 @@ export class TwoFactorService {
   }
 
   /**
-   * Store 2FA data in database
+   * Store 2FA data
    */
   private async storeTwoFactorData(userId: string, secret: string, backupCodes: string[]): Promise<void> {
     // Try admin_users table first
