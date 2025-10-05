@@ -95,11 +95,11 @@ const HomePageNew = ({ onToggleFavorite, currentUser }) => {
       try {
         setIsLoading(true);
         const fetchedListings = await fetchListings(currentUser.id);
-        setListings(fetchedListings || []);
+        setListings(fetchedListings?.listings || []);
         
         // SessionStorage'a kaydet
         sessionStorage.setItem(STORAGE_KEY, 'true');
-        sessionStorage.setItem(LISTINGS_CACHE_KEY, JSON.stringify(fetchedListings || []));
+        sessionStorage.setItem(LISTINGS_CACHE_KEY, JSON.stringify(fetchedListings?.listings || []));
         sessionStorage.setItem('homepage_user_id_v2', currentUser.id.toString());
         
         setIsLoading(false);

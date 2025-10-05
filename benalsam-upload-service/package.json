@@ -24,7 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "amqplib": "^0.10.3",
-    "benalsam-shared-types": "^1.0.11",
+    "benalsam-shared-types": "^1.1.2",
     "cloudinary": "^1.41.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

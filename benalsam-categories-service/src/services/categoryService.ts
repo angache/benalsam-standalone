@@ -731,53 +731,81 @@ export class CategoryService {
    */
   async getCategoryCounts(): Promise<Record<string, number>> {
     try {
-      logger.info('🔄 Fetching category listing counts', { service: 'categories-service' });
-      
+      logger.info('🔄 Fetching category listing counts (cumulative, non-zero only)', { service: 'categories-service' });
+
+      // Try cache first (10m)
+      const cacheKey = 'categories:counts:cumulative:v1';
+      const cached = await CacheService.get(cacheKey);
+      if (cached) {
+        logger.info('📦 Returning cached category counts', { service: 'categories-service' });
+        return cached;
+      }
+
       // Use circuit breaker for database operations
-      return await databaseCircuitBreaker.execute(async () => {
-        const { data: counts, error } = await supabase
-          .from('listings')
-          .select('category_id, status')
-          .eq('status', 'active'); // Only count active listings
-
-        if (error) {
-          logger.error('Error fetching category counts:', { error, service: 'categories-service' });
-          throw error;
-        }
-
-        // Count listings per category
-        const categoryCounts: Record<string, number> = {};
-        
-        // Initialize all categories with 0
-        const { data: categories } = await supabase
+      const result = await databaseCircuitBreaker.execute(async () => {
+        // 1) Load active categories (id, parent)
+        const { data: categories, error: catErr } = await supabase
           .from('categories')
-          .select('id')
+          .select('id, parent_id, is_active')
           .eq('is_active', true);
-        
-        categories?.forEach(cat => {
-          categoryCounts[cat.id.toString()] = 0;
+        if (catErr) throw catErr;
+
+        const parentMap = new Map<number, number | null>();
+        (categories || []).forEach(c => {
+          const idNum = Number(c.id);
+          const parentNum = c.parent_id !== null && c.parent_id !== undefined ? Number(c.parent_id) : null;
+          parentMap.set(idNum, parentNum);
         });
 
-        // Count actual listings
-        counts?.forEach(listing => {
-          if (listing.category_id) {
-            const categoryId = listing.category_id.toString();
-            categoryCounts[categoryId] = (categoryCounts[categoryId] || 0) + 1;
+        // 2) Load active listings' category_id
+        const { data: listings, error: listErr } = await supabase
+          .from('listings')
+          .select('category_id')
+          .eq('status', 'active');
+        if (listErr) throw listErr;
+
+        // 3) Leaf counts
+        const counts: Record<string, number> = {};
+        let total = 0;
+        (listings || []).forEach(l => {
+          const cid = l.category_id;
+          if (cid) {
+            counts[cid] = (counts[cid] || 0) + 1;
+            total += 1;
           }
         });
 
-        // Add total count for "all categories"
-        const totalCount = counts?.length || 0;
-        categoryCounts['all'] = totalCount;
+        // 4) Cumulative: propagate each counted category to its ancestors
+        const cumulative: Record<string, number> = {};
+        const addTo = (id: number, value: number) => {
+          cumulative[id] = (cumulative[id] || 0) + value;
+          let parent = parentMap.get(Number(id)) ?? null;
+          while (parent !== null && parent !== undefined) {
+            cumulative[parent] = (cumulative[parent] || 0) + value;
+            parent = parentMap.get(Number(parent)) ?? null;
+          }
+        };
+        Object.entries(counts).forEach(([idStr, value]) => addTo(parseInt(idStr, 10), value));
 
-        logger.info('✅ Category counts calculated', { 
-          totalCategories: Object.keys(categoryCounts).length - 1, // -1 for 'all'
-          totalListings: totalCount,
-          service: 'categories-service' 
+        // 5) Filter zeros and add total
+        const filtered: Record<string, number> = {};
+        Object.entries(cumulative).forEach(([id, value]) => {
+          if (value > 0) filtered[id] = value;
+        });
+        filtered['all'] = total;
+
+        logger.info('✅ Category counts (cumulative) calculated', {
+          nonZeroCategories: Object.keys(filtered).length - 1,
+          totalListings: total,
+          service: 'categories-service'
         });
 
-        return categoryCounts;
+        return filtered;
       });
+
+      // Cache for 10 minutes (async, no await)
+      CacheService.set('categories:counts:cumulative:v1', result, 600).catch(() => {});
+      return result;
     } catch (error) {
       logger.error('Error in getCategoryCounts:', { error, service: 'categories-service' });
       throw error;

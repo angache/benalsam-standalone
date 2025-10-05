@@ -238,6 +238,7 @@ export class SecurityMiddleware {
             this.getSecurityHeaders(),
             this.getRequestLogger(),
             this.getRequestSizeLimit(),
+            this.getRateLimit(), // Add rate limiting to all middleware
             this.getHealthCheckBypass()
         ];
     }

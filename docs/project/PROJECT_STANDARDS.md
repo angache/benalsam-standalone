@@ -163,7 +163,7 @@ import { User, Listing } from '@benalsam/shared-types';
 ```json
 {
   "dependencies": {
-    "benalsam-shared-types": "^1.0.0"
+    "benalsam-shared-types": "^1.1.2"
   }
 }
 ```

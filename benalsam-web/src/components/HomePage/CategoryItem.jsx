@@ -130,18 +130,14 @@ const CategoryItem = ({ category, level = 0, onSelect, selectedPath = [], getCat
           <IconComponent className="w-4 h-4" />
           <span>{category.name}</span>
         </span>
-        {getCategoryCount && (
+        {getCategoryCount && !isLoadingCounts && getCategoryCountValue() > 0 && (
           <motion.span 
             className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.2 }}
           >
-            {isLoadingCounts ? (
-              <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-            ) : (
-              getCategoryCountValue()
-            )}
+            {getCategoryCountValue()}
           </motion.span>
         )}
         {hasSubcategories && (

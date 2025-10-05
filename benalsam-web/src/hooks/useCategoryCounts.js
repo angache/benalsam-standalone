@@ -6,7 +6,8 @@ export const useCategoryCounts = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Local storage cache functions
-  const CACHE_KEY = 'category_counts_cache_v6';
+  // Bump cache version to invalidate stale/partial caches
+  const CACHE_KEY = 'category_counts_cache_v8';
   const CACHE_TTL = 10 * 60 * 1000; // 10 dakika
   const RATE_LIMIT = 30 * 1000; // 30 saniye
   const lastFetchTime = useRef(0);
@@ -24,7 +25,11 @@ export const useCategoryCounts = () => {
         localStorage.removeItem(CACHE_KEY);
         return null;
       }
-      
+      // Guard: ignore partial caches (must contain 'all' or at least 2 keys)
+      if (!data || typeof data !== 'object' || Object.keys(data).length < 2 || !('all' in data)) {
+        localStorage.removeItem(CACHE_KEY);
+        return null;
+      }
       return data;
     } catch (error) {
       console.error('Error reading from cache:', error);
@@ -34,6 +39,10 @@ export const useCategoryCounts = () => {
 
   const setCachedCategoryCounts = useCallback((data) => {
     try {
+      // Guard: don't cache empty objects
+      if (!data || (typeof data === 'object' && Object.keys(data).length === 0)) {
+        return;
+      }
       const cacheData = {
         data,
         timestamp: Date.now()
@@ -44,16 +53,45 @@ export const useCategoryCounts = () => {
     }
   }, []);
 
-  // Elasticsearch'ten category counts çek
+  // Categories Service üzerinden category counts çek (tercih)
   const fetchCategoryCountsFromElasticsearch = useCallback(async () => {
     try {
-      const ADMIN_BACKEND_URL = import.meta.env.VITE_ADMIN_BACKEND_URL || 'http://localhost:3002';
-      const response = await fetch(`${ADMIN_BACKEND_URL}/api/v1/elasticsearch/category-counts`);
+      const CATEGORIES_SERVICE_URL = import.meta.env.VITE_CATEGORIES_SERVICE_URL || 'http://localhost:3015';
+      // 1) Try Categories Service
+      let response = await fetch(`${CATEGORIES_SERVICE_URL}/api/v1/categories/counts`);
+      if (response.ok) {
+        const result = await response.json();
+        if (result?.counts) return result.counts;
+        if (result?.data?.counts) return result.data.counts;
+        // NEW: support { success, data: { '499': 1, '500': 1, ... } }
+        if (result?.data && typeof result.data === 'object' && !Array.isArray(result.data)) {
+          return result.data;
+        }
+      }
+
+      // 2) Fallback to Search Service / ES Service stats if categories service unavailable
+      const ES_PUBLIC_URL = import.meta.env.VITE_ELASTICSEARCH_PUBLIC_URL || 'http://localhost:3006';
+      const SEARCH_SERVICE_URL = import.meta.env.VITE_SEARCH_SERVICE_URL || '';
+      const statsUrl = SEARCH_SERVICE_URL
+        ? `${SEARCH_SERVICE_URL}/api/v1/search/stats`
+        : `${ES_PUBLIC_URL}/api/v1/search/stats`;
+      response = await fetch(statsUrl);
       
       if (response.ok) {
         const result = await response.json();
-        console.log('📊 Category counts fetched from Elasticsearch:', result);
-        return result.data || {};
+        console.log('📊 Category counts fetched from service:', result);
+        // Try several shapes: { data: { categoryCounts } } or { categoryCounts } or { aggregations }
+        if (result?.data?.categoryCounts) return result.data.categoryCounts;
+        if (result?.categoryCounts) return result.categoryCounts;
+        if (result?.aggregations?.categories?.buckets) {
+          const counts = {};
+          result.aggregations.categories.buckets.forEach(b => {
+            const key = b.key; const docCount = b.doc_count || 0;
+            if (key !== null && key !== undefined) counts[key] = docCount;
+          });
+          return counts;
+        }
+        return {};
       }
     } catch (error) {
       console.error('Elasticsearch category counts error:', error);
@@ -110,7 +148,7 @@ export const useCategoryCounts = () => {
       // 2. Elasticsearch'ten çek
       const elasticsearchCounts = await fetchCategoryCountsFromElasticsearch();
       
-      if (elasticsearchCounts) {
+      if (elasticsearchCounts && Object.keys(elasticsearchCounts).length > 0) {
         console.log('💾 Caching Elasticsearch counts:', elasticsearchCounts);
         setCachedCategoryCounts(elasticsearchCounts);
         return elasticsearchCounts;
@@ -120,7 +158,7 @@ export const useCategoryCounts = () => {
       console.log('🔄 Falling back to Supabase for category counts');
       const supabaseCounts = await fetchCategoryCountsFromSupabase();
       
-      if (supabaseCounts) {
+      if (supabaseCounts && Object.keys(supabaseCounts).length > 0) {
         setCachedCategoryCounts(supabaseCounts);
       }
       
@@ -133,15 +171,22 @@ export const useCategoryCounts = () => {
 
   // Kategori ID'sine göre sayı getir
   const getCategoryCount = useCallback((categoryId) => {
-    if (!categoryId) {
-      // Tüm ilanlar için toplam sayı
-      return Object.values(categoryCounts).reduce((sum, count) => sum + count, 0);
+    // Support: undefined/null, empty array, or explicit 'all'
+    const isAll =
+      categoryId === undefined || categoryId === null ||
+      (Array.isArray(categoryId) && categoryId.length === 0) ||
+      categoryId === 'all';
+    if (isAll) {
+      // Prefer 'all' from service; fallback to sum of numeric ids only
+      if (categoryCounts && typeof categoryCounts.all === 'number') return categoryCounts.all;
+      return Object.entries(categoryCounts)
+        .filter(([k]) => k !== 'all')
+        .reduce((sum, [, v]) => sum + (typeof v === 'number' ? v : 0), 0);
     }
-    
-    // Kategori ID'si ile direkt eşleştirme
-    const count = categoryCounts[categoryId] || 0;
-    
-    console.log(`🔍 Category count for ID ${categoryId}: ${count}`);
+
+    const key = String(categoryId);
+    const count = categoryCounts[key] || 0;
+    console.log(`🔍 Category count for ID ${key}: ${count}`);
     return count;
   }, [categoryCounts]);
 

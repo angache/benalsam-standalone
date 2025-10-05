@@ -184,7 +184,7 @@ const SidebarContent = ({
             </span>
           </div>
           <Suspense fallback={<LoadingFallback />}>
-            {isLoadingCategories ? (
+              {isLoadingCategories ? (
               <div className="flex items-center justify-center py-4">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
               </div>
