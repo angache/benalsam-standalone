@@ -10,11 +10,11 @@ Benalsam platformu 9 ana microservice'ten oluşan enterprise-grade bir mimariye 
 | **Elasticsearch Service** | 3006 | Search, indexing, sync operations | `/api/v1/health` |
 | **Upload Service** | 3007 | Image upload, processing, Cloudinary integration | `/api/v1/health` |
 | **Listing Service** | 3008 | Listing CRUD operations, job processing | `/api/v1/health` |
-| **Queue Service** | 3012 | RabbitMQ message processing, real-time messaging | `/api/v1/health` |
 | **Backup Service** | 3013 | Data backup, recovery operations | `/api/v1/health` |
 | **Cache Service** | 3014 | Cache management, analytics | `/api/v1/health` |
 | **Categories Service** | 3015 | Category management, CRUD operations | `/api/v1/health` |
 | **Search Service** | 3016 | Advanced search capabilities | `/api/v1/health` |
+| **Realtime Service** | 3019 | Firebase Realtime Queue, real-time messaging | `/api/v1/health` |
 
 ---
 

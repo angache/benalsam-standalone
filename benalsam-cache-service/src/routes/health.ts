@@ -29,8 +29,12 @@ router.get('/', async (_req: Request, res: Response) => {
       environment: process.env['NODE_ENV'],
       redis: {
         status: redisStatus,
-        host: process.env['REDIS_HOST'] || 'localhost',
-        port: process.env['REDIS_PORT'] || '6379',
+        host: process.env['ENABLE_REDIS_CLOUD'] === 'true' 
+          ? process.env['REDIS_CLOUD_HOST'] || 'localhost'
+          : process.env['REDIS_HOST'] || 'localhost',
+        port: process.env['ENABLE_REDIS_CLOUD'] === 'true'
+          ? process.env['REDIS_CLOUD_PORT'] || '6379'
+          : process.env['REDIS_PORT'] || '6379',
         error: redisError,
         connectionState: redis.status
       },

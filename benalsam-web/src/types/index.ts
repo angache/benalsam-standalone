@@ -2,8 +2,25 @@
 // RE-EXPORT SHARED TYPES
 // ===========================
 
-// Re-export all types from shared-types package
-export * from 'benalsam-shared-types';
+// Re-export only client-safe types from shared-types package
+export type {
+  // Core types
+  User,
+  Listing,
+  Category,
+  ListingStatus,
+  ListingReport,
+  QueryFilters,
+  // Analytics types
+  AnalyticsEventType,
+  AnalyticsEventProperties,
+  // Utility types
+  ApiResponse,
+  PaginatedResponse
+} from 'benalsam-shared-types';
+
+// Re-export utility functions
+export { formatDate } from 'benalsam-shared-types';
 
 // ===========================
 // WEB-SPECIFIC TYPES (if any)

@@ -2,11 +2,21 @@ import Redis from 'ioredis';
 import { logger } from './logger';
 import { redisCircuitBreaker } from '../utils/circuitBreaker';
 
+// Use Redis Cloud if enabled, otherwise use local/VPS Redis
+const useRedisCloud = process.env['ENABLE_REDIS_CLOUD'] === 'true';
+
 const redisConfig = {
-  host: process.env['REDIS_HOST'] || 'localhost',
-  port: parseInt(process.env['REDIS_PORT'] || '6379'),
-  ...(process.env['REDIS_PASSWORD'] && { password: process.env['REDIS_PASSWORD'] }),
-  db: parseInt(process.env['REDIS_DB'] || '0'),
+  ...(useRedisCloud ? {
+    host: process.env['REDIS_CLOUD_HOST'] || 'localhost',
+    port: parseInt(process.env['REDIS_CLOUD_PORT'] || '6379'),
+    ...(process.env['REDIS_CLOUD_PASSWORD'] && { password: process.env['REDIS_CLOUD_PASSWORD'] }),
+    db: parseInt(process.env['REDIS_DB'] || '0'),
+  } : {
+    host: process.env['REDIS_HOST'] || 'localhost',
+    port: parseInt(process.env['REDIS_PORT'] || '6379'),
+    ...(process.env['REDIS_PASSWORD'] && { password: process.env['REDIS_PASSWORD'] }),
+    db: parseInt(process.env['REDIS_DB'] || '0'),
+  }),
   retryDelayOnFailover: 1000,
   maxRetriesPerRequest: 5,
   lazyConnect: true,

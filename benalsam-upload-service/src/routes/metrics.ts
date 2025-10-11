@@ -7,7 +7,7 @@ const router = Router();
 /**
  * Prometheus metrics endpoint
  */
-router.get('/metrics', async (_req, res) => {
+router.get('/', async (_req, res) => {
   try {
     const metrics = await collectMetrics();
     

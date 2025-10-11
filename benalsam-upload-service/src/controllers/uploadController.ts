@@ -1,8 +1,8 @@
 import { Response } from 'express';
 import { logger } from '../config/logger';
 import { publishEvent } from '../config/rabbitmq';
-import { CloudinaryService } from '../services/CloudinaryService';
-import { QuotaService } from '../services/QuotaService';
+import { CloudinaryService } from '../services/cloudinaryService';
+import { QuotaService } from '../services/quotaService';
 import {
   validateUserAuthentication,
   validateFileUpload,

@@ -5,7 +5,7 @@ config();
 
 import express from 'express';
 import compression from 'compression';
-import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types/dist/server';
+import { createSecurityMiddleware, SECURITY_CONFIGS } from './sharedTypesServer';
 import { logger } from './config/logger';
 import { checkDatabaseHealth, disconnectDatabase } from './config/database';
 import { disconnectRedis } from './config/redis';

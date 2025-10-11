@@ -107,6 +107,14 @@ export default defineConfig({
 		assetsInlineLimit: 4096, // Inline small assets
 		target: 'es2015', // Target modern browsers
 		rollupOptions: {
+			external: [
+				'express-rate-limit',
+				'helmet',
+				'cors',
+				'node:crypto',
+				'node:buffer',
+				'node:net'
+			],
 			output: {
 				// Use optimized manual chunks
 				manualChunks: createManualChunks,

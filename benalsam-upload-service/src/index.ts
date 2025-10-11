@@ -1,14 +1,18 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
-import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types/dist/server';
+import { createSecurityMiddleware, SECURITY_CONFIGS } from './sharedTypesServer';
 import fileUpload from 'express-fileupload';
 import listingsRouter from './routes/listings';
 import { errorHandler } from './middleware/errorHandler';
+import { logger } from './config/logger';
+import metricsRoutes from './routes/metrics';
+import healthRoutes from './routes/health';
 
 const app = express();
-const PORT = process.env.PORT || 3019;
+const PORT = process.env.PORT || 3007;
 
 const environment = process.env.NODE_ENV || 'development';
 const securityConfig = SECURITY_CONFIGS[environment as keyof typeof SECURITY_CONFIGS] || SECURITY_CONFIGS.development;
@@ -30,10 +34,32 @@ securityMiddleware.getAllMiddleware().forEach(mw => app.use(mw));
 
 // Routes
 app.use('/api/v1/listings', listingsRouter);
+app.use('/api/v1/metrics', metricsRoutes);
+app.use('/api/v1/health', healthRoutes);
 
 // Error handler
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Upload Service running on port ${PORT}`);
+let server: any;
+server = app.listen(PORT, () => {
+  logger.info('🚀 Upload Service running on port ' + PORT);
+  logger.info('📊 Environment: ' + (process.env.NODE_ENV || 'development'));
+  logger.info('🔗 Health check: http://localhost:' + PORT + '/api/v1/health');
 });
+
+// Graceful shutdown
+const shutdown = async (signal: string) => {
+  logger.info(`🛑 ${signal} received, shutting down Upload Service...`);
+  try {
+    if (server) {
+      server.close(() => {
+        logger.info('✅ HTTP server closed gracefully');
+      });
+    }
+  } catch (err) {
+    logger.error('❌ Error during shutdown', err as any);
+  }
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

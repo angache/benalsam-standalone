@@ -10,11 +10,11 @@
 | **Elasticsearch Service** | 3006 | `/api/v1/health` | `status` | ✅ Healthy |
 | **Upload Service** | 3007 | `/api/v1/health` | `status` | ✅ Healthy |
 | **Listing Service** | 3008 | `/api/v1/health` | `status` | ✅ Healthy |
-| **Queue Service** | 3012 | `/api/v1/health` | `data.status` | ✅ Degraded |
 | **Backup Service** | 3013 | `/api/v1/health` | `data.status` | ✅ Healthy |
 | **Cache Service** | 3014 | `/api/v1/health` | `data.status` | ✅ Healthy |
 | **Categories Service** | 3015 | `/api/v1/health` | `status` | ✅ Healthy |
 | **Search Service** | 3016 | `/api/v1/health` | `status` | ✅ Healthy |
+| **Realtime Service** | 3019 | `/api/v1/health` | `status` | ✅ Healthy |
 
 ### 🌐 Web Uygulamaları
 
