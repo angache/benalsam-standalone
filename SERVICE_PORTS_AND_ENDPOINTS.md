@@ -87,11 +87,11 @@ curl -s http://localhost:3002/api/v1/metrics | head -20
 curl -s http://localhost:3006/api/v1/metrics | head -20
 curl -s http://localhost:3007/api/v1/metrics | head -20
 curl -s http://localhost:3008/api/v1/metrics | head -20
-curl -s http://localhost:3012/api/v1/metrics | head -20
 curl -s http://localhost:3013/api/v1/metrics | head -20
 curl -s http://localhost:3014/api/v1/metrics | head -20
 curl -s http://localhost:3015/api/v1/metrics | head -20
 curl -s http://localhost:3016/api/v1/metrics | head -20
+curl -s http://localhost:3019/api/v1/metrics | head -20
 ```
 
 ## 🧪 Health Check Test Komutları
@@ -106,11 +106,11 @@ services=(
   "3006:Elasticsearch Service"
   "3007:Upload Service"
   "3008:Listing Service"
-  "3012:Queue Service"
   "3013:Backup Service"
   "3014:Cache Service"
   "3015:Categories Service"
   "3016:Search Service"
+  "3019:Realtime Service"
 )
 
 for service in "${services[@]}"; do
@@ -119,8 +119,8 @@ for service in "${services[@]}"; do
   
   echo -n "Port $port ($name): "
   
-  if [[ $port == "3012" || $port == "3013" || $port == "3014" ]]; then
-    # Queue Service, Backup Service ve Cache Service data.status formatında
+  if [[ $port == "3013" || $port == "3014" ]]; then
+    # Backup Service ve Cache Service data.status formatında
     status=$(curl -s http://localhost:$port/api/v1/health | jq -r '.data.status // "No response"' 2>/dev/null || echo "No response")
   else
     # Diğer servisler status formatında
@@ -145,9 +145,6 @@ curl -s http://localhost:3007/api/v1/health | jq '.status'
 # Listing Service
 curl -s http://localhost:3008/api/v1/health | jq '.status'
 
-# Queue Service (data.status format)
-curl -s http://localhost:3012/api/v1/health | jq '.data.status'
-
 # Backup Service (data.status format)
 curl -s http://localhost:3013/api/v1/health | jq '.data.status'
 
@@ -159,6 +156,9 @@ curl -s http://localhost:3015/api/v1/health | jq '.status'
 
 # Search Service
 curl -s http://localhost:3016/api/v1/health | jq '.status'
+
+# Realtime Service
+curl -s http://localhost:3019/api/v1/health | jq '.status'
 ```
 
 ## 🔧 Service Registry Konfigürasyonu
@@ -179,10 +179,6 @@ const serviceConfigs = {
     url: 'http://localhost:3008',
     healthEndpoint: '/api/v1/health'
   },
-  'queue-service': {
-    url: 'http://localhost:3012',
-    healthEndpoint: '/api/v1/health'
-  },
   'backup-service': {
     url: 'http://localhost:3013',
     healthEndpoint: '/api/v1/health'
@@ -197,6 +193,10 @@ const serviceConfigs = {
   },
   'search-service': {
     url: 'http://localhost:3016',
+    healthEndpoint: '/api/v1/health'
+  },
+  'realtime-service': {
+    url: 'http://localhost:3019',
     healthEndpoint: '/api/v1/health'
   }
 };
@@ -223,11 +223,11 @@ lsof -i :3002
 lsof -i :3006
 lsof -i :3007
 lsof -i :3008
-lsof -i :3012
 lsof -i :3013
 lsof -i :3014
 lsof -i :3015
 lsof -i :3016
+lsof -i :3019
 ```
 
 ### Health Check Başarısız
@@ -247,6 +247,6 @@ curl -v http://localhost:<port>/metrics
 
 ---
 
-**Son Güncelleme**: 27 Eylül 2025, 10:30  
+**Son Güncelleme**: 11 Ekim 2025
 **Doğrulama**: Tüm endpoint'ler test edildi ve çalışır durumda  
-**Versiyon**: 1.0.0
+**Versiyon**: 2.0.0 (Queue Service removed, Firebase Realtime Queue active)
