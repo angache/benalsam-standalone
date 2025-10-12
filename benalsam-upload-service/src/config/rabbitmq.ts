@@ -174,6 +174,7 @@ class RabbitMQConfig {
       throw error;
     }
   }
+
 }
 
 export const rabbitmqConfig = RabbitMQConfig.getInstance();

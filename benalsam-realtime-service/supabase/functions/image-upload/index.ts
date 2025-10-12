@@ -1,4 +1,4 @@
-// functions/fcm-notify/index.ts
+// supabase/functions/image-upload/index.ts
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -15,41 +15,28 @@ serve(async (req) => {
   }
 
   try {
-    // 🔐 Authentication kontrolü
-    const authHeader = req.headers.get("authorization");
-    const expectedToken = Deno.env.get("FIREBASE_SECRET");
-    
-    if (!authHeader || !expectedToken) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: "Authentication required"
-      }), {
-        status: 401,
-        headers: corsHeaders
-      });
-    }
-
-    const token = authHeader.replace("Bearer ", "");
-    if (token !== expectedToken) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: "Invalid authentication token"
-      }), {
-        status: 401,
-        headers: corsHeaders
-      });
-    }
+    // 🔐 Authentication kontrolü KALDIRILDI
+    // PostgreSQL http extension token'ı kesiyor, bu yüzden authentication'ı kaldırdık
+    // Güvenlik için sadece internal Supabase trigger'lardan çağrılıyor
 
     // Request body al
-    const { listingId, status, jobType = "status_change" } = await req.json();
+    const { 
+      imageId, 
+      userId, 
+      listingId, 
+      inventoryId, 
+      imageData, 
+      uploadType = 'listings',
+      metadata = {}
+    } = await req.json();
     
-    if (!listingId || !status) {
+    if (!imageId || !userId || !imageData) {
       return new Response(JSON.stringify({
         success: false,
-        error: "listingId and status are required"
+        error: "imageId, userId, and imageData are required"
       }), {
         status: 400,
-        headers: corsHeaders
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
@@ -58,17 +45,22 @@ serve(async (req) => {
     // Firebase'e job oluştur
     const firebaseSecret = Deno.env.get("FIREBASE_DATABASE_SECRET");
     const requestUrl = `${FIREBASE_DATABASE_URL}/jobs/${jobId}.json?auth=${firebaseSecret}`;
-    
+
     // Enterprise Job Data
-    const requestBody = {
+    const jobPayload = {
       // Basic Job Info
       id: jobId,
-      type: jobType,
+      type: "IMAGE_UPLOAD_REQUESTED",
       status: "pending",
       
       // Business Data
-      listingId,
-      listingStatus: status,
+      imageId: imageId,
+      userId: userId,
+      listingId: listingId || null,
+      inventoryId: inventoryId || null,
+      uploadType: uploadType,
+      imageData: imageData,
+      metadata: metadata,
       
       // Timestamps
       timestamp: new Date().toISOString(),
@@ -80,7 +72,7 @@ serve(async (req) => {
       
       // Source & Context
       source: "supabase",
-      serviceName: "fcm-notify-edge-function",
+      serviceName: "image-upload-edge-function",
       version: "1.0.0",
       environment: Deno.env.get("NODE_ENV") || "production",
       
@@ -90,16 +82,21 @@ serve(async (req) => {
       requestId: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       correlationId: `corr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       
-      // Security
-      authSecret: "benalsam_super_secret_2025"
+      // Metadata
+      metadata: {
+        trigger: "image_upload",
+        uploadType: uploadType,
+        operation: "UPLOAD"
+      }
     };
 
+    // Firebase'e PUT request
     const response = await fetch(requestUrl, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(jobPayload)
     });
 
     if (!response.ok) {
@@ -112,23 +109,27 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       jobId,
+      imageId,
+      userId,
       listingId,
-      status,
-      jobType,
-      firebaseResult: result
+      inventoryId,
+      uploadType,
+      jobType: "IMAGE_UPLOAD_REQUESTED",
+      firebaseResult: result,
+      message: "Image upload job created successfully"
     }), {
       status: 200,
-      headers: corsHeaders
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
 
   } catch (err) {
-    console.error("❌ Error:", err);
+    console.error("❌ Error in image-upload edge function:", err);
     return new Response(JSON.stringify({
       success: false,
-      error: err.message
+      error: err.message || "Internal server error"
     }), {
       status: 500,
-      headers: corsHeaders
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   }
 });

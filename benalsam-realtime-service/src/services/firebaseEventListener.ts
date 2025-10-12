@@ -91,32 +91,64 @@ export class FirebaseEventListener {
         status: 'processing'
       });
 
-      // RabbitMQ mesajı oluştur
-      const rabbitmqMessage = {
-        id: jobId,
-        type: safeJobData.type || 'listing_change',
-        action: 'update',
-        timestamp: safeJobData.timestamp || new Date().toISOString(),
-        source: safeJobData.source || 'firebase_realtime',
-        recordId: safeJobData.listingId, // ✅ Elasticsearch Service için gerekli
-        data: {
-          listingId: safeJobData.listingId,
-          jobId: jobId,
-          change: {
-            field: 'status',
-            newValue: safeJobData.listingStatus || safeJobData.status,
-            changedAt: safeJobData.timestamp
-          },
-          source: {
-            database: 'supabase',
-            table: 'listings',
-            id: safeJobData.listingId
+      // Job type'a göre routing
+      const jobType = safeJobData.type || 'listing_change';
+      
+      if (jobType.startsWith('IMAGE_')) {
+        // Image processing jobs için upload queue
+        const rabbitmqMessage = {
+          id: jobId,
+          type: jobType,
+          action: 'process',
+          timestamp: safeJobData.timestamp || new Date().toISOString(),
+          source: safeJobData.source || 'firebase_realtime',
+          recordId: safeJobData.imageId || safeJobData.listingId,
+          data: {
+            imageId: safeJobData.imageId,
+            userId: safeJobData.userId,
+            listingId: safeJobData.listingId,
+            inventoryId: safeJobData.inventoryId,
+            uploadType: safeJobData.uploadType,
+            imageData: safeJobData.imageData,
+            imageUrl: safeJobData.imageUrl,
+            processingType: safeJobData.processingType,
+            transformations: safeJobData.transformations,
+            metadata: safeJobData.metadata,
+            jobId: jobId
           }
-        }
-      };
+        };
 
-      // RabbitMQ'ya gönder
-      await rabbitmqService.sendMessage('elasticsearch.sync', rabbitmqMessage);
+        // Upload queue'ya gönder
+        await rabbitmqService.sendMessage('upload.jobs', rabbitmqMessage);
+        
+      } else {
+        // Listing jobs için elasticsearch queue
+        const rabbitmqMessage = {
+          id: jobId,
+          type: jobType,
+          action: 'update',
+          timestamp: safeJobData.timestamp || new Date().toISOString(),
+          source: safeJobData.source || 'firebase_realtime',
+          recordId: safeJobData.listingId, // ✅ Elasticsearch Service için gerekli
+          data: {
+            listingId: safeJobData.listingId,
+            jobId: jobId,
+            change: {
+              field: 'status',
+              newValue: safeJobData.listingStatus || safeJobData.status,
+              changedAt: safeJobData.timestamp
+            },
+            source: {
+              database: 'supabase',
+              table: 'listings',
+              id: safeJobData.listingId
+            }
+          }
+        };
+
+        // Elasticsearch queue'ya gönder
+        await rabbitmqService.sendMessage('elasticsearch.sync', rabbitmqMessage);
+      }
 
       // 🔄 Update job status to 'completed' with performance metrics
       const completedAt = new Date().toISOString();

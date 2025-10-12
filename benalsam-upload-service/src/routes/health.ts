@@ -3,11 +3,14 @@ import { getRedisClient } from '../config/redis';
 import { getChannel } from '../config/rabbitmq';
 import { logger } from '../config/logger';
 import { cloudinaryCircuitBreaker, redisCircuitBreaker, rabbitmqCircuitBreaker, fileOperationCircuitBreaker } from '../utils/circuitBreaker';
+import { uploadEventConsumer } from '../services/uploadEventConsumer';
 
 const router = Router();
 
 // Basic health check
 router.get('/', (req, res) => {
+  const tempDirStats = uploadEventConsumer.getTempDirectoryStats();
+  
   res.json({
     success: true,
     service: 'upload-service',
@@ -16,6 +19,12 @@ router.get('/', (req, res) => {
     uptime: process.uptime(),
     memory: process.memoryUsage(),
     version: '1.0.0',
+    consumers: {
+      uploadEventConsumer: {
+        running: uploadEventConsumer.isConsumerRunning(),
+        tempDirectory: tempDirStats
+      }
+    },
     circuitBreakers: {
       cloudinary: cloudinaryCircuitBreaker.getMetrics(),
       redis: redisCircuitBreaker.getMetrics(),
