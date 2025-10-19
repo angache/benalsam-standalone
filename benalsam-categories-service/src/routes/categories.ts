@@ -43,6 +43,13 @@ router.get('/stats', categoryController.getCategoryStats);
 router.get('/counts', categoryController.getCategoryCounts);
 
 /**
+ * @route GET /api/v1/categories/version
+ * @desc Get categories version for cache validation
+ * @access Public
+ */
+router.get('/version', categoryController.getVersion);
+
+/**
  * @route GET /api/v1/categories/popular
  * @desc Get popular categories
  * @access Public

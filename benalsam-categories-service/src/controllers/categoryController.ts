@@ -575,6 +575,37 @@ export class CategoryController {
   }
 
   /**
+   * Get categories version for cache validation
+   * GET /api/v1/categories/version
+   */
+  async getVersion(req: Request, res: Response): Promise<void> {
+    try {
+      logger.info('Getting categories version', { service: 'categories-service' });
+      
+      // Use timestamp as version (changes when categories are modified)
+      const version = Date.now();
+      
+      const response = {
+        success: true,
+        version: version,
+        timestamp: new Date().toISOString()
+      };
+      
+      res.json(response);
+    } catch (error) {
+      logger.error('Error in getVersion:', { error, service: 'categories-service' });
+      
+      const response = {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      };
+      
+      res.status(500).json(response);
+    }
+  }
+
+  /**
    * Get popular categories
    * GET /api/v1/categories/popular
    */

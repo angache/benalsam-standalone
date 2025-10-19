@@ -13,44 +13,86 @@ import {
   Heart,
   Filter,
   MapPin,
-  DollarSign
+  DollarSign,
+  Loader2
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { categoryService, type Category } from '@/services/categoryService'
+import { useCategoryCounts } from '@/hooks/useCategoryCounts'
+
+// Icon mapping for categories
+const iconMap: Record<string, any> = {
+  Home,
+  Car,
+  Smartphone,
+  Shirt,
+  Gamepad2,
+  Heart,
+}
 
 export default function Sidebar() {
-  const categories = [
-    { icon: Home, name: 'Emlak', count: 1250 },
-    { icon: Car, name: 'Araç', count: 890 },
-    { icon: Smartphone, name: 'Elektronik', count: 2100 },
-    { icon: Shirt, name: 'Moda', count: 750 },
-    { icon: Gamepad2, name: 'Spor & Hobi', count: 420 },
-    { icon: Heart, name: 'Ev & Yaşam', count: 680 },
-  ]
+  const [categories, setCategories] = useState<Category[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const { getCategoryCount, isLoading: countsLoading } = useCategoryCounts()
+
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  const fetchCategories = async () => {
+    try {
+      setIsLoading(true)
+      // Tüm level 0 kategorileri çek
+      const allCategories = await categoryService.getCategories()
+      const topLevelCategories = allCategories.filter(cat => cat.level === 0)
+      console.log('📊 Fetched top level categories for sidebar:', topLevelCategories.length, topLevelCategories)
+      setCategories(topLevelCategories)
+    } catch (error) {
+      console.error('Error loading categories:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
-    <aside className="hidden lg:block w-80 border-r bg-muted/30 p-4">
+    <aside className="hidden lg:block w-80 border-r bg-muted/30 p-4 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
       <div className="space-y-6">
         {/* Categories */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Filter className="h-5 w-5" />
-              Kategoriler
+              Kategoriler ({categories.length})
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {categories.map((category, index) => (
-              <Button
-                key={index}
-                variant="ghost"
-                className="w-full justify-start gap-3 h-auto p-3"
-              >
-                <category.icon className="h-4 w-4" />
-                <span className="flex-1 text-left">{category.name}</span>
-                <span className="text-muted-foreground text-sm">
-                  {category.count}
-                </span>
-              </Button>
-            ))}
+          <CardContent className="space-y-2 max-h-[400px] overflow-y-auto">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : categories.length > 0 ? (
+              categories.map((category) => {
+                const IconComponent = category.icon ? iconMap[category.icon] : Home
+                return (
+                  <Button
+                    key={category.id}
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-auto p-3"
+                    onClick={() => window.location.href = `/kategori/${category.id}`}
+                  >
+                    {IconComponent && <IconComponent className="h-4 w-4" />}
+                    <span className="flex-1 text-left">{category.name}</span>
+                    <span className="text-muted-foreground text-sm">
+                      {countsLoading ? '...' : getCategoryCount(String(category.id))}
+                    </span>
+                  </Button>
+                )
+              })
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Kategori bulunamadı
+              </p>
+            )}
           </CardContent>
         </Card>
 
