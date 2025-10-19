@@ -1,9 +1,7 @@
 // ESM exports
 export * from './types/index';
 export * from './errors/ServiceError';
-export * from './middleware/ErrorHandler';
-export { SecurityMiddleware, createSecurityMiddleware, SECURITY_CONFIGS } from './security/SecurityMiddleware';
-export { ValidationMiddleware, createValidationMiddleware, COMMON_SCHEMAS } from './security/ValidationMiddleware';
+// Server-only middleware and security exports were moved to './server' entry
 export * from './testing/MockFactory';
 export * from './testing/TestHelpers';
 // Eğer search tipi gerekiyorsa:
@@ -106,14 +104,10 @@ export const formatPhoneNumber = (phone) => {
 if (typeof module !== 'undefined' && module.exports) {
     const types = require('./types/index');
     const errors = require('./errors/ServiceError');
-    const middleware = require('./middleware/ErrorHandler');
-    const security = require('./security/SecurityMiddleware');
     // const searchTypes = require('./types/search');
     module.exports = {
         ...types,
         ...errors,
-        ...middleware,
-        ...security,
         // ...searchTypes,
         formatPrice,
         formatDate,

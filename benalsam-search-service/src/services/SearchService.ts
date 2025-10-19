@@ -63,8 +63,11 @@ export class SearchService {
     try {
       const { Client } = await import('@elastic/elasticsearch');
       const elasticsearchUrl = process.env.ELASTICSEARCH_URL || 'http://localhost:9200';
+      const elasticsearchUsername = process.env.ELASTICSEARCH_USERNAME;
+      const elasticsearchPassword = process.env.ELASTICSEARCH_PASSWORD;
       
-      this.elasticsearchClient = new Client({ 
+      // Build client config
+      const clientConfig: any = { 
         node: elasticsearchUrl,
         maxRetries: 5,
         requestTimeout: 30000, // 30 saniye
@@ -72,11 +75,24 @@ export class SearchService {
         sniffOnStart: false,
         sniffOnConnectionFault: false,
         resurrectStrategy: 'ping'
-      });
+      };
+      
+      // Add authentication if credentials are provided
+      if (elasticsearchUsername && elasticsearchPassword) {
+        clientConfig.auth = {
+          username: elasticsearchUsername,
+          password: elasticsearchPassword
+        };
+      }
+      
+      this.elasticsearchClient = new Client(clientConfig);
       await this.elasticsearchClient.ping();
       this.isElasticsearchAvailable = true;
       
-      logger.info('✅ Elasticsearch client initialized', { url: elasticsearchUrl });
+      logger.info('✅ Elasticsearch client initialized', { 
+        url: elasticsearchUrl,
+        hasAuth: !!(elasticsearchUsername && elasticsearchPassword)
+      });
     } catch (error) {
       logger.warn('⚠️ Elasticsearch not available, using Supabase fallback', { 
         error: error instanceof Error ? error.message : 'Unknown error' 
