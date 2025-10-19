@@ -1,151 +1,173 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Heart, Eye, Clock } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Heart, MapPin, Eye, Clock, Loader2 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { listingService } from '@/services/listingService'
+import { useFilterStore } from '@/stores/filterStore'
+
+interface Listing {
+  id: string
+  title: string
+  description: string
+  price: number
+  images: string[]
+  location?: {
+    city?: string
+    district?: string
+  }
+  views?: number
+  created_at: string
+  category_id?: number
+}
 
 export default function MainContent() {
-  // Mock data for listings
-  const listings = [
-    {
-      id: 1,
-      title: "iPhone 15 Pro Max 256GB",
-      description: "Az kullanılmış, garantili, kutusu ile birlikte",
-      price: 45000,
-      location: "İstanbul, Kadıköy",
-      image: "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=400&h=300&fit=crop",
-      views: 1250,
-      timeAgo: "2 saat önce",
-      isFavorite: false
+  const { selectedCategory, minPrice, maxPrice, city, sortBy, page, limit } = useFilterStore()
+  
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['listings', { selectedCategory, minPrice, maxPrice, city, sortBy, page, limit }],
+    queryFn: async () => {
+      const filters: any = {
+        page,
+        limit,
+        sort: sortBy,
+      }
+      
+      if (selectedCategory) filters.category_id = selectedCategory
+      if (minPrice) filters.min_price = minPrice
+      if (maxPrice) filters.max_price = maxPrice
+      if (city) filters.city = city
+      
+      const response = await listingService.getListings(filters)
+      return response
     },
-    {
-      id: 2,
-      title: "3+1 Kiralık Daire",
-      description: "Merkezi konumda, asansörlü, balkonlu",
-      price: 15000,
-      location: "Ankara, Çankaya",
-      image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop",
-      views: 890,
-      timeAgo: "5 saat önce",
-      isFavorite: true
-    },
-    {
-      id: 3,
-      title: "2020 Model BMW 3.20i",
-      description: "Tek elden, servis bakımlı, kazasız",
-      price: 850000,
-      location: "İzmir, Konak",
-      image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=300&fit=crop",
-      views: 2100,
-      timeAgo: "1 gün önce",
-      isFavorite: false
-    },
-    {
-      id: 4,
-      title: "MacBook Pro M2 14 inch",
-      description: "Profesyonel kullanım için ideal",
-      price: 35000,
-      location: "Bursa, Nilüfer",
-      image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=300&fit=crop",
-      views: 750,
-      timeAgo: "3 gün önce",
-      isFavorite: false
-    },
-    {
-      id: 5,
-      title: "2+1 Satılık Daire",
-      description: "Deniz manzaralı, güney cephe",
-      price: 2500000,
-      location: "Antalya, Muratpaşa",
-      image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=300&fit=crop",
-      views: 3200,
-      timeAgo: "1 hafta önce",
-      isFavorite: true
-    },
-    {
-      id: 6,
-      title: "Samsung Galaxy S24 Ultra",
-      description: "Yeni nesil kamera sistemi",
-      price: 28000,
-      location: "Trabzon, Ortahisar",
-      image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=300&fit=crop",
-      views: 450,
-      timeAgo: "2 gün önce",
-      isFavorite: false
-    }
-  ]
+  })
+
+  const listings = data?.data || []
+  const totalPages = data?.pagination?.totalPages || 1
 
   const formatPrice = (price: number) => {
-    if (price >= 1000000) {
-      return `${(price / 1000000).toFixed(1)}M ₺`
-    } else if (price >= 1000) {
-      return `${(price / 1000).toFixed(0)}K ₺`
+    if (price >= 1_000_000) {
+      return `${(price / 1_000_000).toFixed(1)} Mn ₺`
+    } else if (price >= 1_000) {
+      return `${(price / 1_000).toFixed(0)} Bin ₺`
     }
     return `${price.toLocaleString('tr-TR')} ₺`
   }
 
-  return (
-    <main className="flex-1 p-6">
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Son İlanlar</h1>
-        <p className="text-muted-foreground">
-          En yeni eklenen ilanları keşfedin
-        </p>
-      </div>
+  const getTimeAgo = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
+    
+    if (diffDays > 0) return `${diffDays} gün önce`
+    if (diffHours > 0) return `${diffHours} saat önce`
+    if (diffMins > 0) return `${diffMins} dakika önce`
+    return 'Az önce'
+  }
 
-      {/* Listings Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {listings.map((listing) => (
-          <Card key={listing.id} className="group hover:shadow-lg transition-all duration-300">
-            <CardHeader className="p-0">
-              <div className="relative">
-                <img
-                  src={listing.image}
-                  alt={listing.title}
-                  className="w-full h-48 object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
-                />
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Heart className={`h-4 w-4 ${listing.isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-                </Button>
-                <Badge className="absolute top-2 left-2 bg-black/70 text-white">
-                  {formatPrice(listing.price)}
-                </Badge>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="p-4">
-              <CardTitle className="text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                {listing.title}
-              </CardTitle>
-              <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+  if (isLoading) {
+    return (
+      <main className="flex-1 p-4">
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      </main>
+    )
+  }
+
+  if (error) {
+    return (
+      <main className="flex-1 p-4">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <p className="text-xl text-muted-foreground mb-4">İlanlar yüklenirken bir hata oluştu</p>
+            <Button onClick={() => window.location.reload()}>Tekrar Dene</Button>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  if (listings.length === 0) {
+    return (
+      <main className="flex-1 p-4">
+        <h2 className="mb-6 text-3xl font-bold">Son İlanlar</h2>
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <p className="text-xl text-muted-foreground mb-4">Henüz ilan bulunmuyor</p>
+            <Button className="bg-gradient-to-r from-blue-600 to-purple-600">
+              İlk İlanı Sen Ver
+            </Button>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  return (
+    <main className="flex-1 p-4">
+      <h2 className="mb-6 text-3xl font-bold">
+        Son İlanlar ({data?.pagination?.total || listings.length})
+      </h2>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {listings.map((listing: Listing) => (
+          <Card
+            key={listing.id}
+            className="overflow-hidden transition-all duration-300 hover:shadow-lg cursor-pointer"
+            onClick={() => window.location.href = `/ilan/${listing.id}`}
+          >
+            <div className="relative h-48">
+              <img
+                src={listing.images?.[0] || 'https://images.unsplash.com/photo-1607936854279-55686100644d?q=80&w=2070&auto=format&fit=crop'}
+                alt={listing.title}
+                className="h-full w-full object-cover"
+              />
+              <Badge className="absolute left-3 top-3 bg-primary text-primary-foreground">
+                {formatPrice(listing.price)}
+              </Badge>
+              <Button
+                variant="secondary"
+                size="icon"
+                className="absolute right-3 top-3 rounded-full"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  // TODO: Add to favorites
+                }}
+              >
+                <Heart className="h-4 w-4" />
+              </Button>
+            </div>
+            <CardHeader>
+              <CardTitle className="text-xl line-clamp-1">{listing.title}</CardTitle>
+              <p className="text-sm text-muted-foreground line-clamp-2">
                 {listing.description}
               </p>
-              
-              <div className="flex items-center gap-1 text-muted-foreground text-sm mb-3">
+            </CardHeader>
+            <CardContent className="flex items-center justify-between text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
-                <span>{listing.location}</span>
+                <span>{listing.location?.city || 'Konum belirtilmemiş'}</span>
               </div>
-              
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
+              {listing.views && (
                 <div className="flex items-center gap-1">
                   <Eye className="h-4 w-4" />
                   <span>{listing.views}</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  <span>{listing.timeAgo}</span>
-                </div>
-              </div>
+              )}
             </CardContent>
-            
-            <CardFooter className="p-4 pt-0">
-              <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+            <CardFooter className="flex justify-between">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>{getTimeAgo(listing.created_at)}</span>
+              </div>
+              <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600">
                 Detayları Gör
               </Button>
             </CardFooter>
@@ -153,12 +175,28 @@ export default function MainContent() {
         ))}
       </div>
 
-      {/* Load More Button */}
-      <div className="text-center mt-8">
-        <Button variant="outline" size="lg">
-          Daha Fazla Göster
-        </Button>
-      </div>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-8">
+          <Button
+            variant="outline"
+            disabled={page === 1}
+            onClick={() => useFilterStore.setState({ page: page - 1 })}
+          >
+            Önceki
+          </Button>
+          <span className="flex items-center px-4">
+            {page} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            disabled={page >= totalPages}
+            onClick={() => useFilterStore.setState({ page: page + 1 })}
+          >
+            Sonraki
+          </Button>
+        </div>
+      )}
     </main>
   )
 }
