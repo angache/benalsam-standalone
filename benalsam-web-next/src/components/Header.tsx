@@ -4,8 +4,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Search, Plus, User, Menu } from 'lucide-react'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { useRouter } from 'next/navigation'
 
 export default function Header() {
+  const router = useRouter()
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
@@ -33,7 +36,10 @@ export default function Header() {
         {/* Actions */}
         <div className="flex items-center gap-2">
           {/* Create Listing Button */}
-          <Button className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+          <Button 
+            className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            onClick={() => router.push('/ilan-olustur')}
+          >
             <Plus className="h-4 w-4" />
             <span className="hidden md:inline">İlan Ver</span>
           </Button>

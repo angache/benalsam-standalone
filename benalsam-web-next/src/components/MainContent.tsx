@@ -8,6 +8,7 @@ import { Heart, MapPin, Eye, Clock, Loader2 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { listingService } from '@/services/listingService'
 import { useFilterStore } from '@/stores/filterStore'
+import { useRouter } from 'next/navigation'
 
 interface Listing {
   id: string
@@ -25,6 +26,7 @@ interface Listing {
 }
 
 export default function MainContent() {
+  const router = useRouter()
   const { selectedCategory, minPrice, maxPrice, city, sortBy, page, limit } = useFilterStore()
   
   const { data, isLoading, error } = useQuery({
@@ -121,7 +123,7 @@ export default function MainContent() {
           <Card
             key={listing.id}
             className="overflow-hidden transition-all duration-300 hover:shadow-lg cursor-pointer"
-            onClick={() => window.location.href = `/ilan/${listing.id}`}
+            onClick={() => router.push(`/ilan/${listing.id}`)}
           >
             <div className="relative h-48">
               <img
