@@ -4,10 +4,12 @@ import { useState } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import CategoryStep from '@/components/CreateListing/CategoryStep'
+import DetailsStep from '@/components/CreateListing/DetailsStep'
 
 export default function CreateListingPage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [details, setDetails] = useState({ title: '', description: '', price: '' })
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId)
@@ -37,7 +39,15 @@ export default function CreateListingPage() {
           />
         )
       case 2:
-        return <div>Detaylar Adımı (Yapılacak)</div>
+        return (
+          <DetailsStep
+            formData={details}
+            onChange={(field, value) => setDetails(prev => ({ ...prev, [field]: value }))}
+            onNext={handleNext}
+            onBack={handleBack}
+            selectedCategoryId={selectedCategory}
+          />
+        )
       case 3:
         return <div>Özellikler Adımı (Yapılacak)</div>
       case 4:

@@ -427,25 +427,64 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
         </div>
       </div>
 
-      {/* Breadcrumb */}
-      {navigationStack.length > 0 && (
-        <div className="mb-6">
-          <div className="flex items-center gap-2 text-sm text-gray-400">
-            <span>Ana Sayfa</span>
-            {navigationStack.map((cat, index) => (
-              <span key={cat.id}>
-                {' > '}
-                <span className="text-blue-400">{cat.name}</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+           {/* Breadcrumb */}
+           {navigationStack.length > 0 && (
+             <div className="mb-6">
+               <div className="flex items-center gap-2 text-sm text-gray-400">
+                 <span>Ana Sayfa</span>
+                 {navigationStack.map((cat, index) => (
+                   <span key={cat.id}>
+                     {' > '}
+                     <span className="text-blue-400">{cat.name}</span>
+                   </span>
+                 ))}
+               </div>
+             </div>
+           )}
 
-      {/* Title */}
-      <h1 className="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-        {navigationStack.length > 0 ? getBreadcrumb() : 'İlanınız için bir kategori seçin'}
-      </h1>
+           {/* Search */}
+           <div className="text-center mb-6">
+             <div className="relative max-w-2xl mx-auto">
+               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+               <Input
+                 placeholder="Kategori ara (örn: akıllı telefon)"
+                 value={searchTerm}
+                 onChange={(e) => setSearchTerm(e.target.value)}
+                 className="pl-10 bg-gray-800 border-gray-600 text-white focus:border-orange-500 focus:ring-orange-500"
+               />
+               
+               {/* Search Suggestions */}
+               {searchTerm && (
+                 <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-600 rounded-lg shadow-xl z-10 max-h-64 overflow-y-auto">
+                   {getSearchSuggestions(searchTerm).map((suggestion, index) => (
+                     <div
+                       key={index}
+                       className="px-4 py-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
+                       onClick={() => handleSuggestionClick(suggestion)}
+                     >
+                       <div className="text-sm text-white">
+                         {suggestion.path.split(' > ').map((part, i) => (
+                           <span key={i}>
+                             {i > 0 && <span className="text-gray-400"> {'>'} </span>}
+                             {part.toLowerCase().includes(searchTerm.toLowerCase()) ? (
+                               <span className="text-blue-400 font-medium">{part}</span>
+                             ) : (
+                               <span>{part}</span>
+                             )}
+                           </span>
+                         ))}
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               )}
+             </div>
+           </div>
+
+           {/* Title */}
+           <h1 className="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+             {navigationStack.length > 0 ? getBreadcrumb() : 'İlanınız için bir kategori seçin'}
+           </h1>
 
       {/* Back Button */}
       {navigationStack.length > 0 && (
@@ -460,8 +499,8 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
         </div>
       )}
 
-      {/* SINGLE GRID - Dynamic categories based on current level */}
-      <div className="grid grid-cols-4 gap-6 mb-8">
+           {/* SINGLE GRID - Dynamic categories based on current level */}
+           <div className="grid grid-cols-5 gap-4 mb-6">
         {currentLevel.map((category) => {
           const IconComponent = getIconComponent(category.icon)
           const isSelected = selectedLeafCategory === category.id
@@ -477,11 +516,11 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
               } border border-gray-700 bg-gray-800 relative`}
               onClick={() => handleCategoryClick(category)}
             >
-              <CardContent className="p-6 text-center min-h-[120px] flex flex-col justify-center">
-                <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${category.bgColor || getDefaultColors(category.name)} flex items-center justify-center shadow-lg`}>
-                  <IconComponent className="w-8 h-8 text-white" />
-                </div>
-                <p className="text-sm font-semibold text-white">{category.name}</p>
+                   <CardContent className="p-4 text-center min-h-[100px] flex flex-col justify-center">
+                     <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${category.bgColor || getDefaultColors(category.name)} flex items-center justify-center shadow-lg`}>
+                       <IconComponent className="w-6 h-6 text-white" />
+                     </div>
+                     <p className="text-xs font-semibold text-white leading-tight">{category.name}</p>
                 {isLeaf && (
                   <span className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
                     ✓ Seçilebilir
@@ -493,59 +532,18 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
         })}
       </div>
 
-      {/* Search */}
-      <div className="text-center mb-8">
-        <p className="text-gray-400 mb-4">veya</p>
-        <div className="relative max-w-2xl mx-auto">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            placeholder="Kategori ara (örn: akıllı telefon)"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-gray-800 border-gray-600 text-white focus:border-orange-500 focus:ring-orange-500"
-          />
-          
-          {/* Search Suggestions */}
-          {searchTerm && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-600 rounded-lg shadow-xl z-10 max-h-64 overflow-y-auto">
-              {getSearchSuggestions(searchTerm).map((suggestion, index) => (
-                <div
-                  key={index}
-                  className="px-4 py-3 hover:bg-gray-700 cursor-pointer border-b border-gray-700 last:border-b-0"
-                  onClick={() => handleSuggestionClick(suggestion)}
-                >
-                  <div className="text-sm text-white">
-                    {suggestion.path.split(' > ').map((part, i) => (
-                      <span key={i}>
-                        {i > 0 && <span className="text-gray-400"> {'>'} </span>}
-                        {part.toLowerCase().includes(searchTerm.toLowerCase()) ? (
-                          <span className="text-blue-400 font-medium">{part}</span>
-                        ) : (
-                          <span>{part}</span>
-                        )}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
 
-      {/* Navigation */}
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onBack}>
-          ← İptal
-        </Button>
-        <Button 
-          onClick={onNext}
-          disabled={!selectedLeafCategory}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-        >
-          İleri → {selectedLeafCategory && '✓'}
-        </Button>
-      </div>
+           {/* Navigation - Only show when category is selected */}
+           {selectedLeafCategory && (
+             <div className="flex justify-end mt-4">
+               <Button 
+                 onClick={onNext}
+                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+               >
+                 İleri → ✓
+               </Button>
+             </div>
+           )}
     </div>
   )
 }
