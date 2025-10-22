@@ -3,7 +3,7 @@
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
 import { fetchUserProfile } from '@/services/profileService';
-import { sharedRateLimitService } from '@/services/sharedRateLimitService';
+// import { sharedRateLimitService } from '@/services/sharedRateLimitService'; // Not available in Next.js
 import { User } from 'benalsam-shared-types';
 
 interface AuthState {
@@ -159,7 +159,18 @@ export const useAuthStore = create<AuthState>((set, get) => {
       
       try {
               // Rate limit check
-      const rateLimitCheck = await sharedRateLimitService.checkRateLimit(email);
+      // Simple rate limiting - check localStorage for recent attempts
+      const rateLimitKey = `rate_limit_${email}`;
+      const lastAttempt = localStorage.getItem(rateLimitKey);
+      const now = Date.now();
+      const rateLimitCheck = { allowed: true };
+      
+      if (lastAttempt) {
+        const timeDiff = now - parseInt(lastAttempt);
+        if (timeDiff < 60000) { // 1 minute cooldown
+          rateLimitCheck.allowed = false;
+        }
+      }
       console.log('🔐 [AuthStore] Rate limit check:', rateLimitCheck);
         
         if (!rateLimitCheck.allowed) {
@@ -197,7 +208,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
           console.error('🔐 [AuthStore] Sign in error:', error);
           
                   // Record failed attempt for rate limiting
-        await sharedRateLimitService.recordFailedAttempt(email);
+        // Record failed attempt in localStorage
+        localStorage.setItem(rateLimitKey, now.toString());
           
           set({ loading: false });
           return { error: error.message };
@@ -243,7 +255,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
           });
           
           // Reset rate limit on successful login
-          await sharedRateLimitService.resetRateLimit(email);
+          // Reset rate limit on successful login
+          localStorage.removeItem(rateLimitKey);
           
           set({ user: basicUser, currentUser: basicUser, loading: false });
         }

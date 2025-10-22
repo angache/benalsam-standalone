@@ -40,15 +40,45 @@ export default function Sidebar() {
   }, [])
 
   const fetchCategories = async () => {
+    const startTime = Date.now()
     try {
       setIsLoading(true)
+      console.log('🚀 [PERF] Sidebar.fetchCategories started', {
+        timestamp: new Date().toISOString()
+      })
+
       // Tüm level 0 kategorileri çek
+      const fetchStart = Date.now()
       const allCategories = await categoryService.getCategories()
+      const fetchTime = Date.now() - fetchStart
+      
+      console.log('📥 [PERF] Categories fetched from service', {
+        fetchTime: `${fetchTime}ms`,
+        totalCategories: allCategories.length
+      })
+
+      const filterStart = Date.now()
       const topLevelCategories = allCategories.filter(cat => cat.level === 0)
-      console.log('📊 Fetched top level categories for sidebar:', topLevelCategories.length, topLevelCategories)
+      const filterTime = Date.now() - filterStart
+      
+      const totalTime = Date.now() - startTime
+      console.log('✅ [PERF] Sidebar.fetchCategories completed', {
+        totalTime: `${totalTime}ms`,
+        breakdown: {
+          serviceFetch: `${fetchTime}ms`,
+          filtering: `${filterTime}ms`
+        },
+        topLevelCount: topLevelCategories.length,
+        totalCategories: allCategories.length
+      })
+      
       setCategories(topLevelCategories)
     } catch (error) {
-      console.error('Error loading categories:', error)
+      const totalTime = Date.now() - startTime
+      console.error('❌ [PERF] Error loading categories:', {
+        error,
+        totalTime: `${totalTime}ms`
+      })
     } finally {
       setIsLoading(false)
     }

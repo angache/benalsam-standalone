@@ -20,17 +20,30 @@ class CategoryCacheService {
    * Get categories from cache or API
    */
   async getCategories(fetchFn: () => Promise<Category[]>): Promise<Category[]> {
+    const startTime = Date.now()
     try {
+      console.log('🚀 [PERF] CategoryCache.getCategories started', {
+        timestamp: new Date().toISOString()
+      })
+
       // 🔄 Backend'den version kontrolü yap (sadece ilk seferde)
+      const versionStart = Date.now()
       const versionChanged = await checkCategoriesVersion()
+      const versionTime = Date.now() - versionStart
+      
+      console.log('🔍 [PERF] Version check completed', {
+        versionTime: `${versionTime}ms`,
+        versionChanged
+      })
+
       if (versionChanged) {
-        console.log('🔄 Category version changed, clearing cache')
+        console.log('🔄 [PERF] Category version changed, clearing cache')
         this.clearCache()
       }
 
       // Check if we're already fetching
       if (this.isFetching) {
-        console.log('⏳ Category fetch already in progress, waiting...')
+        console.log('⏳ [PERF] Category fetch already in progress, waiting...')
         await this.waitForFetch()
         return this.getCachedData()
       }
@@ -38,29 +51,55 @@ class CategoryCacheService {
       // Check rate limiting
       const now = Date.now()
       if (now - this.lastFetchTime < RATE_LIMIT) {
-        console.log('⏱️ Rate limit active, using cached data')
+        console.log('⏱️ [PERF] Rate limit active, using cached data', {
+          timeSinceLastFetch: `${now - this.lastFetchTime}ms`
+        })
         const cached = this.getCachedData()
         if (cached && cached.length > 0) {
+          console.log('✅ [PERF] Returned cached data (rate limited)', {
+            categoryCount: cached.length,
+            totalTime: `${Date.now() - startTime}ms`
+          })
           return cached
         }
       }
 
       // Try to get from cache first
+      const cacheStart = Date.now()
       const cached = this.getCachedData()
+      const cacheTime = Date.now() - cacheStart
+      
+      console.log('📦 [PERF] Cache check completed', {
+        cacheTime: `${cacheTime}ms`,
+        cacheHit: !!(cached && cached.length > 0),
+        categoryCount: cached?.length || 0
+      })
+
       if (cached && cached.length > 0) {
-        console.log('📦 Categories loaded from cache')
+        console.log('✅ [PERF] Categories loaded from cache', {
+          categoryCount: cached.length,
+          totalTime: `${Date.now() - startTime}ms`
+        })
         return cached
       }
 
+      console.log('🔄 [PERF] Cache miss - fetching from API')
       // Fetch from API
       return await this.fetchFromAPI(fetchFn)
     } catch (error) {
-      console.error('❌ Error in getCategories:', error)
+      const totalTime = Date.now() - startTime
+      console.error('❌ [PERF] Error in getCategories:', {
+        error,
+        totalTime: `${totalTime}ms`
+      })
       
       // Fallback to cached data if available
       const cached = this.getCachedData()
       if (cached && cached.length > 0) {
-        console.log('🔄 Falling back to cached data')
+        console.log('🔄 [PERF] Falling back to cached data', {
+          categoryCount: cached.length,
+          totalTime: `${totalTime}ms`
+        })
         return cached
       }
       
@@ -72,21 +111,46 @@ class CategoryCacheService {
    * Fetch categories from API
    */
   private async fetchFromAPI(fetchFn: () => Promise<Category[]>): Promise<Category[]> {
+    const startTime = Date.now()
     this.isFetching = true
     this.lastFetchTime = Date.now()
 
     try {
-      console.log('🌐 Fetching categories from API...')
+      console.log('🌐 [PERF] Fetching categories from API...', {
+        timestamp: new Date().toISOString()
+      })
       
+      const fetchStart = Date.now()
       const categories = await fetchFn()
+      const fetchTime = Date.now() - fetchStart
+      
+      console.log('📥 [PERF] API fetch completed', {
+        fetchTime: `${fetchTime}ms`,
+        categoryCount: categories.length
+      })
       
       // Cache the data
+      const cacheStart = Date.now()
       this.setCachedData(categories)
+      const cacheTime = Date.now() - cacheStart
       
-      console.log(`✅ Fetched ${categories.length} categories from API`)
+      const totalTime = Date.now() - startTime
+      console.log('✅ [PERF] fetchFromAPI completed', {
+        totalTime: `${totalTime}ms`,
+        breakdown: {
+          apiFetch: `${fetchTime}ms`,
+          cacheSet: `${cacheTime}ms`
+        },
+        categoryCount: categories.length
+      })
+      
       return categories
     } catch (error) {
-      console.error('❌ Error fetching from API:', error)
+      const totalTime = Date.now() - startTime
+      console.error('❌ [PERF] Error fetching from API:', {
+        error,
+        totalTime: `${totalTime}ms`
+      })
       throw error
     } finally {
       this.isFetching = false

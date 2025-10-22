@@ -482,7 +482,7 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
            </div>
 
            {/* Title */}
-           <h1 className="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+           <h1 className="text-2xl md:text-4xl font-bold text-center mb-6 md:mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
              {navigationStack.length > 0 ? getBreadcrumb() : 'İlanınız için bir kategori seçin'}
            </h1>
 
@@ -500,7 +500,7 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
       )}
 
            {/* SINGLE GRID - Dynamic categories based on current level */}
-           <div className="grid grid-cols-5 gap-4 mb-6">
+           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 mb-6">
         {currentLevel.map((category) => {
           const IconComponent = getIconComponent(category.icon)
           const isSelected = selectedLeafCategory === category.id
@@ -516,15 +516,17 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
               } border border-gray-700 bg-gray-800 relative`}
               onClick={() => handleCategoryClick(category)}
             >
-                   <CardContent className="p-4 text-center min-h-[100px] flex flex-col justify-center">
-                     <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${category.bgColor || getDefaultColors(category.name)} flex items-center justify-center shadow-lg`}>
-                       <IconComponent className="w-6 h-6 text-white" />
+                   <CardContent className="p-3 md:p-4 text-center min-h-[80px] md:min-h-[100px] flex flex-col justify-center">
+                     <div className={`w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 md:mb-3 rounded-full ${category.bgColor || getDefaultColors(category.name)} flex items-center justify-center shadow-lg`}>
+                       <IconComponent className="w-5 h-5 md:w-6 md:h-6 text-white" />
                      </div>
                      <p className="text-xs font-semibold text-white leading-tight">{category.name}</p>
                 {isLeaf && (
-                  <span className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                    ✓ Seçilebilir
-                  </span>
+                  <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
                 )}
               </CardContent>
             </Card>

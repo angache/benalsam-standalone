@@ -70,6 +70,37 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
     reValidateMode: 'onChange'
   })
 
+  // Watch form changes and update store
+  const watchedValues = watch()
+  const prevValues = React.useRef<DetailsFormData>(formData)
+  
+  React.useEffect(() => {
+    const currentValues = {
+      title: watchedValues.title || '',
+      description: watchedValues.description || '',
+      price: watchedValues.price || '',
+      urgency: watchedValues.urgency || 'normal'
+    }
+    
+    // Only update if values actually changed
+    if (
+      prevValues.current.title !== currentValues.title ||
+      prevValues.current.description !== currentValues.description ||
+      prevValues.current.price !== currentValues.price ||
+      prevValues.current.urgency !== currentValues.urgency
+    ) {
+      // Only log when form is complete (all fields filled)
+      if (currentValues.title && currentValues.description && currentValues.price) {
+        console.log('📝 [FORM] Form completed:', currentValues)
+      }
+      onChange('title', currentValues.title)
+      onChange('description', currentValues.description)
+      onChange('price', currentValues.price)
+      onChange('urgency', currentValues.urgency)
+      prevValues.current = currentValues
+    }
+  }, [watchedValues.title, watchedValues.description, watchedValues.price, watchedValues.urgency, onChange])
+
   // Manual validation check for button state
   const isFormValid = useMemo(() => {
     const values = watch()
@@ -106,6 +137,36 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
+      {/* Progress Bar */}
+      <div className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          {[1, 2, 3, 4, 5, 6].map((step) => (
+            <div key={step} className="flex items-center">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+                step <= 2 
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
+                  : 'bg-gray-200 text-gray-600'
+              }`}>
+                {step < 2 ? '✓' : step === 2 ? '2' : step}
+              </div>
+              {step < 6 && (
+                <div className={`w-20 h-2 mx-3 rounded-full transition-all duration-300 ${
+                  step < 2 ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gray-200'
+                }`} />
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-between text-sm font-medium text-gray-600">
+          <span className="text-green-600">✓ Kategori</span>
+          <span className="text-blue-600">Detaylar</span>
+          <span>Özellikler</span>
+          <span>Görseller</span>
+          <span>Konum</span>
+          <span>Onay</span>
+        </div>
+      </div>
+
       {selectedCategoryName && (
         <div className="mb-4">
           <div className="flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2 text-sm text-muted-foreground w-fit">
@@ -116,7 +177,7 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
           </div>
         </div>
       )}
-      <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
         Detaylar
       </h1>
 

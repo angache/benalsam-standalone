@@ -2,18 +2,36 @@
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Plus, User, Menu } from 'lucide-react'
+import { Search, Plus, User, Menu, LogIn, LogOut, Settings, UserCircle } from 'lucide-react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export default function Header() {
   const router = useRouter()
+  const { user, isAuthenticated, isLoading, logout } = useAuth()
+
+  const handleLogout = async () => {
+    await logout()
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <div className="flex items-center gap-2">
+        <div 
+          className="flex items-center gap-2 cursor-pointer" 
+          onClick={() => router.push('/')}
+        >
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
             <span className="text-white font-bold text-sm">B</span>
           </div>
@@ -48,9 +66,61 @@ export default function Header() {
           <ThemeToggle />
 
           {/* User Menu */}
-          <Button variant="outline" size="icon">
-            <User className="h-4 w-4" />
-          </Button>
+          {isLoading ? (
+            <Button variant="outline" size="icon" disabled>
+              <User className="h-4 w-4 animate-pulse" />
+            </Button>
+          ) : isAuthenticated && user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage src={user.avatar_url || undefined} alt={user.name} />
+                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+                      {user.name?.charAt(0).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push(`/profil/${user.id}`)}>
+                  <UserCircle className="mr-2 h-4 w-4" />
+                  <span>Profilim</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/ilanlarim')}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  <span>İlanlarım</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/ayarlar')}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Ayarlar</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Çıkış Yap</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button 
+              variant="outline" 
+              onClick={() => router.push('/auth/login')}
+              className="flex items-center gap-2"
+            >
+              <LogIn className="h-4 w-4" />
+              <span className="hidden sm:inline">Giriş Yap</span>
+            </Button>
+          )}
 
           {/* Mobile Menu */}
           <Button variant="ghost" size="icon" className="md:hidden">
