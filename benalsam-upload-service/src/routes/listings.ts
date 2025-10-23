@@ -14,7 +14,7 @@ interface CreateListingRequest {
   title: string;
   description: string;
   category: string;
-  price: number;  // Web "price" gönderiyor, "budget" değil
+  budget: number;  // Budget
   location: string;
   
   // Optional fields that web might send
@@ -64,7 +64,7 @@ router.post('/create', uploadRateLimiter, asyncHandler(async (req: Request<{}, {
     title,
     description,
     category,
-    price,  // Web'den "price" geliyor
+    budget,  // Web'den "budget" geliyor
     location,
     images = [],
     status,
@@ -85,10 +85,10 @@ router.post('/create', uploadRateLimiter, asyncHandler(async (req: Request<{}, {
   } = req.body;
 
   // Validation
-  if (!title || !description || !category || !price) {
+  if (!title || !description || !category || !budget) {
     return res.status(400).json({
       success: false,
-      message: 'Missing required fields: title, description, category, price'
+      message: 'Missing required fields: title, description, category, budget'
     });
   }
 
@@ -115,7 +115,7 @@ router.post('/create', uploadRateLimiter, asyncHandler(async (req: Request<{}, {
           title,
           description,
           category,
-          budget: price,  // Web'den gelen "price" -> "budget" olarak map et
+          budget: Number(budget) || 1,  // Numeric budget
           location,
           urgency: urgency || 'medium',  // Default değer
           images,

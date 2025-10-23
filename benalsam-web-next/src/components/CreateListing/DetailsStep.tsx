@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 const detailsSchema = z.object({
   title: z.string().min(5, 'Başlık en az 5 karakter olmalı'),
   description: z.string().min(20, 'Açıklama en az 20 karakter olmalı'),
-  price: z.string().min(1, 'Fiyat gerekli').refine((val) => {
+  budget: z.string().min(1, 'Bütçe gerekli').refine((val) => {
     const num = Number(val.replace(/\D+/g, ''))
     return !isNaN(num) && num > 0
   }, 'Fiyat pozitif bir sayı olmalı'),
@@ -78,7 +78,7 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
     const currentValues = {
       title: watchedValues.title || '',
       description: watchedValues.description || '',
-      price: watchedValues.price || '',
+      budget: watchedValues.budget || '',
       urgency: watchedValues.urgency || 'normal'
     }
     
@@ -86,20 +86,20 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
     if (
       prevValues.current.title !== currentValues.title ||
       prevValues.current.description !== currentValues.description ||
-      prevValues.current.price !== currentValues.price ||
+      prevValues.current.budget !== currentValues.budget ||
       prevValues.current.urgency !== currentValues.urgency
     ) {
       // Only log when form is complete (all fields filled)
-      if (currentValues.title && currentValues.description && currentValues.price) {
+      if (currentValues.title && currentValues.description && currentValues.budget) {
         console.log('📝 [FORM] Form completed:', currentValues)
       }
       onChange('title', currentValues.title)
       onChange('description', currentValues.description)
-      onChange('price', currentValues.price)
+      onChange('budget', currentValues.budget)
       onChange('urgency', currentValues.urgency)
       prevValues.current = currentValues
     }
-  }, [watchedValues.title, watchedValues.description, watchedValues.price, watchedValues.urgency, onChange])
+  }, [watchedValues.title, watchedValues.description, watchedValues.budget, watchedValues.urgency, onChange])
 
   // Manual validation check for button state
   const isFormValid = useMemo(() => {
@@ -123,11 +123,11 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
     
     if (num > 0) {
       const formatted = formatNumberTR(num)
-      setValue('price', formatted)
-      onChange('price', String(num))
+      setValue('budget', formatted)
+      onChange('budget', String(num))
     } else {
-      setValue('price', '')
-      onChange('price', '')
+      setValue('budget', '')
+      onChange('budget', '')
     }
   }
 
@@ -210,13 +210,13 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
               <div className="space-y-2">
                 <Label htmlFor="price">Bütçe (₺) *</Label>
                 <Input
-                  id="price"
-                  value={watch('price')}
+                  id="budget"
+                  value={watch('budget')}
                   onChange={(e) => handlePriceChange(e.target.value)}
                   placeholder="Örn: 1.000.000"
                   maxLength={12}
                 />
-                {errors.price && <p className="text-xs text-destructive">{errors.price.message}</p>}
+                {errors.budget && <p className="text-xs text-destructive">{errors.budget.message}</p>}
               </div>
 
               <div className="space-y-2">

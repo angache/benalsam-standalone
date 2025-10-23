@@ -39,11 +39,20 @@ export const processFetchedListings = async (
     }
   }
   
-  let listings = listingsData.map(listing => ({
-    ...listing,
-    user: listing.user_id ? profilesMap.get(listing.user_id) : undefined,
-    is_favorited: false 
-  })) as Listing[];
+  let listings = listingsData.map(listing => {
+    // Combine main_image_url and additional_image_urls into images array
+    const images = [
+      listing.main_image_url,
+      ...(listing.additional_image_urls || [])
+    ].filter(Boolean) as string[]
+    
+    return {
+      ...listing,
+      images, // Add images array
+      user: listing.user_id ? profilesMap.get(listing.user_id) : undefined,
+      is_favorited: false 
+    }
+  }) as Listing[];
 
   if (currentUserId && listings.length > 0) {
     const listingIds = listings.map(l => l.id);

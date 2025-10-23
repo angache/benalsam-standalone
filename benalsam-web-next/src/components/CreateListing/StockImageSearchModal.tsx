@@ -138,11 +138,11 @@ export default function StockImageSearchModal({
 
           {images.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
-              {images.map((image) => {
+              {images.map((image, index) => {
                 const isSelected = selectedImages.find(img => img.id === image.id)
                 return (
                   <div
-                    key={image.id}
+                    key={`${image.id}-${index}`}
                     className={`relative aspect-square cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
                       isSelected 
                         ? 'border-primary ring-2 ring-primary/50' 

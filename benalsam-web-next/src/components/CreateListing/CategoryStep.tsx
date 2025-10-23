@@ -223,7 +223,7 @@ const hardcodedCategories: Category[] = [
 
 interface CategoryStepProps {
   selectedCategory: string | null
-  onCategorySelect: (categoryId: string) => void
+  onCategorySelect: (categoryId: string, pathNames?: string[], pathIds?: string[]) => void
   onNext: () => void
   onBack: () => void
 }
@@ -339,8 +339,20 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
     if (isLeaf) {
       // LEAF CATEGORY - Select it!
       setSelectedLeafCategory(category.id)
-      onCategorySelect(String(category.id))
-      console.log('✅ LEAF category selected:', category.name, category.id)
+      
+      // Build hierarchical path: navigationStack + current category
+      const hierarchicalPath = [...navigationStack, category]
+      const pathNames = hierarchicalPath.map(cat => cat.name)
+      const pathIds = hierarchicalPath.map(cat => String(cat.id))
+      
+      console.log('✅ LEAF category selected with hierarchy:', {
+        category: category.name,
+        id: category.id,
+        pathNames,
+        pathIds
+      })
+      
+      onCategorySelect(String(category.id), pathNames, pathIds)
     } else {
       // HAS SUBCATEGORIES - Drill down!
       setNavigationStack([...navigationStack, category])

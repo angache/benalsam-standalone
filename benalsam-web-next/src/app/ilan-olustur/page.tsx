@@ -8,14 +8,24 @@ import AttributesStep from '@/components/CreateListing/AttributesStep'
 import ImagesStep from '@/components/CreateListing/ImagesStep'
 import LocationStep from '@/components/CreateListing/LocationStep'
 import ReviewStep from '@/components/CreateListing/ReviewStep'
+import ProgressModal, { ProgressPhase } from '@/components/CreateListing/ProgressModal'
 import { useCreateListingStore } from '@/stores'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { createListingWithUploadService } from '@/services/createListingService'
 
 export default function CreateListingPage() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // Progress modal state
+  const [isProgressModalOpen, setIsProgressModalOpen] = useState(false)
+  const [progressPhase, setProgressPhase] = useState<ProgressPhase>('idle')
+  const [progressMessage, setProgressMessage] = useState('')
+  const [uploadProgress, setUploadProgress] = useState(0)
   
   const {
     currentStep,
@@ -40,26 +50,33 @@ export default function CreateListingPage() {
     resetForm
   } = useCreateListingStore()
 
-  const handleCategorySelect = (categoryId: string) => {
+  const handleCategorySelect = (categoryId: string, pathNames?: string[], pathIds?: string[]) => {
     // Get category name from localStorage cache
     try {
-      const raw = localStorage.getItem('benalsam_categories_next_v1.0.0')
-      if (raw) {
-        const parsed = JSON.parse(raw)
-        const roots: unknown[] = parsed?.data || []
-        const findById = (nodes: unknown[]): { id: string; name: string } | null => {
-          for (const n of nodes) {
-            const node = n as { id: string; name: string; subcategories?: unknown[]; children?: unknown[] }
-            if (String(node.id) === String(categoryId)) return { id: node.id, name: node.name }
-            const subs = node.subcategories || node.children || []
-            const found = findById(subs)
-            if (found) return found
+      if (pathNames && pathIds) {
+        // Use hierarchical path from CategoryStep
+        console.log('🏷️ [PAGE] Using hierarchical path:', { pathNames, pathIds })
+        setCategory(categoryId, pathNames[pathNames.length - 1], pathNames, pathIds)
+      } else {
+        // Fallback: find category name from localStorage
+        const raw = localStorage.getItem('benalsam_categories_next_v1.0.0')
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          const roots: unknown[] = parsed?.data || []
+          const findById = (nodes: unknown[]): { id: string; name: string } | null => {
+            for (const n of nodes) {
+              const node = n as { id: string; name: string; subcategories?: unknown[]; children?: unknown[] }
+              if (String(node.id) === String(categoryId)) return { id: node.id, name: node.name }
+              const subs = node.subcategories || node.children || []
+              const found = findById(subs)
+              if (found) return found
+            }
+            return null
           }
-          return null
-        }
-        const node = findById(roots)
-        if (node) {
-          setCategory(categoryId, node.name, [node.name])
+          const node = findById(roots)
+          if (node) {
+            setCategory(categoryId, node.name, [])
+          }
         }
       }
     } catch (error) {
@@ -184,65 +201,71 @@ export default function CreateListingPage() {
       return
     }
 
+    if (!session?.user?.id) {
+      alert('Lütfen giriş yapın.')
+      router.push('/auth/login')
+      return
+    }
+
     setIsSubmitting(true)
+    setIsProgressModalOpen(true)
+    setProgressPhase('uploading')
+    setProgressMessage('Görseller yükleniyor...')
+    setUploadProgress(0)
     
     try {
       // Prepare listing data
       const listingData = {
         title: details.title,
         description: details.description,
-        budget: parseInt(details.budget) || 0,
-        category: category.selectedCategoryName || category.categoryPath?.join(' > ') || 'Kategori Seçilmedi',
+        budget: Number(details.budget.replace(/\D/g, '')) || 1, // Remove non-digits from formatted string
+        category: category.categoryPath?.join(' > ') || category.selectedCategoryName || 'Kategori Seçilmedi',
+        category_id: category.category_id, // Use from store (already calculated)
+        category_path: category.category_path, // Use from store (already calculated)
         location: `${location.city || 'Şehir'} / ${location.district || 'İlçe'}${location.neighborhood ? ' / ' + location.neighborhood : ''}`,
+        listings_province: location.city || null,
+        listings_district: location.district || null,
+        listings_neighborhood: location.neighborhood || null,
         urgency: details.urgency || 'medium',
         condition: details.condition || [],
         attributes: attributes,
-        images: images,
+        images: images || [], // Pass image objects
         mainImageIndex: mainImageIndex,
         duration: parseInt(details.duration) || 30,
-        contactPreference: details.contactPreference || 'site_message',
-        autoRepublish: details.autoRepublish || false,
-        acceptTerms: acceptTerms,
-        premiumFeatures: {
-          is_featured: details.premiumFeatures?.is_featured || false,
-          is_urgent_premium: details.premiumFeatures?.is_urgent_premium || false,
-          is_showcase: details.premiumFeatures?.is_showcase || false,
-          has_bold_border: details.premiumFeatures?.has_bold_border || false
-        },
+        contact_preference: details.contactPreference || 'site_message',
+        auto_republish: details.autoRepublish || false,
+        accept_terms: acceptTerms,
+        is_featured: details.premiumFeatures?.is_featured || false,
+        is_urgent_premium: details.premiumFeatures?.is_urgent_premium || false,
+        is_showcase: details.premiumFeatures?.is_showcase || false,
+        has_bold_border: details.premiumFeatures?.has_bold_border || false,
         geolocation: location.coordinates?.lat && location.coordinates?.lng ? `POINT(${location.coordinates.lng} ${location.coordinates.lat})` : null
       }
 
       console.log('📤 [SUBMIT] Creating listing:', listingData)
 
-      // Call API to create listing
-      const response = await fetch('/api/listings/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(listingData)
-      })
+      // Call the service (handles upload + create + polling)
+      const result = await createListingWithUploadService(
+        listingData,
+        session.user.id,
+        (progress) => {
+          setUploadProgress(progress)
+          if (progress >= 50 && progressPhase === 'uploading') {
+            setProgressPhase('creating')
+            setProgressMessage('İlan kaydediliyor...')
+          }
+        }
+      )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'İlan oluşturulamadı')
-      }
-
-      const result = await response.json()
       console.log('✅ [SUBMIT] Listing created successfully:', result)
 
       // Success
-      alert('✅ İlanınız başarıyla oluşturuldu! Yönetici onayından sonra yayınlanacaktır.')
-      
-      // Reset form
-      resetForm()
-      setAcceptTerms(false)
-      
-      // Redirect to listings page
-      router.push('/ilanlarim')
+      setProgressPhase('success')
+      setProgressMessage('İlan başarıyla oluşturuldu. Onaylandıktan sonra yayına alınacak.')
     } catch (error) {
-      console.error('❌ [SUBMIT] Error creating listing:', error)
-      alert(`❌ İlan oluşturulurken bir hata oluştu: ${error.message}`)
+      console.error('❌ [SUBMIT] Error:', error)
+      setProgressPhase('error')
+      setProgressMessage(error instanceof Error ? error.message : 'Beklenmedik bir hata oluştu')
     } finally {
       setIsSubmitting(false)
     }
@@ -288,6 +311,23 @@ export default function CreateListingPage() {
         {renderCurrentStep()}
       </main>
       <Footer />
+
+      {/* Progress Modal */}
+      <ProgressModal
+        isOpen={isProgressModalOpen}
+        phase={progressPhase}
+        message={progressMessage}
+        uploadProgress={uploadProgress}
+        onSuccess={() => {
+          setIsProgressModalOpen(false)
+          resetForm()
+          setAcceptTerms(false)
+          router.push('/ilanlarim')
+        }}
+        onError={() => {
+          setIsProgressModalOpen(false)
+        }}
+      />
     </div>
   )
 }

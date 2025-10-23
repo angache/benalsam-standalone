@@ -1,90 +1,118 @@
-import axios, { AxiosInstance, AxiosProgressEvent } from 'axios'
+/**
+ * Upload Service Integration - EXACT COPY from old system
+ * Adapted from benalsam-web/src/services/uploadService.ts
+ */
 
-const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007'
+const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1'
 
-export interface UploadResult {
-  images: Array<{
-    url: string
-    filename: string
-    size: number
-    mimeType: string
-  }>
-  totalSize: number
-  uploadTime: number
+interface UploadedImage {
+  id: string
+  url: string
+  width: number
+  height: number
+  format: string
+  size: number
+  thumbnailUrl?: string
+  mediumUrl?: string
+}
+
+interface UploadResponse {
+  success: boolean
+  data: {
+    images: UploadedImage[]
+    tempId?: string
+    expiresAt?: string
+  }
+  message?: string
 }
 
 class UploadServiceClient {
-  private client: AxiosInstance
+  private userId: string | null = null
 
-  constructor() {
-    this.client = axios.create({
-      baseURL: UPLOAD_SERVICE_URL,
-      timeout: 120000, // 2 minutes for large uploads
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+  setUserId(userId: string): void {
+    this.userId = userId
+  }
+
+  private getUserId(): string {
+    if (!this.userId) {
+      throw new Error('User ID not set. Call setUserId() first.')
+    }
+    return this.userId
   }
 
   /**
-   * Upload images with progress tracking
+   * Upload images to Upload Service - EXACT COPY from old system
    */
   async uploadImages(
     files: File[],
-    userId: string,
+    type: 'listings' | 'inventory' | 'profile' = 'listings',
     onProgress?: (progress: number) => void
-  ): Promise<UploadResult> {
-    const formData = new FormData()
-    
-    files.forEach((file) => {
-      formData.append('images', file)
-    })
+  ): Promise<UploadedImage[]> {
+    if (!files || files.length === 0) {
+      throw new Error('No files provided')
+    }
 
+    const userId = this.getUserId()
+    
     try {
-      console.log('📤 [UPLOAD] Uploading images:', {
-        count: files.length,
-        userId,
-        totalSize: files.reduce((sum, f) => sum + f.size, 0),
+      // Create FormData
+      const formData = new FormData()
+      files.forEach(file => {
+        formData.append('images', file)
       })
 
-      const response = await this.client.post<UploadResult>('/api/v1/upload/images', formData, {
+      // Add type parameter
+      formData.append('type', type)
+
+      console.log(`🚀 [UploadService] Uploading ${files.length} files to Upload Service...`)
+
+      // Upload to Upload Service
+      const response = await fetch(`${UPLOAD_SERVICE_URL}/upload/${type}`, {
+        method: 'POST',
         headers: {
           'x-user-id': userId,
         },
-        onUploadProgress: (progressEvent: AxiosProgressEvent) => {
-          if (progressEvent.total) {
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-            console.log(`📊 [UPLOAD] Progress: ${percentCompleted}%`)
-            onProgress?.(percentCompleted)
-          }
-        },
+        body: formData,
       })
 
-      console.log('✅ [UPLOAD] Upload successful:', {
-        imageCount: response.data.images.length,
-        totalSize: response.data.totalSize,
-        uploadTime: response.data.uploadTime,
-      })
-
-      return response.data
-    } catch (error) {
-      console.error('❌ [UPLOAD] Upload failed:', error)
-      if (axios.isAxiosError(error)) {
-        throw new Error(error.response?.data?.message || 'Görsel yüklenirken hata oluştu')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || `Upload failed: ${response.statusText}`)
       }
+
+      const result: UploadResponse = await response.json()
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Upload failed')
+      }
+
+      console.log(`✅ [UploadService] Upload successful:`, result.data.images.length, 'images')
+
+      // Simulate progress completion
+      if (onProgress) {
+        onProgress(100)
+      }
+
+      return result.data.images
+
+    } catch (error) {
+      console.error('❌ [UploadService] Upload error:', error)
       throw error
     }
   }
 
   /**
-   * Check if upload service is available
+   * Check if Upload Service is available
    */
   async isAvailable(): Promise<boolean> {
     try {
-      const response = await this.client.get('/health', { timeout: 3000 })
-      return response.status === 200
+      const response = await fetch(`${UPLOAD_SERVICE_URL}/health`, {
+        method: 'GET',
+      })
+
+      return response.ok
     } catch (error) {
-      console.warn('⚠️ [UPLOAD] Service not available:', error)
+      console.warn('⚠️ [UploadService] Service not available:', error)
       return false
     }
   }

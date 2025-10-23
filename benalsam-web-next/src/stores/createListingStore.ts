@@ -13,7 +13,7 @@ interface CategoryData {
 interface DetailsData {
   title: string
   description: string
-  price: string
+  budget: string
   urgency: 'normal' | 'urgent' | 'very_urgent'
 }
 
@@ -63,7 +63,7 @@ interface CreateListingState {
   prevStep: () => void
   
   // Category actions
-  setCategory: (id: string, name: string, path: string[]) => void
+  setCategory: (id: string, name: string, pathNames: string[], pathIds?: string[]) => void
   clearCategory: () => void
   
   // Details actions
@@ -109,13 +109,15 @@ const initialState = {
   category: {
     selectedCategoryId: null,
     selectedCategoryName: null,
-    categoryPath: []
+    categoryPath: [],
+    category_id: null, // Numeric category ID for backend
+    category_path: [] // Numeric category path for backend
   },
   
   details: {
     title: '',
     description: '',
-    price: '',
+    budget: '',
     urgency: 'normal' as const
   },
   
@@ -181,12 +183,28 @@ export const useCreateListingStore = create<CreateListingState>()(
       },
       
       // Category actions
-      setCategory: (id: string, name: string, path: string[]) => {
+      setCategory: (id: string, name: string, pathNames: string[], pathIds?: string[]) => {
+        // Calculate category_id and category_path (like old system)
+        const category_id = parseInt(id) || null
+        
+        // Build hierarchical categoryPath (names) and category_path (IDs)
+        const categoryPath = pathNames // Names for display
+        const category_path = pathIds 
+          ? pathIds.map(p => parseInt(p)).filter(id => !isNaN(id))
+          : (category_id ? [category_id] : [])
+        
+        console.log('🏷️ [STORE] setCategory with hierarchy:', {
+          id, name, pathNames, pathIds,
+          category_id, category_path, categoryPath
+        })
+        
         set({
           category: {
             selectedCategoryId: id,
             selectedCategoryName: name,
-            categoryPath: path
+            categoryPath: categoryPath, // Hierarchical path (names) for display
+            category_id, // Numeric ID for backend
+            category_path // Numeric path (IDs) for backend
           },
           // Clear attributes when category changes
           attributes: {}
@@ -332,12 +350,12 @@ export const useCreateListingStore = create<CreateListingState>()(
             const detailsValid = !!(
               state.details.title.trim() &&
               state.details.description.trim() &&
-              state.details.price.trim()
+              state.details.budget.trim()
             )
             console.log(`✅ [VALIDATION] Step 2 (Details): ${detailsValid}`, {
               title: state.details.title,
               description: state.details.description,
-              price: state.details.price
+              budget: state.details.budget
             })
             return detailsValid
           
@@ -414,6 +432,7 @@ export const useCreateListingStore = create<CreateListingState>()(
     }),
     {
       name: 'create-listing-store',
+      version: 2, // Bumped to clear old cache with 'price' field
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         currentStep: state.currentStep,

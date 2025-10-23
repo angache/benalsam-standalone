@@ -72,7 +72,8 @@ export default function ListingDetailPage() {
     queryFn: () => listingService.getSingleListing(listingId, null),
   })
 
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: number | undefined) => {
+    if (!price) return 'Belirtilmemiş'
     if (price >= 1_000_000) {
       return `${(price / 1_000_000).toFixed(1)} Mn ₺`
     } else if (price >= 1_000) {
@@ -206,39 +207,61 @@ export default function ListingDetailPage() {
             {/* Fotoğraflar */}
             {listing.images && listing.images.length > 0 && (
               <Card>
-                <CardContent className="p-0">
-                  <div className="grid grid-cols-1 gap-4">
+                <CardContent className="p-4">
+                  <div className="space-y-4">
                     {/* Ana Fotoğraf */}
-                    <div className="relative">
+                    <div className="relative group">
                       <img
                         src={listing.images[selectedImage]}
                         alt={listing.title}
                         className="w-full h-96 object-cover rounded-lg"
                       />
+                      
+                      {/* Sağa/Sola Ok Butonları */}
                       {listing.images.length > 1 && (
-                        <div className="absolute bottom-4 left-4 right-4">
-                          <div className="flex gap-2 overflow-x-auto">
-                            {listing.images.map((image, index) => (
-                              <button
-                                key={index}
-                                onClick={() => setSelectedImage(index)}
-                                className={`flex-shrink-0 w-16 h-16 rounded border-2 ${
-                                  selectedImage === index 
-                                    ? 'border-primary' 
-                                    : 'border-transparent'
-                                }`}
-                              >
-                                <img
-                                  src={image}
-                                  alt={`${listing.title} ${index + 1}`}
-                                  className="w-full h-full object-cover rounded"
-                                />
-                              </button>
-                            ))}
-                          </div>
-                        </div>
+                        <>
+                          <button
+                            onClick={() => setSelectedImage(prev => prev > 0 ? prev - 1 : listing.images!.length - 1)}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => setSelectedImage(prev => prev < listing.images!.length - 1 ? prev + 1 : 0)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                        </>
                       )}
                     </div>
+                    
+                    {/* Thumbnail'ler - Alta Alındı */}
+                    {listing.images.length > 1 && (
+                      <div className="flex gap-2 overflow-x-auto pb-2 justify-center">
+                        {listing.images.map((image, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setSelectedImage(index)}
+                            className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 transition-all ${
+                              selectedImage === index 
+                                ? 'border-primary ring-2 ring-primary/20' 
+                                : 'border-border hover:border-primary/50'
+                            }`}
+                          >
+                            <img
+                              src={image}
+                              alt={`${listing.title} ${index + 1}`}
+                              className="w-full h-full object-cover rounded-md"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -323,14 +346,14 @@ export default function ListingDetailPage() {
                 <CardTitle>İletişim</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {listing.contact.phone && (
+                {listing.contact?.phone && (
                   <Button className="w-full" variant="outline">
                     <Phone className="h-4 w-4 mr-2" />
                     Telefon Et
                   </Button>
                 )}
                 
-                {listing.contact.email && (
+                {listing.contact?.email && (
                   <Button className="w-full" variant="outline">
                     <Mail className="h-4 w-4 mr-2" />
                     E-posta Gönder
