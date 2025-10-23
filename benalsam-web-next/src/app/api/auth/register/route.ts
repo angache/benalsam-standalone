@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user already exists (check in auth.users via Supabase Auth)
     const { data: existingAuthUser } = await supabaseAdmin.auth.admin.listUsers()
-    const userExists = existingAuthUser.users.some(u => u.email === body.email)
+    const userExists = existingAuthUser.users.some((u: { email?: string }) => u.email === body.email)
 
     if (userExists) {
       return NextResponse.json(
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       .select('username')
       .not('username', 'is', null)
     
-    const usernameList = existingUsernames?.map(p => p.username) || []
+    const usernameList = existingUsernames?.map((p: { username: string | null }) => p.username) || []
     const uniqueUsername = ensureUniqueUsername(baseUsername, usernameList)
 
     // Create user profile in database (profiles table)

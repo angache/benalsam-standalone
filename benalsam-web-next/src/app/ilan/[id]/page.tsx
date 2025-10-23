@@ -21,9 +21,12 @@ import {
   Shield,
   Clock
 } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { listingService } from '@/services/listingService'
 import { extractIdFromSlug } from '@/lib/slugify'
+import { addFavorite, removeFavorite } from '@/services/favoriteService'
+import { useSession } from 'next-auth/react'
+import { useToast } from '@/hooks/use-toast'
 
 interface Listing {
   id: string
@@ -62,8 +65,10 @@ interface Listing {
 export default function ListingDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { data: session } = useSession()
+  const { toast } = useToast()
+  const queryClient = useQueryClient()
   const [selectedImage, setSelectedImage] = useState(0)
-  const [isLiked, setIsLiked] = useState(false)
 
   const slugOrId = params.id as string
   
@@ -73,9 +78,94 @@ export default function ListingDetailPage() {
   // İlan detaylarını çek
   const { data: listing, isLoading, error } = useQuery({
     queryKey: ['listing', listingId],
-    queryFn: () => listingId ? listingService.getSingleListing(listingId, null) : Promise.resolve(null),
+    queryFn: () => listingId ? listingService.getSingleListing(listingId, session?.user?.id || null) : Promise.resolve(null),
     enabled: !!listingId, // Only run query if we have a valid ID
   })
+
+  // Favorite toggle mutation
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async () => {
+      if (!session?.user?.id || !listingId) {
+        throw new Error('Giriş yapmalısınız')
+      }
+      
+      if (listing?.is_favorited) {
+        // Remove favorite via API route
+        const response = await fetch(`/api/favorites?listingId=${listingId}`, {
+          method: 'DELETE'
+        })
+        
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.error || 'Favori kaldırılamadı')
+        }
+        
+        return false
+      } else {
+        // Add favorite via API route
+        const response = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ listingId })
+        })
+        
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.error || 'Favori eklenemedi')
+        }
+        
+        return true
+      }
+    },
+    onSuccess: (isFavorited) => {
+      // Update cache
+      queryClient.setQueryData(['listing', listingId], (old: any) => ({
+        ...old,
+        is_favorited: isFavorited
+      }))
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Hata',
+        description: error.message || 'Favori işlemi başarısız',
+        variant: 'destructive'
+      })
+    }
+  })
+
+  const handleToggleFavorite = () => {
+    if (!session?.user) {
+      toast({
+        title: 'Giriş Gerekli',
+        description: 'Favorilere eklemek için giriş yapmalısınız',
+        variant: 'destructive'
+      })
+      router.push('/auth/login')
+      return
+    }
+    
+    toggleFavoriteMutation.mutate()
+  }
+
+  const handleShare = () => {
+    const url = window.location.href
+    const text = `${listing?.title} - ${formatPrice(listing?.price)}`
+    
+    if (navigator.share) {
+      navigator.share({
+        title: listing?.title,
+        text: text,
+        url: url
+      }).catch(console.error)
+    } else {
+      // Fallback: Copy to clipboard
+      navigator.clipboard.writeText(url)
+      toast({
+        title: 'Link Kopyalandı!',
+        description: 'İlan linki panoya kopyalandı'
+      })
+    }
+  }
 
   const formatPrice = (price: number | undefined) => {
     if (!price) return 'Belirtilmemiş'
@@ -158,12 +248,30 @@ export default function ListingDetailPage() {
             </Button>
             
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon">
-                <Share2 className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon">
-                <Flag className="h-4 w-4" />
-              </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={handleToggleFavorite}
+                    disabled={toggleFavoriteMutation.isPending}
+                    aria-label={listing?.is_favorited ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+                  >
+                    <Heart className={`h-4 w-4 ${listing?.is_favorited ? 'fill-red-500 text-red-500' : ''}`} />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={handleShare}
+                    aria-label="İlanı paylaş"
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    aria-label="İlanı raporla"
+                  >
+                    <Flag className="h-4 w-4" />
+                  </Button>
             </div>
           </div>
         </div>

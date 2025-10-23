@@ -185,8 +185,14 @@ export const checkElasticsearchHealth = async (): Promise<boolean> => {
  */
 export const fetchListingByIdFromES = async (listingId: string): Promise<Listing | null> => {
   try {
-    const res = await fetch(`${ELASTICSEARCH_PUBLIC_URL}/api/v1/search/listings/${listingId}`);
-    if (!res.ok) return null;
+    const res = await fetch(`${ELASTICSEARCH_PUBLIC_URL}/api/v1/search/listings/${listingId}`, {
+      // Suppress 404 errors in console (normal for new listings not yet indexed)
+      signal: AbortSignal.timeout(5000)
+    });
+    if (!res.ok) {
+      // Silently fail for 404 (listing not indexed yet)
+      return null;
+    }
     const data = await res.json();
     const doc = data?.data;
     if (!doc) return null;

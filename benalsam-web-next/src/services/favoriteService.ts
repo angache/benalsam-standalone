@@ -35,11 +35,12 @@ export const addFavorite = async (userId: string, listingId: string) => {
       .single();
 
     if (error) {
+      console.error('❌ [FAVORITE] Supabase error:', error)
       if (error.code === '23505') {
         toast({ title: "Bilgi", description: "Bu ilan zaten favorilerinizde." });
         return { listing_id: listingId, user_id: userId, already_favorited: true };
       }
-      return handleError(error, "Favori Eklenemedi", error.message);
+      return handleError(error, "Favori Eklenemedi", error.message || JSON.stringify(error));
     }
 
     toast({ 

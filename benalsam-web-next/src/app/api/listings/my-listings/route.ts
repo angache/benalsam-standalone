@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Process listings to include counts
-    const processedListings = listings?.map(listing => ({
+    const processedListings = listings?.map((listing: any) => ({
       ...listing,
       offers_count: listing.offers?.[0]?.count || 0,
       favorites_count: listing.favorites?.[0]?.count || 0
