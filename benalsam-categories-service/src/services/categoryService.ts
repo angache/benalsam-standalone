@@ -36,13 +36,11 @@ export class CategoryService {
       
       // Use circuit breaker only for database operations
       return await databaseCircuitBreaker.execute(async () => {
+        // Simple query - let Supabase handle the joins
         const { data: categories, error } = await supabase
           .from('categories')
-          .select(`
-            *,
-            category_attributes (*)
-          `)
-          .eq('is_active', true) // Only active categories
+          .select('*, category_attributes(*)')
+          .eq('is_active', true)
           .order('sort_order', { ascending: true });
 
         if (error) {

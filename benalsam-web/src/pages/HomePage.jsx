@@ -197,14 +197,30 @@ const HomePageSkeleton = () => (
   // Load categories dynamically
   useEffect(() => {
     const loadCategories = async () => {
+      const startTime = Date.now();
       try {
         setIsLoadingCategories(true);
-        console.log('🔄 Loading categories from dynamic service...');
+        console.log('🔄 [PERF] Loading categories from dynamic service...', { 
+          timestamp: new Date().toISOString() 
+        });
+        
+        const fetchStart = Date.now();
         const fetchedCategories = await dynamicCategoryService.getCategoryTree();
-        console.log('📦 Categories loaded:', fetchedCategories);
+        const fetchTime = Date.now() - fetchStart;
+        
+        console.log('📦 [PERF] Categories loaded:', { 
+          categoryCount: fetchedCategories.length,
+          fetchTime: `${fetchTime}ms`,
+          totalTime: `${Date.now() - startTime}ms`
+        });
+        
         setCategories(fetchedCategories);
       } catch (error) {
-        console.error('Error loading categories:', error);
+        const totalTime = Date.now() - startTime;
+        console.error('❌ [PERF] Error loading categories:', { 
+          error, 
+          totalTime: `${totalTime}ms` 
+        });
         setCategories([]);
       } finally {
         setIsLoadingCategories(false);

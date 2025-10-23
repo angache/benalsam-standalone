@@ -47,24 +47,52 @@ router.post('/get', async (req: Request, res: Response) => {
 
 // Cache set endpoint
 router.post('/set', async (req: Request, res: Response) => {
+  const startTime = Date.now();
   try {
     const { key, data, ttl, sessionId } = req.body;
     
+    logger.info('💾 [PERF] Cache SET started', { 
+      key, 
+      sessionId, 
+      ttl,
+      dataSize: JSON.stringify(data).length,
+      service: 'cache-service',
+      timestamp: new Date().toISOString()
+    });
+    
     if (!key || data === undefined) {
+      logger.warn('⚠️ [PERF] Cache set failed - missing key or data', { service: 'cache-service' });
       return res.status(400).json({
         success: false,
         error: 'Cache key ve data gerekli'
       });
     }
     
+    const cacheStart = Date.now();
     const success = await cacheManager.set(key, data, ttl, sessionId);
+    const cacheTime = Date.now() - cacheStart;
+    
+    const totalTime = Date.now() - startTime;
+    logger.info('✅ [PERF] Cache SET completed', { 
+      key,
+      success,
+      cacheTime: `${cacheTime}ms`,
+      totalTime: `${totalTime}ms`,
+      dataSize: JSON.stringify(data).length,
+      service: 'cache-service'
+    });
     
     return res.json({
       success,
       message: success ? 'Cache verisi kaydedildi' : 'Cache verisi kaydedilemedi'
     });
   } catch (error) {
-    logger.error('❌ Cache set error:', { error, service: 'cache-service' });
+    const totalTime = Date.now() - startTime;
+    logger.error('❌ [PERF] Cache set error:', { 
+      error, 
+      service: 'cache-service',
+      totalTime: `${totalTime}ms`
+    });
     return res.status(500).json({
       success: false,
       error: 'Cache verisi kaydedilemedi'

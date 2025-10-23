@@ -262,25 +262,80 @@ class DynamicCategoryService {
 
   // Kategori ağacı al (hierarchical structure)
   async getCategoryTree() {
+    const startTime = Date.now();
+    console.log('🌳 [PERF] getCategoryTree started', { 
+      timestamp: new Date().toISOString() 
+    });
+
     // Direkt flat cache'i kullan (çünkü orada zaten subkategoriler var)
+    const cacheStart = Date.now();
     const flatCached = this.getCachedData(CATEGORIES_CACHE_KEY);
+    const cacheTime = Date.now() - cacheStart;
+    
+    console.log('📦 [PERF] Cache check completed', { 
+      cacheTime: `${cacheTime}ms`,
+      cacheHit: !!flatCached
+    });
+
     if (flatCached) {
-      console.log('📦 Using flat cache for tree:', flatCached);
+      console.log('📦 [PERF] Using flat cache for tree', { 
+        categoryCount: flatCached.length,
+        totalTime: `${Date.now() - startTime}ms`
+      });
       this.categoryTree = flatCached;
       return flatCached;
     }
 
+    console.log('🔄 [PERF] Cache miss - fetching from backend', { 
+      cacheTime: `${cacheTime}ms` 
+    });
+
     // Eğer cache yoksa backend'den çek
+    const fetchStart = Date.now();
     const categories = await this.getCategories();
+    const fetchTime = Date.now() - fetchStart;
+    
+    console.log('📥 [PERF] Categories fetched from backend', { 
+      categoryCount: categories.length,
+      fetchTime: `${fetchTime}ms`
+    });
     
     // Flat listeyi tree yapısına çevir
+    const treeStart = Date.now();
     const tree = this.buildCategoryTree(categories);
+    const treeTime = Date.now() - treeStart;
+    
+    console.log('🌳 [PERF] Category tree built', { 
+      treeCategoryCount: tree.length,
+      treeTime: `${treeTime}ms`
+    });
     
     // Tree'yi zenginleştir (icon, color ekle)
+    const enrichStart = Date.now();
     const enrichedTree = this.enrichCategoryData(tree);
+    const enrichTime = Date.now() - enrichStart;
+    
+    console.log('✨ [PERF] Category data enriched', { 
+      enrichTime: `${enrichTime}ms`
+    });
     
     // Cache'e kaydet
+    const cacheSetStart = Date.now();
     this.setCachedData(CATEGORY_TREE_CACHE_KEY, enrichedTree);
+    const cacheSetTime = Date.now() - cacheSetStart;
+    
+    const totalTime = Date.now() - startTime;
+    console.log('✅ [PERF] getCategoryTree completed', { 
+      totalTime: `${totalTime}ms`,
+      breakdown: {
+        cacheCheck: `${cacheTime}ms`,
+        backendFetch: `${fetchTime}ms`,
+        treeBuilding: `${treeTime}ms`,
+        dataEnrichment: `${enrichTime}ms`,
+        cacheSet: `${cacheSetTime}ms`
+      },
+      categoryCount: enrichedTree.length
+    });
     
     this.categoryTree = enrichedTree;
     return enrichedTree;

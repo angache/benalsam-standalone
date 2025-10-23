@@ -187,7 +187,9 @@ export const useCreateListingStore = create<CreateListingState>()(
             selectedCategoryId: id,
             selectedCategoryName: name,
             categoryPath: path
-          }
+          },
+          // Clear attributes when category changes
+          attributes: {}
         })
       },
       
@@ -372,6 +374,8 @@ export const useCreateListingStore = create<CreateListingState>()(
       // Reset
       resetForm: () => {
         set(initialState)
+        // Clear localStorage for this store
+        localStorage.removeItem('create-listing-store')
       },
       
       resetStep: (step: number) => {

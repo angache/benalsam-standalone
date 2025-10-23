@@ -1,6 +1,21 @@
 import { categoriesServiceClient } from '@/lib/apiClient'
 import { categoryCacheService } from './categoryCacheService'
 
+export interface CategoryAttribute {
+  id: number
+  key: string
+  type: string
+  label: string
+  options?: string // JSON string
+  required: boolean
+  created_at: string
+  updated_at: string
+  sort_order: number
+  ai_enhanced: boolean
+  category_id: number
+  ai_suggestions?: Record<string, any>
+}
+
 export interface Category {
   id: number | string
   name: string
@@ -16,6 +31,7 @@ export interface Category {
   created_at: string
   updated_at: string
   children?: Category[]
+  category_attributes?: CategoryAttribute[]
 }
 
 export interface CategoryTree extends Category {

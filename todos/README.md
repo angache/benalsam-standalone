@@ -1,7 +1,7 @@
 # 📋 Benalsam Projesi - Tüm TODO'lar
 
-> **Son Güncelleme:** 2025-01-09  
-> **Toplam TODO Sayısı:** 9
+> **Son Güncelleme:** 2025-01-22  
+> **Toplam TODO Sayısı:** 11
 
 Bu klasör, Benalsam projesindeki tüm TODO dosyalarını organize eder ve proje durumunu takip etmek için kullanılır.
 
@@ -14,8 +14,10 @@ todos/
 ├── README.md                           # Bu dosya
 ├── active/                             # 🔥 Aktif TODO'lar
 │   ├── CACHE_SYSTEM_TODO.md
+│   ├── DRAFT_MANAGEMENT_TODO.md
 │   ├── ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md
 │   ├── ENVIRONMENT_CONFIG_TODO.md
+│   ├── LOGIN_2FA_SYSTEM_TODO.md
 │   ├── RESPONSIVE_TODO.md
 │   ├── TODO.md
 │   └── TODO_WEB_ADMIN_INTEGRATION.md
@@ -55,13 +57,25 @@ todos/
 - **Açıklama:** Mobil uygulamada cache sistemi implementasyonu
 - **Kaynak:** `packages/mobile/`
 
-#### 3. **Responsive Design TODO** - `active/RESPONSIVE_TODO.md`
+#### 3. **Draft Management TODO** - `active/DRAFT_MANAGEMENT_TODO.md`
+- **Durum:** 🔴 Başlanmadı
+- **Öncelik:** Orta
+- **Açıklama:** İlan oluşturma sürecinde taslak (draft) yönetimi sistemi
+- **Kaynak:** `benalsam-web-next/`
+
+#### 4. **Login & 2FA System TODO** - `active/LOGIN_2FA_SYSTEM_TODO.md`
+- **Durum:** 🔴 Başlanmadı
+- **Öncelik:** Yüksek
+- **Açıklama:** NextAuth.js + Supabase hybrid yaklaşımı ile modern login ve 2FA sistemi
+- **Kaynak:** `benalsam-web-next/`
+
+#### 5. **Responsive Design TODO** - `active/RESPONSIVE_TODO.md`
 - **Durum:** 🔴 Başlanmadı
 - **Öncelik:** Orta
 - **Açıklama:** Admin UI'da responsive tasarım iyileştirmeleri
 - **Kaynak:** `packages/admin-ui/`
 
-#### 4. **Elasticsearch Production TODO** - `active/ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md`
+#### 5. **Elasticsearch Production TODO** - `active/ELASTICSEARCH_PRODUCTION_DEPLOYMENT_TODO.md`
 - **Durum:** 🔴 Başlanmadı
 - **Öncelik:** Düşük
 - **Açıklama:** Elasticsearch production deployment
@@ -71,13 +85,13 @@ todos/
 
 ### 📚 **Dokümantasyon TODO'ları**
 
-#### 5. **General TODO** - `active/TODO.md`
+#### 6. **General TODO** - `active/TODO.md`
 - **Durum:** 🔴 Başlanmadı
 - **Öncelik:** Düşük
 - **Açıklama:** Genel proje TODO'ları
 - **Kaynak:** `docs/`
 
-#### 6. **Web Admin Integration TODO** - `active/TODO_WEB_ADMIN_INTEGRATION.md`
+#### 7. **Web Admin Integration TODO** - `active/TODO_WEB_ADMIN_INTEGRATION.md`
 - **Durum:** 🔴 Başlanmadı
 - **Öncelik:** Düşük
 - **Açıklama:** Web ve Admin UI entegrasyonu
@@ -87,13 +101,13 @@ todos/
 
 ### 🗂️ **Deprecated TODO'lar**
 
-#### 7. **Elasticsearch TODO (Deprecated)** - `deprecated/ELASTICSEARCH_TODO.md`
+#### 8. **Elasticsearch TODO (Deprecated)** - `deprecated/ELASTICSEARCH_TODO.md`
 - **Durum:** 🔴 Deprecated
 - **Öncelik:** Yok
 - **Açıklama:** Eski Elasticsearch TODO'su
 - **Kaynak:** `docs/deprecated/`
 
-#### 8. **TODO Completion Report (Deprecated)** - `deprecated/TODO_COMPLETION_REPORT.md`
+#### 9. **TODO Completion Report (Deprecated)** - `deprecated/TODO_COMPLETION_REPORT.md`
 - **Durum:** 🔴 Deprecated
 - **Öncelik:** Yok
 - **Açıklama:** Eski TODO tamamlama raporu
@@ -104,17 +118,17 @@ todos/
 ## 📊 **Genel Durum Özeti**
 
 ### **Aktif TODO'lar:**
-- ✅ **Tamamlanan:** 1/7
-- 🟡 **Devam Eden:** 0/7
-- 🔴 **Başlanmayan:** 6/7
+- ✅ **Tamamlanan:** 1/8
+- 🟡 **Devam Eden:** 0/8
+- 🔴 **Başlanmayan:** 7/8
 
 ### **Öncelik Dağılımı:**
 - 🔥 **Yüksek:** 1 TODO
-- ⚡ **Orta:** 2 TODO
+- ⚡ **Orta:** 3 TODO
 - 📱 **Düşük:** 3 TODO
 
 ### **Kategori Dağılımı:**
-- 🔧 **Teknik:** 3 TODO
+- 🔧 **Teknik:** 4 TODO
 - 📚 **Dokümantasyon:** 2 TODO
 - 🗂️ **Deprecated:** 2 TODO
 
@@ -124,12 +138,16 @@ todos/
 
 ### **Öncelik Sırası:**
 1. **Environment Config TODO** - Environment configuration sorunları
-2. **Cache System TODO** - Mobil performans için önemli
-3. **Responsive Design TODO** - Admin UI kullanılabilirliği
+2. **Login & 2FA System TODO** - Web-next authentication sistemi
+3. **Cache System TODO** - Mobil performans için önemli
+4. **Draft Management TODO** - Web-next ilan oluşturma UX iyileştirmesi
+5. **Responsive Design TODO** - Admin UI kullanılabilirliği
 
 ### **Öneriler:**
 - Type Consistency tamamlandı! 🎉
-- Cache System TODO'suna geç
+- Login & 2FA System TODO'suna geç (yüksek öncelik)
+- Cache System TODO'su authentication system'den sonra implement edilmeli
+- Draft Management TODO'su authentication system'den sonra implement edilmeli
 - Responsive Design TODO'sunu paralel olarak yürüt
 - Deprecated TODO'ları arşivle
 
@@ -164,5 +182,5 @@ todos/
 
 ---
 
-**Son Güncelleme:** 2025-01-09  
+**Son Güncelleme:** 2025-01-22  
 **Güncelleyen:** AI Assistant

@@ -161,6 +161,48 @@ const categoryAttributes = {
         { value: 'any', label: 'Fark Etmez', description: 'Herhangi bir durumda olabilir' }
       ]}
     ]
+  },
+  'real_estate': {
+    name: 'Emlak',
+    attributes: [
+      { key: 'area', label: 'Metrekare', type: 'text', required: false, placeholder: 'Örn: 120 m²' },
+      { key: 'rooms', label: 'Oda Sayısı', type: 'checkbox-grid', required: false, options: [
+        { value: '1+0', label: '1+0', description: 'Stüdyo' },
+        { value: '1+1', label: '1+1', description: '1 oda 1 salon' },
+        { value: '2+1', label: '2+1', description: '2 oda 1 salon' },
+        { value: '3+1', label: '3+1', description: '3 oda 1 salon' },
+        { value: '4+1', label: '4+1', description: '4 oda 1 salon' },
+        { value: '5+1', label: '5+1', description: '5 oda 1 salon' },
+        { value: '6+', label: '6+', description: '6 ve üzeri' }
+      ]},
+      { key: 'floor', label: 'Kat', type: 'text', required: false, placeholder: 'Örn: 3. Kat' },
+      { key: 'building_age', label: 'Bina Yaşı', type: 'checkbox-grid', required: false, options: [
+        { value: '0', label: '0 (Yeni)', description: 'Sıfır bina' },
+        { value: '1-5', label: '1-5', description: 'Çok yeni' },
+        { value: '6-10', label: '6-10', description: 'Yeni sayılır' },
+        { value: '11-15', label: '11-15', description: 'Orta yaşlı' },
+        { value: '16-20', label: '16-20', description: 'Eski' },
+        { value: '21+', label: '21+', description: 'Çok eski' }
+      ]},
+      { key: 'heating', label: 'Isıtma', type: 'checkbox-grid', required: false, options: [
+        { value: 'central', label: 'Merkezi', description: 'Merkezi ısıtma' },
+        { value: 'combi', label: 'Kombi', description: 'Doğalgaz kombisi' },
+        { value: 'stove', label: 'Soba', description: 'Soba ile' },
+        { value: 'floor', label: 'Yerden', description: 'Yerden ısıtma' },
+        { value: 'none', label: 'Yok', description: 'Isıtma yok' }
+      ]},
+      { key: 'furnished', label: 'Eşyalı', type: 'checkbox-grid', required: false, options: [
+        { value: 'yes', label: 'Evet', description: 'Eşyalı' },
+        { value: 'no', label: 'Hayır', description: 'Boş' },
+        { value: 'partial', label: 'Kısmi', description: 'Kısmen eşyalı' }
+      ]},
+      { key: 'deed_status', label: 'Tapu Durumu', type: 'checkbox-grid', required: false, options: [
+        { value: 'clear', label: 'Kat Mülkiyeti', description: 'Temiz tapu' },
+        { value: 'shared', label: 'Kat İrtifakı', description: 'Kat irtifakı' },
+        { value: 'land', label: 'Arsa Tapusu', description: 'Arsa tapusu' },
+        { value: 'other', label: 'Diğer', description: 'Diğer tapu durumları' }
+      ]}
+    ]
   }
 }
 
@@ -170,43 +212,106 @@ interface AttributesStepProps {
   onNext: () => void
   onBack: () => void
   selectedCategoryId?: string | null
+  selectedCategoryName?: string | null
 }
 
-export default function AttributesStep({ formData, onChange, onNext, onBack, selectedCategoryId }: AttributesStepProps) {
-  // Seçilen kategori adını localStorage cache'inden bul
-  const selectedCategoryName = useMemo(() => {
+export default function AttributesStep({ formData, onChange, onNext, onBack, selectedCategoryId, selectedCategoryName: propCategoryName }: AttributesStepProps) {
+  // Seçilen kategorinin backend'den gelen attribute'larını bul
+  const categoryAttributesFromBackend = useMemo(() => {
     try {
-      if (!selectedCategoryId) return ''
+      console.log('🔍 [ATTRIBUTES] Finding attributes for category ID:', selectedCategoryId)
+      
+      if (!selectedCategoryId) {
+        console.log('❌ [ATTRIBUTES] No category ID provided')
+        return []
+      }
+      
       const raw = localStorage.getItem('benalsam_categories_next_v1.0.0')
-      if (!raw) return ''
+      if (!raw) {
+        console.log('❌ [ATTRIBUTES] No categories cache found')
+        return []
+      }
+      
       const parsed = JSON.parse(raw)
-      const roots: any[] = parsed?.data || []
+      const categories: any[] = parsed?.data || []
+      console.log('🌳 [ATTRIBUTES] Total categories:', categories.length)
+      
       const findById = (nodes: any[]): any | null => {
         for (const n of nodes) {
-          if (String(n.id) === String(selectedCategoryId)) return n
-          const subs = n.subcategories || n.children || []
+          if (String(n.id) === String(selectedCategoryId)) {
+            console.log('✅ [ATTRIBUTES] Found matching category:', { 
+              id: n.id, 
+              name: n.name, 
+              attributesCount: n.category_attributes?.length || 0 
+            })
+            return n
+          }
+          const subs = n.children || []
           const found = findById(subs)
           if (found) return found
         }
         return null
       }
-      const node = findById(roots)
-      return node?.name || ''
-    } catch {
-      return ''
+      
+      const category = findById(categories)
+      const attrs = category?.category_attributes || []
+      console.log('🎯 [ATTRIBUTES] Category attributes:', attrs)
+      return attrs
+    } catch (error) {
+      console.error('❌ [ATTRIBUTES] Error finding category attributes:', error)
+      return []
     }
   }, [selectedCategoryId])
+  
+  // Seçilen kategori adını prop'tan al
+  const selectedCategoryName = propCategoryName || ''
 
-  // Kategoriye göre attribute'ları belirle
-  const categoryKey = useMemo(() => {
+  // Backend'den gelen attribute'ları kullan (eğer varsa), yoksa hardcoded olanları kullan
+  const attributes = useMemo(() => {
+    if (categoryAttributesFromBackend && categoryAttributesFromBackend.length > 0) {
+      console.log('✅ [ATTRIBUTES] Using backend attributes:', categoryAttributesFromBackend.length)
+      // Backend attribute'larını component'in beklediği formata çevir
+      return categoryAttributesFromBackend.map((attr: any) => {
+        const parsedOptions = attr.options ? JSON.parse(attr.options) : []
+        return {
+          key: attr.key,
+          label: attr.label,
+          type: attr.type === 'string' ? 'select' : attr.type,
+          required: attr.required,
+          options: parsedOptions.map((opt: string) => ({
+            value: opt.toLowerCase().replace(/\s+/g, '_'),
+            label: opt,
+            description: ''
+          })),
+          placeholder: `${attr.label} seçin`
+        }
+      })
+    }
+    
+    // Fallback: Hardcoded attribute'lar
+    console.log('⚠️ [ATTRIBUTES] No backend attributes, using fallback')
     const name = selectedCategoryName.toLowerCase()
-    if (name.includes('telefon') || name.includes('smartphone')) return 'smartphone'
-    if (name.includes('laptop') || name.includes('bilgisayar')) return 'laptop'
-    if (name.includes('araç') || name.includes('otomobil')) return 'car'
-    return 'smartphone' // default
-  }, [selectedCategoryName])
-
-  const attributes = categoryAttributes[categoryKey]?.attributes || []
+    
+    if (name.includes('telefon') || name.includes('smartphone')) {
+      console.log('📱 [ATTRIBUTES] Matched: smartphone')
+      return categoryAttributes['smartphone']?.attributes || []
+    }
+    if (name.includes('laptop') || name.includes('bilgisayar')) {
+      console.log('💻 [ATTRIBUTES] Matched: laptop')
+      return categoryAttributes['laptop']?.attributes || []
+    }
+    if (name.includes('araç') || name.includes('otomobil')) {
+      console.log('🚗 [ATTRIBUTES] Matched: car')
+      return categoryAttributes['car']?.attributes || []
+    }
+    if (name.includes('emlak') || name.includes('daire') || name.includes('ev') || name.includes('dükkan') || name.includes('mağaza') || name.includes('ofis') || name.includes('arsa') || name.includes('bina')) {
+      console.log('🏠 [ATTRIBUTES] Matched: real_estate')
+      return categoryAttributes['real_estate']?.attributes || []
+    }
+    
+    console.log('⚠️ [ATTRIBUTES] No match, no attributes')
+    return []
+  }, [categoryAttributesFromBackend, selectedCategoryName])
 
   const handleAttributeChange = (key: string, value: any) => {
     console.log('🔧 [ATTRIBUTES] Attribute changed:', { key, value })

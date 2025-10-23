@@ -18,26 +18,33 @@
 - [x] **EmptyState componentini ekle**
 - [x] **Follow/unfollow API'sini implement et**
 
+#### 2. **İlanlarım** (`/ilanlarim`) - ✅ **TAMAMLANDI**
+- [x] My listings grid with responsive layout
+- [x] Status filter (All, Published, Draft, Pending, etc.)
+- [x] Listing actions dropdown (View, Edit, Toggle Status, Delete)
+- [x] Listing statistics (offers count, favorites count)
+- [x] Premium badges (Featured, Urgent, Showcase)
+- [x] Status badges (Published, Draft, In Transaction, Sold, etc.)
+- [x] Doping modal (Promote listings with premium features)
+- [x] Delete listing functionality
+- [x] Toggle listing status (Active/Inactive)
+- [x] Mark as completed functionality
+- [x] Loading states (Skeleton cards)
+- [x] Empty states for filtered views
+- [x] API integration (/api/listings/my-listings)
+- [x] Framer Motion animations
+
 ---
 
 ### **🔄 SIRADAKİ SAYFALAR**
 
-#### 2. **Mesajlarım** (`/mesajlarim`) - 🔄 **BEKLİYOR**
+#### 3. **Mesajlarım** (`/mesajlarim`) - 🔄 **BEKLİYOR**
 - [ ] Message list (received/sent)
 - [ ] Conversation threads
 - [ ] Real-time messaging
 - [ ] Message search/filter
 - [ ] Message status (read/unread)
 - [ ] Message actions (delete, archive)
-
-#### 3. **İlanlarım** (`/ilanlarim`) - 🔄 **BEKLİYOR**
-- [ ] My listings grid
-- [ ] Listing status management (active, draft, expired)
-- [ ] Listing actions (edit, delete, duplicate, promote)
-- [ ] Listing statistics (views, offers, favorites)
-- [ ] Bulk actions
-- [ ] Listing search/filter
-- [ ] Pagination
 
 #### 4. **Envanterim** (`/envanterim`) - 🔄 **BEKLİYOR**
 - [ ] Inventory management
@@ -147,11 +154,11 @@
 ## 📊 **PROGRESS TRACKING**
 
 **Total Pages:** 11
-**Completed:** 1 (9%)
+**Completed:** 2 (18%)
 **In Progress:** 0
-**Remaining:** 10
+**Remaining:** 9
 
-**Next Target:** İlanlarım (`/ilanlarim`)
+**Next Target:** Mesajlarım (`/mesajlarim`) or Favorilerim (`/favorilerim`)
 
 ---
 

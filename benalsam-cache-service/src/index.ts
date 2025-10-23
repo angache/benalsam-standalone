@@ -14,7 +14,9 @@ const securityConfig = SECURITY_CONFIGS[environment as keyof typeof SECURITY_CON
 const securityMiddleware = createSecurityMiddleware(securityConfig as any);
 securityMiddleware.getAllMiddleware().forEach(m => app.use(m));
 
-app.use(express.json());
+// Increase body size limit for large category trees (10MB)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use('/api/v1/cache', cacheRoutes);
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/metrics', metricsRoutes);

@@ -10,13 +10,16 @@ import LocationStep from '@/components/CreateListing/LocationStep'
 import ReviewStep from '@/components/CreateListing/ReviewStep'
 import { useCreateListingStore } from '@/stores'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function CreateListingPage() {
+  const router = useRouter()
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   const {
     currentStep,
+    totalSteps,
     category,
     details,
     attributes,
@@ -103,6 +106,7 @@ export default function CreateListingPage() {
             onNext={handleNext}
             onBack={handleBack}
             selectedCategoryId={category.selectedCategoryId}
+            selectedCategoryName={category.selectedCategoryName}
           />
         )
       case 4:
@@ -159,21 +163,73 @@ export default function CreateListingPage() {
       return
     }
 
+    // Validate required fields
+    if (!category.selectedCategoryName) {
+      alert('Lütfen bir kategori seçin.')
+      return
+    }
+
+    if (!details.title || details.title.length < 3) {
+      alert('Başlık en az 3 karakter olmalıdır.')
+      return
+    }
+
+    if (!details.description || details.description.length < 10) {
+      alert('Açıklama en az 10 karakter olmalıdır.')
+      return
+    }
+
+    if (!location.city || !location.district) {
+      alert('Lütfen şehir ve ilçe seçin.')
+      return
+    }
+
     setIsSubmitting(true)
     
     try {
-      // TODO: API call to create listing
-      console.log('📤 [SUBMIT] Creating listing:', {
-        category,
-        details,
-        attributes,
-        images,
-        mainImageIndex,
-        location
+      // Prepare listing data
+      const listingData = {
+        title: details.title,
+        description: details.description,
+        budget: parseInt(details.budget) || 0,
+        category: category.selectedCategoryName || category.categoryPath?.join(' > ') || 'Kategori Seçilmedi',
+        location: `${location.city || 'Şehir'} / ${location.district || 'İlçe'}${location.neighborhood ? ' / ' + location.neighborhood : ''}`,
+        urgency: details.urgency || 'medium',
+        condition: details.condition || [],
+        attributes: attributes,
+        images: images,
+        mainImageIndex: mainImageIndex,
+        duration: parseInt(details.duration) || 30,
+        contactPreference: details.contactPreference || 'site_message',
+        autoRepublish: details.autoRepublish || false,
+        acceptTerms: acceptTerms,
+        premiumFeatures: {
+          is_featured: details.premiumFeatures?.is_featured || false,
+          is_urgent_premium: details.premiumFeatures?.is_urgent_premium || false,
+          is_showcase: details.premiumFeatures?.is_showcase || false,
+          has_bold_border: details.premiumFeatures?.has_bold_border || false
+        },
+        geolocation: location.coordinates?.lat && location.coordinates?.lng ? `POINT(${location.coordinates.lng} ${location.coordinates.lat})` : null
+      }
+
+      console.log('📤 [SUBMIT] Creating listing:', listingData)
+
+      // Call API to create listing
+      const response = await fetch('/api/listings/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(listingData)
       })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'İlan oluşturulamadı')
+      }
+
+      const result = await response.json()
+      console.log('✅ [SUBMIT] Listing created successfully:', result)
 
       // Success
       alert('✅ İlanınız başarıyla oluşturuldu! Yönetici onayından sonra yayınlanacaktır.')
@@ -182,13 +238,21 @@ export default function CreateListingPage() {
       resetForm()
       setAcceptTerms(false)
       
-      // Redirect to home or listings page
-      // router.push('/ilanlarim')
+      // Redirect to listings page
+      router.push('/ilanlarim')
     } catch (error) {
       console.error('❌ [SUBMIT] Error creating listing:', error)
-      alert('❌ İlan oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.')
+      alert(`❌ İlan oluşturulurken bir hata oluştu: ${error.message}`)
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleCancel = () => {
+    if (confirm('İlan oluşturmayı iptal etmek istediğinizden emin misiniz? Tüm veriler silinecektir.')) {
+      resetForm()
+      setAcceptTerms(false)
+      router.push('/')
     }
   }
 
@@ -196,6 +260,31 @@ export default function CreateListingPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
       <main className="flex-1">
+        {/* Cancel Button */}
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => router.back()}
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Geri
+              </button>
+              <span className="text-sm text-muted-foreground">
+                Adım {currentStep} / {totalSteps}
+              </span>
+            </div>
+            <button
+              onClick={handleCancel}
+              className="text-sm text-red-600 hover:text-red-700 transition-colors"
+            >
+              Vazgeç
+            </button>
+          </div>
+        </div>
         {renderCurrentStep()}
       </main>
       <Footer />
