@@ -123,7 +123,10 @@ export default function MainContent() {
           <Card
             key={listing.id}
             className="overflow-hidden transition-all duration-300 hover:shadow-lg cursor-pointer"
-            onClick={() => router.push(`/ilan/${listing.id}`)}
+            onClick={() => {
+              const { generateListingUrl } = require('@/lib/slugify')
+              router.push(generateListingUrl(listing.title, listing.id))
+            }}
           >
             <div className="relative h-48">
               <img

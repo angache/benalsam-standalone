@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { listingService } from '@/services/listingService'
+import { extractIdFromSlug } from '@/lib/slugify'
 
 interface Listing {
   id: string
@@ -64,12 +65,16 @@ export default function ListingDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0)
   const [isLiked, setIsLiked] = useState(false)
 
-  const listingId = params.id as string
+  const slugOrId = params.id as string
+  
+  // Extract UUID from slug (supports both slug-uuid and uuid-only formats)
+  const listingId = extractIdFromSlug(slugOrId)
 
   // İlan detaylarını çek
   const { data: listing, isLoading, error } = useQuery({
     queryKey: ['listing', listingId],
-    queryFn: () => listingService.getSingleListing(listingId, null),
+    queryFn: () => listingId ? listingService.getSingleListing(listingId, null) : Promise.resolve(null),
+    enabled: !!listingId, // Only run query if we have a valid ID
   })
 
   const formatPrice = (price: number | undefined) => {

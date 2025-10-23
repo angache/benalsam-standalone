@@ -246,7 +246,10 @@ const MyListingsPage = () => {
                     key={listing.id}
                     listing={listing}
                     status={status}
-                    onView={(id) => router.push(`/ilan/${id}`)}
+                    onView={(id) => {
+                      const { generateListingUrl } = require('@/lib/slugify')
+                      router.push(generateListingUrl(listing.title, id))
+                    }}
                     onEdit={() => toast({ title: '🚧 Yakında!', description: 'İlan düzenleme özelliği geliştirme aşamasında.' })}
                     onToggleStatus={handleToggleStatus}
                     onDelete={handleDeleteListing}
