@@ -14,6 +14,9 @@ export type {
   // Analytics types
   AnalyticsEventType,
   AnalyticsEventProperties,
+  // Messaging types
+  Conversation,
+  Message,
   // Utility types
   ApiResponse,
   PaginatedResponse
