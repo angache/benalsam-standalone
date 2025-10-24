@@ -65,11 +65,11 @@ const MyListingCard = ({
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="h-full flex flex-col hover:shadow-lg transition-shadow duration-300">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-2">
+      <Card className="h-full flex flex-col hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+        <CardHeader className="pb-3 min-w-0">
+          <div className="flex items-start justify-between gap-2 min-w-0">
             <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg font-semibold truncate mb-2">
+              <CardTitle className="text-lg font-semibold truncate mb-2 overflow-hidden">
                 {listing.title}
               </CardTitle>
               <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -182,14 +182,14 @@ const MyListingCard = ({
             </div>
           )}
           
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1 overflow-hidden">
             {listing.description}
           </p>
           
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <MapPin className="w-4 h-4" />
+              <div className="flex items-center gap-1 text-muted-foreground truncate">
+                <MapPin className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate max-w-24">
                   {listing.listings_district || listing.listings_province || 'Konum Yok'}
                 </span>
@@ -197,19 +197,19 @@ const MyListingCard = ({
             </div>
             
             <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <MessageSquare className="w-4 h-4" />
-                  <span>{listing.offers_count || 0}</span>
+              <div className="flex items-center gap-4 truncate">
+                <div className="flex items-center gap-1 text-muted-foreground truncate">
+                  <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{listing.offers_count || 0}</span>
                 </div>
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Heart className="w-4 h-4" />
-                  <span>{listing.favorites_count || 0}</span>
+                <div className="flex items-center gap-1 text-muted-foreground truncate">
+                  <Heart className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{listing.favorites_count || 0}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <Calendar className="w-4 h-4" />
-                <span className="text-xs">
+              <div className="flex items-center gap-1 text-muted-foreground truncate">
+                <Calendar className="w-4 h-4 flex-shrink-0" />
+                <span className="text-xs truncate">
                   {formatDistanceToNow(new Date(listing.created_at), { addSuffix: true, locale: tr })}
                 </span>
               </div>

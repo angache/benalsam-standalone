@@ -273,26 +273,26 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           <h3 className="font-semibold text-sm line-clamp-2 mb-2 truncate">{listing.title}</h3>
           
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 truncate">
               <MapPin size={12} />
               {listing.location?.district || 'Konum'}
             </span>
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 truncate">
               <Clock size={12} />
               {formatDate(listing.created_at)}
             </span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="font-bold text-primary">
+            <span className="font-bold text-primary truncate">
               {formatPrice(listing.price, listing.currency)}
             </span>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground truncate">
+              <span className="flex items-center gap-1 truncate">
                 <Eye size={12} />
                 {listing.views_count || 0}
               </span>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1 truncate">
                 <MessageCircle size={12} />
                 {listing.offers_count || 0}
               </span>
@@ -394,34 +394,34 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         <h3 className="font-semibold text-lg line-clamp-2 mb-2 truncate">{listing.title}</h3>
         
         {listing.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{listing.description}</p>
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-3 truncate">{listing.description}</p>
         )}
 
         <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1 truncate">
             <MapPin size={14} />
             {listing.location?.district || 'Konum belirtilmemiş'}
           </span>
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1 truncate">
             <Clock size={14} />
             {formatDate(listing.created_at)}
           </span>
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="font-bold text-xl text-primary">
+          <span className="font-bold text-xl text-primary truncate">
             {formatPrice(listing.price, listing.currency)}
           </span>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground truncate">
+            <span className="flex items-center gap-1 truncate">
               <Eye size={14} />
               {listing.views_count || 0}
             </span>
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 truncate">
               <MessageCircle size={14} />
               {listing.offers_count || 0}
             </span>
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 truncate">
               <Heart size={14} />
               {listing.favorites_count || 0}
             </span>
