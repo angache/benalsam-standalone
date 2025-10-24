@@ -45,28 +45,7 @@ export async function GET(
     // Get user's listings
     const { data: listings, error: listingsError } = await supabaseAdmin
       .from('listings')
-      .select(`
-        id,
-        title,
-        description,
-        main_image_url,
-        image_url,
-        category,
-        urgency,
-        status,
-        is_featured,
-        is_showcase,
-        is_urgent_premium,
-        has_bold_border,
-        created_at,
-        updated_at,
-        views_count,
-        offers_count,
-        favorites_count,
-        listings_province,
-        listings_district,
-        listings_neighborhood
-      `)
+      .select('*')
       .eq('user_id', profile?.id)
       // .eq('status', 'active') // TODO: Uncomment after debugging
       .order('created_at', { ascending: false })
