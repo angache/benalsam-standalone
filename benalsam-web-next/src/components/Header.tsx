@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Plus, User, Menu, LogIn, LogOut, Settings, UserCircle } from 'lucide-react'
+import { Search, Plus, User, Menu, LogIn, LogOut, Settings, UserCircle, MessageCircle, FileText, Package, Heart, Users, MessageSquare, Send, Crown } from 'lucide-react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
@@ -88,7 +88,7 @@ export default function Header() {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-sm font-semibold leading-none">{user.name}</p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
                     </p>
@@ -96,21 +96,55 @@ export default function Header() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => router.push(`/profil/${user.id}`)}>
-                  <UserCircle className="mr-2 h-4 w-4" />
+                  <UserCircle className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>Profilim</span>
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/mesajlarim')}>
+                  <MessageCircle className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                  <span>Mesajlarım</span>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push('/ilanlarim')}>
-                  <Plus className="mr-2 h-4 w-4" />
+                  <FileText className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>İlanlarım</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/ayarlar')}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Ayarlar</span>
+                <DropdownMenuItem onClick={() => router.push('/envanterim')}>
+                  <Package className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                  <span>Envanterim</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/favorilerim')}>
+                  <Heart className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                  <span>Favorilerim</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/takip-ettiklerim')}>
+                  <Users className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                  <span>Takip Ettiklerim</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push('/alidigim-teklifler')}>
+                  <MessageSquare className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                  <span>Aldığım Teklifler</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/gonderdigim-teklifler')}>
+                  <Send className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                  <span>Gönderdiğim Teklifler</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push('/premium/dashboard')}>
+                  <Crown className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                  <span>Premium Dashboard</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/premium/settings')}>
+                  <Settings className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                  <span>Premium Ayarlar</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push('/ayarlar')}>
+                  <Settings className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                  <span>Ayarlar</span>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Çıkış Yap</span>
+                  <LogOut className="mr-2 h-4 w-4 text-red-600" />
+                  <span className="text-red-600">Çıkış Yap</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
