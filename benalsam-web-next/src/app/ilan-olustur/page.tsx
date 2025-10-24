@@ -222,7 +222,7 @@ export default function CreateListingPage() {
         category: category.categoryPath?.join(' > ') || category.selectedCategoryName || 'Kategori Seçilmedi',
         category_id: category.category_id, // Use from store (already calculated)
         category_path: category.category_path, // Use from store (already calculated)
-        location: `${location.city || 'Şehir'} / ${location.district || 'İlçe'}${location.neighborhood ? ' / ' + location.neighborhood : ''}`,
+        location: `${location.neighborhood ? location.neighborhood + ', ' : ''}${location.district || 'İlçe'}, ${location.city || 'Şehir'}`,
         listings_province: location.city || null,
         listings_district: location.district || null,
         listings_neighborhood: location.neighborhood || null,

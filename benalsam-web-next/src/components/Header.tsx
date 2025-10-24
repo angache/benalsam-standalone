@@ -26,17 +26,17 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8 max-w-full mx-auto">
         {/* Logo */}
         <div 
           className="flex items-center gap-2 cursor-pointer" 
           onClick={() => router.push('/')}
         >
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-            <span className="text-white font-bold text-sm">B</span>
+          <div className="h-8 w-8 rounded-lg" style={{backgroundColor: 'var(--secondary)'}}>
+            <span className="text-white font-bold text-sm flex items-center justify-center h-full">B</span>
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            BenAlsam
+          <span className="text-xl font-bold" style={{color: 'var(--secondary)'}}>
+            Benalsam
           </span>
         </div>
 
@@ -55,7 +55,10 @@ export default function Header() {
         <div className="flex items-center gap-2">
           {/* Create Listing Button */}
           <Button 
-            className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            className="hidden sm:flex items-center gap-2 text-white"
+            style={{backgroundColor: 'var(--primary)'}}
+            onMouseEnter={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary-hover)'}}
+            onMouseLeave={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary)'}}
             onClick={() => router.push('/ilan-olustur')}
           >
             <Plus className="h-4 w-4" />
@@ -76,7 +79,7 @@ export default function Header() {
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <Avatar className="h-9 w-9">
                     <AvatarImage src={user.avatar_url || undefined} alt={user.name} />
-                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+                    <AvatarFallback className="text-white" style={{backgroundColor: 'var(--secondary)'}}>
                       {user.name?.charAt(0).toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>

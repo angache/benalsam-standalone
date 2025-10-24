@@ -344,7 +344,10 @@ export default function LocationStep({ formData, onChange, onNext, onBack }: Loc
           type="button"
           onClick={onNext}
           disabled={!isFormValid}
-          className="px-8 py-6 text-base font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="px-8 py-6 text-base font-semibold rounded-xl text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          style={{backgroundColor: 'var(--primary)'}}
+          onMouseEnter={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary-hover)'}}
+          onMouseLeave={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary)'}}
         >
           İleri →
         </Button>

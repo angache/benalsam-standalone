@@ -144,22 +144,21 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
             <div key={step} className="flex items-center">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
                 step <= 2 
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
-                  : 'bg-gray-200 text-gray-600'
-              }`}>
+                  ? 'text-white shadow-lg' 
+                  : 'bg-gray-300'}`} style={step <= 2 ? {backgroundColor: 'var(--primary)'} : {}}>
                 {step < 2 ? '✓' : step === 2 ? '2' : step}
               </div>
               {step < 6 && (
-                <div className={`w-20 h-2 mx-3 rounded-full transition-all duration-300 ${
-                  step < 2 ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gray-200'
-                }`} />
+                <div className={`w-20 h-2 mx-3 rounded-full transition-all duration-300`} style={{
+                  backgroundColor: step < 2 ? 'var(--primary)' : '#e5e7eb'
+                }} />
               )}
             </div>
           ))}
         </div>
         <div className="flex justify-between text-sm font-medium text-gray-600">
           <span className="text-green-600">✓ Kategori</span>
-          <span className="text-blue-600">Detaylar</span>
+          <span style={{color: 'var(--primary)'}}>Detaylar</span>
           <span>Özellikler</span>
           <span>Görseller</span>
           <span>Konum</span>
@@ -177,7 +176,7 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
           </div>
         </div>
       )}
-      <h1 className="text-2xl md:text-3xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6" style={{color: 'var(--primary)'}}>
         Detaylar
       </h1>
 
@@ -244,7 +243,11 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
               <Button type="button" variant="outline" onClick={onBack}>
                 ← Geri
               </Button>
-              <Button type="submit" disabled={!isFormValid} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Button type="submit" disabled={!isFormValid} className="text-white"
+                style={{backgroundColor: 'var(--primary)'}}
+                onMouseEnter={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary-hover)'}}
+                onMouseLeave={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary)'}}
+              >
                 İleri →
               </Button>
             </div>

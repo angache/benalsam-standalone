@@ -54,6 +54,8 @@ export const processFetchedListings = async (
     }
   }) as Listing[];
 
+  // Always use direct database access for both client and server
+  // This is called from the queryFn which runs server-side in Next.js
   if (currentUserId && listings.length > 0) {
     const listingIds = listings.map(l => l.id);
     const response = await fetchUserFavoriteStatusForListings(currentUserId, listingIds);
@@ -62,6 +64,8 @@ export const processFetchedListings = async (
       ...l,
       is_favorited: favoriteStatuses[l.id] || false
     }));
+    
+    console.log('✅ [LISTING] Applied favorite statuses:', listings.map(l => ({ id: l.id, is_favorited: l.is_favorited })));
   }
   
   return listings;

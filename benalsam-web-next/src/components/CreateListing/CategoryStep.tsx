@@ -416,21 +416,20 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
             <div key={step} className="flex items-center">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
                 step === 1 
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg' 
-                  : 'bg-gray-200 text-gray-600'
-              }`}>
+                  ? 'text-white shadow-lg' 
+                  : 'bg-gray-300'}`} style={step === 1 ? {backgroundColor: 'var(--primary)'} : {}}>
                 {step === 1 ? '✓' : step}
               </div>
               {step < 6 && (
-                <div className={`w-20 h-2 mx-3 rounded-full transition-all duration-300 ${
-                  step === 1 ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gray-200'
-                }`} />
+                <div className={`w-20 h-2 mx-3 rounded-full transition-all duration-300`} style={{
+                  backgroundColor: step === 1 ? 'var(--primary)' : '#e5e7eb'
+                }} />
               )}
             </div>
           ))}
         </div>
         <div className="flex justify-between text-sm font-medium text-gray-600">
-          <span className="text-blue-600">Kategori</span>
+          <span style={{color: 'var(--primary)'}}>Kategori</span>
           <span>Detaylar</span>
           <span>Özellikler</span>
           <span>Görseller</span>
@@ -494,7 +493,7 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
            </div>
 
            {/* Title */}
-           <h1 className="text-2xl md:text-4xl font-bold text-center mb-6 md:mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+           <h1 className="text-2xl md:text-4xl font-bold text-center mb-6 md:mb-8" style={{color: 'var(--primary)'}}>
              {navigationStack.length > 0 ? getBreadcrumb() : 'İlanınız için bir kategori seçin'}
            </h1>
 
@@ -552,7 +551,10 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
              <div className="flex justify-end mt-4">
                <Button 
                  onClick={onNext}
-                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                 className="text-white"
+                 style={{backgroundColor: 'var(--primary)'}}
+                 onMouseEnter={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary-hover)'}}
+                 onMouseLeave={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary)'}}
                >
                  İleri → ✓
                </Button>

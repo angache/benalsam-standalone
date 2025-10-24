@@ -104,7 +104,11 @@ export default function MainContent() {
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <p className="text-xl text-muted-foreground mb-4">Henüz ilan bulunmuyor</p>
-            <Button className="bg-gradient-to-r from-blue-600 to-purple-600">
+            <Button className="text-white"
+              style={{backgroundColor: 'var(--primary)'}}
+              onMouseEnter={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary-hover)'}}
+              onMouseLeave={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary)'}}
+            >
               İlk İlanı Sen Ver
             </Button>
           </div>
@@ -172,7 +176,11 @@ export default function MainContent() {
                 <Clock className="h-4 w-4" />
                 <span>{getTimeAgo(listing.created_at)}</span>
               </div>
-              <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600">
+              <Button size="sm" className="text-white"
+                style={{backgroundColor: 'var(--primary)'}}
+                onMouseEnter={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary-hover)'}}
+                onMouseLeave={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary)'}}
+              >
                 Detayları Gör
               </Button>
             </CardFooter>

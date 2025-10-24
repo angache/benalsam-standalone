@@ -8,7 +8,10 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
+    console.log('🔍 [API] POST /api/favorites - Session:', session?.user?.id)
+    
     if (!session?.user?.id) {
+      console.log('❌ [API] No session found')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -16,6 +19,8 @@ export async function POST(request: NextRequest) {
     }
 
     const { listingId } = await request.json()
+    
+    console.log('🔍 [API] Listing ID:', listingId)
 
     if (!listingId) {
       return NextResponse.json(
@@ -23,6 +28,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    console.log('📝 [API] Inserting favorite:', { user_id: session.user.id, listing_id: listingId })
 
     const { data, error } = await supabaseAdmin
       .from('user_favorites')

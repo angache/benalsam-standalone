@@ -45,18 +45,31 @@
 
 :root {
   --radius: 0.625rem;
+  
+  /* Amazon-Style Color Palette */
+  --primary: #FF9900;
+  --primary-hover: #E68A00;
+  --primary-light: #FFB84D;
+  
+  --secondary: #146EB4;
+  --secondary-hover: #0C5494;
+  --secondary-light: #1E90FF;
+  
+  --success: #00B050;
+  --success-light: #4CAF50;
+  
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary-legacy: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary-legacy: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.25 0 0); /* Darker gray for better contrast (similar to old project: 210 8% 35%) */
+  --muted-foreground: oklch(0.25 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
@@ -79,15 +92,26 @@
 }
 
 .dark {
+  --primary: #FF9900;
+  --primary-hover: #E68A00;
+  --primary-light: #FFB84D;
+  
+  --secondary: #1E90FF;
+  --secondary-hover: #146EB4;
+  --secondary-light: #4DA6FF;
+  
+  --success: #00E676;
+  --success-light: #4CAF50;
+  
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
+  --primary-legacy: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  --secondary-legacy: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);

@@ -47,7 +47,7 @@ const ReviewItem = ({ icon: Icon, label, value, children }: {
   children?: React.ReactNode
 }) => (
   <div className="flex items-start py-3">
-    <Icon className="w-5 h-5 mr-4 text-blue-600 dark:text-blue-400 mt-1 shrink-0" />
+    <Icon className="w-5 h-5 mr-4 mt-1 shrink-0" style={{color: 'var(--primary)'}} />
     <div className="flex-grow">
       <p className="text-sm text-gray-600 dark:text-gray-400">{label}</p>
       {children ? children : <p className="font-semibold">{value || "Belirtilmedi"}</p>}
@@ -157,7 +157,13 @@ export default function ReviewStep({
         <ReviewItem icon={Text} label="Kategori" value={categoryPath} />
         <ReviewItem icon={Text} label="Açıklama" value={formData.details.description} />
         <ReviewItem icon={DollarSign} label="Bütçe" value={`${formData.details.price} ₺`} />
-        <ReviewItem icon={MapPin} label="Konum" value={locationPath} />
+        <ReviewItem icon={MapPin} label="Konum">
+          <div className="flex flex-col text-sm text-gray-600 dark:text-gray-400">
+            <span>{formData.location.neighborhood}</span>
+            <span>{formData.location.district}</span>
+            <span>{formData.location.city}</span>
+          </div>
+        </ReviewItem>
         <ReviewItem icon={ShieldCheck} label="Kabul Ettiğim Durumlar">
           <div className="flex flex-wrap gap-2 mt-1">
             {(!formData.attributes || Object.keys(formData.attributes).length === 0) ? (
@@ -213,7 +219,7 @@ export default function ReviewStep({
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Crown className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <Crown className="w-5 h-5" style={{color: 'var(--primary)'}} />
             Premium Özellikler
           </h3>
           <Badge variant="outline" className="text-yellow-600 border-yellow-600">
@@ -232,7 +238,7 @@ export default function ReviewStep({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                          <div className={`p-2 rounded-lg ${isSelected ? 'bg-primary/10' : 'bg-muted'}`}>
-                           <Icon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                           <Icon className="w-5 h-5" style={{color: 'var(--primary)'}} />
                       </div>
                       <div>
                         <CardTitle className="text-base">{feature.name}</CardTitle>
@@ -304,11 +310,11 @@ export default function ReviewStep({
       </div>
 
       <div className="space-y-6">
-        <h3 className="text-lg font-semibold text-foreground flex items-center"><ShieldCheck className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400"/>Yayın Ayarları</h3>
+        <h3 className="text-lg font-semibold text-foreground flex items-center"><ShieldCheck className="w-5 h-5 mr-2" style={{color: 'var(--primary)'}}/>Yayın Ayarları</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground flex items-center gap-2">
-              <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <Clock className="w-4 h-4" style={{color: 'var(--primary)'}} />
               Yayın Süresi
             </label>
             <Select value={duration} onValueChange={setDuration}>
@@ -322,7 +328,7 @@ export default function ReviewStep({
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground flex items-center gap-2">
-              <Phone className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <Phone className="w-4 h-4" style={{color: 'var(--primary)'}} />
               İletişim Tercihi
             </label>
             <Select value={contactPreference} onValueChange={setContactPreference}>
@@ -336,7 +342,7 @@ export default function ReviewStep({
           </div>
         </div>
         <div className="flex items-center space-x-2 p-3 bg-input rounded-lg">
-          <Repeat className="w-5 h-5 text-blue-600 dark:text-blue-400"/>
+          <Repeat className="w-5 h-5" style={{color: 'var(--primary)'}}/>
           <Label htmlFor="auto-republish" className="flex-grow">Süre bitince ilanı otomatik olarak yeniden yayınla</Label>
           <Switch
             id="auto-republish"
@@ -347,7 +353,7 @@ export default function ReviewStep({
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-foreground flex items-center"><CopyCheck className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400"/>Kurallar ve Onay</h3>
+        <h3 className="text-lg font-semibold text-foreground flex items-center"><CopyCheck className="w-5 h-5 mr-2" style={{color: 'var(--primary)'}}/>Kurallar ve Onay</h3>
         <div className="items-top flex space-x-3 p-3 bg-input rounded-lg">
           <Checkbox id="terms" checked={acceptTerms} onCheckedChange={onAcceptTermsChange} className="mt-0.5 flex-shrink-0" />
           <div className="grid gap-1.5 leading-none">
@@ -380,7 +386,10 @@ export default function ReviewStep({
           type="button"
           onClick={onSubmit}
           disabled={!acceptTerms || isSubmitting}
-          className="px-8 py-6 text-base font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="px-8 py-6 text-base font-semibold rounded-xl text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          style={{backgroundColor: 'var(--primary)'}}
+          onMouseEnter={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary-hover)'}}
+          onMouseLeave={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary)'}}
         >
           {isSubmitting ? (
             <>

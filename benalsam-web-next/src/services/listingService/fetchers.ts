@@ -99,11 +99,27 @@ export const fetchSingleListing = async (listingId: string, currentUserId: strin
       return processed[0] || null;
     }
 
+    console.log('🔍 [FETCH] fetchSingleListing started:', { listingId, currentUserId });
+    
+    // Fetch listing with favorite status in ONE query using LEFT JOIN
+    let selectQuery = '*';
+    
+    if (currentUserId) {
+      // LEFT JOIN with user_favorites to check if it's favorited
+      selectQuery = `
+        *,
+        user_favorites!left(user_id, listing_id)
+      `;
+    }
+    
+    console.log('🔍 [FETCH] Executing Supabase query...');
     const { data: listing, error } = await supabase
       .from('listings')
-      .select('*')
+      .select(selectQuery)
       .eq('id', listingId)
-      .single();
+      .maybeSingle();
+
+    console.log('🔍 [FETCH] Supabase response:', { listing: !!listing, error: !!error });
 
     if (error) {
       console.error('Error fetching single listing:', error);
@@ -115,7 +131,32 @@ export const fetchSingleListing = async (listingId: string, currentUserId: strin
       return null;
     }
 
-    const processedListings = await processFetchedListings([listing], currentUserId);
+    // Check if favorite exists from the JOIN
+    if (currentUserId && listing.user_favorites) {
+      const favorites = Array.isArray(listing.user_favorites) ? listing.user_favorites : [listing.user_favorites];
+      const isFavorited = favorites.some((fav: any) => 
+        fav && fav.user_id === currentUserId && fav.listing_id === listingId
+      );
+      listing.is_favorited = isFavorited;
+      console.log('✅ [FETCH] Favorite status from JOIN:', { isFavorited, favoritesCount: favorites.length });
+    } else {
+      listing.is_favorited = false;
+      console.log('✅ [FETCH] No favorites (user not logged in or no favorites)');
+    }
+    
+    // Remove the join data from the result
+    delete listing.user_favorites;
+
+    console.log('🔍 [FETCH] Processing listings...');
+    // Process listing (add profile data, etc) WITHOUT fetching favorites again
+    const processedListings = await processFetchedListings([listing], null); // Pass null to skip favorite check
+    
+    // Restore the is_favorited we already set
+    if (processedListings[0]) {
+      processedListings[0].is_favorited = listing.is_favorited;
+    }
+    
+    console.log('✅ [FETCH] fetchSingleListing completed:', { is_favorited: processedListings[0]?.is_favorited });
     return processedListings[0] || null;
 
   } catch (error) {

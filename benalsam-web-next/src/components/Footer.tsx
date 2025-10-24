@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { 
@@ -18,11 +20,11 @@ export default function Footer() {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">B</span>
+              <div className="h-8 w-8 rounded-lg" style={{backgroundColor: 'var(--secondary)'}}>
+                <span className="text-white font-bold text-sm flex items-center justify-center h-full">B</span>
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                BenAlsam
+              <span className="text-xl font-bold" style={{color: 'var(--secondary)'}}>
+                Benalsam
               </span>
             </div>
             <p className="text-muted-foreground text-sm">
@@ -77,7 +79,11 @@ export default function Footer() {
                 placeholder="E-posta adresiniz" 
                 className="h-9"
               />
-              <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Button className="w-full text-white" 
+                style={{backgroundColor: 'var(--primary)'}}
+                onMouseEnter={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary-hover)'}}
+                onMouseLeave={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary)'}}
+              >
                 Abone Ol
               </Button>
             </div>

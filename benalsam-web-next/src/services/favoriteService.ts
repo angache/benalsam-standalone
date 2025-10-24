@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Listing, ApiResponse } from '@/types';
 
@@ -112,25 +112,25 @@ export const fetchUserFavoriteStatusForListings = async (userId: string, listing
   }
   
   try {
-    const { data, error } = await supabase
-      .from('user_favorites')
-      .select('listing_id')
-      .eq('user_id', userId)
-      .in('listing_id', listingIds);
+    // Use supabaseAdmin for server-side (bypass RLS)
+    // This function is called from queryFn which runs client-side, so we use API route instead
+    const response = await fetch('/api/favorites/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ listingIds })
+    });
 
-    if (error) {
-      console.error('Error fetching favorite statuses:', error);
+    if (!response.ok) {
+      console.error('❌ [FAVORITE] API error:', response.status);
       return { data: {} };
     }
 
-    const favoritedMap: { [key: string]: boolean } = {};
-    data?.forEach(fav => {
-      favoritedMap[fav.listing_id] = true;
-    });
-    
-    return { data: favoritedMap };
+    const result = await response.json();
+    console.log('✅ [FAVORITE] Fetched favorite statuses:', { userId, count: Object.keys(result.data || {}).length, listingIds });
+
+    return { data: result.data || {} };
   } catch (e) {
-    console.error('Unexpected error in fetchUserFavoriteStatusForListings:', e);
+    console.error('❌ [FAVORITE] Unexpected error in fetchUserFavoriteStatusForListings:', e);
     return { data: {} };
   }
 };
