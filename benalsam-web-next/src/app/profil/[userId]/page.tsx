@@ -111,6 +111,13 @@ export default function ProfilePage() {
     }
   }, [userId, currentUser])
 
+  useEffect(() => {
+    console.log(`🔍 [PROFILE] Loading: ${isLoading}, Error: ${isError}, Tab: ${activeTab}, Listings: ${listings.length}`)
+    if (listings.length > 0) {
+      console.log('📋 Listings:', listings.map(l => `${l.id} - ${l.title}`))
+    }
+  }, [isLoading, listings, activeTab, isError])
+
   const handleToggleFollow = async () => {
     if (!isAuthenticated) {
       toast({ title: "Giriş Yapın", description: "Takip etmek için giriş yapmalısınız.", variant: "destructive" })
@@ -279,8 +286,7 @@ export default function ProfilePage() {
                 listing={listing}
                 size="normal"
                 onView={(listing) => {
-                  // TODO: Navigate to listing detail page
-                  console.log('View listing:', listing.id)
+                  router.push(`/ilan/${listing.id}`)
                 }}
               />
             ))}

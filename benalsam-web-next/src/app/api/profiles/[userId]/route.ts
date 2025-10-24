@@ -14,6 +14,7 @@ export async function GET(
     }
 
     const { userId } = await params
+    console.log('🔍 [PROFILE API] userId:', userId)
 
     // Get profile data (try username first, then fallback to ID)
     let { data: profile, error: profileError } = await supabaseAdmin
@@ -38,6 +39,8 @@ export async function GET(
       console.error('Profile fetch error:', profileError)
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
     }
+
+    console.log('🔍 [PROFILE API] Found profile:', profile?.id)
 
     // Get user's listings
     const { data: listings, error: listingsError } = await supabaseAdmin
@@ -64,10 +67,12 @@ export async function GET(
         listings_district,
         listings_neighborhood
       `)
-      .eq('user_id', userId)
-      .eq('status', 'active')
+      .eq('user_id', profile?.id)
+      // .eq('status', 'active') // TODO: Uncomment after debugging
       .order('created_at', { ascending: false })
       .limit(20)
+
+    console.log('🔍 [PROFILE API] Listings result:', { count: listings?.length, error: listingsError })
 
     if (listingsError) {
       console.error('Listings fetch error:', listingsError)
