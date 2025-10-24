@@ -269,8 +269,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-3 flex-1 flex flex-col">
-          <h3 className="font-semibold text-sm line-clamp-2 mb-2">{listing.title}</h3>
+        <div className="p-3 flex-1 flex flex-col min-w-0">
+          <h3 className="font-semibold text-sm line-clamp-2 mb-2 truncate">{listing.title}</h3>
           
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
             <span className="flex items-center gap-1">
@@ -390,8 +390,8 @@ export const ListingCard: React.FC<ListingCardProps> = ({
       </div>
 
       {/* Content */}
-      <div className="p-4 flex-1 flex flex-col">
-        <h3 className="font-semibold text-lg line-clamp-2 mb-2">{listing.title}</h3>
+      <div className="p-4 flex-1 flex flex-col min-w-0">
+        <h3 className="font-semibold text-lg line-clamp-2 mb-2 truncate">{listing.title}</h3>
         
         {listing.description && (
           <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{listing.description}</p>
