@@ -302,29 +302,27 @@ export const markMessagesAsRead = async (
       throw new ValidationError('Conversation ID and user ID are required');
     }
 
-    // Add timeout to prevent hanging
-    const updatePromise = supabase
-      .from('messages')
-      .update({ 
-        is_read: true,
-        read_at: new Date().toISOString(),
-        status: 'read'
-      })
-      .eq('conversation_id', conversationId)
-      .neq('sender_id', userId)
-      .eq('is_read', false);
+    // Call API endpoint with timeout
+    const fetchPromise = fetch('/api/messages/mark-read', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ conversationId }),
+    });
 
     const timeoutPromise = new Promise((_, reject) => 
       setTimeout(() => reject(new Error('Mark as read timeout')), 5000)
     );
 
-    const { error } = await Promise.race([updatePromise, timeoutPromise]) as any;
+    const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
 
-    if (error) {
-      throw new DatabaseError('Failed to mark messages as read', error);
+    if (!response.ok) {
+      throw new DatabaseError('Failed to mark messages as read');
     }
 
-    return true;
+    const result = await response.json();
+    return result.success;
   } catch (error) {
     console.error('Error in markMessagesAsRead:', error);
     return false;
