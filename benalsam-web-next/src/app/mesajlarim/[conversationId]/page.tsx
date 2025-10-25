@@ -93,12 +93,16 @@ export default function MessageThreadPage() {
         });
         setMessages(messagesData);
 
-        // Mark messages as read
-        const readStart = performance.now();
-        await markMessagesAsRead(conversationId, user.id);
-        console.log(`⏱️ [MessageThread] Messages marked as read in ${(performance.now() - readStart).toFixed(0)}ms`);
-        
         console.log(`✅ [MessageThread] Total load time: ${(performance.now() - startTime).toFixed(0)}ms`);
+        
+        // Mark messages as read (non-blocking, don't wait for it)
+        markMessagesAsRead(conversationId, user.id)
+          .then(() => {
+            console.log(`✅ [MessageThread] Messages marked as read`);
+          })
+          .catch((err) => {
+            console.error(`⚠️ [MessageThread] Failed to mark as read (non-critical):`, err);
+          });
       } catch (err) {
         console.error('Error loading conversation:', err);
         setError(err instanceof Error ? err.message : 'Sohbet yüklenemedi');

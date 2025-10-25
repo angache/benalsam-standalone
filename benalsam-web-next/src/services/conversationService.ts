@@ -302,7 +302,8 @@ export const markMessagesAsRead = async (
       throw new ValidationError('Conversation ID and user ID are required');
     }
 
-    const { error } = await supabase
+    // Add timeout to prevent hanging
+    const updatePromise = supabase
       .from('messages')
       .update({ 
         is_read: true,
@@ -312,6 +313,12 @@ export const markMessagesAsRead = async (
       .eq('conversation_id', conversationId)
       .neq('sender_id', userId)
       .eq('is_read', false);
+
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Mark as read timeout')), 5000)
+    );
+
+    const { error } = await Promise.race([updatePromise, timeoutPromise]) as any;
 
     if (error) {
       throw new DatabaseError('Failed to mark messages as read', error);
