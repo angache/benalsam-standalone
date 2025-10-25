@@ -1,57 +1,132 @@
-import { withAuth } from 'next-auth/middleware'
-import { NextResponse } from 'next/server'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
 /**
- * Middleware for route protection
+ * Middleware for route protection using Supabase Auth
  * 
  * Protected routes require authentication
- * Admin routes require admin role
+ * Public routes are accessible without authentication
  */
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token
-    const path = req.nextUrl.pathname
-
-    // Check if user is authenticated
-    if (!token) {
-      return NextResponse.redirect(new URL('/auth/login', req.url))
-    }
-
-    // Check admin routes
-    if (path.startsWith('/admin')) {
-      if (token.role !== 'admin' && token.role !== 'moderator') {
-        return NextResponse.redirect(new URL('/', req.url))
-      }
-    }
-
-    // Check 2FA requirement for sensitive routes
-    const requires2FA = ['/profile/security', '/settings/billing']
-    if (requires2FA.some((route) => path.startsWith(route))) {
-      if (token.is_2fa_enabled && !token.twoFactorVerified) {
-        return NextResponse.redirect(new URL('/auth/2fa/verify', req.url))
-      }
-    }
-
-    return NextResponse.next()
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
+export async function middleware(req: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: req.headers,
     },
+  })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return req.cookies.get(name)?.value
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          req.cookies.set({
+            name,
+            value,
+            ...options,
+          })
+          response = NextResponse.next({
+            request: {
+              headers: req.headers,
+            },
+          })
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          })
+        },
+        remove(name: string, options: CookieOptions) {
+          req.cookies.set({
+            name,
+            value: '',
+            ...options,
+          })
+          response = NextResponse.next({
+            request: {
+              headers: req.headers,
+            },
+          })
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+          })
+        },
+      },
+    }
+  )
+
+  // Get session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  const path = req.nextUrl.pathname
+
+  console.log('🔒 [Middleware]', { 
+    path, 
+    hasSession: !!session, 
+    userId: session?.user?.id,
+    isProtected: isProtectedRoute(path) 
+  })
+
+  // If no session and trying to access protected route, redirect to login
+  if (!session && isProtectedRoute(path)) {
+    console.log('🔒 [Middleware] Redirecting to login - no session')
+    const loginUrl = new URL('/auth/login', req.url)
+    loginUrl.searchParams.set('callbackUrl', path)
+    return NextResponse.redirect(loginUrl)
   }
-)
+
+  // If session exists but trying to access auth pages, redirect to home
+  if (session && isAuthRoute(path)) {
+    return NextResponse.redirect(new URL('/', req.url))
+  }
+
+  return response
+}
 
 /**
- * Routes that require authentication
+ * Check if route requires authentication
+ */
+function isProtectedRoute(path: string): boolean {
+  const protectedPrefixes = [
+    '/profil',
+    '/ayarlar',
+    '/ilan-olustur',
+    '/mesajlarim',
+    '/ilanlarim',
+    '/favorilerim',
+    '/admin',
+  ]
+
+  return protectedPrefixes.some((prefix) => path.startsWith(prefix))
+}
+
+/**
+ * Check if route is an auth page (login, register, etc.)
+ */
+function isAuthRoute(path: string): boolean {
+  return path.startsWith('/auth/')
+}
+
+/**
+ * Routes that the middleware should run on
  */
 export const config = {
   matcher: [
-    '/profile/:path*',
-    '/settings/:path*',
-    '/ilan-olustur/:path*',
-    '/mesajlar/:path*',
-    '/favoriler/:path*',
-    '/admin/:path*',
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     * - api routes (handled separately)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
-

@@ -1,5 +1,4 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { extractIdFromSlug } from '@/lib/slugify'
 import { ListingDetailClient } from './ListingDetailClient'

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/hooks/useAuth';
 import { ChevronLeft, Send, AlertCircle, MessageCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -20,7 +20,7 @@ import { Conversation, Message } from 'benalsam-shared-types';
 export default function MessageThreadPage() {
   const router = useRouter();
   const params = useParams();
-  const { data: session } = useSession();
+  const { user, isLoading } = useAuth();
   const conversationId = params.conversationId as string;
   
   const [conversation, setConversation] = useState<Conversation | null>(null);
@@ -30,11 +30,19 @@ export default function MessageThreadPage() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Scroll to bottom when messages update
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Auto-focus input on mount and after sending
+  useEffect(() => {
+    if (!loading && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [loading, sending]);
 
   useEffect(() => {
     scrollToBottom();
@@ -42,7 +50,7 @@ export default function MessageThreadPage() {
 
   // Fetch conversation and messages
   useEffect(() => {
-    if (!session?.user?.id || !conversationId) return;
+    if (!user?.id || !conversationId) return;
 
     const loadConversation = async () => {
       try {
@@ -61,7 +69,7 @@ export default function MessageThreadPage() {
         setMessages(messagesData);
 
         // Mark messages as read
-        await markMessagesAsRead(conversationId, session.user.id);
+        await markMessagesAsRead(conversationId, user.id);
       } catch (err) {
         console.error('Error loading conversation:', err);
         setError(err instanceof Error ? err.message : 'Sohbet yüklenemedi');
@@ -74,10 +82,16 @@ export default function MessageThreadPage() {
 
     // Subscribe to new messages
     const channel = subscribeToMessages(conversationId, (newMsg) => {
-      setMessages(prev => [...prev, newMsg]);
+      setMessages(prev => {
+        // Avoid duplicates
+        if (prev.some(msg => msg.id === newMsg.id)) {
+          return prev;
+        }
+        return [...prev, newMsg];
+      });
       // Mark as read if it's from other user
-      if (newMsg.sender_id !== session.user.id) {
-        markMessagesAsRead(conversationId, session.user.id);
+      if (newMsg.sender_id !== user.id) {
+        markMessagesAsRead(conversationId, user.id);
       }
     });
 
@@ -86,18 +100,26 @@ export default function MessageThreadPage() {
         channel.unsubscribe();
       }
     };
-  }, [conversationId, session?.user?.id]);
+  }, [conversationId, user?.id]);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !session?.user?.id) return;
+    if (!newMessage.trim() || !user?.id) return;
 
     try {
       setSending(true);
-      const sentMessage = await sendMessage(conversationId, session.user.id, newMessage.trim());
+      const sentMessage = await sendMessage(conversationId, user.id, newMessage.trim());
       
       if (sentMessage) {
-        setMessages(prev => [...prev, sentMessage]);
+        setMessages(prev => {
+          // Avoid duplicates (realtime will also add it)
+          if (prev.some(msg => msg.id === sentMessage.id)) {
+            return prev;
+          }
+          return [...prev, sentMessage];
+        });
         setNewMessage('');
+        // Keep focus on input
+        setTimeout(() => inputRef.current?.focus(), 0);
       }
     } catch (err) {
       console.error('Error sending message:', err);
@@ -108,8 +130,8 @@ export default function MessageThreadPage() {
   };
 
   const getOtherUser = () => {
-    if (!conversation || !session?.user?.id) return null;
-    return conversation.user1_id === session.user.id ? conversation.user2 : conversation.user1;
+    if (!conversation || !user?.id) return null;
+    return conversation.user1_id === user.id ? conversation.user2 : conversation.user1;
   };
 
   const otherUser = getOtherUser();
@@ -194,7 +216,7 @@ export default function MessageThreadPage() {
             </div>
           ) : (
             messages.map((message, index) => {
-              const isOwnMessage = message.sender_id === session?.user?.id;
+              const isOwnMessage = message.sender_id === user?.id;
               const showAvatar =
                 index === messages.length - 1 ||
                 messages[index + 1]?.sender_id !== message.sender_id;
@@ -241,6 +263,7 @@ export default function MessageThreadPage() {
         <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="flex gap-3">
             <Input
+              ref={inputRef}
               type="text"
               placeholder="Mesaj yaz..."
               value={newMessage}

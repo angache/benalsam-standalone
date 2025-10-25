@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getServerUser } from '@/lib/supabase-server'
 import speakeasy from 'speakeasy'
 import QRCode from 'qrcode'
 import { supabaseAdmin } from '@/lib/supabase'
@@ -12,8 +11,8 @@ import { supabaseAdmin } from '@/lib/supabase'
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    const user = await getServerUser()
+    if (!user?.id) {
       return NextResponse.json(
         { success: false, error: 'Oturum açmanız gerekiyor' },
         { status: 401 }
@@ -44,7 +43,7 @@ export async function POST(request: NextRequest) {
         backup_codes: backupCodes,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', session.user.id)
+      .eq('id', user.id)
 
     if (error) {
       console.error('2FA setup error:', error)

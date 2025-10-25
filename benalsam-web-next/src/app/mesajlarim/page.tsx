@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/hooks/useAuth';
 import { MessageCircle, Search, ChevronRight, Clock, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ interface ConversationPreview {
 
 export default function MessagesPage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user, isLoading } = useAuth();
   const [conversations, setConversations] = useState<ConversationPreview[]>([]);
   const [filteredConversations, setFilteredConversations] = useState<ConversationPreview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,14 +33,14 @@ export default function MessagesPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!session?.user?.id) return;
+    if (!user?.id) return;
 
     const fetchConversations = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/messages?userId=${session.user.id}`);
+        const response = await fetch(`/api/messages?userId=${user.id}`);
         if (!response.ok) {
           throw new Error('Mesajlar yüklenemedi');
         }
@@ -57,7 +57,7 @@ export default function MessagesPage() {
     };
 
     fetchConversations();
-  }, [session?.user?.id]);
+  }, [user?.id]);
 
   // Search handler
   useEffect(() => {
@@ -157,7 +157,7 @@ export default function MessagesPage() {
           <div className="space-y-3">
             {filteredConversations.map((conversation) => {
               const isUnread = conversation.unreadCount > 0;
-              const isLastMessageFromOther = conversation.lastMessage?.sender_id !== session?.user?.id;
+              const isLastMessageFromOther = conversation.lastMessage?.sender_id !== user?.id;
 
               return (
                 <Card

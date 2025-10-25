@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(
@@ -8,8 +7,8 @@ export async function GET(
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    const user = await getServerUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -81,11 +80,11 @@ export async function GET(
 
     // Check if current user is following this profile
     let isFollowing = false
-    if (session.user.id !== userId) {
+    if (user.id !== userId) {
       const { data: followData } = await supabaseAdmin
         .from('follows')
         .select('id')
-        .eq('follower_id', session.user.id)
+        .eq('follower_id', user.id)
         .eq('following_id', userId)
         .single()
 

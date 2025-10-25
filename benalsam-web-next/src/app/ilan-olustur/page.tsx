@@ -12,12 +12,12 @@ import ProgressModal, { ProgressPhase } from '@/components/CreateListing/Progres
 import { useCreateListingStore } from '@/stores'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/hooks/useAuth'
 import { createListingWithUploadService } from '@/services/createListingService'
 
 export default function CreateListingPage() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { user, isLoading } = useAuth()
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
@@ -201,7 +201,7 @@ export default function CreateListingPage() {
       return
     }
 
-    if (!session?.user?.id) {
+    if (!user?.id) {
       alert('Lütfen giriş yapın.')
       router.push('/auth/login')
       return

@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
 
 // Check favorite status for multiple listings
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
+    const user = await getServerUser()
+
+    if (!user?.id) {
       return NextResponse.json(
         { data: {} }, // Return empty object for unauthenticated users
         { status: 200 }
@@ -27,7 +26,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabaseAdmin
       .from('user_favorites')
       .select('listing_id')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .in('listing_id', listingIds)
 
     if (error) {
@@ -43,7 +42,7 @@ export async function POST(request: NextRequest) {
       favoritedMap[fav.listing_id] = true
     })
 
-    console.log('✅ [API] Favorite check:', { userId: session.user.id, count: data?.length, total: listingIds.length })
+    console.log('✅ [API] Favorite check:', { userId: user.id, count: data?.length, total: listingIds.length })
 
     return NextResponse.json({ data: favoritedMap })
   } catch (error: unknown) {

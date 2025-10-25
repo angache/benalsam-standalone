@@ -1,15 +1,12 @@
-import type { DefaultSession, DefaultUser } from 'next-auth'
-import type { JWT as DefaultJWT } from 'next-auth/jwt'
-
 /**
  * Extended User type with additional fields
  */
-export interface User extends DefaultUser {
+export interface User {
   id: string
   email: string
   name: string
-  role: 'user' | 'admin' | 'moderator'
-  is_2fa_enabled: boolean
+  role?: 'user' | 'admin' | 'moderator'
+  is_2fa_enabled?: boolean
   phone?: string | null
   avatar_url?: string | null
   created_at?: string
@@ -19,6 +16,7 @@ export interface User extends DefaultUser {
   bio?: string | null
   rating?: number | null
   total_ratings?: number
+  rating_sum?: number
   trust_score?: number | null
   is_premium?: boolean
   premium_expires_at?: string | null
@@ -28,44 +26,6 @@ export interface User extends DefaultUser {
   listings_count?: number
   followers_count?: number
   following_count?: number
-}
-
-/**
- * Extended Session type
- */
-declare module 'next-auth' {
-  interface Session extends DefaultSession {
-    user: User
-    accessToken?: string
-    error?: string
-  }
-
-  interface User extends DefaultUser {
-    id: string
-    email: string
-    name: string
-    role: 'user' | 'admin' | 'moderator'
-    is_2fa_enabled: boolean
-    phone?: string | null
-    avatar_url?: string | null
-  }
-}
-
-/**
- * Extended JWT type
- */
-declare module 'next-auth/jwt' {
-  interface JWT extends DefaultJWT {
-    id: string
-    email: string
-    name: string
-    role: 'user' | 'admin' | 'moderator'
-    is_2fa_enabled: boolean
-    phone?: string | null
-    avatar_url?: string | null
-    accessToken?: string
-    error?: string
-  }
 }
 
 /**
@@ -132,4 +92,3 @@ export interface PasswordReset {
   password: string
   passwordConfirm: string
 }
-

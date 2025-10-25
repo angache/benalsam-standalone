@@ -143,80 +143,44 @@ export const sendMessage = async (
       throw new ValidationError('Conversation ID, sender ID and content are required');
     }
 
-    // Check conversation exists and user is participant
-    const { data: conversation, error: convError } = await supabase
-      .from('conversations')
-      .select('id, user1_id, user2_id')
-      .eq('id', conversationId)
-      .single();
+    console.log('📤 Sending message via API...', { conversationId, senderId });
 
-    if (convError || !conversation) {
-      throw new DatabaseError('Conversation not found', convError);
-    }
-
-    if (conversation.user1_id !== senderId && conversation.user2_id !== senderId) {
-      throw new ValidationError('User is not authorized for this conversation');
-    }
-
-    // Check participant record exists
-    const { data: participant, error: participantError } = await supabase
-      .from('conversation_participants')
-      .select('user_id')
-      .eq('conversation_id', conversationId)
-      .eq('user_id', senderId)
-      .maybeSingle();
-
-    if (!participant) {
-      console.log('⚠️ User not in participants table, adding...');
-      const { error: insertError } = await supabase
-        .from('conversation_participants')
-        .insert([{ conversation_id: conversationId, user_id: senderId }]);
-
-      if (insertError && insertError.code !== '23505') {
-        throw new DatabaseError('Failed to add user to participants', insertError);
-      }
-    }
-
-    console.log('✅ User authorized, sending message...');
-
-    const { data, error } = await supabase
-      .from('messages')
-      .insert({
-        conversation_id: conversationId,
-        sender_id: senderId,
-        content: content,
-        message_type: messageType,
-        created_at: new Date().toISOString()
+    // Send message via API (bypasses RLS)
+    const response = await fetch('/api/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        conversationId,
+        senderId,
+        content,
+        messageType
       })
-      .select(`
-        *,
-        sender:profiles!sender_id(id, name, avatar_url)
-      `)
-      .single();
+    });
 
-    if (error) {
-      throw new DatabaseError('Failed to send message', error);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to send message');
     }
 
-    // Update conversation's last message timestamp
-    await supabase
-      .from('conversations')
-      .update({
-        last_message_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', conversationId);
+    const result = await response.json();
+    console.log('✅ Message sent successfully:', result.data);
 
-    // Add user activity
-    await addUserActivity(
-      senderId,
-      'message_sent',
-      'Mesaj gönderildi',
-      'Yeni bir mesaj gönderildi',
-      data.id
-    );
+    // Add user activity (optional - don't fail if this fails)
+    try {
+      await addUserActivity(
+        senderId,
+        'message_sent',
+        'Mesaj gönderildi',
+        'Yeni bir mesaj gönderildi',
+        result.data.id
+      );
+    } catch (activityError) {
+      console.warn('⚠️ Failed to log user activity (non-critical):', activityError);
+    }
 
-    return data;
+    return result.data;
   } catch (error) {
     console.error('Error in sendMessage:', error);
     return handleError(error, "Mesaj Gönderilemedi", "Mesaj gönderilirken bir sorun oluştu");
@@ -232,21 +196,15 @@ export const fetchMessages = async (
       throw new ValidationError('Conversation ID is required');
     }
 
-    const { data, error } = await supabase
-      .from('messages')
-      .select(`
-        *,
-        sender:profiles!sender_id(id, name, avatar_url)
-      `)
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true })
-      .limit(limit);
-
-    if (error) {
-      throw new DatabaseError('Failed to fetch messages', error);
+    // Use API endpoint - server-side has service_role permissions
+    const response = await fetch(`/api/conversations/${conversationId}/messages?limit=${limit}`);
+    
+    if (!response.ok) {
+      throw new DatabaseError('Failed to fetch messages');
     }
 
-    return data || [];
+    const result = await response.json();
+    return result.data || [];
   } catch (error) {
     console.error('Error in fetchMessages:', error);
     return [];
@@ -261,48 +219,20 @@ export const fetchConversationDetails = async (
       throw new ValidationError('Conversation ID is required');
     }
 
-    const { data: conversation, error: convError } = await supabase
-      .from('conversations')
-      .select(`
-        *,
-        user1:profiles!conversations_user1_id_fkey (
-          id,
-          name,
-          avatar_url
-        ),
-        user2:profiles!conversations_user2_id_fkey (
-          id,
-          name,
-          avatar_url
-        ),
-        listings!conversations_listing_id_fkey (
-          id,
-          title,
-          user_id
-        ),
-        conversation_participants (
-          user_id
-        )
-      `)
-      .eq('id', conversationId)
-      .single();
-
-    if (convError) {
-      console.error('Error in fetchConversationDetails:', convError);
-      if (convError.code === 'PGRST201') {
-        toast({ 
-          title: "Sohbet Detayları Yüklenemedi", 
-          description: "Veritabanı ilişkilerinde bir sorun var. Lütfen daha sonra tekrar deneyin.", 
-          variant: "destructive" 
-        });
-      }
-      throw new DatabaseError('Failed to fetch conversation details', convError);
+    // Use API endpoint - server-side has service_role permissions
+    const response = await fetch(`/api/conversations/${conversationId}`);
+    
+    if (!response.ok) {
+      toast({ 
+        title: "Sohbet Detayları Yüklenemedi", 
+        description: "Sohbet detayları yüklenirken bir hata oluştu.", 
+        variant: "destructive" 
+      });
+      throw new DatabaseError('Failed to fetch conversation details');
     }
 
-    // ✅ OPTIMIZED: Offer data already included in the main query
-    // No need for separate offer query anymore
-
-    return conversation;
+    const result = await response.json();
+    return result.data;
   } catch (error) {
     console.error('Error in fetchConversationDetails:', error);
     return null;
@@ -408,6 +338,8 @@ export const subscribeToMessages = (conversationId: string, onNewMessage: (messa
         filter: `conversation_id=eq.${conversationId}`
       },
       async (payload) => {
+        console.log('🔔 INSERT event received:', payload);
+        
         const { data: messageWithSender, error } = await supabase
           .from('messages')
           .select(`
@@ -417,12 +349,19 @@ export const subscribeToMessages = (conversationId: string, onNewMessage: (messa
           .eq('id', payload.new.id)
           .single();
 
-        if (!error && messageWithSender) {
+        if (error) {
+          console.error('❌ Error fetching message with sender:', error);
+        } else if (messageWithSender) {
+          console.log('✅ New message received:', messageWithSender);
           onNewMessage(messageWithSender);
+        } else {
+          console.warn('⚠️ Message received but no data:', payload);
         }
       }
     )
-    .subscribe();
+    .subscribe((status) => {
+      console.log(`📡 [subscribeToMessages] Subscription status: ${status}`, { conversationId });
+    });
 
   return channel;
 };
@@ -444,7 +383,9 @@ export const subscribeToMessageStatusChanges = (conversationId: string, onStatus
         onStatusUpdate(payload.new);
       }
     )
-    .subscribe();
+    .subscribe((status) => {
+      console.log(`📡 [subscribeToMessageStatusChanges] Subscription status: ${status}`);
+    });
 
   return channel;
 };

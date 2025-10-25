@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getServerUser()
 
-    if (!session?.user?.id) {
+    if (!user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -21,7 +20,7 @@ export async function GET(request: NextRequest) {
         offers:offers(count),
         favorites:user_favorites(count)
       `)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('is_urgent_premium', { ascending: false, nullsLast: true })
       .order('is_featured', { ascending: false, nullsLast: true })
       .order('is_showcase', { ascending: false, nullsLast: true })

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
 
 // DELETE /api/listings/[listingId] - Delete a listing
@@ -9,9 +8,9 @@ export async function DELETE(
   { params }: { params: Promise<{ listingId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getServerUser()
 
-    if (!session?.user?.id) {
+    if (!user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -34,7 +33,7 @@ export async function DELETE(
       )
     }
 
-    if (listing.user_id !== session.user.id) {
+    if (listing.user_id !== user.id) {
       return NextResponse.json(
         { error: 'Unauthorized to delete this listing' },
         { status: 403 }
@@ -74,9 +73,9 @@ export async function PATCH(
   { params }: { params: Promise<{ listingId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getServerUser()
 
-    if (!session?.user?.id) {
+    if (!user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -100,7 +99,7 @@ export async function PATCH(
       )
     }
 
-    if (listing.user_id !== session.user.id) {
+    if (listing.user_id !== user.id) {
       return NextResponse.json(
         { error: 'Unauthorized to update this listing' },
         { status: 403 }

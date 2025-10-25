@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
 
 // Add favorite
@@ -29,12 +28,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('📝 [API] Inserting favorite:', { user_id: session.user.id, listing_id: listingId })
+    console.log('📝 [API] Inserting favorite:', { user_id: user.id, listing_id: listingId })
 
     const { data, error } = await supabaseAdmin
       .from('user_favorites')
       .insert([{ 
-        user_id: session.user.id, 
+        user_id: user.id, 
         listing_id: listingId 
       }])
       .select()
@@ -69,9 +68,9 @@ export async function POST(request: NextRequest) {
 // Remove favorite
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.id) {
+    const user = await getServerUser()
+
+    if (!user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -91,7 +90,7 @@ export async function DELETE(request: NextRequest) {
     const { error } = await supabaseAdmin
       .from('user_favorites')
       .delete()
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .eq('listing_id', listingId)
 
     if (error) {

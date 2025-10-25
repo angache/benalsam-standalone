@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,8 +13,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch conversations where user is participant
-    const { data: conversations, error: convError } = await supabase
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
+    // Fetch conversations where user is participant - use admin client to bypass RLS
+    const { data: conversations, error: convError } = await supabaseAdmin
       .from('conversations')
       .select(`
         *,
@@ -63,6 +70,92 @@ export async function GET(request: NextRequest) {
     console.error('API Error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { conversationId, senderId, content, messageType = 'text' } = body;
+
+    if (!conversationId || !senderId || !content) {
+      return NextResponse.json(
+        { error: 'conversationId, senderId, and content are required' },
+        { status: 400 }
+      );
+    }
+
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
+    // Verify user is participant in conversation
+    const { data: conversation, error: convError } = await supabaseAdmin
+      .from('conversations')
+      .select('id, user1_id, user2_id')
+      .eq('id', conversationId)
+      .single();
+
+    if (convError || !conversation) {
+      return NextResponse.json(
+        { error: 'Conversation not found' },
+        { status: 404 }
+      );
+    }
+
+    if (conversation.user1_id !== senderId && conversation.user2_id !== senderId) {
+      return NextResponse.json(
+        { error: 'User is not a participant in this conversation' },
+        { status: 403 }
+      );
+    }
+
+    // Insert message
+    const { data: message, error: messageError } = await supabaseAdmin
+      .from('messages')
+      .insert({
+        conversation_id: conversationId,
+        sender_id: senderId,
+        content: content,
+        message_type: messageType,
+        is_read: false,
+        created_at: new Date().toISOString()
+      })
+      .select(`
+        *,
+        sender:profiles!sender_id(id, name, avatar_url)
+      `)
+      .single();
+
+    if (messageError) {
+      console.error('Error creating message:', messageError);
+      return NextResponse.json(
+        { error: `Failed to send message: ${messageError.message}` },
+        { status: 500 }
+      );
+    }
+
+    // Update conversation's updated_at timestamp
+    await supabaseAdmin
+      .from('conversations')
+      .update({
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', conversationId);
+
+    return NextResponse.json({
+      success: true,
+      data: message
+    });
+  } catch (error) {
+    console.error('API Error:', error);
+    return NextResponse.json(
+      { error: `Internal server error: ${error instanceof Error ? error.message : 'Unknown'}` },
       { status: 500 }
     );
   }

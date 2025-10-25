@@ -24,7 +24,7 @@ import {
   ChevronRight
 } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
@@ -36,7 +36,7 @@ interface ListingDetailClientProps {
 
 export function ListingDetailClient({ listing: initialListing, listingId }: ListingDetailClientProps) {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { user, isLoading } = useAuth()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [selectedImage, setSelectedImage] = useState(0)
@@ -47,7 +47,7 @@ export function ListingDetailClient({ listing: initialListing, listingId }: List
   // Favorite toggle mutation
   const toggleFavoriteMutation = useMutation({
     mutationFn: async () => {
-      if (!session?.user?.id || !listingId) {
+      if (!user?.id || !listingId) {
         throw new Error('Giriş yapmalısınız')
       }
       
@@ -101,7 +101,7 @@ export function ListingDetailClient({ listing: initialListing, listingId }: List
   })
 
   const handleToggleFavorite = () => {
-    if (!session?.user) {
+    if (!user) {
       toast({
         title: 'Giriş Gerekli',
         description: 'Favorilere eklemek için giriş yapmalısınız',
