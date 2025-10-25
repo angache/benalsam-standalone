@@ -103,6 +103,13 @@ export default function Header() {
                   <MessageCircle className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>Mesajlarım</span>
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/mesajlarim-v2')}>
+                  <MessageCircle className="mr-2 h-4 w-4" style={{color: 'var(--primary)'}} />
+                  <span className="flex items-center gap-2">
+                    Mesajlarım 2.0
+                    <span className="text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-0.5 rounded-full">NEW</span>
+                  </span>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push('/ilanlarim')}>
                   <FileText className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>İlanlarım</span>
