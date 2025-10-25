@@ -33,10 +33,20 @@ export default function MessagesPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user?.id) return;
+    console.log('🔍 [MessagesPage] useEffect triggered', {
+      userId: user?.id,
+      isLoading,
+      hasUser: !!user
+    });
+    
+    if (!user?.id) {
+      console.log('⚠️ [MessagesPage] Waiting for user...', { isLoading });
+      return;
+    }
 
     const fetchConversations = async () => {
       try {
+        console.log('⏱️ [MessagesPage] Fetching conversations...');
         setLoading(true);
         setError(null);
 

@@ -50,26 +50,55 @@ export default function MessageThreadPage() {
 
   // Fetch conversation and messages
   useEffect(() => {
-    if (!user?.id || !conversationId) return;
+    console.log('🔍 [MessageThread] useEffect triggered', {
+      userId: user?.id,
+      conversationId,
+      isLoading,
+      hasUser: !!user
+    });
+    
+    if (!user?.id || !conversationId || isLoading) {
+      console.log('⚠️ [MessageThread] Waiting for user or conversationId...', {
+        hasUser: !!user,
+        userId: user?.id,
+        conversationId,
+        isLoading
+      });
+      return;
+    }
 
     const loadConversation = async () => {
       try {
+        const startTime = performance.now();
+        console.log('⏱️ [MessageThread] Loading conversation started');
+        
         setLoading(true);
         setError(null);
 
         // Fetch conversation details
+        const convStart = performance.now();
         const convData = await fetchConversationDetails(conversationId);
+        console.log(`⏱️ [MessageThread] Conversation details loaded in ${(performance.now() - convStart).toFixed(0)}ms`);
+        
         if (!convData) {
           throw new Error('Sohbet bulunamadı');
         }
         setConversation(convData);
 
         // Fetch messages
+        const msgStart = performance.now();
         const messagesData = await fetchMessages(conversationId, 100);
+        console.log(`⏱️ [MessageThread] Messages loaded in ${(performance.now() - msgStart).toFixed(0)}ms`, {
+          count: messagesData.length
+        });
         setMessages(messagesData);
 
         // Mark messages as read
+        const readStart = performance.now();
         await markMessagesAsRead(conversationId, user.id);
+        console.log(`⏱️ [MessageThread] Messages marked as read in ${(performance.now() - readStart).toFixed(0)}ms`);
+        
+        console.log(`✅ [MessageThread] Total load time: ${(performance.now() - startTime).toFixed(0)}ms`);
       } catch (err) {
         console.error('Error loading conversation:', err);
         setError(err instanceof Error ? err.message : 'Sohbet yüklenemedi');
@@ -100,7 +129,8 @@ export default function MessageThreadPage() {
         channel.unsubscribe();
       }
     };
-  }, [conversationId, user?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId, isLoading]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !user?.id) return;
