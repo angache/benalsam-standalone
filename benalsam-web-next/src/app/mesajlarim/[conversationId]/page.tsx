@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { ChevronLeft, Send, AlertCircle, MessageCircle, Loader } from 'lucide-react';
+import { ChevronLeft, Send, AlertCircle, MessageCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -118,7 +118,7 @@ export default function MessageThreadPage() {
     return (
       <div className="h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
         <div className="text-center">
-          <Loader className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-500" />
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-500" />
           <p className="text-slate-600 dark:text-slate-400">Sohbet yükleniyor...</p>
         </div>
       </div>
@@ -262,7 +262,7 @@ export default function MessageThreadPage() {
               style={{ backgroundColor: sending ? '#999' : 'var(--primary)' }}
             >
               {sending ? (
-                <Loader className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Send className="w-4 h-4" />
               )}

@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Loader } from '@/components/ui/loader';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 interface ConversationPreview {
   id: string;
@@ -101,7 +101,7 @@ export default function MessagesPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
-        <Loader />
+        <LoadingSpinner />
       </div>
     );
   }
