@@ -136,16 +136,24 @@ export function useAuth() {
         console.log('✅ Login successful:', { userId: data.user.id })
         
         // Check if 2FA is enabled in profiles table
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('is_2fa_enabled')
           .eq('id', data.user.id)
           .single()
         
+        console.log('🔍 2FA Check:', { 
+          profile, 
+          profileError, 
+          is_2fa_enabled: profile?.is_2fa_enabled 
+        })
+        
         const requires2FA = profile?.is_2fa_enabled || false
         
         if (requires2FA) {
           console.log('🔐 2FA required for user:', data.user.id)
+        } else {
+          console.log('✅ No 2FA required for user:', data.user.id)
         }
         
         return { 

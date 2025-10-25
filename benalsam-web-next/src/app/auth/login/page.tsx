@@ -57,13 +57,18 @@ function LoginPageContent() {
       })
 
       if (result.success) {
+        console.log('🔍 Login result:', { requires2FA: result.requires2FA, userId: result.user?.id })
+        
         // Small delay to ensure Supabase session is fully set
         await new Promise(resolve => setTimeout(resolve, 100))
 
         if (result.requires2FA) {
           // Redirect to 2FA verification with userId
-          router.push(`/auth/2fa/verify?userId=${result.user?.id}`)
+          const redirectUrl = `/auth/2fa/verify?userId=${result.user?.id}`
+          console.log('🔐 Redirecting to 2FA:', redirectUrl)
+          router.push(redirectUrl)
         } else {
+          console.log('✅ No 2FA, redirecting to:', callbackUrl)
           toast({
             title: 'Başarılı',
             description: 'Giriş başarılı!',

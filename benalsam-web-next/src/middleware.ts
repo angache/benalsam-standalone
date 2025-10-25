@@ -82,8 +82,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // If session exists but trying to access auth pages, redirect to home
-  if (session && isAuthRoute(path)) {
+  // If session exists but trying to access auth pages (except 2FA), redirect to home
+  if (session && isAuthRoute(path) && !path.startsWith('/auth/2fa/')) {
+    console.log('🔒 [Middleware] Redirecting to home - already authenticated')
     return NextResponse.redirect(new URL('/', req.url))
   }
 
