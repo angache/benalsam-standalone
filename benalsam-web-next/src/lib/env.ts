@@ -14,10 +14,6 @@ const getEnv = (key: string) => {
 }
 
 export const env = {
-  // NextAuth.js (server-only)
-  NEXTAUTH_URL: getEnv('NEXTAUTH_URL') || 'http://localhost:3000',
-  NEXTAUTH_SECRET: getEnv('NEXTAUTH_SECRET'),
-
   // Supabase
   NEXT_PUBLIC_SUPABASE_URL: getEnv('NEXT_PUBLIC_SUPABASE_URL'),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
@@ -42,10 +38,8 @@ export function validateEnv() {
     'NEXT_PUBLIC_ADMIN_BACKEND_URL',
   ] as const
 
-  // On server, also check server-only vars
-  const serverRequired = typeof window === 'undefined' 
-    ? ['NEXTAUTH_SECRET'] as const
-    : [] as const
+  // No additional server-only vars required for now
+  const serverRequired = [] as const
 
   const allRequired = [...required, ...serverRequired]
   const missing = allRequired.filter((key) => !env[key as keyof typeof env])

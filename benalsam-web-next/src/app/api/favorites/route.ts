@@ -5,12 +5,12 @@ import { supabaseAdmin } from '@/lib/supabase'
 // Add favorite
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const user = await getServerUser()
     
-    console.log('🔍 [API] POST /api/favorites - Session:', session?.user?.id)
+    console.log('🔍 [API] POST /api/favorites - User:', user?.id)
     
-    if (!session?.user?.id) {
-      console.log('❌ [API] No session found')
+    if (!user?.id) {
+      console.log('❌ [API] No user found')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

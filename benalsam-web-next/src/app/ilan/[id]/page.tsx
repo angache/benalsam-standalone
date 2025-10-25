@@ -11,7 +11,7 @@ export default async function ListingDetailPage({
 }) {
   console.log('🚀 [SSR] ListingDetailPage rendering on server')
   
-  const session = await getServerSession(authOptions)
+  const currentUser = await getServerUser()
   const listingId = extractIdFromSlug(params.id)
   
   if (!listingId) {
@@ -49,13 +49,13 @@ export default async function ListingDetailPage({
 
   // Check if favorited
   let is_favorited = false
-  if (session?.user?.id && listing.user_favorites) {
+  if (currentUser?.id && listing.user_favorites) {
     const favorites = Array.isArray(listing.user_favorites) 
       ? listing.user_favorites 
       : [listing.user_favorites]
     
     is_favorited = favorites.some((fav: any) => 
-      fav && fav.user_id === session.user.id && fav.listing_id === listingId
+      fav && fav.user_id === currentUser.id && fav.listing_id === listingId
     )
   }
 

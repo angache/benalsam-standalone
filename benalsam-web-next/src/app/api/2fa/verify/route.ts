@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getServerUser } from '@/lib/supabase-server'
 import speakeasy from 'speakeasy'
 import { supabaseAdmin } from '@/lib/supabase'
 
@@ -20,8 +19,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user session or use provided userId (for login flow)
-    const session = await getServerSession(authOptions)
-    const targetUserId = userId || session?.user?.id
+    const user = await getServerUser()
+    const targetUserId = userId || user?.id
 
     if (!targetUserId) {
       return NextResponse.json(
