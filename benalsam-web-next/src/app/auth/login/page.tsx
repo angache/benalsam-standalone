@@ -57,20 +57,20 @@ function LoginPageContent() {
       })
 
       if (result.success) {
-        toast({
-          title: 'Başarılı',
-          description: 'Giriş başarılı!',
-        })
-
         // Small delay to ensure Supabase session is fully set
         await new Promise(resolve => setTimeout(resolve, 100))
 
         if (result.requires2FA) {
-          router.push('/auth/2fa/verify')
+          // Redirect to 2FA verification with userId
+          router.push(`/auth/2fa/verify?userId=${result.user?.id}`)
         } else {
+          toast({
+            title: 'Başarılı',
+            description: 'Giriş başarılı!',
+          })
           router.push(callbackUrl)
+          router.refresh() // Refresh to get new session from cookies
         }
-        router.refresh() // Refresh to get new session from cookies
       } else {
         toast({
           title: 'Hata',

@@ -31,13 +31,13 @@ export async function POST(request: NextRequest) {
 
     // Get user from database (profiles table)
     // Using existing column names: totp_secret, backup_codes
-    const { data: user, error: userError } = await supabaseAdmin
+    const { data: profile, error: userError } = await supabaseAdmin
       .from('profiles')
       .select('id, totp_secret, backup_codes, is_2fa_enabled')
       .eq('id', targetUserId)
       .single()
 
-    if (userError || !user) {
+    if (userError || !profile) {
       return NextResponse.json(
         { success: false, error: 'Kullanıcı bulunamadı' },
         { status: 404 }
@@ -45,9 +45,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if it's a backup code
-    if (user.backup_codes && user.backup_codes.includes(code)) {
+    if (profile.backup_codes && profile.backup_codes.includes(code)) {
       // Remove used backup code
-      const updatedCodes = user.backup_codes.filter((c: string) => c !== code)
+      const updatedCodes = profile.backup_codes.filter((c: string) => c !== code)
       
       await supabaseAdmin
         .from('profiles')
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Use totp_secret from existing schema
-    const secret = user.totp_secret
+    const secret = profile.totp_secret
 
     if (!secret) {
       return NextResponse.json(
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     }
 
     // If 2FA is not enabled yet, enable it now (after successful verification)
-    if (!user.is_2fa_enabled) {
+    if (!profile.is_2fa_enabled) {
       await supabaseAdmin
         .from('profiles')
         .update({
