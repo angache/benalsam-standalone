@@ -172,17 +172,36 @@ export function useAuth() {
   }
 
   const logout = async () => {
+    console.log('🚪 [useAuth] Logout started')
+    setLoading(true)
+    
     try {
-      setLoading(true)
-      await supabase.auth.signOut()
-      setUser(null)
-      setSession(null)
-      router.push('/auth/login')
+      // Try to sign out from Supabase with timeout
+      const signOutPromise = supabase.auth.signOut()
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Logout timeout')), 5000)
+      )
+      
+      const { error } = await Promise.race([signOutPromise, timeoutPromise]) as any
+      
+      if (error) {
+        console.error('❌ [useAuth] Logout error:', error)
+      } else {
+        console.log('✅ [useAuth] Supabase signOut successful')
+      }
     } catch (error) {
-      console.error('Error logging out:', error)
-    } finally {
-      setLoading(false)
+      console.error('❌ [useAuth] Logout failed or timed out:', error)
     }
+    
+    // Clear local state immediately (don't wait for Supabase)
+    console.log('🧹 [useAuth] Clearing local state...')
+    setUser(null)
+    setSession(null)
+    setLoading(false)
+    
+    // Use window.location for hard redirect to clear all client state
+    console.log('🔄 [useAuth] Redirecting to login...')
+    window.location.href = '/auth/login'
   }
 
   const isAuthenticated = !!session && !!user
