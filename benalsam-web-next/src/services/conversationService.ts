@@ -133,6 +133,25 @@ export const getOrCreateConversation = async (
   }
 };
 
+/**
+ * Send a message in a conversation
+ * 
+ * @param conversationId - UUID of the conversation
+ * @param senderId - UUID of the message sender
+ * @param content - Message content (will be sanitized)
+ * @param messageType - Type of message (text, image, etc.)
+ * @returns Promise<Message> - The created message object
+ * @throws ValidationError if parameters are invalid
+ * @throws Error if API call fails
+ * 
+ * @example
+ * const message = await sendMessage(
+ *   'conv-123',
+ *   'user-456', 
+ *   'Hello!',
+ *   'text'
+ * )
+ */
 export const sendMessage = async (
   conversationId: string,
   senderId: string,
@@ -188,6 +207,14 @@ export const sendMessage = async (
   }
 };
 
+/**
+ * Fetch messages for a conversation
+ * 
+ * @param conversationId - UUID of the conversation
+ * @param limit - Maximum number of messages to fetch (default: 50)
+ * @returns Promise<Message[]> - Array of messages with sender info
+ * @throws DatabaseError if query fails
+ */
 export const fetchMessages = async (
   conversationId: string,
   limit: number = 50
@@ -294,6 +321,16 @@ export const getUserConversations = async (userId: string): Promise<Conversation
   }
 };
 
+/**
+ * Mark all unread messages in a conversation as read
+ * 
+ * @param conversationId - UUID of the conversation
+ * @param userId - UUID of the current user
+ * @returns Promise<boolean> - Success status
+ * @throws Error if update fails
+ * 
+ * Note: Uses API endpoint to bypass RLS, includes 5s timeout
+ */
 export const markMessagesAsRead = async (
   conversationId: string,
   userId: string
@@ -360,6 +397,26 @@ async function getUserProfile(userId: string) {
   return null;
 }
 
+/**
+ * Subscribe to realtime message updates for a conversation
+ * 
+ * @param conversationId - UUID of the conversation
+ * @param onNewMessage - Callback function for new messages
+ * @returns RealtimeChannel | null - Channel for unsubscribing
+ * 
+ * Features:
+ * - User profile caching (5min TTL)
+ * - Auto-reconnect on connection loss
+ * - Broadcasts to self (see own messages)
+ * 
+ * @example
+ * const channel = subscribeToMessages('conv-123', (message) => {
+ *   console.log('New message:', message)
+ * })
+ * 
+ * // Cleanup
+ * if (channel) channel.unsubscribe()
+ */
 export const subscribeToMessages = (conversationId: string, onNewMessage: (message: Message) => void) => {
   if (!conversationId || !onNewMessage) return null;
 
