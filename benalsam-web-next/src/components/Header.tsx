@@ -6,6 +6,7 @@ import { Search, Plus, User, Menu, LogIn, LogOut, Settings, UserCircle, MessageC
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { useNotifications } from '@/contexts/NotificationContext'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 export default function Header() {
   const router = useRouter()
   const { user, isAuthenticated, isLoading, logout } = useAuth()
+  const { unreadCount, requestPermission } = useNotifications()
+
+  console.log('🔔 [Header] Rendering with unreadCount:', unreadCount)
 
   const handleLogout = async () => {
     await logout()
@@ -83,6 +87,12 @@ export default function Header() {
                       {user.name?.charAt(0).toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
+                  {/* Unread message badge */}
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white dark:border-gray-900">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
@@ -101,13 +111,25 @@ export default function Header() {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push('/mesajlarim')}>
                   <MessageCircle className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
-                  <span>Mesajlarım</span>
+                  <span className="flex items-center gap-2">
+                    Mesajlarım
+                    {unreadCount > 0 && (
+                      <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
+                  </span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push('/mesajlarim-v2')}>
                   <MessageCircle className="mr-2 h-4 w-4" style={{color: 'var(--primary)'}} />
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 flex-1">
                     Mesajlarım 2.0
                     <span className="text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-0.5 rounded-full">NEW</span>
+                    {unreadCount > 0 && (
+                      <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
                   </span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push('/ilanlarim')}>
@@ -148,6 +170,10 @@ export default function Header() {
                 <DropdownMenuItem onClick={() => router.push('/ayarlar')}>
                   <Settings className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>Ayarlar</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={requestPermission}>
+                  <MessageSquare className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                  <span>Bildirimler</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4 text-red-600" />

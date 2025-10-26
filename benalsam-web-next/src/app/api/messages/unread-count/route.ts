@@ -1,0 +1,61 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase';
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Get all conversations where user is participant
+    const { data: conversations, error: convError } = await supabaseAdmin
+      .from('conversations')
+      .select('id')
+      .or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
+
+    if (convError) {
+      console.error('Error fetching conversations:', convError);
+      return NextResponse.json(
+        { error: 'Failed to fetch conversations' },
+        { status: 500 }
+      );
+    }
+
+    if (!conversations || conversations.length === 0) {
+      return NextResponse.json({ count: 0 });
+    }
+
+    const conversationIds = conversations.map(c => c.id);
+
+    // Count unread messages in these conversations
+    const { count, error: countError } = await supabaseAdmin
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .in('conversation_id', conversationIds)
+      .neq('sender_id', userId)
+      .eq('is_read', false);
+
+    if (countError) {
+      console.error('Error counting unread messages:', countError);
+      return NextResponse.json(
+        { error: 'Failed to count unread messages' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ count: count || 0 });
+  } catch (error) {
+    console.error('API Error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+

@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useNotifications } from '@/contexts/NotificationContext';
+import { supabase } from '@/lib/supabase';
 import { MessageCircle, Search, Edit, Send, Phone, Video, Info, Smile, MoreVertical } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -31,6 +33,7 @@ interface ConversationPreview {
 export default function MessagesV2Page() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  const { setActiveConversation, refreshUnreadCount } = useNotifications();
   const [conversations, setConversations] = useState<ConversationPreview[]>([]);
   const [filteredConversations, setFilteredConversations] = useState<ConversationPreview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +41,20 @@ export default function MessagesV2Page() {
   
   // Selected conversation state
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+
+  // Update active conversation for notifications
+  useEffect(() => {
+    setActiveConversation(selectedConversationId);
+    
+    // Refresh unread count when conversation changes
+    if (selectedConversationId) {
+      refreshUnreadCount();
+    }
+    
+    return () => {
+      setActiveConversation(null);
+    };
+  }, [selectedConversationId, setActiveConversation, refreshUnreadCount]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -95,10 +112,10 @@ export default function MessagesV2Page() {
       return;
     }
 
-    const fetchConversationsList = async () => {
+    const fetchConversationsList = async (silent = false) => {
       try {
-        console.log('📞 [MessagesV2] Fetching conversations list...');
-        setLoading(true);
+        console.log('📞 [MessagesV2] Fetching conversations list...', { silent });
+        if (!silent) setLoading(true);
         const response = await fetch(`/api/messages?userId=${user.id}`);
         if (!response.ok) throw new Error('Mesajlar yüklenemedi');
 
@@ -109,12 +126,51 @@ export default function MessagesV2Page() {
       } catch (err) {
         console.error('❌ [MessagesV2] Error fetching conversations:', err);
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
     };
 
-    fetchConversationsList();
-  }, [user?.id]);
+    fetchConversationsList(false);
+
+    // Subscribe to new messages to refresh conversation list (silently)
+    const channel = supabase
+      .channel('conversations-list')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE)
+          schema: 'public',
+          table: 'messages',
+        },
+        async (payload) => {
+          const newMessage = payload.new as any;
+          console.log('📬 [MessagesV2] Message event detected:', {
+            conversationId: newMessage?.conversation_id,
+            selectedConversationId
+          });
+          
+          // Don't refresh immediately if this message is for the active conversation
+          // (let the mark-as-read flow handle it)
+          if (newMessage?.conversation_id === selectedConversationId) {
+            console.log('📬 [MessagesV2] Message is for active conversation, skipping immediate refresh');
+            // Delay refresh to let mark-as-read complete first
+            setTimeout(async () => {
+              await fetchConversationsList(true);
+            }, 1000);
+          } else {
+            console.log('📬 [MessagesV2] Message is for different conversation, refreshing now');
+            await fetchConversationsList(true);
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('📬 [MessagesV2] Conversations subscription status:', status);
+      });
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [user?.id, selectedConversationId]);
 
   // Search handler
   useEffect(() => {
@@ -172,11 +228,17 @@ export default function MessagesV2Page() {
         setSelectedConversation(convData);
         setMessages(messagesData);
 
-        // Mark as read (non-blocking)
+        // Mark as read (non-blocking) and refresh counts
         console.log('📞 [MessagesV2] Marking messages as read...');
-        markMessagesAsRead(selectedConversationId, user.id).catch((err) => {
-          console.error('⚠️ [MessagesV2] Mark as read failed:', err);
-        });
+        markMessagesAsRead(selectedConversationId, user.id)
+          .then(() => {
+            console.log('✅ [MessagesV2] Messages marked as read, refreshing counts...');
+            // Refresh both conversation list and notification count
+            refreshUnreadCount();
+          })
+          .catch((err) => {
+            console.error('⚠️ [MessagesV2] Mark as read failed:', err);
+          });
       } catch (err) {
         console.error('❌ [MessagesV2] Error loading conversation:', err);
       } finally {
@@ -398,7 +460,11 @@ export default function MessagesV2Page() {
                     )}
                   </div>
 
-                  {isUnread && <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>}
+                  {conv.unreadCount > 0 && (
+                    <div className="bg-blue-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0">
+                      {conv.unreadCount > 9 ? '9+' : conv.unreadCount}
+                    </div>
+                  )}
                 </div>
               );
             })
