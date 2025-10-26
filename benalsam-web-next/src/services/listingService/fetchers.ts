@@ -29,7 +29,10 @@ export const fetchListings = async (
     const result = await searchListingsWithElasticsearch(searchParams, currentUserId);
     
     if (result.data && result.data.length > 0) {
-      console.log('✅ fetchListings - Found', result.data.length, 'listings from Elasticsearch, total:', result.total);
+      // Check source from debug flag (set in dev mode)
+      const source = (result.data[0] as any)?.__src === 'S' ? 'Supabase' : 
+                     (result.data[0] as any)?.__src === 'E' ? 'Elasticsearch' : 'Unknown';
+      console.log(`✅ fetchListings - Found ${result.data.length} listings from ${source}, total:`, result.total);
       return {
         listings: result.data,
         total: result.total || 0,
@@ -72,7 +75,7 @@ export const fetchListings = async (
 
     const processedListings = await processFetchedListings(listingsData, currentUserId);
     // Mark source for debug (only used in development)
-    if (import.meta.env.MODE !== 'production') {
+    if (process.env.NODE_ENV !== 'production') {
       (processedListings as any[]).forEach(l => { try { (l as any).__src = 'S'; } catch (_) {} });
       incrementSourceCount('S', (processedListings as any[]).length);
     }

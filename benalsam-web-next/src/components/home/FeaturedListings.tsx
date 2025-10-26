@@ -30,48 +30,21 @@ export default function FeaturedListings({
       console.log('🔍 [FeaturedListings] Starting fetch...', { limit, userId: user?.id })
       
       try {
-        // Try Elasticsearch first
-        try {
-          const result = await listingService.fetchListings(user?.id || null, { 
-            page: 1, 
-            limit 
-          })
-          
-          if (result?.listings && result.listings.length > 0) {
-            console.log('✅ [FeaturedListings] Got from Elasticsearch:', result.listings.length)
-            return result.listings
-          }
-          
-          console.log('⚠️ [FeaturedListings] Elasticsearch returned empty, trying Supabase...')
-        } catch (esError) {
-          console.warn('⚠️ [FeaturedListings] Elasticsearch failed:', esError)
+        // Fetch listings using listingService (handles ES + Supabase fallback internally)
+        const result = await listingService.getListings(user?.id || null, { 
+          page: 1, 
+          limit 
+        })
+        
+        if (result?.listings && result.listings.length > 0) {
+          // Check source (listingService marks source in dev mode)
+          const source = (result.listings[0] as any)?.__src === 'S' ? 'Supabase' : 'Elasticsearch'
+          console.log(`✅ [FeaturedListings] Got ${result.listings.length} listings from ${source}`)
+          return result.listings
         }
         
-        // Fallback to Supabase
-        console.log('🔄 [FeaturedListings] Using Supabase fallback...')
-        const { data, error: supabaseError } = await supabase
-          .from('listings')
-          .select(`
-            *,
-            profiles!listings_user_id_fkey (
-              id,
-              name,
-              avatar_url,
-              rating,
-              trust_score
-            )
-          `)
-          .eq('status', 'active')
-          .order('created_at', { ascending: false })
-          .limit(limit)
-        
-        if (supabaseError) {
-          console.error('❌ [FeaturedListings] Supabase error:', supabaseError)
-          throw supabaseError
-        }
-        
-        console.log('✅ [FeaturedListings] Got from Supabase:', data?.length || 0)
-        return data || []
+        console.log('⚠️ [FeaturedListings] No listings found')
+        return []
         
       } catch (err) {
         console.error('❌ [FeaturedListings] Total failure:', err)

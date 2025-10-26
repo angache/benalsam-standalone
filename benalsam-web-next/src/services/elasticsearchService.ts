@@ -110,7 +110,7 @@ export const searchListingsWithElasticsearch = async (
     const sortedListings = docs;
 
     // Mark source for debug (only used in development)
-    if (import.meta.env.MODE !== 'production') {
+    if (process.env.NODE_ENV !== 'production') {
       sortedListings.forEach((l: any) => { try { l.__src = 'E'; } catch (_) {} });
       incrementSourceCount('E', sortedListings.length);
     }
@@ -158,6 +158,12 @@ const searchListingsWithSupabase = async (
     const limit = params.limit || 20;
 
     const result = await fetchFilteredListings(filterParams, currentUserId, page, limit);
+    
+    // Mark source for debug (only used in development)
+    if (process.env.NODE_ENV !== 'production') {
+      result.listings.forEach((l: any) => { try { l.__src = 'S'; } catch (_) {} });
+      incrementSourceCount('S', result.listings.length);
+    }
     
     return { data: result.listings };
   } catch (error) {
