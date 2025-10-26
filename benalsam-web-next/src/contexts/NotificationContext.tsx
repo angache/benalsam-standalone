@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { realtimeManager } from '@/lib/realtime-manager'
+import { REFRESH_INTERVAL } from '@/config/messaging'
 
 interface NotificationContextType {
   unreadCount: number
@@ -101,8 +102,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     // Initial fetch
     fetchUnreadCount()
 
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchUnreadCount, 30000)
+    // Refresh periodically
+    const interval = setInterval(fetchUnreadCount, REFRESH_INTERVAL)
 
     // Subscribe to realtime updates using global manager
     logger.debug('[NotificationContext] Setting up realtime for user', { userId: user.id })

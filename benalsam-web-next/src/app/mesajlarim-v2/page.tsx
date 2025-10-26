@@ -9,6 +9,7 @@ import { MessageCircle, Search, Edit, Send, Phone, Video, Info, Smile, MoreVerti
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { sanitizeMessage, sanitizeText, sanitizeListingTitle } from '@/utils/sanitize';
+import { MessagingErrorBoundary } from '@/components/ErrorBoundary';
 import { 
   fetchMessages, 
   sendMessage, 
@@ -336,7 +337,8 @@ export default function MessagesV2Page() {
   }
 
   return (
-    <div className="h-screen flex bg-white dark:bg-black">
+    <MessagingErrorBoundary>
+      <div className="h-screen flex bg-white dark:bg-black">
       {/* LEFT SIDEBAR - Conversations List */}
       <div className={`
         w-full md:w-96 border-r border-gray-200 dark:border-gray-800 flex flex-col
@@ -688,5 +690,6 @@ export default function MessagesV2Page() {
         )}
       </div>
     </div>
+    </MessagingErrorBoundary>
   );
 }

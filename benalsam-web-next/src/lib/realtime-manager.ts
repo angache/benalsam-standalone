@@ -26,6 +26,7 @@
 import { supabase } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import type { RealtimeChannel } from '@supabase/supabase-js'
+import { RECONNECT_MAX_ATTEMPTS, RECONNECT_BASE_DELAY } from '@/config/messaging'
 
 // Event types
 export type RealtimeEvent = 
@@ -76,8 +77,8 @@ class RealtimeManager {
   private listeners: Map<RealtimeEvent, Set<EventCallback<any>>> = new Map()
   private userId: string | null = null
   private reconnectAttempts = 0
-  private maxReconnectAttempts = 5
-  private reconnectDelay = 1000
+  private maxReconnectAttempts = RECONNECT_MAX_ATTEMPTS
+  private reconnectDelay = RECONNECT_BASE_DELAY
 
   private constructor() {
     // Private constructor for singleton

@@ -330,9 +330,11 @@ export const markMessagesAsRead = async (
   }
 };
 
+import { USER_PROFILE_CACHE_TTL } from '@/config/messaging';
+
 // User profile cache to avoid N+1 queries
 const userProfileCache = new Map<string, { id: string; name: string; avatar_url: string | null }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = USER_PROFILE_CACHE_TTL;
 
 // Helper to get or fetch user profile
 async function getUserProfile(userId: string) {
