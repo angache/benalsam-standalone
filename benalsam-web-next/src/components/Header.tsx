@@ -1,12 +1,15 @@
 'use client'
 
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Plus, User, Menu, LogIn, LogOut, Settings, UserCircle, MessageCircle, FileText, Package, Heart, Users, MessageSquare, Send, Crown } from 'lucide-react'
+import { Search, Plus, User, Menu, LogIn, LogOut, Settings, UserCircle, MessageCircle, FileText, Package, Heart, Users, MessageSquare, Send, Crown, Grid3x3, ChevronDown } from 'lucide-react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { useNotifications } from '@/contexts/NotificationContext'
+import { useQuery } from '@tanstack/react-query'
+import { categoryService } from '@/services/categoryService'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,45 +18,133 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Separator } from '@/components/ui/separator'
+import { logger } from '@/utils/production-logger'
 
 export default function Header() {
   const router = useRouter()
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   const { unreadCount, requestPermission } = useNotifications()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
 
-  console.log('🔔 [Header] Rendering with unreadCount:', unreadCount)
+  // Fetch categories for mega menu
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => categoryService.getCategories(),
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const topCategories = categories?.filter(cat => cat.level === 0 && cat.is_active).slice(0, 6) || []
+
+  logger.debug('[Header] Rendering with unreadCount', { unreadCount })
 
   const handleLogout = async () => {
     await logout()
   }
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/ara?q=${encodeURIComponent(searchQuery.trim())}`)
+      setSearchQuery('')
+    }
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8 max-w-full mx-auto">
-        {/* Logo */}
-        <div 
-          className="flex items-center gap-2 cursor-pointer" 
-          onClick={() => router.push('/')}
-        >
-          <div className="h-8 w-8 rounded-lg" style={{backgroundColor: 'var(--secondary)'}}>
-            <span className="text-white font-bold text-sm flex items-center justify-center h-full">B</span>
+        {/* Logo & Category Menu */}
+        <div className="flex items-center gap-4">
+          {/* Logo */}
+          <div 
+            className="flex items-center gap-2 cursor-pointer" 
+            onClick={() => router.push('/')}
+          >
+            <div className="h-8 w-8 rounded-lg" style={{backgroundColor: 'var(--secondary)'}}>
+              <span className="text-white font-bold text-sm flex items-center justify-center h-full">B</span>
+            </div>
+            <span className="text-xl font-bold" style={{color: 'var(--secondary)'}}>
+              Benalsam
+            </span>
           </div>
-          <span className="text-xl font-bold" style={{color: 'var(--secondary)'}}>
-            Benalsam
-          </span>
+
+          {/* Category Mega Menu - Desktop */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="hidden lg:flex items-center gap-1">
+                <Grid3x3 className="h-4 w-4" />
+                <span>Kategoriler</span>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-80" align="start">
+              <DropdownMenuLabel>Popüler Kategoriler</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <div className="grid grid-cols-2 gap-1 p-2">
+                {topCategories.map((category) => (
+                  <DropdownMenuItem
+                    key={category.id}
+                    onClick={() => router.push(`/kategori/${category.slug || category.id}`)}
+                    className="cursor-pointer"
+                  >
+                    <span className="truncate">{category.name}</span>
+                    {category.listing_count && category.listing_count > 0 && (
+                      <span className="ml-auto text-xs text-muted-foreground">
+                        {category.listing_count}
+                      </span>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => router.push('/kategoriler')}
+                className="cursor-pointer font-medium"
+                style={{ color: 'var(--primary)' }}
+              >
+                Tüm Kategoriler →
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Search Bar - Desktop */}
-        <div className="hidden md:flex flex-1 max-w-md mx-8">
+        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-8">
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Ne arıyorsunuz? (örn: iPhone 13, kiralık daire)"
               className="pl-10 pr-4"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch(e)
+                }
+              }}
             />
+            {searchQuery && (
+              <Button
+                type="submit"
+                size="sm"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-7 px-3"
+                style={{ backgroundColor: 'var(--primary)' }}
+              >
+                Ara
+              </Button>
+            )}
           </div>
-        </div>
+        </form>
 
         {/* Actions */}
         <div className="flex items-center gap-2">
@@ -193,9 +284,160 @@ export default function Header() {
           )}
 
           {/* Mobile Menu */}
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-4 w-4" />
-          </Button>
+          <Sheet open={showMobileMenu} onOpenChange={setShowMobileMenu}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetHeader>
+                <SheetTitle>Menü</SheetTitle>
+              </SheetHeader>
+              
+              <div className="mt-6 space-y-4">
+                {/* User Info */}
+                {isAuthenticated && user ? (
+                  <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={user.avatar_url || undefined} />
+                      <AvatarFallback style={{ backgroundColor: 'var(--secondary)' }} className="text-white">
+                        {user.name?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold truncate">{user.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <Button 
+                    className="w-full"
+                    onClick={() => {
+                      setShowMobileMenu(false)
+                      router.push('/auth/login')
+                    }}
+                  >
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Giriş Yap
+                  </Button>
+                )}
+
+                <Separator />
+
+                {/* Quick Actions */}
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground px-2">Hızlı İşlemler</p>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      setShowMobileMenu(false)
+                      router.push('/ilan-olustur')
+                    }}
+                  >
+                    <Plus className="mr-2 h-4 w-4" style={{ color: 'var(--primary)' }} />
+                    İlan Ver
+                  </Button>
+                  {isAuthenticated && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => {
+                          setShowMobileMenu(false)
+                          router.push('/mesajlarim-v2')
+                        }}
+                      >
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        <span className="flex-1 text-left">Mesajlarım</span>
+                        {unreadCount > 0 && (
+                          <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </span>
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => {
+                          setShowMobileMenu(false)
+                          router.push('/ilanlarim')
+                        }}
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        İlanlarım
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => {
+                          setShowMobileMenu(false)
+                          router.push('/favorilerim')
+                        }}
+                      >
+                        <Heart className="mr-2 h-4 w-4" />
+                        Favorilerim
+                      </Button>
+                    </>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Categories */}
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground px-2">Kategoriler</p>
+                  {topCategories.map((category) => (
+                    <Button
+                      key={category.id}
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => {
+                        setShowMobileMenu(false)
+                        router.push(`/kategori/${category.slug || category.id}`)
+                      }}
+                    >
+                      <span className="truncate">{category.name}</span>
+                      {category.listing_count && category.listing_count > 0 && (
+                        <span className="ml-auto text-xs text-muted-foreground">
+                          {category.listing_count}
+                        </span>
+                      )}
+                    </Button>
+                  ))}
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start font-medium"
+                    style={{ color: 'var(--primary)' }}
+                    onClick={() => {
+                      setShowMobileMenu(false)
+                      router.push('/kategoriler')
+                    }}
+                  >
+                    Tüm Kategoriler →
+                  </Button>
+                </div>
+
+                {isAuthenticated && (
+                  <>
+                    <Separator />
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-red-600"
+                      onClick={() => {
+                        setShowMobileMenu(false)
+                        handleLogout()
+                      }}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Çıkış Yap
+                    </Button>
+                  </>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
