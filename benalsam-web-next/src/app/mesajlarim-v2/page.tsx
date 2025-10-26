@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { MessageCircle, Search, Edit, Send, Phone, Video, Info, Smile, MoreVertical } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { sanitizeMessage, sanitizeText, sanitizeListingTitle } from '@/utils/sanitize';
 import { 
   fetchMessages, 
   sendMessage, 
@@ -422,7 +423,7 @@ export default function MessagesV2Page() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline justify-between gap-2 mb-0.5">
                       <p className={`text-sm truncate ${isUnread ? 'font-bold' : 'font-semibold'}`}>
-                        {conv.otherUser?.name || 'Kullanıcı'}
+                        {sanitizeText(conv.otherUser?.name) || 'Kullanıcı'}
                       </p>
                       {conv.lastMessage && (
                         <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
@@ -444,7 +445,7 @@ export default function MessagesV2Page() {
                           </span>
                         )}
                         <span className="text-gray-600 dark:text-gray-400 truncate">
-                          {conv.listing.title}
+                          {sanitizeListingTitle(conv.listing.title)}
                         </span>
                       </p>
                     )}
@@ -455,7 +456,7 @@ export default function MessagesV2Page() {
                         ${isUnread ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-500 dark:text-gray-400'}
                       `}>
                         {conv.lastMessage.sender_id === user?.id && 'Siz: '}
-                        {conv.lastMessage.content}
+                        {sanitizeText(conv.lastMessage.content)}
                       </p>
                     )}
                   </div>
@@ -512,7 +513,7 @@ export default function MessagesV2Page() {
                 </Avatar>
                 
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate">{otherUser?.name}</p>
+                  <p className="font-semibold text-sm truncate">{sanitizeText(otherUser?.name)}</p>
                   {selectedConversation?.listing && (
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                       {selectedConversation.listing.title}
@@ -568,7 +569,7 @@ export default function MessagesV2Page() {
                       {otherUser?.name?.[0] || 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <p className="font-semibold mb-1">{otherUser?.name}</p>
+                  <p className="font-semibold mb-1">{sanitizeText(otherUser?.name)}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Sohbeti başlatmak için bir mesaj gönderin
                   </p>
@@ -611,7 +612,7 @@ export default function MessagesV2Page() {
                             }
                           `}>
                             <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                              {message.content}
+                              {sanitizeText(message.content)}
                             </p>
                           </div>
                           
