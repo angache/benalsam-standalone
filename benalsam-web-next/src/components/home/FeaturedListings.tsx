@@ -23,18 +23,20 @@ export default function FeaturedListings({
 }: FeaturedListingsProps) {
   const { user } = useAuth()
 
-  const { data: listings, isLoading } = useQuery({
-    queryKey: ['featured-listings', limit],
+  const { data, isLoading } = useQuery({
+    queryKey: ['featured-listings', limit, user?.id],
     queryFn: async () => {
-      const response = await listingService.getListings({
-        page: 1,
-        limit,
-        sort: 'created_at-desc',
+      // Use Elasticsearch + Supabase fallback (same as old system)
+      const result = await listingService.fetchListings(user?.id || null, { 
+        page: 1, 
+        limit 
       })
-      return response.data || []
+      return result
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
   })
+
+  const listings = data?.listings || []
 
   if (isLoading) {
     return (

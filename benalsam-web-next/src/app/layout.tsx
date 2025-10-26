@@ -4,6 +4,8 @@ import "./globals.css";
 import "./console-override"; // Production console override
 import { Providers } from "@/components/Providers";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +34,9 @@ export default function RootLayout({
       >
         <ErrorBoundary>
           <Providers>
+            <Header />
             {children}
+            <Footer />
           </Providers>
         </ErrorBoundary>
       </body>

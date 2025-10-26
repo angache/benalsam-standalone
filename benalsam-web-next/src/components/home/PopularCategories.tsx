@@ -89,19 +89,11 @@ export default function PopularCategories() {
               onClick={() => router.push(`/kategori/${category.slug || category.id}`)}
               className="group cursor-pointer bg-card border rounded-lg p-4 text-center hover:border-primary/50 hover:shadow-md transition-all duration-200"
             >
-              <div 
-                className="w-12 h-12 mx-auto mb-3 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform"
-                style={{ backgroundColor: 'var(--primary-light)', opacity: 0.1 }}
-              >
-                <div 
-                  className="w-12 h-12 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: 'var(--primary)', opacity: 0.1 }}
-                >
-                  <Icon 
-                    className="w-6 h-6" 
-                    style={{ color: 'var(--primary)' }}
-                  />
-                </div>
+              <div className="w-12 h-12 mx-auto mb-3 bg-primary/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Icon 
+                  className="w-6 h-6" 
+                  style={{ color: 'var(--primary)' }}
+                />
               </div>
               
               <h3 className="font-medium text-sm group-hover:text-primary transition-colors">
