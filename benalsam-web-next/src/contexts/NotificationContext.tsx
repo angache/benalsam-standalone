@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
+import { realtimeManager } from '@/lib/realtime-manager'
 
 interface NotificationContextType {
   unreadCount: number
@@ -103,71 +104,48 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     // Refresh every 30 seconds
     const interval = setInterval(fetchUnreadCount, 30000)
 
-    // Subscribe to realtime updates for all user's conversations
+    // Subscribe to realtime updates using global manager
     logger.debug('[NotificationContext] Setting up realtime for user', { userId: user.id })
     
-    const channel = supabase
-      .channel('user-messages', {
-        config: {
-          broadcast: { self: false }
+    const unsubscribe = realtimeManager.on('message:new', async ({ conversationId, message }) => {
+      logger.debug('[NotificationContext] New message event', { conversationId, messageId: message.id })
+
+      // Check if this message is for current user
+      const { data: conversation } = await supabase
+        .from('conversations')
+        .select('user1_id, user2_id')
+        .eq('id', conversationId)
+        .single()
+
+      if (conversation && 
+          (conversation.user1_id === user.id || conversation.user2_id === user.id) &&
+          message.sender_id !== user.id) {
+        logger.debug('[NotificationContext] Message is for current user!')
+        
+        // Refresh count
+        await fetchUnreadCount()
+
+        // Show notification
+        const { data: sender } = await supabase
+          .from('profiles')
+          .select('name, avatar_url')
+          .eq('id', message.sender_id)
+          .single()
+
+        if (sender) {
+          showNotification(
+            conversationId,
+            `${sender.name} size mesaj gönderdi`,
+            message.content,
+            sender.avatar_url
+          )
         }
-      })
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-        },
-        async (payload) => {
-          logger.debug('[NotificationContext] New message event', { payload })
-          const newMessage = payload.new as any
-
-          // Check if this message is for current user
-          logger.debug('[NotificationContext] Checking conversation', { conversationId: newMessage.conversation_id })
-          const { data: conversation, error } = await supabase
-            .from('conversations')
-            .select('user1_id, user2_id')
-            .eq('id', newMessage.conversation_id)
-            .single()
-
-          logger.debug('[NotificationContext] Conversation check', { conversation, error })
-
-          if (conversation && 
-              (conversation.user1_id === user.id || conversation.user2_id === user.id) &&
-              newMessage.sender_id !== user.id) {
-            logger.debug('[NotificationContext] Message is for current user!')
-            
-            // Refresh count
-            await fetchUnreadCount()
-
-            // Show notification
-            const { data: sender } = await supabase
-              .from('profiles')
-              .select('name, avatar_url')
-              .eq('id', newMessage.sender_id)
-              .single()
-
-            if (sender) {
-              showNotification(
-                newMessage.conversation_id,
-                `${sender.name} size mesaj gönderdi`,
-                newMessage.content,
-                sender.avatar_url
-              )
-            }
-          } else {
-            logger.debug('[NotificationContext] Message not for current user or sent by user')
-          }
-        }
-      )
-      .subscribe((status, err) => {
-        logger.debug('[NotificationContext] Subscription status', { status, err })
-      })
+      }
+    })
 
     return () => {
       clearInterval(interval)
-      channel.unsubscribe()
+      unsubscribe()
     }
   }, [user?.id, permissionGranted])
 

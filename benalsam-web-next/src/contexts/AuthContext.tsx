@@ -6,6 +6,7 @@ import type { LoginCredentials, User } from '@/types/auth'
 import { supabase } from '@/lib/supabase'
 import type { Session } from '@supabase/supabase-js'
 import { logger } from '@/utils/production-logger'
+import { realtimeManager } from '@/lib/realtime-manager'
 
 interface AuthContextType {
   session: Session | null
@@ -140,6 +141,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           updated_at: data.updated_at,
         } as User)
         logger.debug('[AuthContext] User state updated')
+        
+        // Initialize realtime manager for this user
+        realtimeManager.initialize(data.id).catch(err => {
+          logger.error('[AuthContext] Failed to initialize realtime manager', { error: err })
+        })
       } else {
         logger.warn('[AuthContext] Profile data is null', { userId })
         fetchedUserIds.current.delete(userId)
@@ -223,6 +229,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       logger.error('[AuthContext] Logout failed or timed out', { error })
     }
+    
+    // Disconnect realtime manager
+    await realtimeManager.disconnect()
     
     // Clear local state immediately (don't wait for Supabase)
     logger.debug('[AuthContext] Clearing local state...')
