@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
 
 interface NotificationContextType {
   unreadCount: number
@@ -24,18 +25,18 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     if (!user?.id) return
 
     try {
-      console.log('🔔 [NotificationContext] Fetching unread count...')
+      logger.debug('[NotificationContext] Fetching unread count...')
       const response = await fetch(`/api/messages/unread-count?userId=${user.id}`)
       if (response.ok) {
         const { count } = await response.json()
-        console.log('🔔 [NotificationContext] Unread count updated:', count)
+        logger.debug('[NotificationContext] Unread count updated', { count })
         setUnreadCount(count || 0)
         
         // Update tab title
         updateTabTitle(count || 0)
       }
     } catch (error) {
-      console.error('❌ [NotificationContext] Failed to fetch unread count:', error)
+      logger.error('[NotificationContext] Failed to fetch unread count', { error })
     }
   }
 
@@ -65,16 +66,16 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     // 3. Tab is visible (user is actively using the app)
     if (!permissionGranted || !('Notification' in window)) return
     if (conversationId === activeConversationId) {
-      console.log('🔕 Notification suppressed: user is viewing this conversation')
+      logger.debug('[NotificationContext] Notification suppressed: user is viewing this conversation')
       return
     }
     if (document.visibilityState === 'visible' && conversationId === activeConversationId) {
-      console.log('🔕 Notification suppressed: tab is visible and viewing conversation')
+      logger.debug('[NotificationContext] Notification suppressed: tab is visible and viewing conversation')
       return
     }
 
     try {
-      console.log('🔔 Showing notification:', { conversationId, title })
+      logger.info('[NotificationContext] Showing notification', { conversationId, title })
       new Notification(title, {
         body,
         icon: icon || '/favicon.ico',
@@ -83,7 +84,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         renotify: true
       })
     } catch (error) {
-      console.error('Failed to show notification:', error)
+      logger.error('[NotificationContext] Failed to show notification', { error })
     }
   }
 
@@ -103,7 +104,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     const interval = setInterval(fetchUnreadCount, 30000)
 
     // Subscribe to realtime updates for all user's conversations
-    console.log('🔔 [NotificationContext] Setting up realtime for user:', user.id)
+    logger.debug('[NotificationContext] Setting up realtime for user', { userId: user.id })
     
     const channel = supabase
       .channel('user-messages', {
@@ -119,23 +120,23 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           table: 'messages',
         },
         async (payload) => {
-          console.log('🔔 [NotificationContext] New message event:', payload)
+          logger.debug('[NotificationContext] New message event', { payload })
           const newMessage = payload.new as any
 
           // Check if this message is for current user
-          console.log('🔔 [NotificationContext] Checking conversation:', newMessage.conversation_id)
+          logger.debug('[NotificationContext] Checking conversation', { conversationId: newMessage.conversation_id })
           const { data: conversation, error } = await supabase
             .from('conversations')
             .select('user1_id, user2_id')
             .eq('id', newMessage.conversation_id)
             .single()
 
-          console.log('🔔 [NotificationContext] Conversation check:', { conversation, error })
+          logger.debug('[NotificationContext] Conversation check', { conversation, error })
 
           if (conversation && 
               (conversation.user1_id === user.id || conversation.user2_id === user.id) &&
               newMessage.sender_id !== user.id) {
-            console.log('🔔 [NotificationContext] Message is for current user!')
+            logger.debug('[NotificationContext] Message is for current user!')
             
             // Refresh count
             await fetchUnreadCount()
@@ -156,12 +157,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
               )
             }
           } else {
-            console.log('🔕 [NotificationContext] Message not for current user or sent by user')
+            logger.debug('[NotificationContext] Message not for current user or sent by user')
           }
         }
       )
       .subscribe((status, err) => {
-        console.log('🔔 [NotificationContext] Subscription status:', status, err)
+        logger.debug('[NotificationContext] Subscription status', { status, err })
       })
 
     return () => {

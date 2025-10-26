@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { addUserActivity } from '@/services/userActivityService';
 import { Conversation, Message } from '@/types';
+import { logger } from '@/utils/production-logger';
 
 // Custom error classes for better error handling
 class ValidationError extends Error {

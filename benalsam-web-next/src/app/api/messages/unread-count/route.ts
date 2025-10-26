@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { logger } from '@/utils/production-logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
       .or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
 
     if (convError) {
-      console.error('Error fetching conversations:', convError);
+      logger.error('[API] Error fetching conversations', { error: convError, userId });
       return NextResponse.json(
         { error: 'Failed to fetch conversations' },
         { status: 500 }
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
       .eq('is_read', false);
 
     if (countError) {
-      console.error('Error counting unread messages:', countError);
+      logger.error('[API] Error counting unread messages', { error: countError, userId });
       return NextResponse.json(
         { error: 'Failed to count unread messages' },
         { status: 500 }
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ count: count || 0 });
   } catch (error) {
-    console.error('API Error:', error);
+    logger.error('[API] unread-count error', { error, userId: request.url });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

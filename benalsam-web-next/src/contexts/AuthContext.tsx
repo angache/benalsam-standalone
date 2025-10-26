@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { LoginCredentials, User } from '@/types/auth'
 import { supabase } from '@/lib/supabase'
 import type { Session } from '@supabase/supabase-js'
+import { logger } from '@/utils/production-logger'
 
 interface AuthContextType {
   session: Session | null
@@ -33,26 +34,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Get initial session
     const initializeAuth = async () => {
       try {
-        console.log('🔐 [AuthContext] Initializing...')
+        logger.debug('[AuthContext] Initializing...')
         const { data: { session: initialSession }, error } = await supabase.auth.getSession()
         
         if (error) {
-          console.error('🔐 [AuthContext] Error getting session:', error)
+          logger.error('[AuthContext] Error getting session', { error })
         }
 
         if (isSubscribed) {
           if (initialSession) {
-            console.log('🔐 [AuthContext] Initial session found:', { userId: initialSession.user.id })
+            logger.debug('[AuthContext] Initial session found', { userId: initialSession.user.id })
             setSession(initialSession)
             await fetchUserProfile(initialSession.user.id)
           } else {
-            console.log('🔐 [AuthContext] No initial session')
+            logger.debug('[AuthContext] No initial session')
           }
           setLoading(false)
           setInitialized(true)
         }
       } catch (error) {
-        console.error('🔐 [AuthContext] Initialize error:', error)
+        logger.error('[AuthContext] Initialize error', { error })
         if (isSubscribed) {
           setLoading(false)
           setInitialized(true)
@@ -65,17 +66,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
-        console.log('🔐 [AuthContext] Auth state change:', event, { hasSession: !!currentSession })
+        logger.debug('[AuthContext] Auth state change', { event, hasSession: !!currentSession })
         
         if (!isSubscribed) return
 
         setSession(currentSession)
         
         if (currentSession?.user) {
-          console.log('🔐 [AuthContext] User logged in:', { userId: currentSession.user.id })
+          logger.debug('[AuthContext] User logged in', { userId: currentSession.user.id })
           await fetchUserProfile(currentSession.user.id)
         } else {
-          console.log('🔐 [AuthContext] User logged out')
+          logger.debug('[AuthContext] User logged out')
           setUser(null)
         }
         
@@ -94,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserProfile = async (userId: string) => {
     // Skip if already fetched this user OR if already fetching
     if (fetchedUserIds.current.has(userId)) {
-      console.log('⚡ [AuthContext] Profile already cached, skipping fetch', { userId })
+      logger.debug('[AuthContext] Profile already cached, skipping fetch', { userId })
       return
     }
 
@@ -102,8 +103,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchedUserIds.current.add(userId)
 
     try {
-      console.log('📞 [AuthContext] Fetching user profile...', { userId })
-      const startTime = performance.now()
+      logger.startTimer('[AuthContext] fetchUserProfile')
+      logger.debug('[AuthContext] Fetching user profile...', { userId })
       
       const { data, error } = await supabase
         .from('profiles')
@@ -111,16 +112,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('id', userId)
         .single()
 
-      console.log(`⏱️ [AuthContext] Profile fetch completed in ${(performance.now() - startTime).toFixed(0)}ms`)
+      logger.endTimer('[AuthContext] fetchUserProfile')
 
       if (error) {
-        console.error('❌ [AuthContext] Error fetching profile:', error)
+        logger.error('[AuthContext] Error fetching profile', { error, userId })
         fetchedUserIds.current.delete(userId) // Remove on error so retry is possible
         return
       }
 
       if (data) {
-        console.log('✅ [AuthContext] Profile loaded:', { name: data.name, email: data.email })
+        logger.debug('[AuthContext] Profile loaded', { name: data.name, email: data.email })
         setUser({
           id: data.id,
           email: data.email,
@@ -138,13 +139,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           created_at: data.created_at,
           updated_at: data.updated_at,
         } as User)
-        console.log('✅ [AuthContext] User state updated')
+        logger.debug('[AuthContext] User state updated')
       } else {
-        console.warn('⚠️ [AuthContext] Profile data is null')
+        logger.warn('[AuthContext] Profile data is null', { userId })
         fetchedUserIds.current.delete(userId)
       }
     } catch (error) {
-      console.error('❌ [AuthContext] Error fetching user profile:', error)
+      logger.error('[AuthContext] Error fetching user profile', { error, userId })
       fetchedUserIds.current.delete(userId)
     }
   }
@@ -163,7 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.session) {
-        console.log('✅ Login successful:', { userId: data.user.id })
+        logger.info('[AuthContext] Login successful', { userId: data.user.id })
         
         // Check if 2FA is enabled in profiles table
         const { data: profile, error: profileError } = await supabase
@@ -172,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .eq('id', data.user.id)
           .single()
         
-        console.log('🔍 2FA Check:', { 
+        logger.debug('[AuthContext] 2FA Check', { 
           profile, 
           profileError, 
           is_2fa_enabled: profile?.is_2fa_enabled 
@@ -181,9 +182,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const requires2FA = profile?.is_2fa_enabled || false
         
         if (requires2FA) {
-          console.log('🔐 2FA required for user:', data.user.id)
+          logger.info('[AuthContext] 2FA required for user', { userId: data.user.id })
         } else {
-          console.log('✅ No 2FA required for user:', data.user.id)
+          logger.debug('[AuthContext] No 2FA required for user', { userId: data.user.id })
         }
         
         return { 
@@ -202,7 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = async () => {
-    console.log('🚪 [AuthContext] Logout started')
+    logger.info('[AuthContext] Logout started')
     setLoading(true)
     
     try {
@@ -215,22 +216,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await Promise.race([signOutPromise, timeoutPromise]) as any
       
       if (error) {
-        console.error('❌ [AuthContext] Logout error:', error)
+        logger.error('[AuthContext] Logout error', { error })
       } else {
-        console.log('✅ [AuthContext] Supabase signOut successful')
+        logger.info('[AuthContext] Supabase signOut successful')
       }
     } catch (error) {
-      console.error('❌ [AuthContext] Logout failed or timed out:', error)
+      logger.error('[AuthContext] Logout failed or timed out', { error })
     }
     
     // Clear local state immediately (don't wait for Supabase)
-    console.log('🧹 [AuthContext] Clearing local state...')
+    logger.debug('[AuthContext] Clearing local state...')
     setUser(null)
     setSession(null)
     setLoading(false)
     
     // Use window.location for hard redirect to clear all client state
-    console.log('🔄 [AuthContext] Redirecting to login...')
+    logger.debug('[AuthContext] Redirecting to login...')
     window.location.href = '/auth/login'
   }
 
