@@ -82,10 +82,11 @@ export const searchListingsWithElasticsearch = async (
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(servicePayload),
+      signal: AbortSignal.timeout(5000), // 5 second timeout
     });
 
     if (!response.ok) {
-      console.error('❌ Elasticsearch API error:', response.status, response.statusText);
+      console.warn('⚠️ Elasticsearch service unavailable, using Supabase fallback');
       // Fallback to Supabase search
       return await searchListingsWithSupabase(params, currentUserId);
     }
@@ -123,7 +124,12 @@ export const searchListingsWithElasticsearch = async (
     return { data: sortedListings, total };
 
   } catch (error) {
-    console.error('❌ Unexpected error in Elasticsearch search:', error);
+    // Silent fallback for network errors (ES service not running)
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      console.log('🔄 Elasticsearch service not available, using Supabase');
+    } else {
+      console.error('❌ Unexpected error in Elasticsearch search:', error);
+    }
     // Fallback to Supabase search
     return await searchListingsWithSupabase(params, currentUserId);
   }

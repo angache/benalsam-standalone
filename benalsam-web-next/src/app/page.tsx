@@ -41,6 +41,8 @@ export default function HomePageV2() {
     maxPrice: searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')!) : null,
     location: searchParams.get('location') || null,
     urgency: searchParams.get('urgency') || null,
+    sortBy: searchParams.get('sortBy') || null,
+    searchQuery: searchParams.get('search') || null,
   })
 
   // Update URL params when filters change
@@ -54,9 +56,11 @@ export default function HomePageV2() {
     if (newFilters.maxPrice) params.set('maxPrice', newFilters.maxPrice.toString())
     if (newFilters.location) params.set('location', newFilters.location)
     if (newFilters.urgency) params.set('urgency', newFilters.urgency)
+    if (newFilters.sortBy) params.set('sortBy', newFilters.sortBy)
+    if (newFilters.searchQuery) params.set('search', newFilters.searchQuery)
     
     // Update URL without full page reload
-    const newUrl = params.toString() ? `/v2?${params.toString()}` : '/v2'
+    const newUrl = params.toString() ? `/?${params.toString()}` : '/'
     router.push(newUrl, { scroll: false })
   }, [router])
 
@@ -67,8 +71,10 @@ export default function HomePageV2() {
       maxPrice: null,
       location: null,
       urgency: null,
+      sortBy: null,
+      searchQuery: null,
     })
-    router.push('/v2', { scroll: false })
+    router.push('/', { scroll: false })
   }, [router])
 
   return (

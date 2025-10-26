@@ -1,15 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, memo, useMemo, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Plus, User, Menu, LogIn, LogOut, Settings, UserCircle, MessageCircle, FileText, Package, Heart, Users, MessageSquare, Send, Crown, Grid3x3, ChevronDown } from 'lucide-react'
+import { Search, Plus, User, Menu, LogIn, LogOut, Settings, UserCircle, MessageCircle, FileText, Package, Heart, Users, MessageSquare, Send, Crown, Grid3x3, ChevronDown, ArrowRight } from 'lucide-react'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { useNotifications } from '@/contexts/NotificationContext'
 import { useQuery } from '@tanstack/react-query'
 import { categoryService } from '@/services/categoryService'
+import { getCategoryIcon } from '@/lib/category-icons'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,8 +31,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { logger } from '@/utils/production-logger'
 
-export default function Header() {
+const Header = memo(function Header() {
   const router = useRouter()
+  const pathname = usePathname()
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   const { unreadCount, requestPermission } = useNotifications()
   const [searchQuery, setSearchQuery] = useState('')
@@ -44,32 +46,51 @@ export default function Header() {
     staleTime: 5 * 60 * 1000,
   })
 
-  const topCategories = categories?.filter(cat => cat.level === 0 && cat.is_active).slice(0, 6) || []
+  // Memoize filtered categories to prevent recalculation
+  const rootCategories = useMemo(
+    () => categories?.filter(cat => cat.level === 0 && cat.is_active) || [],
+    [categories]
+  )
 
-  logger.debug('[Header] Rendering with unreadCount', { unreadCount })
-
-  const handleLogout = async () => {
+  // Memoize handlers to prevent recreation on every render
+  const handleLogout = useCallback(async () => {
     await logout()
-  }
+  }, [logout])
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
       router.push(`/ara?q=${encodeURIComponent(searchQuery.trim())}`)
       setSearchQuery('')
     }
-  }
+  }, [searchQuery, router])
+
+  // Navigate only if not already on the page
+  const handleNavigate = useCallback((path: string) => {
+    logger.debug('[Header] handleNavigate called', { 
+      targetPath: path, 
+      currentPath: pathname,
+      willNavigate: pathname !== path 
+    })
+    
+    if (pathname !== path) {
+      logger.info('[Header] Navigating to', { from: pathname, to: path })
+      router.push(path)
+    } else {
+      logger.info('[Header] Already on target page, skipping navigation', { path })
+    }
+  }, [pathname, router])
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8 max-w-full mx-auto">
         {/* Logo & Category Menu */}
         <div className="flex items-center gap-4">
-          {/* Logo */}
-          <div 
-            className="flex items-center gap-2 cursor-pointer" 
-            onClick={() => router.push('/')}
-          >
+        {/* Logo */}
+        <div 
+          className="flex items-center gap-2 cursor-pointer" 
+          onClick={() => router.push('/')}
+        >
             <div className="h-8 w-8 rounded-lg" style={{backgroundColor: 'var(--secondary)'}}>
               <span className="text-white font-bold text-sm flex items-center justify-center h-full">B</span>
             </div>
@@ -87,33 +108,46 @@ export default function Header() {
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-80" align="start">
-              <DropdownMenuLabel>Popüler Kategoriler</DropdownMenuLabel>
+            <DropdownMenuContent className="w-[900px] max-w-[90vw]" align="start">
+              <DropdownMenuLabel className="text-base font-semibold py-3 px-4">
+                Popüler Kategoriler
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <div className="grid grid-cols-2 gap-1 p-2">
-                {topCategories.map((category) => (
-                  <DropdownMenuItem
-                    key={category.id}
-                    onClick={() => router.push(`/kategori/${category.slug || category.id}`)}
-                    className="cursor-pointer"
-                  >
-                    <span className="truncate">{category.name}</span>
-                    {category.listing_count && category.listing_count > 0 && (
-                      <span className="ml-auto text-xs text-muted-foreground">
-                        {category.listing_count}
-                      </span>
-                    )}
-                  </DropdownMenuItem>
-                ))}
+              <div className="grid grid-cols-4 gap-2 p-4 max-h-[500px] overflow-y-auto">
+                {rootCategories.map((category) => {
+                  const Icon = getCategoryIcon(category.name)
+                  return (
+                    <div
+                      key={category.id}
+                      onClick={() => router.push(`/kategori/${category.slug || category.id}`)}
+                      className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all hover:bg-accent group"
+                    >
+                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <Icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium truncate block group-hover:text-primary transition-colors">
+                          {category.name}
+                        </span>
+                        {category.listing_count && category.listing_count > 0 && (
+                          <span className="text-xs text-muted-foreground">
+                            {category.listing_count} ilan
+          </span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
+              <div 
                 onClick={() => router.push('/kategoriler')}
-                className="cursor-pointer font-medium"
+                className="p-3 cursor-pointer hover:bg-accent transition-colors flex items-center justify-center gap-2 font-medium"
                 style={{ color: 'var(--primary)' }}
               >
-                Tüm Kategoriler →
-              </DropdownMenuItem>
+                <span>Tüm Kategoriler</span>
+                <ArrowRight className="w-4 h-4" />
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -200,8 +234,8 @@ export default function Header() {
                   <UserCircle className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>Profilim</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/mesajlarim')}>
-                  <MessageCircle className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                <DropdownMenuItem onClick={() => handleNavigate('/mesajlarim-v2')}>
+                  <MessageCircle className="mr-2 h-4 w-4" style={{color: 'var(--primary)'}} />
                   <span className="flex items-center gap-2">
                     Mesajlarım
                     {unreadCount > 0 && (
@@ -211,54 +245,42 @@ export default function Header() {
                     )}
                   </span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/mesajlarim-v2')}>
-                  <MessageCircle className="mr-2 h-4 w-4" style={{color: 'var(--primary)'}} />
-                  <span className="flex items-center gap-2 flex-1">
-                    Mesajlarım 2.0
-                    <span className="text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-0.5 rounded-full">NEW</span>
-                    {unreadCount > 0 && (
-                      <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                        {unreadCount > 99 ? '99+' : unreadCount}
-                      </span>
-                    )}
-                  </span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/ilanlarim')}>
+                <DropdownMenuItem onClick={() => handleNavigate('/ilanlarim')}>
                   <FileText className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>İlanlarım</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/envanterim')}>
+                <DropdownMenuItem onClick={() => handleNavigate('/envanterim')}>
                   <Package className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>Envanterim</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/favorilerim')}>
+                <DropdownMenuItem onClick={() => handleNavigate('/favorilerim')}>
                   <Heart className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>Favorilerim</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/takip-ettiklerim')}>
+                <DropdownMenuItem onClick={() => handleNavigate('/takip-ettiklerim')}>
                   <Users className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>Takip Ettiklerim</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push('/alidigim-teklifler')}>
+                <DropdownMenuItem onClick={() => handleNavigate('/alidigim-teklifler')}>
                   <MessageSquare className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>Aldığım Teklifler</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/gonderdigim-teklifler')}>
+                <DropdownMenuItem onClick={() => handleNavigate('/gonderdigim-teklifler')}>
                   <Send className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>Gönderdiğim Teklifler</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push('/premium/dashboard')}>
+                <DropdownMenuItem onClick={() => handleNavigate('/premium/dashboard')}>
                   <Crown className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>Premium Dashboard</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/premium/settings')}>
+                <DropdownMenuItem onClick={() => handleNavigate('/premium/settings')}>
                   <Settings className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>Premium Ayarlar</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push('/ayarlar')}>
+                <DropdownMenuItem onClick={() => handleNavigate('/ayarlar')}>
                   <Settings className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>Ayarlar</span>
                 </DropdownMenuItem>
@@ -286,7 +308,7 @@ export default function Header() {
           {/* Mobile Menu */}
           <Sheet open={showMobileMenu} onOpenChange={setShowMobileMenu}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+          <Button variant="ghost" size="icon" className="md:hidden">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -346,7 +368,7 @@ export default function Header() {
                         className="w-full justify-start"
                         onClick={() => {
                           setShowMobileMenu(false)
-                          router.push('/mesajlarim-v2')
+                          handleNavigate('/mesajlarim-v2')
                         }}
                       >
                         <MessageCircle className="mr-2 h-4 w-4" />
@@ -362,7 +384,7 @@ export default function Header() {
                         className="w-full justify-start"
                         onClick={() => {
                           setShowMobileMenu(false)
-                          router.push('/ilanlarim')
+                          handleNavigate('/ilanlarim')
                         }}
                       >
                         <FileText className="mr-2 h-4 w-4" />
@@ -373,7 +395,7 @@ export default function Header() {
                         className="w-full justify-start"
                         onClick={() => {
                           setShowMobileMenu(false)
-                          router.push('/favorilerim')
+                          handleNavigate('/favorilerim')
                         }}
                       >
                         <Heart className="mr-2 h-4 w-4" />
@@ -388,24 +410,28 @@ export default function Header() {
                 {/* Categories */}
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-muted-foreground px-2">Kategoriler</p>
-                  {topCategories.map((category) => (
-                    <Button
-                      key={category.id}
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        setShowMobileMenu(false)
-                        router.push(`/kategori/${category.slug || category.id}`)
-                      }}
-                    >
-                      <span className="truncate">{category.name}</span>
-                      {category.listing_count && category.listing_count > 0 && (
-                        <span className="ml-auto text-xs text-muted-foreground">
-                          {category.listing_count}
-                        </span>
-                      )}
-                    </Button>
-                  ))}
+                  {rootCategories.slice(0, 8).map((category) => {
+                    const Icon = getCategoryIcon(category.name)
+                    return (
+                      <Button
+                        key={category.id}
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => {
+                          setShowMobileMenu(false)
+                          router.push(`/kategori/${category.slug || category.id}`)
+                        }}
+                      >
+                        <Icon className="w-4 h-4 mr-2 text-primary" />
+                        <span className="truncate">{category.name}</span>
+                        {category.listing_count && category.listing_count > 0 && (
+                          <span className="ml-auto text-xs text-muted-foreground">
+                            {category.listing_count}
+                          </span>
+                        )}
+                      </Button>
+                    )
+                  })}
                   <Button
                     variant="ghost"
                     className="w-full justify-start font-medium"
@@ -432,7 +458,7 @@ export default function Header() {
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Çıkış Yap
-                    </Button>
+          </Button>
                   </>
                 )}
               </div>
@@ -442,4 +468,6 @@ export default function Header() {
       </div>
     </header>
   )
-}
+})
+
+export default Header

@@ -1,11 +1,10 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { realtimeManager } from '@/lib/realtime-manager'
-import { REFRESH_INTERVAL } from '@/config/messaging'
 
 interface NotificationContextType {
   unreadCount: number
@@ -22,8 +21,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [permissionGranted, setPermissionGranted] = useState(false)
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
 
-  // Fetch unread count
-  const fetchUnreadCount = async () => {
+  // Fetch unread count - memoized to prevent recreation
+  const fetchUnreadCount = useCallback(async () => {
     if (!user?.id) return
 
     try {
@@ -40,7 +39,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       logger.error('[NotificationContext] Failed to fetch unread count', { error })
     }
-  }
+  }, [user?.id])
 
   // Update browser tab title
   const updateTabTitle = (count: number) => {
@@ -99,13 +98,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       setPermissionGranted(Notification.permission === 'granted')
     }
 
-    // Initial fetch
+    // Initial fetch (only once)
     fetchUnreadCount()
 
-    // Refresh periodically
-    const interval = setInterval(fetchUnreadCount, REFRESH_INTERVAL)
-
-    // Subscribe to realtime updates using global manager
+    // Subscribe to realtime updates using global manager (no polling needed!)
     logger.debug('[NotificationContext] Setting up realtime for user', { userId: user.id })
     
     const unsubscribe = realtimeManager.on('message:new', async ({ conversationId, message }) => {
@@ -145,10 +141,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     })
 
     return () => {
-      clearInterval(interval)
+      // Cleanup realtime subscription
       unsubscribe()
     }
-  }, [user?.id, permissionGranted])
+  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  // fetchUnreadCount is stable (useCallback with user?.id dependency)
 
   const value = {
     unreadCount,

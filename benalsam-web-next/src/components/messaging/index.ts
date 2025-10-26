@@ -9,6 +9,8 @@ export { ConversationListItem } from './ConversationListItem'
 export { ChatHeader } from './ChatHeader'
 export { MessageInput } from './MessageInput'
 export { UnreadBadge } from './UnreadBadge'
+export { ConversationList } from './ConversationList'
+export { ChatArea } from './ChatArea'
 
 export default {
   MessageBubble,
@@ -16,5 +18,7 @@ export default {
   ChatHeader,
   MessageInput,
   UnreadBadge,
+  ConversationList,
+  ChatArea,
 }
 

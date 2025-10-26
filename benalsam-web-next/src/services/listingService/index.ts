@@ -8,8 +8,9 @@ import * as core from './core'
 
 export const listingService = {
   // Core fetching functions
-  getListings: fetchers.fetchListings, // ES + Supabase fallback
-  getFilteredListings: fetchers.fetchFilteredListings, // Advanced Supabase RPC search
+  getListings: fetchers.fetchListings, // ES + Supabase fallback (simple)
+  getListingsWithFilters: fetchers.fetchListingsWithFilters, // ES + Supabase fallback (with filters)
+  getFilteredListings: fetchers.fetchFilteredListings, // Advanced Supabase RPC search (legacy)
   getSingleListing: fetchers.fetchSingleListing,
   getPopularListings: fetchers.fetchPopularListings,
   getMostOfferedListings: fetchers.fetchMostOfferedListings,

@@ -36,25 +36,46 @@ export default function FilteredListings({ filters }: FilteredListingsProps) {
     queryFn: async ({ pageParam = 1 }) => {
       console.log('🔍 [FilteredListings] Fetching page:', pageParam, 'with filters:', filters)
       
-      // Convert filters to listingService format
-      const result = await listingService.getFilteredListings(
+      // Determine sort field and order based on sortBy filter
+      let sortBy = 'created_at'
+      let sortOrder: 'asc' | 'desc' = 'desc'
+      
+      if (filters.sortBy === 'newest') {
+        sortBy = 'created_at'
+        sortOrder = 'desc'
+      } else if (filters.sortBy === 'cheapest') {
+        sortBy = 'budget'
+        sortOrder = 'asc'
+      } else if (filters.sortBy === 'expensive') {
+        sortBy = 'budget'
+        sortOrder = 'desc'
+      } else if (filters.sortBy === 'popular') {
+        sortBy = 'view_count'
+        sortOrder = 'desc'
+      }
+      
+      // Use ES + Supabase fallback with filters
+      const result = await listingService.getListingsWithFilters(
+        user?.id || null,
         {
-          category: filters.categoryId || undefined,
-          minBudget: filters.minPrice || undefined,
-          maxBudget: filters.maxPrice || undefined,
+          search: filters.searchQuery || undefined,
+          categoryId: filters.categoryId || undefined,
+          minPrice: filters.minPrice || undefined,
+          maxPrice: filters.maxPrice || undefined,
           location: filters.location || undefined,
           urgency: filters.urgency || undefined,
-          sortBy: 'created_at',
-          sortOrder: 'desc',
+          sortBy,
+          sortOrder,
         },
-        user?.id || null,
-        pageParam,
-        12 // 12 listings per page
+        {
+          page: pageParam,
+          limit: 12
+        }
       )
 
       return {
         listings: result.listings,
-        totalCount: result.totalCount,
+        totalCount: result.total,
         page: pageParam,
       }
     },

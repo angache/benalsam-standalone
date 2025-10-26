@@ -93,6 +93,138 @@ export const fetchListings = async (
   }
 };
 
+/**
+ * Fetch listings with advanced filters (ES + Supabase fallback)
+ */
+export const fetchListingsWithFilters = async (
+  currentUserId: string | null = null,
+  filters: {
+    search?: string;
+    categoryId?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    location?: string;
+    urgency?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  } = {},
+  options: { page?: number; limit?: number } = {}
+): Promise<{ listings: Listing[]; total: number; hasMore: boolean }> => {
+  try {
+    const { page = 1, limit = 12 } = options;
+    console.log('🔍 fetchListingsWithFilters - Filters:', filters, 'Page:', page);
+    
+    // Elasticsearch search params
+    const searchParams = {
+      query: filters.search || '',
+      filters: {
+        category_id: filters.categoryId,
+        location: filters.location,
+        minBudget: filters.minPrice,
+        maxBudget: filters.maxPrice,
+        urgency: filters.urgency,
+      },
+      sort: {
+        field: filters.sortBy || 'created_at',
+        order: filters.sortOrder || 'desc' as 'asc' | 'desc'
+      },
+      page,
+      limit
+    };
+
+    const result = await searchListingsWithElasticsearch(searchParams, currentUserId);
+    
+    if (result.data && result.data.length > 0) {
+      // Check source from debug flag (set in dev mode)
+      const source = (result.data[0] as any)?.__src === 'S' ? 'Supabase' : 
+                     (result.data[0] as any)?.__src === 'E' ? 'Elasticsearch' : 'Unknown';
+      console.log(`✅ fetchListings - Found ${result.data.length} listings from ${source}, total:`, result.total);
+      return {
+        listings: result.data,
+        total: result.total || 0,
+        hasMore: result.data.length === limit
+      };
+    }
+
+    // Fallback to Supabase WITH FILTERS
+    console.log('⚠️ fetchListingsWithFilters - ES failed, using Supabase fallback with filters');
+    
+    const offset = (page - 1) * limit;
+    
+    // Build Supabase query with ALL filters
+    let query = supabase
+      .from('listings')
+      .select('*', { count: 'exact' })
+      .eq('status', 'active')
+      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
+
+    // Apply search filter
+    if (filters.search) {
+      query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+    }
+    
+    // Apply category filter
+    if (filters.categoryId) {
+      query = query.eq('category_id', filters.categoryId);
+    }
+    
+    // Apply price range filters
+    if (filters.minPrice) {
+      query = query.gte('budget', filters.minPrice);
+    }
+    if (filters.maxPrice) {
+      query = query.lte('budget', filters.maxPrice);
+    }
+    
+    // Apply location filter
+    if (filters.location) {
+      query = query.ilike('location', `%${filters.location}%`);
+    }
+    
+    // Apply urgency filter
+    if (filters.urgency) {
+      query = query.eq('urgency', filters.urgency);
+    }
+
+    // Apply sorting
+    const sortField = filters.sortBy || 'created_at';
+    const sortAscending = filters.sortOrder === 'asc';
+    query = addPremiumSorting(query).order(sortField, { ascending: sortAscending });
+
+    // Apply pagination
+    query = query.range(offset, offset + limit - 1);
+
+    const { data: listingsData, error: listingsError, count: totalCount } = await query;
+
+    if (listingsError) {
+      console.error('Error fetching listings from Supabase:', listingsError);
+      toast({ title: "Veri Hatası", description: "İlanlar yüklenirken bir sorun oluştu.", variant: "destructive" });
+      return { listings: [], total: 0, hasMore: false };
+    }
+
+    const processedListings = await processFetchedListings(listingsData || [], currentUserId);
+    
+    // Mark source for debug
+    if (process.env.NODE_ENV !== 'production') {
+      (processedListings as any[]).forEach(l => { try { (l as any).__src = 'S'; } catch (_) {} });
+      incrementSourceCount('S', (processedListings as any[]).length);
+    }
+    
+    console.log(`✅ fetchListingsWithFilters - Got ${processedListings.length} from Supabase (total: ${totalCount})`);
+    
+    return {
+      listings: processedListings,
+      total: totalCount || 0,
+      hasMore: offset + limit < (totalCount || 0)
+    };
+
+  } catch (e) {
+    console.error('Unexpected error in fetchListingsWithFilters:', e);
+    toast({ title: "Beklenmedik Hata", description: "İlanlar yüklenirken bir sorun oluştu.", variant: "destructive" });
+    return { listings: [], total: 0, hasMore: false };
+  }
+};
+
 export const fetchSingleListing = async (listingId: string, currentUserId: string | null = null): Promise<Listing | null> => {
   try {
     // Try Elasticsearch first

@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotifications } from '@/contexts/NotificationContext';
-import { useConversations } from '@/hooks/useMessaging';
 import { supabase } from '@/lib/supabase';
 import { MessagingErrorBoundary } from '@/components/ErrorBoundary';
 import { ConversationList } from '@/components/messaging/ConversationList';
@@ -36,20 +35,13 @@ interface ConversationPreview {
 export default function MessagesV2Page() {
   console.log('🔴 [MessagesV2Page] Main page rendering...');
 
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const { setActiveConversation, refreshUnreadCount } = useNotifications();
   
+  const [conversations, setConversations] = useState<ConversationPreview[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
-
-  // React Query - auto cached!
-  const { data: conversations = [], isLoading: loadingConversations } = useConversations(user?.id);
-
-  console.log('🔴 [MessagesV2Page] Query state', {
-    conversationsCount: conversations.length,
-    isLoading: loadingConversations,
-    isCached: !loadingConversations && conversations.length > 0
-  });
 
   // Update active conversation for notifications
   useEffect(() => {
@@ -59,10 +51,28 @@ export default function MessagesV2Page() {
     };
   }, [selectedConversationId, setActiveConversation]);
 
-  // Subscribe to realtime updates (still needed for instant updates)
+  // Fetch conversations list
   useEffect(() => {
     if (!user?.id) return;
 
+    const fetchConversationsList = async (silent = false) => {
+      try {
+        if (!silent) setLoading(true);
+        const response = await fetch(`/api/messages?userId=${user.id}`);
+        if (!response.ok) throw new Error('Mesajlar yüklenemedi');
+
+        const { data } = await response.json();
+        setConversations(data || []);
+      } catch (err) {
+        console.error('❌ [MessagesV2] Error fetching conversations:', err);
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    };
+
+    fetchConversationsList(false);
+
+    // Subscribe to new messages to refresh conversation list (silently)
     const channel = supabase
       .channel('conversations-list')
       .on(
@@ -72,9 +82,16 @@ export default function MessagesV2Page() {
           schema: 'public',
           table: 'messages',
         },
-        async () => {
-          // React Query will automatically refetch and update cache
-          console.log('📨 [MessagesV2Page] New message detected, cache will auto-update');
+        async (payload) => {
+          const newMessage = payload.new as any;
+          
+          if (newMessage?.conversation_id === selectedConversationId) {
+            setTimeout(async () => {
+              await fetchConversationsList(true);
+            }, 1000);
+          } else {
+            await fetchConversationsList(true);
+          }
         }
       )
       .subscribe();
@@ -82,7 +99,7 @@ export default function MessagesV2Page() {
     return () => {
       channel.unsubscribe();
     };
-  }, [user?.id]);
+  }, [user?.id, selectedConversationId]);
 
   // Filter conversations based on search
   const filteredConversations = useMemo(() => {
@@ -111,7 +128,7 @@ export default function MessagesV2Page() {
     refreshUnreadCount();
   }, [refreshUnreadCount]);
 
-  if (authLoading || !user) {
+  if (isLoading || !user) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>
