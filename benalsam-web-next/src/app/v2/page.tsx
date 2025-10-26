@@ -39,9 +39,7 @@ export default function HomePageV2() {
 
       {/* Popular Categories */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Suspense fallback={<div className="h-64 bg-muted animate-pulse rounded-lg" />}>
-          <PopularCategories />
-        </Suspense>
+        <PopularCategories />
       </section>
 
       {/* Feature Cards */}
@@ -53,9 +51,7 @@ export default function HomePageV2() {
 
       {/* Featured Listings */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Suspense fallback={<div className="h-96 bg-muted animate-pulse rounded-lg" />}>
-          <FeaturedListings />
-        </Suspense>
+        <FeaturedListings />
       </section>
     </div>
   )

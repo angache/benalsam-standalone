@@ -61,11 +61,13 @@ export default function PopularCategories() {
         <h2 className="text-2xl md:text-3xl font-bold mb-6 text-foreground">
           Popüler Kategoriler
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="bg-card border rounded-lg p-4">
-              <div className="w-12 h-12 mx-auto mb-3 bg-muted rounded-lg animate-pulse" />
-              <div className="h-4 bg-muted rounded animate-pulse" />
+            <div key={i} className="group cursor-pointer bg-card border rounded-lg p-4 text-center">
+              <div className="w-12 h-12 mx-auto mb-3 bg-primary/10 rounded-lg flex items-center justify-center">
+                <div className="w-6 h-6 bg-muted rounded animate-pulse" />
+              </div>
+              <div className="h-4 bg-muted rounded animate-pulse mx-auto w-20" />
             </div>
           ))}
         </div>

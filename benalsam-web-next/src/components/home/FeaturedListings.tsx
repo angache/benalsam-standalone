@@ -11,6 +11,7 @@ import { listingService } from '@/services/listingService'
 import ListingCard from '@/components/ListingCard'
 import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { supabase } from '@/lib/supabase'
 
 interface FeaturedListingsProps {
   title?: string
@@ -23,20 +24,69 @@ export default function FeaturedListings({
 }: FeaturedListingsProps) {
   const { user } = useAuth()
 
-  const { data, isLoading } = useQuery({
+  const { data: listings, isLoading, error } = useQuery({
     queryKey: ['featured-listings', limit, user?.id],
     queryFn: async () => {
-      // Use Elasticsearch + Supabase fallback (same as old system)
-      const result = await listingService.fetchListings(user?.id || null, { 
-        page: 1, 
-        limit 
-      })
-      return result
+      console.log('🔍 [FeaturedListings] Starting fetch...', { limit, userId: user?.id })
+      
+      try {
+        // Try Elasticsearch first
+        try {
+          const result = await listingService.fetchListings(user?.id || null, { 
+            page: 1, 
+            limit 
+          })
+          
+          if (result?.listings && result.listings.length > 0) {
+            console.log('✅ [FeaturedListings] Got from Elasticsearch:', result.listings.length)
+            return result.listings
+          }
+          
+          console.log('⚠️ [FeaturedListings] Elasticsearch returned empty, trying Supabase...')
+        } catch (esError) {
+          console.warn('⚠️ [FeaturedListings] Elasticsearch failed:', esError)
+        }
+        
+        // Fallback to Supabase
+        console.log('🔄 [FeaturedListings] Using Supabase fallback...')
+        const { data, error: supabaseError } = await supabase
+          .from('listings')
+          .select(`
+            *,
+            profiles!listings_user_id_fkey (
+              id,
+              name,
+              avatar_url,
+              rating,
+              trust_score
+            )
+          `)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(limit)
+        
+        if (supabaseError) {
+          console.error('❌ [FeaturedListings] Supabase error:', supabaseError)
+          throw supabaseError
+        }
+        
+        console.log('✅ [FeaturedListings] Got from Supabase:', data?.length || 0)
+        return data || []
+        
+      } catch (err) {
+        console.error('❌ [FeaturedListings] Total failure:', err)
+        throw err
+      }
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 1,
   })
-
-  const listings = data?.listings || []
+  
+  console.log('📊 [FeaturedListings] Render:', { 
+    isLoading, 
+    hasError: !!error, 
+    count: listings?.length || 0 
+  })
 
   if (isLoading) {
     return (
