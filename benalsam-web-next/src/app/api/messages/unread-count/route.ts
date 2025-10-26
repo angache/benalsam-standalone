@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { logger } from '@/utils/production-logger';
+import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,6 +13,15 @@ export async function GET(request: NextRequest) {
         { error: 'User ID is required' },
         { status: 400 }
       );
+    }
+
+    // Rate limiting - 60 requests per minute per user
+    const identifier = getClientIdentifier(request, userId);
+    const allowed = await rateLimiters.messaging.check(identifier);
+    
+    if (!allowed) {
+      logger.warn('[API] Rate limit exceeded', { identifier, endpoint: 'unread-count' });
+      return rateLimitExceeded();
     }
 
     // Get all conversations where user is participant

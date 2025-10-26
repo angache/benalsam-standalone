@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { getServerUser } from '@/lib/supabase-server'
+import { logger } from '@/utils/production-logger'
+import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
 
 /**
  * POST /api/messages/mark-read
@@ -15,6 +17,15 @@ export async function POST(request: NextRequest) {
         { success: false, error: 'Unauthorized' },
         { status: 401 }
       )
+    }
+
+    // Rate limiting - 60 requests per minute per user
+    const identifier = getClientIdentifier(request, user.id)
+    const allowed = await rateLimiters.messaging.check(identifier)
+    
+    if (!allowed) {
+      logger.warn('[API] Rate limit exceeded', { identifier, endpoint: 'mark-read' })
+      return rateLimitExceeded()
     }
 
     const { conversationId } = await request.json()
@@ -39,7 +50,7 @@ export async function POST(request: NextRequest) {
       .eq('is_read', false)
 
     if (error) {
-      console.error('Error marking messages as read:', error)
+      logger.error('[API] Error marking messages as read', { error, conversationId, userId: user.id })
       return NextResponse.json(
         { success: false, error: 'Failed to mark messages as read' },
         { status: 500 }
@@ -51,7 +62,7 @@ export async function POST(request: NextRequest) {
       message: 'Messages marked as read'
     })
   } catch (error: any) {
-    console.error('API Error:', error)
+    logger.error('[API] mark-read error', { error })
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

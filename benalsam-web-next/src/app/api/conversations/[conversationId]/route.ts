@@ -1,20 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { logger } from '@/utils/production-logger';
+import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit';
+import { getServerUser } from '@/lib/supabase-server';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { conversationId: string } }
 ) {
   try {
-    const startTime = performance.now();
     const { conversationId } = params;
-    console.log('📞 [API] GET /conversations/[conversationId]', { conversationId });
+    logger.startTimer('[API] GET /conversations/[conversationId]');
 
     if (!conversationId) {
       return NextResponse.json(
         { error: 'Conversation ID is required' },
         { status: 400 }
       );
+    }
+
+    // Rate limiting - Check user or IP
+    const user = await getServerUser();
+    const identifier = getClientIdentifier(request, user?.id);
+    const allowed = await rateLimiters.messaging.check(identifier);
+    
+    if (!allowed) {
+      logger.warn('[API] Rate limit exceeded', { identifier, endpoint: 'conversation-detail' });
+      return rateLimitExceeded();
     }
 
     if (!supabaseAdmin) {
@@ -25,7 +37,6 @@ export async function GET(
     }
 
     // Fetch conversation details - use admin client to bypass RLS
-    const queryStart = performance.now();
     const { data: conversation, error: convError } = await supabaseAdmin
       .from('conversations')
       .select(`
@@ -49,24 +60,22 @@ export async function GET(
       .eq('id', conversationId)
       .single();
 
-    console.log(`⏱️ [API] Supabase query took ${(performance.now() - queryStart).toFixed(0)}ms`);
+    logger.endTimer('[API] GET /conversations/[conversationId]');
 
     if (convError) {
-      console.error('❌ [API] Error fetching conversation:', convError);
+      logger.error('[API] Error fetching conversation', { error: convError, conversationId });
       return NextResponse.json(
         { error: 'Failed to fetch conversation details' },
         { status: 500 }
       );
     }
-
-    console.log(`✅ [API] Total request took ${(performance.now() - startTime).toFixed(0)}ms`);
     
     return NextResponse.json({
       success: true,
       data: conversation
     });
   } catch (error) {
-    console.error('❌ [API] Error:', error);
+    logger.error('[API] conversation-detail error', { error, params });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
