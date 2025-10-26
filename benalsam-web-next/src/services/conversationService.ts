@@ -333,7 +333,11 @@ export const subscribeToMessages = (conversationId: string, onNewMessage: (messa
   if (!conversationId || !onNewMessage) return null;
 
   const channel = supabase
-    .channel(`messages:${conversationId}`)
+    .channel(`messages:${conversationId}`, {
+      config: {
+        broadcast: { self: true }
+      }
+    })
     .on(
       'postgres_changes',
       {
@@ -364,8 +368,18 @@ export const subscribeToMessages = (conversationId: string, onNewMessage: (messa
         }
       }
     )
-    .subscribe((status) => {
-      console.log(`📡 [subscribeToMessages] Subscription status: ${status}`, { conversationId });
+    .subscribe((status, err) => {
+      if (status === 'SUBSCRIBED') {
+        console.log(`✅ [subscribeToMessages] Connected`, { conversationId });
+      } else if (status === 'CHANNEL_ERROR') {
+        console.error(`❌ [subscribeToMessages] Channel error:`, err, { conversationId });
+      } else if (status === 'TIMED_OUT') {
+        console.error(`⏱️ [subscribeToMessages] Connection timed out`, { conversationId });
+      } else if (status === 'CLOSED') {
+        console.warn(`🔌 [subscribeToMessages] Connection closed`, { conversationId });
+      } else {
+        console.log(`📡 [subscribeToMessages] Status: ${status}`, { conversationId });
+      }
     });
 
   return channel;

@@ -6,9 +6,11 @@ export async function GET(
   { params }: { params: { conversationId: string } }
 ) {
   try {
+    const startTime = performance.now();
     const { conversationId } = params;
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
+    console.log('📞 [API] GET /conversations/[conversationId]/messages', { conversationId, limit });
 
     if (!conversationId) {
       return NextResponse.json(
@@ -25,6 +27,7 @@ export async function GET(
     }
 
     // Fetch messages - use admin client to bypass RLS
+    const queryStart = performance.now();
     const { data: messages, error } = await supabaseAdmin
       .from('messages')
       .select(`
@@ -35,20 +38,24 @@ export async function GET(
       .order('created_at', { ascending: true })
       .limit(limit);
 
+    console.log(`⏱️ [API] Supabase query took ${(performance.now() - queryStart).toFixed(0)}ms`, { count: messages?.length || 0 });
+
     if (error) {
-      console.error('Error fetching messages:', error);
+      console.error('❌ [API] Error fetching messages:', error);
       return NextResponse.json(
         { error: 'Failed to fetch messages' },
         { status: 500 }
       );
     }
 
+    console.log(`✅ [API] Total request took ${(performance.now() - startTime).toFixed(0)}ms`);
+
     return NextResponse.json({
       success: true,
       data: messages || []
     });
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('❌ [API] Error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

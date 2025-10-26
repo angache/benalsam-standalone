@@ -58,21 +58,54 @@ export default function MessagesV2Page() {
     }
   }, [sending]);
 
+  // Handle page visibility change (tab becomes visible again)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && selectedConversationId && user?.id) {
+        console.log('👁️ [MessagesV2] Page became visible, refreshing messages...');
+        
+        // Refresh messages when tab becomes active again
+        fetchMessages(selectedConversationId, 100)
+          .then(messagesData => {
+            setMessages(messagesData);
+            console.log('✅ [MessagesV2] Messages refreshed on visibility change');
+          })
+          .catch(err => {
+            console.error('❌ [MessagesV2] Failed to refresh messages:', err);
+          });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [selectedConversationId, user?.id]);
+
   // Fetch conversations list
   useEffect(() => {
-    if (!user?.id) return;
+    console.log('🔄 [MessagesV2] Conversations list useEffect triggered', {
+      hasUser: !!user,
+      userId: user?.id,
+      timestamp: new Date().toISOString()
+    });
+
+    if (!user?.id) {
+      console.log('⚠️ [MessagesV2] Skipping conversations - no user');
+      return;
+    }
 
     const fetchConversationsList = async () => {
       try {
+        console.log('📞 [MessagesV2] Fetching conversations list...');
         setLoading(true);
         const response = await fetch(`/api/messages?userId=${user.id}`);
         if (!response.ok) throw new Error('Mesajlar yüklenemedi');
 
         const { data } = await response.json();
+        console.log('✅ [MessagesV2] Conversations loaded:', { count: data?.length || 0 });
         setConversations(data || []);
         setFilteredConversations(data || []);
       } catch (err) {
-        console.error('Error fetching conversations:', err);
+        console.error('❌ [MessagesV2] Error fetching conversations:', err);
       } finally {
         setLoading(false);
       }
@@ -101,44 +134,86 @@ export default function MessagesV2Page() {
 
   // Load selected conversation messages
   useEffect(() => {
-    if (!selectedConversationId || !user?.id) return;
+    console.log('🔄 [MessagesV2] useEffect triggered', {
+      selectedConversationId,
+      hasUser: !!user,
+      userId: user?.id,
+      timestamp: new Date().toISOString()
+    });
+
+    if (!selectedConversationId || !user?.id) {
+      console.log('⚠️ [MessagesV2] Skipping - no conversation or user');
+      return;
+    }
+
+    console.log('⏱️ [MessagesV2] Starting conversation load...', { conversationId: selectedConversationId });
 
     const loadConversationMessages = async () => {
       try {
         setLoadingMessages(true);
+        const totalStart = performance.now();
 
-        const convData = await fetchConversationDetails(selectedConversationId);
+        console.log('📞 [MessagesV2] Fetching conversation & messages in parallel...');
+        
+        // Fetch conversation details and messages in parallel
+        const [convData, messagesData] = await Promise.all([
+          fetchConversationDetails(selectedConversationId),
+          fetchMessages(selectedConversationId, 100)
+        ]);
+
+        console.log(`✅ [MessagesV2] Parallel fetch completed in ${(performance.now() - totalStart).toFixed(0)}ms`, {
+          hasConversation: !!convData,
+          messageCount: messagesData.length
+        });
+        
         if (!convData) throw new Error('Sohbet bulunamadı');
         setSelectedConversation(convData);
-
-        const messagesData = await fetchMessages(selectedConversationId, 100);
         setMessages(messagesData);
 
-        markMessagesAsRead(selectedConversationId, user.id).catch(() => {});
+        // Mark as read (non-blocking)
+        console.log('📞 [MessagesV2] Marking messages as read...');
+        markMessagesAsRead(selectedConversationId, user.id).catch((err) => {
+          console.error('⚠️ [MessagesV2] Mark as read failed:', err);
+        });
       } catch (err) {
-        console.error('Error loading conversation:', err);
+        console.error('❌ [MessagesV2] Error loading conversation:', err);
       } finally {
         setLoadingMessages(false);
+        console.log('✅ [MessagesV2] Loading complete');
       }
     };
 
     loadConversationMessages();
 
     // Subscribe to new messages
+    console.log('📡 [MessagesV2] Setting up realtime subscription...');
     const channel = subscribeToMessages(selectedConversationId, (newMsg) => {
+      console.log('📨 [MessagesV2] New message received:', {
+        messageId: newMsg.id,
+        senderId: newMsg.sender_id,
+        isOwnMessage: newMsg.sender_id === user.id
+      });
+      
       setMessages(prev => {
-        if (prev.some(msg => msg.id === newMsg.id)) return prev;
+        if (prev.some(msg => msg.id === newMsg.id)) {
+          console.log('⚠️ [MessagesV2] Duplicate message, skipping');
+          return prev;
+        }
         return [...prev, newMsg];
       });
+      
       if (newMsg.sender_id !== user.id) {
+        console.log('📞 [MessagesV2] Marking new message as read...');
         markMessagesAsRead(selectedConversationId, user.id).catch(() => {});
       }
     });
 
     return () => {
+      console.log('🔌 [MessagesV2] Cleaning up - unsubscribing from realtime');
       if (channel) channel.unsubscribe();
     };
-  }, [selectedConversationId, user?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedConversationId]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !user?.id || !selectedConversationId) return;
@@ -198,7 +273,10 @@ export default function MessagesV2Page() {
   return (
     <div className="h-screen flex bg-white dark:bg-black">
       {/* LEFT SIDEBAR - Conversations List */}
-      <div className="w-full md:w-96 border-r border-gray-200 dark:border-gray-800 flex flex-col">
+      <div className={`
+        w-full md:w-96 border-r border-gray-200 dark:border-gray-800 flex flex-col
+        ${selectedConversationId ? 'hidden md:flex' : 'flex'}
+      `}>
         {/* Header */}
         <div className="border-b border-gray-200 dark:border-gray-800 p-4">
           <div className="flex items-center justify-between mb-4">
@@ -261,8 +339,8 @@ export default function MessagesV2Page() {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline justify-between gap-2 mb-1">
-                      <p className={`text-sm truncate ${isUnread ? 'font-bold' : 'font-normal'}`}>
+                    <div className="flex items-baseline justify-between gap-2 mb-0.5">
+                      <p className={`text-sm truncate ${isUnread ? 'font-bold' : 'font-semibold'}`}>
                         {conv.otherUser?.name || 'Kullanıcı'}
                       </p>
                       {conv.lastMessage && (
@@ -272,9 +350,35 @@ export default function MessagesV2Page() {
                       )}
                     </div>
                     
+                    {/* Listing info with role indicator */}
+                    {conv.listing && (
+                      <p className="text-xs truncate mb-1 flex items-center gap-1.5">
+                        {/* Role badge */}
+                        {conv.listing.user_id === user?.id ? (
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 flex-shrink-0">
+                            <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd"/>
+                            </svg>
+                            Satıcı
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 flex-shrink-0">
+                            <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clipRule="evenodd"/>
+                            </svg>
+                            Alıcı
+                          </span>
+                        )}
+                        <span className="text-gray-600 dark:text-gray-400 truncate">
+                          {conv.listing.title}
+                        </span>
+                      </p>
+                    )}
+                    
                     {conv.lastMessage && (
                       <p className={`
-                        text-sm truncate
+                        text-xs truncate
                         ${isUnread ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-500 dark:text-gray-400'}
                       `}>
                         {conv.lastMessage.sender_id === user?.id && 'Siz: '}
@@ -292,7 +396,10 @@ export default function MessagesV2Page() {
       </div>
 
       {/* RIGHT PANEL - Chat Area */}
-      <div className="hidden md:flex flex-1 flex-col">
+      <div className={`
+        flex-1 flex-col
+        ${selectedConversationId ? 'flex' : 'hidden md:flex'}
+      `}>
         {!selectedConversationId ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
             <MessageCircle className="w-24 h-24 text-gray-300 dark:text-gray-600 mb-4" />
@@ -308,8 +415,18 @@ export default function MessagesV2Page() {
         ) : (
           <>
             {/* Chat Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+            <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
               <div className="flex items-center gap-3 flex-1 min-w-0">
+                {/* Back Button - Mobile Only */}
+                <button
+                  onClick={() => setSelectedConversationId(null)}
+                  className="md:hidden p-2 -ml-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+
                 <Avatar className="w-10 h-10">
                   <AvatarImage src={otherUser?.avatar_url || ''} alt={otherUser?.name} />
                   <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white">
@@ -415,7 +532,7 @@ export default function MessagesV2Page() {
             </div>
 
             {/* Input Area */}
-            <div className="border-t border-gray-200 dark:border-gray-800 px-6 py-3">
+            <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 px-6 py-3 bg-white dark:bg-black">
               <div className="flex items-center gap-3">
                 <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors flex-shrink-0">
                   <Smile className="w-6 h-6 text-gray-600 dark:text-gray-400" />

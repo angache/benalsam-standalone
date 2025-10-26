@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         *,
         user1:profiles!conversations_user1_id_fkey(id, name, avatar_url),
         user2:profiles!conversations_user2_id_fkey(id, name, avatar_url),
-        listing:listings!conversations_listing_id_fkey(id, title),
+        listing:listings!conversations_listing_id_fkey(id, title, user_id),
         messages(content, created_at, sender_id, is_read)
       `)
       .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)

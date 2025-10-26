@@ -29,6 +29,6 @@ export interface Conversation {
   last_message_at?: string;
   user1?: UserProfile;
   user2?: UserProfile;
-  listing?: Pick<Listing, 'id' | 'title'>;
+  listing?: Pick<Listing, 'id' | 'title' | 'user_id'>;
   last_message?: Message;
 } 

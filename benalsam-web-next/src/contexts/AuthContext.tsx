@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import type { LoginCredentials, User } from '@/types/auth'
 import { supabase } from '@/lib/supabase'
@@ -24,6 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [initialized, setInitialized] = useState(false)
+  const fetchedUserIds = useRef<Set<string>>(new Set())
 
   // Initialize auth state and listen for changes
   useEffect(() => {
@@ -91,19 +92,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Fetch full user profile from database
   const fetchUserProfile = async (userId: string) => {
+    // Skip if already fetched this user OR if already fetching
+    if (fetchedUserIds.current.has(userId)) {
+      console.log('⚡ [AuthContext] Profile already cached, skipping fetch', { userId })
+      return
+    }
+
+    // Mark as being fetched immediately to prevent race condition
+    fetchedUserIds.current.add(userId)
+
     try {
+      console.log('📞 [AuthContext] Fetching user profile...', { userId })
+      const startTime = performance.now()
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single()
 
+      console.log(`⏱️ [AuthContext] Profile fetch completed in ${(performance.now() - startTime).toFixed(0)}ms`)
+
       if (error) {
-        console.error('Error fetching profile:', error)
+        console.error('❌ [AuthContext] Error fetching profile:', error)
+        fetchedUserIds.current.delete(userId) // Remove on error so retry is possible
         return
       }
 
       if (data) {
+        console.log('✅ [AuthContext] Profile loaded:', { name: data.name, email: data.email })
         setUser({
           id: data.id,
           email: data.email,
@@ -121,9 +138,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           created_at: data.created_at,
           updated_at: data.updated_at,
         } as User)
+        console.log('✅ [AuthContext] User state updated')
+      } else {
+        console.warn('⚠️ [AuthContext] Profile data is null')
+        fetchedUserIds.current.delete(userId)
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error)
+      console.error('❌ [AuthContext] Error fetching user profile:', error)
+      fetchedUserIds.current.delete(userId)
     }
   }
 
