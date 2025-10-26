@@ -330,6 +330,34 @@ export const markMessagesAsRead = async (
   }
 };
 
+// User profile cache to avoid N+1 queries
+const userProfileCache = new Map<string, { id: string; name: string; avatar_url: string | null }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// Helper to get or fetch user profile
+async function getUserProfile(userId: string) {
+  const cached = userProfileCache.get(userId);
+  if (cached) return cached;
+
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, name, avatar_url')
+      .eq('id', userId)
+      .single();
+
+    if (!error && data) {
+      userProfileCache.set(userId, data);
+      // Auto-expire cache after TTL
+      setTimeout(() => userProfileCache.delete(userId), CACHE_TTL);
+      return data;
+    }
+  } catch (err) {
+    console.error('Error fetching user profile:', err);
+  }
+  return null;
+}
+
 export const subscribeToMessages = (conversationId: string, onNewMessage: (message: Message) => void) => {
   if (!conversationId || !onNewMessage) return null;
 
@@ -350,22 +378,23 @@ export const subscribeToMessages = (conversationId: string, onNewMessage: (messa
       async (payload) => {
         console.log('🔔 INSERT event received:', payload);
         
-        const { data: messageWithSender, error } = await supabase
-          .from('messages')
-          .select(`
-            *,
-            sender:profiles!sender_id(id, name, avatar_url)
-          `)
-          .eq('id', payload.new.id)
-          .single();
-
-        if (error) {
-          console.error('❌ Error fetching message with sender:', error);
-        } else if (messageWithSender) {
+        // Use payload data directly and fetch sender from cache
+        const newMessage = payload.new as any;
+        
+        // Get sender profile (from cache or fetch)
+        const sender = await getUserProfile(newMessage.sender_id);
+        
+        if (sender) {
+          const messageWithSender = {
+            ...newMessage,
+            sender
+          };
           console.log('✅ New message received:', messageWithSender);
           onNewMessage(messageWithSender);
         } else {
-          console.warn('⚠️ Message received but no data:', payload);
+          console.warn('⚠️ Could not fetch sender profile:', newMessage.sender_id);
+          // Still emit message without sender details
+          onNewMessage(newMessage);
         }
       }
     )
