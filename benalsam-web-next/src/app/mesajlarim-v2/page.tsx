@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { MessageCircle, Search, Edit, Send, Phone, Video, Info, Smile, MoreVertical } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -28,6 +29,7 @@ interface ConversationPreview {
 }
 
 export default function MessagesV2Page() {
+  const router = useRouter();
   const { user, isLoading } = useAuth();
   const [conversations, setConversations] = useState<ConversationPreview[]>([]);
   const [filteredConversations, setFilteredConversations] = useState<ConversationPreview[]>([]);
@@ -281,9 +283,26 @@ export default function MessagesV2Page() {
         <div className="border-b border-gray-200 dark:border-gray-800 p-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">{user?.name || 'Mesajlar'}</h1>
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors">
-              <Edit className="w-6 h-6" />
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Home Button */}
+              <button 
+                onClick={() => router.push('/')}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors"
+                title="Ana Sayfa"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+              </button>
+              
+              {/* New Message Button */}
+              <button 
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors"
+                title="Yeni Mesaj"
+              >
+                <Edit className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Search */}
@@ -350,24 +369,16 @@ export default function MessagesV2Page() {
                       )}
                     </div>
                     
-                    {/* Listing info with role indicator */}
+                    {/* Listing info with owner indicator */}
                     {conv.listing && (
                       <p className="text-xs truncate mb-1 flex items-center gap-1.5">
-                        {/* Role badge */}
-                        {conv.listing.user_id === user?.id ? (
+                        {/* Show badge only if other user is the listing owner */}
+                        {conv.listing.user_id === conv.otherUser?.id && (
                           <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 flex-shrink-0">
                             <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd"/>
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                             </svg>
-                            Satıcı
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 flex-shrink-0">
-                            <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clipRule="evenodd"/>
-                            </svg>
-                            Alıcı
+                            İlan Sahibi
                           </span>
                         )}
                         <span className="text-gray-600 dark:text-gray-400 truncate">
@@ -445,14 +456,38 @@ export default function MessagesV2Page() {
               </div>
 
               <div className="flex items-center gap-2">
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors">
-                  <Phone className="w-5 h-5" />
+                {/* View Listing Button */}
+                {selectedConversation?.listing && (
+                  <button 
+                    onClick={() => router.push(`/ilan/${selectedConversation.listing?.id}`)}
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors"
+                    title="İlanı Görüntüle"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </button>
+                )}
+                
+                {/* View Profile Button */}
+                <button 
+                  onClick={() => router.push(`/profil/${otherUser?.id}`)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors"
+                  title="Profili Görüntüle"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </button>
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors">
-                  <Video className="w-5 h-5" />
-                </button>
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors">
-                  <Info className="w-5 h-5" />
+                
+                {/* More Options Button */}
+                <button 
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors"
+                  title="Daha Fazla"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                  </svg>
                 </button>
               </div>
             </div>
