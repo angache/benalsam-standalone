@@ -7,6 +7,7 @@
 
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { sanitizeText } from '@/utils/sanitize'
+import { Check, CheckCheck } from 'lucide-react'
 import type { Message } from '@/types'
 
 interface MessageBubbleProps {
@@ -65,14 +66,28 @@ export function MessageBubble({
           </p>
         </div>
         
-        {showTime && (
-          <p className={`
-            text-xs text-gray-400 mt-1 px-2
-            ${isOwnMessage ? 'text-right' : 'text-left'}
-          `}>
-            {formatTime(message.created_at)}
-          </p>
-        )}
+        {/* Time and Status */}
+        <div className={`
+          flex items-center gap-1 mt-1 px-2
+          ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}
+        `}>
+          {showTime && (
+            <p className="text-xs text-gray-400">
+              {formatTime(message.created_at)}
+            </p>
+          )}
+          
+          {/* Read Status (only for own messages) */}
+          {isOwnMessage && (
+            <div className="flex items-center">
+              {message.is_read ? (
+                <CheckCheck size={12} className="text-blue-400" />
+              ) : (
+                <Check size={12} className="text-gray-400" />
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

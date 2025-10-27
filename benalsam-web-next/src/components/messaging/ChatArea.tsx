@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useEffect, useState, useRef } from 'react';
-import { MessageCircle, Send, MoreVertical, ArrowLeft } from 'lucide-react';
+import { MessageCircle, Send, MoreVertical, ArrowLeft, Check, CheckCheck } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { sanitizeText } from '@/utils/sanitize';
@@ -11,6 +11,9 @@ import {
   useSendMessage, 
   useMarkAsRead 
 } from '@/hooks/useMessaging';
+import { useTypingIndicator, TypingIndicatorUI } from '@/hooks/useTypingIndicator';
+import { supabase } from '@/lib/supabase';
+import { realtimeManager } from '@/lib/realtime-manager';
 
 interface Message {
   id: string;
@@ -58,10 +61,14 @@ export const ChatArea = memo(function ChatArea({
   onBack,
   className = '',
 }: ChatAreaProps) {
-  console.log('🟩 [ChatArea] Rendering', { conversationId });
 
   const [newMessage, setNewMessage] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  
+  // Local messages state for new messages (not in infinite scroll cache)
+  const [localNewMessages, setLocalNewMessages] = useState<Message[]>([]);
 
   // React Query hooks - with automatic caching!
   const { data: conversation, isLoading: loadingConversation } = useConversation(conversationId);
@@ -76,46 +83,35 @@ export const ChatArea = memo(function ChatArea({
   const sendMessageMutation = useSendMessage();
   const markAsReadMutation = useMarkAsRead();
 
-  // Flatten all pages into single array
-  const messages = messagesData?.pages.flatMap(page => page.messages) || [];
-  const totalMessages = messagesData?.pages[0]?.total || 0;
+  // Get other user ID (after conversation is loaded)
+  const otherUserId = conversation?.user1_id === currentUserId ? conversation?.user2_id : conversation?.user1_id || '';
 
-  const loading = loadingConversation || loadingMessages;
-
-  console.log('🟩 [ChatArea] Query state', { 
+  // Typing indicator hook
+  const { isOtherUserTyping, sendTypingStatus } = useTypingIndicator(
     conversationId,
-    hasConversation: !!conversation,
-    messageCount: messages.length,
-    totalMessages,
-    isLoading: loading,
-    isFetching,
-    hasNextPage,
-    isFetchingNextPage,
-    isCached: !loading && messages.length > 0,
-    pagesCount: messagesData?.pages?.length || 0
-  });
-  
-  console.log('🟩 [ChatArea] Pages detail:', 
-    messagesData?.pages.map((p, i) => ({
-      pageIndex: i,
-      messageCount: p.messages.length,
-      total: p.total,
-      hasMore: p.hasMore,
-      firstMsg: p.messages[0]?.id?.substring(0, 8),
-      lastMsg: p.messages[p.messages.length - 1]?.id?.substring(0, 8)
-    }))
+    currentUserId,
+    otherUserId
   );
 
-  // Check for duplicates
-  const messageIds = messages.map(m => m.id);
-  const uniqueIds = new Set(messageIds);
-  if (messageIds.length !== uniqueIds.size) {
-    console.error('❌ [ChatArea] DUPLICATE MESSAGES DETECTED!', {
-      total: messageIds.length,
-      unique: uniqueIds.size,
-      duplicates: messageIds.filter((id, index) => messageIds.indexOf(id) !== index)
-    });
-  }
+  // Flatten all pages into single array (from cache/API)
+  const cachedMessages = messagesData?.pages.flatMap(page => page.messages) || [];
+  
+  // Get IDs of cached messages
+  const cachedIds = new Set(cachedMessages.map(m => m?.id).filter(Boolean));
+  
+  // Only add local messages that are NOT already in cache (deduplicate)
+  const uniqueLocalMessages = localNewMessages.filter(m => !cachedIds.has(m?.id));
+  
+  // Combine cached + unique local messages
+  const messages = [...cachedMessages, ...uniqueLocalMessages].filter(Boolean);
+  const totalMessages = messagesData?.pages[0]?.total || 0;
+  
+  const loading = loadingConversation || loadingMessages;
+  
+  // Clear local messages when conversation changes
+  useEffect(() => {
+    setLocalNewMessages([]);
+  }, [conversationId]);
 
   // Auto-scroll only if user is at bottom (WhatsApp style)
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -163,11 +159,63 @@ export const ChatArea = memo(function ChatArea({
     }
   }, [conversationId, currentUserId, messages.length, loading]); // eslint-disable-line
 
+  // Subscribe to global realtime manager for new messages
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const unsubscribe = realtimeManager.on('message:new', (data) => {
+      // Only handle messages for THIS conversation
+      if (data.conversationId !== conversationId) {
+        return;
+      }
+
+      const newMessage = data.message;
+
+      // Only add if it's NOT from current user (we already added it optimistically)
+      if (newMessage.sender_id !== currentUserId) {
+        setLocalNewMessages(prev => {
+          // Check if message already exists
+          const exists = prev.some(m => m.id === newMessage.id);
+          if (exists) return prev;
+          
+          return [...prev, newMessage];
+        });
+
+        // Auto-scroll if at bottom
+        if (isAtBottom) {
+          setTimeout(() => scrollToBottom(), 100);
+        }
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [conversationId, currentUserId, isAtBottom]); // eslint-disable-line
+
+  // Subscribe to message UPDATE events (for is_read status changes)
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const unsubscribe = realtimeManager.on('message:update', (data) => {
+      // Update local messages if exists
+      setLocalNewMessages(prev =>
+        prev.map(msg => 
+          msg.id === data.messageId 
+            ? { ...msg, ...data.updates }
+            : msg
+        )
+      );
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [conversationId]); // eslint-disable-line
+
   // Scroll to bottom when conversation first loads
   useEffect(() => {
     if (conversationId && messages.length > 0 && !loading) {
-      console.log('📜 [ChatArea] Initial scroll to bottom');
-      // Small delay to ensure DOM is ready
       setTimeout(() => {
         scrollToBottom();
         setIsAtBottom(true);
@@ -176,24 +224,62 @@ export const ChatArea = memo(function ChatArea({
   }, [conversationId]); // Only on conversation change, not messages change
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !conversationId || !currentUserId) return;
+    if (!newMessage.trim() || !conversationId || !currentUserId) {
+      return;
+    }
 
     const messageContent = newMessage.trim();
-    setNewMessage(''); // Clear immediately for better UX
     
+    // Create optimistic message
+    const optimisticMessage: Message = {
+      id: `temp-${Date.now()}`,
+      content: messageContent,
+      sender_id: currentUserId,
+      created_at: new Date().toISOString(),
+      is_read: false,
+    };
+    
+    // Add to local messages immediately (optimistic update)
+    setLocalNewMessages(prev => [...prev, optimisticMessage]);
+    setNewMessage(''); // Clear input immediately for better UX
+    
+    // Stop typing indicator
+    setIsTyping(false);
+    sendTypingStatus(false);
+    
+    // Force scroll to bottom to see new message
+    setIsAtBottom(true);
+    setTimeout(() => {
+      const container = messagesContainerRef.current;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }, 100);
+    
+    // Send to API
     sendMessageMutation.mutate(
       { conversationId, senderId: currentUserId, content: messageContent },
       {
-        onSuccess: () => {
-          // Scroll to bottom after sending
+        onSuccess: (realMessage) => {
+          // Replace optimistic message with real one
+          setLocalNewMessages(prev => 
+            prev.map(msg => msg.id === optimisticMessage.id ? realMessage : msg)
+          );
+          
+          // Scroll to bottom
           setTimeout(() => {
-            scrollToBottom();
-            setIsAtBottom(true);
+            const container = messagesContainerRef.current;
+            if (container) {
+              container.scrollTop = container.scrollHeight;
+            }
             inputRef.current?.focus();
           }, 100);
         },
         onError: () => {
-          // Restore message on error
+          // Remove optimistic message on error
+          setLocalNewMessages(prev => prev.filter(msg => msg.id !== optimisticMessage.id));
+          
+          // Restore message in input
           setNewMessage(messageContent);
         }
       }
@@ -206,6 +292,38 @@ export const ChatArea = memo(function ChatArea({
       handleSendMessage();
     }
   };
+
+  // Typing indicator handlers
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewMessage(value);
+
+    // Send typing status
+    if (value.trim() && !isTyping) {
+      setIsTyping(true);
+      sendTypingStatus(true);
+    }
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Set new timeout to stop typing
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      sendTypingStatus(false);
+    }, 1000);
+  };
+
+  // Cleanup typing timeout
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const formatMessageTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -321,23 +439,51 @@ export const ChatArea = memo(function ChatArea({
 
             {messages.map((message) => {
               const isMine = message.sender_id === currentUserId;
+              
               return (
-                <div key={message.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[70%] ${isMine ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
-                    <div className={`px-4 py-2 rounded-2xl ${
-                      isMine 
-                        ? 'bg-blue-500 text-white' 
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
-                    }`}>
-                      <p className="text-sm break-words">{sanitizeText(message.content)}</p>
+                <div 
+                  key={message.id} 
+                  className={`flex ${isMine ? 'justify-end' : 'justify-start'} mb-2`}
+                >
+                  <div className={`relative max-w-[70%] ${isMine ? 'items-end' : 'items-start'} flex flex-col`}>
+                    {/* Message Bubble */}
+                    <div className={`
+                      relative px-3 py-2 rounded-2xl shadow-sm
+                      ${isMine 
+                        ? 'bg-blue-500 text-white rounded-br-md' 
+                        : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md border border-gray-200 dark:border-gray-600'
+                      }
+                    `}>
+                      <p className="text-sm break-words leading-relaxed">{sanitizeText(message.content)}</p>
+                      
+                      {/* Time + Status (inside bubble, bottom right) */}
+                      <div className={`
+                        flex items-center gap-1 mt-1 justify-end
+                        ${isMine ? 'text-white/70' : 'text-gray-500 dark:text-gray-400'}
+                      `}>
+                        <span className="text-[10px] leading-none">
+                          {formatMessageTime(message.created_at)}
+                        </span>
+                        {isMine && (
+                          <div className="flex items-center ml-1">
+                            {message.is_read ? (
+                              <CheckCheck size={14} className="text-blue-200" strokeWidth={2.5} />
+                            ) : (
+                              <Check size={14} className="text-white/60" strokeWidth={2.5} />
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 px-2">
-                      {formatMessageTime(message.created_at)}
-                    </span>
                   </div>
                 </div>
               );
             })}
+
+            {/* Typing Indicator */}
+            {isOtherUserTyping && otherUser && (
+              <TypingIndicatorUI isTyping={isOtherUserTyping} userName={otherUser.name} />
+            )}
           </div>
         )}
       </div>
@@ -350,7 +496,7 @@ export const ChatArea = memo(function ChatArea({
             type="text"
             placeholder="Mesajınızı yazın..."
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={handleInputChange}
             onKeyPress={handleKeyPress}
             disabled={sendMessageMutation.isPending}
             className="

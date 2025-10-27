@@ -82,57 +82,17 @@ export function useSendMessage() {
       return sendMessageAPI(conversationId, senderId, content);
     },
     
-    // Optimistic update for infinite query
-    onMutate: async ({ conversationId, senderId, content }) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['messages', conversationId] });
-
-      // Snapshot previous value
-      const previousMessages = queryClient.getQueryData(['messages', conversationId]);
-
-      // Optimistically update - add to first page's messages
-      const tempMessage = {
-        id: `temp-${Date.now()}`,
-        content,
-        sender_id: senderId,
-        created_at: new Date().toISOString(),
-        is_read: false,
-      };
-
-      queryClient.setQueryData(['messages', conversationId], (old: any) => {
-        if (!old?.pages?.length) return old;
-        
-        // Add message to the first page (newest messages)
-        const newPages = [...old.pages];
-        newPages[0] = {
-          ...newPages[0],
-          messages: [...newPages[0].messages, tempMessage]
-        };
-        
-        return {
-          ...old,
-          pages: newPages
-        };
-      });
-
-      console.log('✨ [useSendMessage] Optimistic update applied');
-
-      return { previousMessages };
-    },
-
-    // On success, invalidate to refetch
-    onSuccess: (data, variables) => {
+    // On success, update conversations list
+    onSuccess: async (data, variables) => {
       console.log('✅ [useSendMessage] Message sent successfully');
-      queryClient.invalidateQueries({ queryKey: ['messages', variables.conversationId] });
+      
+      // Update conversations list to show latest message
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
 
-    // On error, rollback
-    onError: (err, variables, context) => {
+    // On error, log it
+    onError: (err) => {
       console.error('❌ [useSendMessage] Failed to send message:', err);
-      if (context?.previousMessages) {
-        queryClient.setQueryData(['messages', variables.conversationId], context.previousMessages);
-      }
     },
   });
 }

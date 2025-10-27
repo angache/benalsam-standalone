@@ -34,8 +34,6 @@ interface ConversationPreview {
 }
 
 export default function MessagesV2Page() {
-  console.log('🔴 [MessagesV2Page] Main page rendering...');
-
   const { user, isLoading: authLoading } = useAuth();
   const { setActiveConversation, refreshUnreadCount } = useNotifications();
   
@@ -44,12 +42,6 @@ export default function MessagesV2Page() {
 
   // React Query - auto cached!
   const { data: conversations = [], isLoading: loadingConversations } = useConversations(user?.id);
-
-  console.log('🔴 [MessagesV2Page] Query state', {
-    conversationsCount: conversations.length,
-    isLoading: loadingConversations,
-    isCached: !loadingConversations && conversations.length > 0
-  });
 
   // Update active conversation for notifications
   useEffect(() => {
@@ -103,7 +95,6 @@ export default function MessagesV2Page() {
   }, []);
 
   const handleConversationSelect = useCallback((conversationId: string) => {
-    console.log('🟢 [MessagesV2Page] Conversation selected', { conversationId });
     setSelectedConversationId(conversationId);
   }, []);
 
@@ -112,7 +103,6 @@ export default function MessagesV2Page() {
   }, [refreshUnreadCount]);
 
   const handleBack = useCallback(() => {
-    console.log('⬅️ [MessagesV2Page] Back button clicked, clearing selection');
     setSelectedConversationId(null);
   }, []);
 

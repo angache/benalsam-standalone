@@ -60,8 +60,6 @@ export const ConversationList = memo(function ConversationList({
   onConversationSelect,
   className = '',
 }: ConversationListProps) {
-  console.log('🟦 [ConversationList] Rendering', { count: conversations.length, selectedConversationId });
-
   return (
     <div className={`w-full md:w-96 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 flex flex-col h-screen bg-white dark:bg-black ${className}`}>
       {/* Header */}

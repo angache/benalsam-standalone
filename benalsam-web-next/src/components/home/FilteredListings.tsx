@@ -8,21 +8,36 @@
 
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useInView } from 'react-intersection-observer'
-import { useEffect } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { listingService } from '@/services/listingService'
 import ListingCard from '@/components/ListingCard'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Loader2, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { ViewToggle } from './ViewToggle'
+import { ActiveFilterBadge } from './ActiveFilterBadge'
 import type { FilterState } from './FilterSidebar'
 
 interface FilteredListingsProps {
   filters: FilterState
+  onClearFilters?: () => void
 }
 
-export default function FilteredListings({ filters }: FilteredListingsProps) {
+export default function FilteredListings({ filters, onClearFilters }: FilteredListingsProps) {
   const { user } = useAuth()
   const { ref, inView } = useInView()
+  const [view, setView] = useState<'grid' | 'list'>('grid')
+
+  // Count active filters
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.categoryId) count++;
+    if (filters.minPrice || filters.maxPrice) count++;
+    if (filters.location) count++;
+    if (filters.urgency) count++;
+    if (filters.searchQuery) count++;
+    return count;
+  }, [filters])
 
   const {
     data,
@@ -170,18 +185,32 @@ export default function FilteredListings({ filters }: FilteredListingsProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-          İlanlar
-          <span className="text-base font-normal text-muted-foreground ml-3">
-            ({totalCount} ilan)
-          </span>
-        </h2>
+      {/* Header with View Toggle and Active Filters */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+            İlanlar
+            <span className="text-base font-normal text-muted-foreground ml-3">
+              ({totalCount} ilan)
+            </span>
+          </h2>
+          {onClearFilters && (
+            <ActiveFilterBadge 
+              count={activeFilterCount} 
+              onClear={onClearFilters} 
+            />
+          )}
+        </div>
+        
+        <ViewToggle view={view} onViewChange={setView} />
       </div>
 
-      {/* Listings Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+      {/* Listings Grid/List */}
+      <div className={
+        view === 'grid' 
+          ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
+          : "flex flex-col gap-4"
+      }>
         {allListings.map((listing: any, index: number) => (
           <div 
             key={listing.id}

@@ -255,13 +255,15 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           {onToggleFavorite && (
             <button
               onClick={handleFavoriteClick}
-              className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+              className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-black/50 hover:bg-black/70 transition-colors group"
             >
               <Heart 
                 size={16} 
                 className={cn(
-                  'transition-colors',
-                  isFavorited ? 'fill-red-500 text-red-500' : 'text-white'
+                  'transition-all',
+                  isFavorited 
+                    ? 'fill-red-500 text-red-500 animate-favoriteAdded' 
+                    : 'text-white group-hover:scale-110'
                 )}
               />
             </button>
@@ -376,13 +378,15 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         {onToggleFavorite && (
           <button
             onClick={handleFavoriteClick}
-            className="absolute top-2 right-2 z-10 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+            className="absolute top-2 right-2 z-10 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors group"
           >
             <Heart 
               size={18} 
               className={cn(
-                'transition-colors',
-                isFavorited ? 'fill-red-500 text-red-500' : 'text-white'
+                'transition-all',
+                isFavorited 
+                  ? 'fill-red-500 text-red-500 animate-favoriteAdded' 
+                  : 'text-white group-hover:scale-110'
               )}
             />
           </button>

@@ -26,6 +26,10 @@ import FeatureCards from '@/components/home/FeatureCards'
 import FilteredListings from '@/components/home/FilteredListings'
 import FilterSidebar, { FilterState } from '@/components/home/FilterSidebar'
 import SearchWithAI from '@/components/home/SearchWithAI'
+import { PopularListings } from '@/components/home/PopularListings'
+import { RecentlyViewed } from '@/components/home/RecentlyViewed'
+import { AIRecommendations } from '@/components/home/AIRecommendations'
+import { ScrollToTop } from '@/components/ScrollToTop'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { SlidersHorizontal } from 'lucide-react'
@@ -110,6 +114,19 @@ export default function HomePageV2() {
         </Suspense>
       </section>
 
+      {/* Popular Listings */}
+      <Suspense fallback={<div className="h-96 bg-muted animate-pulse rounded-lg" />}>
+        <PopularListings />
+      </Suspense>
+
+      {/* Recently Viewed */}
+      <RecentlyViewed />
+
+      {/* AI Recommendations */}
+      <Suspense fallback={<div className="h-96 bg-muted animate-pulse rounded-lg" />}>
+        <AIRecommendations />
+      </Suspense>
+
       {/* Filtered Listings with Sidebar */}
       <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -136,7 +153,7 @@ export default function HomePageV2() {
                     Filtrele
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-full sm:w-96 overflow-y-auto">
+                <SheetContent className="w-full sm:w-96 overflow-y-auto">
                   <SheetHeader>
                     <SheetTitle>Filtreler</SheetTitle>
                   </SheetHeader>
@@ -151,10 +168,16 @@ export default function HomePageV2() {
               </Sheet>
             </div>
 
-            <FilteredListings filters={filters} />
+            <FilteredListings 
+              filters={filters} 
+              onClearFilters={handleResetFilters}
+            />
           </div>
         </div>
       </section>
+
+      {/* Scroll to Top Button */}
+      <ScrollToTop />
     </div>
   )
 }
