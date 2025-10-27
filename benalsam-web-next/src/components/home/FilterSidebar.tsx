@@ -6,7 +6,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
@@ -39,10 +39,42 @@ export default function FilterSidebar({
 }: FilterSidebarProps) {
   const [localFilters, setLocalFilters] = useState<FilterState>(filters)
 
+  // Debounce hook for price inputs
+  const useDebounce = (value: any, delay: number) => {
+    const [debouncedValue, setDebouncedValue] = useState(value)
+
+    useEffect(() => {
+      const handler = setTimeout(() => {
+        setDebouncedValue(value)
+      }, delay)
+
+      return () => {
+        clearTimeout(handler)
+      }
+    }, [value, delay])
+
+    return debouncedValue
+  }
+
+  // Debounced price values
+  const debouncedMinPrice = useDebounce(localFilters.minPrice, 300)
+  const debouncedMaxPrice = useDebounce(localFilters.maxPrice, 300)
+
   // Sync with parent when filters prop changes
   useEffect(() => {
     setLocalFilters(filters)
   }, [filters])
+
+  // Update parent when debounced price values change
+  useEffect(() => {
+    if (debouncedMinPrice !== filters.minPrice || debouncedMaxPrice !== filters.maxPrice) {
+      onFiltersChange({
+        ...filters,
+        minPrice: debouncedMinPrice,
+        maxPrice: debouncedMaxPrice
+      })
+    }
+  }, [debouncedMinPrice, debouncedMaxPrice, filters, onFiltersChange])
 
   // Fetch categories
   const { data: categories } = useQuery({
@@ -65,6 +97,12 @@ export default function FilterSidebar({
   const handleFilterChange = (key: keyof FilterState, value: any) => {
     const newFilters = { ...localFilters, [key]: value }
     setLocalFilters(newFilters)
+    
+    // For price inputs, don't immediately update parent (debounce will handle it)
+    if (key === 'minPrice' || key === 'maxPrice') {
+      return
+    }
+    
     onFiltersChange(newFilters)
   }
 

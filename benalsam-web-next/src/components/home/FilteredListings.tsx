@@ -6,16 +6,18 @@
 
 'use client'
 
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useInView } from 'react-intersection-observer'
 import { useEffect, useState, useMemo } from 'react'
 import { listingService } from '@/services/listingService'
 import ListingCard from '@/components/ListingCard'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { Loader2, AlertCircle, ArrowUpDown, Star, Crown, Zap } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { ViewToggle } from './ViewToggle'
 import { ActiveFilterBadge } from './ActiveFilterBadge'
+import { QuickViewModal } from './QuickViewModal'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { FilterState } from './FilterSidebar'
 
 interface FilteredListingsProps {
@@ -26,7 +28,77 @@ interface FilteredListingsProps {
 export default function FilteredListings({ filters, onClearFilters }: FilteredListingsProps) {
   const { user } = useAuth()
   const { ref, inView } = useInView()
+  const queryClient = useQueryClient()
   const [view, setView] = useState<'grid' | 'list'>('grid')
+  const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high' | 'popular'>('newest')
+  const [quickViewListing, setQuickViewListing] = useState<{
+    id: string
+    title: string
+    description?: string
+    budget?: number
+    currency?: string
+    location?: string
+    category?: string
+    main_image_url?: string
+    additional_image_urls?: string[]
+    view_count?: number
+    created_at?: string
+    urgency?: string
+    is_featured?: boolean
+    is_showcase?: boolean
+    is_urgent_premium?: boolean
+    profiles?: {
+      id: string
+      name: string
+      avatar_url?: string
+      rating?: number
+    }
+  } | null>(null)
+
+  // Optimistic update mutation for favorites
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async ({ listingId, isFavorited }: { listingId: string, isFavorited: boolean }) => {
+      // API call would go here
+      console.log('Toggle favorite:', listingId, isFavorited)
+      return { listingId, isFavorited }
+    },
+    onMutate: async ({ listingId, isFavorited }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['filtered-listings', filters, user?.id, sortBy] })
+
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData(['filtered-listings', filters, user?.id, sortBy])
+
+      // Optimistically update the cache
+      queryClient.setQueryData(['filtered-listings', filters, user?.id, sortBy], (old: any) => {
+        if (!old) return old
+        
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            listings: page.listings.map((listing: any) =>
+              listing.id === listingId
+                ? { ...listing, is_favorited: isFavorited }
+                : listing
+            )
+          }))
+        }
+      })
+
+      return { previousData }
+    },
+    onError: (err, variables, context) => {
+      // Revert the optimistic update on error
+      if (context?.previousData) {
+        queryClient.setQueryData(['filtered-listings', filters, user?.id, sortBy], context.previousData)
+      }
+    },
+    onSettled: () => {
+      // Refetch after error or success
+      queryClient.invalidateQueries({ queryKey: ['filtered-listings', filters, user?.id, sortBy] })
+    },
+  })
 
   // Count active filters
   const activeFilterCount = useMemo(() => {
@@ -47,26 +119,31 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
     isLoading,
     error,
   } = useInfiniteQuery({
-    queryKey: ['filtered-listings', filters, user?.id],
+    queryKey: ['filtered-listings', filters, user?.id, sortBy],
     queryFn: async ({ pageParam = 1 }) => {
       console.log('🔍 [FilteredListings] Fetching page:', pageParam, 'with filters:', filters)
       
       // Determine sort field and order based on sortBy filter
-      let sortBy = 'created_at'
+      let sortField = 'created_at'
       let sortOrder: 'asc' | 'desc' = 'desc'
       
-      if (filters.sortBy === 'newest') {
-        sortBy = 'created_at'
-        sortOrder = 'desc'
-      } else if (filters.sortBy === 'cheapest') {
-        sortBy = 'budget'
-        sortOrder = 'asc'
-      } else if (filters.sortBy === 'expensive') {
-        sortBy = 'budget'
-        sortOrder = 'desc'
-      } else if (filters.sortBy === 'popular') {
-        sortBy = 'view_count'
-        sortOrder = 'desc'
+      switch (sortBy) {
+        case 'newest':
+          sortField = 'created_at'
+          sortOrder = 'desc'
+          break
+        case 'price_low':
+          sortField = 'budget'
+          sortOrder = 'asc'
+          break
+        case 'price_high':
+          sortField = 'budget'
+          sortOrder = 'desc'
+          break
+        case 'popular':
+          sortField = 'view_count'
+          sortOrder = 'desc'
+          break
       }
       
       // Use ES + Supabase fallback with filters
@@ -79,8 +156,8 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
           maxPrice: filters.maxPrice || undefined,
           location: filters.location || undefined,
           urgency: filters.urgency || undefined,
-          sortBy,
-          sortOrder,
+          sortBy: sortField,
+          sortOrder: sortOrder,
         },
         {
           page: pageParam,
@@ -114,6 +191,52 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
   const allListings = data?.pages.flatMap((page) => page.listings) || []
   const totalCount = data?.pages[0]?.totalCount || 0
 
+  // Dynamic results message
+  const getResultsMessage = () => {
+    if (isLoading) return 'Yükleniyor...'
+    if (error) return 'Hata oluştu'
+    if (totalCount === 0) return 'İlan bulunamadı'
+    if (totalCount === 1) return '1 ilan bulundu'
+    return `${totalCount.toLocaleString('tr-TR')} ilan bulundu`
+  }
+
+  // Premium badges function
+  const getPremiumBadges = (listing: {
+    id: string
+    title: string
+    is_featured?: boolean
+    is_showcase?: boolean
+    is_urgent_premium?: boolean
+  }) => {
+    const badges = []
+    
+    if (listing.is_featured) {
+      badges.push({
+        icon: Star,
+        label: 'Öne Çıkan',
+        color: 'bg-yellow-500 hover:bg-yellow-600'
+      })
+    }
+    
+    if (listing.is_showcase) {
+      badges.push({
+        icon: Crown,
+        label: 'Vitrin',
+        color: 'bg-purple-500 hover:bg-purple-600'
+      })
+    }
+    
+    if (listing.is_urgent_premium) {
+      badges.push({
+        icon: Zap,
+        label: 'Acil Premium',
+        color: 'bg-red-500 hover:bg-red-600'
+      })
+    }
+    
+    return badges
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-6 animate-fadeIn">
@@ -143,6 +266,9 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
         <div className="flex items-center justify-between">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground">
             İlanlar
+            <span className="text-base font-normal text-muted-foreground ml-3">
+              ({getResultsMessage()})
+            </span>
           </h2>
         </div>
         <div className="flex flex-col items-center justify-center h-64 text-center">
@@ -164,6 +290,9 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
         <div className="flex items-center justify-between">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground">
             İlanlar
+            <span className="text-base font-normal text-muted-foreground ml-3">
+              ({getResultsMessage()})
+            </span>
           </h2>
         </div>
         <div className="flex flex-col items-center justify-center h-64 text-center">
@@ -184,6 +313,7 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
   }
 
   return (
+    <>
     <div className="space-y-6">
       {/* Header with View Toggle and Active Filters */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -191,7 +321,7 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
           <h2 className="text-2xl md:text-3xl font-bold text-foreground">
             İlanlar
             <span className="text-base font-normal text-muted-foreground ml-3">
-              ({totalCount} ilan)
+              ({getResultsMessage()})
             </span>
           </h2>
           {onClearFilters && (
@@ -202,7 +332,23 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
           )}
         </div>
         
-        <ViewToggle view={view} onViewChange={setView} />
+        <div className="flex items-center gap-3">
+          {/* Sort Dropdown */}
+          <Select value={sortBy} onValueChange={(value: 'newest' | 'price_low' | 'price_high' | 'popular') => setSortBy(value)}>
+            <SelectTrigger className="w-[180px]">
+              <ArrowUpDown className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="Sırala" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">En Yeni</SelectItem>
+              <SelectItem value="price_low">En Ucuz</SelectItem>
+              <SelectItem value="price_high">En Pahalı</SelectItem>
+              <SelectItem value="popular">Popüler</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <ViewToggle view={view} onViewChange={setView} />
+        </div>
       </div>
 
       {/* Listings Grid/List */}
@@ -211,7 +357,7 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
           ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
           : "flex flex-col gap-4"
       }>
-        {allListings.map((listing: any, index: number) => (
+        {allListings.map((listing, index: number) => (
           <div 
             key={listing.id}
             className="animate-fadeInUp hover-lift"
@@ -220,9 +366,18 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
             <ListingCard
               listing={listing}
               currentUser={user}
-              onToggleFavorite={async (listingId, isFavorited) => {
-                console.log('Toggle favorite:', listingId, isFavorited)
+              priority={index < 6} // First 6 cards load with priority
+              onToggleFavorite={(listingId: string) => {
+                const listing = allListings.find(l => l.id === listingId)
+                if (listing) {
+                  toggleFavoriteMutation.mutate({
+                    listingId,
+                    isFavorited: !listing.is_favorited
+                  })
+                }
               }}
+              onView={(listing) => setQuickViewListing(listing)}
+              getPremiumBadges={getPremiumBadges}
               size="normal"
             />
           </div>
@@ -252,6 +407,15 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
         </div>
       )}
     </div>
+    
+    {/* Quick View Modal */}
+    {quickViewListing && (
+      <QuickViewModal
+        listing={quickViewListing}
+        onClose={() => setQuickViewListing(null)}
+      />
+    )}
+  </>
   )
 }
 

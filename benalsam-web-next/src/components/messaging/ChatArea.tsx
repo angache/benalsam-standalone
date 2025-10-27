@@ -2,6 +2,7 @@
 
 import { memo, useEffect, useState, useRef } from 'react';
 import { MessageCircle, Send, MoreVertical, ArrowLeft, Check, CheckCheck, Home, Info } from 'lucide-react';
+import { useInView } from 'react-intersection-observer';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { sanitizeText } from '@/utils/sanitize';
@@ -72,6 +73,11 @@ export const ChatArea = memo(function ChatArea({
   
   // Local messages state for new messages (not in infinite scroll cache)
   const [localNewMessages, setLocalNewMessages] = useState<Message[]>([]);
+  
+  // Infinite scroll trigger
+  const { ref: loadMoreRef, inView } = useInView({
+    threshold: 0,
+  });
 
   // React Query hooks - with automatic caching!
   const { data: conversation, isLoading: loadingConversation } = useConversation(conversationId);
@@ -97,7 +103,8 @@ export const ChatArea = memo(function ChatArea({
   );
 
   // Flatten all pages into single array (from cache/API)
-  const cachedMessages = messagesData?.pages.flatMap(page => page.messages) || [];
+  // API returns newest first, but we need oldest first for chat UI
+  const cachedMessages = messagesData?.pages.flatMap(page => page.messages).reverse() || [];
   
   // Get IDs of cached messages
   const cachedIds = new Set(cachedMessages.map(m => m?.id).filter(Boolean));
@@ -105,7 +112,7 @@ export const ChatArea = memo(function ChatArea({
   // Only add local messages that are NOT already in cache (deduplicate)
   const uniqueLocalMessages = localNewMessages.filter(m => !cachedIds.has(m?.id));
   
-  // Combine cached + unique local messages
+  // Combine cached + unique local messages (oldest to newest)
   const messages = [...cachedMessages, ...uniqueLocalMessages].filter(Boolean);
   const totalMessages = messagesData?.pages[0]?.total || 0;
   
@@ -115,6 +122,38 @@ export const ChatArea = memo(function ChatArea({
   useEffect(() => {
     setLocalNewMessages([]);
   }, [conversationId]);
+
+  // Infinite scroll - load more when scrolling to top (with scroll position preservation)
+  const previousScrollHeightRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      console.log('🔄 [ChatArea] Loading more messages (infinite scroll)...');
+      
+      // Save current scroll position before loading
+      if (messagesContainerRef.current) {
+        previousScrollHeightRef.current = messagesContainerRef.current.scrollHeight;
+      }
+      
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Restore scroll position after new messages are loaded
+  useEffect(() => {
+    if (isFetchingNextPage === false && previousScrollHeightRef.current > 0 && messagesContainerRef.current) {
+      const newScrollHeight = messagesContainerRef.current.scrollHeight;
+      const scrollDiff = newScrollHeight - previousScrollHeightRef.current;
+      
+      if (scrollDiff > 0) {
+        // Adjust scroll position to maintain user's view
+        messagesContainerRef.current.scrollTop += scrollDiff;
+        console.log('📍 [ChatArea] Scroll position restored', { scrollDiff });
+      }
+      
+      previousScrollHeightRef.current = 0;
+    }
+  }, [isFetchingNextPage, messages.length]);
 
   // Auto-scroll only if user is at bottom (WhatsApp style)
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -434,33 +473,22 @@ export const ChatArea = memo(function ChatArea({
           </div>
         ) : (
           <div className="space-y-4">
-            {/* Load More Button */}
+            {/* Infinite Scroll Trigger - at the top */}
             {hasNextPage && (
-              <div className="flex justify-center py-4">
-                <button
-                  onClick={() => fetchNextPage()}
-                  disabled={isFetchingNextPage}
-                  className="
-                    px-6 py-2 text-sm font-medium
-                    bg-gray-100 dark:bg-gray-800 
-                    hover:bg-gray-200 dark:hover:bg-gray-700
-                    text-gray-700 dark:text-gray-300
-                    rounded-full transition-colors
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                    flex items-center gap-2
-                  "
-                >
-                  {isFetchingNextPage ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-                      Yükleniyor...
-                    </>
-                  ) : (
-                    <>
-                      ↑ Daha Eski Mesajları Yükle ({totalMessages - messages.length} mesaj daha)
-                    </>
-                  )}
-                </button>
+              <div 
+                ref={loadMoreRef}
+                className="flex justify-center py-4"
+              >
+                {isFetchingNextPage ? (
+                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                    Eski mesajlar yükleniyor...
+                  </div>
+                ) : (
+                  <div className="text-xs text-gray-400 dark:text-gray-500">
+                    ↑ Yukarı kaydırarak daha eski mesajları yükleyin
+                  </div>
+                )}
               </div>
             )}
 

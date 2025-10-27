@@ -50,7 +50,7 @@ export async function GET(
     }
 
     // Fetch messages with pagination - use admin client to bypass RLS
-    // Always order ASCENDING (oldest first) for consistent pagination
+    // Order DESCENDING (newest first) for chat UI
     const { data: messages, error } = await supabaseAdmin
       .from('messages')
       .select(`
@@ -58,7 +58,7 @@ export async function GET(
         sender:profiles!sender_id(id, name, avatar_url)
       `)
       .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true }) // Oldest first, always
+      .order('created_at', { ascending: false }) // Newest first for chat UI
       .range(offset, offset + limit - 1);
 
     logger.endTimer('[API] GET /conversations/messages');

@@ -219,10 +219,40 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               sizes="(max-width: 640px) 224px, 250px"
               priority={priority}
               quality={85}
+              placeholder="blur"
+              blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
             />
           ) : (
             <div className="w-full h-full bg-muted flex items-center justify-center">
               <ImageIcon className="w-8 h-8 text-muted-foreground" />
+            </div>
+          )}
+
+          {/* Premium Badges */}
+          {premiumBadges.length > 0 && (
+            <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+              {premiumBadges.map((badge, index) => {
+                const IconComponent = badge.icon
+                return (
+                  <Badge 
+                    key={index}
+                    className={`${badge.color} text-white border-0 shadow-lg`}
+                  >
+                    <IconComponent className="w-3 h-3 mr-1" />
+                    {badge.label}
+                  </Badge>
+                )
+              })}
+            </div>
+          )}
+
+          {/* New Badge */}
+          {listing.created_at && new Date(listing.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000) && (
+            <div className="absolute top-3 right-3 z-10">
+              <Badge className="bg-green-500 hover:bg-green-600 text-white border-0 shadow-lg">
+                <Zap className="w-3 h-3 mr-1" />
+                Yeni
+              </Badge>
             </div>
           )}
 
