@@ -4,6 +4,7 @@ import "./globals.css";
 import "./console-override"; // Production console override
 import { Providers } from "@/components/Providers";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -37,6 +38,7 @@ export default function RootLayout({
             <Header />
             {children}
             <Footer />
+            <Toaster />
           </Providers>
         </ErrorBoundary>
       </body>

@@ -18,6 +18,7 @@ import { ViewToggle } from './ViewToggle'
 import { ActiveFilterBadge } from './ActiveFilterBadge'
 import { QuickViewModal } from './QuickViewModal'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useToast } from '@/components/ui/use-toast'
 import type { FilterState } from './FilterSidebar'
 
 interface FilteredListingsProps {
@@ -29,6 +30,7 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
   const { user } = useAuth()
   const { ref, inView } = useInView()
   const queryClient = useQueryClient()
+  const { toast } = useToast()
   const [view, setView] = useState<'grid' | 'list'>('grid')
   const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high' | 'popular'>('newest')
   const [quickViewListing, setQuickViewListing] = useState<{
@@ -63,6 +65,13 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
       return { listingId, isFavorited }
     },
     onMutate: async ({ listingId, isFavorited }) => {
+      // Show toast
+      toast({
+        title: isFavorited ? "❤️ Favorilere Eklendi" : "Favorilerden Çıkarıldı",
+        description: isFavorited ? "İlan favorilerinize kaydedildi" : "İlan favorilerinizden kaldırıldı",
+        duration: 2000,
+      })
+      
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['filtered-listings', filters, user?.id, sortBy] })
 
@@ -327,14 +336,37 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
           {onClearFilters && (
             <ActiveFilterBadge 
               count={activeFilterCount} 
-              onClear={onClearFilters} 
+              onClear={() => {
+                onClearFilters()
+                toast({
+                  title: "🗑️ Filtreler Temizlendi",
+                  description: "Tüm filtreler kaldırıldı",
+                  duration: 2000,
+                })
+              }} 
             />
           )}
         </div>
         
         <div className="flex items-center gap-3">
           {/* Sort Dropdown */}
-          <Select value={sortBy} onValueChange={(value: 'newest' | 'price_low' | 'price_high' | 'popular') => setSortBy(value)}>
+          <Select 
+            value={sortBy} 
+            onValueChange={(value: 'newest' | 'price_low' | 'price_high' | 'popular') => {
+              setSortBy(value)
+              const sortLabels = {
+                newest: 'En Yeni',
+                price_low: 'En Ucuz',
+                price_high: 'En Pahalı',
+                popular: 'Popüler'
+              }
+              toast({
+                title: "🔄 Sıralama Değiştirildi",
+                description: `İlanlar "${sortLabels[value]}" sıralamasına göre güncellendi`,
+                duration: 2000,
+              })
+            }}
+          >
             <SelectTrigger className="w-[180px]">
               <ArrowUpDown className="w-4 h-4 mr-2" />
               <SelectValue placeholder="Sırala" />
