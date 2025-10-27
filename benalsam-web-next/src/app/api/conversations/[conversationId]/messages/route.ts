@@ -12,6 +12,7 @@ export async function GET(
     const { conversationId } = params;
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
+    const offset = parseInt(searchParams.get('offset') || '0');
     logger.startTimer('[API] GET /conversations/messages');
 
     if (!conversationId) {
@@ -38,7 +39,18 @@ export async function GET(
       );
     }
 
-    // Fetch messages - use admin client to bypass RLS
+    // Get total count first
+    const { count: totalCount, error: countError } = await supabaseAdmin
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('conversation_id', conversationId);
+
+    if (countError) {
+      logger.error('[API] Error counting messages', { error: countError, conversationId });
+    }
+
+    // Fetch messages with pagination - use admin client to bypass RLS
+    // Always order ASCENDING (oldest first) for consistent pagination
     const { data: messages, error } = await supabaseAdmin
       .from('messages')
       .select(`
@@ -46,8 +58,8 @@ export async function GET(
         sender:profiles!sender_id(id, name, avatar_url)
       `)
       .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true })
-      .limit(limit);
+      .order('created_at', { ascending: true }) // Oldest first, always
+      .range(offset, offset + limit - 1);
 
     logger.endTimer('[API] GET /conversations/messages');
 
@@ -61,7 +73,9 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: messages || []
+      data: messages || [],
+      total: totalCount || 0,
+      hasMore: offset + (messages?.length || 0) < (totalCount || 0)
     });
   } catch (error) {
     logger.error('[API] conversation-messages error', { error, params });

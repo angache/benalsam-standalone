@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { 
   fetchMessages, 
   fetchConversationDetails,
@@ -25,20 +25,41 @@ export function useConversation(conversationId: string | null) {
 }
 
 /**
- * Hook for fetching messages in a conversation
+ * Hook for fetching messages in a conversation with infinite scroll
  */
 export function useMessages(conversationId: string | null) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ['messages', conversationId],
-    queryFn: () => {
+    queryFn: async ({ pageParam = 0 }) => {
       if (!conversationId) throw new Error('No conversation ID');
-      console.log('🔵 [useMessages] Fetching from API...', { conversationId });
-      return fetchMessages(conversationId, 100);
+      console.log('🔵 [useMessages] Fetching from API...', { 
+        conversationId, 
+        offset: pageParam 
+      });
+      return fetchMessages(conversationId, 50, pageParam);
     },
     enabled: !!conversationId,
-    staleTime: 2 * 60 * 1000, // 2 minutes - messages more frequently updated
+    staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes cache
-    refetchOnWindowFocus: true, // Refetch when user comes back
+    refetchOnWindowFocus: true,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      // Calculate total messages loaded so far
+      const loadedCount = allPages.reduce((sum, page) => sum + page.messages.length, 0);
+      
+      // If there are more messages, return next offset
+      if (lastPage.hasMore && loadedCount < lastPage.total) {
+        console.log('📊 [useMessages] Next page', { 
+          loadedCount, 
+          total: lastPage.total, 
+          nextOffset: loadedCount 
+        });
+        return loadedCount;
+      }
+      
+      console.log('📊 [useMessages] No more pages');
+      return undefined;
+    },
   });
 }
 
@@ -61,7 +82,7 @@ export function useSendMessage() {
       return sendMessageAPI(conversationId, senderId, content);
     },
     
-    // Optimistic update
+    // Optimistic update for infinite query
     onMutate: async ({ conversationId, senderId, content }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['messages', conversationId] });
@@ -69,7 +90,7 @@ export function useSendMessage() {
       // Snapshot previous value
       const previousMessages = queryClient.getQueryData(['messages', conversationId]);
 
-      // Optimistically update
+      // Optimistically update - add to first page's messages
       const tempMessage = {
         id: `temp-${Date.now()}`,
         content,
@@ -79,7 +100,19 @@ export function useSendMessage() {
       };
 
       queryClient.setQueryData(['messages', conversationId], (old: any) => {
-        return old ? [...old, tempMessage] : [tempMessage];
+        if (!old?.pages?.length) return old;
+        
+        // Add message to the first page (newest messages)
+        const newPages = [...old.pages];
+        newPages[0] = {
+          ...newPages[0],
+          messages: [...newPages[0].messages, tempMessage]
+        };
+        
+        return {
+          ...old,
+          pages: newPages
+        };
       });
 
       console.log('✨ [useSendMessage] Optimistic update applied');

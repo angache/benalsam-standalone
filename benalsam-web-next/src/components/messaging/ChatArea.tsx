@@ -57,14 +57,24 @@ export const ChatArea = memo(function ChatArea({
   console.log('🟩 [ChatArea] Rendering', { conversationId });
 
   const [newMessage, setNewMessage] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // React Query hooks - with automatic caching!
   const { data: conversation, isLoading: loadingConversation } = useConversation(conversationId);
-  const { data: messages = [], isLoading: loadingMessages, isFetching } = useMessages(conversationId);
+  const { 
+    data: messagesData, 
+    isLoading: loadingMessages, 
+    isFetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useMessages(conversationId);
   const sendMessageMutation = useSendMessage();
   const markAsReadMutation = useMarkAsRead();
+
+  // Flatten all pages into single array
+  const messages = messagesData?.pages.flatMap(page => page.messages) || [];
+  const totalMessages = messagesData?.pages[0]?.total || 0;
 
   const loading = loadingConversation || loadingMessages;
 
@@ -72,18 +82,62 @@ export const ChatArea = memo(function ChatArea({
     conversationId,
     hasConversation: !!conversation,
     messageCount: messages.length,
+    totalMessages,
     isLoading: loading,
-    isFetching, // Fetching in background
-    isCached: !loading && messages.length > 0
+    isFetching,
+    hasNextPage,
+    isFetchingNextPage,
+    isCached: !loading && messages.length > 0,
+    pagesCount: messagesData?.pages?.length || 0
   });
+  
+  console.log('🟩 [ChatArea] Pages detail:', 
+    messagesData?.pages.map((p, i) => ({
+      pageIndex: i,
+      messageCount: p.messages.length,
+      total: p.total,
+      hasMore: p.hasMore,
+      firstMsg: p.messages[0]?.id?.substring(0, 8),
+      lastMsg: p.messages[p.messages.length - 1]?.id?.substring(0, 8)
+    }))
+  );
+
+  // Check for duplicates
+  const messageIds = messages.map(m => m.id);
+  const uniqueIds = new Set(messageIds);
+  if (messageIds.length !== uniqueIds.size) {
+    console.error('❌ [ChatArea] DUPLICATE MESSAGES DETECTED!', {
+      total: messageIds.length,
+      unique: uniqueIds.size,
+      duplicates: messageIds.filter((id, index) => messageIds.indexOf(id) !== index)
+    });
+  }
+
+  // Auto-scroll only if user is at bottom (WhatsApp style)
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
+  // Track if user is at bottom
+  const handleScroll = () => {
+    if (!messagesContainerRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+    const atBottom = scrollHeight - scrollTop - clientHeight < 100; // 100px threshold
+    setIsAtBottom(atBottom);
+  };
+
+  // Auto-scroll only if at bottom
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (isAtBottom) {
+      scrollToBottom();
+    }
+  }, [messages, isAtBottom]);
 
   useEffect(() => {
     if (!sendMessageMutation.isPending && inputRef.current) {
@@ -105,6 +159,18 @@ export const ChatArea = memo(function ChatArea({
     }
   }, [conversationId, currentUserId, messages.length, loading]); // eslint-disable-line
 
+  // Scroll to bottom when conversation first loads
+  useEffect(() => {
+    if (conversationId && messages.length > 0 && !loading) {
+      console.log('📜 [ChatArea] Initial scroll to bottom');
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        scrollToBottom();
+        setIsAtBottom(true);
+      }, 100);
+    }
+  }, [conversationId]); // Only on conversation change, not messages change
+
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !conversationId || !currentUserId) return;
 
@@ -115,7 +181,12 @@ export const ChatArea = memo(function ChatArea({
       { conversationId, senderId: currentUserId, content: messageContent },
       {
         onSuccess: () => {
-          setTimeout(() => inputRef.current?.focus(), 0);
+          // Scroll to bottom after sending
+          setTimeout(() => {
+            scrollToBottom();
+            setIsAtBottom(true);
+            inputRef.current?.focus();
+          }, 100);
         },
         onError: () => {
           // Restore message on error
@@ -192,13 +263,48 @@ export const ChatArea = memo(function ChatArea({
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto px-6 py-4" style={{ minHeight: 0 }}>
+      <div 
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto px-6 py-4" 
+        style={{ minHeight: 0 }}
+      >
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-gray-500 dark:text-gray-400">Henüz mesaj yok. İlk mesajı gönderin!</p>
           </div>
         ) : (
           <div className="space-y-4">
+            {/* Load More Button */}
+            {hasNextPage && (
+              <div className="flex justify-center py-4">
+                <button
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  className="
+                    px-6 py-2 text-sm font-medium
+                    bg-gray-100 dark:bg-gray-800 
+                    hover:bg-gray-200 dark:hover:bg-gray-700
+                    text-gray-700 dark:text-gray-300
+                    rounded-full transition-colors
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    flex items-center gap-2
+                  "
+                >
+                  {isFetchingNextPage ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                      Yükleniyor...
+                    </>
+                  ) : (
+                    <>
+                      ↑ Daha Eski Mesajları Yükle ({totalMessages - messages.length} mesaj daha)
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
             {messages.map((message) => {
               const isMine = message.sender_id === currentUserId;
               return (
@@ -218,7 +324,6 @@ export const ChatArea = memo(function ChatArea({
                 </div>
               );
             })}
-            <div ref={messagesEndRef} />
           </div>
         )}
       </div>

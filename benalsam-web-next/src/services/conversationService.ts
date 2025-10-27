@@ -217,25 +217,34 @@ export const sendMessage = async (
  */
 export const fetchMessages = async (
   conversationId: string,
-  limit: number = 50
-): Promise<Message[]> => {
+  limit: number = 50,
+  offset: number = 0
+): Promise<{ messages: Message[]; hasMore: boolean; total: number }> => {
   try {
     if (!conversationId) {
       throw new ValidationError('Conversation ID is required');
     }
 
     // Use API endpoint - server-side has service_role permissions
-    const response = await fetch(`/api/conversations/${conversationId}/messages?limit=${limit}`);
+    const response = await fetch(`/api/conversations/${conversationId}/messages?limit=${limit}&offset=${offset}`);
     
     if (!response.ok) {
       throw new DatabaseError('Failed to fetch messages');
     }
 
     const result = await response.json();
-    return result.data || [];
+    const messages = result.data || [];
+    const total = result.total || 0;
+    const hasMore = offset + messages.length < total;
+
+    return {
+      messages,
+      hasMore,
+      total
+    };
   } catch (error) {
     console.error('Error in fetchMessages:', error);
-    return [];
+    return { messages: [], hasMore: false, total: 0 };
   }
 };
 
