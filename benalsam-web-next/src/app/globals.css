@@ -297,9 +297,25 @@
       transform: scale(1) rotate(0deg);
     }
   }
-
+  
   .animate-favoriteAdded {
     animation: favoriteAdded 0.5s ease-out;
+  }
+
+  /* Modal Animations */
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-scaleIn {
+    animation: scaleIn 0.2s ease-out;
   }
 
   /* Hover Effects */

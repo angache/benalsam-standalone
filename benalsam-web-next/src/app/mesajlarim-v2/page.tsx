@@ -116,7 +116,7 @@ export default function MessagesV2Page() {
 
   return (
     <MessagingErrorBoundary>
-      <div className="fixed inset-0 flex bg-white dark:bg-black overflow-hidden z-[100]">
+      <div className="fixed inset-0 flex bg-white dark:bg-black overflow-hidden z-50">
         {/* LEFT PANEL - Conversation List */}
         <ConversationList
           conversations={filteredConversations}

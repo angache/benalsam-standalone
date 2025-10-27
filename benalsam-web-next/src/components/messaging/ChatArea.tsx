@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useEffect, useState, useRef } from 'react';
-import { MessageCircle, Send, MoreVertical, ArrowLeft, Check, CheckCheck } from 'lucide-react';
+import { MessageCircle, Send, MoreVertical, ArrowLeft, Check, CheckCheck, Home, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { sanitizeText } from '@/utils/sanitize';
@@ -14,6 +14,8 @@ import {
 import { useTypingIndicator, TypingIndicatorUI } from '@/hooks/useTypingIndicator';
 import { supabase } from '@/lib/supabase';
 import { realtimeManager } from '@/lib/realtime-manager';
+import { ListingInfoModal } from './ListingInfoModal';
+import { MessageBubble } from './MessageBubble';
 
 interface Message {
   id: string;
@@ -66,6 +68,7 @@ export const ChatArea = memo(function ChatArea({
   const inputRef = useRef<HTMLInputElement>(null);
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const [showListingInfo, setShowListingInfo] = useState(false);
   
   // Local messages state for new messages (not in infinite scroll cache)
   const [localNewMessages, setLocalNewMessages] = useState<Message[]>([]);
@@ -389,9 +392,33 @@ export const ChatArea = memo(function ChatArea({
           </div>
         </div>
 
-        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors flex-shrink-0">
-          <MoreVertical className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-        </button>
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Home Button */}
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors"
+            title="Ana Sayfaya Dön"
+          >
+            <Home className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          </button>
+
+          {/* Info Button */}
+          {conversation?.listing_id && (
+            <button 
+              onClick={() => setShowListingInfo(true)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors"
+              title="İlan Bilgileri"
+            >
+              <Info className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            </button>
+          )}
+
+          {/* More Options */}
+          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors">
+            <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          </button>
+        </div>
       </div>
 
       {/* Messages Container */}
@@ -527,6 +554,14 @@ export const ChatArea = memo(function ChatArea({
           )}
         </div>
       </div>
+
+      {/* Listing Info Modal */}
+      {showListingInfo && conversation?.listing_id && (
+        <ListingInfoModal
+          listingId={conversation.listing_id}
+          onClose={() => setShowListingInfo(false)}
+        />
+      )}
     </div>
   );
 });

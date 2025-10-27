@@ -1,7 +1,7 @@
 'use client';
 
 import { memo } from 'react';
-import { MessageCircle, Search } from 'lucide-react';
+import { MessageCircle, Search, Home } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { sanitizeText, sanitizeListingTitle } from '@/utils/sanitize';
@@ -64,7 +64,18 @@ export const ConversationList = memo(function ConversationList({
     <div className={`w-full md:w-96 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 flex flex-col h-screen bg-white dark:bg-black ${className}`}>
       {/* Header */}
       <div className="flex-shrink-0 p-4 border-b border-gray-200 dark:border-gray-800">
-        <h1 className="text-2xl font-bold mb-4">Mesajlar</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold">Mesajlar</h1>
+          
+          {/* Home Button */}
+          <button
+            onClick={() => window.location.href = '/'}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors"
+            title="Ana Sayfaya Dön"
+          >
+            <Home className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          </button>
+        </div>
         
         {/* Search */}
         <div className="relative">

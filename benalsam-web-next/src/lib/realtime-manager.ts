@@ -162,10 +162,12 @@ class RealtimeManager {
             logger.info('[RealtimeManager] Connected', { userId: this.userId })
             this.reconnectAttempts = 0
           } else if (status === 'CHANNEL_ERROR') {
-            logger.error('[RealtimeManager] Channel error', { userId: this.userId })
+            // Silent error - will auto-reconnect
+            logger.debug('[RealtimeManager] Channel error (auto-reconnecting)', { userId: this.userId })
             this.handleReconnect()
           } else if (status === 'TIMED_OUT') {
-            logger.error('[RealtimeManager] Connection timed out', { userId: this.userId })
+            // Silent timeout - will auto-reconnect
+            logger.debug('[RealtimeManager] Connection timed out (auto-reconnecting)', { userId: this.userId })
             this.handleReconnect()
           } else if (status === 'CLOSED') {
             logger.warn('[RealtimeManager] Connection closed', { userId: this.userId })
