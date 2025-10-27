@@ -37,6 +37,7 @@ interface ConversationListProps {
   currentUserId: string;
   onSearchChange: (query: string) => void;
   onConversationSelect: (conversationId: string) => void;
+  className?: string;
 }
 
 const formatMessageTime = (timestamp: string) => {
@@ -57,11 +58,12 @@ export const ConversationList = memo(function ConversationList({
   currentUserId,
   onSearchChange,
   onConversationSelect,
+  className = '',
 }: ConversationListProps) {
   console.log('🟦 [ConversationList] Rendering', { count: conversations.length, selectedConversationId });
 
   return (
-    <div className="w-full md:w-96 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 flex flex-col h-screen bg-white dark:bg-black">
+    <div className={`w-full md:w-96 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 flex flex-col h-screen bg-white dark:bg-black ${className}`}>
       {/* Header */}
       <div className="flex-shrink-0 p-4 border-b border-gray-200 dark:border-gray-800">
         <h1 className="text-2xl font-bold mb-4">Mesajlar</h1>

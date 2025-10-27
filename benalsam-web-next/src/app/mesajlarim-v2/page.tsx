@@ -111,6 +111,11 @@ export default function MessagesV2Page() {
     refreshUnreadCount();
   }, [refreshUnreadCount]);
 
+  const handleBack = useCallback(() => {
+    console.log('⬅️ [MessagesV2Page] Back button clicked, clearing selection');
+    setSelectedConversationId(null);
+  }, []);
+
   if (authLoading || !user) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -130,6 +135,7 @@ export default function MessagesV2Page() {
           currentUserId={user.id}
           onSearchChange={handleSearchChange}
           onConversationSelect={handleConversationSelect}
+          className={selectedConversationId ? 'hidden md:flex' : 'flex'}
         />
 
         {/* RIGHT PANEL - Chat Area */}
@@ -137,6 +143,8 @@ export default function MessagesV2Page() {
           conversationId={selectedConversationId}
           currentUserId={user.id}
           onMessagesRead={handleMessagesRead}
+          onBack={handleBack}
+          className={selectedConversationId ? 'flex' : 'hidden md:flex'}
         />
       </div>
     </MessagingErrorBoundary>

@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useEffect, useState, useRef } from 'react';
-import { MessageCircle, Send, MoreVertical } from 'lucide-react';
+import { MessageCircle, Send, MoreVertical, ArrowLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { sanitizeText } from '@/utils/sanitize';
@@ -47,12 +47,16 @@ interface ChatAreaProps {
   conversationId: string | null;
   currentUserId: string;
   onMessagesRead: () => void;
+  onBack?: () => void;
+  className?: string;
 }
 
 export const ChatArea = memo(function ChatArea({
   conversationId,
   currentUserId,
   onMessagesRead,
+  onBack,
+  className = '',
 }: ChatAreaProps) {
   console.log('🟩 [ChatArea] Rendering', { conversationId });
 
@@ -215,7 +219,7 @@ export const ChatArea = memo(function ChatArea({
   // Empty state
   if (!conversationId) {
     return (
-      <div className="flex-1 flex flex-col h-screen">
+      <div className={`flex-1 flex flex-col h-screen ${className}`}>
         <div className="flex flex-col items-center justify-center h-full text-center p-8 animate-fadeIn">
           <MessageCircle className="w-24 h-24 text-gray-300 dark:text-gray-600 mb-4" />
           <h2 className="text-2xl font-bold mb-2">Mesajlarınız</h2>
@@ -230,17 +234,27 @@ export const ChatArea = memo(function ChatArea({
   // Loading state
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center h-screen animate-fadeIn">
+      <div className={`flex-1 flex items-center justify-center h-screen animate-fadeIn ${className}`}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col h-screen animate-fadeIn">
+    <div className={`flex-1 flex flex-col h-screen animate-fadeIn ${className}`}>
       {/* Chat Header */}
       <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
         <div className="flex items-center gap-3 flex-1 min-w-0">
+          {/* Back Button - Mobile Only */}
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="md:hidden p-2 -ml-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+          )}
+          
           <Avatar className="w-10 h-10">
             <AvatarImage src={otherUser?.avatar_url || undefined} alt={otherUser?.name} />
             <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white">
