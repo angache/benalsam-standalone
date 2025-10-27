@@ -14,7 +14,7 @@ import ListingCard from '@/components/ListingCard'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Loader2, AlertCircle, ArrowUpDown, Star, Crown, Zap } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
-import { ViewToggle } from './ViewToggle'
+import { ViewToggle, type ViewType } from './ViewToggle'
 import { ActiveFilterBadge } from './ActiveFilterBadge'
 import { QuickViewModal } from './QuickViewModal'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -31,8 +31,37 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
   const { ref, inView } = useInView()
   const queryClient = useQueryClient()
   const { toast } = useToast()
-  const [view, setView] = useState<'grid' | 'list'>('grid')
+  
+  // Load view preference from localStorage
+  const [view, setView] = useState<ViewType>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('listingView') as ViewType) || 'grid-3'
+    }
+    return 'grid-3'
+  })
+  
   const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high' | 'popular'>('newest')
+  
+  // Save view preference to localStorage
+  const handleViewChange = (newView: ViewType) => {
+    setView(newView)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('listingView', newView)
+    }
+    
+    const viewLabels = {
+      'grid-2': '2 Sütun',
+      'grid-3': '3 Sütun',
+      'grid-4': '4 Sütun',
+      'list': 'Liste'
+    }
+    
+    toast({
+      title: "👁️ Görünüm Değiştirildi",
+      description: `${viewLabels[newView]} görünümü aktif`,
+      duration: 2000,
+    })
+  }
   const [quickViewListing, setQuickViewListing] = useState<{
     id: string
     title: string
@@ -379,15 +408,19 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
             </SelectContent>
           </Select>
           
-          <ViewToggle view={view} onViewChange={setView} />
+          <ViewToggle view={view} onViewChange={handleViewChange} />
         </div>
       </div>
 
       {/* Listings Grid/List */}
       <div className={
-        view === 'grid' 
-          ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
-          : "flex flex-col gap-4"
+        view === 'list'
+          ? "flex flex-col gap-4 transition-all duration-300"
+          : view === 'grid-2'
+          ? "grid grid-cols-1 sm:grid-cols-2 gap-6 transition-all duration-300"
+          : view === 'grid-3'
+          ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 transition-all duration-300"
+          : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 transition-all duration-300"
       }>
         {allListings.map((listing, index: number) => (
           <div 
