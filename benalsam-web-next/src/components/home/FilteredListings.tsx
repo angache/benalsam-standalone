@@ -44,6 +44,7 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
   
   // Save view preference to localStorage
   const handleViewChange = (newView: ViewType) => {
+    
     setView(newView)
     if (typeof window !== 'undefined') {
       localStorage.setItem('listingView', newView)

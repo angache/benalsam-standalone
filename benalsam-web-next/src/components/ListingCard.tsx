@@ -18,7 +18,8 @@ import {
   Edit3,
   Trash2,
   EyeOff,
-  CheckCircle2
+  CheckCircle2,
+  Share2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -180,6 +181,33 @@ export const ListingCard: React.FC<ListingCardProps> = ({
     }
   }
 
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    
+    const shareData = {
+      title: listing.title,
+      text: listing.description || listing.title,
+      url: `${window.location.origin}/ilan/${listing.id}`
+    }
+
+    // Check if native share is available (mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData)
+      } catch (err) {
+        console.log('Share cancelled or failed')
+      }
+    } else {
+      // Fallback: Copy to clipboard
+      try {
+        await navigator.clipboard.writeText(shareData.url)
+        alert('Link kopyalandı!')
+      } catch (err) {
+        console.error('Failed to copy:', err)
+      }
+    }
+  }
+
   // Card content based on size
   if (isSmall) {
     return (
@@ -258,6 +286,41 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10"></div>
+          
+          {/* Hover overlay with extra info */}
+          <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2 z-20">
+            <div className="text-white text-center space-y-1 px-2">
+              {listing.views_count !== undefined && (
+                <div className="flex items-center gap-1 justify-center text-sm">
+                  <Eye className="w-4 h-4" />
+                  <span>{listing.views_count} görüntüleme</span>
+                </div>
+              )}
+              {listing.created_at && (
+                <div className="text-xs opacity-80">
+                  {formatDistanceToNow(new Date(listing.created_at), { addSuffix: true, locale: tr })}
+                </div>
+              )}
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (onView) onView(listing)
+                  }}
+                  className="px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium backdrop-blur-sm transition-colors"
+                >
+                  Hızlı Görünüm
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="p-1.5 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-colors"
+                  title="Paylaş"
+                >
+                  <Share2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
           
           {/* Badges */}
           <div className="absolute top-1 sm:top-2 left-1 sm:left-2 flex flex-wrap gap-1 z-10">

@@ -17,7 +17,7 @@
 
 'use client'
 
-import { Suspense, useState, useCallback } from 'react'
+import { Suspense, useState, useCallback, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import HeroSection from '@/components/home/HeroSection'
 import PopularCategories from '@/components/home/PopularCategories'
@@ -80,6 +80,43 @@ export default function HomePageV2() {
     })
     router.push('/', { scroll: false })
   }, [router])
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // / - Focus search
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+        const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement
+        if (searchInput && document.activeElement !== searchInput) {
+          e.preventDefault()
+          searchInput.focus()
+        }
+      }
+      
+      // Esc - Clear filters or blur input
+      if (e.key === 'Escape') {
+        const activeElement = document.activeElement as HTMLElement
+        if (activeElement?.tagName === 'INPUT' || activeElement?.tagName === 'TEXTAREA') {
+          activeElement.blur()
+        } else if (filters.categoryId || filters.minPrice || filters.maxPrice || filters.location || filters.urgency || filters.searchQuery) {
+          handleResetFilters()
+        }
+      }
+      
+      // Ctrl/Cmd + K - Focus search (alternative)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement
+        if (searchInput) {
+          searchInput.focus()
+          searchInput.select()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [filters, handleResetFilters])
 
   return (
     <div className="min-h-screen bg-background">
