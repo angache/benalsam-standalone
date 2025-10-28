@@ -135,17 +135,17 @@ export default function FilterSidebar({
             variant="ghost"
             size="sm"
             onClick={handleReset}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground animate-fadeIn transition-all duration-200 hover:scale-105"
           >
-            <X className="w-4 h-4 mr-1" />
+            <X className="w-4 h-4 mr-1 transition-transform duration-200 group-hover:rotate-90" />
             Temizle
           </Button>
         )}
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 transition-all duration-300">
         {/* Search Box */}
-        <div>
+        <div className="transition-all duration-200">
           <Label htmlFor="search" className="text-sm font-medium mb-2 block">
             Ara
           </Label>
