@@ -226,6 +226,31 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
     }
   }, [inView, fetchNextPage, hasNextPage, isFetchingNextPage])
 
+  // Prefetch next page when user is close to bottom (2 items before trigger)
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return
+
+    const prefetchTriggerIndex = Math.max(0, allListings.length - 4)
+    const triggerElement = document.querySelector(`[data-listing-index="${prefetchTriggerIndex}"]`)
+    
+    if (!triggerElement) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+            console.log('🔮 [FilteredListings] Prefetching next page...')
+            fetchNextPage()
+          }
+        })
+      },
+      { rootMargin: '400px' } // Start prefetch 400px before reaching the element
+    )
+
+    observer.observe(triggerElement)
+    return () => observer.disconnect()
+  }, [allListings.length, hasNextPage, isFetchingNextPage, fetchNextPage])
+
   // Flatten all pages into single array
   const allListings = data?.pages.flatMap((page) => page.listings) || []
   const totalCount = data?.pages[0]?.totalCount || 0
@@ -426,6 +451,7 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
         {allListings.map((listing, index: number) => (
           <div 
             key={listing.id}
+            data-listing-index={index}
             className="animate-fadeInUp hover-lift"
             style={{ animationDelay: `${(index % 12) * 50}ms` }}
           >

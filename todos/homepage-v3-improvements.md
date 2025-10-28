@@ -30,7 +30,7 @@
 ## ⚡ 5. PERFORMANS OPTİMİZASYONU
 - [x] Debounce fiyat inputları (300ms) ✅
 - [x] Optimistic updates (favori toggle) ✅
-- [ ] Prefetch next page (viewport'a yaklaşınca)
+- [x] Prefetch next page (viewport'a yaklaşınca) ✅
 - [x] Image lazy loading optimization ✅
 - [x] React Query cache stratejisi ✅
 
