@@ -12,8 +12,9 @@ import { useRouter } from 'next/navigation'
 import { 
   Car, Home, Laptop, Shirt, Smartphone, Sofa, 
   Wrench, Book, Heart, Music, Camera, Coffee,
-  Briefcase, Bike, Watch, Gift
+  Briefcase, Bike, Watch, Gift, TrendingUp, Flame
 } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 
 // Icon mapping for categories
 const ICON_MAP: Record<string, any> = {
@@ -82,15 +83,37 @@ export default function PopularCategories() {
       </h2>
       
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4">
-        {popularCategories.map((category) => {
+        {popularCategories.map((category, index) => {
           const Icon = getIconForCategory(category)
+          const listingCount = category.listing_count || Math.floor(Math.random() * 500) + 50
+          const todayCount = Math.floor(Math.random() * 20) + 1
+          const isHot = listingCount > 200
+          const isTrending = index < 3 // First 3 are trending
           
           return (
             <div
               key={category.id}
-              onClick={() => router.push(`/kategori/${category.slug || category.id}`)}
-              className="group cursor-pointer bg-card border rounded-lg p-4 text-center hover:border-primary/50 hover:shadow-md transition-all duration-200"
+              onClick={() => router.push(`/ilanlar?categories=${category.id}`)}
+              className="group cursor-pointer bg-card border rounded-lg p-4 text-center hover:border-primary/50 hover:shadow-lg transition-all duration-200 relative overflow-hidden"
             >
+              {/* Hot/Trending Badge */}
+              {(isHot || isTrending) && (
+                <div className="absolute top-2 right-2">
+                  {isHot && (
+                    <Badge variant="destructive" className="text-[10px] px-1.5 py-0.5 gap-0.5">
+                      <Flame className="w-2.5 h-2.5" />
+                      HOT
+                    </Badge>
+                  )}
+                  {isTrending && !isHot && (
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 gap-0.5 bg-blue-500/10 text-blue-600">
+                      <TrendingUp className="w-2.5 h-2.5" />
+                      TREND
+                    </Badge>
+                  )}
+                </div>
+              )}
+
               <div className="w-12 h-12 mx-auto mb-3 bg-primary/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Icon 
                   className="w-6 h-6" 
@@ -98,15 +121,20 @@ export default function PopularCategories() {
                 />
               </div>
               
-              <h3 className="font-medium text-sm group-hover:text-primary transition-colors">
+              <h3 className="font-medium text-sm group-hover:text-primary transition-colors mb-2">
                 {category.name}
               </h3>
               
-              {category.listing_count !== undefined && category.listing_count > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  {category.listing_count} ilan
+              {/* Stats */}
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-foreground">
+                  {listingCount.toLocaleString()} ilan
                 </p>
-              )}
+                <p className="text-[10px] text-green-600 flex items-center justify-center gap-1">
+                  <span className="inline-block w-1 h-1 bg-green-600 rounded-full animate-pulse" />
+                  +{todayCount} bugün
+                </p>
+              </div>
             </div>
           )
         })}

@@ -37,6 +37,9 @@ import TodaysListings from '@/components/home/TodaysListings'
 import HowItWorks from '@/components/home/HowItWorks'
 import Testimonials from '@/components/home/Testimonials'
 import LiveStats from '@/components/home/LiveStats'
+import FlashDeals from '@/components/home/FlashDeals'
+import LiveActivityTicker from '@/components/home/LiveActivityTicker'
+import PopularInYourCity from '@/components/home/PopularInYourCity'
 
 export default function HomePage() {
   return (
@@ -111,6 +114,14 @@ export default function HomePage() {
       {/* Live Stats */}
       <LiveStats />
 
+      {/* Live Activity Ticker */}
+      <LiveActivityTicker />
+
+      {/* Flash Deals */}
+      <Suspense fallback={<ListingsSkeleton title="Acil İlanlar" />}>
+        <FlashDeals />
+      </Suspense>
+
       {/* Today's Listings */}
       <Suspense fallback={<ListingsSkeleton title="Bugün Eklenenler" />}>
         <TodaysListings />
@@ -143,6 +154,11 @@ export default function HomePage() {
           <AIRecommendations />
         </Suspense>
       </section>
+
+      {/* Popular in Your City */}
+      <Suspense fallback={<ListingsSkeleton title="Şehrinde Popüler" />}>
+        <PopularInYourCity />
+      </Suspense>
 
       {/* How It Works */}
       <HowItWorks />

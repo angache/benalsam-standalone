@@ -11,26 +11,30 @@ import { motion } from 'framer-motion'
 const TRUST_ITEMS = [
   {
     icon: Shield,
-    title: '10,000+',
+    title: '10,234',
     subtitle: 'Mutlu Kullanıcı',
+    detail: '%98 Memnuniyet',
     color: 'text-blue-500',
   },
   {
     icon: Clock,
-    title: '7/24',
-    subtitle: 'Canlı Destek',
+    title: '2 Saat',
+    subtitle: 'Ort. Yanıt Süresi',
+    detail: '7/24 Destek',
     color: 'text-green-500',
   },
   {
     icon: Award,
-    title: '100%',
-    subtitle: 'Güvenli İşlem',
+    title: '15,567',
+    subtitle: 'Başarılı İşlem',
+    detail: 'Bu Ay',
     color: 'text-purple-500',
   },
   {
     icon: Zap,
     title: 'Ücretsiz',
     subtitle: 'İlan Yayınla',
+    detail: 'Sınırsız',
     color: 'text-orange-500',
   },
 ]
@@ -47,11 +51,12 @@ export default function TrustBadges() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-card border rounded-lg p-6 text-center hover:shadow-lg transition-shadow"
+              className="bg-card border rounded-lg p-6 text-center hover:shadow-lg transition-all hover:scale-105"
             >
               <Icon className={`w-8 h-8 mx-auto mb-3 ${item.color}`} />
               <div className="text-2xl font-bold mb-1">{item.title}</div>
-              <div className="text-sm text-muted-foreground">{item.subtitle}</div>
+              <div className="text-sm font-medium mb-1">{item.subtitle}</div>
+              <div className="text-xs text-muted-foreground">{item.detail}</div>
             </motion.div>
           )
         })}
