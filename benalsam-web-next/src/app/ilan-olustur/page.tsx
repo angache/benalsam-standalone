@@ -1,6 +1,5 @@
 'use client'
 
-import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import CategoryStep from '@/components/CreateListing/CategoryStep'
 import DetailsStep from '@/components/CreateListing/DetailsStep'
@@ -247,7 +246,7 @@ export default function CreateListingPage() {
       // Call the service (handles upload + create + polling)
       const result = await createListingWithUploadService(
         listingData,
-        session.user.id,
+        user.id,
         (progress) => {
           setUploadProgress(progress)
           if (progress >= 50 && progressPhase === 'uploading') {
@@ -281,7 +280,6 @@ export default function CreateListingPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
       <main className="flex-1">
         {/* Cancel Button */}
         <div className="container mx-auto px-4 py-4">

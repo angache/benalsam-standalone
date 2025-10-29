@@ -10,6 +10,7 @@ import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import { useInView } from 'react-intersection-observer'
 import { useEffect, useState, useMemo } from 'react'
 import { listingService } from '@/services/listingService'
+import { toggleFavorite } from '@/services/favoriteService'
 import ListingCard from '@/components/ListingCard'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Loader2, AlertCircle, ArrowUpDown, Star, Crown, Zap } from 'lucide-react'
@@ -90,9 +91,11 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
   // Optimistic update mutation for favorites
   const toggleFavoriteMutation = useMutation({
     mutationFn: async ({ listingId, isFavorited }: { listingId: string, isFavorited: boolean }) => {
-      // API call would go here
-      console.log('Toggle favorite:', listingId, isFavorited)
-      return { listingId, isFavorited }
+      if (!user?.id) throw new Error('User not logged in')
+      
+      // Real API call
+      const newIsFavorited = await toggleFavorite(user.id, listingId)
+      return { listingId, isFavorited: newIsFavorited }
     },
     onMutate: async ({ listingId, isFavorited }) => {
       // Show toast
@@ -103,7 +106,7 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
       })
       
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['filtered-listings', filters, user?.id, sortBy] })
+      await queryClient.cancelQueries({ queryKey: ['filtered-listings'] })
 
       // Snapshot the previous value
       const previousData = queryClient.getQueryData(['filtered-listings', filters, user?.id, sortBy])
@@ -128,14 +131,23 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
       return { previousData }
     },
     onError: (err, variables, context) => {
+      // Show error toast
+      toast({
+        title: "❌ Hata",
+        description: "Favori işlemi başarısız oldu",
+        variant: "destructive",
+        duration: 3000,
+      })
+      
       // Revert the optimistic update on error
       if (context?.previousData) {
         queryClient.setQueryData(['filtered-listings', filters, user?.id, sortBy], context.previousData)
       }
     },
-    onSettled: () => {
-      // Refetch after error or success
-      queryClient.invalidateQueries({ queryKey: ['filtered-listings', filters, user?.id, sortBy] })
+    onSuccess: () => {
+      // Refetch to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['filtered-listings'] })
+      queryClient.invalidateQueries({ queryKey: ['favorites'] })
     },
   })
 
@@ -160,7 +172,7 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
   } = useInfiniteQuery({
     queryKey: ['filtered-listings', filters, user?.id, sortBy],
     queryFn: async ({ pageParam = 1 }) => {
-      console.log('🔍 [FilteredListings] Fetching page:', pageParam, 'with filters:', filters)
+      console.log('🔍 [FilteredListings] Fetching page:', pageParam, 'with filters:', filters, 'sortBy:', sortBy)
       
       // Determine sort field and order based on sortBy filter
       let sortField = 'created_at'
@@ -219,6 +231,10 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
     staleTime: 1 * 60 * 1000, // 1 minute
   })
 
+  // Flatten all pages into single array
+  const allListings = data?.pages.flatMap((page) => page.listings) || []
+  const totalCount = data?.pages[0]?.totalCount || 0
+
   // Fetch next page when scrolling to bottom
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -250,10 +266,6 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
     observer.observe(triggerElement)
     return () => observer.disconnect()
   }, [allListings.length, hasNextPage, isFetchingNextPage, fetchNextPage])
-
-  // Flatten all pages into single array
-  const allListings = data?.pages.flatMap((page) => page.listings) || []
-  const totalCount = data?.pages[0]?.totalCount || 0
 
   // Dynamic results message
   const getResultsMessage = () => {
@@ -460,12 +472,20 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
               currentUser={user}
               priority={index < 6} // First 6 cards load with priority
               onToggleFavorite={(listingId: string) => {
+                console.log('🔄 [FilteredListings] Toggle favorite called:', listingId)
                 const listing = allListings.find(l => l.id === listingId)
+                console.log('📦 [FilteredListings] Found listing:', { 
+                  id: listing?.id, 
+                  is_favorited: listing?.is_favorited,
+                  hasUser: !!user?.id 
+                })
                 if (listing) {
                   toggleFavoriteMutation.mutate({
                     listingId,
                     isFavorited: !listing.is_favorited
                   })
+                } else {
+                  console.error('❌ [FilteredListings] Listing not found in allListings!')
                 }
               }}
               onView={(listing) => setQuickViewListing(listing)}

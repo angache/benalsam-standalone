@@ -170,8 +170,15 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation()
+    console.log('❤️ [ListingCard] Favorite clicked:', { 
+      listingId: listing.id, 
+      hasHandler: !!onToggleFavorite,
+      isFavorited 
+    })
     if (onToggleFavorite) {
       onToggleFavorite(listing.id)
+    } else {
+      console.warn('⚠️ [ListingCard] No onToggleFavorite handler!')
     }
   }
 
@@ -429,7 +436,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         {cardImageUrl ? (
           <Image
             src={cardImageUrl}
-            alt={listing.title}
+            alt={listing.title || 'İlan görseli'}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
             sizes={isLarge ? "(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw" : "(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"}

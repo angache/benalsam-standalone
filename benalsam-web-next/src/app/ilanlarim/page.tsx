@@ -10,10 +10,21 @@ import MyListingCard from '@/components/MyListings/MyListingCard'
 import DopingModal from '@/components/MyListings/DopingModal'
 import { statusConfig, getListingStatus, getStatusBadge, getPremiumBadges } from '@/lib/myListingsUtils'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { SkeletonCard } from '@/components/ui/skeleton'
+import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyStateList } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
-import Header from '@/components/Header'
+
+// Skeleton card for listing
+const SkeletonCard = () => (
+  <div className="rounded-lg overflow-hidden bg-card border">
+    <Skeleton className="h-48 w-full" />
+    <div className="p-4 space-y-3">
+      <Skeleton className="h-4 w-3/4" />
+      <Skeleton className="h-4 w-1/2" />
+      <Skeleton className="h-4 w-full" />
+    </div>
+  </div>
+)
 
 // Modern skeleton component for my listings page
 const MyListingsSkeleton = () => (
@@ -193,7 +204,6 @@ const MyListingsPage = () => {
   if (loadingAuth || isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
           <LoadingSpinner size="xl" />
         </div>
@@ -203,7 +213,6 @@ const MyListingsPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

@@ -135,13 +135,30 @@ export async function createListingWithUploadService(
       // Convert image objects to File objects
       const imageFiles: File[] = []
       for (const img of listingData.images) {
-        if (img.file instanceof File) {
-          imageFiles.push(img.file)
-        } else if (img.preview && img.preview.startsWith('blob:')) {
-          const response = await fetch(img.preview)
-          const blob = await response.blob()
-          const file = new File([blob], img.name || 'image.jpg', { type: blob.type || 'image/jpeg' })
-          imageFiles.push(file)
+        try {
+          // Priority 1: Use existing file object
+          if (img.file && typeof img.file === 'object' && img.file.constructor.name === 'File') {
+            imageFiles.push(img.file)
+            console.log('✅ [UPLOAD] Using existing file:', img.name)
+          } 
+          // Priority 2: Try to fetch from blob URL (for non-cached images)
+          else if (img.preview && img.preview.startsWith('blob:')) {
+            console.log('🔄 [UPLOAD] Fetching blob URL:', img.name)
+            const response = await fetch(img.preview)
+            if (!response.ok) {
+              throw new Error(`Failed to fetch blob: ${response.status}`)
+            }
+            const blob = await response.blob()
+            const file = new File([blob], img.name || 'image.jpg', { type: blob.type || 'image/jpeg' })
+            imageFiles.push(file)
+            console.log('✅ [UPLOAD] Converted blob to file:', img.name)
+          }
+          else {
+            console.warn('⚠️ [UPLOAD] Image has no valid file or blob:', img.name)
+          }
+        } catch (error) {
+          console.error('❌ [UPLOAD] Failed to process image:', img.name, error)
+          throw new Error(`Failed to process image: ${img.name}`)
         }
       }
 

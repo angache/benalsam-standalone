@@ -76,11 +76,13 @@ const nextConfig: NextConfig = {
             value: process.env.NODE_ENV === 'production'
               ? [
                   "default-src 'self'",
-                  "script-src 'self' https://accounts.google.com https://apis.google.com",
+                  "script-src 'self' https://accounts.google.com https://apis.google.com https://cdn.jsdelivr.net",
+                  "worker-src 'self' blob:",
+                  "script-src-elem 'self' https://accounts.google.com https://apis.google.com https://cdn.jsdelivr.net",
                   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                   "img-src 'self' data: blob: https: http:",
                   "font-src 'self' data: https://fonts.gstatic.com",
-                  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+                  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://images.unsplash.com https://api.unsplash.com https://nominatim.openstreetmap.org data: blob:",
                   "frame-src 'self' https://accounts.google.com",
                   "object-src 'none'",
                   "base-uri 'self'",
@@ -91,11 +93,13 @@ const nextConfig: NextConfig = {
               : [
                   // Development: More permissive
                   "default-src 'self'",
-                  "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com https://apis.google.com",
+                  "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com https://apis.google.com https://cdn.jsdelivr.net",
+                  "worker-src 'self' blob:",
+                  "script-src-elem 'self' 'unsafe-inline' https://accounts.google.com https://apis.google.com https://cdn.jsdelivr.net",
                   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                   "img-src 'self' data: blob: https: http:",
                   "font-src 'self' data: https://fonts.gstatic.com",
-                  "connect-src 'self' https://*.supabase.co wss://*.supabase.co http://localhost:* ws://localhost:* wss://localhost:* ws://0.0.0.0:*",
+                  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://images.unsplash.com https://api.unsplash.com https://nominatim.openstreetmap.org data: blob: http://localhost:* ws://localhost:* wss://localhost:* ws://0.0.0.0:*",
                   "frame-src 'self' https://accounts.google.com",
                   "object-src 'none'",
                   "base-uri 'self'",
@@ -118,6 +122,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'source.unsplash.com',
       },
       {
         protocol: 'https',

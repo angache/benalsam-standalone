@@ -70,7 +70,7 @@ export const useCategoryCounts = () => {
       }
 
       // 2) Fallback to Search Service / ES Service stats if categories service unavailable
-      const ES_PUBLIC_URL = process.env.NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL || 'http://localhost:3006';
+      const ES_PUBLIC_URL = process.env.NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL || 'http://localhost:3016';
       const SEARCH_SERVICE_URL = process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || '';
       const statsUrl = SEARCH_SERVICE_URL
         ? `${SEARCH_SERVICE_URL}/api/v1/search/stats`

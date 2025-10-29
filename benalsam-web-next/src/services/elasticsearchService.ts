@@ -1,10 +1,11 @@
 import { Listing, ApiResponse, QueryFilters } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { incrementSourceCount } from '@/lib/debugSource';
+import { processFetchedListings } from './listingService/core';
 
 // Search Service API endpoint'i
 const SEARCH_SERVICE_URL = process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || 'http://localhost:3016';
-const ELASTICSEARCH_PUBLIC_URL = process.env.NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL || 'http://localhost:3006';
+const ELASTICSEARCH_PUBLIC_URL = process.env.NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL || 'http://localhost:3016';
 
 export interface ElasticsearchSearchParams {
   query?: string;
@@ -70,7 +71,13 @@ export const searchListingsWithElasticsearch = async (
       page,
       pageSize: limit,
       sortBy,
-      sortOrder
+      sortOrder,
+      // Add filters (Search Service expects these field names)
+      categoryIds: params.filters?.category_id ? [params.filters.category_id] : undefined,
+      location: params.filters?.location,
+      minPrice: params.filters?.minBudget,
+      maxPrice: params.filters?.maxBudget,
+      urgency: params.filters?.urgency,
     } as any;
 
     console.log('🔍 Elasticsearch search - Payload:', servicePayload);
@@ -108,20 +115,22 @@ export const searchListingsWithElasticsearch = async (
       return { data: [] };
     }
 
-    const sortedListings = docs;
+    // Process listings to add is_favorited and user profiles
+    const processedListings = await processFetchedListings(docs, currentUserId);
 
     // Mark source for debug (only used in development)
     if (process.env.NODE_ENV !== 'production') {
-      sortedListings.forEach((l: any) => { try { l.__src = 'E'; } catch (_) {} });
-      incrementSourceCount('E', sortedListings.length);
+      processedListings.forEach((l: any) => { try { l.__src = 'E'; } catch (_) {} });
+      incrementSourceCount('E', processedListings.length);
     }
 
     console.log('✅ Elasticsearch search completed:', {
-      returned: sortedListings.length,
-      total
+      returned: processedListings.length,
+      total,
+      hasFavorites: processedListings.some(l => l.is_favorited)
     });
 
-    return { data: sortedListings, total };
+    return { data: processedListings, total };
 
   } catch (error) {
     // Silent fallback for network errors (ES service not running)

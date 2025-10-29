@@ -152,11 +152,22 @@ export default function ImagesStep({ formData, mainImageIndex, onChange, onSetMa
         imagesToProcess.map(async (img) => {
           try {
             console.log('🔄 [STOCK] Processing image:', img.id)
-            const response = await fetch(img.urls.regular)
+            // Use download link with CORS-friendly parameters
+            const downloadUrl = `${img.urls.regular}&fm=jpg&fit=max&w=1920`
+            const response = await fetch(downloadUrl, {
+              mode: 'cors',
+              credentials: 'omit'
+            })
+            
+            if (!response.ok) {
+              throw new Error(`Failed to download image: ${response.status}`)
+            }
+            
             const blob = await response.blob()
             const file = new File([blob], `${img.id}.jpg`, { type: 'image/jpeg' })
             const compressedFile = await compressImage(file)
             const preview = URL.createObjectURL(compressedFile)
+            
             console.log('✅ [STOCK] Image processed:', { 
               id: img.id, 
               fileName: compressedFile.name, 

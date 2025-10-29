@@ -22,7 +22,6 @@ export interface FilterState {
   maxPrice?: number | null
   location?: string | null
   urgency?: string | null
-  sortBy?: string | null
   searchQuery?: string | null
 }
 
@@ -69,12 +68,12 @@ export default function FilterSidebar({
   useEffect(() => {
     if (debouncedMinPrice !== filters.minPrice || debouncedMaxPrice !== filters.maxPrice) {
       onFiltersChange({
-        ...filters,
+        ...localFilters,
         minPrice: debouncedMinPrice,
         maxPrice: debouncedMaxPrice
       })
     }
-  }, [debouncedMinPrice, debouncedMaxPrice, filters, onFiltersChange])
+  }, [debouncedMinPrice, debouncedMaxPrice])
 
   // Fetch categories
   const { data: categories } = useQuery({
@@ -100,9 +99,11 @@ export default function FilterSidebar({
     
     // For price inputs, don't immediately update parent (debounce will handle it)
     if (key === 'minPrice' || key === 'maxPrice') {
+      console.log('💰 [FilterSidebar] Price changed (debouncing):', { [key]: value })
       return
     }
     
+    console.log('✅ [FilterSidebar] Filter changed:', { key, value, newFilters })
     onFiltersChange(newFilters)
   }
 
@@ -113,7 +114,6 @@ export default function FilterSidebar({
       maxPrice: null,
       location: null,
       urgency: null,
-      sortBy: null,
       searchQuery: null,
     }
     setLocalFilters(emptyFilters)
@@ -159,67 +159,6 @@ export default function FilterSidebar({
               onChange={(e) => handleFilterChange('searchQuery', e.target.value || null)}
               className="pl-10"
             />
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Sort Dropdown */}
-        <div>
-          <Label className="text-sm font-medium mb-3 block">
-            Sıralama
-          </Label>
-          <div className="space-y-2">
-            <button
-              onClick={() => handleFilterChange('sortBy', null)}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                !localFilters.sortBy
-                  ? 'bg-primary text-primary-foreground font-medium'
-                  : 'hover:bg-muted'
-              }`}
-            >
-              Varsayılan
-            </button>
-            <button
-              onClick={() => handleFilterChange('sortBy', 'newest')}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                localFilters.sortBy === 'newest'
-                  ? 'bg-primary text-primary-foreground font-medium'
-                  : 'hover:bg-muted'
-              }`}
-            >
-              En Yeni
-            </button>
-            <button
-              onClick={() => handleFilterChange('sortBy', 'cheapest')}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                localFilters.sortBy === 'cheapest'
-                  ? 'bg-primary text-primary-foreground font-medium'
-                  : 'hover:bg-muted'
-              }`}
-            >
-              En Ucuz
-            </button>
-            <button
-              onClick={() => handleFilterChange('sortBy', 'expensive')}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                localFilters.sortBy === 'expensive'
-                  ? 'bg-primary text-primary-foreground font-medium'
-                  : 'hover:bg-muted'
-              }`}
-            >
-              En Pahalı
-            </button>
-            <button
-              onClick={() => handleFilterChange('sortBy', 'popular')}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                localFilters.sortBy === 'popular'
-                  ? 'bg-primary text-primary-foreground font-medium'
-                  : 'hover:bg-muted'
-              }`}
-            >
-              En Popüler
-            </button>
           </div>
         </div>
 
