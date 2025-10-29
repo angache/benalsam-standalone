@@ -20,9 +20,8 @@
 
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { Search, TrendingUp, Sparkles, Grid3x3 } from 'lucide-react'
+import { TrendingUp, Sparkles, Grid3x3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Components
@@ -40,10 +39,18 @@ import LiveStats from '@/components/home/LiveStats'
 import FlashDeals from '@/components/home/FlashDeals'
 import LiveActivityTicker from '@/components/home/LiveActivityTicker'
 import PopularInYourCity from '@/components/home/PopularInYourCity'
+import SmartSearchBox from '@/components/home/SmartSearchBox'
+import PersonalizedSection from '@/components/home/PersonalizedSection'
+import AppDownloadBanner from '@/components/home/AppDownloadBanner'
+import BlogSection from '@/components/home/BlogSection'
+import ScrollProgress from '@/components/ScrollProgress'
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
+      {/* Scroll Progress */}
+      <ScrollProgress />
+
       {/* Hero Section - Enhanced */}
       <section className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-background py-16 sm:py-24">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -60,32 +67,9 @@ export default function HomePage() {
               Binlerce ilan arasından kolayca arama yap, fırsatları kaçırma
             </p>
 
-            {/* Quick Search Box */}
-            <div className="max-w-2xl mx-auto mt-8">
-              <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                <Input
-                  type="text"
-                  placeholder="Ne arıyorsunuz? (iPhone, Daire, Araba...)"
-                  className="pl-12 pr-32 h-14 text-base shadow-lg border-2 focus-visible:border-primary"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      const query = (e.target as HTMLInputElement).value
-                      if (query.trim()) {
-                        window.location.href = `/ilanlar?q=${encodeURIComponent(query)}`
-                      }
-                    }
-                  }}
-                />
-                <Link href="/ilanlar">
-                  <Button 
-                    size="lg" 
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-10"
-                  >
-                    Ara
-                  </Button>
-                </Link>
-              </div>
+            {/* Smart Search Box with Autocomplete */}
+            <div className="mt-8">
+              <SmartSearchBox />
 
               {/* Trending Keywords */}
               <div className="mt-6">
@@ -116,6 +100,9 @@ export default function HomePage() {
 
       {/* Live Activity Ticker */}
       <LiveActivityTicker />
+
+      {/* Personalized Section (logged-in users only) */}
+      <PersonalizedSection />
 
       {/* Flash Deals */}
       <Suspense fallback={<ListingsSkeleton title="Acil İlanlar" />}>
@@ -163,8 +150,14 @@ export default function HomePage() {
       {/* How It Works */}
       <HowItWorks />
 
+      {/* App Download Banner */}
+      <AppDownloadBanner />
+
       {/* Testimonials */}
       <Testimonials />
+
+      {/* Blog Section */}
+      <BlogSection />
 
       {/* CTA Section - Go to Advanced Search */}
       <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
