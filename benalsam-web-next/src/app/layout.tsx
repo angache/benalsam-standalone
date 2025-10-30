@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default function RootLayout({
             {children}
             <Footer />
             <Toaster />
+            <ChatbotWidget />
           </Providers>
         </ErrorBoundary>
       </body>

@@ -17,25 +17,26 @@ import Link from 'next/link'
 export default function PersonalizedSection() {
   const { user } = useAuth()
 
-  // Only show for logged-in users
-  if (!user) return null
-
   const { data, isLoading } = useQuery({
-    queryKey: ['personalized-listings', user.id],
+    queryKey: ['personalized-listings', user?.id],
     queryFn: () =>
       fetchListingsWithFilters(
         {
           sortBy: 'created_at',
           sortOrder: 'desc',
         },
-        user.id,
+        user?.id,
         1,
         8
       ),
+    enabled: !!user, // Only fetch if user exists
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
   const listings = data?.listings || []
+
+  // Only show for logged-in users
+  if (!user) return null
 
   if (isLoading) {
     return (

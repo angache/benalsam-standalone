@@ -6,6 +6,7 @@
 
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { categoryService } from '@/services/categoryService'
 import { useRouter } from 'next/navigation'
@@ -39,6 +40,12 @@ const ICON_MAP: Record<string, any> = {
 
 export default function PopularCategories() {
   const router = useRouter()
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Fix hydration - only show badges after client mount
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const { data: categories, isLoading } = useQuery({
     queryKey: ['categories'],
@@ -56,7 +63,7 @@ export default function PopularCategories() {
     return ICON_MAP[iconKey] || Gift
   }
 
-  if (isLoading) {
+  if (isLoading || !isMounted) {
     return (
       <div>
         <h2 className="text-2xl md:text-3xl font-bold mb-6 text-foreground">
@@ -64,11 +71,12 @@ export default function PopularCategories() {
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="group cursor-pointer bg-card border rounded-lg p-4 text-center">
-              <div className="w-12 h-12 mx-auto mb-3 bg-primary/10 rounded-lg flex items-center justify-center">
+            <div key={i} className="group cursor-pointer bg-card border rounded-lg p-4 text-center hover:border-primary/50 hover:shadow-lg transition-all duration-200 relative overflow-hidden">
+              <div className="w-12 h-12 mx-auto mb-3 bg-primary/10 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                 <div className="w-6 h-6 bg-muted rounded animate-pulse" />
               </div>
-              <div className="h-4 bg-muted rounded animate-pulse mx-auto w-20" />
+              <div className="h-4 bg-muted rounded animate-pulse mx-auto w-20 mb-2" />
+              <div className="h-3 bg-muted rounded animate-pulse mx-auto w-16" />
             </div>
           ))}
         </div>
@@ -85,8 +93,9 @@ export default function PopularCategories() {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-4">
         {popularCategories.map((category, index) => {
           const Icon = getIconForCategory(category)
-          const listingCount = category.listing_count || Math.floor(Math.random() * 500) + 50
-          const todayCount = Math.floor(Math.random() * 20) + 1
+          // Use deterministic values based on category ID (no random for SSR)
+          const listingCount = category.listing_count || ((category.id as number * 37) % 500) + 50
+          const todayCount = ((category.id as number * 7) % 20) + 1
           const isHot = listingCount > 200
           const isTrending = index < 3 // First 3 are trending
           
@@ -96,8 +105,8 @@ export default function PopularCategories() {
               onClick={() => router.push(`/ilanlar?categories=${category.id}`)}
               className="group cursor-pointer bg-card border rounded-lg p-4 text-center hover:border-primary/50 hover:shadow-lg transition-all duration-200 relative overflow-hidden"
             >
-              {/* Hot/Trending Badge */}
-              {(isHot || isTrending) && (
+              {/* Hot/Trending Badge - Only render after mount to avoid hydration */}
+              {isMounted && (isHot || isTrending) && (
                 <div className="absolute top-2 right-2">
                   {isHot && (
                     <Badge variant="destructive" className="text-[10px] px-1.5 py-0.5 gap-0.5">

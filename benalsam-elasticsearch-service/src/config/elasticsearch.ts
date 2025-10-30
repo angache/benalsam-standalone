@@ -37,9 +37,9 @@ export const ES_MAPPINGS: { properties: Record<string, MappingProperty> } = {
           } as MappingProperty,
 
           // Kategori alanları
-          category: { type: 'keyword' } as MappingProperty,
-          category_id: { type: 'integer' } as MappingProperty,
-          category_path: { type: 'integer' } as MappingProperty,
+          category: { type: 'text' } as MappingProperty, // Match existing: text with keyword subfield
+          category_id: { type: 'long' } as MappingProperty, // Match existing: long
+          category_path: { type: 'long' } as MappingProperty, // Match existing: long
           subcategory: { type: 'keyword' } as MappingProperty,
 
           // Bütçe alanı
@@ -53,8 +53,8 @@ export const ES_MAPPINGS: { properties: Record<string, MappingProperty> } = {
           coordinates: { type: 'geo_point' } as MappingProperty,
 
           // Diğer temel alanlar
-          condition: { type: 'keyword' } as MappingProperty,
-          urgency: { type: 'keyword' } as MappingProperty,
+          condition: { type: 'text' } as MappingProperty, // Match existing: text with keyword subfield
+          urgency: { type: 'text' } as MappingProperty, // Match existing: text with keyword subfield
           main_image_url: { type: 'keyword' } as MappingProperty,
           additional_image_urls: { type: 'keyword' } as MappingProperty,
           status: { type: 'keyword' } as MappingProperty,
@@ -223,16 +223,17 @@ class ElasticsearchConfig {
           }
         });
 
-        // Update mapping
-        await client.indices.putMapping({
-          index: indexName,
-          body: ES_MAPPINGS
-        });
+        // DO NOT update mapping on existing index (causes conflicts)
+        // Mapping updates are not allowed in Elasticsearch
+        // await client.indices.putMapping({
+        //   index: indexName,
+        //   body: ES_MAPPINGS
+        // });
 
         // Open index
         await client.indices.open({ index: indexName });
         
-        logger.info(`✅ Updated index settings and mapping: ${indexName}`);
+        logger.info(`✅ Index already exists, using existing mapping: ${indexName}`);
       }
     } catch (error) {
       logger.error(`❌ Failed to initialize index ${indexName}:`, error);
