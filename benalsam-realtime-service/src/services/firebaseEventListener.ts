@@ -8,9 +8,18 @@ export class FirebaseEventListener {
   private firebaseService: FirebaseService;
   private isListening: boolean = false;
   private cleanupFunction: (() => void) | null = null;
+  private processingQueue: Set<string> = new Set(); // Track processing jobs
+  private readonly MAX_CONCURRENT_JOBS = parseInt(process.env['QUEUE_MAX_CONCURRENT_JOBS'] || '10');
+  private readonly BATCH_SIZE = parseInt(process.env['QUEUE_BATCH_SIZE'] || '50');
+  private readonly MAX_DEPTH_WARNING = parseInt(process.env['QUEUE_MAX_DEPTH_WARNING'] || '1000');
 
   constructor() {
     this.firebaseService = new FirebaseService();
+    logger.info('🔧 Queue settings:', {
+      maxConcurrentJobs: this.MAX_CONCURRENT_JOBS,
+      batchSize: this.BATCH_SIZE,
+      maxDepthWarning: this.MAX_DEPTH_WARNING
+    });
   }
 
   async startListening(): Promise<void> {
@@ -43,13 +52,80 @@ export class FirebaseEventListener {
         return;
       }
 
-      // Firebase'deki her job'ı işle
-      Object.entries(data).forEach(async ([jobId, jobData]: [string, any]) => {
-        await this.processJob(jobId, jobData);
-      });
+      // 🔒 MEMORY SAFETY: Convert to array with limit
+      const allJobs = Object.entries(data) as [string, EnterpriseJobData][];
+      
+      // Filter only pending jobs to avoid reprocessing
+      const pendingJobs = allJobs.filter(([_, job]) => job.status === 'pending');
+      
+      if (pendingJobs.length === 0) {
+        return;
+      }
+
+      logger.info(`📊 Queue stats: ${pendingJobs.length} pending, ${allJobs.length} total`);
+
+      // 🚨 BACKPRESSURE: Warn if queue is too large
+      if (allJobs.length > this.MAX_DEPTH_WARNING) {
+        logger.warn(`⚠️ Large queue detected: ${allJobs.length} jobs. Consider increasing cleanup frequency.`, {
+          totalJobs: allJobs.length,
+          pendingJobs: pendingJobs.length,
+          threshold: this.MAX_DEPTH_WARNING
+        });
+      }
+
+      // 🔄 BATCH PROCESSING: Process in batches with concurrency limit
+      await this.processBatch(pendingJobs.slice(0, this.BATCH_SIZE));
 
     } catch (error) {
       logger.error('❌ Error handling Firebase changes:', error);
+    }
+  }
+
+  /**
+   * Process jobs in batch with concurrency limit
+   */
+  private async processBatch(jobs: [string, EnterpriseJobData][]): Promise<void> {
+    const batchStartTime = Date.now();
+    
+    try {
+      // Process with concurrency limit
+      const promises: Promise<void>[] = [];
+      
+      for (const [jobId, jobData] of jobs) {
+        // Wait if we hit concurrency limit
+        while (this.processingQueue.size >= this.MAX_CONCURRENT_JOBS) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        // Add to processing queue
+        this.processingQueue.add(jobId);
+
+        // Process job with cleanup
+        const jobPromise = this.processJob(jobId, jobData)
+          .finally(() => {
+            this.processingQueue.delete(jobId);
+          });
+
+        promises.push(jobPromise);
+
+        // 🔄 EVENT LOOP BREATHING: Yield to event loop every 10 jobs
+        if (promises.length % 10 === 0) {
+          await new Promise(resolve => setImmediate(resolve));
+        }
+      }
+
+      // Wait for all jobs to complete
+      await Promise.allSettled(promises);
+
+      const batchDuration = Date.now() - batchStartTime;
+      logger.info(`✅ Batch processed: ${jobs.length} jobs in ${batchDuration}ms`, {
+        batchSize: jobs.length,
+        duration: batchDuration,
+        avgPerJob: Math.round(batchDuration / jobs.length)
+      });
+
+    } catch (error) {
+      logger.error('❌ Batch processing error:', error);
     }
   }
 

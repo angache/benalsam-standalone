@@ -16,6 +16,11 @@ export interface SearchParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   attributes?: Record<string, string[]>;
+  // 🆕 Advanced filters
+  dateRange?: string; // 'all' | '24h' | '7d' | '30d'
+  featured?: boolean;
+  showcase?: boolean;
+  urgent?: boolean;
 }
 
 export interface SearchResult {
@@ -278,6 +283,45 @@ export class SearchService {
             budget: priceRange
           }
         });
+      }
+
+      // 🆕 Date Range filter
+      if (params.dateRange && params.dateRange !== 'all') {
+        const now = new Date();
+        let startDate: Date;
+        
+        switch (params.dateRange) {
+          case '24h':
+            startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            break;
+          case '7d':
+            startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            break;
+          case '30d':
+            startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            break;
+          default:
+            startDate = new Date(0); // Beginning of time
+        }
+        
+        filterQueries.push({
+          range: {
+            created_at: {
+              gte: startDate.toISOString()
+            }
+          }
+        });
+      }
+
+      // 🆕 Premium filters
+      if (params.featured) {
+        filterQueries.push({ term: { is_featured: true } });
+      }
+      if (params.showcase) {
+        filterQueries.push({ term: { is_showcase: true } });
+      }
+      if (params.urgent) {
+        filterQueries.push({ term: { is_urgent_premium: true } });
       }
 
       // Build final query

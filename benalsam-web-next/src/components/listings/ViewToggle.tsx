@@ -9,6 +9,7 @@ import { useFilterStore, ViewMode } from '@/stores/filterStore'
 import { Button } from '@/components/ui/button'
 import { Grid2x2, LayoutGrid, Grid3x3, List } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useState, useEffect } from 'react'
 
 const VIEW_OPTIONS: { value: ViewMode; icon: any; label: string }[] = [
   { value: 'grid-2', icon: Grid2x2, label: '2 Kolon' },
@@ -19,6 +20,23 @@ const VIEW_OPTIONS: { value: ViewMode; icon: any; label: string }[] = [
 
 export function ViewToggle() {
   const { viewMode, setViewMode } = useFilterStore()
+  const [isMounted, setIsMounted] = useState(false)
+
+  // 🔧 Fix hydration mismatch - only render after mount
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // Show skeleton during SSR to prevent hydration mismatch
+  if (!isMounted) {
+    return (
+      <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+        {VIEW_OPTIONS.map((option) => (
+          <div key={option.value} className="h-8 w-8" />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="flex items-center gap-1 bg-muted rounded-lg p-1">

@@ -4,9 +4,9 @@
   "description": "Benalsam Realtime Service - Event-based queue system with Firebase Realtime Database",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "nodemon",
+    "dev": "NODE_OPTIONS='--max-old-space-size=2048' nodemon",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js",
+    "start": "NODE_OPTIONS='--max-old-space-size=2048' node dist/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:security": "node test-security.js",

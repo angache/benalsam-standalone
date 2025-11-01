@@ -8,13 +8,14 @@ import logger from '../config/logger';
  */
 export class JobCleanupService {
   private cronJob: ReturnType<typeof cron.schedule> | null = null;
-  private readonly DEFAULT_CLEANUP_DAYS = 7;
-  private readonly DEFAULT_SCHEDULE = '0 2 * * *'; // Daily at 2 AM
+  private readonly DEFAULT_CLEANUP_HOURS = parseInt(process.env['QUEUE_CLEANUP_TTL_HOURS'] || '24');
+  private readonly CLEANUP_INTERVAL_HOURS = parseInt(process.env['QUEUE_CLEANUP_INTERVAL_HOURS'] || '6');
+  private readonly DEFAULT_SCHEDULE = `0 */${this.CLEANUP_INTERVAL_HOURS} * * *`; // ENV'den oku
 
   /**
    * Start the cleanup scheduler
    */
-  start(schedule: string = this.DEFAULT_SCHEDULE, olderThanDays: number = this.DEFAULT_CLEANUP_DAYS): void {
+  start(schedule: string = this.DEFAULT_SCHEDULE, olderThanHours: number = this.DEFAULT_CLEANUP_HOURS): void {
     if (this.cronJob) {
       logger.warn('⚠️ Job cleanup service already running');
       return;
@@ -27,10 +28,10 @@ export class JobCleanupService {
     }
 
     this.cronJob = cron.schedule(schedule, async () => {
-      await this.runCleanup(olderThanDays);
+      await this.runCleanup(olderThanHours);
     });
 
-    logger.info(`✅ Job cleanup service started (schedule: ${schedule}, older than: ${olderThanDays} days)`);
+    logger.info(`✅ Job cleanup service started (schedule: ${schedule}, older than: ${olderThanHours} hours)`);
   }
 
   /**
@@ -47,10 +48,12 @@ export class JobCleanupService {
   /**
    * Run cleanup manually
    */
-  async runCleanup(olderThanDays: number = this.DEFAULT_CLEANUP_DAYS): Promise<number> {
+  async runCleanup(olderThanHours: number = this.DEFAULT_CLEANUP_HOURS): Promise<number> {
     try {
-      logger.info(`🧹 Starting job cleanup (older than ${olderThanDays} days)...`);
+      logger.info(`🧹 Starting job cleanup (older than ${olderThanHours} hours)...`);
       
+      // Convert hours to days for compatibility
+      const olderThanDays = olderThanHours / 24;
       const deletedCount = await firebaseService.deleteOldJobs(olderThanDays);
       
       logger.info(`✅ Job cleanup completed: ${deletedCount} jobs deleted`);

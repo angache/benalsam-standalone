@@ -105,6 +105,10 @@ export const fetchListingsWithFilters = async (
     maxPrice?: number;
     location?: string;
     urgency?: string;
+    dateRange?: string;
+    featured?: boolean;
+    showcase?: boolean;
+    urgent?: boolean;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   } = {},
@@ -123,6 +127,11 @@ export const fetchListingsWithFilters = async (
         minBudget: filters.minPrice,
         maxBudget: filters.maxPrice,
         urgency: filters.urgency,
+        // 🆕 Advanced filters
+        dateRange: filters.dateRange,
+        featured: filters.featured,
+        showcase: filters.showcase,
+        urgent: filters.urgent,
       },
       sort: {
         field: filters.sortBy || 'created_at',

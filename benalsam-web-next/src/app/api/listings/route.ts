@@ -49,16 +49,19 @@ export async function GET(request: NextRequest) {
       maxPrice,
       location: city || undefined,
       urgency,
+      dateRange,
+      featured,
+      showcase,
+      urgent,
       sortBy,
       sortOrder,
     }
 
     // Fetch listings
     const result = await fetchListingsWithFilters(
-      filters,
       undefined, // userId - will be extracted from request if needed
-      page,
-      pageSize
+      filters,
+      { page, limit: pageSize }
     )
 
     return NextResponse.json({

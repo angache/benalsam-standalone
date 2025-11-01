@@ -9,7 +9,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { useFilterStore } from '@/stores/filterStore'
 import { useAuth } from '@/contexts/AuthContext'
 import { useInView } from 'react-intersection-observer'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import ListingCard from '@/components/ListingCard'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
@@ -47,6 +47,12 @@ export function ListingsGrid() {
   const filterStore = useFilterStore()
   const { user } = useAuth()
   const { ref: loadMoreRef, inView } = useInView()
+  const [isMounted, setIsMounted] = useState(false)
+
+  // 🔧 Fix hydration mismatch
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Fetch listings with filters
   const {
@@ -80,14 +86,14 @@ export function ListingsGrid() {
   const allListings = data?.pages.flatMap((page) => page.listings || page.data || []) || []
   const totalCount = data?.pages[0]?.pagination?.total || 0
 
-  // Grid class based on view mode
+  // Grid class based on view mode (use default until mounted to prevent hydration mismatch)
   const gridClass = cn(
     'grid gap-4',
     {
-      'grid-cols-1 sm:grid-cols-2': filterStore.viewMode === 'grid-2',
-      'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3': filterStore.viewMode === 'grid-3',
-      'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4': filterStore.viewMode === 'grid-4',
-      'grid-cols-1': filterStore.viewMode === 'list',
+      'grid-cols-1 sm:grid-cols-2': isMounted && filterStore.viewMode === 'grid-2',
+      'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3': !isMounted || filterStore.viewMode === 'grid-3', // Default
+      'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4': isMounted && filterStore.viewMode === 'grid-4',
+      'grid-cols-1': isMounted && filterStore.viewMode === 'list',
     }
   )
 
@@ -146,7 +152,7 @@ export function ListingsGrid() {
       <div className={gridClass}>
         {allListings.map((listing: any, index: number) => (
           <ListingCard
-            key={listing.id}
+            key={`${listing.id}-${index}`}
             listing={listing}
             priority={index < 6}
             isLarge={filterStore.viewMode === 'list'}

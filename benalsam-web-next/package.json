@@ -10,7 +10,10 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
-    "seed:test": "tsx scripts/seed-test-listing.ts"
+    "seed:test": "tsx scripts/seed-test-listing.ts",
+    "seed:realistic": "tsx scripts/seed-realistic-listings.ts",
+    "seed:10": "tsx scripts/seed-10-listings.ts",
+    "seed:100": "tsx scripts/seed-100-listings.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

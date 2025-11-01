@@ -16,6 +16,11 @@ export interface ElasticsearchSearchParams {
     maxBudget?: number;
     urgency?: string;
     attributes?: Record<string, string[]>;
+    // 🆕 Advanced filters
+    dateRange?: string;
+    featured?: boolean;
+    showcase?: boolean;
+    urgent?: boolean;
   };
   sort?: {
     field: string;
@@ -78,6 +83,11 @@ export const searchListingsWithElasticsearch = async (
       minPrice: params.filters?.minBudget,
       maxPrice: params.filters?.maxBudget,
       urgency: params.filters?.urgency,
+      // 🆕 Advanced filters
+      dateRange: params.filters?.dateRange,
+      featured: params.filters?.featured,
+      showcase: params.filters?.showcase,
+      urgent: params.filters?.urgent,
     } as any;
 
     console.log('🔍 Elasticsearch search - Payload:', servicePayload);
@@ -114,6 +124,10 @@ export const searchListingsWithElasticsearch = async (
       console.log('⚠️ No hits found in Elasticsearch');
       return { data: [] };
     }
+
+    // 🔍 DEBUG: Search Service RAW response (disabled after fix)
+    // console.log('🔍 [ES] RAW Search Service Response - FULL FIRST ITEM:');
+    // console.log(JSON.stringify(responseData.data?.[0], null, 2));
 
     // Process listings to add is_favorited and user profiles
     const processedListings = await processFetchedListings(docs, currentUserId);

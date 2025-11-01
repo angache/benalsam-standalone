@@ -198,23 +198,65 @@ export class FirebaseService {
       const cutoffTimestamp = cutoffDate.toISOString();
 
       let deletedCount = 0;
+      let movedToDLQ = 0;
 
-      for (const [jobId, jobData] of Object.entries(jobs)) {
-        const job = jobData as any;
-        
-        // Delete if completed and older than cutoff date
-        if (job.status === 'completed' && job.completedAt && job.completedAt < cutoffTimestamp) {
-          await this.deleteData(`jobs/${jobId}`);
-          deletedCount++;
-          logger.info(`🗑️ Deleted old job: ${jobId}`);
+      // 🔄 BATCH DELETE: Process in chunks to avoid memory issues
+      const jobEntries = Object.entries(jobs);
+      const CHUNK_SIZE = 100;
+
+      for (let i = 0; i < jobEntries.length; i += CHUNK_SIZE) {
+        const chunk = jobEntries.slice(i, i + CHUNK_SIZE);
+
+        for (const [jobId, jobData] of chunk) {
+          const job = jobData as any;
+          
+          // Delete if completed and older than cutoff date
+          if (job.status === 'completed' && job.completedAt && job.completedAt < cutoffTimestamp) {
+            await this.deleteData(`jobs/${jobId}`);
+            deletedCount++;
+            
+            if (deletedCount % 50 === 0) {
+              logger.info(`🗑️ Deleted ${deletedCount} jobs so far...`);
+            }
+          }
+          
+          // 🚨 DLQ: Move failed jobs to Dead Letter Queue after max retries
+          else if (job.status === 'failed' && (job.retryCount || 0) >= (job.maxRetries || 3)) {
+            await this.moveJobToDLQ(jobId, job);
+            movedToDLQ++;
+          }
         }
+
+        // 🔄 EVENT LOOP BREATHING: Yield between chunks
+        await new Promise(resolve => setImmediate(resolve));
       }
 
-      logger.info(`✅ Deleted ${deletedCount} old jobs (older than ${olderThanDays} days)`);
+      logger.info(`✅ Cleanup completed: ${deletedCount} deleted, ${movedToDLQ} moved to DLQ (older than ${olderThanDays} days)`);
       return deletedCount;
     } catch (error) {
       logger.error('❌ Delete old jobs failed:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Move failed job to Dead Letter Queue
+   */
+  private async moveJobToDLQ(jobId: string, jobData: any): Promise<void> {
+    try {
+      const dlqPath = `dlq/${jobId}`;
+      await this.writeData(dlqPath, {
+        ...jobData,
+        movedToDLQAt: new Date().toISOString(),
+        originalPath: `jobs/${jobId}`
+      });
+      
+      // Delete from main queue
+      await this.deleteData(`jobs/${jobId}`);
+      
+      logger.info(`🚨 Job moved to DLQ: ${jobId}`);
+    } catch (error) {
+      logger.error(`❌ Failed to move job to DLQ: ${jobId}`, error);
     }
   }
 }
