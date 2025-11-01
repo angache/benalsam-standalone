@@ -1,19 +1,18 @@
 /**
  * ListingsGrid Component
- * Main listings display with infinite scroll
+ * Main listings display with pagination
  */
 
 'use client'
 
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useFilterStore } from '@/stores/filterStore'
 import { useAuth } from '@/contexts/AuthContext'
-import { useInView } from 'react-intersection-observer'
 import { useEffect, useState } from 'react'
 import ListingCard from '@/components/ListingCard'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { AlertCircle, Inbox } from 'lucide-react'
+import { AlertCircle, Inbox, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // Temporary fetch function - will be replaced with proper service
@@ -52,10 +51,116 @@ async function fetchListingsWithAdvancedFilters(
   return response.json()
 }
 
+// Pagination Component
+interface PaginationProps {
+  currentPage: number
+  totalPages: number
+  onPageChange: (page: number) => void
+}
+
+function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+  // Generate page numbers to show
+  const getPageNumbers = () => {
+    const delta = 2 // Show 2 pages on each side
+    const range: (number | string)[] = []
+    const rangeWithDots: (number | string)[] = []
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - delta && i <= currentPage + delta)
+      ) {
+        range.push(i)
+      }
+    }
+
+    let l: number | undefined
+    range.forEach((i) => {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1)
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...')
+        }
+      }
+      rangeWithDots.push(i)
+      l = typeof i === 'number' ? i : undefined
+    })
+
+    return rangeWithDots
+  }
+
+  const pageNumbers = getPageNumbers()
+
+  return (
+    <div className="flex items-center justify-center gap-2 py-8">
+      {/* Previous Button */}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="gap-1"
+      >
+        <ChevronLeft className="w-4 h-4" />
+        Önceki
+      </Button>
+
+      {/* Page Numbers */}
+      <div className="flex items-center gap-1">
+        {pageNumbers.map((page, index) => {
+          if (page === '...') {
+            return (
+              <span key={`dots-${index}`} className="px-2 py-1 text-muted-foreground">
+                ...
+              </span>
+            )
+          }
+
+          const pageNum = page as number
+          const isActive = pageNum === currentPage
+
+          return (
+            <Button
+              key={pageNum}
+              variant={isActive ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => onPageChange(pageNum)}
+              className={cn(
+                'min-w-[40px]',
+                isActive && 'bg-primary text-primary-foreground'
+              )}
+            >
+              {pageNum}
+            </Button>
+          )
+        })}
+      </div>
+
+      {/* Next Button */}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="gap-1"
+      >
+        Sonraki
+        <ChevronRight className="w-4 h-4" />
+      </Button>
+
+      {/* Page Info */}
+      <div className="ml-4 text-sm text-muted-foreground">
+        Sayfa {currentPage} / {totalPages}
+      </div>
+    </div>
+  )
+}
+
 export function ListingsGrid() {
   const filterStore = useFilterStore()
   const { user } = useAuth()
-  const { ref: loadMoreRef, inView } = useInView()
   const [isMounted, setIsMounted] = useState(false)
 
   // 🔧 Fix hydration mismatch
@@ -63,37 +168,24 @@ export function ListingsGrid() {
     setIsMounted(true)
   }, [])
 
-  // Fetch listings with filters
+  // Get current page from filterStore (default 1)
+  const currentPage = filterStore.page || 1
+
+  // Fetch listings with filters (single page)
   const {
     data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
     isLoading,
     isError,
     error,
-  } = useInfiniteQuery({
-    queryKey: ['advanced-listings', filterStore, user?.id],
-    queryFn: ({ pageParam = 1 }) =>
-      fetchListingsWithAdvancedFilters(filterStore, user?.id, pageParam),
-    getNextPageParam: (lastPage) => {
-      if (!lastPage.pagination) return undefined
-      const { page, totalPages } = lastPage.pagination
-      return page < totalPages ? page + 1 : undefined
-    },
-    initialPageParam: 1,
+  } = useQuery({
+    queryKey: ['advanced-listings', filterStore, user?.id, currentPage],
+    queryFn: () => fetchListingsWithAdvancedFilters(filterStore, user?.id, currentPage),
   })
 
-  // Infinite scroll trigger
-  useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage()
-    }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
-
-  // Flatten all pages into single array
-  const allListings = data?.pages.flatMap((page) => page.listings || page.data || []) || []
-  const totalCount = data?.pages[0]?.pagination?.total || 0
+  const listings = data?.listings || data?.data || []
+  const pagination = data?.pagination
+  const totalCount = pagination?.total || 0
+  const totalPages = pagination?.totalPages || 1
 
   // Grid class based on view mode (use default until mounted to prevent hydration mismatch)
   const gridClass = cn(
@@ -134,7 +226,7 @@ export function ListingsGrid() {
   }
 
   // Empty State
-  if (allListings.length === 0) {
+  if (listings.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <Inbox className="w-16 h-16 text-muted-foreground mb-4" />
@@ -159,7 +251,7 @@ export function ListingsGrid() {
 
       {/* Grid */}
       <div className={gridClass}>
-        {allListings.map((listing: any, index: number) => (
+        {listings.map((listing: any, index: number) => (
           <ListingCard
             key={`${listing.id}-${index}`}
             listing={listing}
@@ -169,23 +261,17 @@ export function ListingsGrid() {
         ))}
       </div>
 
-      {/* Infinite Scroll Trigger */}
-      {hasNextPage && (
-        <div ref={loadMoreRef} className="flex justify-center py-8">
-          {isFetchingNextPage && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              <span>Daha fazla yükleniyor...</span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* End of Results */}
-      {!hasNextPage && allListings.length > 0 && (
-        <div className="text-center py-8 text-muted-foreground">
-          Tüm ilanlar gösterildi
-        </div>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => {
+            filterStore.setPage(page)
+            // Scroll to top when page changes
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }}
+        />
       )}
     </div>
   )

@@ -94,7 +94,7 @@ export default function ListingsPage() {
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Filter Sidebar - Desktop */}
-          <aside className="hidden lg:block lg:col-span-1 h-fit sticky top-24">
+          <aside className="hidden lg:block lg:col-span-1">
             <div className="bg-card rounded-lg border p-6 space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Filtreler</h2>
