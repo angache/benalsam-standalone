@@ -25,6 +25,16 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get('sort') || 'newest'
     const page = Number(searchParams.get('page')) || 1
     const pageSize = Number(searchParams.get('pageSize')) || 24
+    
+    // 🆕 Parse attributes from query params
+    // Format: ?attributes=brand:Samsung,Apple&attributes=color:Siyah
+    const attributes: Record<string, string[]> = {}
+    searchParams.forEach((value, key) => {
+      if (key.startsWith('attr_')) {
+        const attrKey = key.replace('attr_', '')
+        attributes[attrKey] = value.split(',')
+      }
+    })
 
     // Map sort to created_at/price sorting
     let sortBy = 'created_at'
@@ -53,6 +63,7 @@ export async function GET(request: NextRequest) {
       featured,
       showcase,
       urgent,
+      attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
       sortBy,
       sortOrder,
     }

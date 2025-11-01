@@ -324,6 +324,20 @@ export class SearchService {
         filterQueries.push({ term: { is_urgent_premium: true } });
       }
 
+      // 🆕 Attribute filters
+      if (attributes && Object.keys(attributes).length > 0) {
+        Object.entries(attributes).forEach(([key, values]) => {
+          if (values && values.length > 0) {
+            // Match any of the selected attribute values
+            filterQueries.push({
+              terms: {
+                [`attributes.${key}`]: values
+              }
+            });
+          }
+        });
+      }
+
       // Build final query
       const esQuery: any = {
         query: {

@@ -22,7 +22,6 @@ async function fetchListingsWithAdvancedFilters(
   userId: string | undefined,
   page: number
 ) {
-  // TODO: Implement proper Elasticsearch query builder
   const params = new URLSearchParams()
   if (filters.searchQuery) params.set('q', filters.searchQuery)
   if (filters.categories.length) params.set('categories', filters.categories.join(','))
@@ -34,6 +33,16 @@ async function fetchListingsWithAdvancedFilters(
   if (filters.showOnlyFeatured) params.set('featured', '1')
   if (filters.showOnlyShowcase) params.set('showcase', '1')
   if (filters.showOnlyUrgent) params.set('urgent', '1')
+  
+  // 🆕 Add attribute filters
+  if (filters.categoryAttributes && Object.keys(filters.categoryAttributes).length > 0) {
+    Object.entries(filters.categoryAttributes).forEach(([key, values]) => {
+      if (values && values.length > 0) {
+        params.set(`attr_${key}`, values.join(','))
+      }
+    })
+  }
+  
   params.set('sort', filters.sortBy)
   params.set('page', page.toString())
   params.set('pageSize', filters.pageSize.toString())

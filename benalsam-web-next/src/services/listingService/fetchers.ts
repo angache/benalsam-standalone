@@ -109,6 +109,7 @@ export const fetchListingsWithFilters = async (
     featured?: boolean;
     showcase?: boolean;
     urgent?: boolean;
+    attributes?: Record<string, string[]>;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   } = {},
@@ -132,6 +133,7 @@ export const fetchListingsWithFilters = async (
         featured: filters.featured,
         showcase: filters.showcase,
         urgent: filters.urgent,
+        attributes: filters.attributes,
       },
       sort: {
         field: filters.sortBy || 'created_at',

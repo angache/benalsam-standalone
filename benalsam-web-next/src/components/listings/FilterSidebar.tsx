@@ -14,7 +14,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Slider } from '@/components/ui/slider'
 import { X } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useCategories } from '@/hooks/useCategories'
+import { HierarchicalCategoryFilter } from './HierarchicalCategoryFilter'
+import { AttributeFilters } from './AttributeFilters'
 
 // Turkish cities for location filter
 const CITIES = [
@@ -34,6 +35,7 @@ export function FilterSidebar() {
     showOnlyFeatured,
     showOnlyShowcase,
     showOnlyUrgent,
+    categoryAttributes,
     setSearchQuery,
     setCategories,
     setLocation,
@@ -44,10 +46,10 @@ export function FilterSidebar() {
     setShowOnlyFeatured,
     setShowOnlyShowcase,
     setShowOnlyUrgent,
+    setCategoryAttribute,
     resetFilters,
   } = useFilterStore()
 
-  const { categories: availableCategories } = useCategories()
   const [priceMin, setPriceMin] = useState(priceRange.min?.toString() || '')
   const [priceMax, setPriceMax] = useState(priceRange.max?.toString() || '')
 
@@ -85,26 +87,11 @@ export function FilterSidebar() {
         </div>
       </div>
 
-      {/* Category */}
-      <div className="space-y-2">
-        <Label>Kategori</Label>
-        <Select
-          value={categories[0]?.toString() || 'all'}
-          onValueChange={(value) => setCategories(value === 'all' ? [] : [parseInt(value)])}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Tüm Kategoriler" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tüm Kategoriler</SelectItem>
-            {availableCategories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.id.toString()}>
-                {cat.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {/* 🆕 Hierarchical Category Filter */}
+      <HierarchicalCategoryFilter
+        selectedCategories={categories}
+        onCategoryChange={setCategories}
+      />
 
       {/* Location */}
       <div className="space-y-2">
@@ -183,6 +170,13 @@ export function FilterSidebar() {
           </SelectContent>
         </Select>
       </div>
+
+      {/* 🆕 Dynamic Attribute Filters */}
+      <AttributeFilters
+        selectedCategories={categories}
+        selectedAttributes={categoryAttributes}
+        onAttributeChange={setCategoryAttribute}
+      />
 
       {/* Premium Filters */}
       <div className="space-y-3 pt-4 border-t">
