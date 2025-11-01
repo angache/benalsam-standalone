@@ -30,6 +30,7 @@ import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import Image from 'next/image'
+import { useCategories } from '@/hooks/useCategories'
 
 // Types
 interface Listing {
@@ -37,10 +38,13 @@ interface Listing {
   title: string
   description?: string
   price?: number
+  budget?: number
   currency?: string
   main_image_url?: string
   image_url?: string
   category?: string
+  category_id?: number
+  category_path?: number[]
   urgency?: 'Acil' | 'Normal' | 'Acil Değil'
   status?: 'active' | 'inactive' | 'pending' | 'rejected' | 'completed' | 'in_transaction'
   is_featured?: boolean
@@ -60,7 +64,7 @@ interface Listing {
     rating?: number
     trust_score?: number
   }
-  location?: {
+  location?: string | {
     province?: string
     district?: string
     neighborhood?: string
@@ -116,7 +120,9 @@ const getStatusInfo = (status?: string) => {
   }
 }
 
-const formatPrice = (price?: number, currency = 'TL') => {
+const formatPrice = (listing: Listing) => {
+  const price = listing.price || listing.budget
+  const currency = listing.currency || 'TL'
   if (!price) return 'Fiyat belirtilmemiş'
   return new Intl.NumberFormat('tr-TR').format(price) + ' ' + currency
 }
@@ -152,8 +158,39 @@ export const ListingCard: React.FC<ListingCardProps> = ({
   onDopingClick,
   onMarkAsCompleted
 }) => {
+  const { categories: allCategories } = useCategories()
   const isSmall = size === 'small'
   const isLarge = size === 'large'
+  
+  // Build category breadcrumb from category_path
+  const buildCategoryBreadcrumb = (): string => {
+    if (!listing.category_path || listing.category_path.length === 0) {
+      return listing.category || 'Kategori belirtilmemiş'
+    }
+
+    // Find categories by IDs in category_path
+    const findCategoryById = (id: number, cats: any[]): any => {
+      for (const cat of cats) {
+        if (Number(cat.id) === id) return cat
+        if (cat.subcategories && cat.subcategories.length > 0) {
+          const found = findCategoryById(id, cat.subcategories)
+          if (found) return found
+        }
+      }
+      return null
+    }
+
+    const categoryNames = listing.category_path
+      .map(id => {
+        const cat = findCategoryById(id, allCategories || [])
+        return cat?.name
+      })
+      .filter(Boolean)
+
+    return categoryNames.length > 0 ? categoryNames.join(' > ') : (listing.category || 'Kategori')
+  }
+
+  const categoryBreadcrumb = buildCategoryBreadcrumb()
   
   // Generate image URL
   const cardImageUrl = listing.main_image_url || 
@@ -372,12 +409,19 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
         {/* Content */}
         <div className="p-3 flex-1 flex flex-col min-w-0">
+          {/* 🆕 Category Breadcrumb */}
+          <div className="text-[10px] text-muted-foreground mb-1 truncate">
+            {categoryBreadcrumb}
+          </div>
+
           <h3 className="font-semibold text-sm line-clamp-2 mb-2 truncate">{listing.title}</h3>
           
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
             <span className="flex items-center gap-1 truncate">
               <MapPin size={12} />
-              {listing.location?.district || 'Konum'}
+              {typeof listing.location === 'string' 
+                ? listing.location 
+                : listing.location?.district || 'Konum'}
             </span>
             <span className="flex items-center gap-1 truncate">
               <Clock size={12} />
@@ -387,7 +431,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
           <div className="flex items-center justify-between">
             <span className="font-bold text-primary truncate">
-              {formatPrice(listing.price, listing.currency)}
+              {formatPrice(listing)}
             </span>
             <div className="flex items-center gap-2 text-xs text-muted-foreground truncate">
               <span className="flex items-center gap-1 truncate">
@@ -495,6 +539,11 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
       {/* Content */}
       <div className="p-4 flex-1 flex flex-col min-w-0">
+        {/* 🆕 Category Breadcrumb */}
+        <div className="text-xs text-muted-foreground mb-1.5 truncate">
+          {categoryBreadcrumb}
+        </div>
+
         <h3 className="font-semibold text-lg line-clamp-2 mb-2 truncate">{listing.title}</h3>
         
         {listing.description && (
@@ -504,7 +553,9 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
           <span className="flex items-center gap-1 truncate">
             <MapPin size={14} />
-            {listing.location?.district || 'Konum belirtilmemiş'}
+            {typeof listing.location === 'string' 
+              ? listing.location 
+              : listing.location?.district || 'Konum belirtilmemiş'}
           </span>
           <span className="flex items-center gap-1 truncate">
             <Clock size={14} />
@@ -514,7 +565,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
         <div className="flex items-center justify-between">
           <span className="font-bold text-xl text-primary truncate">
-            {formatPrice(listing.price, listing.currency)}
+            {formatPrice(listing)}
           </span>
           <div className="flex items-center gap-4 text-sm text-muted-foreground truncate">
             <span className="flex items-center gap-1 truncate">

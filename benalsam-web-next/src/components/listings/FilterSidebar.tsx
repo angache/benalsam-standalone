@@ -14,7 +14,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Slider } from '@/components/ui/slider'
 import { X } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { HierarchicalCategoryFilter } from './HierarchicalCategoryFilter'
+import { ModernCategoryFilter } from './ModernCategoryFilter'
 import { AttributeFilters } from './AttributeFilters'
 
 // Turkish cities for location filter
@@ -87,11 +87,14 @@ export function FilterSidebar() {
         </div>
       </div>
 
-      {/* 🆕 Hierarchical Category Filter */}
-      <HierarchicalCategoryFilter
-        selectedCategories={categories}
-        onCategoryChange={setCategories}
-      />
+      {/* 🆕 Modern Category Filter (Sahibinden.com style) */}
+      <div className="space-y-2">
+        <Label className="text-base font-semibold">Kategori</Label>
+        <ModernCategoryFilter
+          selectedCategories={categories}
+          onCategoryChange={setCategories}
+        />
+      </div>
 
       {/* Location */}
       <div className="space-y-2">
