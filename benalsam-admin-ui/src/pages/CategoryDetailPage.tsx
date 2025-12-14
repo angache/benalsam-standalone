@@ -34,15 +34,19 @@ import { getIconComponent } from '../utils/iconUtils';
 import { getColorStyle, getColorName } from '../utils/colorUtils';
 
 export const CategoryDetailPage: React.FC = () => {
-  const { path } = useParams<{ path: string }>();
+  const params = useParams();
+  console.log('🔍 CategoryDetailPage params:', params);
+  // Support multiple param formats: path, id, or wildcard (*)
+  const categoryIdentifier = params.path || params.id || params['*'] || params['0'];
+  console.log('🎯 Category identifier:', categoryIdentifier);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   // Fetch category
   const { data: category, isLoading, error } = useQuery({
-    queryKey: ['category', path],
-    queryFn: () => categoryService.getCategory(path!),
-    enabled: !!path,
+    queryKey: ['category', categoryIdentifier],
+    queryFn: () => categoryService.getCategory(categoryIdentifier!),
+    enabled: !!categoryIdentifier,
   });
 
   // Delete mutation

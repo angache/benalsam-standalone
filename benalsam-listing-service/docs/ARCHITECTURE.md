@@ -145,6 +145,16 @@ User Request → API Layer → Authentication → Job Service → Job Status →
 3. Job service retrieves job details
 4. Status information is returned
 
+**Frontend Integration:**
+- Frontend polls job status using `/api/v1/listings/jobs/:jobId` endpoint
+- Job status can be: `pending`, `processing`, `completed`, `failed`
+- When job is `completed`, frontend fetches the created listing from database
+- Listing status is `PENDING_APPROVAL` until admin moderation
+
+**Note (2025-01-XX Fix)**: 
+- Frontend now correctly handles `PENDING_APPROVAL` status in listing status display
+- Job polling checks Listing Service endpoint first, then falls back to Upload Service for backward compatibility
+
 ## 🗄️ Database Schema
 
 ### **Listings Table**

@@ -5,9 +5,23 @@ import { listingService } from '@/services/listingService';
 import { ListingCard } from '@/components/ListingCard';
 import { TrendingUp, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import type { Listing } from '@/types';
 
-export function PopularListings() {
-  const { data: listings, isLoading } = useQuery({
+interface PopularListingsProps {
+  /**
+   * Pre-fetched listings from batch API
+   * If provided, component won't make its own API call
+   */
+  listings?: Listing[];
+  /**
+   * Loading state from batch API
+   */
+  isLoading?: boolean;
+}
+
+export function PopularListings({ listings: propListings, isLoading: propIsLoading }: PopularListingsProps = {}) {
+  // Use batch data if provided, otherwise fetch independently (backward compatibility)
+  const { data: queryListings, isLoading: queryIsLoading } = useQuery({
     queryKey: ['popular-listings'],
     queryFn: async () => {
       console.log('🔥 [PopularListings] Fetching popular listings...');
@@ -29,7 +43,11 @@ export function PopularListings() {
     },
     staleTime: 5 * 60 * 1000, // 5 minutes - popular listings don't change often
     gcTime: 30 * 60 * 1000, // 30 minutes cache
+    enabled: !propListings, // Only fetch if no prop data provided
   });
+
+  const listings = propListings || queryListings;
+  const isLoading = propIsLoading !== undefined ? propIsLoading : queryIsLoading;
 
   if (isLoading) {
     return (

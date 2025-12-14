@@ -30,6 +30,7 @@ The Benalsam Listing Service is a dedicated microservice responsible for managin
 - **Rate Limiting**: API protection
 - **Error Handling**: Comprehensive error management
 - **Logging**: Structured logging with Winston
+- **AI Learning System**: Self-improving AI suggestions based on successful listings
 
 ## 🏗️ Architecture
 
@@ -110,6 +111,11 @@ CORS_ORIGIN=http://localhost:3000,http://localhost:3003
 JOB_PROCESSING_ENABLED=true
 JOB_RETRY_ATTEMPTS=3
 JOB_RETRY_DELAY=5000
+
+# AI Learning Configuration
+AI_LEARNING_ENABLED=true
+AI_LEARNING_ANALYSIS_INTERVAL_HOURS=6
+AI_LEARNING_CLEANUP_HOUR=2
 ```
 
 ## 🚀 Usage
@@ -144,6 +150,8 @@ curl http://localhost:3008/api/v1/health/jobs
 
 ## 📚 API Documentation
 
+For complete API documentation, see [docs/API_ENDPOINTS.md](./docs/API_ENDPOINTS.md)
+
 ### Base URL
 ```
 Development: http://localhost:3008/api/v1
@@ -171,6 +179,18 @@ curl -H "x-user-id: user-123" http://localhost:3008/api/v1/listings
 - `GET /jobs/:id` - Get job details
 - `DELETE /jobs/:id` - Cancel job
 - `GET /jobs/:id/status` - Get job status
+
+#### AI Suggestions
+- `POST /listings/ai/suggest-title` - Suggest listing titles
+- `POST /listings/ai/suggest-description` - Suggest listing descriptions
+- `POST /listings/ai/suggest-attributes` - Extract attributes from text
+- `POST /listings/ai/suggest-completion` - Suggest completion for incomplete listings
+
+#### AI Learning (Admin)
+- `GET /ai-learning/status` - Get learning system status
+- `POST /ai-learning/trigger-analysis` - Manually trigger analysis
+- `POST /ai-learning/trigger-cleanup` - Manually trigger cleanup
+- `GET /ai-learning/patterns/:category` - Get learned patterns for category
 
 #### Health
 - `GET /health` - Basic health check
@@ -348,7 +368,28 @@ DEBUG=listing-service:* npm run dev
 - Log security events
 - Regular security updates
 
+## 🤖 AI Learning System
+
+The service includes a self-improving AI learning system that learns from successful listings:
+
+- **Automatic Learning**: Analyzes successful listings every 6 hours
+- **Pattern Extraction**: Extracts title and description patterns
+- **Persistent Storage**: Patterns stored in PostgreSQL with Redis caching
+- **Success Tracking**: Tracks pattern usage and success rates
+- **Auto Cleanup**: Removes low-quality patterns automatically
+
+For detailed documentation:
+- [AI Learning System](./docs/AI_LEARNING_SYSTEM.md) - System architecture
+- [AI Learning Setup](./docs/AI_LEARNING_SETUP.md) - Setup guide
+
 ## 📝 Changelog
+
+### v1.1.0 (2025-01-20)
+- AI Learning System implementation
+- Self-improving AI suggestions
+- Pattern extraction from successful listings
+- Redis + PostgreSQL hybrid storage
+- Admin API for learning management
 
 ### v1.0.0 (2025-09-15)
 - Initial release

@@ -359,6 +359,9 @@ export class JobProcessorService {
       title: listing.title
     });
 
+    // Note: Learning from new listings will happen later when they become successful
+    // This is handled by a separate scheduled job that analyzes successful listings
+
     return {
       listingId: listing.id,
       listing,

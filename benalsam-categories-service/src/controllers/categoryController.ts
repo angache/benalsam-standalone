@@ -111,7 +111,17 @@ export class CategoryController {
 
       logger.info('Getting category by ID', { id, service: 'categories-service' });
       
-      const category = await categoryService.getCategory(id);
+      let category = null;
+
+      // Check if it's a numeric ID
+      const numericId = parseInt(id, 10);
+      if (!isNaN(numericId)) {
+        // It's a numeric ID, fetch by ID
+        category = await categoryService.getCategory(numericId);
+      } else {
+        // It's a path or slug, try path first
+        category = await categoryService.getCategoryByPath(decodeURIComponent(id));
+      }
       
       if (!category) {
         const response: CategoryResponse = {

@@ -19,6 +19,8 @@ import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 import { authMiddleware } from './middleware/auth';
 import listingRoutes from './routes/listings';
+import aiRoutes from './routes/ai';
+import aiLearningRoutes from './routes/ai-learning';
 import jobRoutes from './routes/jobs';
 import healthRoutes from './routes/health';
 import metricsRoutes from './routes/metrics';
@@ -27,6 +29,7 @@ import { connectRabbitMQ, disconnectRabbitMQ } from './config/rabbitmq';
 import { connectDatabase, disconnectDatabase } from './config/database';
 import { jobProcessorService } from './services/jobProcessor';
 import { listingService } from './services/listingService';
+import { learningScheduler } from './services/ai/learningScheduler';
 
 const app = express();
 const PORT = process.env['PORT'] || 3008;
@@ -39,9 +42,13 @@ app.use(cors({
   origin: process.env['CORS_ORIGIN']?.split(',') || [
     'http://localhost:3000',
     'http://localhost:5173',
-    'http://localhost:3001'
+    'http://localhost:3001',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:5173'
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id']
 }));
 
 // Body parsing middleware
@@ -68,6 +75,8 @@ app.use((req, _res, next) => {
 
 // Routes
 app.use(`/api/${API_VERSION}/listings`, authMiddleware, listingRoutes);
+app.use(`/api/${API_VERSION}/listings/ai`, authMiddleware, aiRoutes);
+app.use(`/api/${API_VERSION}/ai-learning`, authMiddleware, aiLearningRoutes);
 app.use(`/api/${API_VERSION}/jobs`, authMiddleware, jobRoutes);
 app.use(`/api/${API_VERSION}/health`, healthRoutes);
 app.use(`/api/${API_VERSION}`, metricsRoutes);
@@ -81,6 +90,7 @@ app.get('/', (_req, res) => {
     timestamp: new Date().toISOString(),
     endpoints: {
       listings: `/api/${API_VERSION}/listings`,
+      ai: `/api/${API_VERSION}/listings/ai`,
       jobs: `/api/${API_VERSION}/jobs`,
       health: `/api/${API_VERSION}/health`
     }
@@ -127,6 +137,12 @@ async function startServer() {
     await listingService.start();
     logger.info('✅ Listing Service started');
 
+    // Start AI Learning Scheduler (if enabled)
+    if (process.env['AI_LEARNING_ENABLED'] !== 'false') {
+      learningScheduler.start();
+      logger.info('✅ AI Learning Scheduler started');
+    }
+
     // Start server
     server = app.listen(PORT, () => {
       logger.info(`🚀 Listing Service running on port ${PORT}`);
@@ -165,6 +181,12 @@ const gracefulShutdown = async (signal: string) => {
     // Stop listing service
     await listingService.stop();
     logger.info('✅ Listing Service stopped gracefully');
+
+    // Stop AI Learning Scheduler
+    if (process.env['AI_LEARNING_ENABLED'] !== 'false') {
+      learningScheduler.stop();
+      logger.info('✅ AI Learning Scheduler stopped gracefully');
+    }
 
     // Disconnect from external services
     await disconnectDatabase();

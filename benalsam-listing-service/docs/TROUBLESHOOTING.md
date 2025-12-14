@@ -179,6 +179,7 @@ pm2 restart listing-service
 - Jobs stuck in pending status
 - Job processing stops
 - High job failure rate
+- **NEW**: Listing created but not visible in "My Listings" page
 
 #### **Diagnosis:**
 ```bash
@@ -187,6 +188,9 @@ curl http://localhost:3008/api/v1/jobs/metrics
 
 # Check job processor health
 curl http://localhost:3008/api/v1/health/jobs
+
+# Check specific job status
+curl -H "x-user-id: USER_ID" http://localhost:3008/api/v1/listings/jobs/JOB_ID
 
 # Check job queue
 # RabbitMQ Management UI: http://localhost:15672
@@ -202,6 +206,40 @@ echo $JOB_PROCESSING_ENABLED
 
 # Clear stuck jobs (if needed)
 # Access RabbitMQ Management UI and purge queues
+```
+
+#### **Listing Not Visible After Creation (Fixed 2025-01-XX)**
+
+**Problem**: Listing is created with `PENDING_APPROVAL` status but doesn't appear in "My Listings" page.
+
+**Root Causes**:
+1. Frontend status handler doesn't recognize `PENDING_APPROVAL` status
+2. Job polling checks wrong endpoint (Upload Service instead of Listing Service)
+
+**Solution**:
+1. **Status Handling**: Frontend now normalizes status to lowercase and handles `pending_approval` correctly
+2. **Job Polling**: Updated to check Listing Service endpoint first (`/api/v1/listings/jobs/:jobId`), then fallback to Upload Service
+
+**Verification**:
+```bash
+# Check if listing exists in database
+# Query Supabase listings table with status = 'pending_approval'
+
+# Check job status
+curl -H "x-user-id: USER_ID" http://localhost:3008/api/v1/listings/jobs/JOB_ID
+
+# Expected response:
+{
+  "success": true,
+  "data": {
+    "jobId": "...",
+    "status": "completed",
+    "result": {
+      "listingId": "...",
+      "listing": { ... }
+    }
+  }
+}
 ```
 
 ### **6. Performance Issues**

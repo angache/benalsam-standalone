@@ -38,7 +38,19 @@ const ICON_MAP: Record<string, any> = {
   'gifts': Gift,
 }
 
-export default function PopularCategories() {
+interface PopularCategoriesProps {
+  /**
+   * Pre-fetched categories from batch API
+   * If provided, component won't make its own API call
+   */
+  categories?: any[]
+  /**
+   * Loading state from batch API
+   */
+  isLoading?: boolean
+}
+
+export default function PopularCategories({ categories: propCategories, isLoading: propIsLoading }: PopularCategoriesProps = {}) {
   const router = useRouter()
   const [isMounted, setIsMounted] = useState(false)
 
@@ -47,15 +59,20 @@ export default function PopularCategories() {
     setIsMounted(true)
   }, [])
 
-  const { data: categories, isLoading } = useQuery({
+  // Use batch data if provided, otherwise fetch independently (backward compatibility)
+  const { data: queryCategories, isLoading: queryIsLoading } = useQuery({
     queryKey: ['categories'],
     queryFn: () => categoryService.getCategories(),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !propCategories, // Only fetch if no prop data provided
   })
+
+  const categories = propCategories || queryCategories
+  const isLoading = propIsLoading !== undefined ? propIsLoading : queryIsLoading
 
   // Get top-level categories (level 0) and limit to 8
   const popularCategories = categories
-    ?.filter(cat => cat.level === 0 && cat.is_active)
+    ?.filter((cat: any) => cat.level === 0 && cat.is_active)
     .slice(0, 8) || []
 
   const getIconForCategory = (category: any) => {

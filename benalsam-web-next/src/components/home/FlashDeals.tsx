@@ -13,8 +13,21 @@ import { Button } from '@/components/ui/button'
 import { Zap, ArrowRight, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import type { Listing } from '@/types'
 
-export default function FlashDeals() {
+interface FlashDealsProps {
+  /**
+   * Pre-fetched listings from batch API
+   * If provided, component won't make its own API call
+   */
+  listings?: Listing[]
+  /**
+   * Loading state from batch API
+   */
+  isLoading?: boolean
+}
+
+export default function FlashDeals({ listings: propListings, isLoading: propIsLoading }: FlashDealsProps = {}) {
   const [timeLeft, setTimeLeft] = useState({
     hours: 2,
     minutes: 34,
@@ -48,7 +61,8 @@ export default function FlashDeals() {
     return () => clearInterval(interval)
   }, [])
 
-  const { data, isLoading } = useQuery({
+  // Use batch data if provided, otherwise fetch independently (backward compatibility)
+  const { data, isLoading: queryIsLoading } = useQuery({
     queryKey: ['flash-deals'],
     queryFn: () =>
       fetchListingsWithFilters(
@@ -62,9 +76,11 @@ export default function FlashDeals() {
         6
       ),
     staleTime: 2 * 60 * 1000, // 2 minutes
+    enabled: !propListings, // Only fetch if no prop data provided
   })
 
-  const listings = data?.listings || []
+  const listings = propListings || data?.listings || []
+  const isLoading = propIsLoading !== undefined ? propIsLoading : queryIsLoading
 
   if (isLoading) {
     return (

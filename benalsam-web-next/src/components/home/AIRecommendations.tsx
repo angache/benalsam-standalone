@@ -6,6 +6,19 @@ import { ListingCard } from '@/components/ListingCard';
 import { Sparkles, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
+import type { Listing } from '@/types';
+
+interface AIRecommendationsProps {
+  /**
+   * Pre-fetched recommendations from batch API
+   * If provided, component won't make its own API call
+   */
+  recommendations?: Listing[];
+  /**
+   * Loading state from batch API
+   */
+  isLoading?: boolean;
+}
 
 /**
  * AI-powered recommendation algorithm (Hybrid approach)
@@ -17,10 +30,11 @@ import { useAuth } from '@/hooks/useAuth';
  * 4. Trending items
  * 5. Similar budget range
  */
-export function AIRecommendations() {
+export function AIRecommendations({ recommendations: propRecommendations, isLoading: propIsLoading }: AIRecommendationsProps = {}) {
   const { user } = useAuth();
 
-  const { data: recommendations, isLoading } = useQuery({
+  // Use batch data if provided, otherwise fetch independently (backward compatibility)
+  const { data: queryRecommendations, isLoading: queryIsLoading } = useQuery({
     queryKey: ['ai-recommendations', user?.id],
     queryFn: async () => {
       console.log('✨ [AIRecommendations] Generating recommendations...');
@@ -41,10 +55,13 @@ export function AIRecommendations() {
       console.log('✨ [AIRecommendations] Generated', { count: result.listings.length });
       return result.listings;
     },
-    enabled: !!user,
+    enabled: !!user && !propRecommendations, // Only fetch if user exists and no prop data provided
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes cache
   });
+
+  const recommendations = propRecommendations || queryRecommendations;
+  const isLoading = propIsLoading !== undefined ? propIsLoading : queryIsLoading;
 
   // Don't show if not logged in
   if (!user) {

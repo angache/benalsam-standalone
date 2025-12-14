@@ -11,6 +11,10 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Sparkles, Loader2 } from 'lucide-react'
+import { listingAIService } from '@/services/listingAIService'
+import { useToast } from '@/hooks/use-toast'
+import { useCreateListingStore } from '@/stores'
 
 const detailsSchema = z.object({
   title: z.string().min(5, 'Başlık en az 5 karakter olmalı'),
@@ -33,6 +37,11 @@ interface DetailsStepProps {
 }
 
 export default function DetailsStep({ formData, onChange, onNext, onBack, selectedCategoryId }: DetailsStepProps) {
+  const { toast } = useToast()
+  const { attributes } = useCreateListingStore()
+  const [isAILoading, setIsAILoading] = React.useState(false)
+  const [aiLoadingType, setAILoadingType] = React.useState<'title' | 'description' | 'all' | null>(null)
+
   // Seçilen kategori adını localStorage cache'inden bul
   const selectedCategoryName = useMemo(() => {
     try {
@@ -135,6 +144,142 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
     onNext()
   }
 
+  // AI Functions
+  const handleAISuggestTitle = async () => {
+    if (!selectedCategoryName) {
+      toast({ title: 'Kategori seçilmedi', description: 'Önce bir kategori seçmelisiniz', variant: 'destructive' })
+      return
+    }
+
+    setIsAILoading(true)
+    setAILoadingType('title')
+    try {
+      const suggestions = await listingAIService.suggestTitle({
+        category: selectedCategoryName,
+        categoryId: selectedCategoryId || undefined,
+        attributes: attributes || {},
+        currentTitle: formData.title,
+        userInput: formData.title || formData.description || selectedCategoryName
+      })
+
+      if (suggestions.length > 0) {
+        setValue('title', suggestions[0].title)
+        onChange('title', suggestions[0].title)
+        toast({ 
+          title: 'Başlık önerildi', 
+          description: suggestions[0].reason,
+          variant: 'default'
+        })
+      } else {
+        toast({ title: 'Öneri bulunamadı', variant: 'destructive' })
+      }
+    } catch (error: any) {
+      console.error('AI title suggestion error:', error)
+      const errorMessage = error?.message?.includes('not authenticated') 
+        ? 'Giriş yapmanız gerekiyor' 
+        : 'Başlık önerisi alınamadı'
+      toast({ title: 'Hata', description: errorMessage, variant: 'destructive' })
+    } finally {
+      setIsAILoading(false)
+      setAILoadingType(null)
+    }
+  }
+
+  const handleAISuggestDescription = async () => {
+    if (!selectedCategoryName) {
+      toast({ title: 'Kategori seçilmedi', description: 'Önce bir kategori seçmelisiniz', variant: 'destructive' })
+      return
+    }
+
+    setIsAILoading(true)
+    setAILoadingType('description')
+    try {
+      const description = await listingAIService.suggestDescription({
+        category: selectedCategoryName,
+        categoryId: selectedCategoryId || undefined,
+        attributes: attributes || {},
+        currentDescription: formData.description,
+        userInput: formData.title || formData.description || selectedCategoryName
+      })
+
+      if (description) {
+        setValue('description', description)
+        onChange('description', description)
+        toast({ title: 'Açıklama oluşturuldu', variant: 'default' })
+      }
+    } catch (error: any) {
+      console.error('AI description suggestion error:', error)
+      const errorMessage = error?.message?.includes('not authenticated') 
+        ? 'Giriş yapmanız gerekiyor' 
+        : 'Açıklama oluşturulamadı'
+      toast({ title: 'Hata', description: errorMessage, variant: 'destructive' })
+    } finally {
+      setIsAILoading(false)
+      setAILoadingType(null)
+    }
+  }
+
+  const handleAIGenerateAll = async () => {
+    if (!selectedCategoryName) {
+      toast({ title: 'Kategori seçilmedi', description: 'Önce bir kategori seçmelisiniz', variant: 'destructive' })
+      return
+    }
+
+    setIsAILoading(true)
+    setAILoadingType('all')
+    try {
+      const result = await listingAIService.generateCompleteListing({
+        category: selectedCategoryName,
+        categoryId: selectedCategoryId || undefined,
+        attributes: attributes || {},
+        userInput: formData.title || formData.description || selectedCategoryName,
+        currentTitle: formData.title,
+        currentDescription: formData.description
+      })
+
+      // Fill all fields
+      if (result.title) {
+        setValue('title', result.title)
+        onChange('title', result.title)
+      }
+          if (result.description) {
+            setValue('description', result.description)
+            onChange('description', result.description)
+          }
+          // Bütçe önerisi kaldırıldı - kullanıcı kendisi girecek
+
+      // Update attributes in store
+      if (result.attributes && Object.keys(result.attributes).length > 0) {
+        const { updateAttribute } = useCreateListingStore.getState()
+        for (const [key, value] of Object.entries(result.attributes)) {
+          updateAttribute(key, value)
+        }
+      }
+
+      toast({ 
+        title: 'AI ile oluşturuldu', 
+        description: 'Tüm alanlar otomatik dolduruldu',
+        variant: 'default'
+      })
+    } catch (error: any) {
+      console.error('AI generate all error:', error)
+      let errorMessage = 'İlan oluşturulamadı'
+      
+      if (error?.message?.includes('not authenticated')) {
+        errorMessage = 'Giriş yapmanız gerekiyor'
+      } else if (error?.message?.includes('kullanılamıyor') || error?.message?.includes('Failed to fetch')) {
+        errorMessage = 'AI servisi şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.'
+      } else if (error?.message) {
+        errorMessage = error.message
+      }
+      
+      toast({ title: 'Hata', description: errorMessage, variant: 'destructive' })
+    } finally {
+      setIsAILoading(false)
+      setAILoadingType(null)
+    }
+  }
+
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
       {/* Progress Bar */}
@@ -168,11 +313,31 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
 
       {selectedCategoryName && (
         <div className="mb-4">
-          <div className="flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2 text-sm text-muted-foreground w-fit">
-            <span className="inline-flex items-center gap-2">
-              <span className="opacity-80">Seçilen Kategori:</span>
-              <Badge variant="secondary">{selectedCategoryName}</Badge>
-            </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-2">
+                <span className="opacity-80">Seçilen Kategori:</span>
+                <Badge variant="secondary">{selectedCategoryName}</Badge>
+              </span>
+            </div>
+            <Button
+              onClick={handleAIGenerateAll}
+              disabled={isAILoading}
+              variant="outline"
+              className="gap-2"
+            >
+              {isAILoading && aiLoadingType === 'all' ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Oluşturuluyor...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  AI ile Oluştur
+                </>
+              )}
+            </Button>
           </div>
         </div>
       )}
@@ -184,7 +349,29 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
         <Card>
           <CardContent className="space-y-6 p-6">
             <div className="space-y-2">
-              <Label htmlFor="title">İlan Başlığı</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="title">İlan Başlığı</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleAISuggestTitle}
+                  disabled={isAILoading}
+                  className="h-7 gap-1 text-xs"
+                >
+                  {isAILoading && aiLoadingType === 'title' ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Öneriliyor...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3 h-3" />
+                      AI Öner
+                    </>
+                  )}
+                </Button>
+              </div>
               <Input
                 id="title"
                 {...register('title')}
@@ -194,7 +381,29 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Açıklama</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="description">Açıklama</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleAISuggestDescription}
+                  disabled={isAILoading}
+                  className="h-7 gap-1 text-xs"
+                >
+                  {isAILoading && aiLoadingType === 'description' ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Oluşturuluyor...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3 h-3" />
+                      AI Oluştur
+                    </>
+                  )}
+                </Button>
+              </div>
               <Textarea
                 id="description"
                 {...register('description')}

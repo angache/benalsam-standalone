@@ -3,7 +3,7 @@
 import { useState, memo, useMemo, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Plus, User, Menu, LogIn, LogOut, Settings, UserCircle, MessageCircle, FileText, Package, Heart, Users, MessageSquare, Send, Crown, Grid3x3, ChevronDown, ArrowRight } from 'lucide-react'
+import { Search, Plus, User, Menu, LogIn, LogOut, Settings, UserCircle, MessageCircle, FileText, Package, Heart, Users, MessageSquare, Send, Crown, Grid3x3, ChevronDown, ArrowRight, Sparkles } from 'lucide-react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
@@ -30,14 +30,19 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { logger } from '@/utils/production-logger'
+import { useChatbot } from '@/contexts/ChatbotContext'
+import { useStickyHeader } from '@/hooks/useStickyHeader'
+import { cn } from '@/lib/utils'
 
 const Header = memo(function Header() {
   const router = useRouter()
   const pathname = usePathname()
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   const { unreadCount, requestPermission } = useNotifications()
+  const { setIsOpen: setChatbotOpen } = useChatbot()
   const [searchQuery, setSearchQuery] = useState('')
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const { isScrolled } = useStickyHeader({ threshold: 10 })
 
   // Fetch categories for mega menu
   const { data: categories } = useQuery({
@@ -82,7 +87,13 @@ const Header = memo(function Header() {
   }, [pathname, router])
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header 
+      className={cn(
+        "sticky top-0 z-50 w-full border-b transition-all duration-300",
+        "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        isScrolled && "shadow-md border-b-border/80"
+      )}
+    >
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8 max-w-full mx-auto">
         {/* Logo & Category Menu */}
         <div className="flex items-center gap-4">
@@ -182,6 +193,17 @@ const Header = memo(function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          {/* Chatbot Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setChatbotOpen(true)}
+            className="relative"
+            title="Asistan"
+          >
+            <Sparkles className="h-5 w-5" style={{color: 'var(--primary)'}} />
+          </Button>
+
           {/* Create Listing Button */}
           <Button 
             className="hidden sm:flex items-center gap-2 text-white"
@@ -360,6 +382,17 @@ const Header = memo(function Header() {
                   >
                     <Plus className="mr-2 h-4 w-4" style={{ color: 'var(--primary)' }} />
                     İlan Ver
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      setShowMobileMenu(false)
+                      setChatbotOpen(true)
+                    }}
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" style={{ color: 'var(--primary)' }} />
+                    Asistan
                   </Button>
                   {isAuthenticated && (
                     <>

@@ -12,9 +12,23 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Calendar, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import type { Listing } from '@/types'
 
-export default function TodaysListings() {
-  const { data, isLoading } = useQuery({
+interface TodaysListingsProps {
+  /**
+   * Pre-fetched listings from batch API
+   * If provided, component won't make its own API call
+   */
+  listings?: Listing[]
+  /**
+   * Loading state from batch API
+   */
+  isLoading?: boolean
+}
+
+export default function TodaysListings({ listings: propListings, isLoading: propIsLoading }: TodaysListingsProps = {}) {
+  // Use batch data if provided, otherwise fetch independently (backward compatibility)
+  const { data, isLoading: queryIsLoading } = useQuery({
     queryKey: ['todays-listings'],
     queryFn: () =>
       fetchListingsWithFilters(
@@ -27,9 +41,11 @@ export default function TodaysListings() {
         8
       ),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !propListings, // Only fetch if no prop data provided
   })
 
-  const listings = data?.listings || []
+  const listings = propListings || data?.listings || []
+  const isLoading = propIsLoading !== undefined ? propIsLoading : queryIsLoading
 
   if (isLoading) {
     return (

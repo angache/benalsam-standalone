@@ -35,12 +35,15 @@ export const statusConfig: Record<string, StatusConfig> = {
 
 export const getListingStatus = (listing: any): string => {
   const { status, expires_at, offer_accepted_at, accepted_offer_id } = listing
+  
+  // Normalize status to lowercase for comparison
+  const normalizedStatus = (status || '').toLowerCase()
 
-  if (status === 'in_transaction') return 'in_transaction'
-  if (status === 'sold') return 'sold'
-  if (status === 'inactive') return 'inactive'
+  if (normalizedStatus === 'in_transaction') return 'in_transaction'
+  if (normalizedStatus === 'sold') return 'sold'
+  if (normalizedStatus === 'inactive') return 'inactive'
 
-  if (status === 'active' || status === 'published') {
+  if (normalizedStatus === 'active' || normalizedStatus === 'published') {
     if (expires_at && new Date(expires_at) < new Date()) {
       return 'expired'
     }
@@ -59,11 +62,13 @@ export const getListingStatus = (listing: any): string => {
     return 'published'
   }
 
-  if (status === 'draft') return 'draft'
-  if (status === 'pending') return 'pending'
-  if (status === 'approved') return 'approved'
-  if (status === 'rejected') return 'rejected'
+  // Handle pending approval status (from Listing Service)
+  if (normalizedStatus === 'pending' || normalizedStatus === 'pending_approval') return 'pending'
+  if (normalizedStatus === 'draft') return 'draft'
+  if (normalizedStatus === 'approved') return 'approved'
+  if (normalizedStatus === 'rejected') return 'rejected'
 
+  // Default to pending for unknown statuses (new listings)
   return 'pending'
 }
 

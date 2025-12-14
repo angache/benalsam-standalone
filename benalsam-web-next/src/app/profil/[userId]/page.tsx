@@ -23,7 +23,6 @@ import { useProfileData } from '@/hooks/useProfileData'
 import { useToast } from '@/hooks/use-toast'
 import { EmptyStateProfileListings, EmptyStateProfileReviews } from '@/components/ui/empty-state'
 import ListingCard from '@/components/ListingCard'
-import Header from '@/components/Header'
 
 // Helper function to generate boring avatar URL
 const generateBoringAvatarUrl = (name: string, userId: string) => {
@@ -170,7 +169,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

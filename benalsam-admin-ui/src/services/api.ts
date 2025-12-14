@@ -235,6 +235,27 @@ export const apiService = {
     return response.data;
   },
 
+  // Service Registry - Get all services health status
+  async getServicesHealth(): Promise<{
+    success: boolean;
+    data: {
+      overall: 'healthy' | 'degraded' | 'unhealthy';
+      healthy: number;
+      unhealthy: number;
+      total: number;
+      services: Array<{
+        name: string;
+        healthy: boolean;
+        responseTime: number;
+        error?: string;
+        data?: any;
+      }>;
+    };
+  }> {
+    const response = await apiClient.get('/service-registry/health');
+    return response.data;
+  },
+
   // Real-time Analytics
   async getRealTimeMetrics(): Promise<any> {
     const response = await apiClient.get('/analytics/real-time-metrics');

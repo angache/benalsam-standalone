@@ -359,6 +359,21 @@
   /* Smooth Scroll */
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 4rem; /* Account for sticky header */
+  }
+
+  /* Smooth scroll for anchor links */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* Respect user's motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
 
   /* Focus Visible */

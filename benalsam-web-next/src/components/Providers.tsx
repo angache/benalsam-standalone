@@ -6,6 +6,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Toaster } from '@/components/ui/toaster'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { NotificationProvider } from '@/contexts/NotificationContext'
+import { ChatbotProvider } from '@/contexts/ChatbotContext'
 import { useState } from 'react'
 
 /**
@@ -26,6 +27,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
             gcTime: 5 * 60 * 1000, // 5 minutes (formerly cacheTime)
             retry: 1,
             refetchOnWindowFocus: false,
+            // Request deduplication is enabled by default in React Query
+            // Multiple components requesting the same query will share the same request
+            refetchOnMount: true, // Refetch if data is stale
+            refetchOnReconnect: true, // Refetch when connection is restored
+            // Background refetch configuration
+            refetchInterval: false, // Disable by default, enable per-query if needed
           },
         },
       })
@@ -41,8 +48,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
             enableSystem
             disableTransitionOnChange
           >
-            {children}
-            <Toaster />
+            <ChatbotProvider>
+              {children}
+              <Toaster />
+            </ChatbotProvider>
           </ThemeProvider>
           <ReactQueryDevtools 
             initialIsOpen={false} 

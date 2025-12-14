@@ -257,13 +257,27 @@ async function pollListingJobStatus(
   const maxAttempts = 60 // 5 minutes max
   const pollInterval = 5000 // 5 seconds
   
+  // Try Listing Service first (new system), fallback to Upload Service (old system)
+  const LISTING_SERVICE_URL = process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || 'http://localhost:3008/api/v1'
+  
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const response = await fetch(`${UPLOAD_SERVICE_URL}/listings/status/${jobId}`, {
+      // Try Listing Service endpoint first
+      let response = await fetch(`${LISTING_SERVICE_URL}/listings/jobs/${jobId}`, {
         headers: {
           'x-user-id': userId,
         },
       })
+
+      // If Listing Service fails, try Upload Service (backward compatibility)
+      if (!response.ok && response.status === 404) {
+        console.log('⚠️ Job not found in Listing Service, trying Upload Service...')
+        response = await fetch(`${UPLOAD_SERVICE_URL}/listings/status/${jobId}`, {
+          headers: {
+            'x-user-id': userId,
+          },
+        })
+      }
 
       if (!response.ok) {
         throw new Error(`Status check failed: ${response.statusText}`)
@@ -272,10 +286,15 @@ async function pollListingJobStatus(
       const result = await response.json()
       
       if (!result.success) {
-        throw new Error(result.data.message || 'Status check failed')
+        throw new Error(result.data?.message || result.error || 'Status check failed')
       }
 
-      const { status, progress, result: jobResult, error } = result.data
+      // Handle both Listing Service and Upload Service response formats
+      const jobData = result.data || result
+      const status = jobData.status
+      const progress = jobData.progress
+      const jobResult = jobData.result || jobData
+      const error = jobData.error
 
       // Update progress
       if (onProgress && progress !== undefined) {
@@ -284,7 +303,33 @@ async function pollListingJobStatus(
 
       if (status === 'completed') {
         console.log('✅ Listing job completed', { jobId })
-        return jobResult?.listing || { id: jobResult?.listingId }
+        
+        // Extract listing ID
+        const listingId = jobResult?.listingId || jobResult?.listing?.id
+        if (!listingId) {
+          console.warn('⚠️ No listing ID in job result', { jobResult })
+          return null
+        }
+
+        // Try to fetch listing from database
+        try {
+          const { supabase } = await import('@/lib/supabase')
+          const { data: listing, error: fetchError } = await supabase
+            .from('listings')
+            .select('*')
+            .eq('id', listingId)
+            .single()
+
+          if (fetchError) {
+            console.warn('⚠️ Could not fetch listing', { listingId, error: fetchError.message })
+            return { id: listingId, status: 'pending_approval' }
+          }
+
+          return listing || { id: listingId, status: 'pending_approval' }
+        } catch (fetchErr) {
+          console.warn('⚠️ Listing fetch error', { listingId, error: String(fetchErr) })
+          return { id: listingId, status: 'pending_approval' }
+        }
       } else if (status === 'failed') {
         throw new Error(error || 'Listing job failed')
       }
@@ -294,7 +339,11 @@ async function pollListingJobStatus(
       
     } catch (error) {
       console.error('❌ Error polling job status:', error)
-      throw error
+      // Don't throw immediately, wait and retry (might be temporary network issue)
+      if (attempt === maxAttempts - 1) {
+        throw error
+      }
+      await new Promise(resolve => setTimeout(resolve, pollInterval))
     }
   }
 

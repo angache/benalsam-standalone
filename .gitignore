@@ -122,5 +122,8 @@ docker-compose.override.yml
 *.backup
 *.bak
 
+# Nginx backups (may contain sensitive keys)
+nginx-backups/
+
 # Local development
-.local/ 
+.local/ KategorilerBenalsam/

@@ -12,16 +12,25 @@ import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap", // Font display strategy for better performance
+  preload: true, // Preload critical font
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
+  preload: false, // Not critical, don't preload
 });
 
 export const metadata: Metadata = {
   title: "BenAlsam - Türkiye'nin En Güvenilir Alım-Satım Platformu",
   description: "Binlerce ilan arasından ihtiyacınıza uygun olanı bulun. Emlak, araç, elektronik ve daha fazlası.",
+  // Performance optimizations
+  other: {
+    "dns-prefetch": "https://api.benalsam.com",
+    "preconnect": "https://api.benalsam.com",
+  },
 };
 
 export default function RootLayout({

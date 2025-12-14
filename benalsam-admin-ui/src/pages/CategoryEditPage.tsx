@@ -32,7 +32,11 @@ import { getIconComponent } from '../utils/iconUtils';
 import { getColorStyle, getColorName } from '../utils/colorUtils';
 
 export const CategoryEditPage: React.FC = () => {
-  const { path } = useParams<{ path: string }>();
+  const params = useParams();
+  console.log('🔍 CategoryEditPage params:', params);
+  // Support multiple param formats: path, id, or wildcard (*)
+  const categoryIdentifier = params.path || params.id || params['*'] || params['0'];
+  console.log('🎯 Category identifier:', categoryIdentifier);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -48,9 +52,9 @@ export const CategoryEditPage: React.FC = () => {
 
   // Fetch category
   const { data: category, isLoading, error } = useQuery({
-    queryKey: ['category', path],
-    queryFn: () => categoryService.getCategory(path!),
-    enabled: !!path,
+    queryKey: ['category', categoryIdentifier],
+    queryFn: () => categoryService.getCategory(categoryIdentifier!),
+    enabled: !!categoryIdentifier,
   });
 
   // Update form data when category is loaded
@@ -66,11 +70,11 @@ export const CategoryEditPage: React.FC = () => {
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: (data: Partial<Category>) => categoryService.updateCategory(path!, data),
+    mutationFn: (data: Partial<Category>) => categoryService.updateCategory(categoryIdentifier!, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['category', path] });
+      queryClient.invalidateQueries({ queryKey: ['category', categoryIdentifier] });
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-      navigate(`/categories/${encodeURIComponent(path!)}`);
+      navigate(`/categories/${encodeURIComponent(categoryIdentifier!)}`);
     },
   });
 
@@ -138,7 +142,7 @@ export const CategoryEditPage: React.FC = () => {
           textAlign: { xs: 'center', sm: 'left' }
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton onClick={() => navigate(`/categories/${encodeURIComponent(path!)}`)}>
+            <IconButton onClick={() => navigate(`/categories/${encodeURIComponent(categoryIdentifier!)}`)}>
               <ArrowLeft size={20} />
             </IconButton>
             <Typography variant="h4" component="h1" sx={{ 
@@ -165,7 +169,7 @@ export const CategoryEditPage: React.FC = () => {
           <Button
             variant="outlined"
             startIcon={<X />}
-            onClick={() => navigate(`/categories/${encodeURIComponent(path!)}`)}
+            onClick={() => navigate(`/categories/${encodeURIComponent(categoryIdentifier!)}`)}
             sx={{ 
               minWidth: { xs: '100%', sm: 'auto' },
               fontSize: { xs: '0.875rem', sm: '1rem' }
@@ -415,7 +419,7 @@ export const CategoryEditPage: React.FC = () => {
                     Kategori Yolu
                   </Typography>
                   <Typography variant="body1" fontWeight="medium" sx={{ wordBreak: 'break-all' }}>
-                    {path}
+                    {category?.path || categoryIdentifier}
                   </Typography>
                 </Grid>
               </Grid>

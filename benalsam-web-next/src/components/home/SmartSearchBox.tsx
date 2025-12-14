@@ -90,7 +90,10 @@ export default function SmartSearchBox() {
     <div ref={containerRef} className="relative max-w-2xl mx-auto">
       {/* Search Input */}
       <div className="relative group">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors z-10" />
+        <Search 
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors z-10" 
+          aria-hidden="true"
+        />
         <Input
           ref={inputRef}
           type="text"
@@ -100,15 +103,29 @@ export default function SmartSearchBox() {
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               handleSearch(query)
+            } else if (e.key === 'Escape') {
+              setIsFocused(false)
+              inputRef.current?.blur()
+            } else if (e.key === 'ArrowDown' && showSuggestions) {
+              e.preventDefault()
+              const firstSuggestion = containerRef.current?.querySelector<HTMLElement>('[role="option"]')
+              firstSuggestion?.focus()
             }
           }}
           placeholder="Ne arıyorsunuz? (iPhone, Daire, Araba...)"
           className="pl-12 pr-32 h-14 text-base shadow-lg border-2 focus-visible:border-primary"
+          aria-label="İlan ara"
+          aria-autocomplete="list"
+          aria-expanded={showSuggestions}
+          aria-controls="search-suggestions"
+          role="combobox"
         />
         <Button
           size="lg"
           onClick={() => handleSearch(query)}
           className="absolute right-2 top-1/2 -translate-y-1/2 h-10"
+          aria-label="Ara"
+          type="submit"
         >
           Ara
         </Button>
@@ -144,8 +161,24 @@ export default function SmartSearchBox() {
                     key={index}
                     onClick={() => handleSearch(item)}
                     className="w-full text-left px-3 py-2 hover:bg-muted rounded flex items-center gap-2 text-sm"
+                    role="option"
+                    aria-label={`Ara: ${item}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleSearch(item)
+                      } else if (e.key === 'ArrowDown') {
+                        e.preventDefault()
+                        const next = e.currentTarget.nextElementSibling as HTMLElement
+                        next?.focus()
+                      } else if (e.key === 'ArrowUp') {
+                        e.preventDefault()
+                        const prev = e.currentTarget.previousElementSibling as HTMLElement
+                        prev?.focus() || inputRef.current?.focus()
+                      }
+                    }}
                   >
-                    <Clock className="w-3 h-3 text-muted-foreground" />
+                    <Clock className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
                     {item}
                   </button>
                 ))}
@@ -164,8 +197,24 @@ export default function SmartSearchBox() {
                     key={index}
                     onClick={() => handleSearch(item)}
                     className="w-full text-left px-3 py-2 hover:bg-muted rounded flex items-center gap-2 text-sm"
+                    role="option"
+                    aria-label={`Ara: ${item}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleSearch(item)
+                      } else if (e.key === 'ArrowDown') {
+                        e.preventDefault()
+                        const next = e.currentTarget.nextElementSibling as HTMLElement
+                        next?.focus()
+                      } else if (e.key === 'ArrowUp') {
+                        e.preventDefault()
+                        const prev = e.currentTarget.previousElementSibling as HTMLElement
+                        prev?.focus() || inputRef.current?.focus()
+                      }
+                    }}
                   >
-                    <Search className="w-3 h-3 text-muted-foreground" />
+                    <Search className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
                     {item}
                   </button>
                 ))}
@@ -185,6 +234,7 @@ export default function SmartSearchBox() {
                       key={index}
                       onClick={() => handleSearch(item)}
                       className="px-3 py-1.5 bg-muted hover:bg-muted/80 rounded-full text-xs transition-colors"
+                      aria-label={`Popüler arama: ${item}`}
                     >
                       {item}
                     </button>
@@ -206,6 +256,7 @@ export default function SmartSearchBox() {
                       <button
                         key={index}
                         onClick={() => router.push(`/ilanlar?categories=${cat.name}`)}
+                        aria-label={`${cat.name} kategorisine git`}
                         className="flex items-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm transition-colors"
                       >
                         <Icon className={`w-5 h-5 ${cat.color}`} />

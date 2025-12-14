@@ -54,7 +54,11 @@ interface AttributeFormData {
 }
 
 export const CategoryAttributesPage: React.FC = () => {
-  const { path } = useParams<{ path: string }>();
+  const params = useParams();
+  console.log('🔍 CategoryAttributesPage params:', params);
+  // Support multiple param formats: path, id, or wildcard (*)
+  const categoryIdentifier = params.path || params.id || params['*'] || params['0'];
+  console.log('🎯 Category identifier:', categoryIdentifier);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -71,9 +75,9 @@ export const CategoryAttributesPage: React.FC = () => {
 
   // Fetch category
   const { data: category, isLoading, error } = useQuery({
-    queryKey: ['category', path],
-    queryFn: () => categoryService.getCategory(path!),
-    enabled: !!path,
+    queryKey: ['category', categoryIdentifier],
+    queryFn: () => categoryService.getCategory(categoryIdentifier!),
+    enabled: !!categoryIdentifier,
   });
 
   // Update category mutation

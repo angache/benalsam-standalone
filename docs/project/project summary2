@@ -1,6 +1,37 @@
 # Benalsam Project Summary
 
-## Current Status (Updated: 2025-08-14)
+## Current Status (Updated: 2025-01-XX)
+
+### 🎯 **Today's Major Fix (2025-01-XX)**
+
+#### **1. Listing Creation Visibility Bug Fix**
+- **Problem**: İlan oluşturulduktan sonra "onaya gönderildi" mesajı gösteriliyordu ancak ilan "İlanlarım" sayfasında görünmüyordu
+- **Root Cause**: 
+  - Frontend'de `getListingStatus` fonksiyonu `PENDING_APPROVAL` status'ünü handle etmiyordu
+  - Job polling yanlış endpoint'i (Upload Service) kontrol ediyordu, oysa ilan Listing Service üzerinden oluşturuluyordu
+- **Solution**:
+  - ✅ Status handling düzeltmesi: `PENDING_APPROVAL` status'ü artık doğru handle ediliyor
+  - ✅ Job polling endpoint düzeltmesi: Listing Service endpoint'i öncelikli, Upload Service fallback
+  - ✅ Dokümantasyon güncellemeleri: CHANGELOG.md, TROUBLESHOOTING.md, ARCHITECTURE.md
+
+#### **2. Files Modified**
+- `benalsam-web-next/src/lib/myListingsUtils.tsx` - Status handling düzeltmesi
+- `benalsam-web-next/src/services/listingService/uploadServiceMutations.ts` - Job polling düzeltmesi
+- `benalsam-web-next/src/services/createListingService.ts` - Job polling düzeltmesi
+- `docs/project/CHANGELOG.md` - Bug fix dokümantasyonu
+- `benalsam-listing-service/docs/TROUBLESHOOTING.md` - Troubleshooting guide güncellemesi
+- `benalsam-listing-service/docs/ARCHITECTURE.md` - Architecture dokümantasyonu güncellemesi
+
+#### **3. Key Technical Details**
+- **Listing Status Flow**: `PENDING_APPROVAL` → Admin moderation → `ACTIVE` or `REJECTED`
+- **Job System**: Listing Service uses job system for async processing
+- **Job Endpoint**: `/api/v1/listings/jobs/:jobId` (Listing Service)
+- **Fallback**: Upload Service endpoint for backward compatibility
+- **Status Normalization**: All statuses are normalized to lowercase for comparison
+
+---
+
+## Previous Status (Updated: 2025-08-14)
 
 ### 🎯 **Today's Major Achievements (2025-08-14)**
 
@@ -152,5 +183,34 @@
 
 ---
 
-*Last Updated: 2025-08-14 20:45*
-*Next Session: 2025-08-15*
+## 🏗️ **Project Structure Reminder**
+
+### **Microservices Architecture**
+- **benalsam-listing-service** (Port 3008) - Listing management with job system
+- **benalsam-upload-service** (Port 3007) - Image upload and processing
+- **benalsam-admin-backend** (Port 3002) - Admin API
+- **benalsam-web-next** (Port 5173) - Next.js web application
+- **benalsam-admin-ui** (Port 3003) - Admin dashboard
+
+### **Key Services & Endpoints**
+- **Listing Service**: `/api/v1/listings` - CRUD operations, job system
+- **Job Status**: `/api/v1/listings/jobs/:jobId` - Check job status
+- **Upload Service**: `/api/v1/upload` - Image upload
+- **Admin Backend**: `/api/v1/*` - Admin operations
+
+### **Important Notes**
+- **Job System**: All listing operations go through job system for async processing
+- **Status Flow**: New listings start with `PENDING_APPROVAL` status
+- **Frontend Polling**: Frontend polls job status from Listing Service endpoint
+- **Status Handling**: All statuses normalized to lowercase in frontend
+
+### **Recent Fixes (2025-01-XX)**
+- ✅ Listing visibility after creation fixed
+- ✅ Status handling for `PENDING_APPROVAL` fixed
+- ✅ Job polling endpoint corrected
+- ✅ Documentation updated
+
+---
+
+*Last Updated: 2025-01-XX*
+*Previous Update: 2025-08-14 20:45*

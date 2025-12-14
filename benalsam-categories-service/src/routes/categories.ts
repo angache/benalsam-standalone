@@ -66,11 +66,11 @@ router.get('/path/:path', categoryController.getCategoryByPath);
 
 /**
  * @route GET /api/v1/categories/:id
- * @desc Get single category by ID
+ * @desc Get single category by ID or path
  * @access Public
- * @param {number} id - Category ID
+ * @param {number|string} id - Category ID or path (supports slashes)
  */
-router.get('/:id', categoryController.getCategory);
+router.get('/:id(*)', categoryController.getCategory);
 
 /**
  * @route POST /api/v1/categories

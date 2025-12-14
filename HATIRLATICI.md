@@ -279,9 +279,38 @@ curl -X POST http://localhost:3008/api/v1/listings \
 
 ---
 
-**Son Güncelleme**: 15 Eylül 2025, 11:30  
-**Durum**: Upload Service ve Listing Service dokümantasyonu tamamlandı  
-**Sonraki Adım**: Mobile App integration veya CQRS pattern implementation
+**Son Güncelleme**: 2025-01-XX  
+**Durum**: Listing creation visibility bug fix tamamlandı  
+**Sonraki Adım**: Test ve doğrulama
+
+---
+
+## 🐛 **SON DÜZELTME (2025-01-XX)**
+
+### **Listing Creation Visibility Bug Fix**
+- **Problem**: İlan oluşturulduktan sonra "onaya gönderildi" mesajı gösteriliyordu ancak ilan "İlanlarım" sayfasında görünmüyordu
+- **Root Cause**: 
+  - Frontend'de `getListingStatus` fonksiyonu `PENDING_APPROVAL` status'ünü handle etmiyordu
+  - Job polling yanlış endpoint'i (Upload Service) kontrol ediyordu, oysa ilan Listing Service üzerinden oluşturuluyordu
+- **Solution**:
+  - ✅ Status handling düzeltmesi: `PENDING_APPROVAL` status'ü artık doğru handle ediliyor
+  - ✅ Job polling endpoint düzeltmesi: Listing Service endpoint'i öncelikli, Upload Service fallback
+  - ✅ Dokümantasyon güncellemeleri: CHANGELOG.md, TROUBLESHOOTING.md, ARCHITECTURE.md
+
+### **Modified Files**
+- `benalsam-web-next/src/lib/myListingsUtils.tsx` - Status handling düzeltmesi
+- `benalsam-web-next/src/services/listingService/uploadServiceMutations.ts` - Job polling düzeltmesi
+- `benalsam-web-next/src/services/createListingService.ts` - Job polling düzeltmesi
+- `docs/project/CHANGELOG.md` - Bug fix dokümantasyonu
+- `benalsam-listing-service/docs/TROUBLESHOOTING.md` - Troubleshooting guide güncellemesi
+- `benalsam-listing-service/docs/ARCHITECTURE.md` - Architecture dokümantasyonu güncellemesi
+
+### **Key Technical Details**
+- **Listing Status Flow**: `PENDING_APPROVAL` → Admin moderation → `ACTIVE` or `REJECTED`
+- **Job System**: Listing Service uses job system for async processing
+- **Job Endpoint**: `/api/v1/listings/jobs/:jobId` (Listing Service)
+- **Fallback**: Upload Service endpoint for backward compatibility
+- **Status Normalization**: All statuses are normalized to lowercase for comparison
 
 ---
 

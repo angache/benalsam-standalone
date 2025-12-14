@@ -1,5 +1,106 @@
 # 📋 CHANGELOG - Benalsam Projesi
 
+## 🎯 **2025-01-XX - Listing Status & Job Polling Fix**
+
+### ✅ **Yapılan İşler**
+
+#### 🐛 **Bug Fixes**
+
+##### **İlan Oluşturma Sonrası Görünmeme Sorunu Düzeltildi**
+- **Sorun**: İlan oluşturulduktan sonra "onaya gönderildi" mesajı gösteriliyordu ancak ilan "İlanlarım" sayfasında görünmüyordu
+- **Neden**: 
+  - Frontend'de `getListingStatus` fonksiyonu `PENDING_APPROVAL` status'ünü handle etmiyordu
+  - Job polling yanlış endpoint'i (Upload Service) kontrol ediyordu, oysa ilan Listing Service üzerinden oluşturuluyordu
+
+##### **Status Handling Düzeltmesi**
+**Dosya**: `benalsam-web-next/src/lib/myListingsUtils.tsx`
+
+```typescript
+// ÖNCE (Hatalı)
+if (status === 'pending') return 'pending'
+return 'pending' // Her zaman pending döndürüyordu
+
+// SONRA (Düzeltilmiş)
+const normalizedStatus = (status || '').toLowerCase()
+if (normalizedStatus === 'pending' || normalizedStatus === 'pending_approval') return 'pending'
+// Artık PENDING_APPROVAL status'ünü doğru handle ediyor
+```
+
+**Değişiklikler**:
+- Status'ü lowercase'e çevirerek normalize ediyor
+- `pending_approval` ve `pending` durumlarını `pending` olarak döndürüyor
+- Bilinmeyen status'ler için default olarak `pending` döndürüyor
+
+##### **Job Polling Endpoint Düzeltmesi**
+**Dosyalar**: 
+- `benalsam-web-next/src/services/listingService/uploadServiceMutations.ts`
+- `benalsam-web-next/src/services/createListingService.ts`
+
+```typescript
+// ÖNCE (Hatalı)
+const response = await fetch(`${UPLOAD_SERVICE_URL}/listings/status/${jobId}`, {
+  headers: { 'x-user-id': userId },
+});
+
+// SONRA (Düzeltilmiş)
+// Önce Listing Service endpoint'ini kontrol et
+let response = await fetch(`${LISTING_SERVICE_URL}/listings/jobs/${jobId}`, {
+  headers: { 'x-user-id': userId },
+});
+
+// Bulamazsa Upload Service'e fallback yap (geriye dönük uyumluluk)
+if (!response.ok && response.status === 404) {
+  response = await fetch(`${UPLOAD_SERVICE_URL}/listings/status/${jobId}`, {
+    headers: { 'x-user-id': userId },
+  });
+}
+```
+
+**Değişiklikler**:
+- Önce Listing Service endpoint'ini (`/api/v1/listings/jobs/:jobId`) kontrol ediyor
+- Bulamazsa Upload Service'e fallback yapıyor (geriye dönük uyumluluk)
+- Job tamamlandığında ilanı veritabanından çekiyor
+- Her iki servisin response formatını handle ediyor
+
+##### **Job Result Handling İyileştirmesi**
+```typescript
+// Job result'tan listing ID'yi çıkar
+const listingId = jobResult?.listingId || jobResult?.listing?.id;
+
+// İlanı veritabanından çek
+const { data: listing } = await supabase
+  .from('listings')
+  .select('*')
+  .eq('id', listingId)
+  .single();
+
+// Eğer fetch başarısız olursa minimal object döndür
+return listing || { id: listingId, status: 'pending_approval' };
+```
+
+**İyileştirmeler**:
+- Job result'tan listing ID'yi güvenli şekilde çıkarıyor
+- Veritabanından ilanı çekiyor
+- Fetch başarısız olursa minimal object döndürüyor (frontend'in ilanın oluşturulduğunu bilmesi için)
+
+#### 📝 **Etkilenen Dosyalar**
+- `benalsam-web-next/src/lib/myListingsUtils.tsx` - Status handling düzeltmesi
+- `benalsam-web-next/src/services/listingService/uploadServiceMutations.ts` - Job polling düzeltmesi
+- `benalsam-web-next/src/services/createListingService.ts` - Job polling düzeltmesi
+
+#### ✅ **Test Edilmesi Gerekenler**
+1. ✅ Yeni ilan oluşturulduğunda "onaya gönderildi" mesajı gösterilmeli
+2. ✅ "İlanlarım" sayfasında ilan "Onay Bekliyor" status'ü ile görünmeli
+3. ✅ Job polling Listing Service endpoint'ini kullanmalı
+4. ✅ Job tamamlandığında ilan veritabanından çekilmeli
+
+#### 🔍 **İlgili Dokümantasyon**
+- `benalsam-listing-service/docs/ARCHITECTURE.md` - Listing Service mimarisi
+- `benalsam-listing-service/docs/TROUBLESHOOTING.md` - Troubleshooting guide
+- `docs/features/QUEUE_SYSTEM_DOCUMENTATION.md` - Queue sistemi dokümantasyonu
+
+---
+
 ## 🎯 **2025-08-12 - Security Audit & TODO Consolidation**
 
 ### ✅ **Yapılan İşler**

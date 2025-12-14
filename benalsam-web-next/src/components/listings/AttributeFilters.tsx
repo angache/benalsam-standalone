@@ -10,6 +10,13 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
+interface AttributeDefinition {
+  key: string
+  label: string
+  type: string
+  options?: string[]
+}
+
 interface AttributeFiltersProps {
   selectedCategories: number[]
   selectedAttributes: Record<string, string[]>
@@ -26,6 +33,7 @@ export function AttributeFilters({
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(false)
   const [attributes, setAttributes] = useState<Record<string, string[]>>(availableAttributes || {})
+  const [attributeLabels, setAttributeLabels] = useState<Record<string, string>>({})
 
   // Fetch available attributes for selected category
   useEffect(() => {
@@ -47,38 +55,70 @@ export function AttributeFilters({
   const fetchAttributesForCategory = async (categoryId: number) => {
     setLoading(true)
     try {
-      // Fetch listings for this category to extract unique attributes
-      const response = await fetch(`/api/listings?categories=${categoryId}&pageSize=100`)
-      const data = await response.json()
-      
-      if (data.success && data.listings) {
-        const attrMap: Record<string, Set<string>> = {}
-        
-        // Extract unique attribute values
-        data.listings.forEach((listing: any) => {
-          const attrs = listing.attributes || {}
-          Object.entries(attrs).forEach(([key, values]) => {
-            if (!attrMap[key]) {
-              attrMap[key] = new Set()
-            }
-            if (Array.isArray(values)) {
-              values.forEach(v => attrMap[key].add(v))
-            } else if (values) {
-              attrMap[key].add(String(values))
-            }
-          })
-        })
+      // Get categories from localStorage cache
+      const cachedCategories = localStorage.getItem('benalsam_categories_next_v1.0.0')
+      if (!cachedCategories) {
+        console.warn('No cached categories found')
+        return
+      }
 
-        // Convert Sets to Arrays
+      const parsed = JSON.parse(cachedCategories)
+      // Handle both formats: {data: [...]} or [...]
+      const categories = parsed.data || parsed
+      
+      // Find the selected category
+      const findCategory = (cats: any[], id: number): any => {
+        for (const cat of cats) {
+          if (cat.id === id) return cat
+          if (cat.subcategories) {
+            const found = findCategory(cat.subcategories, id)
+            if (found) return found
+          }
+        }
+        return null
+      }
+
+      const selectedCategory = findCategory(categories, categoryId)
+      
+      console.log('🔍 Selected category:', selectedCategory?.name, 'ID:', categoryId)
+      console.log('📦 Category attributes:', selectedCategory?.category_attributes)
+      
+      // Check for category_attributes (from backend)
+      const categoryAttrs = selectedCategory?.category_attributes || selectedCategory?.attributes || []
+      
+      console.log('✅ Found', categoryAttrs.length, 'attributes')
+      
+      if (categoryAttrs.length > 0) {
+        // Build attributes object from category definition
         const result: Record<string, string[]> = {}
-        Object.entries(attrMap).forEach(([key, valueSet]) => {
-          result[key] = Array.from(valueSet).sort()
+        const labels: Record<string, string> = {}
+        
+        categoryAttrs.forEach((attr: any) => {
+          // Parse options if it's a JSON string
+          let options = attr.options
+          if (typeof options === 'string') {
+            try {
+              options = JSON.parse(options)
+            } catch (e) {
+              options = []
+            }
+          }
+
+          // If attribute has predefined options, use them
+          if (options && Array.isArray(options) && options.length > 0) {
+            result[attr.key] = options
+            labels[attr.key] = attr.label
+          }
         })
 
         setAttributes(result)
+        setAttributeLabels(labels)
+      } else {
+        setAttributes({})
+        setAttributeLabels({})
       }
     } catch (error) {
-      console.error('Error fetching attributes:', error)
+      console.error('Error loading attributes from cache:', error)
     } finally {
       setLoading(false)
     }
@@ -98,18 +138,8 @@ export function AttributeFilters({
   }
 
   const getAttributeLabel = (key: string): string => {
-    const labels: Record<string, string> = {
-      brand: 'Marka',
-      color: 'Renk',
-      size: 'Beden',
-      material: 'Malzeme',
-      condition: 'Durum',
-      fuel_type: 'Yakıt Tipi',
-      transmission: 'Vites',
-      room_count: 'Oda Sayısı',
-      building_age: 'Bina Yaşı',
-    }
-    return labels[key] || key.charAt(0).toUpperCase() + key.slice(1)
+    // Use label from category definition if available
+    return attributeLabels[key] || key.charAt(0).toUpperCase() + key.slice(1)
   }
 
   if (selectedCategories.length === 0) {

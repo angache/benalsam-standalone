@@ -11,6 +11,7 @@ import { MessageCircle, X, Minimize2, Maximize2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import { useChatbot } from '@/contexts/ChatbotContext'
 import {
   processUserMessage,
   getQuickReplies,
@@ -29,8 +30,7 @@ import { ChatbotHeader } from './ChatbotHeader'
 export default function ChatbotWidget() {
   const pathname = usePathname()
   const { user } = useAuth()
-  
-  const [isOpen, setIsOpen] = useState(false)
+  const { isOpen, setIsOpen } = useChatbot()
   const [isMinimized, setIsMinimized] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isTyping, setIsTyping] = useState(false)
@@ -138,34 +138,6 @@ export default function ChatbotWidget() {
 
   return (
     <>
-      {/* Floating Button */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-6 right-6 z-50"
-          >
-            <Button
-              size="lg"
-              onClick={() => setIsOpen(true)}
-              className="w-16 h-16 rounded-full shadow-2xl bg-gradient-to-br from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 relative group"
-            >
-              <MessageCircle className="w-7 h-7 text-white" />
-              
-              {/* Pulse animation */}
-              <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-75" />
-              
-              {/* Notification badge */}
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                !
-              </span>
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (

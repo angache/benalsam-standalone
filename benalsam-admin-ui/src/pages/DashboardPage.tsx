@@ -17,6 +17,8 @@ import {
   Heart,
   AlertTriangle,
   CheckCircle,
+  Server,
+  Activity,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { apiService } from '../services/api';
@@ -77,6 +79,13 @@ export const DashboardPage: React.FC = () => {
     queryKey: ['dashboard-stats'],
     queryFn: () => apiService.getDashboardStats(),
     staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const { data: servicesHealth, isLoading: servicesLoading } = useQuery({
+    queryKey: ['services-health'],
+    queryFn: () => apiService.getServicesHealth(),
+    staleTime: 30 * 1000, // 30 seconds - more frequent updates
+    refetchInterval: 30 * 1000, // Auto-refresh every 30 seconds
   });
 
   if (isLoading) {
@@ -185,6 +194,97 @@ export const DashboardPage: React.FC = () => {
             icon={<Package size={24} color="white" />}
             color="#388e3c"
           />
+        </Grid>
+      </Grid>
+
+      {/* System Status Card */}
+      <Grid container spacing={3} sx={{ mt: 2 }}>
+        <Grid item xs={12}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Server size={24} style={{ marginRight: 12 }} />
+                <Typography variant="h6" component="h2">
+                  Sistem Durumu
+                </Typography>
+              </Box>
+              
+              {servicesLoading ? (
+                <LinearProgress />
+              ) : servicesHealth?.data ? (
+                <Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                    <Chip
+                      icon={
+                        servicesHealth.data.overall === 'healthy' ? (
+                          <CheckCircle size={16} />
+                        ) : (
+                          <AlertTriangle size={16} />
+                        )
+                      }
+                      label={
+                        servicesHealth.data.overall === 'healthy'
+                          ? 'Tüm Servisler Sağlıklı'
+                          : `${servicesHealth.data.unhealthy} Servis Sorunlu`
+                      }
+                      color={servicesHealth.data.overall === 'healthy' ? 'success' : 'warning'}
+                      sx={{ mr: 2 }}
+                    />
+                    <Typography variant="body2" color="text.secondary">
+                      {servicesHealth.data.healthy}/{servicesHealth.data.total} servis çalışıyor
+                    </Typography>
+                  </Box>
+
+                  <Grid container spacing={2}>
+                    {servicesHealth.data.services.map((service) => (
+                      <Grid item xs={12} sm={6} md={4} key={service.name}>
+                        <Box
+                          sx={{
+                            p: 2,
+                            border: `1px solid ${
+                              service.healthy ? '#4caf50' : '#f44336'
+                            }`,
+                            borderRadius: 2,
+                            bgcolor: service.healthy
+                              ? 'rgba(76, 175, 80, 0.05)'
+                              : 'rgba(244, 67, 54, 0.05)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Activity
+                              size={20}
+                              color={service.healthy ? '#4caf50' : '#f44336'}
+                              style={{ marginRight: 8 }}
+                            />
+                            <Box>
+                              <Typography variant="body2" fontWeight="bold">
+                                {service.name}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {service.responseTime}ms
+                              </Typography>
+                            </Box>
+                          </Box>
+                          {service.healthy ? (
+                            <CheckCircle size={20} color="#4caf50" />
+                          ) : (
+                            <AlertTriangle size={20} color="#f44336" />
+                          )}
+                        </Box>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  Servis durumu yükleniyor...
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
 

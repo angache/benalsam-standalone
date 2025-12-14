@@ -42,9 +42,11 @@ export function ScrollToTop() {
         transition-all duration-300
         animate-fadeIn
       "
-      aria-label="Scroll to top"
+      aria-label="Sayfanın başına git"
+      aria-keyshortcuts="Home"
+      title="Sayfanın başına git (Home tuşu)"
     >
-      <ArrowUp className="w-6 h-6" />
+      <ArrowUp className="w-6 h-6" aria-hidden="true" />
     </button>
   );
 }
