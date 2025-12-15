@@ -9,11 +9,6 @@ const nextConfig: NextConfig = {
   // Performance optimizations
   reactStrictMode: true,
   
-  // ESLint - Allow build despite warnings
-  eslint: {
-    ignoreDuringBuilds: true, // Ignore ESLint warnings during production build
-  },
-  
   // TypeScript - Allow build despite type errors (for faster iteration)
   typescript: {
     ignoreBuildErrors: true, // Skip TypeScript checks during build

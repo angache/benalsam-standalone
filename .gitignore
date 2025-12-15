@@ -127,3 +127,6 @@ nginx-backups/
 
 # Local development
 .local/ KategorilerBenalsam/
+
+# Local category tooling (do not commit large JSON dumps)
+KategorilerBenalsam/

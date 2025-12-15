@@ -40,7 +40,12 @@ export function generateListingUrl(title: string, id: string): string {
  * - /ilan/[slug]-[full-uuid] (new format)
  * - /ilan/[full-uuid] (old format, backward compatible)
  */
-export function extractIdFromSlug(slugOrId: string): string | null {
+export function extractIdFromSlug(slugOrId: string | undefined): string | null {
+  // Guard against undefined/null
+  if (!slugOrId || typeof slugOrId !== 'string') {
+    return null
+  }
+  
   // If it's a full UUID (no slug), return as is (backward compatible)
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId)) {
     return slugOrId

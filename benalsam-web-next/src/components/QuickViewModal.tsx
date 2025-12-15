@@ -5,6 +5,7 @@ import { MapPin, DollarSign, Clock, Eye, Heart, Share2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
+import { generateListingUrl } from '@/lib/slugify';
 
 interface QuickViewModalProps {
   listing: any;
@@ -97,7 +98,7 @@ export function QuickViewModal({
             {/* Actions */}
             <div className="flex gap-3 pt-4">
               <Button asChild className="flex-1">
-                <Link href={`/ilan/${listing.id}`}>
+                <Link href={generateListingUrl(listing.title, listing.id)}>
                   Detaylı Görüntüle
                 </Link>
               </Button>
@@ -122,7 +123,7 @@ export function QuickViewModal({
                 onClick={() => {
                   navigator.share?.({
                     title: listing.title,
-                    url: `${window.location.origin}/ilan/${listing.id}`
+                    url: `${window.location.origin}${generateListingUrl(listing.title, listing.id)}`
                   });
                 }}
               >

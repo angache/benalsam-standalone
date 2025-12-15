@@ -210,7 +210,10 @@ export const QuickViewModal = memo(function QuickViewModal({
             Kapat
           </Button>
           <Button
-            onClick={() => window.open(`/ilan/${listing.id}`, '_blank')}
+            onClick={() => {
+              const { generateListingUrl } = require('@/lib/slugify')
+              window.open(generateListingUrl(listing.title, listing.id), '_blank')
+            }}
             className="flex-1"
           >
             <ExternalLink className="w-4 h-4 mr-2" />

@@ -161,6 +161,9 @@ export function ListingInfoModal({ listingId, onClose }: ListingInfoModalProps) 
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => {
+                    const { generateListingUrl } = require('@/lib/slugify')
+                    // Note: We need listing title for SEO URL, but we only have listingId here
+                    // For now, redirect to UUID format - the page will redirect to SEO format
                     window.location.href = `/ilan/${listingId}`;
                   }}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors"

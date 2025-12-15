@@ -284,7 +284,8 @@ export default function ProfilePage() {
                 listing={listing}
                 size="normal"
                 onView={(listing) => {
-                  router.push(`/ilan/${listing.id}`)
+                  const { generateListingUrl } = require('@/lib/slugify')
+                  router.push(generateListingUrl(listing.title, listing.id))
                 }}
               />
             ))}

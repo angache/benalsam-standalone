@@ -50,10 +50,12 @@ export const generateSitemap = async (listings = [], users = []) => {
 `;
   });
 
-  // Add dynamic listing routes
+  // Add dynamic listing routes with SEO-friendly slugs
+  const { generateListingUrl } = require('../lib/slugify');
   listings.forEach(listing => {
+    const seoUrl = generateListingUrl(listing.title || 'ilan', listing.id);
     sitemap += `  <url>
-    <loc>${BASE_URL}/ilan/${listing.id}</loc>
+    <loc>${BASE_URL}${seoUrl}</loc>
     <lastmod>${listing.updated_at || currentDate}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>

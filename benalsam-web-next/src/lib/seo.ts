@@ -5,6 +5,7 @@
  */
 
 import type { Metadata } from 'next'
+import { generateListingUrl } from './slugify'
 
 export interface SEOData {
   title: string
@@ -193,7 +194,7 @@ export function generateListingStructuredData(listing: {
           price: listing.budget,
           priceCurrency: listing.currency || 'TRY',
           availability: 'https://schema.org/InStock',
-          url: `https://benalsam.com/ilan/${listing.id}`,
+          url: `https://benalsam.com${generateListingUrl(listing.title, listing.id)}`,
         }
       : undefined,
     seller: listing.profiles

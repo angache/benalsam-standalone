@@ -4,6 +4,7 @@ import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { Clock, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { generateListingUrl } from '@/lib/slugify';
 
 export function RecentlyViewed() {
   const { items, clearAll } = useRecentlyViewed();
@@ -44,7 +45,7 @@ export function RecentlyViewed() {
             {items.slice(0, 10).map((item) => (
               <Link
                 key={item.id}
-                href={`/ilan/${item.id}`}
+                href={generateListingUrl(item.title, item.id)}
                 className="group flex-shrink-0 w-48 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 hover:shadow-lg transition-all overflow-hidden"
               >
                 {/* Image */}

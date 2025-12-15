@@ -1,21 +1,38 @@
 import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { extractIdFromSlug } from '@/lib/slugify'
+import { extractIdFromSlug, generateListingUrl } from '@/lib/slugify'
 import { ListingDetailClient } from './ListingDetailClient'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 
 export default async function ListingDetailPage({ 
   params 
 }: { 
-  params: { id: string } 
+  params: Promise<{ id: string }> 
 }) {
   console.log('🚀 [SSR] ListingDetailPage rendering on server')
   
   const currentUser = await getServerUser()
-  const listingId = extractIdFromSlug(params.id)
+  const { id } = await params
+  const listingId = extractIdFromSlug(id)
   
   if (!listingId) {
     notFound()
+  }
+
+  // SEO Redirect: If URL is UUID-only (old format), redirect to slug format
+  const isUuidOnly = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+  if (isUuidOnly) {
+    // Fetch listing title to generate SEO-friendly URL
+    const { data: listingForRedirect } = await supabaseAdmin
+      .from('listings')
+      .select('title')
+      .eq('id', listingId)
+      .single()
+    
+    if (listingForRedirect) {
+      const seoUrl = generateListingUrl(listingForRedirect.title, listingId)
+      redirect(seoUrl)
+    }
   }
 
   // Server-side: Tek query ile her şeyi çek
@@ -54,7 +71,7 @@ export default async function ListingDetailPage({
       ? listing.user_favorites 
       : [listing.user_favorites]
     
-    is_favorited = favorites.some((fav: any) => 
+    is_favorited = favorites.some((fav: { user_id?: string; listing_id?: string } | null) => 
       fav && fav.user_id === currentUser.id && fav.listing_id === listingId
     )
   }

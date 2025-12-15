@@ -31,6 +31,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import Image from 'next/image'
 import { useCategories } from '@/hooks/useCategories'
+import { generateListingUrl } from '@/lib/slugify'
 
 // Types
 interface Listing {
@@ -231,7 +232,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
     const shareData = {
       title: listing.title,
       text: listing.description || listing.title,
-      url: `${window.location.origin}/ilan/${listing.id}`
+      url: `${window.location.origin}${generateListingUrl(listing.title, listing.id)}`
     }
 
     // Check if native share is available (mobile)
