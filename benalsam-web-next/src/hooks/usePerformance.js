@@ -5,6 +5,8 @@ export const usePerformance = () => {
   // Track Core Web Vitals
   const trackCoreWebVitals = useCallback(() => {
     if ('PerformanceObserver' in window) {
+      const observers = [];
+      
       // LCP (Largest Contentful Paint)
       const lcpObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
@@ -28,6 +30,7 @@ export const usePerformance = () => {
       
       try {
         lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
+        observers.push(lcpObserver);
       } catch (e) {
         console.warn('LCP observer failed:', e);
       }
@@ -52,6 +55,7 @@ export const usePerformance = () => {
       
       try {
         fidObserver.observe({ entryTypes: ['first-input'] });
+        observers.push(fidObserver);
       } catch (e) {
         console.warn('FID observer failed:', e);
       }
@@ -79,16 +83,29 @@ export const usePerformance = () => {
       
       try {
         clsObserver.observe({ entryTypes: ['layout-shift'] });
+        observers.push(clsObserver);
       } catch (e) {
         console.warn('CLS observer failed:', e);
       }
+      
+      // Return cleanup function
+      return () => {
+        observers.forEach(observer => {
+          try {
+            observer.disconnect();
+          } catch (e) {
+            console.warn('Error disconnecting observer:', e);
+          }
+        });
+      };
     }
+    return () => {}; // No-op cleanup if PerformanceObserver not available
   }, []);
 
   // Track page load performance
   const trackPageLoad = useCallback(() => {
     if ('performance' in window) {
-      window.addEventListener('load', () => {
+      const handleLoad = () => {
         setTimeout(() => {
           const navigation = performance.getEntriesByType('navigation')[0];
           if (navigation) {
@@ -114,8 +131,16 @@ export const usePerformance = () => {
             }
           }
         }, 0);
-      });
+      };
+      
+      window.addEventListener('load', handleLoad);
+      
+      // Return cleanup function
+      return () => {
+        window.removeEventListener('load', handleLoad);
+      };
     }
+    return () => {}; // No-op cleanup if performance API not available
   }, []);
 
   // Track resource loading performance
@@ -142,16 +167,26 @@ export const usePerformance = () => {
       
       try {
         resourceObserver.observe({ entryTypes: ['resource'] });
+        // Return cleanup function
+        return () => {
+          try {
+            resourceObserver.disconnect();
+          } catch (e) {
+            console.warn('Error disconnecting resource observer:', e);
+          }
+        };
       } catch (e) {
         console.warn('Resource observer failed:', e);
+        return () => {}; // No-op cleanup on error
       }
     }
+    return () => {}; // No-op cleanup if PerformanceObserver not available
   }, []);
 
   // Track memory usage (if available)
   const trackMemoryUsage = useCallback(() => {
     if ('memory' in performance) {
-      setInterval(() => {
+      const interval = setInterval(() => {
         const memory = performance.memory;
         const usedMB = Math.round(memory.usedJSHeapSize / 1024 / 1024);
         const totalMB = Math.round(memory.totalJSHeapSize / 1024 / 1024);
@@ -163,14 +198,27 @@ export const usePerformance = () => {
           console.warn('⚠️ High memory usage detected:', usedMB, 'MB');
         }
       }, 30000); // Check every 30 seconds
+      
+      // Return cleanup function
+      return () => clearInterval(interval);
     }
+    return () => {}; // No-op cleanup if memory API not available
   }, []);
 
   useEffect(() => {
-    trackCoreWebVitals();
-    trackPageLoad();
-    trackResourceTiming();
-    trackMemoryUsage();
+    // Start tracking and get cleanup functions
+    const cleanupCoreWebVitals = trackCoreWebVitals();
+    const cleanupPageLoad = trackPageLoad();
+    const cleanupResourceTiming = trackResourceTiming();
+    const cleanupMemoryUsage = trackMemoryUsage();
+    
+    // Return combined cleanup function
+    return () => {
+      if (cleanupCoreWebVitals) cleanupCoreWebVitals();
+      if (cleanupPageLoad) cleanupPageLoad();
+      if (cleanupResourceTiming) cleanupResourceTiming();
+      if (cleanupMemoryUsage) cleanupMemoryUsage();
+    };
   }, [trackCoreWebVitals, trackPageLoad, trackResourceTiming, trackMemoryUsage]);
 
   return {

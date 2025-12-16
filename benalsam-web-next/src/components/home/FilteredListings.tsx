@@ -117,11 +117,15 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
 
   // Handle favorite toggle
   const handleToggleFavorite = (listingId: string) => {
-    const listing = allListings.find(l => l.id === listingId)
+    const listing = allListings.find((l) => l.id === listingId)
     if (listing && user?.id) {
+      // Geçerli favori durumunu al (undefined ise false kabul et)
+      const currentStatus = listing.is_favorited ?? false
+      const newStatus = !currentStatus
+
       toggleFavoriteMutation.mutate({
         listingId,
-        isFavorited: !listing.is_favorited
+        isFavorited: newStatus,
       })
     }
   }

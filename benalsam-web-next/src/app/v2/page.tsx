@@ -20,7 +20,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Button } from '@/components/ui/button'
 import { SlidersHorizontal } from 'lucide-react'
 
-export default function HomePageV2() {
+function HomePageV2Content() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
@@ -140,6 +140,14 @@ export default function HomePageV2() {
         </div>
       </section>
     </div>
+  )
+}
+
+export default function HomePageV2() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background animate-pulse" />}>
+      <HomePageV2Content />
+    </Suspense>
   )
 }
 

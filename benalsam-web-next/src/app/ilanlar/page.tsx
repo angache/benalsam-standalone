@@ -14,7 +14,7 @@
 
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useFilterStore, filtersToUrlParams, urlParamsToFilters } from '@/stores/filterStore'
 import { FilterSidebar } from '@/components/listings/FilterSidebar'
@@ -26,7 +26,7 @@ import { FilterBottomSheet } from '@/components/listings/FilterBottomSheet'
 import { ScrollToTop } from '@/components/ScrollToTop'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function ListingsPage() {
+function ListingsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const filterStore = useFilterStore()
@@ -138,6 +138,14 @@ export default function ListingsPage() {
       {/* Scroll to Top */}
       <ScrollToTop />
     </div>
+  )
+}
+
+export default function ListingsPage() {
+  return (
+    <Suspense fallback={<ListingsPageSkeleton />}>
+      <ListingsPageContent />
+    </Suspense>
   )
 }
 

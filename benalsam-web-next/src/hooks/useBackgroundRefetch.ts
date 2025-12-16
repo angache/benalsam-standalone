@@ -55,6 +55,12 @@ export function useBackgroundRefetch(options: UseBackgroundRefetchOptions) {
   const queryClient = useQueryClient()
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const isVisibleRef = useRef(true)
+  
+  // Stabilize queryKeys reference to prevent unnecessary effect re-runs
+  const queryKeysRef = useRef(queryKeys)
+  useEffect(() => {
+    queryKeysRef.current = queryKeys
+  }, [queryKeys])
 
   useEffect(() => {
     if (!enabled) return
@@ -67,15 +73,15 @@ export function useBackgroundRefetch(options: UseBackgroundRefetchOptions) {
     document.addEventListener('visibilitychange', handleVisibilityChange)
     isVisibleRef.current = !document.hidden
 
-    // Refetch function
+    // Refetch function - uses ref to get latest queryKeys
     const refetch = () => {
       if (onlyWhenVisible && !isVisibleRef.current) {
         return
       }
 
-      console.log('🔄 [BackgroundRefetch] Refetching queries:', queryKeys)
+      console.log('🔄 [BackgroundRefetch] Refetching queries:', queryKeysRef.current)
       
-      queryKeys.forEach((queryKey) => {
+      queryKeysRef.current.forEach((queryKey) => {
         queryClient.refetchQueries({
           queryKey: Array.isArray(queryKey) ? queryKey : [queryKey],
           type: 'active', // Only refetch active queries
@@ -96,11 +102,11 @@ export function useBackgroundRefetch(options: UseBackgroundRefetchOptions) {
       }
       clearTimeout(initialTimeout)
     }
-  }, [queryKeys, interval, onlyWhenVisible, enabled, queryClient])
+  }, [interval, onlyWhenVisible, enabled, queryClient]) // Removed queryKeys from deps
 
   return {
     refetch: () => {
-      queryKeys.forEach((queryKey) => {
+      queryKeysRef.current.forEach((queryKey) => {
         queryClient.refetchQueries({
           queryKey: Array.isArray(queryKey) ? queryKey : [queryKey],
         })

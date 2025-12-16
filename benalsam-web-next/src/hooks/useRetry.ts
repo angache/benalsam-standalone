@@ -72,20 +72,26 @@ export function useRetry(options: UseRetryOptions = {}) {
 
   const retry = useCallback(
     async <T,>(fn: () => Promise<T>): Promise<T> => {
-      if (state.retryCount >= maxRetries) {
-        if (onMaxRetriesReached) {
-          onMaxRetriesReached()
+      // Use functional update to avoid stale closure
+      let currentRetryCount: number
+      setState((prev) => {
+        currentRetryCount = prev.retryCount
+        
+        if (prev.retryCount >= maxRetries) {
+          if (onMaxRetriesReached) {
+            onMaxRetriesReached()
+          }
+          throw new Error(`Max retries (${maxRetries}) reached`)
         }
-        throw new Error(`Max retries (${maxRetries}) reached`)
-      }
+        
+        return {
+          ...prev,
+          isRetrying: true,
+        }
+      })
 
-      setState((prev) => ({
-        ...prev,
-        isRetrying: true,
-      }))
-
-      // Calculate delay with exponential backoff
-      const delay = retryDelay * Math.pow(backoffMultiplier, state.retryCount)
+      // Calculate delay with exponential backoff using current retry count
+      const delay = retryDelay * Math.pow(backoffMultiplier, currentRetryCount!)
 
       // Wait before retrying
       await new Promise((resolve) => setTimeout(resolve, delay))
@@ -102,27 +108,32 @@ export function useRetry(options: UseRetryOptions = {}) {
         
         return result
       } catch (error) {
-        // Increment retry count
-        setState((prev) => ({
-          retryCount: prev.retryCount + 1,
-          isRetrying: false,
-          lastError: error instanceof Error ? error : new Error(String(error)),
-        }))
+        // Increment retry count using functional update
+        setState((prev) => {
+          const newRetryCount = prev.retryCount + 1
+          
+          // If we haven't reached max retries, throw to allow caller to retry again
+          if (newRetryCount < maxRetries) {
+            throw error
+          }
 
-        // If we haven't reached max retries, throw to allow caller to retry again
-        if (state.retryCount + 1 < maxRetries) {
-          throw error
-        }
-
-        // Max retries reached
-        if (onMaxRetriesReached) {
-          onMaxRetriesReached()
-        }
+          // Max retries reached
+          if (onMaxRetriesReached) {
+            onMaxRetriesReached()
+          }
+          
+          return {
+            retryCount: newRetryCount,
+            isRetrying: false,
+            lastError: error instanceof Error ? error : new Error(String(error)),
+          }
+        })
         
+        // If we reach here, max retries was reached
         throw error
       }
     },
-    [maxRetries, retryDelay, backoffMultiplier, state.retryCount, onMaxRetriesReached]
+    [maxRetries, retryDelay, backoffMultiplier, onMaxRetriesReached] // Removed state.retryCount
   )
 
   const reset = useCallback(() => {

@@ -7,39 +7,38 @@
 
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, lazy } from 'react'
 import Link from 'next/link'
 import { TrendingUp, Sparkles, Grid3x3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
-// Components
+// Critical components - load immediately
 import PopularCategories from '@/components/home/PopularCategories'
-import { PopularListings } from '@/components/home/PopularListings'
-import { AIRecommendations } from '@/components/home/AIRecommendations'
-import { RecentlyViewed } from '@/components/home/RecentlyViewed'
-import { ScrollToTop } from '@/components/ScrollToTop'
-import TrustBadges from '@/components/home/TrustBadges'
-import TrendingKeywords from '@/components/home/TrendingKeywords'
-import TodaysListings from '@/components/home/TodaysListings'
-import HowItWorks from '@/components/home/HowItWorks'
-import Testimonials from '@/components/home/Testimonials'
-import LiveStats from '@/components/home/LiveStats'
-import FlashDeals from '@/components/home/FlashDeals'
-import LiveActivityTicker from '@/components/home/LiveActivityTicker'
-import PopularInYourCity from '@/components/home/PopularInYourCity'
 import SmartSearchBox from '@/components/home/SmartSearchBox'
-import PersonalizedSection from '@/components/home/PersonalizedSection'
-import AppDownloadBanner from '@/components/home/AppDownloadBanner'
-import BlogSection from '@/components/home/BlogSection'
-import ScrollProgress from '@/components/ScrollProgress'
+import { ScrollToTop } from '@/components/ScrollToTop'
 import { LazySection } from '@/components/home/LazySection'
 import { CriticalResources } from '@/components/home/CriticalResources'
 import { HomepageSection } from '@/components/home/HomepageErrorBoundary'
-import { ListingsTabs } from '@/components/home/ListingsTabs'
 import { HomepageListingsWithFilters } from '@/components/home/HomepageListingsWithFilters'
 import { useHomePageData } from '@/hooks/useHomePageData'
 import { useBackgroundRefetch } from '@/hooks/useBackgroundRefetch'
+
+// Lazy load heavy components - reduce initial bundle size
+const TrustBadges = lazy(() => import('@/components/home/TrustBadges').then(m => ({ default: m.default })))
+const TrendingKeywords = lazy(() => import('@/components/home/TrendingKeywords').then(m => ({ default: m.default })))
+const LiveStats = lazy(() => import('@/components/home/LiveStats').then(m => ({ default: m.default })))
+const LiveActivityTicker = lazy(() => import('@/components/home/LiveActivityTicker').then(m => ({ default: m.default })))
+const PersonalizedSection = lazy(() => import('@/components/home/PersonalizedSection').then(m => ({ default: m.default })))
+const ListingsTabs = lazy(() => import('@/components/home/ListingsTabs').then(m => ({ default: m.ListingsTabs })))
+const RecentlyViewed = lazy(() => import('@/components/home/RecentlyViewed').then(m => ({ default: m.RecentlyViewed })))
+const AIRecommendations = lazy(() => import('@/components/home/AIRecommendations').then(m => ({ default: m.AIRecommendations })))
+const PopularInYourCity = lazy(() => import('@/components/home/PopularInYourCity').then(m => ({ default: m.default })))
+const HowItWorks = lazy(() => import('@/components/home/HowItWorks').then(m => ({ default: m.default })))
+const AppDownloadBanner = lazy(() => import('@/components/home/AppDownloadBanner').then(m => ({ default: m.default })))
+const Testimonials = lazy(() => import('@/components/home/Testimonials').then(m => ({ default: m.default })))
+const BlogSection = lazy(() => import('@/components/home/BlogSection').then(m => ({ default: m.default })))
+const ScrollProgress = lazy(() => import('@/components/ScrollProgress').then(m => ({ default: m.default })))
 
 interface HomePageClientProps {
   initialStats?: {
@@ -279,8 +278,10 @@ export default function HomePageClient({ initialStats }: HomePageClientProps) {
       {/* Critical Resources Preloading */}
       <CriticalResources />
       
-      {/* Scroll Progress */}
-      <ScrollProgress />
+      {/* Scroll Progress - Lazy loaded */}
+      <Suspense fallback={null}>
+        <ScrollProgress />
+      </Suspense>
 
       {/* Main Content */}
       <Suspense fallback={<HomePageSkeleton />}>

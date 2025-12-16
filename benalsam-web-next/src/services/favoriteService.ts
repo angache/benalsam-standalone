@@ -182,11 +182,12 @@ export const toggleFavorite = async (userId: string, listingId: string): Promise
 
     if (isCurrentlyFavorite) {
       // Eğer zaten favorilerdeyse, çıkar
-      return await removeFavorite(userId, listingId);
+      const success = await removeFavorite(userId, listingId);
+      return false; // Return false because we removed it
     } else {
       // Değilse ekle
       const result = await addFavorite(userId, listingId);
-      return !!result;
+      return !!result; // Return true if added successfully
     }
   } catch (error) {
     console.error('Error in toggleFavorite:', error);

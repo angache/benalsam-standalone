@@ -84,8 +84,13 @@ export function useIntersectionObserver(
     const element = ref.current
     if (!element) return
 
-    // If already intersected and triggerOnce, don't observe
-    if (hasIntersected && triggerOnce) return
+    // If already intersected and triggerOnce, still need cleanup
+    if (hasIntersected && triggerOnce) {
+      // Return no-op cleanup to ensure cleanup function always exists
+      return () => {
+        // Observer should already be disconnected, but ensure cleanup
+      }
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {

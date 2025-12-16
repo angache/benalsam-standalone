@@ -122,11 +122,34 @@ export function createDeduplicatedRequest<TArgs extends any[], TReturn>(
 
 /**
  * Cleanup stale requests periodically
+ * Returns cleanup function to stop the interval
  */
-if (typeof window !== 'undefined') {
+let staleCleanupInterval: NodeJS.Timeout | null = null
+
+export function startStaleCleanup(): void {
+  if (typeof window === 'undefined') return
+  if (staleCleanupInterval) return // Already started
+
   // Cleanup stale requests every minute
-  setInterval(() => {
+  staleCleanupInterval = setInterval(() => {
     requestDeduplicator.clearStale()
   }, 60 * 1000)
+}
+
+export function stopStaleCleanup(): void {
+  if (staleCleanupInterval) {
+    clearInterval(staleCleanupInterval)
+    staleCleanupInterval = null
+  }
+}
+
+// Auto-start cleanup in browser environment
+if (typeof window !== 'undefined') {
+  startStaleCleanup()
+  
+  // Cleanup on page unload
+  window.addEventListener('beforeunload', () => {
+    stopStaleCleanup()
+  })
 }
 

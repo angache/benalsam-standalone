@@ -30,7 +30,7 @@ import HomePageClient from './HomePageClient'
 // Generate metadata for SEO
 export const metadata: Metadata = generateSEOMetadata({
   title: 'BenAlsam - Türkiye\'nin En Güvenilir Alım-Satım Platformu',
-  description: 'Binlerce ilan arasından ihtiyacınıza uygun olanı bulun. Emlak, araç, elektronik ve daha fazlası. Güvenli alım-satım platformu.',
+  description: 'Binlerce ilan arasından ihtiyacınıza uygun olanı bulun. Emlak, araç, elektronik ve daha fazlası. Güvenli alım-satım platformu. İkinci el alışveriş için güvenilir pazar yeri.',
   keywords: [
     'ikinci el',
     'alım satım',

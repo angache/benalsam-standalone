@@ -212,5 +212,36 @@
 
 ---
 
+## 🚀 **Strategic Roadmap (2025-01-XX)**
+
+### **1. Next.js 16 Middleware → Proxy Migration**
+- **Status**: 🟡 RFC Draft Complete
+- **Priority**: High (Security & Future-Proofing)
+- **RFC**: `docs/rfc/MIDDLEWARE_TO_PROXY_MIGRATION.md`
+- **Timeline**: 1-2 days
+- **Impact**: 
+  - Maintains all security features
+  - Future-proofs for Next.js 16+
+  - No breaking changes
+
+### **2. Unified Category Management System**
+- **Status**: 🟡 RFC Draft Complete
+- **Priority**: High (Strategic Impact)
+- **RFC**: `docs/rfc/CATEGORY_MANAGEMENT_SYSTEM.md`
+- **Timeline**: 6-8 weeks
+- **Impact**:
+  - Single source of truth for categories/attributes
+  - Automated data pipeline from external sources
+  - Unified API for all clients
+  - Reduces manual work by 90%+
+
+### **3. Next Steps**
+1. Review RFCs with team
+2. Prioritize implementation order
+3. Begin middleware → proxy migration (quick win)
+4. Plan category management system implementation
+
+---
+
 *Last Updated: 2025-01-XX*
 *Previous Update: 2025-08-14 20:45*

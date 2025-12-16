@@ -194,11 +194,17 @@ export const ListingCard: React.FC<ListingCardProps> = ({
   const categoryBreadcrumb = buildCategoryBreadcrumb()
   
   // Generate image URL
-  const cardImageUrl = listing.main_image_url || 
-                     listing.image_url || 
-                     `https://source.unsplash.com/random/400x300/?${listing.category?.split(' > ')[0].replace(/\s/g, '+') || 'product'}&sig=${listing.id}`
-  
-  const isFavorited = isFavoritedOverride !== null ? isFavoritedOverride : listing.is_favorited
+  const cardImageUrl =
+    listing.main_image_url ||
+    listing.image_url ||
+    `https://source.unsplash.com/random/400x300/?${
+      listing.category?.split(' > ')[0].replace(/\s/g, '+') || 'product'
+    }&sig=${listing.id}`
+
+  const isFavorited =
+    isFavoritedOverride !== null && isFavoritedOverride !== undefined
+      ? isFavoritedOverride
+      : (listing.is_favorited ?? false)
   const statusInfo = getStatusInfo(listing.status)
   const premiumBadges = getPremiumBadges ? getPremiumBadges(listing) : []
   

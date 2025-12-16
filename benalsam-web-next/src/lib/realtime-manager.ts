@@ -79,6 +79,8 @@ class RealtimeManager {
   private reconnectAttempts = 0
   private maxReconnectAttempts = RECONNECT_MAX_ATTEMPTS
   private reconnectDelay = RECONNECT_BASE_DELAY
+  private reconnectTimeout: NodeJS.Timeout | null = null
+  private isReconnecting = false
 
   private constructor() {
     // Private constructor for singleton
@@ -95,6 +97,11 @@ class RealtimeManager {
    * Initialize the realtime manager for a user
    */
   public async initialize(userId: string): Promise<void> {
+    if (!userId) {
+      logger.warn('[RealtimeManager] Cannot initialize without userId')
+      return
+    }
+
     if (this.userId === userId && this.channel) {
       logger.debug('[RealtimeManager] Already initialized for user', { userId })
       return
@@ -104,6 +111,10 @@ class RealtimeManager {
     if (this.channel) {
       await this.disconnect()
     }
+
+    // Reset reconnect attempts for new user
+    this.reconnectAttempts = 0
+    this.isReconnecting = false
 
     this.userId = userId
     await this.connect()
@@ -161,17 +172,39 @@ class RealtimeManager {
           if (status === 'SUBSCRIBED') {
             logger.info('[RealtimeManager] Connected', { userId: this.userId })
             this.reconnectAttempts = 0
+            this.isReconnecting = false
+            // Clear any pending reconnection timeout
+            if (this.reconnectTimeout) {
+              clearTimeout(this.reconnectTimeout)
+              this.reconnectTimeout = null
+            }
           } else if (status === 'CHANNEL_ERROR') {
-            // Silent error - will auto-reconnect
-            logger.debug('[RealtimeManager] Channel error (auto-reconnecting)', { userId: this.userId })
-            this.handleReconnect()
+            // Silent error - will auto-reconnect (only if not at max attempts)
+            if (this.reconnectAttempts < this.maxReconnectAttempts) {
+              logger.debug('[RealtimeManager] Channel error (auto-reconnecting)', { userId: this.userId })
+              this.handleReconnect()
+            } else {
+              logger.warn('[RealtimeManager] Channel error but max attempts reached, not reconnecting', { userId: this.userId })
+            }
           } else if (status === 'TIMED_OUT') {
-            // Silent timeout - will auto-reconnect
-            logger.debug('[RealtimeManager] Connection timed out (auto-reconnecting)', { userId: this.userId })
-            this.handleReconnect()
+            // Silent timeout - will auto-reconnect (only if not at max attempts)
+            if (this.reconnectAttempts < this.maxReconnectAttempts) {
+              logger.debug('[RealtimeManager] Connection timed out (auto-reconnecting)', { userId: this.userId })
+              this.handleReconnect()
+            } else {
+              logger.warn('[RealtimeManager] Connection timed out but max attempts reached, not reconnecting', { userId: this.userId })
+            }
           } else if (status === 'CLOSED') {
-            logger.warn('[RealtimeManager] Connection closed', { userId: this.userId })
-            this.handleReconnect()
+            // Only reconnect if not at max attempts and user is still logged in
+            if (this.reconnectAttempts < this.maxReconnectAttempts && this.userId) {
+              logger.warn('[RealtimeManager] Connection closed (auto-reconnecting)', { userId: this.userId })
+              this.handleReconnect()
+            } else {
+              logger.warn('[RealtimeManager] Connection closed, not reconnecting', { 
+                userId: this.userId,
+                reason: this.reconnectAttempts >= this.maxReconnectAttempts ? 'max attempts reached' : 'no user'
+              })
+            }
           } else {
             logger.debug('[RealtimeManager] Status', { status, userId: this.userId })
           }
@@ -186,24 +219,46 @@ class RealtimeManager {
    * Handle automatic reconnection
    */
   private async handleReconnect(): Promise<void> {
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      logger.error('[RealtimeManager] Max reconnect attempts reached', {
-        userId: this.userId,
-        attempts: this.reconnectAttempts
-      })
+    // Don't reconnect if already reconnecting or max attempts reached
+    if (this.isReconnecting) {
+      logger.debug('[RealtimeManager] Already reconnecting, skipping...')
       return
     }
 
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      logger.warn('[RealtimeManager] Max reconnect attempts reached, stopping reconnection', {
+        userId: this.userId,
+        attempts: this.reconnectAttempts,
+        maxAttempts: this.maxReconnectAttempts
+      })
+      // Clean up and stop trying
+      this.isReconnecting = false
+      if (this.reconnectTimeout) {
+        clearTimeout(this.reconnectTimeout)
+        this.reconnectTimeout = null
+      }
+      return
+    }
+
+    this.isReconnecting = true
     this.reconnectAttempts++
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1)
 
     logger.info('[RealtimeManager] Reconnecting...', {
       userId: this.userId,
       attempt: this.reconnectAttempts,
+      maxAttempts: this.maxReconnectAttempts,
       delay
     })
 
-    setTimeout(() => {
+    // Clear any existing timeout
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout)
+    }
+
+    this.reconnectTimeout = setTimeout(() => {
+      this.isReconnecting = false
+      this.reconnectTimeout = null
       this.connect()
     }, delay)
   }
@@ -212,9 +267,20 @@ class RealtimeManager {
    * Disconnect from Supabase realtime
    */
   public async disconnect(): Promise<void> {
+    // Clear any pending reconnection
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout)
+      this.reconnectTimeout = null
+    }
+    this.isReconnecting = false
+
     if (this.channel) {
       logger.debug('[RealtimeManager] Disconnecting...', { userId: this.userId })
-      await this.channel.unsubscribe()
+      try {
+        await this.channel.unsubscribe()
+      } catch (error) {
+        logger.warn('[RealtimeManager] Error during disconnect', { error })
+      }
       this.channel = null
     }
     this.userId = null
