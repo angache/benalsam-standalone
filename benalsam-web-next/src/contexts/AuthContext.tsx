@@ -159,6 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (credentials: LoginCredentials) => {
     try {
       setLoading(true)
+      logger.info('[AuthContext] Login attempt started', { email: credentials.email })
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email: credentials.email,
@@ -166,6 +167,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
 
       if (error) {
+        logger.error('[AuthContext] Login error from Supabase', { 
+          error: error.message, 
+          code: error.name,
+          status: error.status 
+        })
         return { success: false, error: error.message }
       }
 
@@ -178,6 +184,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .select('is_2fa_enabled')
           .eq('id', data.user.id)
           .single()
+        
+        if (profileError) {
+          logger.error('[AuthContext] Error fetching profile for 2FA check', { 
+            error: profileError.message,
+            userId: data.user.id 
+          })
+        }
         
         logger.debug('[AuthContext] 2FA Check', { 
           profile, 
@@ -200,9 +213,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      logger.warn('[AuthContext] Login successful but no session returned')
       return { success: false, error: 'Giriş yapılırken bir hata oluştu' }
     } catch (error: any) {
-      return { success: false, error: error.message }
+      logger.error('[AuthContext] Login exception', { error: error.message, stack: error.stack })
+      return { success: false, error: error.message || 'Giriş yapılırken bir hata oluştu' }
     } finally {
       setLoading(false)
     }
