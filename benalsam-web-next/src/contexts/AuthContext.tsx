@@ -32,21 +32,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isSubscribed = true
 
-    // Get initial session
-    const initializeAuth = async () => {
+    // Get initial session with retry mechanism
+    const initializeAuth = async (retryCount = 0) => {
       try {
-        logger.debug('[AuthContext] Initializing...')
+        logger.debug('[AuthContext] Initializing...', { retryCount })
+        
+        // Retry up to 3 times with exponential backoff
         const { data: { session: initialSession }, error } = await supabase.auth.getSession()
         
         if (error) {
-          logger.error('[AuthContext] Error getting session', { error })
+          logger.error('[AuthContext] Error getting session', { error, retryCount })
+          
+          // Retry on error (up to 3 times)
+          if (retryCount < 3 && isSubscribed) {
+            const delay = Math.min(1000 * Math.pow(2, retryCount), 5000)
+            logger.debug('[AuthContext] Retrying session fetch...', { retryCount: retryCount + 1, delay })
+            setTimeout(() => {
+              if (isSubscribed) {
+                initializeAuth(retryCount + 1)
+              }
+            }, delay)
+            return
+          }
         }
 
         if (isSubscribed) {
           if (initialSession) {
-            logger.debug('[AuthContext] Initial session found', { userId: initialSession.user.id })
-            setSession(initialSession)
-            await fetchUserProfile(initialSession.user.id)
+            // Verify session is still valid
+            const now = Math.floor(Date.now() / 1000)
+            const expiresAt = initialSession.expires_at || 0
+            
+            if (expiresAt > now) {
+              logger.debug('[AuthContext] Initial session found', { userId: initialSession.user.id })
+              setSession(initialSession)
+              await fetchUserProfile(initialSession.user.id)
+            } else {
+              logger.debug('[AuthContext] Session expired, refreshing...')
+              // Try to refresh the session
+              const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession()
+              if (refreshedSession && !refreshError) {
+                logger.debug('[AuthContext] Session refreshed', { userId: refreshedSession.user.id })
+                setSession(refreshedSession)
+                await fetchUserProfile(refreshedSession.user.id)
+              } else {
+                logger.debug('[AuthContext] Could not refresh session', { error: refreshError })
+                setSession(null)
+              }
+            }
           } else {
             logger.debug('[AuthContext] No initial session')
           }
@@ -54,10 +86,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setInitialized(true)
         }
       } catch (error) {
-        logger.error('[AuthContext] Initialize error', { error })
+        logger.error('[AuthContext] Initialize error', { error, retryCount })
         if (isSubscribed) {
-          setLoading(false)
-          setInitialized(true)
+          // Retry on exception (up to 3 times)
+          if (retryCount < 3) {
+            const delay = Math.min(1000 * Math.pow(2, retryCount), 5000)
+            setTimeout(() => {
+              if (isSubscribed) {
+                initializeAuth(retryCount + 1)
+              }
+            }, delay)
+          } else {
+            setLoading(false)
+            setInitialized(true)
+          }
         }
       }
     }
@@ -71,6 +113,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (!isSubscribed) return
 
+        // Handle token refresh
+        if (event === 'TOKEN_REFRESHED' && currentSession) {
+          logger.debug('[AuthContext] Token refreshed', { userId: currentSession.user.id })
+          setSession(currentSession)
+          if (currentSession.user) {
+            await fetchUserProfile(currentSession.user.id)
+          }
+          return
+        }
+
+        // Handle signed in
+        if (event === 'SIGNED_IN' && currentSession) {
+          logger.debug('[AuthContext] User signed in', { userId: currentSession.user.id })
+          setSession(currentSession)
+          await fetchUserProfile(currentSession.user.id)
+          setLoading(false)
+          setInitialized(true)
+          return
+        }
+
+        // Handle signed out
+        if (event === 'SIGNED_OUT') {
+          logger.debug('[AuthContext] User signed out')
+          setSession(null)
+          setUser(null)
+          setLoading(false)
+          setInitialized(true)
+          return
+        }
+
+        // Handle session update
         setSession(currentSession)
         
         if (currentSession?.user) {
@@ -178,6 +251,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.session) {
         logger.info('[AuthContext] Login successful', { userId: data.user.id })
         
+        // Immediately set session to ensure it's available
+        setSession(data.session)
+        
+        // Verify session is set correctly
+        const { data: { session: verifySession } } = await supabase.auth.getSession()
+        if (!verifySession) {
+          logger.warn('[AuthContext] Session not persisted after login, retrying...')
+          // Wait a bit and retry
+          await new Promise(resolve => setTimeout(resolve, 200))
+          const { data: { session: retrySession } } = await supabase.auth.getSession()
+          if (retrySession) {
+            setSession(retrySession)
+            logger.info('[AuthContext] Session verified after retry')
+          } else {
+            logger.error('[AuthContext] Session still not available after retry')
+          }
+        }
+        
         // Check if 2FA is enabled in profiles table
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
@@ -204,6 +295,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           logger.info('[AuthContext] 2FA required for user', { userId: data.user.id })
         } else {
           logger.debug('[AuthContext] No 2FA required for user', { userId: data.user.id })
+          // Fetch full profile if no 2FA
+          await fetchUserProfile(data.user.id)
         }
         
         return { 

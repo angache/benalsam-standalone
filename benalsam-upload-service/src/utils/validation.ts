@@ -93,11 +93,39 @@ function validateFile(file: Express.Multer.File, index: number): void {
   
   // Check file extension
   const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-  const fileExtension = file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.'));
+  const mimeExtensionMap: Record<string, string> = {
+    'image/jpeg': '.jpg',
+    'image/jpg': '.jpg',
+    'image/png': '.png',
+    'image/gif': '.gif',
+    'image/webp': '.webp',
+  };
+
+  const originalName = file.originalname || '';
+  let fileExtension = '';
+
+  // Try to read extension from original file name
+  const lastDotIndex = originalName.lastIndexOf('.');
+  if (lastDotIndex !== -1 && lastDotIndex < originalName.length - 1) {
+    fileExtension = originalName.toLowerCase().substring(lastDotIndex);
+  } else {
+    // Fallback: derive extension from MIME type (for names like "blob")
+    const derivedExt = mimeExtensionMap[file.mimetype];
+    if (derivedExt) {
+      fileExtension = derivedExt;
+      console.warn(`ℹ️ Derived file extension from mimetype for index ${index}:`, {
+        originalname: originalName,
+        mimetype: file.mimetype,
+        derivedExtension: derivedExt,
+      });
+    } else {
+      fileExtension = '';
+    }
+  }
   
   if (!allowedExtensions.includes(fileExtension)) {
     throw new ValidationError(
-      `File at index ${index} has unsupported extension: ${fileExtension}`
+      `File at index ${index} has unsupported extension: ${fileExtension || originalName || 'unknown'}`
     );
   }
   

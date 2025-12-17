@@ -82,37 +82,215 @@ export const addInventoryItem = async (
   }
 
   try {
-    const { mainImageUrl, additionalImageUrls } = await processImagesForUploadService(
-      itemData.images || [],
-      itemData.mainImageIndex || 0,
-      'inventory',
-      currentUserId,
-      onProgress
-    );
+    let mainImageUrl: string | null = null;
+    let additionalImageUrls: string[] = [];
+    
+    try {
+      // itemData.images is already File[] from useInventoryForm
+      const images = itemData.images || [];
+      let imageFiles: File[] = [];
+      
+      // Check if images is File[] or ImageItem[]
+      // More robust check: File objects have name, size, type properties
+      if (images.length > 0) {
+        const firstItem = images[0];
+        const isFile = firstItem instanceof File || 
+                      (firstItem && typeof firstItem === 'object' && 
+                       'name' in firstItem && 'size' in firstItem && 'type' in firstItem &&
+                       typeof (firstItem as any).name === 'string' &&
+                       typeof (firstItem as any).size === 'number');
+        
+        if (isFile) {
+          // Already File[]
+          imageFiles = images as File[];
+        } else if (firstItem && typeof firstItem === 'object' && 'file' in firstItem) {
+          // ImageItem[] format - extract File objects
+          imageFiles = (images as any[])
+            .filter((img: any) => img.file && !img.isUploaded)
+            .map((img: any) => img.file)
+            .filter(Boolean) as File[];
+        } else {
+          // Fallback: try to use as File[] if items look like Files
+          imageFiles = images.filter((item: any) => {
+            return item && typeof item === 'object' && 
+                   ('name' in item || 'size' in item || item instanceof File);
+          }) as File[];
+        }
+      }
+      
+      console.log('📸 Processing images:', {
+        totalImages: images.length,
+        filesToUpload: imageFiles.length,
+        mainImageIndex: itemData.mainImageIndex || 0,
+        firstImageType: images.length > 0 ? typeof images[0] : 'none',
+        firstImageIsFile: images.length > 0 ? images[0] instanceof File : false,
+        imageFiles: imageFiles.map(f => ({ name: f.name, size: f.size }))
+      });
+      
+      if (imageFiles.length > 0) {
+        // Ensure mainImageIndex is valid (0-based index)
+        const validMainImageIndex = itemData.mainImageIndex >= 0 && itemData.mainImageIndex < imageFiles.length 
+          ? itemData.mainImageIndex 
+          : 0;
+        
+        console.log('📤 Uploading images:', {
+          imageFilesCount: imageFiles.length,
+          mainImageIndex: validMainImageIndex,
+          originalMainImageIndex: itemData.mainImageIndex
+        });
+        
+        const imageResult = await processImagesForUploadService(
+          imageFiles,
+          validMainImageIndex,
+          'inventory',
+          currentUserId,
+          onProgress
+        );
+        mainImageUrl = imageResult.mainImageUrl;
+        additionalImageUrls = imageResult.additionalImageUrls;
+        
+        console.log('✅ Images processed:', {
+          mainImageUrl,
+          additionalImageUrlsCount: additionalImageUrls.length,
+          additionalImageUrls
+        });
+      } else {
+        console.warn('⚠️ No images to upload - imageFiles is empty');
+      }
+    } catch (imageError) {
+      console.error('❌ Error processing images:', imageError);
+      console.error('❌ Image error details:', {
+        error: imageError,
+        message: imageError instanceof Error ? imageError.message : String(imageError),
+        stack: imageError instanceof Error ? imageError.stack : undefined
+      });
+      // Continue without images if image processing fails
+      toast({ 
+        title: "Görsel Yükleme Hatası", 
+        description: "Görseller yüklenemedi, ancak ürün kaydedilecek.", 
+        variant: "destructive" 
+      });
+    }
 
-    const itemToInsert = {
+    // Build item object, removing undefined values (Supabase doesn't accept undefined)
+    // Note: is_available and is_featured columns may not exist in the database schema
+    const itemToInsert: Record<string, any> = {
       user_id: currentUserId,
       name: itemData.name || '',
       category: itemData.category || '',
-      description: itemData.description,
-      main_image_url: mainImageUrl,
-      additional_image_urls: additionalImageUrls.length > 0 ? additionalImageUrls : null,
-      image_url: mainImageUrl,
-      condition: itemData.condition,
-      estimated_value: itemData.estimated_value,
-      tags: itemData.tags,
-      is_available: itemData.is_available ?? true,
-      is_featured: itemData.is_featured ?? false,
     };
+    
+    // Only add optional fields if they have values
+    if (itemData.description) {
+      itemToInsert.description = itemData.description;
+    }
+    if (mainImageUrl) {
+      itemToInsert.main_image_url = mainImageUrl;
+      itemToInsert.image_url = mainImageUrl;
+    }
+    if (additionalImageUrls.length > 0) {
+      itemToInsert.additional_image_urls = additionalImageUrls;
+    }
+    // Note: condition, estimated_value columns may not exist in the database schema
+    // Uncomment if your database has these columns:
+    // if (itemData.condition) {
+    //   itemToInsert.condition = itemData.condition;
+    // }
+    // if (itemData.estimated_value !== undefined && itemData.estimated_value !== null) {
+    //   itemToInsert.estimated_value = itemData.estimated_value;
+    // }
+    // Note: tags kolonu mevcut şemada yok; Supabase 42703 hatası veriyor.
+    // İleride tabloya eklenirse burayı tekrar açabiliriz.
+    // if (itemData.tags && Array.isArray(itemData.tags) && itemData.tags.length > 0) {
+    //   itemToInsert.tags = itemData.tags;
+    // }
+    
+    // Only add is_available and is_featured if they exist in the schema
+    // These columns may not exist in all database schemas
+    // Uncomment if your database has these columns:
+    // if (itemData.is_available !== undefined) {
+    //   itemToInsert.is_available = itemData.is_available ?? true;
+    // }
+    // if (itemData.is_featured !== undefined) {
+    //   itemToInsert.is_featured = itemData.is_featured ?? false;
+    // }
 
+    // Log the data being inserted for debugging
+    console.log('📦 Inserting inventory item:', {
+      user_id: itemToInsert.user_id,
+      name: itemToInsert.name,
+      category: itemToInsert.category,
+      hasDescription: !!itemToInsert.description,
+      hasMainImage: !!itemToInsert.main_image_url,
+      hasAdditionalImages: !!itemToInsert.additional_image_urls,
+      itemToInsert,
+      itemToInsertKeys: Object.keys(itemToInsert)
+    });
+
+    // Explicitly select only the columns that exist in the schema
+    // Don't use .select() without parameters as it may try to select non-existent columns
+    // Note: condition, estimated_value, tags, is_available, is_featured columns may not exist
     const { data, error } = await supabase
       .from('inventory_items')
       .insert([itemToInsert])
-      .select()
+      .select('id, user_id, name, category, description, main_image_url, additional_image_urls, image_url, created_at, updated_at')
       .single();
 
     if (error) {
-      return handleError(error, "Envanter Eklenemedi", error.message);
+      // Safely extract Supabase error details
+      // Supabase errors can have different structures, so we need to check multiple properties
+      const errorMessage = (error as any)?.message || (error as any)?.details || (error as any)?.hint || String(error) || 'Database error';
+      const errorCode = (error as any)?.code || (error as any)?.statusCode || 'UNKNOWN_ERROR';
+      const errorDetails = (error as any)?.details || null;
+      const errorHint = (error as any)?.hint || null;
+      
+      // Log error with all possible properties
+      console.error('❌ Supabase error occurred:');
+      console.error('  - Message:', errorMessage);
+      console.error('  - Code:', errorCode);
+      console.error('  - Details:', errorDetails);
+      console.error('  - Hint:', errorHint);
+      console.error('  - Full error object:', error);
+      console.error('  - Error type:', typeof error);
+      console.error('  - Error constructor:', error?.constructor?.name);
+      if (error && typeof error === 'object') {
+        console.error('  - Error keys:', Object.keys(error));
+        console.error('  - Error values:', Object.values(error));
+      }
+      
+      // Try to stringify the error object safely
+      try {
+        const errorString = JSON.stringify(error, null, 2);
+        console.error('  - Error JSON:', errorString);
+      } catch (e) {
+        console.error('  - Could not stringify error:', e);
+      }
+      
+      // Create a more descriptive error message
+      let userFriendlyMessage = "Veritabanı hatası oluştu";
+      if (errorCode === '23505' || errorMessage.includes('duplicate') || errorMessage.includes('unique')) {
+        userFriendlyMessage = "Bu ürün zaten envanterinizde mevcut.";
+      } else if (errorCode === '23503' || errorMessage.includes('foreign key')) {
+        userFriendlyMessage = "Geçersiz kategori veya kullanıcı bilgisi.";
+      } else if (errorCode === '23502' || errorMessage.includes('not null')) {
+        userFriendlyMessage = "Gerekli alanlar eksik. Lütfen tüm zorunlu alanları doldurun.";
+      } else if (errorCode === '42703' || errorMessage.includes('does not exist')) {
+        // Column doesn't exist error
+        const missingColumn = errorMessage.match(/column\s+[\w.]+\.(\w+)\s+does not exist/i)?.[1];
+        userFriendlyMessage = missingColumn 
+          ? `Veritabanı şemasında '${missingColumn}' kolonu bulunamadı. Lütfen yöneticiye bildirin.`
+          : "Veritabanı şeması hatası. Lütfen yöneticiye bildirin.";
+      } else if (errorCode === '400' || errorMessage.includes('400')) {
+        userFriendlyMessage = "Geçersiz veri formatı. Lütfen tüm alanları kontrol edin.";
+      } else if (errorMessage && errorMessage !== 'Database error') {
+        userFriendlyMessage = errorMessage;
+      }
+      
+      return handleError(
+        new Error(errorMessage),
+        "Envanter Eklenemedi",
+        userFriendlyMessage
+      );
     }
 
     toast({ 
@@ -122,7 +300,15 @@ export const addInventoryItem = async (
 
     return data as InventoryItem;
   } catch (error) {
-    return handleError(error, "Beklenmedik Envanter Ekleme Hatası", "Envantere ürün eklenirken beklenmedik bir sorun oluştu");
+    console.error('Unexpected error in addInventoryItem:', error);
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : String(error) || "Bilinmeyen bir hata oluştu";
+    return handleError(
+      error instanceof Error ? error : new Error(errorMessage),
+      "Beklenmedik Envanter Ekleme Hatası",
+      errorMessage
+    );
   }
 };
 
@@ -145,20 +331,56 @@ export const updateInventoryItem = async (
       onProgress
     );
     
-    const itemToUpdate = {
-      name: itemData.name,
-      category: itemData.category,
-      description: itemData.description,
-      main_image_url: mainImageUrl,
-      additional_image_urls: additionalImageUrls.length > 0 ? additionalImageUrls : null,
-      image_url: mainImageUrl,
-      condition: itemData.condition,
-      estimated_value: itemData.estimated_value,
-      tags: itemData.tags,
-      is_available: itemData.is_available,
-      is_featured: itemData.is_featured,
+    // Build update object, removing undefined values (Supabase doesn't accept undefined)
+    const itemToUpdate: Record<string, any> = {
       updated_at: new Date().toISOString(),
     };
+    
+    // Only add fields that are provided
+    if (itemData.name) {
+      itemToUpdate.name = itemData.name;
+    }
+    if (itemData.category) {
+      itemToUpdate.category = itemData.category;
+    }
+    if (itemData.description !== undefined) {
+      itemToUpdate.description = itemData.description;
+    }
+    if (mainImageUrl) {
+      itemToUpdate.main_image_url = mainImageUrl;
+      itemToUpdate.image_url = mainImageUrl;
+    }
+    if (additionalImageUrls.length > 0) {
+      itemToUpdate.additional_image_urls = additionalImageUrls;
+    } else if (additionalImageUrls.length === 0 && mainImageUrl === null) {
+      // If no images, set to null
+      itemToUpdate.additional_image_urls = null;
+      itemToUpdate.main_image_url = null;
+      itemToUpdate.image_url = null;
+    }
+    if (itemData.condition !== undefined) {
+      itemToUpdate.condition = itemData.condition;
+    }
+    if (itemData.estimated_value !== undefined && itemData.estimated_value !== null) {
+      itemToUpdate.estimated_value = itemData.estimated_value;
+    }
+    if (itemData.tags !== undefined) {
+      if (Array.isArray(itemData.tags) && itemData.tags.length > 0) {
+        itemToUpdate.tags = itemData.tags;
+      } else {
+        itemToUpdate.tags = null;
+      }
+    }
+    
+    // Only add is_available and is_featured if they exist in the schema
+    // These columns may not exist in all database schemas
+    // Uncomment if your database has these columns:
+    // if (itemData.is_available !== undefined) {
+    //   itemToUpdate.is_available = itemData.is_available;
+    // }
+    // if (itemData.is_featured !== undefined) {
+    //   itemToUpdate.is_featured = itemData.is_featured;
+    // }
 
     const { data, error } = await supabase
       .from('inventory_items')
@@ -295,8 +517,10 @@ export const getInventoryStats = async (userId: string): Promise<{
 
     const items = data || [];
     const totalItems = items.length;
-    const availableItems = items.filter(item => item.is_available).length;
-    const featuredItems = items.filter(item => item.is_featured).length;
+    // Note: is_available and is_featured may not exist in the schema
+    // If these columns don't exist, treat all items as available
+    const availableItems = items.filter(item => item.is_available !== false).length;
+    const featuredItems = items.filter(item => item.is_featured === true).length;
     const totalValue = items.reduce((sum, item) => sum + (item.estimated_value || 0), 0);
     
     const categories: Record<string, number> = {};

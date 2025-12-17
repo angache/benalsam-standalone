@@ -256,12 +256,33 @@ export class UnifiedErrorHandler {
    * Log error with context
    */
   private logError(error: Error, context: ErrorContext): void {
+    // Safely extract error properties
+    const errorName = error?.name || 'UnknownError';
+    const errorMessage = error?.message || String(error) || 'Unknown error occurred';
+    const errorStack = error?.stack || 'No stack trace available';
+    
+    // If error has additional properties (like Supabase errors), include them
+    const errorDetails: Record<string, unknown> = {
+      name: errorName,
+      message: errorMessage,
+      stack: errorStack
+    };
+    
+    // Add any additional error properties
+    if (error && typeof error === 'object') {
+      Object.keys(error).forEach(key => {
+        if (!['name', 'message', 'stack'].includes(key)) {
+          try {
+            errorDetails[key] = (error as Record<string, unknown>)[key];
+          } catch {
+            // Skip if can't serialize
+          }
+        }
+      });
+    }
+    
     const logData = {
-      error: {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      },
+      error: errorDetails,
       context,
       timestamp: new Date().toISOString()
     };

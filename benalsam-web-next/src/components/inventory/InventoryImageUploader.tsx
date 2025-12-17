@@ -167,12 +167,12 @@ const InventoryImageUploader: React.FC<InventoryImageUploaderProps> = ({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="w-full aspect-square flex flex-col items-center justify-center border-2 border-dashed border-primary/50 text-primary hover:bg-primary/10 rounded-md transition-colors overflow-hidden box-border p-2"
+            className="w-full aspect-square flex flex-col items-center justify-center border-2 border-dashed border-primary/50 text-primary hover:bg-primary/10 rounded-md transition-colors overflow-hidden p-1.5 min-w-0"
           >
-            <div className="flex-shrink-0 mb-1 flex items-center justify-center" style={{ maxWidth: '100%', maxHeight: '40%' }}>
-              <Upload className="w-8 h-8" style={{ maxWidth: '100%', maxHeight: '100%' }} />
+            <div className="flex-shrink-0 mb-0.5 flex items-center justify-center min-w-0" style={{ maxWidth: '100%', maxHeight: '50%', width: '100%' }}>
+              <Upload className="w-6 h-6 flex-shrink-0" style={{ maxWidth: '100%', maxHeight: '100%', width: 'auto', height: 'auto' }} />
             </div>
-            <span className="text-[10px] text-center leading-tight whitespace-nowrap overflow-hidden text-ellipsis" style={{ maxWidth: '100%' }}>Yükle</span>
+            <span className="text-[9px] text-center leading-tight overflow-hidden text-ellipsis block min-w-0" style={{ maxWidth: '100%', width: '100%' }}>Yükle</span>
           </button>
         )}
       </div>

@@ -211,48 +211,72 @@ export const processImagesForUploadService = async (
   onProgress?: (progress: number) => void, 
   initialImageUrls: string[] = []
 ): Promise<{ mainImageUrl: string | null; additionalImageUrls: string[]; urlsToDelete?: string[] }> => {
-  
-  // Set user ID
+  // Tüm türler için önce Upload Service kullan, gerekirse Supabase Storage fallback
   uploadService.setUserId(userId);
 
-  // Check if Upload Service is available
   const isAvailable = await uploadService.isAvailable();
   if (!isAvailable) {
     console.warn('⚠️ Upload Service not available, falling back to Supabase Storage');
-    // Fallback to Supabase Storage
     const { processImagesForSupabase } = await import('./imageService');
     return processImagesForSupabase(
       images,
       mainImageIndex,
       'item_images',
-      'listings',
+      type,
       userId,
-      'listings',
+      type,
       onProgress,
       initialImageUrls
     );
   }
 
   try {
-    // Filter files to upload
-    const filesToUpload = images
-      .filter(img => !img.isUploaded && (img.file || img.uri))
-      .map(img => {
-        if (img.file) {
-          return img.file;
-        } else if (img.uri && img.uri.startsWith('file://')) {
-          // Mobile local file - create file object
-          return {
-            uri: img.uri,
-            name: img.name || `image_${Date.now()}.jpg`,
-            type: 'image/jpeg'
-          } as File;
-        }
-        return null;
-      })
-      .filter(Boolean) as File[];
+    // More robust File check: File objects have name, size, type properties
+    const isFileArray = images.length > 0 && (
+      images[0] instanceof File ||
+      (images[0] && typeof images[0] === 'object' && 
+       'name' in images[0] && 'size' in images[0] && 'type' in images[0] &&
+       typeof (images[0] as any).name === 'string' &&
+       typeof (images[0] as any).size === 'number')
+    );
+    
+    let filesToUpload: File[] = [];
+    let keptImageUrls: string[] = [];
+    
+    console.log('🖼️ [processImagesForUploadService] Processing:', {
+      imagesCount: images.length,
+      isFileArray,
+      firstItemType: images.length > 0 ? typeof images[0] : 'none',
+      firstItemIsFile: images.length > 0 ? images[0] instanceof File : false,
+      firstItemKeys: images.length > 0 && typeof images[0] === 'object' ? Object.keys(images[0]) : []
+    });
+    
+    if (isFileArray) {
+      // images is File[]
+      filesToUpload = images as File[];
+      keptImageUrls = [];
+    } else {
+      // images is ImageItem[] (has file, isUploaded, preview properties)
+      filesToUpload = (images as any[])
+        .filter(img => !img.isUploaded && (img.file || img.uri))
+        .map(img => {
+          if (img.file) {
+            return img.file;
+          } else if (img.uri && img.uri.startsWith('file://')) {
+            // Mobile local file - create file object
+            return {
+              uri: img.uri,
+              name: img.name || `image_${Date.now()}.jpg`,
+              type: 'image/jpeg'
+            } as File;
+          }
+          return null;
+        })
+        .filter(Boolean) as File[];
 
-    const keptImageUrls = images.filter(img => img.isUploaded).map(img => img.preview || img.uri);
+      keptImageUrls = (images as any[]).filter(img => img.isUploaded).map(img => img.preview || img.uri);
+    }
+    
     const urlsToDelete = initialImageUrls.filter(url => !keptImageUrls.includes(url));
 
     let newImageUrls: string[] = [];
