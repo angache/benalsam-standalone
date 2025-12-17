@@ -60,30 +60,41 @@ export async function middleware(req: NextRequest) {
     }
   )
 
-  // Get session
+  const path = req.nextUrl.pathname
+  const isProtected = isProtectedRoute(path)
+  const isAuth = isAuthRoute(path)
+
+  // Use getUser() for security (validates with Supabase Auth server)
+  // This is more secure than getSession() which reads from storage
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  // Get session for token info (but don't trust user from session)
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
-  const path = req.nextUrl.pathname
-
   console.log('🔒 [Middleware]', { 
     path, 
+    hasUser: !!user,
     hasSession: !!session, 
-    userId: session?.user?.id,
-    isProtected: isProtectedRoute(path) 
+    userId: user?.id,
+    isProtected,
+    userError: userError?.message
   })
 
-  // If no session and trying to access protected route, redirect to login
-  if (!session && isProtectedRoute(path)) {
-    console.log('🔒 [Middleware] Redirecting to login - no session')
+  // If no authenticated user and trying to access protected route, redirect to login
+  if (!user && isProtected) {
+    console.log('🔒 [Middleware] Redirecting to login - no authenticated user')
     const loginUrl = new URL('/auth/login', req.url)
     loginUrl.searchParams.set('callbackUrl', path)
     return NextResponse.redirect(loginUrl)
   }
 
-  // If session exists but trying to access auth pages (except 2FA), redirect to home
-  if (session && isAuthRoute(path) && !path.startsWith('/auth/2fa/')) {
+  // If authenticated user exists but trying to access auth pages (except 2FA), redirect to home
+  if (user && isAuth && !path.startsWith('/auth/2fa/')) {
     console.log('🔒 [Middleware] Redirecting to home - already authenticated')
     return NextResponse.redirect(new URL('/', req.url))
   }

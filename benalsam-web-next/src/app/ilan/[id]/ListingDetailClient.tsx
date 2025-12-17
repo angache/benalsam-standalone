@@ -21,7 +21,8 @@ import {
   Shield,
   Clock,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Handshake
 } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
@@ -43,6 +44,9 @@ export function ListingDetailClient({ listing: initialListing, listingId }: List
   
   // Use initialListing from SSR
   const [listing, setListing] = useState(initialListing)
+  
+  // Check if user owns this listing (only after auth is loaded to prevent hydration mismatch)
+  const isOwnListing = !isLoading && user?.id && listing?.user?.id && listing.user.id === user.id
 
   // Favorite toggle mutation
   const toggleFavoriteMutation = useMutation({
@@ -364,6 +368,28 @@ export function ListingDetailClient({ listing: initialListing, listingId }: List
                   <MessageCircle className="h-5 w-5 mr-2" />
                   Mesaj Gönder
                 </Button>
+                {!isLoading && !isOwnListing && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    size="lg"
+                    onClick={() => {
+                      if (!user) {
+                        toast({
+                          title: 'Giriş Gerekli',
+                          description: 'Teklif göndermek için giriş yapmalısınız',
+                          variant: 'destructive'
+                        })
+                        router.push('/auth/login')
+                        return
+                      }
+                      router.push(`/teklif-yap/${listingId}`)
+                    }}
+                  >
+                    <Handshake className="h-5 w-5 mr-2" />
+                    Teklif Gönder
+                  </Button>
+                )}
                 {listing.contact?.phone && (
                   <Button variant="outline" className="w-full" size="lg">
                     <Phone className="h-5 w-5 mr-2" />

@@ -284,7 +284,7 @@ const Header = memo(function Header() {
                   <span>Takip Ettiklerim</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleNavigate('/alidigim-teklifler')}>
+                <DropdownMenuItem onClick={() => handleNavigate('/aldigim-teklifler')}>
                   <MessageSquare className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>Aldığım Teklifler</span>
                 </DropdownMenuItem>

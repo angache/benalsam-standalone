@@ -14,7 +14,7 @@
 
 'use client'
 
-import { useEffect, Suspense } from 'react'
+import { useEffect, Suspense, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useFilterStore, filtersToUrlParams, urlParamsToFilters } from '@/stores/filterStore'
 import { FilterSidebar } from '@/components/listings/FilterSidebar'
@@ -30,9 +30,12 @@ function ListingsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const filterStore = useFilterStore()
+  const isInitialMount = useRef(true)
+  const isSyncingFromUrl = useRef(false)
 
   // Sync URL params to store on mount and URL change
   useEffect(() => {
+    isSyncingFromUrl.current = true
     const filters = urlParamsToFilters(searchParams)
     
     // Apply filters to store
@@ -53,13 +56,34 @@ function ListingsPageContent() {
         filterStore.setCategoryAttribute(key, values)
       })
     }
+    
+    // Reset flag after a short delay to allow store updates to complete
+    setTimeout(() => {
+      isSyncingFromUrl.current = false
+    }, 0)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])
 
-  // Sync store to URL on filter changes
+  // Sync store to URL on filter changes (but not when syncing from URL)
   useEffect(() => {
+    // Skip if we're currently syncing from URL or on initial mount
+    if (isSyncingFromUrl.current || isInitialMount.current) {
+      if (isInitialMount.current) {
+        isInitialMount.current = false
+      }
+      return
+    }
+
     const params = filtersToUrlParams(filterStore)
-    const newUrl = params.toString() ? `/ilanlar?${params.toString()}` : '/ilanlar'
-    router.replace(newUrl, { scroll: false })
+    const newUrlParams = params.toString()
+    const currentUrlParams = searchParams.toString()
+    
+    // Only update URL if it's actually different
+    if (newUrlParams !== currentUrlParams) {
+      const newUrl = newUrlParams ? `/ilanlar?${newUrlParams}` : '/ilanlar'
+      router.replace(newUrl, { scroll: false })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     filterStore.searchQuery,
     filterStore.categories,

@@ -43,6 +43,8 @@ export async function createServerSupabaseClient() {
 /**
  * Get the current user session from server-side
  * Returns null if no session exists
+ * 
+ * Note: For security, prefer getServerUser() which uses getUser() to validate with Supabase Auth server
  */
 export async function getServerSession() {
   const supabase = await createServerSupabaseClient()
@@ -55,11 +57,24 @@ export async function getServerSession() {
 }
 
 /**
- * Get the current user from server-side
+ * Get the current authenticated user from server-side
  * Returns null if no user is authenticated
+ * 
+ * Uses getUser() for security - validates with Supabase Auth server
+ * This is more secure than getSession() which reads from storage
  */
 export async function getServerUser() {
-  const session = await getServerSession()
-  return session?.user ?? null
+  const supabase = await createServerSupabaseClient()
+  
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    return null
+  }
+
+  return user
 }
 
