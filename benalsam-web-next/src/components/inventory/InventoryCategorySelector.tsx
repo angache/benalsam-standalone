@@ -433,6 +433,14 @@ const InventoryCategorySelector: React.FC<InventoryCategorySelectorProps> = ({
     setSearchFourth('')
   }, [selectedSubSub])
 
+  // Compute display labels for selected categories (to avoid first-selection UI glitches)
+  const selectedMainLabel = useMemo(() => {
+    if (!selectedMain) return ''
+    const cat = allCategoriesFlat.find((c) => String(c.id) === selectedMain)
+    if (!cat) return ''
+    return getCategoryPath(cat).join(' > ')
+  }, [selectedMain, allCategoriesFlat, getCategoryPath])
+
   return (
     <div className="space-y-3">
       <Select value={selectedMain} onValueChange={onMainChange} disabled={disabled}>
@@ -441,7 +449,11 @@ const InventoryCategorySelector: React.FC<InventoryCategorySelectorProps> = ({
             errors?.category && !selectedMain ? 'border-destructive' : ''
           }`}
         >
-          <SelectValue placeholder="Ana Kategori Seçin *" />
+          {selectedMainLabel ? (
+            <span className="truncate">{selectedMainLabel}</span>
+          ) : (
+            <SelectValue placeholder="Ana Kategori Seçin *" />
+          )}
         </SelectTrigger>
         <SelectContent className="dropdown-content">
           <div className="p-2 border-b">

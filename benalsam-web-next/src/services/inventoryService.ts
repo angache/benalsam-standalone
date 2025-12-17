@@ -328,7 +328,8 @@ export const updateInventoryItem = async (
       itemData.mainImageIndex || 0,
       'inventory',
       currentUserId,
-      onProgress
+      onProgress,
+      itemData.initialImageUrls || []
     );
     
     // Build update object, removing undefined values (Supabase doesn't accept undefined)
