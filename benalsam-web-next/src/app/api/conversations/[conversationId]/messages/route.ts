@@ -6,10 +6,10 @@ import { getServerUser } from '@/lib/supabase-server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { conversationId: string } }
+  { params }: { params: Promise<{ conversationId: string }> }
 ) {
   try {
-    const { conversationId } = params;
+    const { conversationId } = await params;
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
@@ -78,7 +78,8 @@ export async function GET(
       hasMore: offset + (messages?.length || 0) < (totalCount || 0)
     });
   } catch (error) {
-    logger.error('[API] conversation-messages error', { error, params });
+    const resolvedParams = await params;
+    logger.error('[API] conversation-messages error', { error, conversationId: resolvedParams.conversationId });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

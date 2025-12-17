@@ -6,10 +6,10 @@ import { getServerUser } from '@/lib/supabase-server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { conversationId: string } }
+  { params }: { params: Promise<{ conversationId: string }> }
 ) {
   try {
-    const { conversationId } = params;
+    const { conversationId } = await params;
     logger.startTimer('[API] GET /conversations/[conversationId]');
 
     if (!conversationId) {
@@ -75,7 +75,8 @@ export async function GET(
       data: conversation
     });
   } catch (error) {
-    logger.error('[API] conversation-detail error', { error, params });
+    const resolvedParams = await params;
+    logger.error('[API] conversation-detail error', { error, conversationId: resolvedParams.conversationId });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
