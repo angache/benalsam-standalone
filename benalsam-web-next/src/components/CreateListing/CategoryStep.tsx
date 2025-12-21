@@ -408,33 +408,33 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
       {/* Progress Bar */}
-      <div className="mb-12">
-        <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 sm:mb-8 md:mb-12">
+        <div className="flex items-center justify-between mb-3 sm:mb-4 md:mb-6 overflow-x-auto pb-2">
           {[1, 2, 3, 4, 5, 6].map((step) => (
-            <div key={step} className="flex items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+            <div key={step} className="flex items-center shrink-0">
+              <div className={`w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all duration-300 ${
                 step === 1 
                   ? 'text-white shadow-lg' 
                   : 'bg-gray-300'}`} style={step === 1 ? {backgroundColor: 'var(--primary)'} : {}}>
                 {step === 1 ? '✓' : step}
               </div>
               {step < 6 && (
-                <div className={`w-20 h-2 mx-3 rounded-full transition-all duration-300`} style={{
+                <div className={`w-8 sm:w-12 md:w-20 h-1 sm:h-1.5 md:h-2 mx-1 sm:mx-2 md:mx-3 rounded-full transition-all duration-300`} style={{
                   backgroundColor: step === 1 ? 'var(--primary)' : '#e5e7eb'
                 }} />
               )}
             </div>
           ))}
         </div>
-        <div className="flex justify-between text-sm font-medium text-gray-600">
-          <span style={{color: 'var(--primary)'}}>Kategori</span>
-          <span>Detaylar</span>
-          <span>Özellikler</span>
-          <span>Görseller</span>
-          <span>Konum</span>
-          <span>Onay</span>
+        <div className="flex justify-between text-xs sm:text-sm font-medium text-gray-600 overflow-x-auto pb-2">
+          <span className="shrink-0" style={{color: 'var(--primary)'}}>Kategori</span>
+          <span className="shrink-0">Detaylar</span>
+          <span className="shrink-0 hidden sm:inline">Özellikler</span>
+          <span className="shrink-0 hidden md:inline">Görseller</span>
+          <span className="shrink-0 hidden lg:inline">Konum</span>
+          <span className="shrink-0 hidden lg:inline">Onay</span>
         </div>
       </div>
 
@@ -493,7 +493,7 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
            </div>
 
            {/* Title */}
-           <h1 className="text-2xl md:text-4xl font-bold text-center mb-6 md:mb-8" style={{color: 'var(--primary)'}}>
+           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-4 sm:mb-6 md:mb-8 px-2" style={{color: 'var(--primary)'}}>
              {navigationStack.length > 0 ? getBreadcrumb() : 'İlanınız için bir kategori seçin'}
            </h1>
 

@@ -229,6 +229,102 @@ const rules: Record<string, CategoryRule> = {
     ],
     requiredAttributes: ['clothingType', 'size'],
     priceRange: { min: 50, max: 10000 }
+  },
+
+  // Services (Hizmetler) - Special handling for service categories
+  'hizmet': {
+    titlePatterns: [
+      '{service_type} Arıyorum',
+      '{service_type} Hizmeti Arıyorum',
+      '{location} {service_type} Arıyorum',
+      '{category} Hizmeti Arıyorum',
+      '{category} Arıyorum'
+    ],
+    requiredAttributes: ['service_type'],
+    priceRange: { min: 100, max: 50000 }
+  },
+  'hizmetler': {
+    titlePatterns: [
+      '{service_type} Arıyorum',
+      '{service_type} Hizmeti Arıyorum',
+      '{location} {service_type} Arıyorum',
+      '{category} Hizmeti Arıyorum'
+    ],
+    requiredAttributes: ['service_type'],
+    priceRange: { min: 100, max: 50000 }
+  },
+  'tamir': {
+    titlePatterns: [
+      'Tamirci Arıyorum',
+      '{service_type} Tamirci Arıyorum',
+      '{location} Tamirci Arıyorum',
+      'Tamir Hizmeti Arıyorum'
+    ],
+    requiredAttributes: [],
+    priceRange: { min: 200, max: 10000 }
+  },
+  'bakım': {
+    titlePatterns: [
+      'Bakım Hizmeti Arıyorum',
+      '{service_type} Bakım Hizmeti Arıyorum',
+      '{location} Bakım Hizmeti Arıyorum'
+    ],
+    requiredAttributes: [],
+    priceRange: { min: 200, max: 10000 }
+  },
+  'elektrikçi': {
+    titlePatterns: [
+      'Elektrikçi Arıyorum',
+      '{location} Elektrikçi Arıyorum',
+      'Elektrik Hizmeti Arıyorum'
+    ],
+    requiredAttributes: [],
+    priceRange: { min: 300, max: 15000 }
+  },
+  'tesisatçı': {
+    titlePatterns: [
+      'Tesisatçı Arıyorum',
+      '{location} Tesisatçı Arıyorum',
+      'Tesisat Hizmeti Arıyorum'
+    ],
+    requiredAttributes: [],
+    priceRange: { min: 300, max: 15000 }
+  },
+  'boyacı': {
+    titlePatterns: [
+      'Boyacı Arıyorum',
+      '{location} Boyacı Arıyorum',
+      'Boyama Hizmeti Arıyorum'
+    ],
+    requiredAttributes: [],
+    priceRange: { min: 500, max: 20000 }
+  },
+  'marangoz': {
+    titlePatterns: [
+      'Marangoz Arıyorum',
+      '{location} Marangoz Arıyorum',
+      'Marangozluk Hizmeti Arıyorum'
+    ],
+    requiredAttributes: [],
+    priceRange: { min: 500, max: 25000 }
+  },
+  'temizlik': {
+    titlePatterns: [
+      'Temizlik Hizmeti Arıyorum',
+      '{location} Temizlik Hizmeti Arıyorum',
+      'Temizlikçi Arıyorum'
+    ],
+    requiredAttributes: [],
+    priceRange: { min: 200, max: 5000 }
+  },
+  'nakliye': {
+    titlePatterns: [
+      'Nakliye Hizmeti Arıyorum',
+      '{location} Nakliye Hizmeti Arıyorum',
+      'Taşıma Hizmeti Arıyorum'
+    ],
+    requiredAttributes: [],
+    priceRange: { min: 500, max: 20000 }
   }
 };
 

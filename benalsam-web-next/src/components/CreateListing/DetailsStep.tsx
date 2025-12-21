@@ -281,33 +281,33 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
   }
 
   return (
-    <div className="container mx-auto max-w-3xl px-4 py-8">
+    <div className="container mx-auto max-w-3xl px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
       {/* Progress Bar */}
-      <div className="mb-12">
-        <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 sm:mb-8 md:mb-12">
+        <div className="flex items-center justify-between mb-3 sm:mb-4 md:mb-6 overflow-x-auto pb-2">
           {[1, 2, 3, 4, 5, 6].map((step) => (
-            <div key={step} className="flex items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+            <div key={step} className="flex items-center shrink-0">
+              <div className={`w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all duration-300 ${
                 step <= 2 
                   ? 'text-white shadow-lg' 
                   : 'bg-gray-300'}`} style={step <= 2 ? {backgroundColor: 'var(--primary)'} : {}}>
                 {step < 2 ? '✓' : step === 2 ? '2' : step}
               </div>
               {step < 6 && (
-                <div className={`w-20 h-2 mx-3 rounded-full transition-all duration-300`} style={{
+                <div className={`w-8 sm:w-12 md:w-20 h-1 sm:h-1.5 md:h-2 mx-1 sm:mx-2 md:mx-3 rounded-full transition-all duration-300`} style={{
                   backgroundColor: step < 2 ? 'var(--primary)' : '#e5e7eb'
                 }} />
               )}
             </div>
           ))}
         </div>
-        <div className="flex justify-between text-sm font-medium text-gray-600">
-          <span className="text-green-600">✓ Kategori</span>
-          <span style={{color: 'var(--primary)'}}>Detaylar</span>
-          <span>Özellikler</span>
-          <span>Görseller</span>
-          <span>Konum</span>
-          <span>Onay</span>
+        <div className="flex justify-between text-xs sm:text-sm font-medium text-gray-600 overflow-x-auto pb-2">
+          <span className="shrink-0 text-green-600">✓ Kategori</span>
+          <span className="shrink-0" style={{color: 'var(--primary)'}}>Detaylar</span>
+          <span className="shrink-0 hidden sm:inline">Özellikler</span>
+          <span className="shrink-0 hidden md:inline">Görseller</span>
+          <span className="shrink-0 hidden lg:inline">Konum</span>
+          <span className="shrink-0 hidden lg:inline">Onay</span>
         </div>
       </div>
 
@@ -341,13 +341,13 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
           </div>
         </div>
       )}
-      <h1 className="text-2xl md:text-3xl font-bold mb-6" style={{color: 'var(--primary)'}}>
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6" style={{color: 'var(--primary)'}}>
         Detaylar
       </h1>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card>
-          <CardContent className="space-y-6 p-6">
+          <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="title">İlan Başlığı</Label>
@@ -448,11 +448,11 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
               </div>
             </div>
 
-            <div className="flex justify-between pt-2">
-              <Button type="button" variant="outline" onClick={onBack}>
+            <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 pt-2">
+              <Button type="button" variant="outline" onClick={onBack} className="w-full sm:w-auto">
                 ← Geri
               </Button>
-              <Button type="submit" disabled={!isFormValid} className="text-white"
+              <Button type="submit" disabled={!isFormValid} className="text-white w-full sm:w-auto"
                 style={{backgroundColor: 'var(--primary)'}}
                 onMouseEnter={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary-hover)'}}
                 onMouseLeave={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary)'}}

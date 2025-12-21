@@ -85,6 +85,8 @@ Bu bölüm her önemli değişiklikte güncellenir ve şu bilgileri içerir:
 - Job endpoint: /api/v1/listings/jobs/:jobId (Listing Service)
 - Status normalization: All statuses normalized to lowercase
 - Firebase Realtime Queue: Queue Service deprecated, Firebase Realtime DB kullanılıyor
+- AI Suggestions: Hizmet kategorileri için özel AI önerileri eklendi (Tamirci Arıyorum, Elektrikçi Arıyorum, vb.)
+- RabbitMQ: Sistemin tam ortasında, mutlaka çalışmalı (Docker Desktop ile başlatılmalı)
 
 Lütfen şu dosyaları oku:
 1. docs/project/project summary2 (güncel durum - EN ÜSTTEKİ "Current Status" bölümüne bak)
@@ -147,7 +149,7 @@ Bu prompt'u kullanırken:
 
 ---
 
-**Son Güncelleme**: 2025-01-XX (Otomatik güncellenir)  
+**Son Güncelleme**: 2025-12-21 (Otomatik güncellenir)  
 **Hazırlayan**: AI Assistant  
 **Amaç**: Yeni versiyonla geri döndüğünde projeyi hatırlatmak  
 **Güncelleme Stratejisi**: `project summary2` dosyasına dinamik referans - her zaman güncel

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -41,12 +41,18 @@ export function ListingDetailClient({ listing: initialListing, listingId }: List
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [selectedImage, setSelectedImage] = useState(0)
+  const [isMounted, setIsMounted] = useState(false)
   
   // Use initialListing from SSR
   const [listing, setListing] = useState(initialListing)
   
+  // Mark component as mounted to prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+  
   // Check if user owns this listing (only after auth is loaded to prevent hydration mismatch)
-  const isOwnListing = !isLoading && user?.id && listing?.user?.id && listing.user.id === user.id
+  const isOwnListing = isMounted && !isLoading && user?.id && listing?.user?.id && listing.user.id === user.id
 
   // Favorite toggle mutation
   const toggleFavoriteMutation = useMutation({
@@ -368,7 +374,8 @@ export function ListingDetailClient({ listing: initialListing, listingId }: List
                   <MessageCircle className="h-5 w-5 mr-2" />
                   Mesaj Gönder
                 </Button>
-                {!isLoading && !isOwnListing && (
+                {/* Teklif Gönder butonu - sadece client-side'da ve kendi ilanı değilse göster */}
+                {isMounted && !isOwnListing && (
                   <Button 
                     variant="outline" 
                     className="w-full" 

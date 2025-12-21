@@ -471,9 +471,9 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
   }
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div className="container mx-auto max-w-4xl px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
       {/* Progress Bar */}
-      <div className="mb-12">
+      <div className="mb-6 sm:mb-8 md:mb-12">
         <div className="flex items-center justify-between mb-6 overflow-x-auto">
           {[1, 2, 3, 4, 5, 6].map((step) => (
             <div key={step} className="flex items-center flex-shrink-0">

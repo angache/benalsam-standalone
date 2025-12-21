@@ -27,411 +27,246 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [initialized, setInitialized] = useState(false)
   const fetchedUserIds = useRef<Set<string>>(new Set())
+  const sessionInitializedRef = useRef(false)
 
   // Initialize auth state and listen for changes
   useEffect(() => {
     let isSubscribed = true
-    let sessionInitialized = false
     const startTime = Date.now()
 
-    // Debug: Check cookie and storage availability (Chrome-specific checks)
-    const checkCookies = () => {
-      if (typeof window !== 'undefined') {
-        const cookies = document.cookie
-        const hasSupabaseCookies = cookies.includes('sb-') || cookies.includes('supabase')
-        
-        // Chrome-specific: Check localStorage for Supabase session
-        let localStorageCheck = { hasSupabaseStorage: false, storageKeys: [] as string[] }
-        try {
-          const storageKeys = Object.keys(localStorage)
-          const supabaseKeys = storageKeys.filter(key => 
-            key.includes('supabase') || key.includes('sb-') || key.includes('auth')
-          )
-          localStorageCheck = {
-            hasSupabaseStorage: supabaseKeys.length > 0,
-            storageKeys: supabaseKeys.slice(0, 5) // First 5 keys for debugging
-          }
-        } catch (e) {
-          // localStorage might be blocked
-        }
-        
-        // Check if Chrome
-        const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
-        
-        logger.debug('[AuthContext] Cookie and storage check', { 
-          browser: isChrome ? 'Chrome' : 'Other',
-          hasCookies: cookies.length > 0,
-          hasSupabaseCookies,
-          cookieCount: cookies.split(';').length,
-          cookiePreview: cookies.substring(0, 100),
-          ...localStorageCheck
-        })
-        return hasSupabaseCookies || localStorageCheck.hasSupabaseStorage
-      }
-      return false
-    }
-
-    // Get initial session immediately (don't wait for cookies)
-    // Chrome-specific: Multiple attempts with delays
-    const initializeAuth = async (retryCount = 0) => {
+    // Simplified initialization: First getSession() (fast, from cookies), then validate with getUser()
+    const initializeAuth = async () => {
       try {
-        const elapsed = Date.now() - startTime
-        const isChrome = typeof window !== 'undefined' && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
-        
-        logger.debug('[AuthContext] Initializing...', { 
-          retryCount, 
-          elapsed: `${elapsed}ms`,
-          sessionInitialized,
-          isSubscribed,
-          browser: isChrome ? 'Chrome' : 'Other',
-          hasCookies: checkCookies()
+        logger.debug('[AuthContext] Starting initialization...', {
+          timestamp: new Date().toISOString()
         })
         
-        // Chrome-specific: Small delay before first attempt (helps with cookie initialization)
-        if (isChrome && retryCount === 0) {
-          await new Promise(resolve => setTimeout(resolve, 50))
+        // Step 1: Get session from cookies (fast, reliable)
+        const sessionStart = Date.now()
+        const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession()
+        const sessionTime = Date.now() - sessionStart
+        
+        logger.debug('[AuthContext] getSession() completed', {
+          elapsed: `${sessionTime}ms`,
+          hasSession: !!initialSession,
+          hasError: !!sessionError,
+          userId: initialSession?.user?.id,
+          errorMessage: sessionError?.message
+        })
+        
+        if (sessionError) {
+          logger.error('[AuthContext] Session error', { error: sessionError.message })
         }
         
-        // Use getUser() for security (validates with Supabase Auth server)
-        // This is more secure than getSession() which reads from storage
-        const getUserStart = Date.now()
-        let authenticatedUser = null
-        let authenticatedSession = null
-        let error = null
-        
-        try {
-          // First try getUser() for authenticated user data
-          const userResult = await supabase.auth.getUser()
-          authenticatedUser = userResult.data?.user || null
-          error = userResult.error || null
+        // Step 2: If session exists, validate with getUser() for security
+        if (initialSession && initialSession.user) {
+          const getUserStart = Date.now()
+          const { data: { user: validatedUser }, error: userError } = await supabase.auth.getUser()
+          const getUserTime = Date.now() - getUserStart
           
-          // If user is authenticated, get session for token info
-          if (authenticatedUser && !error) {
-            const sessionResult = await supabase.auth.getSession()
-            authenticatedSession = sessionResult.data?.session || null
-            // Use session error only if user was not found
-            if (!authenticatedSession && !error) {
-              error = sessionResult.error || null
-            }
-          }
-        } catch (e: any) {
-          error = e
-          logger.error('[AuthContext] getUser() exception', { error: e?.message || String(e) })
-        }
-        
-        const getUserTime = Date.now() - getUserStart
-        
-        logger.debug('[AuthContext] getUser() completed', {
-          elapsed: `${getUserTime}ms`,
-          hasUser: !!authenticatedUser,
-          hasSession: !!authenticatedSession,
-          hasError: !!error,
-          errorMessage: error?.message,
-          userId: authenticatedUser?.id,
-          sessionExpiresAt: authenticatedSession?.expires_at,
-          sessionExpiresIn: authenticatedSession?.expires_at ? `${Math.floor((authenticatedSession.expires_at * 1000 - Date.now()) / 1000)}s` : 'N/A',
-          browser: isChrome ? 'Chrome' : 'Other'
-        })
-        
-        // Use authenticated session if available
-        const initialSession = authenticatedSession
-        
-        // Chrome-specific: If no user and Chrome, try one more time after a delay
-        if (!authenticatedUser && !error && isChrome && retryCount === 0) {
-          logger.debug('[AuthContext] Chrome: No user on first attempt, retrying after delay...')
-          setTimeout(() => {
-            if (isSubscribed && !sessionInitialized) {
-              initializeAuth(1)
-            }
-          }, 200)
-          return
-        }
-        
-        if (error) {
-          logger.error('[AuthContext] Error getting session', { 
-            error: error.message,
-            errorCode: error.name,
-            retryCount,
-            elapsed: `${Date.now() - startTime}ms`
+          logger.debug('[AuthContext] getUser() validation completed', {
+            elapsed: `${getUserTime}ms`,
+            hasUser: !!validatedUser,
+            hasError: !!userError,
+            userId: validatedUser?.id,
+            errorMessage: userError?.message
           })
           
-          // Retry on error (up to 2 times with shorter delays)
-          if (retryCount < 2 && isSubscribed) {
-            const delay = Math.min(200 * (retryCount + 1), 500) // 200ms, 400ms max
-            logger.debug('[AuthContext] Retrying session fetch...', { 
-              retryCount: retryCount + 1, 
-              delay,
-              willRetry: isSubscribed && !sessionInitialized
-            })
-            setTimeout(() => {
-              if (isSubscribed && !sessionInitialized) {
-                initializeAuth(retryCount + 1)
-              } else {
-                logger.debug('[AuthContext] Retry skipped', { 
-                  isSubscribed, 
-                  sessionInitialized 
-                })
-              }
-            }, delay)
-            return
-          }
-        }
-
-        if (isSubscribed && !sessionInitialized) {
-          if (initialSession) {
+          // Only use session if user is validated
+          if (validatedUser && !userError && validatedUser.id === initialSession.user.id) {
             // Verify session is still valid
             const now = Math.floor(Date.now() / 1000)
             const expiresAt = initialSession.expires_at || 0
             const isValid = expiresAt > now
             
-            logger.debug('[AuthContext] Session validation', {
-              userId: initialSession.user.id,
-              expiresAt,
-              now,
-              isValid,
-              expiresIn: `${expiresAt - now}s`
-            })
-            
             if (isValid) {
-              logger.debug('[AuthContext] Initial session found and valid', { 
-                userId: initialSession.user.id,
-                elapsed: `${Date.now() - startTime}ms`
-              })
-              setSession(initialSession)
-              await fetchUserProfile(initialSession.user.id)
-              sessionInitialized = true
-              logger.debug('[AuthContext] Session initialized successfully', {
-                userId: initialSession.user.id,
+              logger.debug('[AuthContext] Session valid, setting state', {
+                userId: validatedUser.id,
                 totalElapsed: `${Date.now() - startTime}ms`
               })
+              setSession(initialSession)
+              await fetchUserProfile(validatedUser.id)
+              sessionInitializedRef.current = true
             } else {
               logger.debug('[AuthContext] Session expired, refreshing...', {
-                userId: initialSession.user.id,
+                userId: validatedUser.id,
                 expiredBy: `${now - expiresAt}s`
               })
-              // Try to refresh the session
-              const refreshStart = Date.now()
+              // Try to refresh
               const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession()
-              const refreshTime = Date.now() - refreshStart
-              
-              logger.debug('[AuthContext] Refresh attempt completed', {
-                elapsed: `${refreshTime}ms`,
-                success: !!refreshedSession && !refreshError,
-                error: refreshError?.message,
-                newUserId: refreshedSession?.user?.id
-              })
-              
               if (refreshedSession && !refreshError) {
-                logger.debug('[AuthContext] Session refreshed successfully', { 
-                  userId: refreshedSession.user.id,
-                  totalElapsed: `${Date.now() - startTime}ms`
-                })
+                logger.debug('[AuthContext] Session refreshed', { userId: refreshedSession.user.id })
                 setSession(refreshedSession)
                 await fetchUserProfile(refreshedSession.user.id)
-                sessionInitialized = true
+                sessionInitializedRef.current = true
               } else {
-                logger.debug('[AuthContext] Could not refresh session', { 
-                  error: refreshError?.message,
-                  totalElapsed: `${Date.now() - startTime}ms`
-                })
+                logger.debug('[AuthContext] Could not refresh session', { error: refreshError?.message })
                 setSession(null)
               }
             }
           } else {
-            // No fallback needed - we already used getUser() above
-            
-            logger.debug('[AuthContext] No initial session found', {
-              totalElapsed: `${Date.now() - startTime}ms`,
-              browser: isChrome ? 'Chrome' : 'Other'
+            logger.debug('[AuthContext] User validation failed, clearing session', {
+              error: userError?.message
             })
+            setSession(null)
           }
+        } else {
+          logger.debug('[AuthContext] No session found', {
+            totalElapsed: `${Date.now() - startTime}ms`
+          })
+        }
+        
+        if (isSubscribed) {
           setLoading(false)
           setInitialized(true)
           logger.debug('[AuthContext] Initialization complete', {
-            sessionInitialized,
-            totalElapsed: `${Date.now() - startTime}ms`
-          })
-        } else {
-          logger.debug('[AuthContext] Initialization skipped', {
-            isSubscribed,
-            sessionInitialized,
+            sessionInitialized: sessionInitializedRef.current,
             totalElapsed: `${Date.now() - startTime}ms`
           })
         }
       } catch (error: any) {
-        logger.error('[AuthContext] Initialize error', { 
+        logger.error('[AuthContext] Initialize error', {
           error: error?.message || String(error),
           stack: error?.stack,
-          retryCount,
           totalElapsed: `${Date.now() - startTime}ms`
         })
-        if (isSubscribed && !sessionInitialized) {
-          // Retry on exception (up to 2 times)
-          if (retryCount < 2) {
-            const delay = Math.min(200 * (retryCount + 1), 500)
-            logger.debug('[AuthContext] Retrying after exception...', {
-              retryCount: retryCount + 1,
-              delay,
-              willRetry: isSubscribed && !sessionInitialized
-            })
-            setTimeout(() => {
-              if (isSubscribed && !sessionInitialized) {
-                initializeAuth(retryCount + 1)
-              }
-            }, delay)
-          } else {
-            logger.debug('[AuthContext] Max retries reached, giving up', {
-              totalElapsed: `${Date.now() - startTime}ms`
-            })
-            setLoading(false)
-            setInitialized(true)
-          }
+        if (isSubscribed) {
+          setLoading(false)
+          setInitialized(true)
         }
       }
     }
 
-    // Call getUser() FIRST and immediately (this is the most secure method)
-    // Then set up listener for future changes
-    logger.debug('[AuthContext] Starting immediate getUser() call', {
-      timestamp: new Date().toISOString(),
-      hasCookies: checkCookies()
+    // Start initialization immediately
+    initializeAuth().then(() => {
+      // Only set up listener after initialization is complete
+      // This prevents INITIAL_SESSION event from causing double initialization
+      logger.debug('[AuthContext] Setting up onAuthStateChange listener after initialization', {
+        timestamp: new Date().toISOString()
+      })
     })
     
-    // Call initializeAuth immediately (don't wait for listener)
-    initializeAuth()
-    
-    // Set up auth state listener for FUTURE changes (after initial session is loaded)
-    const listenerStartTime = Date.now()
-    
-    logger.debug('[AuthContext] Setting up onAuthStateChange listener for future changes', {
-      timestamp: new Date().toISOString()
-    })
-    
+    // Set up auth state listener for future changes (but ignore INITIAL_SESSION)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
-        const elapsed = Date.now() - listenerStartTime
-        logger.debug('[AuthContext] Auth state change event', { 
-          event, 
+        logger.debug('[AuthContext] Auth state change event', {
+          event,
           hasSession: !!currentSession,
           userId: currentSession?.user?.id,
-          elapsed: `${elapsed}ms`,
-          sessionInitialized,
+          sessionInitialized: sessionInitializedRef.current,
           isSubscribed
         })
         
         if (!isSubscribed) {
-          logger.debug('[AuthContext] Event ignored - not subscribed')
           return
         }
 
-        // Skip INITIAL_SESSION if we already initialized via getUser()
-        // This prevents double initialization
-        if (event === 'INITIAL_SESSION') {
-          logger.debug('[AuthContext] INITIAL_SESSION event received (already handled by getUser())', {
+        // Ignore INITIAL_SESSION and SIGNED_IN during initialization
+        // These events fire during initial load and cause double initialization
+        // We handle initial session in initializeAuth(), so ignore these events until initialization is complete
+        if (event === 'INITIAL_SESSION' || (event === 'SIGNED_IN' && !sessionInitializedRef.current)) {
+          logger.debug('[AuthContext] Event ignored during initialization', {
+            event,
             hasSession: !!currentSession,
-            sessionInitialized,
-            elapsed: `${elapsed}ms`
+            sessionInitialized: sessionInitializedRef.current
           })
-          // Only process if we haven't initialized yet (shouldn't happen, but safety check)
-          if (!sessionInitialized && currentSession) {
-            logger.debug('[AuthContext] Processing INITIAL_SESSION as fallback', {
-              userId: currentSession.user?.id
+          return
+        }
+
+        // Handle SIGNED_IN - user just logged in (only after initialization is complete)
+        if (event === 'SIGNED_IN' && currentSession && currentSession.user) {
+          logger.debug('[AuthContext] User signed in', { userId: currentSession.user.id })
+          
+          // Validate user with getUser() for security
+          const { data: { user: validatedUser }, error: validateError } = await supabase.auth.getUser()
+          
+          if (validatedUser && !validateError && validatedUser.id === currentSession.user.id) {
+            logger.debug('[AuthContext] User validated after sign in', { userId: validatedUser.id })
+            // Only update if session actually changed
+            setSession(prevSession => {
+              if (prevSession?.user?.id === currentSession.user.id) {
+                return prevSession // No change, avoid re-render
+              }
+              return currentSession
             })
-            
-            // Validate user with getUser() for security (don't trust event user)
-            const { data: { user: validatedUser }, error: validateError } = await supabase.auth.getUser()
-            
-            if (validatedUser && !validateError) {
-              logger.debug('[AuthContext] User validated in INITIAL_SESSION fallback', { userId: validatedUser.id })
-              setSession(currentSession)
-              await fetchUserProfile(validatedUser.id)
-              sessionInitialized = true
-              setLoading(false)
-              setInitialized(true)
-            } else {
-              logger.debug('[AuthContext] User validation failed in INITIAL_SESSION', { error: validateError?.message })
-              setSession(null)
-              setUser(null)
-              setLoading(false)
-              setInitialized(true)
-            }
-          }
-          return
-        }
-
-        // Handle token refresh - validate with getUser() for security
-        if (event === 'TOKEN_REFRESHED' && currentSession) {
-          logger.debug('[AuthContext] Token refreshed event', { userId: currentSession.user?.id })
-          
-          // Validate user with getUser() for security (don't trust event user)
-          const { data: { user: validatedUser }, error: validateError } = await supabase.auth.getUser()
-          
-          if (validatedUser && !validateError) {
-            logger.debug('[AuthContext] User validated after token refresh', { userId: validatedUser.id })
-            setSession(currentSession)
             await fetchUserProfile(validatedUser.id)
+            sessionInitializedRef.current = true
           } else {
-            logger.debug('[AuthContext] User validation failed after token refresh', { error: validateError?.message })
-            // Keep session but don't update user profile
-            setSession(currentSession)
-          }
-          return
-        }
-
-        // Handle signed in - validate with getUser() for security
-        if (event === 'SIGNED_IN' && currentSession) {
-          logger.debug('[AuthContext] User signed in event', { userId: currentSession.user?.id })
-          
-          // Validate user with getUser() for security (don't trust event user)
-          const { data: { user: validatedUser }, error: validateError } = await supabase.auth.getUser()
-          
-          if (validatedUser && !validateError) {
-            logger.debug('[AuthContext] User validated with getUser()', { userId: validatedUser.id })
-            setSession(currentSession)
-            await fetchUserProfile(validatedUser.id)
-            sessionInitialized = true
-            setLoading(false)
-            setInitialized(true)
-          } else {
-            logger.debug('[AuthContext] User validation failed', { error: validateError?.message })
+            logger.debug('[AuthContext] User validation failed after sign in', { error: validateError?.message })
             setSession(null)
             setUser(null)
           }
-          return
-        }
-
-        // Handle signed out
-        if (event === 'SIGNED_OUT') {
-          logger.debug('[AuthContext] User signed out')
-          setSession(null)
-          setUser(null)
-          sessionInitialized = false
           setLoading(false)
           setInitialized(true)
           return
         }
 
-        // Handle session update - validate with getUser() for security
-        setSession(currentSession)
-        
-        if (currentSession?.user) {
-          // Validate user with getUser() for security (don't trust session user)
+        // Handle TOKEN_REFRESHED - session token was refreshed
+        if (event === 'TOKEN_REFRESHED' && currentSession && currentSession.user) {
+          logger.debug('[AuthContext] Token refreshed', { userId: currentSession.user.id })
+          
+          // Validate user with getUser() for security
           const { data: { user: validatedUser }, error: validateError } = await supabase.auth.getUser()
           
-          if (validatedUser && !validateError) {
-            logger.debug('[AuthContext] User validated with getUser()', { userId: validatedUser.id })
+          if (validatedUser && !validateError && validatedUser.id === currentSession.user.id) {
+            logger.debug('[AuthContext] User validated after token refresh', { userId: validatedUser.id })
+            // Only update if session actually changed (token refresh usually means new expires_at)
+            setSession(prevSession => {
+              if (prevSession?.expires_at === currentSession.expires_at) {
+                return prevSession // No change, avoid re-render
+              }
+              return currentSession
+            })
+            // Don't refetch profile on token refresh (it's expensive and not needed)
+          } else {
+            logger.debug('[AuthContext] User validation failed after token refresh', { error: validateError?.message })
+            setSession(null)
+            setUser(null)
+            sessionInitializedRef.current = false
+          }
+          return
+        }
+
+        // Handle SIGNED_OUT - user logged out
+        if (event === 'SIGNED_OUT') {
+          logger.debug('[AuthContext] User signed out')
+          setSession(null)
+          setUser(null)
+          sessionInitializedRef.current = false
+          setLoading(false)
+          setInitialized(true)
+          return
+        }
+
+        // Handle other events (SIGNED_UP, USER_UPDATED, etc.)
+        if (currentSession && currentSession.user) {
+          // Validate user with getUser() for security
+          const { data: { user: validatedUser }, error: validateError } = await supabase.auth.getUser()
+          
+          if (validatedUser && !validateError && validatedUser.id === currentSession.user.id) {
+            logger.debug('[AuthContext] Session updated', { userId: validatedUser.id, event })
+            // Only update if session actually changed
+            setSession(prevSession => {
+              if (prevSession?.user?.id === currentSession.user.id && 
+                  prevSession?.expires_at === currentSession.expires_at) {
+                return prevSession // No change, avoid re-render
+              }
+              return currentSession
+            })
+            // fetchUserProfile has its own cache check, so it's safe to call
             await fetchUserProfile(validatedUser.id)
-            sessionInitialized = true
+            sessionInitializedRef.current = true
           } else {
             logger.debug('[AuthContext] User validation failed, clearing session', { error: validateError?.message })
             setSession(null)
             setUser(null)
-            sessionInitialized = false
+            sessionInitializedRef.current = false
           }
         } else {
-          logger.debug('[AuthContext] User logged out')
+          logger.debug('[AuthContext] No session in event', { event })
+          setSession(null)
           setUser(null)
-          sessionInitialized = false
+          sessionInitializedRef.current = false
         }
         
         setLoading(false)

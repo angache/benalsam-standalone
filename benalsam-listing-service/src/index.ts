@@ -119,7 +119,7 @@ async function startServer() {
     await connectRedis();
     logger.info('✅ Redis connected');
 
-    // Connect to RabbitMQ
+    // Connect to RabbitMQ (required for job processing and event system)
     await connectRabbitMQ();
     logger.info('✅ RabbitMQ connected');
 

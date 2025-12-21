@@ -73,6 +73,42 @@ export class ListingAIService {
   }
 
   /**
+   * Check if category is a service category (not a product)
+   * Hizmet kategorileri: tamir, bakım, elektrikçi, tesisatçı, boyacı, marangoz, vb.
+   */
+  private isServiceCategory(category: string): boolean {
+    const categoryLower = category.toLowerCase();
+    
+    // Hizmet kategorisi anahtar kelimeleri
+    const serviceKeywords = [
+      'hizmet', 'service', 'tamir', 'repair', 'bakım', 'maintenance',
+      'elektrikçi', 'electrician', 'tesisatçı', 'plumber', 'boyacı', 'painter',
+      'marangoz', 'carpenter', 'usta', 'master', 'teknisyen', 'technician',
+      'montaj', 'assembly', 'kurulum', 'installation', 'temizlik', 'cleaning',
+      'nakliye', 'transport', 'taşıma', 'moving', 'dizayn', 'design',
+      'mimarlık', 'architecture', 'mühendislik', 'engineering', 'danışmanlık', 'consulting',
+      'eğitim', 'education', 'öğretmen', 'teacher', 'doktor', 'doctor',
+      'avukat', 'lawyer', 'muhasebeci', 'accountant', 'fotoğrafçı', 'photographer',
+      'kuaför', 'hairdresser', 'berber', 'barber', 'masaj', 'massage',
+      'fitness', 'antrenör', 'trainer', 'koç', 'coach', 'terapi', 'therapy'
+    ];
+    
+    // Kategori adında hizmet anahtar kelimesi var mı kontrol et
+    for (const keyword of serviceKeywords) {
+      if (categoryLower.includes(keyword)) {
+        return true;
+      }
+    }
+    
+    // Kategori yolu "Hizmetler" içeriyorsa
+    if (categoryLower.includes('hizmetler') || categoryLower.includes('services')) {
+      return true;
+    }
+    
+    return false;
+  }
+
+  /**
    * Suggest title based on category and attributes
    */
   async suggestTitle(request: AISuggestionRequest): Promise<TitleSuggestion[]> {
@@ -108,7 +144,7 @@ export class ListingAIService {
             if (title && title.trim().length > 5 && title !== currentTitle && !title.match(/^[\s{}]+$/)) {
               suggestions.push({
                 title: title.trim(),
-                score: this.calculateTitleScore(title, enrichedAttributes) + 20, // Higher bonus for user input
+                score: this.calculateTitleScore(title, enrichedAttributes, normalizedCategory) + 20, // Higher bonus for user input
                 reason: 'Kullanıcı girdisinden çıkarılan bilgilere göre oluşturuldu'
               });
             }
@@ -155,7 +191,7 @@ export class ListingAIService {
               cleanTitle !== normalizedCategory) {
             suggestions.push({
               title: cleanTitle,
-              score: this.calculateTitleScore(cleanTitle, attributes),
+              score: this.calculateTitleScore(cleanTitle, attributes, normalizedCategory),
               reason: 'Kategori kurallarına göre oluşturuldu'
             });
           }
@@ -331,18 +367,31 @@ export class ListingAIService {
   /**
    * Adapt title from similar listing
    */
-  private adaptTitleFromSimilar(similarTitle: string, attributes: Record<string, any>, _category: string): string {
+  private adaptTitleFromSimilar(similarTitle: string, attributes: Record<string, any>, category: string): string {
     let adapted = similarTitle;
+    const isService = this.isServiceCategory(category);
     
-    // Replace brand/model if we have different ones
-    if (attributes['brand']) {
-      adapted = adapted.replace(/\b[A-Z][a-z]+\b/g, (match) => {
-        // Try to replace with our brand if it's a brand name
-        if (match.length > 2 && match.length < 20) {
-          return attributes['brand'];
+    // For service categories, replace service type
+    if (isService && attributes['service_type']) {
+      // Try to replace service type in the title
+      const serviceKeywords = ['tamirci', 'elektrikçi', 'tesisatçı', 'boyacı', 'marangoz', 'temizlik', 'nakliye'];
+      for (const keyword of serviceKeywords) {
+        if (adapted.toLowerCase().includes(keyword)) {
+          adapted = adapted.replace(new RegExp(keyword, 'gi'), attributes['service_type']);
+          break;
         }
-        return match;
-      });
+      }
+    } else {
+      // For product categories, replace brand/model if we have different ones
+      if (attributes['brand']) {
+        adapted = adapted.replace(/\b[A-Z][a-z]+\b/g, (match) => {
+          // Try to replace with our brand if it's a brand name
+          if (match.length > 2 && match.length < 20) {
+            return attributes['brand'];
+          }
+          return match;
+        });
+      }
     }
     
     // Ensure it ends with "Arıyorum" or "İstiyorum"
@@ -356,17 +405,36 @@ export class ListingAIService {
   /**
    * Adapt description hint from similar listing
    */
-  private adaptDescriptionHint(hint: string, attributes: Record<string, any>, _category: string): string {
+  private adaptDescriptionHint(hint: string, attributes: Record<string, any>, category: string): string {
     let adapted = hint;
+    const isService = this.isServiceCategory(category);
     
-    // Replace brand/model if we have different ones
-    if (attributes['brand']) {
-      adapted = adapted.replace(/\b[A-Z][a-z]+\b/g, (match) => {
-        if (match === attributes['brand']) {
-          return attributes['brand'];
+    // For service categories, replace service-related terms
+    if (isService) {
+      // Replace "ürün" with "hizmet"
+      adapted = adapted.replace(/ürün/gi, 'hizmet');
+      adapted = adapted.replace(/product/gi, 'service');
+      
+      // Replace service type if we have one
+      if (attributes['service_type']) {
+        const serviceKeywords = ['tamirci', 'elektrikçi', 'tesisatçı', 'boyacı', 'marangoz'];
+        for (const keyword of serviceKeywords) {
+          if (adapted.toLowerCase().includes(keyword)) {
+            adapted = adapted.replace(new RegExp(keyword, 'gi'), attributes['service_type']);
+            break;
+          }
         }
-        return match;
-      });
+      }
+    } else {
+      // For product categories, replace brand/model if we have different ones
+      if (attributes['brand']) {
+        adapted = adapted.replace(/\b[A-Z][a-z]+\b/g, (match) => {
+          if (match === attributes['brand']) {
+            return attributes['brand'];
+          }
+          return match;
+        });
+      }
     }
     
     // Ensure it's in "wanted" format
@@ -386,8 +454,48 @@ export class ListingAIService {
     const parts: string[] = [];
     const categoryLower = category.toLowerCase();
 
+    // Check if this is a service category
+    const isService = this.isServiceCategory(category);
+    
     // Category-specific intro - WANTED format (more natural Turkish)
-    if (categoryLower.includes('daire') || categoryLower.includes('emlak')) {
+    // Hizmet kategorileri için özel mantık
+    if (isService) {
+      // Hizmet kategorileri için özel açıklama
+      const serviceType = this.extractServiceType(category, attributes);
+      parts.push(`Merhaba, ${serviceType} hizmeti arıyorum.`);
+      
+      if (attributes['service_type']) {
+        parts.push(`${attributes['service_type']} konusunda deneyimli bir ${serviceType} tercih ediyorum.`);
+      }
+      
+      if (attributes['location']) {
+        parts.push(`Konum olarak ${attributes['location']} bölgesinde hizmet vermesini istiyorum.`);
+      }
+      
+      if (attributes['availability']) {
+        const availabilityText = this.getAvailabilityText(attributes['availability']);
+        if (availabilityText) {
+          parts.push(availabilityText);
+        }
+      }
+      
+      if (attributes['experience_years']) {
+        parts.push(`En az ${attributes['experience_years']} yıl deneyimli olmasını tercih ediyorum.`);
+      }
+      
+      if (attributes['certification'] && Array.isArray(attributes['certification']) && attributes['certification'].length > 0) {
+        parts.push(`Sertifikalı ve belgeli olmasını istiyorum.`);
+      }
+      
+      if (attributes['location_type']) {
+        const locationTypeText = this.getLocationTypeText(attributes['location_type']);
+        if (locationTypeText) {
+          parts.push(locationTypeText);
+        }
+      }
+      
+      parts.push('Profesyonel, güvenilir ve kaliteli hizmet bekliyorum.');
+    } else if (categoryLower.includes('daire') || categoryLower.includes('emlak')) {
       parts.push(`Merhaba, ${attributes['roomCount'] ? attributes['roomCount'] + '+1 oda' : 'daire'} arıyorum.`);
       if (attributes['area']) {
         parts.push(`Yaklaşık ${attributes['area']} m² civarında bir daire tercih ediyorum.`);
@@ -479,11 +587,14 @@ export class ListingAIService {
     }
 
     // Add attributes in WANTED format (more natural)
-    if (attributes['condition']) {
-      parts.push(`Ürünün ${attributes['condition']} durumda olmasını istiyorum.`);
-    }
-    if (attributes['year']) {
-      parts.push(`${attributes['year']} model veya daha yeni olmasını tercih ediyorum.`);
+    // Hizmet kategorileri için "ürün" yerine "hizmet" kullan
+    if (!isService) {
+      if (attributes['condition']) {
+        parts.push(`Ürünün ${attributes['condition']} durumda olmasını istiyorum.`);
+      }
+      if (attributes['year']) {
+        parts.push(`${attributes['year']} model veya daha yeni olmasını tercih ediyorum.`);
+      }
     }
 
     // Use learned hints if available and we don't have much content
@@ -499,14 +610,95 @@ export class ListingAIService {
 
     // Ensure we have at least some content
     if (parts.length === 0) {
-      parts.push(`Merhaba, ${category} arıyorum.`);
-      parts.push('Uygun fiyatlı ve kaliteli bir ürün tercih ediyorum.');
+      if (isService) {
+        parts.push(`Merhaba, ${category} hizmeti arıyorum.`);
+        parts.push('Profesyonel, güvenilir ve kaliteli hizmet bekliyorum.');
+      } else {
+        parts.push(`Merhaba, ${category} arıyorum.`);
+        parts.push('Uygun fiyatlı ve kaliteli bir ürün tercih ediyorum.');
+      }
     }
 
     // Always end with a friendly closing
-    parts.push('Detaylı bilgi ve tekliflerinizi bekliyorum.');
+    if (isService) {
+      parts.push('Detaylı bilgi, fiyat teklifi ve referanslarınızı bekliyorum.');
+    } else {
+      parts.push('Detaylı bilgi ve tekliflerinizi bekliyorum.');
+    }
 
     return parts.join('\n\n');
+  }
+
+  /**
+   * Extract service type from category name
+   */
+  private extractServiceType(category: string, attributes: Record<string, any>): string {
+    const categoryLower = category.toLowerCase();
+    
+    // Önce attributes'dan service_type varsa onu kullan
+    if (attributes['service_type']) {
+      return attributes['service_type'];
+    }
+    
+    // Kategori adından hizmet tipini çıkar
+    if (categoryLower.includes('tamir') || categoryLower.includes('repair')) {
+      return 'tamirci';
+    }
+    if (categoryLower.includes('elektrikçi') || categoryLower.includes('electrician')) {
+      return 'elektrikçi';
+    }
+    if (categoryLower.includes('tesisatçı') || categoryLower.includes('plumber')) {
+      return 'tesisatçı';
+    }
+    if (categoryLower.includes('boyacı') || categoryLower.includes('painter')) {
+      return 'boyacı';
+    }
+    if (categoryLower.includes('marangoz') || categoryLower.includes('carpenter')) {
+      return 'marangoz';
+    }
+    if (categoryLower.includes('temizlik') || categoryLower.includes('cleaning')) {
+      return 'temizlik hizmeti';
+    }
+    if (categoryLower.includes('nakliye') || categoryLower.includes('transport')) {
+      return 'nakliye hizmeti';
+    }
+    if (categoryLower.includes('kuaför') || categoryLower.includes('hairdresser')) {
+      return 'kuaför';
+    }
+    if (categoryLower.includes('masaj') || categoryLower.includes('massage')) {
+      return 'masaj terapisti';
+    }
+    
+    // Genel hizmet kategorisi
+    const normalized = this.normalizeCategoryName(category);
+    return normalized || 'hizmet';
+  }
+
+  /**
+   * Get availability text in Turkish
+   */
+  private getAvailabilityText(availability: string): string | null {
+    const availabilityMap: Record<string, string> = {
+      'immediate': 'Mümkün olan en kısa sürede hizmet vermesini istiyorum.',
+      'within_week': 'Bu hafta içinde hizmet vermesini tercih ediyorum.',
+      'within_month': 'Bu ay içinde hizmet vermesini istiyorum.',
+      'flexible': 'Tarih konusunda esnekim.'
+    };
+    
+    return availabilityMap[availability] || null;
+  }
+
+  /**
+   * Get location type text in Turkish
+   */
+  private getLocationTypeText(locationType: string): string | null {
+    const locationTypeMap: Record<string, string> = {
+      'on_site': 'Yerinde hizmet vermesini istiyorum.',
+      'remote': 'Uzaktan hizmet vermesini tercih ediyorum.',
+      'hybrid': 'Yerinde veya uzaktan hizmet verebilir.'
+    };
+    
+    return locationTypeMap[locationType] || null;
   }
 
   /**
@@ -765,8 +957,9 @@ export class ListingAIService {
     return result;
   }
 
-  private calculateTitleScore(title: string, attributes: Record<string, any>): number {
+  private calculateTitleScore(title: string, attributes: Record<string, any>, category?: string): number {
     let score = 50; // Base score
+    const isService = category ? this.isServiceCategory(category) : false;
 
     // "Arıyorum" kelimesi net olmalı
     if (title.toLowerCase().includes('arıyorum')) {
@@ -780,31 +973,50 @@ export class ListingAIService {
       score += 25; // Optimal length
     }
 
-    // Titles with brand get higher score
-    if (attributes['brand'] && title.toLowerCase().includes(String(attributes['brand']).toLowerCase())) {
-      score += 15;
-    }
+    // For service categories, prioritize service-specific attributes
+    if (isService) {
+      // Titles with service_type get higher score
+      if (attributes['service_type'] && title.toLowerCase().includes(String(attributes['service_type']).toLowerCase())) {
+        score += 20;
+      }
+      
+      // Titles with location get higher score (important for services)
+      if (attributes['location'] && title.toLowerCase().includes(String(attributes['location']).toLowerCase())) {
+        score += 15;
+      }
+      
+      // Bonus for "hizmet" or "hizmeti" keywords
+      if (title.toLowerCase().includes('hizmet') || title.toLowerCase().includes('hizmeti')) {
+        score += 10;
+      }
+    } else {
+      // For product categories, prioritize product-specific attributes
+      // Titles with brand get higher score
+      if (attributes['brand'] && title.toLowerCase().includes(String(attributes['brand']).toLowerCase())) {
+        score += 15;
+      }
 
-    // Titles with model get higher score
-    if (attributes['model'] && title.toLowerCase().includes(String(attributes['model']).toLowerCase())) {
-      score += 15;
-    }
+      // Titles with model get higher score
+      if (attributes['model'] && title.toLowerCase().includes(String(attributes['model']).toLowerCase())) {
+        score += 15;
+      }
 
-    // Bonus for specific attributes in title
-    if (attributes['storage'] && title.toLowerCase().includes(String(attributes['storage']).toLowerCase())) {
-      score += 10;
-    }
-    if (attributes['roomCount'] && title.toLowerCase().includes(String(attributes['roomCount']).toLowerCase())) {
-      score += 10;
-    }
-    if (attributes['area'] && title.toLowerCase().includes(String(attributes['area']).toLowerCase())) {
-      score += 10;
-    }
-    if (attributes['color'] && title.toLowerCase().includes(String(attributes['color']).toLowerCase())) {
-      score += 8;
-    }
-    if (attributes['ram'] && title.toLowerCase().includes(String(attributes['ram']).toLowerCase())) {
-      score += 8;
+      // Bonus for specific attributes in title
+      if (attributes['storage'] && title.toLowerCase().includes(String(attributes['storage']).toLowerCase())) {
+        score += 10;
+      }
+      if (attributes['roomCount'] && title.toLowerCase().includes(String(attributes['roomCount']).toLowerCase())) {
+        score += 10;
+      }
+      if (attributes['area'] && title.toLowerCase().includes(String(attributes['area']).toLowerCase())) {
+        score += 10;
+      }
+      if (attributes['color'] && title.toLowerCase().includes(String(attributes['color']).toLowerCase())) {
+        score += 8;
+      }
+      if (attributes['ram'] && title.toLowerCase().includes(String(attributes['ram']).toLowerCase())) {
+        score += 8;
+      }
     }
 
     return Math.min(score, 100);
@@ -924,12 +1136,75 @@ export class ListingAIService {
   /**
    * Extract attributes from user input text
    * Enhanced for "WANTED" listings - users describe what they want
+   * Also handles service categories
    */
   private extractAttributesFromText(text: string): Record<string, any> {
     const extracted: Record<string, any> = {};
     const lowerText = text.toLowerCase();
     
-    // Extract brand
+    // Check if this is a service-related input
+    const isServiceInput = this.isServiceCategory(text);
+    
+    // For service categories, extract service-specific attributes first
+    if (isServiceInput) {
+      // Extract service type
+      const serviceTypes = [
+        'tamir', 'repair', 'bakım', 'maintenance', 'elektrikçi', 'electrician',
+        'tesisatçı', 'plumber', 'boyacı', 'painter', 'marangoz', 'carpenter',
+        'temizlik', 'cleaning', 'nakliye', 'transport', 'kuaför', 'hairdresser',
+        'masaj', 'massage', 'fitness', 'antrenör', 'trainer', 'koç', 'coach'
+      ];
+      
+      for (const serviceType of serviceTypes) {
+        if (lowerText.includes(serviceType)) {
+          extracted['service_type'] = serviceType.charAt(0).toUpperCase() + serviceType.slice(1);
+          break;
+        }
+      }
+      
+      // Extract experience years
+      const experienceMatch = text.match(/(\d+)\s*(yıl|year|sene|senelik)/i);
+      if (experienceMatch && experienceMatch[1]) {
+        extracted['experience_years'] = parseInt(experienceMatch[1]);
+      }
+      
+      // Extract availability
+      if (lowerText.includes('acil') || lowerText.includes('hemen') || lowerText.includes('immediate')) {
+        extracted['availability'] = 'immediate';
+      } else if (lowerText.includes('bu hafta') || lowerText.includes('hafta içi')) {
+        extracted['availability'] = 'within_week';
+      } else if (lowerText.includes('bu ay') || lowerText.includes('ay içi')) {
+        extracted['availability'] = 'within_month';
+      } else {
+        extracted['availability'] = 'flexible';
+      }
+      
+      // Extract location type
+      if (lowerText.includes('uzaktan') || lowerText.includes('remote') || lowerText.includes('online')) {
+        extracted['location_type'] = 'remote';
+      } else if (lowerText.includes('yerinde') || lowerText.includes('on site') || lowerText.includes('evde')) {
+        extracted['location_type'] = 'on_site';
+      } else if (lowerText.includes('hibrit') || lowerText.includes('hybrid')) {
+        extracted['location_type'] = 'hybrid';
+      }
+      
+      // Extract certification/qualification keywords
+      if (lowerText.includes('sertifikalı') || lowerText.includes('belgeli') || lowerText.includes('certified')) {
+        extracted['certification'] = ['Sertifikalı'];
+      }
+      
+      // Extract insurance
+      if (lowerText.includes('sigortalı') || lowerText.includes('insurance')) {
+        extracted['insurance'] = true;
+      }
+      
+      // Extract references
+      if (lowerText.includes('referans') || lowerText.includes('reference')) {
+        extracted['references'] = true;
+      }
+    }
+    
+    // Extract brand (for product categories)
     const brand = keywordMatcher.extractBrand(text);
     if (brand) extracted['brand'] = brand;
 
@@ -1107,6 +1382,9 @@ export class ListingAIService {
       return suggestions;
     }
     const categoryLower = category.toLowerCase();
+    
+    // Check if this is a service category
+    const isService = this.isServiceCategory(category);
 
     // Analyze category for keywords
     const keywords: string[] = [];
@@ -1118,6 +1396,49 @@ export class ListingAIService {
     if (categoryLower.includes('daire') || categoryLower.includes('emlak') || categoryLower.includes('ev')) keywords.push('Daire');
 
     const categoryName = keywords[0] || category;
+    
+    // Hizmet kategorileri için özel title önerileri
+    if (isService) {
+      const serviceType = this.extractServiceType(category, attributes);
+      
+      // Hizmet tipine göre öneriler
+      if (attributes['service_type']) {
+        suggestions.push({
+          title: `${attributes['service_type']} Arıyorum`,
+          score: 85,
+          reason: 'Hizmet tipine göre net hizmet arama formatı'
+        });
+        suggestions.push({
+          title: `${attributes['service_type']} Hizmeti Arıyorum`,
+          score: 80,
+          reason: 'Hizmet tipine göre hizmet arama formatı'
+        });
+      }
+      
+      // Kategori adına göre öneriler
+      suggestions.push({
+        title: `${serviceType} Arıyorum`,
+        score: 75,
+        reason: 'Kategoriye özel hizmet arama formatı'
+      });
+      
+      if (attributes['location']) {
+        suggestions.push({
+          title: `${attributes['location']} ${serviceType} Arıyorum`,
+          score: 90,
+          reason: 'Konum ve hizmet tipine göre net hizmet arama formatı'
+        });
+      }
+      
+      // Genel hizmet önerileri
+      suggestions.push({
+        title: `${category} Hizmeti Arıyorum`,
+        score: 70,
+        reason: 'Kategoriye özel hizmet arama formatı'
+      });
+      
+      return suggestions; // Hizmet kategorileri için erken dönüş
+    }
 
     // Generate "WANTED" style suggestions - prioritize specificity
     if (attributes['brand'] && attributes['model']) {

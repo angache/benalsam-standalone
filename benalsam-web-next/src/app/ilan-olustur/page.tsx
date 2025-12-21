@@ -282,25 +282,25 @@ export default function CreateListingPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <main className="flex-1">
         {/* Cancel Button */}
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex justify-between items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <button
                 onClick={() => router.back()}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-1 sm:gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm sm:text-base"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-                Geri
+                <span className="hidden sm:inline">Geri</span>
               </button>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                 Adım {currentStep} / {totalSteps}
               </span>
             </div>
             <button
               onClick={handleCancel}
-              className="text-sm text-red-600 hover:text-red-700 transition-colors"
+              className="text-xs sm:text-sm text-red-600 hover:text-red-700 transition-colors whitespace-nowrap"
             >
               Vazgeç
             </button>

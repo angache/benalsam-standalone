@@ -142,9 +142,9 @@ export default function LocationStep({ formData, onChange, onNext, onBack }: Loc
   const isFormValid = !!(formData.city.trim() && formData.district.trim())
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div className="container mx-auto max-w-4xl px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
       {/* Progress Bar */}
-      <div className="mb-12">
+      <div className="mb-6 sm:mb-8 md:mb-12">
         <div className="flex items-center justify-between mb-6 overflow-x-auto">
           {[1, 2, 3, 4, 5, 6].map((step) => (
             <div key={step} className="flex items-center flex-shrink-0">
@@ -174,27 +174,27 @@ export default function LocationStep({ formData, onChange, onNext, onBack }: Loc
       </div>
 
       {/* Main Content */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full mb-4">
-            <MapPin className="w-8 h-8 text-white" />
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 md:p-8">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full mb-3 sm:mb-4">
+            <MapPin className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
           </div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
             Konum Belirtin
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
             Doğru teklifler alabilmek için konumunuzu belirtin
           </p>
         </div>
 
         {/* Auto Location Detection Button */}
-        <div className="flex justify-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Button
             type="button"
             variant="outline"
             onClick={handleGeolocate}
             disabled={isLocating}
-            className="flex items-center gap-2 border-2 border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-950 px-6 py-6 text-base font-semibold rounded-xl transition-all duration-300 hover:scale-105"
+            className="flex items-center gap-2 border-2 border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-950 px-4 sm:px-6 py-4 sm:py-6 text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 hover:scale-105 w-full sm:w-auto"
           >
             {isLocating ? (
               <>
@@ -214,7 +214,7 @@ export default function LocationStep({ formData, onChange, onNext, onBack }: Loc
               type="button"
               variant="outline"
               onClick={handleClearLocation}
-              className="flex items-center gap-2 border-2 border-red-500 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 px-6 py-6 text-base font-semibold rounded-xl transition-all duration-300 hover:scale-105"
+              className="flex items-center gap-2 border-2 border-red-500 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 px-4 sm:px-6 py-4 sm:py-6 text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 hover:scale-105 w-full sm:w-auto"
             >
               <X className="h-5 w-5" />
               Temizle
@@ -330,12 +330,12 @@ export default function LocationStep({ formData, onChange, onNext, onBack }: Loc
       </div>
 
       {/* Navigation Buttons */}
-      <div className="flex items-center justify-between mt-8 gap-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between mt-6 sm:mt-8 gap-3 sm:gap-4">
         <Button
           type="button"
           variant="outline"
           onClick={onBack}
-          className="px-8 py-6 text-base font-semibold rounded-xl border-2 hover:scale-105 transition-all duration-300"
+          className="px-6 sm:px-8 py-4 sm:py-6 text-sm sm:text-base font-semibold rounded-xl border-2 hover:scale-105 transition-all duration-300 w-full sm:w-auto"
         >
           ← Geri
         </Button>
@@ -344,7 +344,7 @@ export default function LocationStep({ formData, onChange, onNext, onBack }: Loc
           type="button"
           onClick={onNext}
           disabled={!isFormValid}
-          className="px-8 py-6 text-base font-semibold rounded-xl text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="px-6 sm:px-8 py-4 sm:py-6 text-sm sm:text-base font-semibold rounded-xl text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 w-full sm:w-auto"
           style={{backgroundColor: 'var(--primary)'}}
           onMouseEnter={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary-hover)'}}
           onMouseLeave={(e) => {e.currentTarget.style.backgroundColor = 'var(--primary)'}}

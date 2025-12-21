@@ -172,6 +172,67 @@ Merhaba, {brand ? {brand} : Elektronik} {model ? {model} : ürün} arıyorum.
 {hasBox ? ✅ Kutusu ve aksesuarları ile birlikte olmasını istiyorum : }
 
 Uygun fiyatlı ve kaliteli bir ürün arıyorum. Detaylı bilgi ve tekliflerinizi bekliyorum.
+  `,
+
+  // Services (Hizmetler) - Special template for service categories
+  'hizmet': `
+Merhaba, {service_type ? {service_type} : {category}} hizmeti arıyorum.
+
+{location ? Konum olarak {location} bölgesinde hizmet vermesini istiyorum. : }
+
+{experience_years ? En az {experience_years} yıl deneyimli olmasını tercih ediyorum. : }
+{certification ? ✅ Sertifikalı ve belgeli olmasını istiyorum. : }
+{availability ? {availability} : }
+{location_type ? {location_type} : }
+
+{references ? ✅ Referansları olmasını tercih ediyorum : }
+{insurance ? ✅ Sigortalı olmasını istiyorum : }
+{warranty ? ✅ Hizmet garantisi vermesini tercih ediyorum : }
+
+Profesyonel, güvenilir ve kaliteli hizmet bekliyorum. Detaylı bilgi, fiyat teklifi ve referanslarınızı bekliyorum.
+  `,
+  'hizmetler': `
+Merhaba, {service_type ? {service_type} : {category}} hizmeti arıyorum.
+
+{location ? Konum olarak {location} bölgesinde hizmet vermesini istiyorum. : }
+
+{experience_years ? En az {experience_years} yıl deneyimli olmasını tercih ediyorum. : }
+{certification ? ✅ Sertifikalı ve belgeli olmasını istiyorum. : }
+
+Profesyonel, güvenilir ve kaliteli hizmet bekliyorum. Detaylı bilgi, fiyat teklifi ve referanslarınızı bekliyorum.
+  `,
+  'tamir': `
+Merhaba, tamir hizmeti arıyorum.
+
+{service_type ? {service_type} konusunda deneyimli bir tamirci tercih ediyorum. : }
+
+{location ? Konum olarak {location} bölgesinde hizmet vermesini istiyorum. : }
+
+{experience_years ? En az {experience_years} yıl deneyimli olmasını tercih ediyorum. : }
+{certification ? ✅ Sertifikalı ve belgeli olmasını istiyorum. : }
+
+Profesyonel, güvenilir ve kaliteli tamir hizmeti bekliyorum. Detaylı bilgi, fiyat teklifi ve referanslarınızı bekliyorum.
+  `,
+  'elektrikçi': `
+Merhaba, elektrikçi arıyorum.
+
+{location ? Konum olarak {location} bölgesinde hizmet vermesini istiyorum. : }
+
+{experience_years ? En az {experience_years} yıl deneyimli olmasını tercih ediyorum. : }
+{certification ? ✅ Sertifikalı ve belgeli olmasını istiyorum. : }
+{insurance ? ✅ Sigortalı olmasını tercih ediyorum : }
+
+Profesyonel, güvenilir ve kaliteli elektrik hizmeti bekliyorum. Detaylı bilgi, fiyat teklifi ve referanslarınızı bekliyorum.
+  `,
+  'tesisatçı': `
+Merhaba, tesisatçı arıyorum.
+
+{location ? Konum olarak {location} bölgesinde hizmet vermesini istiyorum. : }
+
+{experience_years ? En az {experience_years} yıl deneyimli olmasını tercih ediyorum. : }
+{certification ? ✅ Sertifikalı ve belgeli olmasını istiyorum. : }
+
+Profesyonel, güvenilir ve kaliteli tesisat hizmeti bekliyorum. Detaylı bilgi, fiyat teklifi ve referanslarınızı bekliyorum.
   `
 };
 

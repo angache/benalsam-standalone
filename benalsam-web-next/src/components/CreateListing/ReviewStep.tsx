@@ -148,9 +148,9 @@ export default function ReviewStep({
   const totalCost = calculateTotalCost()
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
-      <h2 className="text-2xl font-bold text-center">Önizleme ve Onay</h2>
-      <p className="text-center text-muted-foreground">Lütfen bilgileri kontrol edin ve ilanınızı onaya gönderin.</p>
+    <div className="container mx-auto max-w-4xl px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
+      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-2 sm:mb-3">Önizleme ve Onay</h2>
+      <p className="text-center text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">Lütfen bilgileri kontrol edin ve ilanınızı onaya gönderin.</p>
       
       <div className="p-4 space-y-2 rounded-lg glass-effect divide-y divide-border">
         <ReviewItem icon={Tag} label="İlan Başlığı" value={formData.details.title} />

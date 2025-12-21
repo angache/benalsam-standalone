@@ -1,8 +1,48 @@
 # Benalsam Project Summary
 
-## Current Status (Updated: 2025-01-XX)
+## Current Status (Updated: 2025-12-21)
 
-### 🎯 **Today's Major Fix (2025-01-XX)**
+### 🎯 **Today's Major Changes (2025-12-21)**
+
+#### **1. AI Suggestions for Service Categories - Fixed**
+- **Problem**: Hizmet kategorilerinde AI önerileri ürün odaklıydı (örn: "iPhone Arıyorum") ve hizmet odaklı değildi (örn: "Tamirci Arıyorum")
+- **Root Cause**: 
+  - `listingAIService.ts` hizmet kategorilerini tanımıyordu
+  - `categoryRules.ts` ve `templates.ts` hizmet kategorileri için özel kurallar içermiyordu
+  - `generateSmartDescription` ve `generateCategoryBasedTitles` hizmet kategorileri için özel mantık içermiyordu
+- **Solution**:
+  - ✅ `isServiceCategory()` helper fonksiyonu eklendi - hizmet kategorilerini tanımlıyor
+  - ✅ `categoryRules.ts`'e hizmet kategorileri için özel kurallar eklendi (hizmet, tamir, elektrikçi, tesisatçı, boyacı, marangoz, temizlik, nakliye)
+  - ✅ `templates.ts`'e hizmet kategorileri için özel şablonlar eklendi
+  - ✅ `generateSmartDescription` hizmet kategorileri için özel mantık içeriyor (service_type, experience_years, certification, vb.)
+  - ✅ `generateCategoryBasedTitles` hizmet kategorileri için özel başlık kalıpları kullanıyor
+  - ✅ `extractAttributesFromText` hizmet özelliklerini çıkarıyor (service_type, experience_years, availability, vb.)
+  - ✅ `adaptTitleFromSimilar` ve `adaptDescriptionHint` hizmet kategorileri için özel işleme yapıyor
+  - ✅ `calculateTitleScore` hizmet kategorileri için bonus puan veriyor
+
+#### **2. RabbitMQ Connection Issue - Fixed**
+- **Problem**: Listing Service başlatılamıyordu - RabbitMQ bağlantı hatası (ECONNRESET)
+- **Root Cause**: Docker Desktop kapalıydı, RabbitMQ container'ı çalışmıyordu
+- **Solution**:
+  - ✅ RabbitMQ bağlantısı zorunlu tutuldu (job processing ve event system için gerekli)
+  - ✅ Docker Desktop açıldıktan sonra RabbitMQ container'ı başlatılmalı
+  - ✅ RabbitMQ port: 5672 (AMQP), 15672 (Management UI)
+
+#### **3. Files Modified**
+- `benalsam-listing-service/src/services/listingAIService.ts` - Hizmet kategorileri için AI mantığı
+- `benalsam-listing-service/src/services/ai/categoryRules.ts` - Hizmet kategorileri kuralları
+- `benalsam-listing-service/src/services/ai/templates.ts` - Hizmet kategorileri şablonları
+- `benalsam-listing-service/src/index.ts` - RabbitMQ bağlantı yorumu güncellendi
+
+#### **4. Key Technical Details**
+- **Service Categories**: Hizmet kategorileri artık "hizmet arıyorum" formatında öneriler üretiyor
+- **Service Attributes**: service_type, experience_years, certification, availability, location_type, languages, portfolio_url, references, insurance, warranty, payment_methods
+- **RabbitMQ**: Sistemin tam ortasında, mutlaka çalışmalı (Docker Desktop ile)
+- **AI Suggestions**: Artık hizmet kategorileri için "Tamirci Arıyorum", "Elektrikçi Arıyorum" gibi öneriler üretiyor
+
+---
+
+### 🎯 **Previous Major Fix (2025-01-XX)**
 
 #### **1. Listing Creation Visibility Bug Fix**
 - **Problem**: İlan oluşturulduktan sonra "onaya gönderildi" mesajı gösteriliyordu ancak ilan "İlanlarım" sayfasında görünmüyordu
