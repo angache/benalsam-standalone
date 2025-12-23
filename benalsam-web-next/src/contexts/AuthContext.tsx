@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import type { Session } from '@supabase/supabase-js'
 import { logger } from '@/utils/production-logger'
 import { realtimeManager } from '@/lib/realtime-manager'
+import { runSupabaseDiagnostics } from '@/utils/supabaseDiagnostics'
 
 interface AuthContextType {
   session: Session | null
@@ -28,101 +29,211 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [initialized, setInitialized] = useState(false)
   const fetchedUserIds = useRef<Set<string>>(new Set())
   const sessionInitializedRef = useRef(false)
+  const initializationCompleteRef = useRef(false)
 
   // Initialize auth state and listen for changes
   useEffect(() => {
     let isSubscribed = true
     const startTime = Date.now()
 
-    // Simplified initialization: First getSession() (fast, from cookies), then validate with getUser()
+    // CRITICAL FIX: Simplified initialization with aggressive timeout handling
+    // Both getSession() and getUser() were timing out, blocking the entire app
+    // Solution: Use very short timeouts and fail gracefully
     const initializeAuth = async () => {
       try {
         logger.debug('[AuthContext] Starting initialization...', {
           timestamp: new Date().toISOString()
         })
+        console.log('🚀 [AuthContext] Starting initialization with timeout protection...')
         
-        // Step 1: Get session from cookies (fast, reliable)
-        const sessionStart = Date.now()
-        const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession()
-        const sessionTime = Date.now() - sessionStart
+        // Verify Supabase client is available
+        if (!supabase || !supabase.auth) {
+          console.error('❌ [AuthContext] Supabase client not available!')
+          console.error('🔍 [AuthContext] Running diagnostics...')
+          try {
+            const diagnostics = await runSupabaseDiagnostics()
+            console.error('📊 [AuthContext] Diagnostics:', diagnostics)
+          } catch (diagError) {
+            console.error('❌ [AuthContext] Diagnostics failed:', diagError)
+          }
+          setLoading(false)
+          setInitialized(true)
+          initializationCompleteRef.current = true
+          return
+        }
         
-        logger.debug('[AuthContext] getSession() completed', {
-          elapsed: `${sessionTime}ms`,
-          hasSession: !!initialSession,
-          hasError: !!sessionError,
-          userId: initialSession?.user?.id,
-          errorMessage: sessionError?.message
+        console.log('✅ [AuthContext] Supabase client verified')
+        
+        // Step 1: Try getUser() with very short timeout (2 seconds max)
+        // If it times out, we assume no user and continue
+        const getUserStart = Date.now()
+        console.log('🔍 [AuthContext] Attempting getUser() with 2s timeout...')
+        
+        let validatedUser: any = null
+        let userError: any = null
+        
+        try {
+          const getUserPromise = supabase.auth.getUser()
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('getUser timeout after 2s')), 2000)
+          )
+          
+          const getUserResult = await Promise.race([getUserPromise, timeoutPromise]) as any
+          
+          validatedUser = getUserResult?.data?.user
+          userError = getUserResult?.error
+          
+          console.log('✅ [AuthContext] getUser() completed', {
+            elapsed: `${Date.now() - getUserStart}ms`,
+            hasUser: !!validatedUser,
+            hasError: !!userError
+          })
+        } catch (error: any) {
+          const elapsed = Date.now() - getUserStart
+          console.warn(`⚠️ [AuthContext] getUser() timeout or error after ${elapsed}ms:`, error?.message || error)
+          // Timeout is not an error - just means no user or slow network
+          // Continue with null user
+          validatedUser = null
+          userError = null // Don't treat timeout as error
+        }
+        
+        const getUserTime = Date.now() - getUserStart
+        
+        logger.debug('[AuthContext] getUser() completed', {
+          elapsed: `${getUserTime}ms`,
+          hasUser: !!validatedUser,
+          hasError: !!userError,
+          userId: validatedUser?.id,
+          errorMessage: userError?.message
+        })
+        console.log('🔍 [AuthContext] getUser() completed', {
+          elapsed: `${getUserTime}ms`,
+          hasUser: !!validatedUser,
+          hasError: !!userError,
+          userId: validatedUser?.id
         })
         
-        if (sessionError) {
-          logger.error('[AuthContext] Session error', { error: sessionError.message })
-        }
-        
-        // Step 2: If session exists, validate with getUser() for security
-        if (initialSession && initialSession.user) {
-          const getUserStart = Date.now()
-          const { data: { user: validatedUser }, error: userError } = await supabase.auth.getUser()
-          const getUserTime = Date.now() - getUserStart
+        // Step 2: If user exists, get session for full session data
+        if (validatedUser && !userError) {
+          console.log('✅ [AuthContext] User validated, getting session...')
           
-          logger.debug('[AuthContext] getUser() validation completed', {
-            elapsed: `${getUserTime}ms`,
-            hasUser: !!validatedUser,
-            hasError: !!userError,
-            userId: validatedUser?.id,
-            errorMessage: userError?.message
-          })
-          
-          // Only use session if user is validated
-          if (validatedUser && !userError && validatedUser.id === initialSession.user.id) {
-            // Verify session is still valid
-            const now = Math.floor(Date.now() / 1000)
-            const expiresAt = initialSession.expires_at || 0
-            const isValid = expiresAt > now
+          // Now get session for full session data (but don't wait if it times out)
+          try {
+            const sessionResult = await Promise.race([
+              supabase.auth.getSession(),
+              new Promise((resolve) => 
+                setTimeout(() => resolve({ data: { session: null }, error: null }), 2000)
+              )
+            ]) as any
             
-            if (isValid) {
-              logger.debug('[AuthContext] Session valid, setting state', {
-                userId: validatedUser.id,
-                totalElapsed: `${Date.now() - startTime}ms`
-              })
-              setSession(initialSession)
-              await fetchUserProfile(validatedUser.id)
-              sessionInitializedRef.current = true
-            } else {
-              logger.debug('[AuthContext] Session expired, refreshing...', {
-                userId: validatedUser.id,
-                expiredBy: `${now - expiresAt}s`
-              })
-              // Try to refresh
-              const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession()
-              if (refreshedSession && !refreshError) {
-                logger.debug('[AuthContext] Session refreshed', { userId: refreshedSession.user.id })
-                setSession(refreshedSession)
-                await fetchUserProfile(refreshedSession.user.id)
-                sessionInitializedRef.current = true
+            const initialSession = sessionResult?.data?.session
+            // Use session if available, otherwise create minimal session from user
+            if (initialSession && initialSession.user?.id === validatedUser.id) {
+              // Verify session is still valid
+              const now = Math.floor(Date.now() / 1000)
+              const expiresAt = initialSession.expires_at || 0
+              const isValid = expiresAt > now
+              
+              if (isValid) {
+                logger.debug('[AuthContext] Session valid, setting state', {
+                  userId: validatedUser.id,
+                  totalElapsed: `${Date.now() - startTime}ms`
+                })
+                console.log('✅ [AuthContext] Session valid, setting state', {
+                  userId: validatedUser.id,
+                  totalElapsed: `${Date.now() - startTime}ms`
+                })
+                setSession(initialSession)
               } else {
-                logger.debug('[AuthContext] Could not refresh session', { error: refreshError?.message })
-                setSession(null)
+                logger.debug('[AuthContext] Session expired, refreshing...', {
+                  userId: validatedUser.id,
+                  expiredBy: `${now - expiresAt}s`
+                })
+                // Try to refresh
+                const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession()
+                if (refreshedSession && !refreshError) {
+                  logger.debug('[AuthContext] Session refreshed', { userId: refreshedSession.user.id })
+                  setSession(refreshedSession)
+                } else {
+                  logger.debug('[AuthContext] Could not refresh session, using user data', { error: refreshError?.message })
+                  // Create minimal session from user data
+                  setSession({
+                    user: validatedUser,
+                    access_token: '',
+                    refresh_token: '',
+                    expires_at: Math.floor(Date.now() / 1000) + 3600, // 1 hour
+                    expires_in: 3600,
+                    token_type: 'bearer'
+                  } as any)
+                }
               }
+            } else {
+              // getSession() timed out or failed, create minimal session from user
+              console.log('⚠️ [AuthContext] getSession() timed out, using user data only')
+              setSession({
+                user: validatedUser,
+                access_token: '',
+                refresh_token: '',
+                expires_at: Math.floor(Date.now() / 1000) + 3600, // 1 hour
+                expires_in: 3600,
+                token_type: 'bearer'
+              } as any)
             }
-          } else {
-            logger.debug('[AuthContext] User validation failed, clearing session', {
-              error: userError?.message
-            })
-            setSession(null)
+            
+            console.log('📥 [AuthContext] Fetching user profile...', { userId: validatedUser.id })
+            try {
+              await fetchUserProfile(validatedUser.id)
+              console.log('✅ [AuthContext] User profile fetched')
+            } catch (profileError) {
+              console.error('❌ [AuthContext] Failed to fetch user profile', profileError)
+            }
+            sessionInitializedRef.current = true
+          } catch (sessionError: any) {
+            console.error('❌ [AuthContext] Error getting session:', sessionError)
+            // Even if session fails, we have user, so create minimal session
+            setSession({
+              user: validatedUser,
+              access_token: '',
+              refresh_token: '',
+              expires_at: Math.floor(Date.now() / 1000) + 3600,
+              expires_in: 3600,
+              token_type: 'bearer'
+            } as any)
+            await fetchUserProfile(validatedUser.id)
+            sessionInitializedRef.current = true
           }
         } else {
-          logger.debug('[AuthContext] No session found', {
-            totalElapsed: `${Date.now() - startTime}ms`
+          // No user found (either timeout or actually no user)
+          logger.debug('[AuthContext] No user found', {
+            totalElapsed: `${Date.now() - startTime}ms`,
+            getUserTime: `${getUserTime}ms`
           })
+          console.log('ℹ️ [AuthContext] No user found (timeout or not logged in)', {
+            totalElapsed: `${Date.now() - startTime}ms`,
+            getUserTime: `${getUserTime}ms`
+          })
+          setSession(null)
+          setUser(null)
         }
+        
+        console.log('🔍 [AuthContext] About to finalize initialization', {
+          isSubscribed,
+          sessionInitialized: sessionInitializedRef.current
+        })
         
         if (isSubscribed) {
           setLoading(false)
           setInitialized(true)
-          logger.debug('[AuthContext] Initialization complete', {
+          initializationCompleteRef.current = true
+          // Use both logger and console for visibility
+          const initLog = {
             sessionInitialized: sessionInitializedRef.current,
             totalElapsed: `${Date.now() - startTime}ms`
-          })
+          }
+          logger.debug('[AuthContext] Initialization complete', initLog)
+          console.log('✅ [AuthContext] Initialization complete', initLog)
+        } else {
+          console.warn('⚠️ [AuthContext] Initialization skipped - component unmounted')
         }
       } catch (error: any) {
         logger.error('[AuthContext] Initialize error', {
@@ -133,45 +244,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (isSubscribed) {
           setLoading(false)
           setInitialized(true)
+          initializationCompleteRef.current = true
         }
       }
     }
 
-    // Start initialization immediately
-    initializeAuth().then(() => {
-      // Only set up listener after initialization is complete
-      // This prevents INITIAL_SESSION event from causing double initialization
-      logger.debug('[AuthContext] Setting up onAuthStateChange listener after initialization', {
-        timestamp: new Date().toISOString()
-      })
-    })
+    // CRITICAL: Initialize auth FIRST, then set up listener
+    // This prevents race conditions where listener fires before initialization completes
+    let subscription: { unsubscribe: () => void } | null = null
     
-    // Set up auth state listener for future changes (but ignore INITIAL_SESSION)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        logger.debug('[AuthContext] Auth state change event', {
-          event,
-          hasSession: !!currentSession,
-          userId: currentSession?.user?.id,
-          sessionInitialized: sessionInitializedRef.current,
-          isSubscribed
-        })
-        
-        if (!isSubscribed) {
-          return
-        }
-
-        // Ignore INITIAL_SESSION and SIGNED_IN during initialization
-        // These events fire during initial load and cause double initialization
-        // We handle initial session in initializeAuth(), so ignore these events until initialization is complete
-        if (event === 'INITIAL_SESSION' || (event === 'SIGNED_IN' && !sessionInitializedRef.current)) {
-          logger.debug('[AuthContext] Event ignored during initialization', {
+    const setupListener = () => {
+      // Set up auth state listener AFTER initialization is complete
+      logger.debug('[AuthContext] Setting up onAuthStateChange listener', {
+        timestamp: new Date().toISOString(),
+        sessionInitialized: sessionInitializedRef.current
+      })
+      
+      const { data: { subscription: sub } } = supabase.auth.onAuthStateChange(
+        async (event, currentSession) => {
+          logger.debug('[AuthContext] Auth state change event', {
             event,
             hasSession: !!currentSession,
-            sessionInitialized: sessionInitializedRef.current
+            userId: currentSession?.user?.id,
+            sessionInitialized: sessionInitializedRef.current,
+            isSubscribed
           })
-          return
-        }
+          
+          if (!isSubscribed) {
+            return
+          }
+
+          // ALWAYS ignore INITIAL_SESSION - we already handled it in initializeAuth()
+          // This event fires when listener is first set up, but we've already initialized
+          if (event === 'INITIAL_SESSION') {
+            logger.debug('[AuthContext] INITIAL_SESSION ignored (already handled)', {
+              hasSession: !!currentSession,
+              sessionInitialized: sessionInitializedRef.current
+            })
+            return
+          }
+
+          // Ignore SIGNED_IN if we haven't finished initialization yet
+          // This can happen if listener fires before initializeAuth() completes
+          if (event === 'SIGNED_IN' && !initializationCompleteRef.current) {
+            logger.debug('[AuthContext] SIGNED_IN ignored (initialization not complete)', {
+              hasSession: !!currentSession,
+              sessionInitialized: sessionInitializedRef.current,
+              initializationComplete: initializationCompleteRef.current
+            })
+            return
+          }
 
         // Handle SIGNED_IN - user just logged in (only after initialization is complete)
         if (event === 'SIGNED_IN' && currentSession && currentSession.user) {
@@ -191,10 +313,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             })
             await fetchUserProfile(validatedUser.id)
             sessionInitializedRef.current = true
+            initializationCompleteRef.current = true
           } else {
             logger.debug('[AuthContext] User validation failed after sign in', { error: validateError?.message })
             setSession(null)
             setUser(null)
+            sessionInitializedRef.current = false
           }
           setLoading(false)
           setInitialized(true)
@@ -273,13 +397,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setInitialized(true)
       }
     )
-
-    // No timeout needed - we already called initializeAuth() immediately above
+      
+      return sub
+    }
+    
+    // Start initialization and set up listener after it completes
+    initializeAuth()
+      .then(() => {
+        // Small delay to ensure state is fully set before listener is created
+        // This prevents race conditions where listener fires before state is ready
+        setTimeout(() => {
+          if (isSubscribed) {
+            subscription = setupListener()
+            const listenerLog = {
+              timestamp: new Date().toISOString(),
+              sessionInitialized: sessionInitializedRef.current,
+              initializationComplete: initializationCompleteRef.current
+            }
+            logger.debug('[AuthContext] Listener setup complete', listenerLog)
+            console.log('✅ [AuthContext] Listener setup complete', listenerLog)
+          }
+        }, 100)
+      })
+      .catch((error) => {
+        logger.error('[AuthContext] Initialization failed', { 
+          error: error?.message || String(error),
+          stack: error?.stack
+        })
+        if (isSubscribed) {
+          setLoading(false)
+          setInitialized(true)
+          initializationCompleteRef.current = true
+          // Still set up listener even if initialization failed
+          // This ensures we can handle future auth changes
+          subscription = setupListener()
+        }
+      })
 
     return () => {
       isSubscribed = false
-      subscription.unsubscribe()
-      logger.debug('[AuthContext] Cleanup: unsubscribed from auth state changes')
+      if (subscription) {
+        subscription.unsubscribe()
+        logger.debug('[AuthContext] Cleanup: unsubscribed from auth state changes')
+      }
     }
   }, [])
 

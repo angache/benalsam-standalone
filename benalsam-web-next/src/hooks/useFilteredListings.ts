@@ -82,10 +82,18 @@ export function useFilteredListings({
     },
     initialPageParam: 1,
     staleTime: 1 * 60 * 1000, // 1 minute
+    gcTime: 5 * 60 * 1000, // 5 minutes (formerly cacheTime)
+    refetchOnMount: false, // Prevent refetch on mount if data is fresh
+    refetchOnWindowFocus: false, // Prevent refetch on window focus
+    refetchOnReconnect: true, // Only refetch on reconnect
     retry: (failureCount, error) => {
-      // Retry on network errors or 5xx errors
+      // Don't retry on 429 (rate limit) - fallback to Supabase instead
       if (error instanceof Error) {
         const errorMessage = error.message.toLowerCase()
+        if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
+          return false // Don't retry, use fallback
+        }
+        // Retry on network errors or 5xx errors
         if (
           errorMessage.includes('network') ||
           errorMessage.includes('fetch') ||

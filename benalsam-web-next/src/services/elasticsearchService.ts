@@ -103,7 +103,21 @@ export const searchListingsWithElasticsearch = async (
     });
 
     if (!response.ok) {
-      console.warn('⚠️ Elasticsearch service unavailable, using Supabase fallback');
+      // Handle different error statuses
+      if (response.status === 429) {
+        console.warn('⚠️ Search Service rate limit exceeded, using Supabase fallback');
+        // Fallback to Supabase search
+        return await searchListingsWithSupabase(params, currentUserId);
+      }
+      if (response.status === 500) {
+        console.warn('⚠️ Search Service internal error (500), using Supabase fallback');
+        // Fallback to Supabase search
+        return await searchListingsWithSupabase(params, currentUserId);
+      }
+      console.warn('⚠️ Elasticsearch service unavailable, using Supabase fallback', {
+        status: response.status,
+        statusText: response.statusText
+      });
       // Fallback to Supabase search
       return await searchListingsWithSupabase(params, currentUserId);
     }
