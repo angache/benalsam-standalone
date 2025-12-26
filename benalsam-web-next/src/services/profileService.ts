@@ -16,6 +16,7 @@ interface Profile {
   updated_at?: string;
   last_seen?: string;
   is_verified?: boolean;
+  is_2fa_enabled?: boolean; // 2FA status from database
   trust_score?: number;
   total_listings?: number;
   total_offers?: number;

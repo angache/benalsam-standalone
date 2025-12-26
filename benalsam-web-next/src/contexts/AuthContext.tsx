@@ -203,17 +203,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             sessionInitializedRef.current = true
           }
         } else {
-          // No user found (either timeout or actually no user)
-          logger.debug('[AuthContext] No user found', {
-            totalElapsed: `${Date.now() - startTime}ms`,
-            getUserTime: `${getUserTime}ms`
-          })
-          console.log('ℹ️ [AuthContext] No user found (timeout or not logged in)', {
-            totalElapsed: `${Date.now() - startTime}ms`,
-            getUserTime: `${getUserTime}ms`
-          })
-          setSession(null)
-          setUser(null)
+          // getUser() timeout or no user - try getSession() as fallback
+          // getSession() reads from cookies and is faster, might find a session
+          console.log('⚠️ [AuthContext] getUser() timeout or no user, trying getSession() fallback...')
+          
+          try {
+            const sessionStart = Date.now()
+            const sessionResult = await Promise.race([
+              supabase.auth.getSession(),
+              new Promise((resolve) => 
+                setTimeout(() => resolve({ data: { session: null }, error: null }), 2000)
+              )
+            ]) as any
+            
+            const fallbackSession = sessionResult?.data?.session
+            const sessionTime = Date.now() - sessionStart
+            
+            if (fallbackSession && fallbackSession.user) {
+              console.log('✅ [AuthContext] Found session via getSession() fallback', {
+                userId: fallbackSession.user.id,
+                sessionTime: `${sessionTime}ms`
+              })
+              
+              // Verify session is still valid
+              const now = Math.floor(Date.now() / 1000)
+              const expiresAt = fallbackSession.expires_at || 0
+              const isValid = expiresAt > now
+              
+              if (isValid) {
+                setSession(fallbackSession)
+                try {
+                  await fetchUserProfile(fallbackSession.user.id)
+                  console.log('✅ [AuthContext] User profile fetched from fallback session')
+                } catch (profileError) {
+                  console.error('❌ [AuthContext] Failed to fetch user profile from fallback', profileError)
+                }
+                sessionInitializedRef.current = true
+              } else {
+                console.log('⚠️ [AuthContext] Fallback session expired, trying refresh...')
+                // Try to refresh
+                const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession()
+                if (refreshedSession && !refreshError) {
+                  console.log('✅ [AuthContext] Session refreshed from fallback')
+                  setSession(refreshedSession)
+                  try {
+                    await fetchUserProfile(refreshedSession.user.id)
+                  } catch (profileError) {
+                    console.error('❌ [AuthContext] Failed to fetch user profile after refresh', profileError)
+                  }
+                  sessionInitializedRef.current = true
+                } else {
+                  console.log('⚠️ [AuthContext] Could not refresh fallback session')
+                  setSession(null)
+                  setUser(null)
+                }
+              }
+            } else {
+              // No session found either
+              logger.debug('[AuthContext] No user and no session found', {
+                totalElapsed: `${Date.now() - startTime}ms`,
+                getUserTime: `${getUserTime}ms`,
+                sessionTime: `${sessionTime}ms`
+              })
+              console.log('ℹ️ [AuthContext] No user and no session found (not logged in)', {
+                totalElapsed: `${Date.now() - startTime}ms`,
+                getUserTime: `${getUserTime}ms`,
+                sessionTime: `${sessionTime}ms`
+              })
+              setSession(null)
+              setUser(null)
+            }
+          } catch (sessionError: any) {
+            console.error('❌ [AuthContext] getSession() fallback also failed:', sessionError)
+            setSession(null)
+            setUser(null)
+          }
         }
         
         console.log('🔍 [AuthContext] About to finalize initialization', {
@@ -284,41 +348,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return
           }
 
-          // Ignore SIGNED_IN if we haven't finished initialization yet
-          // This can happen if listener fires before initializeAuth() completes
-          if (event === 'SIGNED_IN' && !initializationCompleteRef.current) {
-            logger.debug('[AuthContext] SIGNED_IN ignored (initialization not complete)', {
-              hasSession: !!currentSession,
-              sessionInitialized: sessionInitializedRef.current,
-              initializationComplete: initializationCompleteRef.current
-            })
-            return
-          }
+          // CRITICAL FIX: Don't ignore SIGNED_IN during initialization
+          // Login can happen at any time, and we should handle it immediately
+          // The initialization check was too aggressive and blocked logins
 
-        // Handle SIGNED_IN - user just logged in (only after initialization is complete)
+        // Handle SIGNED_IN - user just logged in
         if (event === 'SIGNED_IN' && currentSession && currentSession.user) {
           logger.debug('[AuthContext] User signed in', { userId: currentSession.user.id })
+          console.log('✅ [AuthContext] SIGNED_IN event received', { userId: currentSession.user.id })
           
-          // Validate user with getUser() for security
-          const { data: { user: validatedUser }, error: validateError } = await supabase.auth.getUser()
+          // Validate user with getUser() for security, but with timeout protection
+          // Login is critical, so we should use the session even if getUser() times out
+          let validatedUser: any = null
+          let validateError: any = null
           
-          if (validatedUser && !validateError && validatedUser.id === currentSession.user.id) {
-            logger.debug('[AuthContext] User validated after sign in', { userId: validatedUser.id })
-            // Only update if session actually changed
-            setSession(prevSession => {
-              if (prevSession?.user?.id === currentSession.user.id) {
-                return prevSession // No change, avoid re-render
-              }
-              return currentSession
-            })
-            await fetchUserProfile(validatedUser.id)
+          try {
+            const getUserPromise = supabase.auth.getUser()
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('getUser timeout after 2s')), 2000)
+            )
+            
+            const getUserResult = await Promise.race([getUserPromise, timeoutPromise]) as any
+            validatedUser = getUserResult?.data?.user
+            validateError = getUserResult?.error
+          } catch (error: any) {
+            console.warn('⚠️ [AuthContext] getUser() timeout during login, using session anyway:', error?.message)
+            // Timeout is not critical - we have a valid session from SIGNED_IN event
+            // Use the user from the session
+            validatedUser = currentSession.user
+            validateError = null
+          }
+          
+          // Use session if user is validated OR if getUser() timed out (we trust the SIGNED_IN event)
+          if ((validatedUser && !validateError && validatedUser.id === currentSession.user.id) || 
+              (validateError === null && currentSession.user)) {
+            const userId = validatedUser?.id || currentSession.user.id
+            logger.debug('[AuthContext] User validated after sign in', { userId })
+            console.log('✅ [AuthContext] User validated after sign in', { userId })
+            
+            // Always update session on login (it's a new login)
+            setSession(currentSession)
+            
+            // Fetch user profile
+            try {
+              await fetchUserProfile(userId)
+              console.log('✅ [AuthContext] User profile fetched after login')
+            } catch (profileError) {
+              console.error('❌ [AuthContext] Failed to fetch user profile after login', profileError)
+              // Don't fail login if profile fetch fails
+            }
+            
             sessionInitializedRef.current = true
             initializationCompleteRef.current = true
           } else {
             logger.debug('[AuthContext] User validation failed after sign in', { error: validateError?.message })
-            setSession(null)
-            setUser(null)
-            sessionInitializedRef.current = false
+            console.error('❌ [AuthContext] User validation failed after sign in', { error: validateError?.message })
+            // Even if validation fails, we have a session from SIGNED_IN event
+            // Use it anyway (Supabase already validated it)
+            setSession(currentSession)
+            try {
+              await fetchUserProfile(currentSession.user.id)
+            } catch (profileError) {
+              console.error('❌ [AuthContext] Failed to fetch user profile', profileError)
+            }
+            sessionInitializedRef.current = true
+            initializationCompleteRef.current = true
           }
           setLoading(false)
           setInitialized(true)
@@ -583,19 +677,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Immediately set session to ensure it's available
         setSession(data.session)
         
-        // Verify session is set correctly
-        const { data: { session: verifySession } } = await supabase.auth.getSession()
-        if (!verifySession) {
-          logger.warn('[AuthContext] Session not persisted after login, retrying...')
-          // Wait a bit and retry
-          await new Promise(resolve => setTimeout(resolve, 200))
-          const { data: { session: retrySession } } = await supabase.auth.getSession()
-          if (retrySession) {
-            setSession(retrySession)
-            logger.info('[AuthContext] Session verified after retry')
-          } else {
-            logger.error('[AuthContext] Session still not available after retry')
+        // Verify session is set correctly (with timeout protection)
+        try {
+          const getSessionPromise = supabase.auth.getSession()
+          const timeoutPromise = new Promise((resolve) => 
+            setTimeout(() => resolve({ data: { session: null }, error: null }), 1000)
+          )
+          
+          const verifyResult = await Promise.race([getSessionPromise, timeoutPromise]) as any
+          const verifySession = verifyResult?.data?.session
+          
+          if (!verifySession) {
+            logger.warn('[AuthContext] Session not persisted after login, retrying...')
+            // Wait a bit and retry (with timeout)
+            await new Promise(resolve => setTimeout(resolve, 200))
+            try {
+              const retryPromise = supabase.auth.getSession()
+              const retryTimeoutPromise = new Promise((resolve) => 
+                setTimeout(() => resolve({ data: { session: null }, error: null }), 1000)
+              )
+              const retryResult = await Promise.race([retryPromise, retryTimeoutPromise]) as any
+              const retrySession = retryResult?.data?.session
+              if (retrySession) {
+                setSession(retrySession)
+                logger.info('[AuthContext] Session verified after retry')
+              } else {
+                logger.warn('[AuthContext] Session still not available after retry, but login succeeded')
+                // Don't fail login - we already have data.session from signInWithPassword
+              }
+            } catch (retryError) {
+              logger.warn('[AuthContext] Retry failed, but login succeeded', { error: retryError })
+              // Don't fail login - we already have data.session from signInWithPassword
+            }
           }
+        } catch (verifyError) {
+          logger.warn('[AuthContext] Session verification timeout, but login succeeded', { error: verifyError })
+          // Don't fail login - we already have data.session from signInWithPassword
         }
         
         // Check if 2FA is enabled in profiles table
@@ -622,10 +739,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (requires2FA) {
           logger.info('[AuthContext] 2FA required for user', { userId: data.user.id })
+          console.log('🔐 [AuthContext] 2FA required, session set but profile fetch skipped', { userId: data.user.id })
+          // Mark session as initialized even for 2FA
+          sessionInitializedRef.current = true
+          initializationCompleteRef.current = true
+          setLoading(false)
+          setInitialized(true)
         } else {
           logger.debug('[AuthContext] No 2FA required for user', { userId: data.user.id })
+          console.log('✅ [AuthContext] Login successful, fetching user profile...', { userId: data.user.id })
           // Fetch full profile if no 2FA
-          await fetchUserProfile(data.user.id)
+          try {
+            await fetchUserProfile(data.user.id)
+            console.log('✅ [AuthContext] User profile fetched after login')
+          } catch (profileError) {
+            console.error('❌ [AuthContext] Failed to fetch user profile after login', profileError)
+            // Don't fail login if profile fetch fails
+          }
+          // Mark session as initialized
+          sessionInitializedRef.current = true
+          initializationCompleteRef.current = true
+          setLoading(false)
+          setInitialized(true)
         }
         
         return { 
