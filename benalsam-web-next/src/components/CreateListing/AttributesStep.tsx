@@ -220,7 +220,7 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
   // Seçilen kategorinin backend'den gelen attribute'larını bul
   const categoryAttributesFromBackend = useMemo(() => {
     try {
-      console.log('🔍 [ATTRIBUTES] Finding attributes for category ID:', selectedCategoryId)
+      logger.debug('[AttributesStep] Finding attributes for category ID', { selectedCategoryId })
       
       if (!selectedCategoryId) {
         logger.warn('[AttributesStep] No category ID provided')
@@ -331,7 +331,7 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
     })
     
     // Attributes step is always valid - all fields are optional
-    console.log('✅ [VALIDATION] All attributes optional, form is valid')
+    logger.debug('[AttributesStep] All attributes optional, form is valid')
     return true
   }, [formData, attributes])
 
@@ -399,16 +399,16 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
           let next = current
           if (isSelected(optionValue)) {
             next = current.filter(v => v !== optionValue)
-            console.log('➖ [TOGGLE] Removing option:', { next })
+            logger.debug('[AttributesStep] Removing option', { next })
           } else {
             next = [...current.filter(c => c !== 'any'), optionValue]
-            console.log('➕ [TOGGLE] Adding option:', { next })
+            logger.debug('[AttributesStep] Adding option', { next })
           }
           if (next.length === 0) {
             next = ['any']
-            console.log('🔄 [TOGGLE] No options, setting to any:', { next })
+            logger.debug('[AttributesStep] No options, setting to any', { next })
           }
-          console.log('✅ [TOGGLE] Final value:', { next })
+          logger.debug('[AttributesStep] Final value', { next })
           handleAttributeChange(attr.key, next)
         }
         
