@@ -35,7 +35,7 @@ export const uploadImages = async (
         data: { publicUrl },
       } = supabase.storage.from(bucket).getPublicUrl(fileName)
 
-      console.log(`🔗 [ImageUpload] File ${index + 1} public URL:`, publicUrl)
+      logger.debug(`[ImageService] File ${index + 1} public URL`, { publicUrl })
 
       return publicUrl
     } catch (error) {
