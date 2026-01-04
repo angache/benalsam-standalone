@@ -19,9 +19,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Get user email from profiles table
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('email')
+      .eq('id', user.id)
+      .single()
+
+    const userEmail = profile?.email || user.email || 'user'
+
     // Generate secret
     const secret = speakeasy.generateSecret({
-      name: `Benalsam (${session.user.email})`,
+      name: `Benalsam (${userEmail})`,
       issuer: 'Benalsam',
       length: 32,
     })

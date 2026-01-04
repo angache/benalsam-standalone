@@ -67,6 +67,14 @@ function LoginPageContent() {
         await new Promise(resolve => setTimeout(resolve, 100))
 
         if (result.requires2FA) {
+          // Store credentials temporarily in sessionStorage for 2FA verification
+          // This is more secure than passing in URL
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('2fa_pending_email', email)
+            sessionStorage.setItem('2fa_pending_password', password)
+            sessionStorage.setItem('2fa_pending_redirect', callbackUrl)
+          }
+          
           // Redirect to 2FA verification with userId
           const redirectUrl = `/auth/2fa/verify?userId=${result.user?.id}`
           console.log('🔐 [LoginPage] Redirecting to 2FA:', redirectUrl)

@@ -96,11 +96,34 @@ interface ListingCardProps {
 
 // Helper functions
 const getUrgencyColor = (urgency?: string) => {
-  switch (urgency) {
-    case 'Acil': return 'bg-red-600 hover:bg-red-700'
-    case 'Normal': return 'bg-amber-500 hover:bg-amber-600'
-    case 'Acil Değil': return 'bg-green-500 hover:bg-green-600'
+  switch (urgency?.toLowerCase()) {
+    case 'very_urgent':
+    case 'çok acil':
+      return 'bg-red-600 hover:bg-red-700'
+    case 'urgent':
+    case 'acil':
+      return 'bg-orange-500 hover:bg-orange-600'
+    case 'normal':
+      return 'bg-blue-500 hover:bg-blue-600'
+    case 'acil değil':
+      return 'bg-green-500 hover:bg-green-600'
     default: return 'bg-slate-500 hover:bg-slate-600'
+  }
+}
+
+const getUrgencyLabel = (urgency?: string) => {
+  switch (urgency?.toLowerCase()) {
+    case 'very_urgent':
+    case 'çok acil':
+      return 'Çok Acil'
+    case 'urgent':
+    case 'acil':
+      return 'Acil'
+    case 'normal':
+      return 'Normal'
+    case 'acil değil':
+      return 'Acil Değil'
+    default: return urgency || 'Normal'
   }
 }
 
@@ -336,7 +359,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           )}
 
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 z-0"></div>
           
           {/* Hover overlay with extra info */}
           <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2 z-20">
@@ -373,16 +396,17 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             </div>
           </div>
           
-          {/* Badges */}
-          <div className="absolute top-1 sm:top-2 left-1 sm:left-2 flex flex-wrap gap-1 z-10">
-            <div className={`px-1 sm:px-2 py-0.5 rounded text-xs font-semibold text-white shadow-md transition-colors ${getUrgencyColor(listing.urgency)}`}>
-              {listing.urgency}
-            </div>
-            {listing.is_urgent_premium && (
-              <div className="px-1 sm:px-2 py-0.5 rounded text-xs font-semibold text-white shadow-md bg-red-600 flex items-center gap-1">
-                <Zap size={10} className="sm:w-3 sm:h-3" /> Acil
+          {/* Urgency Badge - Bottom Right */}
+          {listing.urgency && (
+            <div className="absolute bottom-2 right-2 z-20">
+              <div className={`px-2 py-1 rounded-md text-xs font-semibold text-white shadow-lg transition-colors ${getUrgencyColor(listing.urgency)}`}>
+                {getUrgencyLabel(listing.urgency)}
               </div>
-            )}
+            </div>
+          )}
+
+          {/* Premium Badges - Top Left */}
+          <div className="absolute top-1 sm:top-2 left-1 sm:left-2 flex flex-wrap gap-1 z-10">
             {listing.is_featured && (
               <div className="px-1 sm:px-2 py-0.5 rounded text-xs font-semibold text-white shadow-md bg-purple-600 flex items-center gap-1">
                 <Star size={10} className="sm:w-3 sm:h-3" /> Öne Çıkan
@@ -501,18 +525,19 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         )}
 
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 z-0"></div>
         
-        {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-wrap gap-1 z-10">
-          <div className={`px-2 py-0.5 rounded text-xs font-semibold text-white shadow-md transition-colors ${getUrgencyColor(listing.urgency)}`}>
-            {listing.urgency}
-          </div>
-          {listing.is_urgent_premium && (
-            <div className="px-2 py-0.5 rounded text-xs font-semibold text-white shadow-md bg-red-600 flex items-center gap-1">
-              <Zap size={12} className="w-3 h-3" /> Acil
+        {/* Urgency Badge - Bottom Right */}
+        {listing.urgency && (
+          <div className="absolute bottom-2 right-2 z-20">
+            <div className={`px-2 py-1 rounded-md text-xs font-semibold text-white shadow-lg transition-colors ${getUrgencyColor(listing.urgency)}`}>
+              {getUrgencyLabel(listing.urgency)}
             </div>
-          )}
+          </div>
+        )}
+
+        {/* Premium Badges - Top Left */}
+        <div className="absolute top-2 left-2 flex flex-wrap gap-1 z-10">
           {listing.is_featured && (
             <div className="px-2 py-0.5 rounded text-xs font-semibold text-white shadow-md bg-purple-600 flex items-center gap-1">
               <Star size={12} className="w-3 h-3" /> Öne Çıkan

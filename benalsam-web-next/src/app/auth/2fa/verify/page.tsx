@@ -2,32 +2,55 @@
 
 import { useState, useRef, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Shield, Loader2, ArrowLeft } from 'lucide-react'
+import { Shield, Loader2, ArrowLeft, Smartphone, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useToast } from '@/hooks/use-toast'
-import axios from 'axios'
+import { useAuth } from '@/hooks/useAuth'
 import Link from 'next/link'
 
 function TwoFactorVerifyPageContent() {
   const [code, setCode] = useState(['', '', '', '', '', ''])
   const [isLoading, setIsLoading] = useState(false)
-  const [timer, setTimer] = useState(60)
+  const [error, setError] = useState<string | null>(null)
+  const [attempts, setAttempts] = useState(0)
+  const maxAttempts = 5
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
   const { toast } = useToast()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { login } = useAuth()
   const userId = searchParams.get('userId')
+  const [email, setEmail] = useState<string | null>(null)
+  const [password, setPassword] = useState<string | null>(null)
+  const [redirectTo, setRedirectTo] = useState<string>('/')
 
-  // Timer countdown
+  // Load credentials from sessionStorage
   useEffect(() => {
-    if (timer > 0) {
-      const interval = setInterval(() => {
-        setTimer((prev) => prev - 1)
-      }, 1000)
-      return () => clearInterval(interval)
+    if (typeof window !== 'undefined') {
+      const storedEmail = sessionStorage.getItem('2fa_pending_email')
+      const storedPassword = sessionStorage.getItem('2fa_pending_password')
+      const storedRedirect = sessionStorage.getItem('2fa_pending_redirect')
+      
+      if (storedEmail) setEmail(storedEmail)
+      if (storedPassword) setPassword(storedPassword)
+      if (storedRedirect) setRedirectTo(storedRedirect)
     }
-  }, [timer])
+  }, [])
+
+  // Validate userId
+  useEffect(() => {
+    if (!userId) {
+      setError('Geçersiz istek: Kullanıcı ID bulunamadı')
+    }
+  }, [userId])
+
+  // Auto-focus first input
+  useEffect(() => {
+    inputRefs.current[0]?.focus()
+  }, [])
 
   const handleChange = (index: number, value: string) => {
     // Only allow numbers
@@ -64,51 +87,122 @@ function TwoFactorVerifyPageContent() {
     const fullCode = code.join('')
     
     if (fullCode.length !== 6) {
-      toast({
-        title: 'Hata',
-        description: '6 haneli kodu eksiksiz girin',
-        variant: 'destructive',
-      })
+      setError('6 haneli kodu eksiksiz girin')
+      return
+    }
+
+    if (!userId) {
+      setError('Geçersiz istek: Kullanıcı ID bulunamadı')
+      return
+    }
+
+    if (attempts >= maxAttempts) {
+      setError('Çok fazla başarısız deneme yaptınız. Lütfen daha sonra tekrar deneyin.')
       return
     }
 
     setIsLoading(true)
+    setError(null)
 
     try {
-      const response = await axios.post('/api/2fa/verify', {
-        code: fullCode,
-        userId,
+      // Verify 2FA code
+      const response = await fetch('/api/2fa/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: fullCode,
+          userId,
+        }),
       })
 
-      if (response.data.success) {
-        toast({
-          title: 'Başarılı!',
-          description: 'Doğrulama başarılı',
-        })
-        
-        router.push('/')
+      const result = await response.json()
+
+      if (!result.success) {
+        setAttempts((prev) => prev + 1)
+        setError(result.error || 'Geçersiz kod')
+        setCode(['', '', '', '', '', ''])
+        setTimeout(() => {
+          inputRefs.current[0]?.focus()
+        }, 100)
+        return
       }
-    } catch (error: any) {
+
+      // Clear stored credentials
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('2fa_pending_email')
+        sessionStorage.removeItem('2fa_pending_password')
+        sessionStorage.removeItem('2fa_pending_redirect')
+      }
+
+      // If login credentials are provided, complete login after 2FA verification
+      if (email && password) {
+        const loginResult = await login({ email, password })
+        
+        if (!loginResult.success) {
+          setError(loginResult.error || 'Giriş yapılamadı')
+          return
+        }
+      } else {
+        // If no credentials, refresh to get session from cookies
+        router.refresh()
+      }
+
       toast({
-        title: 'Hata',
-        description: error.response?.data?.error || 'Doğrulama başarısız',
-        variant: 'destructive',
+        title: 'Başarılı!',
+        description: 'Doğrulama başarılı',
       })
       
-      // Reset code
+      // Small delay to ensure session is set
+      await new Promise(resolve => setTimeout(resolve, 200))
+      
+      // Redirect to intended page or home
+      router.push(redirectTo)
+      router.refresh()
+    } catch (error: any) {
+      console.error('2FA verification error:', error)
+      setAttempts((prev) => prev + 1)
+      setError('Doğrulama sırasında bir hata oluştu')
       setCode(['', '', '', '', '', ''])
-      inputRefs.current[0]?.focus()
+      setTimeout(() => {
+        inputRefs.current[0]?.focus()
+      }, 100)
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleResend = () => {
+    // Note: TOTP codes are generated by the authenticator app, not sent
+    // This is just for UX consistency
     toast({
-      title: 'Kod gönderildi',
-      description: 'Yeni doğrulama kodu telefonunuza gönderildi',
+      title: 'Bilgi',
+      description: 'TOTP kodları otomatik olarak yenilenir. Authenticator uygulamanızdan yeni kodu alın.',
     })
-    setTimer(60)
+  }
+
+  if (!userId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-destructive">Geçersiz İstek</CardTitle>
+            <CardDescription>
+              2FA doğrulama için gerekli bilgiler eksik.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/auth/login">
+              <Button variant="outline" className="w-full">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Giriş Sayfasına Dön
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -117,7 +211,7 @@ function TwoFactorVerifyPageContent() {
         {/* Back Button */}
         <Link
           href="/auth/login"
-          className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-8"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Giriş sayfasına dön
@@ -125,96 +219,118 @@ function TwoFactorVerifyPageContent() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-            <Shield className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4">
+            <Shield className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             İki Faktörlü Doğrulama
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Authenticator uygulamanızdan 6 haneli kodu girin
+          <p className="text-muted-foreground">
+            {email ? (
+              <>
+                <strong>{email}</strong> hesabı için doğrulama gerekli
+              </>
+            ) : (
+              'Authenticator uygulamanızdan 6 haneli kodu girin'
+            )}
           </p>
         </div>
 
         {/* Verify Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8">
-          {/* Code Input */}
-          <div className="flex justify-center gap-2 mb-6" onPaste={handlePaste}>
-            {code.map((digit, index) => (
-              <Input
-                key={index}
-                ref={(el) => {
-                  inputRefs.current[index] = el
-                }}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                className="w-12 h-14 text-center text-2xl font-bold"
-                disabled={isLoading}
-                autoFocus={index === 0}
-              />
-            ))}
-          </div>
-
-          {/* Verify Button */}
-          <Button
-            onClick={handleVerify}
-            className="w-full mb-4"
-            disabled={isLoading || code.some((d) => !d)}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Doğrulanıyor...
-              </>
-            ) : (
-              'Doğrula'
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Smartphone className="w-5 h-5" />
+              Doğrulama Kodu
+            </CardTitle>
+            <CardDescription>
+              Authenticator uygulamanızdan 6 haneli kodu girin
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Error Alert */}
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
-          </Button>
 
-          {/* Resend Code */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              Kod gelmedi mi?
-            </p>
-            {timer > 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-500">
-                Yeni kod {timer} saniye sonra gönderilebilir
-              </p>
-            ) : (
-              <button
-                onClick={handleResend}
-                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold"
-              >
-                Yeni Kod Gönder
-              </button>
+            {/* Attempts Warning */}
+            {attempts > 0 && attempts < maxAttempts && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  {maxAttempts - attempts} deneme hakkınız kaldı
+                </AlertDescription>
+              </Alert>
             )}
-          </div>
 
-          {/* Backup Code */}
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-600 dark:text-gray-400 text-center mb-2">
-              Authenticator uygulamanıza erişiminiz yok mu?
-            </p>
-            <Link
-              href="/auth/2fa/backup"
-              className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold block text-center"
+            {/* Code Input */}
+            <div className="flex justify-center gap-2" onPaste={handlePaste}>
+              {code.map((digit, index) => (
+                <Input
+                  key={index}
+                  ref={(el) => {
+                    inputRefs.current[index] = el
+                  }}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  className="w-12 h-14 text-center text-2xl font-bold tracking-widest"
+                  disabled={isLoading || attempts >= maxAttempts}
+                  autoFocus={index === 0}
+                />
+              ))}
+            </div>
+
+            {/* Verify Button */}
+            <Button
+              onClick={handleVerify}
+              className="w-full"
+              disabled={isLoading || code.some((d) => !d) || attempts >= maxAttempts}
+              size="lg"
             >
-              Yedekleme kodu kullan
-            </Link>
-          </div>
-        </div>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Doğrulanıyor...
+                </>
+              ) : (
+                <>
+                  <Shield className="w-4 h-4 mr-2" />
+                  Doğrula
+                </>
+              )}
+            </Button>
+
+            {/* Backup Code Link */}
+            <div className="pt-4 border-t">
+              <p className="text-sm text-muted-foreground text-center mb-2">
+                Authenticator uygulamanıza erişiminiz yok mu?
+              </p>
+              <Link
+                href={`/auth/2fa/backup?userId=${userId}`}
+                className="text-sm text-primary hover:underline font-semibold block text-center"
+              >
+                Yedekleme kodu kullan
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Help Text */}
-        <div className="mt-6 p-4 bg-blue-50 dark:bg-gray-700 rounded-lg">
-          <p className="text-sm text-gray-700 dark:text-gray-300">
-            💡 <strong>İpucu:</strong> Google Authenticator, Authy veya Microsoft Authenticator
-            gibi uygulamalardan kodu alabilirsiniz.
-          </p>
-        </div>
+        <Card className="mt-6">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">
+              💡 <strong>İpucu:</strong> Google Authenticator, Authy veya Microsoft Authenticator
+              gibi uygulamalardan kodu alabilirsiniz. Kodlar 30 saniyede bir otomatik olarak yenilenir.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

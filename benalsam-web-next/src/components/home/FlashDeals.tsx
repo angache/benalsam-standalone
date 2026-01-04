@@ -135,13 +135,7 @@ export default function FlashDeals({ listings: propListings, isLoading: propIsLo
         {/* Listings Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
           {listings.map((listing: any) => (
-            <div key={listing.id} className="relative">
-              <div className="absolute top-2 right-2 z-10 bg-orange-600 text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-lg">
-                <Zap className="w-3 h-3" />
-                ACİL
-              </div>
-              <ListingCard listing={listing} />
-            </div>
+            <ListingCard key={listing.id} listing={listing} />
           ))}
         </div>
 
