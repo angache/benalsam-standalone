@@ -2,16 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 
 export async function GET(request: NextRequest) {
   try {
     const user = await getServerUser()
 
     if (!user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
     }
 
     const { data: listings, error } = await supabaseAdmin
@@ -29,10 +27,10 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     if (error) {
-      logger.error('[API] Error fetching my listings', { error, userId: user.id })
-      return NextResponse.json(
-        { error: 'Failed to fetch listings' },
-        { status: 500 }
+      return apiErrors.databaseError(
+        'Failed to fetch listings',
+        { error: error.message, userId: user.id },
+        request.nextUrl.pathname
       )
     }
 
@@ -43,15 +41,15 @@ export async function GET(request: NextRequest) {
       favorites_count: listing.favorites?.[0]?.count || 0
     })) || []
 
-    return NextResponse.json({ listings: processedListings }, { status: 200 })
+    return createSuccessResponse({ listings: processedListings })
   } catch (error: unknown) {
-    logger.error('[API] My listings exception', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    })
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    return apiErrors.internalError(
+      'Failed to fetch listings',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
     )
   }
 }

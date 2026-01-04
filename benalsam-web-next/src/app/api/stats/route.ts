@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,31 +48,32 @@ export async function GET(request: NextRequest) {
       activeUsers
     })
 
-    return NextResponse.json({
+    return createSuccessResponse({
       totalListings,
       totalCategories,
       activeUsers
     }, {
       status: 200,
-      headers: {
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' // 5 minutes cache
+      meta: {
+        cacheControl: 'public, s-maxage=300, stale-while-revalidate=600'
       }
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[API] Stats fetch error', {
-      error: error?.message || String(error),
-      stack: error?.stack
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
     })
     
-    // Return default values on error
-    return NextResponse.json({
+    // Return default values on error (still success response)
+    return createSuccessResponse({
       totalListings: 2500,
       totalCategories: 50,
       activeUsers: 1000
     }, {
-      status: 200, // Still return 200 with defaults
-      headers: {
-        'Cache-Control': 'public, s-maxage=60' // 1 minute cache on error
+      status: 200,
+      meta: {
+        cacheControl: 'public, s-maxage=60',
+        fallback: true
       }
     })
   }

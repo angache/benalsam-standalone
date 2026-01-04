@@ -4,6 +4,7 @@ import speakeasy from 'speakeasy'
 import QRCode from 'qrcode'
 import { supabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 
 /**
  * POST /api/2fa/setup
@@ -14,10 +15,7 @@ export async function POST(request: NextRequest) {
     // Check authentication
     const user = await getServerUser()
     if (!user?.id) {
-      return NextResponse.json(
-        { success: false, error: 'Oturum açmanız gerekiyor' },
-        { status: 401 }
-      )
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
     }
 
     // Get user email from profiles table
@@ -56,29 +54,26 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
 
     if (error) {
-      logger.error('[2FA Setup] Database error', { error, userId: user.id })
-      return NextResponse.json(
-        { success: false, error: '2FA kurulumu başarısız oldu' },
-        { status: 500 }
+      return apiErrors.databaseError(
+        '2FA kurulumu başarısız oldu',
+        { error: error.message, userId: user.id },
+        request.nextUrl.pathname
       )
     }
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        secret: secret.base32,
-        qrCode: qrCodeUrl,
-        backupCodes,
-      },
+    return createSuccessResponse({
+      secret: secret.base32,
+      qrCode: qrCodeUrl,
+      backupCodes,
     })
   } catch (error: unknown) {
-    logger.error('[2FA Setup] Unexpected error', { 
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    })
-    return NextResponse.json(
-      { success: false, error: '2FA kurulumu sırasında bir hata oluştu' },
-      { status: 500 }
+    return apiErrors.internalError(
+      '2FA kurulumu sırasında bir hata oluştu',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
     )
   }
 }

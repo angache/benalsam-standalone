@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
+import { validateParams } from '@/lib/api-validation'
+import { z } from 'zod'
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
+
+/**
+ * Schema for userId parameter (can be UUID or username)
+ */
+const userIdParamSchema = z.object({
+  userId: z.string().min(1, 'User ID or username is required'),
+})
 
 export async function GET(
   request: NextRequest,
@@ -10,10 +20,18 @@ export async function GET(
   try {
     const user = await getServerUser()
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
     }
 
-    const { userId } = await params
+    const rawParams = await params
+    
+    // Validate route parameters
+    const validation = validateParams(rawParams, userIdParamSchema)
+    if (!validation.success) {
+      return validation.response
+    }
+
+    const { userId } = validation.data
     logger.debug('[PROFILE API] Fetching profile', { userId })
 
     // Get profile data (try username first, then fallback to ID)
@@ -36,8 +54,7 @@ export async function GET(
     }
 
     if (profileError) {
-      logger.error('[PROFILE API] Profile fetch error', { error: profileError, userId })
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+      return apiErrors.notFound('Profile', request.nextUrl.pathname)
     }
 
     logger.debug('[PROFILE API] Found profile', { profileId: profile?.id })
@@ -92,7 +109,7 @@ export async function GET(
       isFollowing = !!followData
     }
 
-    return NextResponse.json({
+    return createSuccessResponse({
       profile,
       listings: listings || [],
       reviews: reviews || [],
@@ -100,10 +117,13 @@ export async function GET(
     })
 
   } catch (error: unknown) {
-    logger.error('[PROFILE API] Unexpected error', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    })
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return apiErrors.internalError(
+      'Failed to fetch profile',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
+    )
   }
 }

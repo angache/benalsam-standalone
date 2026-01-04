@@ -1,21 +1,19 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 
 /**
  * GET /api/favorites/list
  * Get all favorite listings for the current user
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const user = await getServerUser()
 
     if (!user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
     }
 
     // Fetch favorites with full listing details
@@ -40,10 +38,10 @@ export async function GET() {
       .order('created_at', { ascending: false })
 
     if (error) {
-      logger.error('[API] Error fetching favorites', { error, userId: user.id })
-      return NextResponse.json(
-        { error: 'Failed to fetch favorites' },
-        { status: 500 }
+      return apiErrors.databaseError(
+        'Failed to fetch favorites',
+        { error: error.message, userId: user.id },
+        request.nextUrl.pathname
       )
     }
 
@@ -76,21 +74,20 @@ export async function GET() {
 
     logger.debug('[API] Fetched favorites', { userId: user.id, count: favoriteListings.length })
 
-    return NextResponse.json(
+    return createSuccessResponse(
       { 
         listings: favoriteListings,
         total: favoriteListings.length 
-      },
-      { status: 200 }
+      }
     )
   } catch (error: unknown) {
-    logger.error('[API] Favorites list exception', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    })
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    return apiErrors.internalError(
+      'Failed to fetch favorites',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
     )
   }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 
 /**
  * POST /api/2fa/enable
@@ -11,10 +12,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await getServerUser()
     if (!user?.id) {
-      return NextResponse.json(
-        { success: false, error: 'Oturum açmanız gerekiyor' },
-        { status: 401 }
-      )
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
     }
 
     // Update user to enable 2FA
@@ -27,26 +25,23 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
 
     if (error) {
-      logger.error('[API] 2FA enable error', { error, userId: user.id })
-      return NextResponse.json(
-        { success: false, error: '2FA aktifleştirilemedi' },
-        { status: 500 }
+      return apiErrors.databaseError(
+        '2FA aktifleştirilemedi',
+        { error: error.message, userId: user.id },
+        request.nextUrl.pathname
       )
     }
 
     logger.debug('[API] 2FA enabled successfully', { userId: user.id })
-    return NextResponse.json({
-      success: true,
-      message: '2FA başarıyla aktifleştirildi',
-    })
+    return createSuccessResponse({ message: '2FA başarıyla aktifleştirildi' })
   } catch (error: unknown) {
-    logger.error('[API] 2FA enable exception', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    })
-    return NextResponse.json(
-      { success: false, error: '2FA aktifleştirme sırasında bir hata oluştu' },
-      { status: 500 }
+    return apiErrors.internalError(
+      '2FA aktifleştirme sırasında bir hata oluştu',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
     )
   }
 }

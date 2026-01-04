@@ -9,16 +9,29 @@
  */
 
 import { logger } from '@/utils/production-logger'
-
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { logger } from '@/utils/production-logger'
+import { validateQuery } from '@/lib/api-validation'
+import { z } from 'zod'
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
+
+/**
+ * Schema for AI suggestions query parameters
+ */
+const aiSuggestionsQuerySchema = z.object({
+  q: z.string().max(200).optional().default(''),
+  categoryId: z.coerce.number().int().positive().optional(),
+})
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams
-    const query = searchParams.get('q') || ''
-    const categoryId = searchParams.get('categoryId')
+    // Validate query parameters
+    const validation = validateQuery(request, aiSuggestionsQuerySchema)
+    if (!validation.success) {
+      return validation.response
+    }
+
+    const { q: query, categoryId } = validation.data
 
     // Create Supabase client for server-side
     const supabase = createClient(
@@ -192,27 +205,21 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => (b.score || 0) - (a.score || 0))
       .slice(0, 10)
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        suggestions: uniqueSuggestions,
-        total: uniqueSuggestions.length,
-        query,
-        categoryId,
-      }
+    return createSuccessResponse({
+      suggestions: uniqueSuggestions,
+      total: uniqueSuggestions.length,
+      query,
+      categoryId,
     })
 
   } catch (error: unknown) {
-    logger.error('[API] AI Suggestions error', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    })
-    return NextResponse.json(
+    return apiErrors.internalError(
+      'Failed to fetch AI suggestions',
       {
-        success: false,
-        error: 'Failed to fetch AI suggestions',
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
       },
-      { status: 500 }
+      request.nextUrl.pathname
     )
   }
 }

@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
+import { validateParams, commonSchemas } from '@/lib/api-validation'
+import { z } from 'zod'
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
+
+/**
+ * Schema for userId parameter
+ */
+const userIdParamSchema = z.object({
+  userId: commonSchemas.uuid,
+})
 
 export async function POST(
   request: NextRequest,
@@ -10,15 +20,27 @@ export async function POST(
   try {
     const user = await getServerUser()
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
     }
 
-    const { userId } = await params
+    const rawParams = await params
+    
+    // Validate route parameters
+    const validation = validateParams(rawParams, userIdParamSchema)
+    if (!validation.success) {
+      return validation.response
+    }
+
+    const { userId } = validation.data
     const currentUserId = user.id
 
     // Can't follow yourself
     if (currentUserId === userId) {
-      return NextResponse.json({ error: 'Cannot follow yourself' }, { status: 400 })
+      return apiErrors.validationError(
+        'Cannot follow yourself',
+        { currentUserId, userId },
+        request.nextUrl.pathname
+      )
     }
 
     // Check if already following
@@ -30,7 +52,7 @@ export async function POST(
       .single()
 
     if (existingFollow) {
-      return NextResponse.json({ error: 'Already following' }, { status: 400 })
+      return apiErrors.duplicateEntry('Follow relationship', request.nextUrl.pathname)
     }
 
     // Create follow relationship
@@ -43,19 +65,25 @@ export async function POST(
       })
 
     if (followError) {
-      logger.error('[API] Follow error', { error: followError, followerId: currentUserId, followingId: userId })
-      return NextResponse.json({ error: 'Failed to follow user' }, { status: 500 })
+      return apiErrors.databaseError(
+        'Failed to follow user',
+        { error: followError.message, followerId: currentUserId, followingId: userId },
+        request.nextUrl.pathname
+      )
     }
 
     logger.debug('[API] User followed successfully', { followerId: currentUserId, followingId: userId })
-    return NextResponse.json({ success: true, message: 'User followed successfully' })
+    return createSuccessResponse({ message: 'User followed successfully' })
 
   } catch (error: unknown) {
-    logger.error('[API] Follow exception', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    })
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return apiErrors.internalError(
+      'Failed to follow user',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
+    )
   }
 }
 
@@ -66,10 +94,18 @@ export async function DELETE(
   try {
     const user = await getServerUser()
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
     }
 
-    const { userId } = await params
+    const rawParams = await params
+    
+    // Validate route parameters
+    const validation = validateParams(rawParams, userIdParamSchema)
+    if (!validation.success) {
+      return validation.response
+    }
+
+    const { userId } = validation.data
     const currentUserId = user.id
 
     // Remove follow relationship
@@ -80,18 +116,24 @@ export async function DELETE(
       .eq('following_id', userId)
 
     if (unfollowError) {
-      logger.error('[API] Unfollow error', { error: unfollowError, followerId: currentUserId, followingId: userId })
-      return NextResponse.json({ error: 'Failed to unfollow user' }, { status: 500 })
+      return apiErrors.databaseError(
+        'Failed to unfollow user',
+        { error: unfollowError.message, followerId: currentUserId, followingId: userId },
+        request.nextUrl.pathname
+      )
     }
 
     logger.debug('[API] User unfollowed successfully', { followerId: currentUserId, followingId: userId })
-    return NextResponse.json({ success: true, message: 'User unfollowed successfully' })
+    return createSuccessResponse({ message: 'User unfollowed successfully' })
 
   } catch (error: unknown) {
-    logger.error('[API] Unfollow exception', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    })
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return apiErrors.internalError(
+      'Failed to unfollow user',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
+    )
   }
 }

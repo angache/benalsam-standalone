@@ -7,18 +7,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { logger } from '@/utils/production-logger'
+import { validateBody } from '@/lib/api-validation'
+import { z } from 'zod'
+import { createSuccessResponse } from '@/lib/api-errors'
+
+/**
+ * Schema for track search request body
+ */
+const trackSearchSchema = z.object({
+  query: z.string().min(1, 'Query is required').max(500, 'Query too long'),
+  source: z.string().optional(),
+  userId: z.string().uuid().optional().nullable(),
+  sessionId: z.string().uuid().optional(),
+})
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { query, source, userId, sessionId } = body
-
-    if (!query) {
-      return NextResponse.json(
-        { success: false, error: 'Query is required' },
-        { status: 400 }
-      )
+    // Validate request body
+    const validation = await validateBody(request, trackSearchSchema)
+    if (!validation.success) {
+      return validation.response
     }
+
+    const { query, source, userId, sessionId } = validation.data
 
     // Create Supabase client for server-side
     const supabase = createClient(
@@ -40,10 +51,10 @@ export async function POST(request: NextRequest) {
     if (error) {
       // Silent fail - table might not exist or RLS might block
       logger.debug('[API] Track search failed (expected if table not configured)', { error: error.message })
-      return NextResponse.json({ success: true }) // Return success anyway
+      return createSuccessResponse({ tracked: false }) // Return success anyway
     }
 
-    return NextResponse.json({ success: true })
+    return createSuccessResponse({ tracked: true })
 
   } catch (error: unknown) {
     logger.error('[API] Track search exception', {
@@ -51,7 +62,7 @@ export async function POST(request: NextRequest) {
       stack: error instanceof Error ? error.stack : undefined
     })
     // Don't fail the request - tracking is optional
-    return NextResponse.json({ success: true })
+    return createSuccessResponse({ tracked: false })
   }
 }
 
