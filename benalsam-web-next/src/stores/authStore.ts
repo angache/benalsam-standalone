@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { fetchUserProfile } from '@/services/profileService';
 // import { sharedRateLimitService } from '@/services/sharedRateLimitService'; // Not available in Next.js
 import { User } from 'benalsam-shared-types';
+import { logger } from '@/utils/production-logger';
 
 interface AuthState {
   user: User | null;
@@ -25,7 +26,7 @@ const sessionLoggerService = {
       // Get current session
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        console.warn('⚠️ No active session found for logging');
+        logger.warn('[AuthStore] No active session found for logging');
         return false;
       }
 
@@ -48,15 +49,15 @@ const sessionLoggerService = {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ Enterprise Session Logger: Failed to log session activity', errorData);
+        logger.error('[AuthStore] Enterprise Session Logger: Failed to log session activity', { error: errorData });
         return false;
       }
 
       const result = await response.json();
-      console.log('✅ Enterprise Session Logger: Session activity logged successfully', result);
+      logger.debug('[AuthStore] Enterprise Session Logger: Session activity logged successfully', { result });
       return true;
     } catch (error) {
-      console.error('❌ Enterprise Session Logger Error:', error);
+      logger.error('[AuthStore] Enterprise Session Logger Error:', { error });
       return false;
     }
   }
@@ -65,7 +66,7 @@ const sessionLoggerService = {
 export const useAuthStore = create<AuthState>((set, get) => {
   // Auto-initialize on store creation
   const initializeStore = async () => {
-    console.log('🔐 [AuthStore] Auto-initializing...');
+    logger.debug('[AuthStore] Auto-initializing...');
     set({ loading: true });
     
     try {
@@ -92,15 +93,15 @@ export const useAuthStore = create<AuthState>((set, get) => {
           updated_at: session.user.updated_at || session.user.created_at
         };
         
-        console.log('🔐 [AuthStore] Setting basic user:', { 
+        logger.debug('[AuthStore] Setting basic user:', { 
           userId: basicUser.id, 
           userEmail: basicUser.email, 
           userName: basicUser.name 
         });
         set({ user: basicUser, currentUser: basicUser, loading: false, initialized: true });
-        console.log('🔐 [AuthStore] Basic user set, profile will be fetched by React Query when needed');
+        logger.debug('[AuthStore] Basic user set, profile will be fetched by React Query when needed');
       } else {
-        console.log('🔐 [AuthStore] No session found');
+        logger.debug('[AuthStore] No session found');
         set({ user: null, currentUser: null, loading: false, initialized: true });
       }
 
@@ -138,8 +139,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
           set({ user: null, currentUser: null, loading: false });
         }
       });
-    } catch (error) {
-      console.error('🔐 [AuthStore] Initialize error:', error);
+      } catch (error) {
+        logger.error('[AuthStore] Initialize error:', { error });
       set({ user: null, currentUser: null, loading: false, initialized: true });
     }
   };

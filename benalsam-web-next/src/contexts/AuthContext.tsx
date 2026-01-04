@@ -717,7 +717,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (requires2FA) {
           logger.info('[AuthContext] 2FA required for user', { userId: data.user.id })
-          console.log('🔐 [AuthContext] 2FA required, session set but profile fetch skipped', { userId: data.user.id })
+          logger.debug('[AuthContext] 2FA required, session set but profile fetch skipped', { userId: data.user.id })
           // Mark session as initialized even for 2FA
           sessionInitializedRef.current = true
           initializationCompleteRef.current = true
