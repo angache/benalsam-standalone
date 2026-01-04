@@ -10,6 +10,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
+    "test:api": "bash scripts/test-api-improvements.sh",
+    "test:all": "bash scripts/run-all-tests.sh",
     "seed:test": "tsx scripts/seed-test-listing.ts",
     "seed:realistic": "tsx scripts/seed-realistic-listings.ts",
     "seed:10": "tsx scripts/seed-10-listings.ts",

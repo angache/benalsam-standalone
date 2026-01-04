@@ -46,8 +46,12 @@ export async function validateBody<T extends z.ZodType>(
         response: NextResponse.json(
           {
             success: false,
-            error: 'Validation failed',
-            errors,
+            error: {
+              code: 'VAL_001',
+              message: 'Validation failed',
+              errors,
+              timestamp: new Date().toISOString(),
+            },
           },
           { status: 400 }
         ),
@@ -61,17 +65,21 @@ export async function validateBody<T extends z.ZodType>(
       path: request.nextUrl.pathname,
     })
 
-    return {
-      success: false,
-      response: NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid JSON',
-          message: 'Request body must be valid JSON',
-        },
-        { status: 400 }
-      ),
-    }
+      return {
+        success: false,
+        response: NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'VAL_001',
+              message: 'Invalid JSON',
+              details: { reason: 'Request body must be valid JSON' },
+              timestamp: new Date().toISOString(),
+            },
+          },
+          { status: 400 }
+        ),
+      }
   }
 }
 
@@ -116,8 +124,12 @@ export function validateQuery<T extends z.ZodType>(
         response: NextResponse.json(
           {
             success: false,
-            error: 'Query validation failed',
-            errors,
+            error: {
+              code: 'VAL_001',
+              message: 'Query validation failed',
+              errors,
+              timestamp: new Date().toISOString(),
+            },
           },
           { status: 400 }
         ),
@@ -131,16 +143,20 @@ export function validateQuery<T extends z.ZodType>(
       path: request.nextUrl.pathname,
     })
 
-    return {
-      success: false,
-      response: NextResponse.json(
-        {
-          success: false,
-          error: 'Query validation error',
-        },
-        { status: 400 }
-      ),
-    }
+      return {
+        success: false,
+        response: NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'VAL_001',
+              message: 'Query validation error',
+              timestamp: new Date().toISOString(),
+            },
+          },
+          { status: 400 }
+        ),
+      }
   }
 }
 
@@ -170,8 +186,12 @@ export function validateParams<T extends z.ZodType>(
         response: NextResponse.json(
           {
             success: false,
-            error: 'Invalid route parameters',
-            errors,
+            error: {
+              code: 'VAL_001',
+              message: 'Invalid route parameters',
+              errors,
+              timestamp: new Date().toISOString(),
+            },
           },
           { status: 400 }
         ),
@@ -184,16 +204,20 @@ export function validateParams<T extends z.ZodType>(
       error: error instanceof Error ? error.message : String(error),
     })
 
-    return {
-      success: false,
-      response: NextResponse.json(
-        {
-          success: false,
-          error: 'Params validation error',
-        },
-        { status: 400 }
-      ),
-    }
+      return {
+        success: false,
+        response: NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: 'VAL_001',
+              message: 'Params validation error',
+              timestamp: new Date().toISOString(),
+            },
+          },
+          { status: 400 }
+        ),
+      }
   }
 }
 
