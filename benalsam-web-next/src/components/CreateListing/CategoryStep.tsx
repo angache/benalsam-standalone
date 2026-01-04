@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Search, Smartphone, Building, Car, WashingMachine, Shirt, GraduationCap, Briefcase, Dumbbell, Palette, Baby, Gamepad2, Heart, Factory, Plane, Star, Bitcoin, Home, Book } from 'lucide-react'
+import { logger } from '@/utils/production-logger'
 
 // Icon mapping for API categories
 const iconMap: { [key: string]: React.ComponentType<any> } = {
@@ -263,12 +264,12 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
           }
         } else {
           // Fallback to hardcoded categories if localStorage is empty
-          console.log('📦 No cached categories found, using hardcoded fallback')
+          logger.debug('[CategoryStep] No cached categories found, using hardcoded fallback')
           setRootCategories(hardcodedCategories)
           setCurrentLevel(hardcodedCategories)
         }
       } catch (error) {
-        console.error('❌ Error loading categories from localStorage:', error)
+        logger.error('[CategoryStep] Error loading categories from localStorage', { error })
         setRootCategories(hardcodedCategories)
         setCurrentLevel(hardcodedCategories)
       }
@@ -345,7 +346,7 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
       const pathNames = hierarchicalPath.map(cat => cat.name)
       const pathIds = hierarchicalPath.map(cat => String(cat.id))
       
-      console.log('✅ LEAF category selected with hierarchy:', {
+      logger.debug('[CategoryStep] LEAF category selected with hierarchy', {
         category: category.name,
         id: category.id,
         pathNames,
@@ -358,7 +359,7 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
       setNavigationStack([...navigationStack, category])
       setCurrentLevel(subcats)
       setSelectedLeafCategory(null)
-      console.log('📂 Drilling down to:', category.name, '- Subcategories:', subcats.length)
+      logger.debug('[CategoryStep] Drilling down', { categoryName: category.name, subcategoriesCount: subcats.length })
     }
   }
 
@@ -381,7 +382,7 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
     }
     
     setSelectedLeafCategory(null)
-    console.log('← Back - Stack depth:', newStack.length)
+    logger.debug('[CategoryStep] Back clicked', { stackDepth: newStack.length })
   }
 
   const handleSuggestionClick = (suggestion: LeafPath) => {

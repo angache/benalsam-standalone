@@ -11,6 +11,7 @@ import { compressImage } from '@/lib/imageUtils'
 import OptimizedImage from '@/components/OptimizedImage'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import StockImageSearchModal from '@/components/CreateListing/StockImageSearchModal'
+import { logger } from '@/utils/production-logger'
 
 const MAX_IMAGES_DEFAULT = 5
 const MAX_FILE_SIZE_MB_DEFAULT = 2
@@ -26,7 +27,7 @@ interface ImagesStepProps {
 }
 
 export default function ImagesStep({ formData, mainImageIndex, onChange, onSetMainImage, onNext, onBack, selectedCategoryName }: ImagesStepProps) {
-  console.log('🔄 [IMAGESSTEP] Component rendered with formData:', formData)
+  logger.debug('[ImagesStep] Component rendered with formData', { formData })
   
   const [isProcessing, setIsProcessing] = useState(false)
   const [isStockModalOpen, setIsStockModalOpen] = useState(false)
@@ -36,9 +37,7 @@ export default function ImagesStep({ formData, mainImageIndex, onChange, onSetMa
   // formData is already the images array (old system approach)
   const images = Array.isArray(formData) ? formData : []
   
-  console.log('🔄 [IMAGESSTEP] formData type:', typeof formData, 'isArray:', Array.isArray(formData))
-  console.log('🔄 [IMAGESSTEP] formData:', formData)
-  console.log('🔄 [IMAGESSTEP] images:', images)
+  logger.debug('[ImagesStep] formData type', { type: typeof formData, isArray: Array.isArray(formData), formData, images })
 
   const handleImageFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || [])
@@ -168,7 +167,7 @@ export default function ImagesStep({ formData, mainImageIndex, onChange, onSetMa
             const compressedFile = await compressImage(file)
             const preview = URL.createObjectURL(compressedFile)
             
-            console.log('✅ [STOCK] Image processed:', { 
+            logger.debug('[ImagesStep] Stock image processed', { 
               id: img.id, 
               fileName: compressedFile.name, 
               fileSize: compressedFile.size,
@@ -176,7 +175,7 @@ export default function ImagesStep({ formData, mainImageIndex, onChange, onSetMa
             })
             return { file: compressedFile, preview, name: compressedFile.name, isUploaded: false }
           } catch (error) {
-            console.error('❌ [STOCK] Error processing stock image:', error)
+            logger.error('[ImagesStep] Error processing stock image', { error })
             return null
           }
         })
@@ -185,7 +184,7 @@ export default function ImagesStep({ formData, mainImageIndex, onChange, onSetMa
       const validImages = newImageObjects.filter(Boolean)
       const newImages = [...images, ...validImages]
 
-      console.log('🔄 [STOCK] Before update (old system):', { 
+      logger.debug('[ImagesStep] Before update (old system)', { 
         currentImages: images.length,
         newImages: newImages.length,
         validImages: validImages.length
@@ -198,7 +197,7 @@ export default function ImagesStep({ formData, mainImageIndex, onChange, onSetMa
         description: "Seçilen görseller başarıyla eklendi."
       })
     } catch (error) {
-      console.error('Stock image processing error:', error)
+      logger.error('[ImagesStep] Stock image processing error', { error })
       toast({
         title: "Hata",
         description: "Stok görselleri işlenirken bir hata oluştu.",

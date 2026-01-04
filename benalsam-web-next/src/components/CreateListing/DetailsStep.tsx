@@ -15,6 +15,7 @@ import { Sparkles, Loader2 } from 'lucide-react'
 import { listingAIService } from '@/services/listingAIService'
 import { useToast } from '@/hooks/use-toast'
 import { useCreateListingStore } from '@/stores'
+import { logger } from '@/utils/production-logger'
 
 const detailsSchema = z.object({
   title: z.string().min(5, 'Başlık en az 5 karakter olmalı'),
@@ -208,7 +209,7 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
         toast({ title: 'Açıklama oluşturuldu', variant: 'default' })
       }
     } catch (error: any) {
-      console.error('AI description suggestion error:', error)
+      logger.error('[DetailsStep] AI description suggestion error', { error })
       const errorMessage = error?.message?.includes('not authenticated') 
         ? 'Giriş yapmanız gerekiyor' 
         : 'Açıklama oluşturulamadı'
@@ -262,7 +263,7 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
         variant: 'default'
       })
     } catch (error: any) {
-      console.error('AI generate all error:', error)
+      logger.error('[DetailsStep] AI generate all error', { error })
       let errorMessage = 'İlan oluşturulamadı'
       
       if (error?.message?.includes('not authenticated')) {
