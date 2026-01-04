@@ -8,6 +8,7 @@
 import { listingService } from './listingService'
 import { categoryService } from './categoryService'
 import type { Listing } from '@/types'
+import { logger } from '@/utils/production-logger'
 
 export interface HomePageData {
   todaysListings: Listing[]
@@ -107,7 +108,7 @@ export async function fetchHomePageData(
       recommendations: userId ? recommendationsResult.listings || [] : undefined,
     }
   } catch (error) {
-    console.error('❌ [HomePageService] Error fetching homepage data:', error)
+    logger.error('[HomePageService] Error fetching homepage data', { error })
     
     // Return empty data on error
     return {
@@ -145,7 +146,7 @@ export async function fetchHomePageStats(): Promise<{
       }
     }
   } catch (error) {
-    console.warn('⚠️ [HomePageService] Stats API not available, using defaults')
+    logger.warn('[HomePageService] Stats API not available, using defaults')
   }
 
   // Fallback to default values

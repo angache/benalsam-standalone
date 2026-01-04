@@ -7,6 +7,7 @@
  */
 
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/production-logger';
 
 interface UploadedImage {
   id: string;
@@ -77,7 +78,7 @@ export class UploadService {
       // Add type parameter
       formData.append('type', type);
 
-      console.log(`🚀 [UploadService] Uploading ${files.length} files to Upload Service...`);
+      logger.debug('[UploadService] Uploading files to Upload Service', { fileCount: files.length });
 
       // Upload to Upload Service
       const response = await fetch(`${UPLOAD_SERVICE_URL}/upload/${type}`, {
@@ -99,7 +100,7 @@ export class UploadService {
         throw new Error(result.message || 'Upload failed');
       }
 
-      console.log(`✅ [UploadService] Upload successful:`, result.data.images.length, 'images');
+      logger.debug('[UploadService] Upload successful', { imageCount: result.data.images.length });
 
       // Simulate progress completion
       if (onProgress) {
@@ -109,7 +110,7 @@ export class UploadService {
       return result.data.images;
 
     } catch (error) {
-      console.error('❌ [UploadService] Upload error:', error);
+      logger.error('[UploadService] Upload error', { error });
       throw error;
     }
   }
@@ -146,7 +147,7 @@ export class UploadService {
       return result.success;
 
     } catch (error) {
-      console.error('❌ [UploadService] Delete error:', error);
+      logger.error('[UploadService] Delete error', { error });
       throw error;
     }
   }
@@ -170,7 +171,7 @@ export class UploadService {
       return result.data;
 
     } catch (error) {
-      console.error('❌ [UploadService] Quota error:', error);
+      logger.error('[UploadService] Quota error', { error });
       throw error;
     }
   }
@@ -187,7 +188,7 @@ export class UploadService {
 
       return response.ok;
     } catch (error) {
-      console.warn('⚠️ [UploadService] Service not available:', error);
+      logger.warn('[UploadService] Service not available', { error });
       return false;
     }
   }
@@ -216,7 +217,7 @@ export const processImagesForUploadService = async (
 
   const isAvailable = await uploadService.isAvailable();
   if (!isAvailable) {
-    console.warn('⚠️ Upload Service not available, falling back to Supabase Storage');
+    logger.warn('[UploadService] Upload Service not available, falling back to Supabase Storage');
     const { processImagesForSupabase } = await import('./imageService');
     return processImagesForSupabase(
       images,
@@ -243,7 +244,7 @@ export const processImagesForUploadService = async (
     let filesToUpload: File[] = [];
     let keptImageUrls: string[] = [];
     
-    console.log('🖼️ [processImagesForUploadService] Processing:', {
+    logger.debug('[UploadService] Processing images', {
       imagesCount: images.length,
       isFileArray,
       firstItemType: images.length > 0 ? typeof images[0] : 'none',
@@ -300,7 +301,7 @@ export const processImagesForUploadService = async (
     };
 
   } catch (error) {
-    console.error('❌ [UploadService] Process images error:', error);
+    logger.error('[UploadService] Process images error', { error });
     toast({
       title: "Upload Hatası",
       description: "Görsel yüklenirken hata oluştu. Lütfen tekrar deneyin.",
@@ -322,7 +323,7 @@ export const uploadImages = async (
   
   const isAvailable = await uploadService.isAvailable();
   if (!isAvailable) {
-    console.warn('⚠️ Upload Service not available, falling back to Supabase Storage');
+    logger.warn('[UploadService] Upload Service not available, falling back to Supabase Storage');
     // Fallback to Supabase Storage
     const { uploadImages: supabaseUploadImages } = await import('./imageService');
     return supabaseUploadImages(files, userId, 'item_images');
@@ -332,7 +333,7 @@ export const uploadImages = async (
     const uploadedImages = await uploadService.uploadImages(files, type);
     return uploadedImages.map(img => img.url);
   } catch (error) {
-    console.error('❌ [UploadService] Upload images error:', error);
+    logger.error('[UploadService] Upload images error', { error });
     throw error;
   }
 };
@@ -349,7 +350,7 @@ export const deleteImages = async (urls: string[]): Promise<any> => {
     const { deleteImages: supabaseDeleteImages } = await import('./imageService');
     return supabaseDeleteImages(urls);
   } catch (error) {
-    console.error('❌ [UploadService] Delete images error:', error);
+    logger.error('[UploadService] Delete images error', { error });
     throw error;
   }
 };

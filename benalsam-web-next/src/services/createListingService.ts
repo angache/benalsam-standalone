@@ -4,6 +4,7 @@
  */
 
 import { uploadServiceClient } from '@/lib/uploadServiceClient'
+import { logger } from '@/utils/production-logger'
 
 const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1'
 
@@ -11,14 +12,14 @@ const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http:/
 const getCategoryIds = async (categoryString: string): Promise<{ category_id: number | null, category_path: number[] | null }> => {
   if (!categoryString) return { category_id: null, category_path: null };
   
-  console.log('Processing category string', { categoryString });
+  logger.debug('[CreateListingService] Processing category string', { categoryString });
   
   // Kategori path'ini parçala (sadece ' > ' ve ' / ' ayırıcılarını kullan)
   const pathParts = categoryString.split(/\s*[>\/]\s*/).map(part => part.trim()).filter(part => part);
-  console.log('Category path parts', { pathParts });
+  logger.debug('[CreateListingService] Category path parts', { pathParts });
   
   if (pathParts.length === 0) {
-    console.warn('No path parts found');
+    logger.warn('[CreateListingService] No path parts found');
     return { category_id: null, category_path: null };
   }
   
@@ -26,22 +27,22 @@ const getCategoryIds = async (categoryString: string): Promise<{ category_id: nu
     // localStorage'dan kategorileri al
     const raw = localStorage.getItem('benalsam_categories_next_v1.0.0')
     if (!raw) {
-      console.warn('No categories cache found')
+      logger.warn('[CreateListingService] No categories cache found')
       return { category_id: null, category_path: null }
     }
     
     const parsed = JSON.parse(raw)
     const categories: any[] = parsed?.data || []
-    console.log('Categories from cache', { categoriesCount: categories.length });
+    logger.debug('[CreateListingService] Categories from cache', { categoriesCount: categories.length });
     
     // Ana kategoriyi bul
     const mainCategory = categories.find(cat => cat.name === pathParts[0]);
     if (!mainCategory) {
-      console.warn('Main category not found', { categoryName: pathParts[0] });
+      logger.warn('[CreateListingService] Main category not found', { categoryName: pathParts[0] });
       return { category_id: null, category_path: null };
     }
     
-    console.log('Main category found', { categoryName: pathParts[0], categoryId: mainCategory.id });
+    logger.debug('[CreateListingService] Main category found', { categoryName: pathParts[0], categoryId: mainCategory.id });
 
     // N-seviye gezinme: her bir path parçasını sırayla children içinde ara
     const categoryPath: number[] = [];
@@ -56,7 +57,7 @@ const getCategoryIds = async (categoryString: string): Promise<{ category_id: nu
       console.log('🔍 Traversing category level', { level: i + 1, lookingFor: part, childrenCount: children.length });
       const next = children.find((c: any) => c.name === part);
       if (!next) {
-        console.warn('❌ Category level not found', { level: i + 1, part, available: children.map((c: any) => c.name) });
+        logger.warn('[CreateListingService] Category level not found', { level: i + 1, part, available: children.map((c: any) => c.name) });
         break;
       }
       categoryPath.push(next.id);
@@ -65,7 +66,7 @@ const getCategoryIds = async (categoryString: string): Promise<{ category_id: nu
 
     const categoryId = categoryPath[categoryPath.length - 1] || null;
 
-    console.log('✅ Category IDs resolved', { 
+    logger.debug('[CreateListingService] Category IDs resolved', { 
       categoryString, 
       categoryId, 
       categoryPath,
@@ -78,7 +79,7 @@ const getCategoryIds = async (categoryString: string): Promise<{ category_id: nu
     };
 
   } catch (error) {
-    console.error('❌ Error processing category string:', error);
+    logger.error('[CreateListingService] Error processing category string', { error });
     return { category_id: null, category_path: null };
   }
 }
@@ -130,7 +131,7 @@ export async function createListingWithUploadService(
     // Step 1: Upload images
     let uploadedImageUrls: string[] = []
     if (listingData.images && listingData.images.length > 0) {
-      console.log('📸 Uploading images...')
+      logger.debug('[CreateListingService] Uploading images...')
       
       // Convert image objects to File objects
       const imageFiles: File[] = []
@@ -139,11 +140,11 @@ export async function createListingWithUploadService(
           // Priority 1: Use existing file object
           if (img.file && typeof img.file === 'object' && img.file.constructor.name === 'File') {
             imageFiles.push(img.file)
-            console.log('✅ [UPLOAD] Using existing file:', img.name)
+            logger.debug('[CreateListingService] Using existing file', { imageName: img.name })
           } 
           // Priority 2: Try to fetch from blob URL (for non-cached images)
           else if (img.preview && img.preview.startsWith('blob:')) {
-            console.log('🔄 [UPLOAD] Fetching blob URL:', img.name)
+            logger.debug('[CreateListingService] Fetching blob URL', { imageName: img.name })
             const response = await fetch(img.preview)
             if (!response.ok) {
               throw new Error(`Failed to fetch blob: ${response.status}`)
@@ -151,13 +152,13 @@ export async function createListingWithUploadService(
             const blob = await response.blob()
             const file = new File([blob], img.name || 'image.jpg', { type: blob.type || 'image/jpeg' })
             imageFiles.push(file)
-            console.log('✅ [UPLOAD] Converted blob to file:', img.name)
+            logger.debug('[CreateListingService] Converted blob to file', { imageName: img.name })
           }
           else {
-            console.warn('⚠️ [UPLOAD] Image has no valid file or blob:', img.name)
+            logger.warn('[CreateListingService] Image has no valid file or blob', { imageName: img.name })
           }
         } catch (error) {
-          console.error('❌ [UPLOAD] Failed to process image:', img.name, error)
+          logger.error('[CreateListingService] Failed to process image', { imageName: img.name, error })
           throw new Error(`Failed to process image: ${img.name}`)
         }
       }
@@ -174,7 +175,7 @@ export async function createListingWithUploadService(
         )
         
         uploadedImageUrls = uploadedImages.map(img => img.url)
-        console.log('✅ Images uploaded', { count: uploadedImageUrls.length })
+        logger.debug('[CreateListingService] Images uploaded', { count: uploadedImageUrls.length })
       }
     }
 

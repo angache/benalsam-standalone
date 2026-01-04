@@ -2,6 +2,7 @@ import { Listing, ApiResponse, QueryFilters } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { incrementSourceCount } from '@/lib/debugSource';
 import { processFetchedListings } from './listingService/core';
+import { logger } from '@/utils/production-logger';
 
 // Search Service API endpoint'i
 const SEARCH_SERVICE_URL = process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || 'http://localhost:3016';
@@ -90,7 +91,7 @@ export const searchListingsWithElasticsearch = async (
       urgent: params.filters?.urgent,
     } as any;
 
-    console.log('🔍 Elasticsearch search - Payload:', servicePayload);
+    logger.debug('[ElasticsearchService] Search payload', { payload: servicePayload });
 
     // Call Search Service
     const response = await fetch(`${SEARCH_SERVICE_URL}/api/v1/search/listings`, {
@@ -105,16 +106,16 @@ export const searchListingsWithElasticsearch = async (
     if (!response.ok) {
       // Handle different error statuses
       if (response.status === 429) {
-        console.warn('⚠️ Search Service rate limit exceeded, using Supabase fallback');
+        logger.warn('[ElasticsearchService] Search Service rate limit exceeded, using Supabase fallback');
         // Fallback to Supabase search
         return await searchListingsWithSupabase(params, currentUserId);
       }
       if (response.status === 500) {
-        console.warn('⚠️ Search Service internal error (500), using Supabase fallback');
+        logger.warn('[ElasticsearchService] Search Service internal error (500), using Supabase fallback');
         // Fallback to Supabase search
         return await searchListingsWithSupabase(params, currentUserId);
       }
-      console.warn('⚠️ Elasticsearch service unavailable, using Supabase fallback', {
+      logger.warn('[ElasticsearchService] Elasticsearch service unavailable, using Supabase fallback', {
         status: response.status,
         statusText: response.statusText
       });
@@ -126,7 +127,7 @@ export const searchListingsWithElasticsearch = async (
 
     // Validate response
     if (!responseData.success || !responseData.data) {
-      console.error('❌ Invalid Search Service response format:', responseData);
+      logger.error('[ElasticsearchService] Invalid Search Service response format', { responseData });
       return await searchListingsWithSupabase(params, currentUserId);
     }
 
@@ -135,7 +136,7 @@ export const searchListingsWithElasticsearch = async (
     const total = responseData.pagination?.total || docs.length || 0;
 
     if (!docs || docs.length === 0) {
-      console.log('⚠️ No hits found in Elasticsearch');
+      logger.debug('[ElasticsearchService] No hits found in Elasticsearch');
       return { data: [] };
     }
 
@@ -152,7 +153,7 @@ export const searchListingsWithElasticsearch = async (
       incrementSourceCount('E', processedListings.length);
     }
 
-    console.log('✅ Elasticsearch search completed:', {
+    logger.debug('[ElasticsearchService] Elasticsearch search completed', {
       returned: processedListings.length,
       total,
       hasFavorites: processedListings.some(l => l.is_favorited)
@@ -163,9 +164,9 @@ export const searchListingsWithElasticsearch = async (
   } catch (error) {
     // Silent fallback for network errors (ES service not running)
     if (error instanceof TypeError && error.message.includes('fetch')) {
-      console.log('🔄 Elasticsearch service not available, using Supabase');
+      logger.debug('[ElasticsearchService] Elasticsearch service not available, using Supabase');
     } else {
-      console.error('❌ Unexpected error in Elasticsearch search:', error);
+      logger.error('[ElasticsearchService] Unexpected error in Elasticsearch search', { error });
     }
     // Fallback to Supabase search
     return await searchListingsWithSupabase(params, currentUserId);
@@ -180,7 +181,7 @@ const searchListingsWithSupabase = async (
   currentUserId: string | null = null
 ): Promise<ApiResponse<Listing[]>> => {
   try {
-    console.log('🔄 Using Supabase fallback search');
+    logger.debug('[ElasticsearchService] Using Supabase fallback search');
     
     // Mevcut fetchFilteredListings fonksiyonunu kullan
     const { fetchFilteredListings } = await import('./listingService/fetchers');
@@ -210,7 +211,7 @@ const searchListingsWithSupabase = async (
     
     return { data: result.listings };
   } catch (error) {
-    console.error('❌ Error in Supabase fallback search:', error);
+    logger.error('[ElasticsearchService] Error in Supabase fallback search', { error });
     return { data: [] };
   }
 };
@@ -224,7 +225,7 @@ export const checkElasticsearchHealth = async (): Promise<boolean> => {
     const data = await response.json();
     return data.status === 'healthy';
   } catch (error) {
-    console.error('❌ Search Service health check failed:', error);
+    logger.error('[ElasticsearchService] Search Service health check failed', { error });
     return false;
   }
 };

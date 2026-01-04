@@ -1,10 +1,11 @@
 import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Listing, ApiResponse } from '@/types';
+import { logger } from '@/utils/production-logger';
 
 // Error handling helper
 const handleError = (error: any, title = "Hata", description = "Bir sorun oluştu") => {
-  console.error(`Error in ${title}:`, error);
+  logger.error(`[FavoriteService] Error in ${title}`, { error });
   toast({ 
     title: title, 
     description: error?.message || description, 
@@ -35,7 +36,7 @@ export const addFavorite = async (userId: string, listingId: string) => {
       .single();
 
     if (error) {
-      console.error('❌ [FAVORITE] Supabase error:', error)
+      logger.error('[FavoriteService] Supabase error', { error })
       if (error.code === '23505') {
         toast({ title: "Bilgi", description: "Bu ilan zaten favorilerinizde." });
         return { listing_id: listingId, user_id: userId, already_favorited: true };
@@ -95,13 +96,13 @@ export const isFavorite = async (userId: string, listingId: string): Promise<boo
       .single();
 
     if (error && error.code !== 'PGRST116') { // Not found error is expected
-      console.error('Error checking favorite status:', error);
+      logger.error('[FavoriteService] Error checking favorite status', { error });
       return false;
     }
 
     return !!data;
   } catch (error) {
-    console.error('Error in isFavorite:', error);
+    logger.error('[FavoriteService] Error in isFavorite', { error });
     return false;
   }
 };
@@ -121,16 +122,16 @@ export const fetchUserFavoriteStatusForListings = async (userId: string, listing
     });
 
     if (!response.ok) {
-      console.error('❌ [FAVORITE] API error:', response.status);
+      logger.error('[FavoriteService] API error', { status: response.status });
       return { data: {} };
     }
 
     const result = await response.json();
-    console.log('✅ [FAVORITE] Fetched favorite statuses:', { userId, count: Object.keys(result.data || {}).length, listingIds });
+    logger.debug('[FavoriteService] Fetched favorite statuses', { userId, count: Object.keys(result.data || {}).length, listingIds });
 
     return { data: result.data || {} };
   } catch (e) {
-    console.error('❌ [FAVORITE] Unexpected error in fetchUserFavoriteStatusForListings:', e);
+    logger.error('[FavoriteService] Unexpected error in fetchUserFavoriteStatusForListings', { error: e });
     return { data: {} };
   }
 };
@@ -153,7 +154,7 @@ export const fetchUserFavoriteListings = async (userId: string): Promise<Listing
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching favorite listings:', error);
+      logger.error('[FavoriteService] Error fetching favorite listings', { error });
       toast({ title: "Favori İlanlar Yüklenemedi", description: error.message, variant: "destructive" });
       return [];
     }
@@ -165,7 +166,7 @@ export const fetchUserFavoriteListings = async (userId: string): Promise<Listing
         is_favorited: true
     })) || [];
   } catch (e) {
-    console.error('Unexpected error in fetchUserFavoriteListings:', e);
+    logger.error('[FavoriteService] Unexpected error in fetchUserFavoriteListings', { error: e });
     toast({ title: "Beklenmedik Hata", description: "Favori ilanlar yüklenirken bir hata oluştu.", variant: "destructive" });
     return [];
   }
@@ -190,7 +191,7 @@ export const toggleFavorite = async (userId: string, listingId: string): Promise
       return !!result; // Return true if added successfully
     }
   } catch (error) {
-    console.error('Error in toggleFavorite:', error);
+    logger.error('[FavoriteService] Error in toggleFavorite', { error });
     return false;
   }
 }; 
