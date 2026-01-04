@@ -62,7 +62,7 @@ class ListingAIServiceClient {
     let response: Response;
     try {
       const url = `${LISTING_SERVICE_URL}/listings/ai${endpoint}`;
-      console.log('🔍 [AI] Requesting:', url, { userId, method: options.method || 'GET' });
+      logger.debug('[ListingAIService] Requesting', { url, userId, method: options.method || 'GET' });
       
       response = await fetch(url, {
         ...options,
