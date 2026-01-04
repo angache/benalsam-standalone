@@ -5,6 +5,7 @@ import { logger } from '@/utils/production-logger'
 import { validateParams } from '@/lib/api-validation'
 import { z } from 'zod'
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
+import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
 
 /**
  * Schema for userId parameter (can be UUID or username)
@@ -21,6 +22,15 @@ export async function GET(
     const user = await getServerUser()
     if (!user) {
       return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
+    }
+
+    // Rate limiting
+    const identifier = getClientIdentifier(request, user.id)
+    const allowed = await rateLimiters.standard.check(identifier)
+    
+    if (!allowed) {
+      logger.warn('[API] Rate limit exceeded', { identifier, endpoint: 'profile-get' })
+      return rateLimitExceeded()
     }
 
     const rawParams = await params

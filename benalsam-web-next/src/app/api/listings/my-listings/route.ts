@@ -3,6 +3,7 @@ import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
+import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,6 +11,15 @@ export async function GET(request: NextRequest) {
 
     if (!user?.id) {
       return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
+    }
+
+    // Rate limiting
+    const identifier = getClientIdentifier(request, user.id)
+    const allowed = await rateLimiters.standard.check(identifier)
+    
+    if (!allowed) {
+      logger.warn('[API] Rate limit exceeded', { identifier, endpoint: 'my-listings' })
+      return rateLimitExceeded()
     }
 
     const { data: listings, error } = await supabaseAdmin

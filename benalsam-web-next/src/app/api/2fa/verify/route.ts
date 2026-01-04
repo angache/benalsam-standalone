@@ -6,6 +6,7 @@ import { logger } from '@/utils/production-logger'
 import { validateBody, commonSchemas } from '@/lib/api-validation'
 import { z } from 'zod'
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
+import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
 
 /**
  * Schema for 2FA verification
@@ -21,6 +22,16 @@ const verify2FASchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting (stricter for 2FA operations)
+    // Use IP-based limiting since user might not be authenticated yet
+    const identifier = getClientIdentifier(request)
+    const allowed = await rateLimiters.strict.check(identifier)
+    
+    if (!allowed) {
+      logger.warn('[API] Rate limit exceeded', { identifier, endpoint: '2fa-verify' })
+      return rateLimitExceeded()
+    }
+
     // Validate request body
     const validation = await validateBody(request, verify2FASchema)
     if (!validation.success) {

@@ -5,6 +5,7 @@ import { logger } from '@/utils/production-logger'
 import { validateBody, commonSchemas } from '@/lib/api-validation'
 import { z } from 'zod'
 import { createSuccessResponse } from '@/lib/api-errors'
+import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
 
 /**
  * Schema for favorite check request body
@@ -21,6 +22,15 @@ export async function POST(request: NextRequest) {
     if (!user?.id) {
       // Return empty object for unauthenticated users (not an error)
       return createSuccessResponse({ data: {} })
+    }
+
+    // Rate limiting
+    const identifier = getClientIdentifier(request, user.id)
+    const allowed = await rateLimiters.standard.check(identifier)
+    
+    if (!allowed) {
+      logger.warn('[API] Rate limit exceeded', { identifier, endpoint: 'favorites-check' })
+      return rateLimitExceeded()
     }
 
     // Validate request body

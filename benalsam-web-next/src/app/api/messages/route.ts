@@ -5,6 +5,7 @@ import { validateQuery, commonSchemas } from '@/lib/api-validation';
 import { z } from 'zod';
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors';
 import { getServerUser } from '@/lib/supabase-server';
+import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit';
 
 /**
  * Schema for GET /api/messages query parameters
@@ -19,6 +20,15 @@ export async function GET(request: NextRequest) {
     const user = await getServerUser()
     if (!user?.id) {
       return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
+    }
+
+    // Rate limiting
+    const identifier = getClientIdentifier(request, user.id)
+    const allowed = await rateLimiters.messaging.check(identifier)
+    
+    if (!allowed) {
+      logger.warn('[API] Rate limit exceeded', { identifier, endpoint: 'messages-get' })
+      return rateLimitExceeded()
     }
 
     // Validate query parameters
@@ -113,6 +123,15 @@ export async function POST(request: NextRequest) {
     const user = await getServerUser()
     if (!user?.id) {
       return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
+    }
+
+    // Rate limiting
+    const identifier = getClientIdentifier(request, user.id)
+    const allowed = await rateLimiters.messaging.check(identifier)
+    
+    if (!allowed) {
+      logger.warn('[API] Rate limit exceeded', { identifier, endpoint: 'messages-post' })
+      return rateLimitExceeded()
     }
 
     // Validate request body

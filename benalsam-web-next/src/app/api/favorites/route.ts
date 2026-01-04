@@ -5,6 +5,7 @@ import { logger } from '@/utils/production-logger'
 import { validateBody, validateQuery, commonSchemas } from '@/lib/api-validation'
 import { z } from 'zod'
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
+import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
 
 /**
  * Schema for adding a favorite
@@ -20,6 +21,15 @@ export async function POST(request: NextRequest) {
     
     if (!user?.id) {
       return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
+    }
+
+    // Rate limiting
+    const identifier = getClientIdentifier(request, user.id)
+    const allowed = await rateLimiters.standard.check(identifier)
+    
+    if (!allowed) {
+      logger.warn('[API] Rate limit exceeded', { identifier, endpoint: 'favorites-post' })
+      return rateLimitExceeded()
     }
 
     // Validate request body
@@ -83,6 +93,15 @@ export async function DELETE(request: NextRequest) {
 
     if (!user?.id) {
       return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
+    }
+
+    // Rate limiting
+    const identifier = getClientIdentifier(request, user.id)
+    const allowed = await rateLimiters.standard.check(identifier)
+    
+    if (!allowed) {
+      logger.warn('[API] Rate limit exceeded', { identifier, endpoint: 'favorites-delete' })
+      return rateLimitExceeded()
     }
 
     // Validate query parameters

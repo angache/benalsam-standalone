@@ -5,6 +5,7 @@ import QRCode from 'qrcode'
 import { supabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
+import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
 
 /**
  * POST /api/2fa/setup
@@ -16,6 +17,15 @@ export async function POST(request: NextRequest) {
     const user = await getServerUser()
     if (!user?.id) {
       return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
+    }
+
+    // Rate limiting (stricter for 2FA operations)
+    const identifier = getClientIdentifier(request, user.id)
+    const allowed = await rateLimiters.strict.check(identifier)
+    
+    if (!allowed) {
+      logger.warn('[API] Rate limit exceeded', { identifier, endpoint: '2fa-setup' })
+      return rateLimitExceeded()
     }
 
     // Get user email from profiles table

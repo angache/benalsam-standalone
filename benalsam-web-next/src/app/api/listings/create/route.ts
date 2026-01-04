@@ -5,6 +5,7 @@ import { logger } from '@/utils/production-logger'
 import { validateBody } from '@/lib/api-validation'
 import { z } from 'zod'
 import { createSuccessResponse, apiErrors, ApiErrorCode } from '@/lib/api-errors'
+import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
 
 /**
  * Schema for creating a listing
@@ -50,6 +51,15 @@ export async function POST(request: NextRequest) {
 
     if (!user?.id) {
       return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
+    }
+
+    // Rate limiting (stricter for listing creation)
+    const identifier = getClientIdentifier(request, user.id)
+    const allowed = await rateLimiters.strict.check(identifier)
+    
+    if (!allowed) {
+      logger.warn('[API] Rate limit exceeded', { identifier, endpoint: 'listing-create' })
+      return rateLimitExceeded()
     }
 
     // Validate request body
