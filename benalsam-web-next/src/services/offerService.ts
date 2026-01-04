@@ -165,7 +165,7 @@ export const fetchOfferDetails = async (offerId: string): Promise<Offer | null> 
       .single();
 
     if (error) {
-      console.error('Error fetching offer details:', error);
+      logger.error('[OfferService] Error fetching offer details', { error });
       toast({ title: "Teklif Bulunamadı", description: "Teklif detayları alınamadı.", variant: "destructive" });
       return null;
     }
@@ -196,7 +196,7 @@ export const updateOfferStatus = async (offerId: string, newStatus: string, user
       .single();
 
     if (fetchError) {
-      console.error('Error fetching offer:', fetchError);
+      logger.error('[OfferService] Error fetching offer', { error: fetchError });
       toast({ title: "Teklif Bulunamadı", description: "Güncellenecek teklif bulunamadı.", variant: "destructive" });
       return null;
     }
@@ -438,7 +438,7 @@ export const deleteOffer = async (offerId: string, userId: string): Promise<bool
       .single();
 
     if (fetchError) {
-      console.error('Error fetching offer:', fetchError);
+      logger.error('[OfferService] Error fetching offer', { error: fetchError });
       toast({ title: "Teklif Bulunamadı", description: "Silinecek teklif bulunamadı.", variant: "destructive" });
       return false;
     }
