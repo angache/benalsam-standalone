@@ -58,7 +58,7 @@ class CategoryService {
       const response = await categoriesServiceClient.get<{ data: CategoryTree[] }>('/api/v1/categories/tree')
       return response.data || []
     } catch (error) {
-      console.error('Error fetching category tree:', error)
+      logger.error('[CategoryService] Error fetching category tree', { error })
       return []
     }
   }
@@ -71,7 +71,7 @@ class CategoryService {
       const response = await categoriesServiceClient.get<{ data: Category }>(`/api/v1/categories/${id}`)
       return response.data
     } catch (error) {
-      console.error(`Error fetching category ${id}:`, error)
+      logger.error(`[CategoryService] Error fetching category ${id}`, { error, categoryId: id })
       return null
     }
   }
@@ -84,7 +84,7 @@ class CategoryService {
       const response = await categoriesServiceClient.get<{ data: Category }>(`/api/v1/categories/slug/${slug}`)
       return response.data
     } catch (error) {
-      console.error(`Error fetching category by slug ${slug}:`, error)
+      logger.error(`[CategoryService] Error fetching category by slug ${slug}`, { error, slug })
       return null
     }
   }
@@ -96,7 +96,7 @@ class CategoryService {
     try {
       // Tüm kategorileri çek
       const allCategories = await this.getCategories()
-      console.log('🔍 All categories fetched:', allCategories.length)
+      logger.debug('[CategoryService] All categories fetched', { count: allCategories.length })
       
       // Sadece level 0 kategorileri filtrele ve ilk N tanesini al
       // NOT: listing_count backend'den gelmiyor, frontend'de useCategoryCounts hook'u ile ekleniyor
@@ -122,7 +122,7 @@ class CategoryService {
       })
       return response.data || []
     } catch (error) {
-      console.error('Error searching categories:', error)
+      logger.error('[CategoryService] Error searching categories', { error })
       return []
     }
   }
@@ -135,7 +135,7 @@ class CategoryService {
       const response = await categoriesServiceClient.get<{ data: Category[] }>(`/api/v1/categories/${parentId}/children`)
       return response.data || []
     } catch (error) {
-      console.error(`Error fetching children for category ${parentId}:`, error)
+      logger.error(`[CategoryService] Error fetching children for category ${parentId}`, { error, parentId })
       return []
     }
   }
