@@ -2,10 +2,11 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { addUserActivity } from '@/services/userActivityService';
 import { Offer, ApiResponse } from '@/types';
+import { logger } from '@/utils/production-logger';
 
 // Error handling helper
 const handleError = (error: any, title = "Hata", description = "Bir sorun oluştu") => {
-  console.error(`Error in ${title}:`, error);
+  logger.error(`[OfferService] Error in ${title}`, { error });
   toast({ 
     title: title, 
     description: error?.message || description, 
@@ -171,7 +172,7 @@ export const fetchOfferDetails = async (offerId: string): Promise<Offer | null> 
 
     return data;
   } catch (error) {
-    console.error('Error in fetchOfferDetails:', error);
+    logger.error('[OfferService] Error in fetchOfferDetails', { error });
     toast({ title: "Beklenmedik Hata", description: "Teklif detayları yüklenirken bir sorun oluştu.", variant: "destructive" });
     return null;
   }
@@ -222,7 +223,7 @@ export const updateOfferStatus = async (offerId: string, newStatus: string, user
         .eq('id', offer.listing.id);
 
       if (listingUpdateError) {
-        console.error('Error updating listing to in_transaction:', listingUpdateError);
+        logger.error('[OfferService] Error updating listing to in_transaction', { error: listingUpdateError });
         toast({ title: "Hata", description: "İlan durumu güncellenirken bir hata oluştu.", variant: "destructive"});
         return null;
       }
@@ -245,7 +246,7 @@ export const updateOfferStatus = async (offerId: string, newStatus: string, user
       .single();
 
     if (error) {
-      console.error('Error updating offer status:', error);
+      logger.error('[OfferService] Error updating offer status', { error });
       toast({ title: "Teklif Güncellenemedi", description: error.message, variant: "destructive" });
       return null;
     }
@@ -314,7 +315,7 @@ export const fetchSentOffers = async (userId: string): Promise<Offer[]> => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching sent offers:', error);
+      logger.error('[OfferService] Error fetching sent offers', { error });
       toast({ title: "Hata", description: "Gönderilen teklifler yüklenirken bir sorun oluştu.", variant: "destructive" });
       return [];
     }
@@ -331,7 +332,7 @@ export const fetchSentOffers = async (userId: string): Promise<Offer[]> => {
 
     return formattedData;
   } catch (error) {
-    console.error('Error in fetchSentOffers:', error);
+    logger.error('[OfferService] Error in fetchSentOffers', { error });
     toast({ title: "Beklenmedik Hata", description: "Gönderilen teklifler yüklenirken bir sorun oluştu.", variant: "destructive" });
     return [];
   }
@@ -352,7 +353,7 @@ export const fetchReceivedOffers = async (userId: string): Promise<Offer[]> => {
       .eq('user_id', userId);
 
     if (listingsError) {
-      console.error('Error fetching user listings:', listingsError);
+      logger.error('[OfferService] Error fetching user listings', { error: listingsError });
       toast({ title: "Hata", description: "Kullanıcı ilanları yüklenirken bir sorun oluştu.", variant: "destructive" });
       return [];
     }
@@ -397,7 +398,7 @@ export const fetchReceivedOffers = async (userId: string): Promise<Offer[]> => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching received offers:', error);
+      logger.error('[OfferService] Error fetching received offers', { error });
       toast({ title: "Hata", description: "Alınan teklifler yüklenirken bir sorun oluştu.", variant: "destructive" });
       return [];
     }
@@ -415,7 +416,7 @@ export const fetchReceivedOffers = async (userId: string): Promise<Offer[]> => {
 
     return formattedData;
   } catch (error) {
-    console.error('Error in fetchReceivedOffers:', error);
+    logger.error('[OfferService] Error in fetchReceivedOffers', { error });
     toast({ title: "Beklenmedik Hata", description: "Alınan teklifler yüklenirken bir sorun oluştu.", variant: "destructive" });
     return [];
   }
@@ -453,7 +454,7 @@ export const deleteOffer = async (offerId: string, userId: string): Promise<bool
       .eq('id', offerId);
 
     if (error) {
-      console.error('Error deleting offer:', error);
+      logger.error('[OfferService] Error deleting offer', { error });
       toast({ title: "Teklif Silinemedi", description: error.message, variant: "destructive" });
       return false;
     }
@@ -508,7 +509,7 @@ export const getOfferById = async (offerId: string): Promise<Offer | null> => {
       .single();
 
     if (error) {
-      console.error('Error in getOfferById:', error);
+      logger.error('[OfferService] Error in getOfferById', { error });
       throw error;
     }
 
@@ -525,7 +526,7 @@ export const getOfferById = async (offerId: string): Promise<Offer | null> => {
 
     return formattedData;
   } catch (error) {
-    console.error('Error in getOfferById:', error);
+    logger.error('[OfferService] Error in getOfferById', { error });
     throw error;
   }
 };
@@ -560,7 +561,7 @@ export const getOffersForListing = async (listingId: string): Promise<Offer[]> =
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error in getOffersForListing:', error);
+      logger.error('[OfferService] Error in getOffersForListing', { error });
       throw error;
     }
 
@@ -573,7 +574,7 @@ export const getOffersForListing = async (listingId: string): Promise<Offer[]> =
 
     return formattedData;
   } catch (error) {
-    console.error('Error in getOffersForListing:', error);
+    logger.error('[OfferService] Error in getOffersForListing', { error });
     throw error;
   }
 };
@@ -592,13 +593,13 @@ export const getOfferCount = async (listingId: string): Promise<number> => {
       .eq('status', 'pending');
 
     if (error) {
-      console.error('Error in getOfferCount:', error);
+      logger.error('[OfferService] Error in getOfferCount', { error });
       throw error;
     }
 
     return count || 0;
   } catch (error) {
-    console.error('Error in getOfferCount:', error);
+    logger.error('[OfferService] Error in getOfferCount', { error });
     throw error;
   }
 }; 

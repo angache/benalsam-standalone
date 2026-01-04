@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
 
 /**
  * Upload images directly to Supabase Storage (fallback when Upload Service is unavailable)
@@ -12,10 +13,10 @@ export const uploadImages = async (
     const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
     const fileName = `${userId}/${Date.now()}-${Math.random()}.${fileExt}`
 
-    console.log(`📁 [ImageUpload] File ${index + 1} path:`, fileName)
+    logger.debug(`[ImageService] File ${index + 1} path`, { fileName })
 
     try {
-      console.log(`🚀 [ImageUpload] Starting upload for file ${index + 1}...`)
+      logger.debug(`[ImageService] Starting upload for file ${index + 1}...`)
 
       const { data, error } = await supabase.storage.from(bucket).upload(fileName, file, {
         cacheControl: '3600',
@@ -23,11 +24,11 @@ export const uploadImages = async (
       })
 
       if (error) {
-        console.error(`❌ Image upload error for file ${index + 1}:`, error)
+        logger.error(`[ImageService] Image upload error for file ${index + 1}`, { error })
         throw error
       }
 
-      console.log(`✅ [ImageUpload] File ${index + 1} uploaded successfully:`, data.path)
+      logger.debug(`[ImageService] File ${index + 1} uploaded successfully`, { path: data.path })
 
       // Public URL oluştur
       const {
@@ -38,7 +39,7 @@ export const uploadImages = async (
 
       return publicUrl
     } catch (error) {
-      console.error(`❌ Upload failed for file ${index + 1}:`, error)
+      logger.error(`[ImageService] Upload failed for file ${index + 1}`, { error })
       throw error
     }
   })
@@ -47,7 +48,7 @@ export const uploadImages = async (
     const results = await Promise.all(uploadPromises)
     return results
   } catch (error) {
-    console.error('❌ Error in uploadImages:', error)
+    logger.error('[ImageService] Error in uploadImages', { error })
     throw error
   }
 }
@@ -80,7 +81,7 @@ export const deleteImages = async (urls: string[]): Promise<any> => {
   const { data, error } = await supabase.storage.from('item_images').remove(filePaths)
 
   if (error) {
-    console.error('Error deleting images:', error)
+    logger.error('[ImageService] Error deleting images', { error })
   }
 
   return data

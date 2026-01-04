@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { processImagesForUploadService } from '@/services/uploadService';
 import type { ImageFile } from '@/types/listing';
+import { logger } from '@/utils/production-logger';
 
 // Supabase error type
 interface SupabaseError {
@@ -66,7 +67,7 @@ export const fetchInventoryItems = async (userId: string): Promise<InventoryItem
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error in fetchInventoryItems:', error);
+      logger.error('[InventoryService] Error in fetchInventoryItems', { error });
       if (error.message.toLowerCase().includes('failed to fetch')) {
         toast({ title: "Ağ Hatası", description: "Envanter yüklenemedi. İnternet bağlantınızı kontrol edin.", variant: "destructive" });
       } else {
@@ -133,7 +134,7 @@ export const addInventoryItem = async (
         }
       }
       
-      console.log('📸 Processing images:', {
+      logger.debug('[InventoryService] Processing images', {
         totalImages: images.length,
         filesToUpload: imageFiles.length,
         mainImageIndex: itemData.mainImageIndex || 0,
@@ -149,7 +150,7 @@ export const addInventoryItem = async (
           ? mainImageIndex 
           : 0;
         
-        console.log('📤 Uploading images:', {
+        logger.debug('[InventoryService] Uploading images', {
           imageFilesCount: imageFiles.length,
           mainImageIndex: validMainImageIndex,
           originalMainImageIndex: itemData.mainImageIndex
@@ -165,17 +166,17 @@ export const addInventoryItem = async (
         mainImageUrl = imageResult.mainImageUrl;
         additionalImageUrls = imageResult.additionalImageUrls;
         
-        console.log('✅ Images processed:', {
+        logger.debug('[InventoryService] Images processed', {
           mainImageUrl,
           additionalImageUrlsCount: additionalImageUrls.length,
           additionalImageUrls
         });
       } else {
-        console.warn('⚠️ No images to upload - imageFiles is empty');
+        logger.warn('[InventoryService] No images to upload - imageFiles is empty');
       }
     } catch (imageError) {
-      console.error('❌ Error processing images:', imageError);
-      console.error('❌ Image error details:', {
+      logger.error('[InventoryService] Error processing images', { error: imageError });
+      logger.error('[InventoryService] Image error details', {
         error: imageError,
         message: imageError instanceof Error ? imageError.message : String(imageError),
         stack: imageError instanceof Error ? imageError.stack : undefined
@@ -232,7 +233,7 @@ export const addInventoryItem = async (
     // }
 
     // Log the data being inserted for debugging
-    console.log('📦 Inserting inventory item:', {
+    logger.debug('[InventoryService] Inserting inventory item', {
       user_id: itemToInsert.user_id,
       name: itemToInsert.name,
       category: itemToInsert.category,
@@ -262,25 +263,25 @@ export const addInventoryItem = async (
       const errorHint = supabaseError?.hint || null;
       
       // Log error with all possible properties
-      console.error('❌ Supabase error occurred:');
-      console.error('  - Message:', errorMessage);
-      console.error('  - Code:', errorCode);
-      console.error('  - Details:', errorDetails);
-      console.error('  - Hint:', errorHint);
-      console.error('  - Full error object:', error);
-      console.error('  - Error type:', typeof error);
-      console.error('  - Error constructor:', error?.constructor?.name);
+      logger.error('[InventoryService] Supabase error occurred', {
+        message: errorMessage,
+        code: errorCode,
+        details: errorDetails,
+        hint: errorHint,
+        errorType: typeof error,
+        errorConstructor: error?.constructor?.name,
+        error
+      });
       if (error && typeof error === 'object') {
-        console.error('  - Error keys:', Object.keys(error));
-        console.error('  - Error values:', Object.values(error));
+        logger.error('[InventoryService] Error keys/values', { keys: Object.keys(error), values: Object.values(error) });
       }
       
       // Try to stringify the error object safely
       try {
         const errorString = JSON.stringify(error, null, 2);
-        console.error('  - Error JSON:', errorString);
+        logger.error('[InventoryService] Error JSON', { errorString });
       } catch (e) {
-        console.error('  - Could not stringify error:', e);
+        logger.error('[InventoryService] Could not stringify error', { error: e });
       }
       
       // Create a more descriptive error message
@@ -321,7 +322,7 @@ export const addInventoryItem = async (
 
     return data as InventoryItem;
   } catch (error) {
-    console.error('Unexpected error in addInventoryItem:', error);
+    logger.error('[InventoryService] Unexpected error in addInventoryItem', { error });
     const errorMessage = error instanceof Error 
       ? error.message 
       : String(error) || "Bilinmeyen bir hata oluştu";
@@ -417,7 +418,7 @@ export const updateInventoryItem = async (
       .single();
     
     if (error) {
-      console.error('Error updating inventory item:', error);
+      logger.error('[InventoryService] Error updating inventory item', { error });
       toast({ title: "Envanter Güncellenemedi", description: error.message, variant: "destructive" });
       return null;
     }
@@ -429,7 +430,7 @@ export const updateInventoryItem = async (
 
     return data as InventoryItem;
   } catch (error) {
-    console.error('Unexpected error in updateInventoryItem:', error);
+    logger.error('[InventoryService] Unexpected error in updateInventoryItem', { error });
     toast({ title: "Beklenmedik Envanter Güncelleme Hatası", description: "Envanter güncellenirken beklenmedik bir sorun oluştu.", variant: "destructive" });
     return null;
   }
@@ -455,7 +456,7 @@ export const deleteInventoryItem = async (itemId: string, currentUserId: string)
 
     return true;
   } catch (error) {
-    console.error('Unexpected error in deleteInventoryItem:', error);
+    logger.error('[InventoryService] Unexpected error in deleteInventoryItem', { error });
     toast({ title: "Beklenmedik Envanter Silme Hatası", description: "Envanter silinirken beklenmedik bir sorun oluştu.", variant: "destructive" });
     return false;
   }
@@ -472,13 +473,13 @@ export const getInventoryItemById = async (itemId: string): Promise<InventoryIte
       .single();
 
     if (error) {
-      console.error('Error fetching inventory item:', error);
+      logger.error('[InventoryService] Error fetching inventory item', { error });
       return null;
     }
 
     return data as InventoryItem;
   } catch (error) {
-    console.error('Error in getInventoryItemById:', error);
+    logger.error('[InventoryService] Error in getInventoryItemById', { error });
     return null;
   }
 };
@@ -510,13 +511,13 @@ export const searchInventoryItems = async (
     const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error searching inventory items:', error);
+      logger.error('[InventoryService] Error searching inventory items', { error });
       return [];
     }
 
     return (data || []) as InventoryItem[];
   } catch (error) {
-    console.error('Error in searchInventoryItems:', error);
+    logger.error('[InventoryService] Error in searchInventoryItems', { error });
     return [];
   }
 };
@@ -537,7 +538,7 @@ export const getInventoryStats = async (userId: string): Promise<{
       .eq('user_id', userId);
 
     if (error) {
-      console.error('Error getting inventory stats:', error);
+      logger.error('[InventoryService] Error getting inventory stats', { error });
       return null;
     }
 
@@ -562,7 +563,7 @@ export const getInventoryStats = async (userId: string): Promise<{
       categories
     };
   } catch (error) {
-    console.error('Error in getInventoryStats:', error);
+    logger.error('[InventoryService] Error in getInventoryStats', { error });
     return null;
   }
 }; 
