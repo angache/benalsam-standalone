@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import Link from 'next/link'
+import { logger } from '@/utils/production-logger'
 
 function TwoFactorVerifyPageContent() {
   const [code, setCode] = useState(['', '', '', '', '', ''])
@@ -161,7 +162,7 @@ function TwoFactorVerifyPageContent() {
       router.push(redirectTo)
       router.refresh()
     } catch (error: any) {
-      console.error('2FA verification error:', error)
+      logger.error('[2FAVerify] 2FA verification error', { error })
       setAttempts((prev) => prev + 1)
       setError('Doğrulama sırasında bir hata oluştu')
       setCode(['', '', '', '', '', ''])

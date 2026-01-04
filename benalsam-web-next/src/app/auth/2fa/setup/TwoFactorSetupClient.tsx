@@ -98,7 +98,7 @@ export default function TwoFactorSetupClient() {
       setSetupData(result.data)
       setStep('qr')
     } catch (error: any) {
-      console.error('2FA setup error:', error)
+      logger.error('[2FASetup] 2FA setup error', { error })
       setError('2FA kurulumu sırasında bir hata oluştu')
       setStep('loading')
     } finally {
@@ -179,7 +179,7 @@ export default function TwoFactorSetupClient() {
       // Verification successful, move to success step
       setStep('success')
     } catch (error: any) {
-      console.error('2FA verification error:', error)
+      logger.error('[2FASetup] 2FA verification error', { error })
       setError('Doğrulama sırasında bir hata oluştu')
       setVerificationCode(['', '', '', '', '', ''])
       setTimeout(() => {
@@ -200,7 +200,7 @@ export default function TwoFactorSetupClient() {
         description: 'Secret key panoya kopyalandı',
       })
     } catch (error) {
-      console.error('Copy failed:', error)
+      logger.error('[2FASetup] Copy failed', { error })
       toast({
         title: 'Hata',
         description: 'Kopyalama başarısız',
@@ -225,7 +225,7 @@ export default function TwoFactorSetupClient() {
         })
       }, 2000)
     } catch (error) {
-      console.error('Copy failed:', error)
+      logger.error('[2FASetup] Copy failed', { error })
     }
   }
 

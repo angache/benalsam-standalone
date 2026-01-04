@@ -13,6 +13,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { createListingWithUploadService } from '@/services/createListingService'
+import { logger } from '@/utils/production-logger'
 
 export default function CreateListingPage() {
   const router = useRouter()
@@ -54,7 +55,7 @@ export default function CreateListingPage() {
     try {
       if (pathNames && pathIds) {
         // Use hierarchical path from CategoryStep
-        console.log('🏷️ [PAGE] Using hierarchical path:', { pathNames, pathIds })
+        logger.debug('[CreateListingPage] Using hierarchical path', { pathNames, pathIds })
         setCategory(categoryId, pathNames[pathNames.length - 1], pathNames, pathIds)
       } else {
         // Fallback: find category name from localStorage
@@ -79,7 +80,7 @@ export default function CreateListingPage() {
         }
       }
     } catch (error) {
-      console.error('Error finding category name:', error)
+      logger.error('[CreateListingPage] Error finding category name', { error })
     }
   }
 
@@ -126,13 +127,13 @@ export default function CreateListingPage() {
           />
         )
       case 4:
-        console.log('🔄 [PAGE] Rendering ImagesStep with images:', images)
+        logger.debug('[CreateListingPage] Rendering ImagesStep with images', { imagesCount: images.length })
         return (
           <ImagesStep
             formData={images}
             mainImageIndex={mainImageIndex}
             onChange={(newImages) => {
-              console.log('🔄 [PAGE] onChange called (old system):', { images: newImages.length })
+              logger.debug('[CreateListingPage] onChange called (old system)', { imagesCount: newImages.length })
               setImages(newImages)
             }}
             onSetMainImage={setMainImage}
@@ -256,13 +257,13 @@ export default function CreateListingPage() {
         }
       )
 
-      console.log('✅ [SUBMIT] Listing created successfully:', result)
+      logger.debug('[CreateListingPage] Listing created successfully', { listingId: result?.id })
 
       // Success
       setProgressPhase('success')
       setProgressMessage('İlan başarıyla oluşturuldu. Onaylandıktan sonra yayına alınacak.')
     } catch (error) {
-      console.error('❌ [SUBMIT] Error:', error)
+      logger.error('[CreateListingPage] Error creating listing', { error })
       setProgressPhase('error')
       setProgressMessage(error instanceof Error ? error.message : 'Beklenmedik bir hata oluştu')
     } finally {

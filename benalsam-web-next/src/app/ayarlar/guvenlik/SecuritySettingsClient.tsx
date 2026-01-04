@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
 import { Loader2, Lock, Shield, Eye, EyeOff } from 'lucide-react'
 import { fetchUserProfile } from '@/services/profileService'
+import { logger } from '@/utils/production-logger'
 
 export default function SecuritySettingsClient({ userId }: { userId: string }) {
   const { user } = useAuth()
@@ -70,7 +71,7 @@ export default function SecuritySettingsClient({ userId }: { userId: string }) {
       const profile = await fetchUserProfile(userId)
       
       if (!profile) {
-        console.warn('⚠️ [2FA] Profile not found, defaulting to disabled')
+        logger.warn('[SecuritySettings] Profile not found, defaulting to disabled')
         setTwoFactorEnabled(false)
         return
       }
@@ -82,7 +83,7 @@ export default function SecuritySettingsClient({ userId }: { userId: string }) {
         profile.is_2fa_enabled === true || 
         profile.security_settings?.two_factor_enabled === true
       
-      console.log('🔍 [2FA] Loading 2FA status:', {
+      logger.debug('[SecuritySettings] Loading 2FA status', {
         userId,
         profileExists: !!profile,
         is_2fa_enabled: profile.is_2fa_enabled,
@@ -94,7 +95,7 @@ export default function SecuritySettingsClient({ userId }: { userId: string }) {
       
       setTwoFactorEnabled(isEnabled)
     } catch (error: any) {
-      console.error('❌ [2FA] Error loading 2FA status:', {
+      logger.error('[SecuritySettings] Error loading 2FA status', {
         error,
         message: error?.message,
         stack: error?.stack,
@@ -217,7 +218,7 @@ export default function SecuritySettingsClient({ userId }: { userId: string }) {
         setTwoFactorEnabled(false)
       }
     } catch (error: any) {
-      console.error('Error toggling 2FA:', error)
+      logger.error('[SecuritySettings] Error toggling 2FA', { error })
       toast({
         title: 'Hata',
         description: error.message || '2FA ayarı değiştirilirken bir hata oluştu',

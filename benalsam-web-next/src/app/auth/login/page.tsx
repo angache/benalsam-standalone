@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/hooks/use-toast'
+import { logger } from '@/utils/production-logger'
 
 const loginSchema = z.object({
   email: z.string().email('Geçerli bir email adresi girin'),
@@ -50,7 +51,7 @@ function LoginPageContent() {
     setIsLoading(true)
 
     try {
-      console.log('🔐 [LoginPage] Attempting login...', { email: data.email })
+      logger.debug('[LoginPage] Attempting login', { email: data.email })
       
       const result = await login({
         email: data.email,
@@ -58,10 +59,10 @@ function LoginPageContent() {
         remember: data.remember,
       })
 
-      console.log('🔐 [LoginPage] Login result:', result)
+      logger.debug('[LoginPage] Login result', { success: result.success, requires2FA: result.requires2FA })
 
       if (result.success) {
-        console.log('✅ [LoginPage] Login successful:', { requires2FA: result.requires2FA, userId: result.user?.id })
+        logger.debug('[LoginPage] Login successful', { requires2FA: result.requires2FA, userId: result.user?.id })
         
         // Small delay to ensure Supabase session is fully set
         await new Promise(resolve => setTimeout(resolve, 100))
@@ -77,10 +78,10 @@ function LoginPageContent() {
           
           // Redirect to 2FA verification with userId
           const redirectUrl = `/auth/2fa/verify?userId=${result.user?.id}`
-          console.log('🔐 [LoginPage] Redirecting to 2FA:', redirectUrl)
+          logger.debug('[LoginPage] Redirecting to 2FA', { redirectUrl })
           router.push(redirectUrl)
         } else {
-          console.log('✅ [LoginPage] No 2FA, redirecting to:', callbackUrl)
+          logger.debug('[LoginPage] No 2FA, redirecting', { callbackUrl })
           toast({
             title: 'Başarılı',
             description: 'Giriş başarılı!',
@@ -89,7 +90,7 @@ function LoginPageContent() {
           router.refresh() // Refresh to get new session from cookies
         }
       } else {
-        console.error('❌ [LoginPage] Login failed:', result.error)
+        logger.error('[LoginPage] Login failed', { error: result.error })
         toast({
           title: 'Hata',
           description: result.error || 'Giriş yapılırken bir hata oluştu',
@@ -97,7 +98,7 @@ function LoginPageContent() {
         })
       }
     } catch (error: any) {
-      console.error('❌ [LoginPage] Login error:', error)
+      logger.error('[LoginPage] Login error', { error })
       toast({
         title: 'Hata',
         description: error.message || 'Giriş yapılırken bir hata oluştu',

@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { toast } from '@/hooks/use-toast'
 import { Loader2, User, Mail, Phone, MapPin, Globe, FileText, Upload } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
 
 interface ProfileData {
   full_name?: string
@@ -63,7 +64,7 @@ export default function ProfileSettingsClient({ userId }: { userId: string }) {
         })
       }
     } catch (error) {
-      console.error('Error loading profile:', error)
+      logger.error('[ProfileSettings] Error loading profile', { error })
       toast({
         title: 'Hata',
         description: 'Profil bilgileri yüklenirken bir hata oluştu',
@@ -172,7 +173,7 @@ export default function ProfileSettingsClient({ userId }: { userId: string }) {
         router.refresh()
       }
     } catch (error: any) {
-      console.error('Error updating profile:', error)
+      logger.error('[ProfileSettings] Error updating profile', { error })
       toast({
         title: 'Hata',
         description: error.message || 'Profil güncellenirken bir hata oluştu',
