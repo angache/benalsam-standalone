@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/production-logger';
 
 // Profile interface
 interface Profile {
@@ -142,7 +143,7 @@ const handleError = (error: unknown, title: string = "Hata", description: string
 // Validation helper
 const validateUserId = (userId: string): boolean => {
   if (!userId) {
-    console.error('Function called with no userId');
+    logger.error('[ProfileService] Function called with no userId');
     return false;
   }
   return true;
@@ -159,7 +160,7 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
   let retryTimeoutId: NodeJS.Timeout | null = null;
 
   try {
-    console.log('🔍 Fetching profile for userId:', userId);
+    logger.debug('[ProfileService] Fetching profile for userId', { userId });
     
     // Add timeout to prevent hanging requests (15 seconds - reduced from 30s)
     const timeoutPromise = new Promise<never>((_, reject) => {
@@ -175,7 +176,7 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
       .eq('id', userId)
       .single();
 
-    console.log('🔍 Profile fetch promise created, racing with timeout...');
+    logger.debug('[ProfileService] Profile fetch promise created, racing with timeout...');
     let result: { data: any; error: any; status: number } | null = null;
     
     try {
@@ -198,7 +199,7 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
       
       // Handle timeout gracefully - don't retry, just return error
       if (timeoutError?.message?.includes('timeout') || timeoutError?.name === 'AbortError') {
-        console.warn('⚠️ Profile fetch timeout');
+        logger.warn('[ProfileService] Profile fetch timeout');
         toast({ 
           title: "Yavaş Bağlantı", 
           description: "Profil yüklenirken zaman aşımı oluştu. Lütfen internet bağlantınızı kontrol edin ve sayfayı yenileyin.", 
@@ -212,15 +213,15 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
     }
     
     if (!result) {
-      console.error('❌ Profile fetch failed: No result');
+      logger.error('[ProfileService] Profile fetch failed: No result');
       return null;
     }
     
     const { data, error, status } = result;
-    console.log('🔍 Profile fetch result:', { data: !!data, error: !!error, status });
+    logger.debug('[ProfileService] Profile fetch result', { hasData: !!data, hasError: !!error, status });
 
     if (error && status !== 406) { 
-      console.error('Error in fetchUserProfile:', { message: error.message, details: error.details, hint: error.hint, code: error.code });
+      logger.error('[ProfileService] Error in fetchUserProfile', { message: error.message, details: error.details, hint: error.hint, code: error.code });
       if (error.message.toLowerCase().includes('failed to fetch')) {
         toast({ title: "Ağ Hatası", description: "Profil bilgileri çekilemedi. Lütfen internet bağlantınızı kontrol edin ve tekrar deneyin.", variant: "destructive", duration: 7000 });
       } else {
@@ -230,14 +231,14 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
     }
 
     if (!data) {
-      console.warn(`No profile found for userId: ${userId}`);
+      logger.warn('[ProfileService] No profile found for userId', { userId });
       return null;
     }
 
     return data as Profile;
   } catch (error) {
-    console.error('Error in fetchUserProfile:', error);
-    console.error('Error details:', {
+    logger.error('[ProfileService] Error in fetchUserProfile', { error });
+    logger.error('[ProfileService] Error details', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       error: error
@@ -307,7 +308,7 @@ export const incrementProfileView = async (userId: string): Promise<void> => {
   } catch (error) {
     // This is a non-critical background task.
     // We log the error for debugging but don't show a toast to the user.
-    console.error('Error in incrementProfileView:', error);
+    logger.error('[ProfileService] Error in incrementProfileView', { error });
   }
 };
 
@@ -343,7 +344,7 @@ export const getUserProfileStats = async (userId: string): Promise<{
       .single();
 
     if (error) {
-      console.error('Error fetching profile stats:', error);
+      logger.error('[ProfileService] Error fetching profile stats', { error });
       return null;
     }
 
@@ -358,7 +359,7 @@ export const getUserProfileStats = async (userId: string): Promise<{
       memberSince: data.created_at || new Date().toISOString()
     };
   } catch (error) {
-    console.error('Error in getUserProfileStats:', error);
+    logger.error('[ProfileService] Error in getUserProfileStats', { error });
     return null;
   }
 };

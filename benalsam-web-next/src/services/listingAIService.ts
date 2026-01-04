@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/production-logger';
 
 const LISTING_SERVICE_URL = process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || 'http://localhost:3008/api/v1';
 
@@ -72,9 +73,9 @@ class ListingAIServiceClient {
         },
       });
       
-      console.log('📡 [AI] Response status:', response.status, response.statusText);
+      logger.debug('[ListingAIService] Response status', { status: response.status, statusText: response.statusText });
     } catch (fetchError: any) {
-      console.error('❌ [AI] Fetch error:', {
+      logger.error('[ListingAIService] Fetch error', {
         message: fetchError.message,
         name: fetchError.name,
         stack: fetchError.stack,
@@ -104,7 +105,7 @@ class ListingAIServiceClient {
       const { data: { session } } = await supabase.auth.getSession();
       return session?.user?.id || null;
     } catch (error) {
-      console.error('Error getting user ID:', error);
+      logger.error('[ListingAIService] Error getting user ID', { error });
       return null;
     }
   }

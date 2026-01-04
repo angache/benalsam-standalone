@@ -21,7 +21,7 @@ class DatabaseError extends Error {
 
 // Error handling helper
 const handleError = (error: any, title = "Hata", description = "Bir sorun oluştu") => {
-  console.error(`Error in ${title}:`, error);
+  logger.error(`[ConversationService] Error in ${title}`, { error });
   toast({ 
     title: title, 
     description: error?.message || description, 
@@ -33,7 +33,7 @@ const handleError = (error: any, title = "Hata", description = "Bir sorun oluşt
 // Validation helper
 const validateConversationData = (user1Id: string, user2Id: string): boolean => {
   if (!user1Id || !user2Id) {
-    console.error('Missing user IDs for conversation');
+    logger.error('[ConversationService] Missing user IDs for conversation');
     return false;
   }
   return true;
@@ -64,11 +64,11 @@ export const getOrCreateConversation = async (
     }
 
     if (existingConversation) {
-      console.log('Found existing conversation:', existingConversation.id);
+      logger.debug('[ConversationService] Found existing conversation', { conversationId: existingConversation.id });
       return existingConversation.id;
     }
 
-    console.log('No existing conversation found, creating new one...');
+    logger.debug('[ConversationService] No existing conversation found, creating new one...');
 
     // Create new conversation
     const { data: newConversation, error: createError } = await supabase
@@ -94,7 +94,7 @@ export const getOrCreateConversation = async (
       { conversation_id: newConversation.id, user_id: user2Id }
     ];
 
-    console.log('Adding conversation participants:', participantInserts);
+    logger.debug('[ConversationService] Adding conversation participants', { count: participantInserts.length });
     
     const { error: participantError } = await supabase
       .from('conversation_participants')
@@ -102,33 +102,33 @@ export const getOrCreateConversation = async (
       .select();
 
     if (participantError) {
-      console.error('Error adding conversation participants:', participantError);
+      logger.error('[ConversationService] Error adding conversation participants', { error: participantError });
       // If participants can't be added, delete the conversation since RLS will fail
       await supabase.from('conversations').delete().eq('id', newConversation.id);
       throw new DatabaseError('Failed to add conversation participants', participantError);
     }
 
-    console.log('✅ Participants added successfully');
+    logger.debug('[ConversationService] Participants added successfully');
 
     // Update the offer with the new conversation_id if offerId is provided
     if (offerId) {
-      console.log('Updating offer with conversation_id:', newConversation.id);
+      logger.debug('[ConversationService] Updating offer with conversation_id', { conversationId: newConversation.id });
       const { error: offerUpdateError } = await supabase
         .from('offers')
         .update({ conversation_id: newConversation.id })
         .eq('id', offerId);
 
       if (offerUpdateError) {
-        console.error('Error updating offer with conversation_id:', offerUpdateError);
+        logger.error('[ConversationService] Error updating offer with conversation_id', { error: offerUpdateError });
         // Don't throw error here, as the conversation is already created successfully
       } else {
-        console.log('✅ Offer updated with conversation_id');
+        logger.debug('[ConversationService] Offer updated with conversation_id');
       }
     }
 
     return newConversation.id;
   } catch (error) {
-    console.error('Error in getOrCreateConversation:', error);
+    logger.error('[ConversationService] Error in getOrCreateConversation', { error });
     return handleError(error, "Sohbet Oluşturulamadı", "Sohbet oluşturulurken bir sorun oluştu");
   }
 };
@@ -185,7 +185,7 @@ export const sendMessage = async (
     }
 
     const result = await response.json();
-    console.log('✅ Message sent successfully:', result.data);
+    logger.debug('[ConversationService] Message sent successfully', { messageId: result.data?.id });
 
     // Add user activity (optional - don't fail if this fails)
     try {
@@ -197,12 +197,12 @@ export const sendMessage = async (
         result.data.id
       );
     } catch (activityError) {
-      console.warn('⚠️ Failed to log user activity (non-critical):', activityError);
+      logger.warn('[ConversationService] Failed to log user activity (non-critical)', { error: activityError });
     }
 
     return result.data;
   } catch (error) {
-    console.error('Error in sendMessage:', error);
+    logger.error('[ConversationService] Error in sendMessage', { error });
     return handleError(error, "Mesaj Gönderilemedi", "Mesaj gönderilirken bir sorun oluştu");
   }
 };
@@ -243,7 +243,7 @@ export const fetchMessages = async (
       total
     };
   } catch (error) {
-    console.error('Error in fetchMessages:', error);
+    logger.error('[ConversationService] Error in fetchMessages', { error });
     return { messages: [], hasMore: false, total: 0 };
   }
 };
@@ -271,7 +271,7 @@ export const fetchConversationDetails = async (
     const result = await response.json();
     return result.data;
   } catch (error) {
-    console.error('Error in fetchConversationDetails:', error);
+    logger.error('[ConversationService] Error in fetchConversationDetails', { error });
     return null;
   }
 };
@@ -325,7 +325,7 @@ export const getUserConversations = async (userId: string): Promise<Conversation
 
     return formattedData || [];
   } catch (error) {
-    console.error('Error in getUserConversations:', error);
+    logger.error('[ConversationService] Error in getUserConversations', { error });
     return [];
   }
 };
