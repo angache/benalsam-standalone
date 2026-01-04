@@ -250,7 +250,12 @@ export default function TwoFactorSetupClient() {
   }
 
   const handleFinish = () => {
+    // Refresh the security settings page to show updated 2FA status
     router.push('/ayarlar/guvenlik')
+    // Force a page refresh after navigation to ensure 2FA status is updated
+    setTimeout(() => {
+      window.location.reload()
+    }, 500)
   }
 
   // Loading step

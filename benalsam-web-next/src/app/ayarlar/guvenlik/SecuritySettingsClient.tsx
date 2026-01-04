@@ -6,7 +6,7 @@
  * Password change and 2FA management
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
@@ -62,42 +62,73 @@ export default function SecuritySettingsClient({ userId }: { userId: string }) {
     }
   }, [])
 
-  // Load 2FA status
-  useEffect(() => {
-    load2FAStatus()
-  }, [userId])
-
-  const load2FAStatus = async () => {
+  const load2FAStatus = useCallback(async () => {
     try {
       setLoading(true)
+      
+      // Use fetchUserProfile which handles RLS and errors better
       const profile = await fetchUserProfile(userId)
+      
+      if (!profile) {
+        console.warn('⚠️ [2FA] Profile not found, defaulting to disabled')
+        setTwoFactorEnabled(false)
+        return
+      }
       
       // Check both possible locations for 2FA status
       // Database field: is_2fa_enabled (boolean) - PRIMARY
       // JSON field: security_settings.two_factor_enabled (legacy fallback)
       const isEnabled = 
-        profile?.is_2fa_enabled === true || 
-        profile?.security_settings?.two_factor_enabled === true
+        profile.is_2fa_enabled === true || 
+        profile.security_settings?.two_factor_enabled === true
       
       console.log('🔍 [2FA] Loading 2FA status:', {
         userId,
-        is_2fa_enabled: profile?.is_2fa_enabled,
-        security_settings: profile?.security_settings,
+        profileExists: !!profile,
+        is_2fa_enabled: profile.is_2fa_enabled,
+        is_2fa_enabled_type: typeof profile.is_2fa_enabled,
+        security_settings: profile.security_settings,
+        security_settings_two_factor_enabled: profile.security_settings?.two_factor_enabled,
         finalStatus: isEnabled
       })
       
       setTwoFactorEnabled(isEnabled)
-    } catch (error) {
-      console.error('Error loading 2FA status:', error)
+    } catch (error: any) {
+      console.error('❌ [2FA] Error loading 2FA status:', {
+        error,
+        message: error?.message,
+        stack: error?.stack,
+        userId
+      })
       toast({
         title: 'Hata',
         description: '2FA durumu yüklenirken bir hata oluştu',
         variant: 'destructive',
       })
+      // Default to disabled on error
+      setTwoFactorEnabled(false)
     } finally {
       setLoading(false)
     }
-  }
+  }, [userId])
+
+  // Load 2FA status on mount and when page becomes visible
+  useEffect(() => {
+    load2FAStatus()
+    
+    // Reload when page becomes visible (e.g., returning from setup page)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        load2FAStatus()
+      }
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [load2FAStatus])
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -308,28 +339,41 @@ export default function SecuritySettingsClient({ userId }: { userId: string }) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="font-medium">2FA Durumu</p>
-              <p className="text-sm text-muted-foreground">
-                {twoFactorEnabled
-                  ? 'İki faktörlü doğrulama aktif'
-                  : 'İki faktörlü doğrulama devre dışı'}
-              </p>
+          {loading ? (
+            // Loading state - prevents flickering
+            <div className="flex items-center justify-between">
+              <div className="space-y-2 flex-1">
+                <div className="h-5 w-32 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-48 bg-muted animate-pulse rounded" />
+              </div>
+              <div className="h-6 w-11 bg-muted animate-pulse rounded-full" />
             </div>
-            <Switch
-              checked={twoFactorEnabled}
-              onCheckedChange={handle2FAToggle}
-              disabled={saving || loading}
-            />
-          </div>
-          {twoFactorEnabled && (
-            <div className="mt-4 p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                İki faktörlü doğrulama aktif. Giriş yaparken telefonunuzdaki doğrulama kodunu
-                girmeniz gerekecek.
-              </p>
-            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="font-medium">2FA Durumu</p>
+                  <p className="text-sm text-muted-foreground">
+                    {twoFactorEnabled
+                      ? 'İki faktörlü doğrulama aktif'
+                      : 'İki faktörlü doğrulama devre dışı'}
+                  </p>
+                </div>
+                <Switch
+                  checked={twoFactorEnabled}
+                  onCheckedChange={handle2FAToggle}
+                  disabled={saving}
+                />
+              </div>
+              {twoFactorEnabled && (
+                <div className="mt-4 p-4 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    İki faktörlü doğrulama aktif. Giriş yaparken telefonunuzdaki doğrulama kodunu
+                    girmeniz gerekecek.
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
