@@ -1,6 +1,16 @@
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { processImagesForUploadService } from '@/services/uploadService';
+import type { ImageFile } from '@/types/listing';
+
+// Supabase error type
+interface SupabaseError {
+  message?: string;
+  details?: string;
+  hint?: string;
+  code?: string;
+  statusCode?: number;
+}
 
 // Inventory item interface
 interface InventoryItem {
@@ -28,7 +38,7 @@ interface InventoryItem {
 import { handleError as unifiedHandleError } from '@/utils/errorHandler';
 
 // Error handling helper
-const handleError = (error: unknown, title: string = "Hata", description: string = "Bir sorun oluştu"): null => {
+const handleError = (error: unknown, title: string = "Hata"): null => {
   unifiedHandleError(error, {
     component: 'inventory-service',
     action: title.toLowerCase().replace(/\s+/g, '-')
@@ -97,24 +107,29 @@ export const addInventoryItem = async (
         const isFile = firstItem instanceof File || 
                       (firstItem && typeof firstItem === 'object' && 
                        'name' in firstItem && 'size' in firstItem && 'type' in firstItem &&
-                       typeof (firstItem as any).name === 'string' &&
-                       typeof (firstItem as any).size === 'number');
+                       typeof (firstItem as File).name === 'string' &&
+                       typeof (firstItem as File).size === 'number');
         
         if (isFile) {
           // Already File[]
           imageFiles = images as File[];
         } else if (firstItem && typeof firstItem === 'object' && 'file' in firstItem) {
-          // ImageItem[] format - extract File objects
-          imageFiles = (images as any[])
-            .filter((img: any) => img.file && !img.isUploaded)
-            .map((img: any) => img.file)
-            .filter(Boolean) as File[];
+          // ImageFile[] format - extract File objects
+          imageFiles = (images as unknown as ImageFile[])
+            .filter((img: ImageFile) => img.file && !img.isUploaded)
+            .map((img: ImageFile) => img.file)
+            .filter((file): file is File => file instanceof File);
         } else {
           // Fallback: try to use as File[] if items look like Files
-          imageFiles = images.filter((item: any) => {
-            return item && typeof item === 'object' && 
-                   ('name' in item || 'size' in item || item instanceof File);
-          }) as File[];
+          imageFiles = images.filter((item: unknown): item is File => {
+            if (item instanceof File) {
+              return true;
+            }
+            if (item && typeof item === 'object') {
+              return 'name' in item || 'size' in item;
+            }
+            return false;
+          });
         }
       }
       
@@ -129,8 +144,9 @@ export const addInventoryItem = async (
       
       if (imageFiles.length > 0) {
         // Ensure mainImageIndex is valid (0-based index)
-        const validMainImageIndex = itemData.mainImageIndex >= 0 && itemData.mainImageIndex < imageFiles.length 
-          ? itemData.mainImageIndex 
+        const mainImageIndex = itemData.mainImageIndex ?? 0;
+        const validMainImageIndex = mainImageIndex >= 0 && mainImageIndex < imageFiles.length 
+          ? mainImageIndex 
           : 0;
         
         console.log('📤 Uploading images:', {
@@ -142,10 +158,10 @@ export const addInventoryItem = async (
         const imageResult = await processImagesForUploadService(
           imageFiles,
           validMainImageIndex,
-          'inventory',
-          currentUserId,
-          onProgress
-        );
+      'inventory',
+      currentUserId,
+      onProgress
+    );
         mainImageUrl = imageResult.mainImageUrl;
         additionalImageUrls = imageResult.additionalImageUrls;
         
@@ -174,7 +190,7 @@ export const addInventoryItem = async (
 
     // Build item object, removing undefined values (Supabase doesn't accept undefined)
     // Note: is_available and is_featured columns may not exist in the database schema
-    const itemToInsert: Record<string, any> = {
+    const itemToInsert: Record<string, unknown> = {
       user_id: currentUserId,
       name: itemData.name || '',
       category: itemData.category || '',
@@ -239,10 +255,11 @@ export const addInventoryItem = async (
     if (error) {
       // Safely extract Supabase error details
       // Supabase errors can have different structures, so we need to check multiple properties
-      const errorMessage = (error as any)?.message || (error as any)?.details || (error as any)?.hint || String(error) || 'Database error';
-      const errorCode = (error as any)?.code || (error as any)?.statusCode || 'UNKNOWN_ERROR';
-      const errorDetails = (error as any)?.details || null;
-      const errorHint = (error as any)?.hint || null;
+      const supabaseError = error as SupabaseError;
+      const errorMessage = supabaseError?.message || supabaseError?.details || supabaseError?.hint || String(error) || 'Database error';
+      const errorCode = supabaseError?.code || String(supabaseError?.statusCode) || 'UNKNOWN_ERROR';
+      const errorDetails = supabaseError?.details || null;
+      const errorHint = supabaseError?.hint || null;
       
       // Log error with all possible properties
       console.error('❌ Supabase error occurred:');
@@ -286,10 +303,14 @@ export const addInventoryItem = async (
         userFriendlyMessage = errorMessage;
       }
       
+      toast({
+        title: "Envanter Eklenemedi",
+        description: userFriendlyMessage,
+        variant: "destructive"
+      });
       return handleError(
         new Error(errorMessage),
-        "Envanter Eklenemedi",
-        userFriendlyMessage
+        "Envanter Eklenemedi"
       );
     }
 
@@ -304,10 +325,14 @@ export const addInventoryItem = async (
     const errorMessage = error instanceof Error 
       ? error.message 
       : String(error) || "Bilinmeyen bir hata oluştu";
+    toast({
+      title: "Beklenmedik Envanter Ekleme Hatası",
+      description: errorMessage,
+      variant: "destructive"
+    });
     return handleError(
       error instanceof Error ? error : new Error(errorMessage),
-      "Beklenmedik Envanter Ekleme Hatası",
-      errorMessage
+      "Beklenmedik Envanter Ekleme Hatası"
     );
   }
 };
@@ -333,7 +358,7 @@ export const updateInventoryItem = async (
     );
     
     // Build update object, removing undefined values (Supabase doesn't accept undefined)
-    const itemToUpdate: Record<string, any> = {
+    const itemToUpdate: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     };
     

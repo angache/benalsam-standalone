@@ -153,13 +153,21 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
     return null;
   }
 
+  // Use AbortController for proper cleanup
+  const abortController = new AbortController();
+  let timeoutId: NodeJS.Timeout | null = null;
+  let retryTimeoutId: NodeJS.Timeout | null = null;
+
   try {
     console.log('🔍 Fetching profile for userId:', userId);
     
-    // Add timeout to prevent hanging requests (30 seconds for slow networks)
-    const timeoutPromise = new Promise<never>((_, reject) => 
-      setTimeout(() => reject(new Error('Profile fetch timeout after 30s')), 30000)
-    );
+    // Add timeout to prevent hanging requests (15 seconds - reduced from 30s)
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        abortController.abort();
+        reject(new Error('Profile fetch timeout after 15s'));
+      }, 15000);
+    });
     
     const fetchPromise = supabase
       .from('profiles')
@@ -175,34 +183,29 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
         fetchPromise,
         timeoutPromise
       ]) as { data: any; error: any; status: number };
+      
+      // Clear timeout on success
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
     } catch (timeoutError: any) {
-      // Handle timeout gracefully
-      if (timeoutError?.message?.includes('timeout')) {
-        console.warn('⚠️ Profile fetch timeout, attempting retry...');
-        // Try once more with a shorter timeout
-        try {
-          const retryPromise = supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .single();
-          const retryTimeout = new Promise<never>((_, reject) => 
-            setTimeout(() => reject(new Error('Retry timeout')), 10000)
-          );
-          result = await Promise.race([
-            retryPromise,
-            retryTimeout
-          ]) as { data: any; error: any; status: number };
-        } catch (retryError) {
-          console.error('❌ Profile fetch retry also failed:', retryError);
-          toast({ 
-            title: "Yavaş Bağlantı", 
-            description: "Profil yüklenirken zaman aşımı oluştu. Lütfen internet bağlantınızı kontrol edin ve sayfayı yenileyin.", 
-            variant: "destructive",
-            duration: 8000
-          });
-          return null;
-        }
+      // Clear timeout
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      
+      // Handle timeout gracefully - don't retry, just return error
+      if (timeoutError?.message?.includes('timeout') || timeoutError?.name === 'AbortError') {
+        console.warn('⚠️ Profile fetch timeout');
+        toast({ 
+          title: "Yavaş Bağlantı", 
+          description: "Profil yüklenirken zaman aşımı oluştu. Lütfen internet bağlantınızı kontrol edin ve sayfayı yenileyin.", 
+          variant: "destructive",
+          duration: 8000
+        });
+        return null;
       } else {
         throw timeoutError;
       }
@@ -239,8 +242,26 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
       stack: error instanceof Error ? error.stack : undefined,
       error: error
     });
-    toast({ title: "Beklenmedik Profil Hatası", description: "Profil yüklenirken beklenmedik bir sorun oluştu.", variant: "destructive" });
+    
+    // Only show toast if it's not an abort error (user-initiated cancellation)
+    if (!(error instanceof Error && error.name === 'AbortError')) {
+      toast({ title: "Beklenmedik Profil Hatası", description: "Profil yüklenirken beklenmedik bir sorun oluştu.", variant: "destructive" });
+    }
     return null;
+  } finally {
+    // Cleanup: Always clear timeouts to prevent memory leaks
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+    if (retryTimeoutId) {
+      clearTimeout(retryTimeoutId);
+      retryTimeoutId = null;
+    }
+    // Abort any pending requests
+    if (!abortController.signal.aborted) {
+      abortController.abort();
+    }
   }
 };
 

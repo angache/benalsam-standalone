@@ -14,9 +14,9 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'framer-motion'],
   },
   
-  // TypeScript - Allow build despite type errors (for faster iteration)
+  // TypeScript - Strict type checking enabled
   typescript: {
-    ignoreBuildErrors: true, // Skip TypeScript checks during build
+    ignoreBuildErrors: false, // Enforce TypeScript checks during build
   },
   
   // Compiler optimizations
