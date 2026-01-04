@@ -1,24 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { logger } from '@/utils/production-logger';
+import { validateQuery, commonSchemas } from '@/lib/api-validation';
+import { z } from 'zod';
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors';
+
+/**
+ * Schema for GET /api/messages query parameters
+ */
+const getMessagesQuerySchema = z.object({
+  userId: commonSchemas.uuid,
+})
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
+    // Validate query parameters
+    const validation = validateQuery(request, getMessagesQuerySchema)
+    if (!validation.success) {
+      return validation.response
     }
 
+    const { userId } = validation.data
+
     if (!supabaseAdmin) {
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
+      return apiErrors.internalError(
+        'Server configuration error',
+        {},
+        request.nextUrl.pathname
+      )
     }
 
     // Fetch conversations where user is participant - use admin client to bypass RLS
@@ -35,11 +44,11 @@ export async function GET(request: NextRequest) {
       .order('updated_at', { ascending: false });
 
     if (convError) {
-      logger.error('[API] Error fetching conversations', { error: convError, userId });
-      return NextResponse.json(
-        { error: 'Failed to fetch conversations' },
-        { status: 500 }
-      );
+      return apiErrors.databaseError(
+        'Failed to fetch conversations',
+        { error: convError.message, userId },
+        request.nextUrl.pathname
+      )
     }
 
     // Format conversations with last message
@@ -63,39 +72,45 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    return NextResponse.json({
-      success: true,
-      data: formattedConversations
-    });
+    return createSuccessResponse(formattedConversations)
   } catch (error: unknown) {
-    logger.error('[API] GET /api/messages error', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    });
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiErrors.internalError(
+      'Failed to fetch messages',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
+    )
   }
 }
 
+/**
+ * Schema for POST /api/messages request body
+ */
+const createMessageSchema = z.object({
+  conversationId: commonSchemas.uuid,
+  senderId: commonSchemas.uuid,
+  content: z.string().min(1, 'Mesaj içeriği boş olamaz').max(5000, 'Mesaj en fazla 5000 karakter olabilir'),
+  messageType: z.enum(['text', 'image', 'file']).optional().default('text'),
+})
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { conversationId, senderId, content, messageType = 'text' } = body;
-
-    if (!conversationId || !senderId || !content) {
-      return NextResponse.json(
-        { error: 'conversationId, senderId, and content are required' },
-        { status: 400 }
-      );
+    // Validate request body
+    const validation = await validateBody(request, createMessageSchema)
+    if (!validation.success) {
+      return validation.response
     }
 
+    const { conversationId, senderId, content, messageType } = validation.data
+
     if (!supabaseAdmin) {
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
+      return apiErrors.internalError(
+        'Server configuration error',
+        {},
+        request.nextUrl.pathname
+      )
     }
 
     // Verify user is participant in conversation
@@ -106,17 +121,14 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (convError || !conversation) {
-      return NextResponse.json(
-        { error: 'Conversation not found' },
-        { status: 404 }
-      );
+      return apiErrors.notFound('Conversation', request.nextUrl.pathname)
     }
 
     if (conversation.user1_id !== senderId && conversation.user2_id !== senderId) {
-      return NextResponse.json(
-        { error: 'User is not a participant in this conversation' },
-        { status: 403 }
-      );
+      return apiErrors.forbidden(
+        'User is not a participant in this conversation',
+        request.nextUrl.pathname
+      )
     }
 
     // Insert message
@@ -137,11 +149,11 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (messageError) {
-      logger.error('[API] Error creating message', { error: messageError, conversationId, senderId });
-      return NextResponse.json(
-        { error: `Failed to send message: ${messageError.message}` },
-        { status: 500 }
-      );
+      return apiErrors.databaseError(
+        'Failed to send message',
+        { error: messageError.message, conversationId, senderId },
+        request.nextUrl.pathname
+      )
     }
 
     // Update conversation's updated_at timestamp
@@ -152,18 +164,15 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', conversationId);
 
-    return NextResponse.json({
-      success: true,
-      data: message
-    });
+    return createSuccessResponse(message)
   } catch (error: unknown) {
-    logger.error('[API] POST /api/messages error', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    });
-    return NextResponse.json(
-      { error: `Internal server error: ${error instanceof Error ? error.message : 'Unknown'}` },
-      { status: 500 }
-    );
+    return apiErrors.internalError(
+      'Failed to send message',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
+    )
   }
 }

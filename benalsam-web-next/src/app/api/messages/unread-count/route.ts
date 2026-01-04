@@ -2,18 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { logger } from '@/utils/production-logger';
 import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit';
+import { validateQuery, commonSchemas } from '@/lib/api-validation';
+import { z } from 'zod';
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors';
+
+/**
+ * Schema for GET /api/messages/unread-count query parameters
+ */
+const unreadCountQuerySchema = z.object({
+  userId: commonSchemas.uuid,
+})
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
+    // Validate query parameters
+    const validation = validateQuery(request, unreadCountQuerySchema)
+    if (!validation.success) {
+      return validation.response
     }
+
+    const { userId } = validation.data
 
     // Rate limiting - 60 requests per minute per user
     const identifier = getClientIdentifier(request, userId);
@@ -31,15 +39,15 @@ export async function GET(request: NextRequest) {
       .or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
 
     if (convError) {
-      logger.error('[API] Error fetching conversations', { error: convError, userId });
-      return NextResponse.json(
-        { error: 'Failed to fetch conversations' },
-        { status: 500 }
-      );
+      return apiErrors.databaseError(
+        'Failed to fetch conversations',
+        { error: convError.message, userId },
+        request.nextUrl.pathname
+      )
     }
 
     if (!conversations || conversations.length === 0) {
-      return NextResponse.json({ count: 0 });
+      return createSuccessResponse({ count: 0 })
     }
 
     const conversationIds = conversations.map(c => c.id);
@@ -53,20 +61,23 @@ export async function GET(request: NextRequest) {
       .eq('is_read', false);
 
     if (countError) {
-      logger.error('[API] Error counting unread messages', { error: countError, userId });
-      return NextResponse.json(
-        { error: 'Failed to count unread messages' },
-        { status: 500 }
-      );
+      return apiErrors.databaseError(
+        'Failed to count unread messages',
+        { error: countError.message, userId },
+        request.nextUrl.pathname
+      )
     }
 
-    return NextResponse.json({ count: count || 0 });
-  } catch (error) {
-    logger.error('[API] unread-count error', { error, userId: request.url });
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return createSuccessResponse({ count: count || 0 })
+  } catch (error: unknown) {
+    return apiErrors.internalError(
+      'Failed to get unread count',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
+    )
   }
 }
 

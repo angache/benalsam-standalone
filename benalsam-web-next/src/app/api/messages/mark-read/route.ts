@@ -3,6 +3,16 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { getServerUser } from '@/lib/supabase-server'
 import { logger } from '@/utils/production-logger'
 import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
+import { validateBody, commonSchemas } from '@/lib/api-validation'
+import { z } from 'zod'
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
+
+/**
+ * Schema for POST /api/messages/mark-read request body
+ */
+const markReadSchema = z.object({
+  conversationId: commonSchemas.uuid,
+})
 
 /**
  * POST /api/messages/mark-read
@@ -13,10 +23,7 @@ export async function POST(request: NextRequest) {
     const user = await getServerUser()
     
     if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
     }
 
     // Rate limiting - 60 requests per minute per user
@@ -28,14 +35,13 @@ export async function POST(request: NextRequest) {
       return rateLimitExceeded()
     }
 
-    const { conversationId } = await request.json()
-
-    if (!conversationId) {
-      return NextResponse.json(
-        { success: false, error: 'Conversation ID is required' },
-        { status: 400 }
-      )
+    // Validate request body
+    const validation = await validateBody(request, markReadSchema)
+    if (!validation.success) {
+      return validation.response
     }
+
+    const { conversationId } = validation.data
 
     // Use admin client to bypass RLS and mark messages as read
     const { error } = await supabaseAdmin
@@ -50,22 +56,22 @@ export async function POST(request: NextRequest) {
       .eq('is_read', false)
 
     if (error) {
-      logger.error('[API] Error marking messages as read', { error, conversationId, userId: user.id })
-      return NextResponse.json(
-        { success: false, error: 'Failed to mark messages as read' },
-        { status: 500 }
+      return apiErrors.databaseError(
+        'Failed to mark messages as read',
+        { error: error.message, conversationId, userId: user.id },
+        request.nextUrl.pathname
       )
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Messages marked as read'
-    })
-  } catch (error: any) {
-    logger.error('[API] mark-read error', { error })
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
+    return createSuccessResponse({ message: 'Messages marked as read' })
+  } catch (error: unknown) {
+    return apiErrors.internalError(
+      'Failed to mark messages as read',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
     )
   }
 }

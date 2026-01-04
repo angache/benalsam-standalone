@@ -3,21 +3,32 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { logger } from '@/utils/production-logger';
 import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit';
 import { getServerUser } from '@/lib/supabase-server';
+import { validateParams, commonSchemas } from '@/lib/api-validation';
+import { z } from 'zod';
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors';
+
+/**
+ * Schema for conversation ID parameter
+ */
+const conversationIdParamSchema = z.object({
+  conversationId: commonSchemas.uuid,
+})
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ conversationId: string }> }
 ) {
   try {
-    const { conversationId } = await params;
-    logger.startTimer('[API] GET /conversations/[conversationId]');
-
-    if (!conversationId) {
-      return NextResponse.json(
-        { error: 'Conversation ID is required' },
-        { status: 400 }
-      );
+    const rawParams = await params;
+    
+    // Validate route parameters
+    const validation = validateParams(rawParams, conversationIdParamSchema)
+    if (!validation.success) {
+      return validation.response
     }
+
+    const { conversationId } = validation.data;
+    logger.startTimer('[API] GET /conversations/[conversationId]');
 
     // Rate limiting - Check user or IP
     const user = await getServerUser();
@@ -30,10 +41,11 @@ export async function GET(
     }
 
     if (!supabaseAdmin) {
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
+      return apiErrors.internalError(
+        'Server configuration error',
+        {},
+        request.nextUrl.pathname
+      )
     }
 
     // Fetch conversation details - use admin client to bypass RLS
@@ -63,24 +75,25 @@ export async function GET(
     logger.endTimer('[API] GET /conversations/[conversationId]');
 
     if (convError) {
-      logger.error('[API] Error fetching conversation', { error: convError, conversationId });
-      return NextResponse.json(
-        { error: 'Failed to fetch conversation details' },
-        { status: 500 }
-      );
+      return apiErrors.databaseError(
+        'Failed to fetch conversation details',
+        { error: convError.message, conversationId },
+        request.nextUrl.pathname
+      )
     }
     
-    return NextResponse.json({
-      success: true,
-      data: conversation
-    });
-  } catch (error) {
+    return createSuccessResponse(conversation)
+  } catch (error: unknown) {
     const resolvedParams = await params;
-    logger.error('[API] conversation-detail error', { error, conversationId: resolvedParams.conversationId });
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiErrors.internalError(
+      'Failed to fetch conversation',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        conversationId: resolvedParams.conversationId,
+      },
+      request.nextUrl.pathname
+    )
   }
 }
 

@@ -3,24 +3,48 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { logger } from '@/utils/production-logger';
 import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit';
 import { getServerUser } from '@/lib/supabase-server';
+import { validateParams, validateQuery, commonSchemas } from '@/lib/api-validation';
+import { z } from 'zod';
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors';
+
+/**
+ * Schema for conversation ID parameter
+ */
+const conversationIdParamSchema = z.object({
+  conversationId: commonSchemas.uuid,
+})
+
+/**
+ * Schema for messages query parameters
+ */
+const messagesQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).optional().default(50),
+  offset: z.coerce.number().int().min(0).optional().default(0),
+})
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ conversationId: string }> }
 ) {
   try {
-    const { conversationId } = await params;
-    const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '50');
-    const offset = parseInt(searchParams.get('offset') || '0');
-    logger.startTimer('[API] GET /conversations/messages');
-
-    if (!conversationId) {
-      return NextResponse.json(
-        { error: 'Conversation ID is required' },
-        { status: 400 }
-      );
+    const rawParams = await params;
+    
+    // Validate route parameters
+    const paramValidation = validateParams(rawParams, conversationIdParamSchema)
+    if (!paramValidation.success) {
+      return paramValidation.response
     }
+
+    const { conversationId } = paramValidation.data;
+    
+    // Validate query parameters
+    const queryValidation = validateQuery(request, messagesQuerySchema)
+    if (!queryValidation.success) {
+      return queryValidation.response
+    }
+
+    const { limit, offset } = queryValidation.data;
+    logger.startTimer('[API] GET /conversations/messages');
 
     // Rate limiting - 60 requests per minute per user
     const user = await getServerUser();
@@ -33,10 +57,11 @@ export async function GET(
     }
 
     if (!supabaseAdmin) {
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
+      return apiErrors.internalError(
+        'Server configuration error',
+        {},
+        request.nextUrl.pathname
+      )
     }
 
     // Get total count first
@@ -46,7 +71,7 @@ export async function GET(
       .eq('conversation_id', conversationId);
 
     if (countError) {
-      logger.error('[API] Error counting messages', { error: countError, conversationId });
+      logger.warn('[API] Error counting messages (non-critical)', { error: countError.message, conversationId });
     }
 
     // Fetch messages with pagination - use admin client to bypass RLS
@@ -64,26 +89,35 @@ export async function GET(
     logger.endTimer('[API] GET /conversations/messages');
 
     if (error) {
-      logger.error('[API] Error fetching messages', { error, conversationId });
-      return NextResponse.json(
-        { error: 'Failed to fetch messages' },
-        { status: 500 }
-      );
+      return apiErrors.databaseError(
+        'Failed to fetch messages',
+        { error: error.message, conversationId },
+        request.nextUrl.pathname
+      )
     }
 
-    return NextResponse.json({
-      success: true,
-      data: messages || [],
-      total: totalCount || 0,
-      hasMore: offset + (messages?.length || 0) < (totalCount || 0)
-    });
-  } catch (error) {
+    return createSuccessResponse(
+      messages || [],
+      {
+        meta: {
+          total: totalCount || 0,
+          hasMore: offset + (messages?.length || 0) < (totalCount || 0),
+          limit,
+          offset,
+        }
+      }
+    )
+  } catch (error: unknown) {
     const resolvedParams = await params;
-    logger.error('[API] conversation-messages error', { error, conversationId: resolvedParams.conversationId });
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return apiErrors.internalError(
+      'Failed to fetch messages',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        conversationId: resolvedParams.conversationId,
+      },
+      request.nextUrl.pathname
+    )
   }
 }
 
