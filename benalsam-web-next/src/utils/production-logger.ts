@@ -7,6 +7,7 @@
  * - Context support for debugging
  * - Performance tracking
  * - Zero overhead in production (tree-shakeable)
+ * - Works in both client and server environments
  * 
  * Usage:
  * import { logger } from '@/utils/production-logger'
@@ -17,8 +18,28 @@
  * logger.error('Failed to fetch data', { error })
  */
 
-const isDevelopment = process.env.NODE_ENV === 'development'
-const isTest = process.env.NODE_ENV === 'test'
+// Check environment - works in both client and server
+const getIsDevelopment = (): boolean => {
+  if (typeof window !== 'undefined') {
+    // Client-side: check NEXT_PUBLIC_APP_ENV or NODE_ENV
+    return (
+      process.env.NEXT_PUBLIC_APP_ENV === 'development' ||
+      process.env.NODE_ENV === 'development'
+    )
+  }
+  // Server-side: check NODE_ENV
+  return process.env.NODE_ENV === 'development'
+}
+
+const getIsTest = (): boolean => {
+  if (typeof window !== 'undefined') {
+    return process.env.NODE_ENV === 'test'
+  }
+  return process.env.NODE_ENV === 'test'
+}
+
+const isDevelopment = getIsDevelopment()
+const isTest = getIsTest()
 
 // Disable all logging in production and test environments
 const isLoggingEnabled = isDevelopment && !isTest

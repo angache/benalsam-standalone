@@ -41,20 +41,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Solution: Use very short timeouts and fail gracefully
     const initializeAuth = async () => {
       try {
-        logger.debug('[AuthContext] Starting initialization...', {
+        logger.debug('[AuthContext] Starting initialization with timeout protection...', {
           timestamp: new Date().toISOString()
         })
-        console.log('🚀 [AuthContext] Starting initialization with timeout protection...')
         
         // Verify Supabase client is available
         if (!supabase || !supabase.auth) {
-          console.error('❌ [AuthContext] Supabase client not available!')
-          console.error('🔍 [AuthContext] Running diagnostics...')
+          logger.error('[AuthContext] Supabase client not available!')
+          logger.debug('[AuthContext] Running diagnostics...')
           try {
             const diagnostics = await runSupabaseDiagnostics()
-            console.error('📊 [AuthContext] Diagnostics:', diagnostics)
+            logger.debug('[AuthContext] Diagnostics:', diagnostics)
           } catch (diagError) {
-            console.error('❌ [AuthContext] Diagnostics failed:', diagError)
+            logger.error('[AuthContext] Diagnostics failed:', { error: diagError })
           }
           setLoading(false)
           setInitialized(true)
@@ -62,12 +61,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return
         }
         
-        console.log('✅ [AuthContext] Supabase client verified')
+        logger.debug('[AuthContext] Supabase client verified')
         
         // Step 1: Try getUser() with very short timeout (2 seconds max)
         // If it times out, we assume no user and continue
         const getUserStart = Date.now()
-        console.log('🔍 [AuthContext] Attempting getUser() with 2s timeout...')
+        logger.debug('[AuthContext] Attempting getUser() with 2s timeout...')
         
         let validatedUser: any = null
         let userError: any = null
@@ -83,14 +82,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           validatedUser = getUserResult?.data?.user
           userError = getUserResult?.error
           
-          console.log('✅ [AuthContext] getUser() completed', {
+          logger.debug('[AuthContext] getUser() completed', {
             elapsed: `${Date.now() - getUserStart}ms`,
             hasUser: !!validatedUser,
             hasError: !!userError
           })
         } catch (error: any) {
           const elapsed = Date.now() - getUserStart
-          console.warn(`⚠️ [AuthContext] getUser() timeout or error after ${elapsed}ms:`, error?.message || error)
+          logger.warn(`[AuthContext] getUser() timeout or error after ${elapsed}ms:`, { error: error?.message || error })
           // Timeout is not an error - just means no user or slow network
           // Continue with null user
           validatedUser = null
@@ -106,16 +105,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           userId: validatedUser?.id,
           errorMessage: userError?.message
         })
-        console.log('🔍 [AuthContext] getUser() completed', {
-          elapsed: `${getUserTime}ms`,
-          hasUser: !!validatedUser,
-          hasError: !!userError,
-          userId: validatedUser?.id
-        })
         
         // Step 2: If user exists, get session for full session data
         if (validatedUser && !userError) {
-          console.log('✅ [AuthContext] User validated, getting session...')
+          logger.debug('[AuthContext] User validated, getting session...')
           
           // Now get session for full session data (but don't wait if it times out)
           try {
@@ -136,10 +129,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               
               if (isValid) {
                 logger.debug('[AuthContext] Session valid, setting state', {
-                  userId: validatedUser.id,
-                  totalElapsed: `${Date.now() - startTime}ms`
-                })
-                console.log('✅ [AuthContext] Session valid, setting state', {
                   userId: validatedUser.id,
                   totalElapsed: `${Date.now() - startTime}ms`
                 })
@@ -169,7 +158,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               }
             } else {
               // getSession() timed out or failed, create minimal session from user
-              console.log('⚠️ [AuthContext] getSession() timed out, using user data only')
+              logger.warn('[AuthContext] getSession() timed out, using user data only')
               setSession({
                 user: validatedUser,
                 access_token: '',
@@ -180,16 +169,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               } as any)
             }
             
-            console.log('📥 [AuthContext] Fetching user profile...', { userId: validatedUser.id })
+            logger.debug('[AuthContext] Fetching user profile...', { userId: validatedUser.id })
             try {
               await fetchUserProfile(validatedUser.id)
-              console.log('✅ [AuthContext] User profile fetched')
+              logger.debug('[AuthContext] User profile fetched')
             } catch (profileError) {
-              console.error('❌ [AuthContext] Failed to fetch user profile', profileError)
+              logger.error('[AuthContext] Failed to fetch user profile', { error: profileError })
             }
             sessionInitializedRef.current = true
           } catch (sessionError: any) {
-            console.error('❌ [AuthContext] Error getting session:', sessionError)
+            logger.error('[AuthContext] Error getting session:', { error: sessionError })
             // Even if session fails, we have user, so create minimal session
             setSession({
               user: validatedUser,
@@ -205,7 +194,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           // getUser() timeout or no user - try getSession() as fallback
           // getSession() reads from cookies and is faster, might find a session
-          console.log('⚠️ [AuthContext] getUser() timeout or no user, trying getSession() fallback...')
+          logger.debug('[AuthContext] getUser() timeout or no user, trying getSession() fallback...')
           
           try {
             const sessionStart = Date.now()
@@ -220,7 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const sessionTime = Date.now() - sessionStart
             
             if (fallbackSession && fallbackSession.user) {
-              console.log('✅ [AuthContext] Found session via getSession() fallback', {
+              logger.debug('[AuthContext] Found session via getSession() fallback', {
                 userId: fallbackSession.user.id,
                 sessionTime: `${sessionTime}ms`
               })
@@ -234,38 +223,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setSession(fallbackSession)
                 try {
                   await fetchUserProfile(fallbackSession.user.id)
-                  console.log('✅ [AuthContext] User profile fetched from fallback session')
+                  logger.debug('[AuthContext] User profile fetched from fallback session')
                 } catch (profileError) {
-                  console.error('❌ [AuthContext] Failed to fetch user profile from fallback', profileError)
+                  logger.error('[AuthContext] Failed to fetch user profile from fallback', { error: profileError })
                 }
                 sessionInitializedRef.current = true
               } else {
-                console.log('⚠️ [AuthContext] Fallback session expired, trying refresh...')
+                logger.debug('[AuthContext] Fallback session expired, trying refresh...')
                 // Try to refresh
                 const { data: { session: refreshedSession }, error: refreshError } = await supabase.auth.refreshSession()
                 if (refreshedSession && !refreshError) {
-                  console.log('✅ [AuthContext] Session refreshed from fallback')
+                  logger.debug('[AuthContext] Session refreshed from fallback')
                   setSession(refreshedSession)
                   try {
                     await fetchUserProfile(refreshedSession.user.id)
                   } catch (profileError) {
-                    console.error('❌ [AuthContext] Failed to fetch user profile after refresh', profileError)
+                    logger.error('[AuthContext] Failed to fetch user profile after refresh', { error: profileError })
                   }
                   sessionInitializedRef.current = true
                 } else {
-                  console.log('⚠️ [AuthContext] Could not refresh fallback session')
+                  logger.warn('[AuthContext] Could not refresh fallback session')
                   setSession(null)
                   setUser(null)
                 }
               }
             } else {
               // No session found either
-              logger.debug('[AuthContext] No user and no session found', {
-                totalElapsed: `${Date.now() - startTime}ms`,
-                getUserTime: `${getUserTime}ms`,
-                sessionTime: `${sessionTime}ms`
-              })
-              console.log('ℹ️ [AuthContext] No user and no session found (not logged in)', {
+              logger.debug('[AuthContext] No user and no session found (not logged in)', {
                 totalElapsed: `${Date.now() - startTime}ms`,
                 getUserTime: `${getUserTime}ms`,
                 sessionTime: `${sessionTime}ms`
@@ -274,13 +258,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               setUser(null)
             }
           } catch (sessionError: any) {
-            console.error('❌ [AuthContext] getSession() fallback also failed:', sessionError)
+            logger.error('[AuthContext] getSession() fallback also failed:', { error: sessionError })
             setSession(null)
             setUser(null)
           }
         }
         
-        console.log('🔍 [AuthContext] About to finalize initialization', {
+        logger.debug('[AuthContext] About to finalize initialization', {
           isSubscribed,
           sessionInitialized: sessionInitializedRef.current
         })
@@ -289,15 +273,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false)
           setInitialized(true)
           initializationCompleteRef.current = true
-          // Use both logger and console for visibility
           const initLog = {
             sessionInitialized: sessionInitializedRef.current,
             totalElapsed: `${Date.now() - startTime}ms`
           }
           logger.debug('[AuthContext] Initialization complete', initLog)
-          console.log('✅ [AuthContext] Initialization complete', initLog)
         } else {
-          console.warn('⚠️ [AuthContext] Initialization skipped - component unmounted')
+          logger.warn('[AuthContext] Initialization skipped - component unmounted')
         }
       } catch (error: any) {
         logger.error('[AuthContext] Initialize error', {
@@ -354,8 +336,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Handle SIGNED_IN - user just logged in
         if (event === 'SIGNED_IN' && currentSession && currentSession.user) {
-          logger.debug('[AuthContext] User signed in', { userId: currentSession.user.id })
-          console.log('✅ [AuthContext] SIGNED_IN event received', { userId: currentSession.user.id })
+          logger.debug('[AuthContext] SIGNED_IN event received', { userId: currentSession.user.id })
           
           // Validate user with getUser() for security, but with timeout protection
           // Login is critical, so we should use the session even if getUser() times out
@@ -372,7 +353,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             validatedUser = getUserResult?.data?.user
             validateError = getUserResult?.error
           } catch (error: any) {
-            console.warn('⚠️ [AuthContext] getUser() timeout during login, using session anyway:', error?.message)
+            logger.warn('[AuthContext] getUser() timeout during login, using session anyway:', { error: error?.message })
             // Timeout is not critical - we have a valid session from SIGNED_IN event
             // Use the user from the session
             validatedUser = currentSession.user
@@ -384,7 +365,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               (validateError === null && currentSession.user)) {
             const userId = validatedUser?.id || currentSession.user.id
             logger.debug('[AuthContext] User validated after sign in', { userId })
-            console.log('✅ [AuthContext] User validated after sign in', { userId })
             
             // Always update session on login (it's a new login)
             setSession(currentSession)
@@ -392,9 +372,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Fetch user profile
             try {
               await fetchUserProfile(userId)
-              console.log('✅ [AuthContext] User profile fetched after login')
+              logger.debug('[AuthContext] User profile fetched after login')
             } catch (profileError) {
-              console.error('❌ [AuthContext] Failed to fetch user profile after login', profileError)
+              logger.error('[AuthContext] Failed to fetch user profile after login', { error: profileError })
               // Don't fail login if profile fetch fails
             }
             
@@ -402,14 +382,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             initializationCompleteRef.current = true
           } else {
             logger.debug('[AuthContext] User validation failed after sign in', { error: validateError?.message })
-            console.error('❌ [AuthContext] User validation failed after sign in', { error: validateError?.message })
             // Even if validation fails, we have a session from SIGNED_IN event
             // Use it anyway (Supabase already validated it)
             setSession(currentSession)
             try {
               await fetchUserProfile(currentSession.user.id)
             } catch (profileError) {
-              console.error('❌ [AuthContext] Failed to fetch user profile', profileError)
+              logger.error('[AuthContext] Failed to fetch user profile', { error: profileError })
             }
             sessionInitializedRef.current = true
             initializationCompleteRef.current = true
@@ -509,7 +488,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               initializationComplete: initializationCompleteRef.current
             }
             logger.debug('[AuthContext] Listener setup complete', listenerLog)
-            console.log('✅ [AuthContext] Listener setup complete', listenerLog)
           }
         }, 100)
       })
@@ -747,13 +725,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setInitialized(true)
         } else {
           logger.debug('[AuthContext] No 2FA required for user', { userId: data.user.id })
-          console.log('✅ [AuthContext] Login successful, fetching user profile...', { userId: data.user.id })
+          logger.debug('[AuthContext] Login successful, fetching user profile...', { userId: data.user.id })
           // Fetch full profile if no 2FA
           try {
             await fetchUserProfile(data.user.id)
-            console.log('✅ [AuthContext] User profile fetched after login')
+            logger.debug('[AuthContext] User profile fetched after login')
           } catch (profileError) {
-            console.error('❌ [AuthContext] Failed to fetch user profile after login', profileError)
+            logger.error('[AuthContext] Failed to fetch user profile after login', { error: profileError })
             // Don't fail login if profile fetch fails
           }
           // Mark session as initialized

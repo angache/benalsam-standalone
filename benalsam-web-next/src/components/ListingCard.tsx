@@ -3,6 +3,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { logger } from '@/utils/production-logger'
 import { 
   MapPin, 
   Clock, 
@@ -237,7 +238,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    console.log('❤️ [ListingCard] Favorite clicked:', { 
+    logger.debug('[ListingCard] Favorite clicked', { 
       listingId: listing.id, 
       hasHandler: !!onToggleFavorite,
       isFavorited 
@@ -245,7 +246,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
     if (onToggleFavorite) {
       onToggleFavorite(listing.id)
     } else {
-      console.warn('⚠️ [ListingCard] No onToggleFavorite handler!')
+      logger.warn('[ListingCard] No onToggleFavorite handler!')
     }
   }
 
@@ -269,7 +270,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
       try {
         await navigator.share(shareData)
       } catch (err) {
-        console.log('Share cancelled or failed')
+        logger.debug('[ListingCard] Share cancelled or failed', { error: err })
       }
     } else {
       // Fallback: Copy to clipboard
@@ -277,7 +278,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
         await navigator.clipboard.writeText(shareData.url)
         alert('Link kopyalandı!')
       } catch (err) {
-        console.error('Failed to copy:', err)
+        logger.error('[ListingCard] Failed to copy to clipboard', { error: err })
       }
     }
   }
