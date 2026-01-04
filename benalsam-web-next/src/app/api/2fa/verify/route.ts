@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { validateBody, commonSchemas } from '@/lib/api-validation'
 import { z } from 'zod'
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 
 /**
  * Schema for 2FA verification
@@ -33,10 +34,7 @@ export async function POST(request: NextRequest) {
     const targetUserId = userId || user?.id
 
     if (!targetUserId) {
-      return NextResponse.json(
-        { success: false, error: 'Kullanıcı bulunamadı' },
-        { status: 401 }
-      )
+      return apiErrors.unauthorized('Kullanıcı bulunamadı', request.nextUrl.pathname)
     }
 
     // Get user from database (profiles table)
@@ -48,10 +46,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (userError || !profile) {
-      return NextResponse.json(
-        { success: false, error: 'Kullanıcı bulunamadı' },
-        { status: 404 }
-      )
+      return apiErrors.notFound('Kullanıcı', request.nextUrl.pathname)
     }
 
     // Check if it's a backup code
@@ -78,9 +73,10 @@ export async function POST(request: NextRequest) {
     const secret = profile.totp_secret
 
     if (!secret) {
-      return NextResponse.json(
-        { success: false, error: '2FA yapılandırması bulunamadı' },
-        { status: 400 }
+      return apiErrors.validationError(
+        '2FA yapılandırması bulunamadı',
+        { userId: targetUserId },
+        request.nextUrl.pathname
       )
     }
 
@@ -93,10 +89,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (!verified) {
-      return NextResponse.json(
-        { success: false, error: 'Geçersiz kod' },
-        { status: 401 }
-      )
+      return apiErrors.unauthorized('Geçersiz kod', request.nextUrl.pathname)
     }
 
     // If 2FA is not enabled yet, enable it now (after successful verification)
@@ -110,8 +103,7 @@ export async function POST(request: NextRequest) {
         })
         .eq('id', targetUserId)
 
-      return NextResponse.json({
-        success: true,
+      return createSuccessResponse({
         message: '2FA başarıyla aktifleştirildi',
         setup: true,
       })
@@ -125,19 +117,18 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', targetUserId)
 
-    return NextResponse.json({
-      success: true,
+    return createSuccessResponse({
       message: 'Kod doğrulandı',
     })
   } catch (error: unknown) {
-    logger.error('[API] 2FA verification error', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      userId: targetUserId
-    })
-    return NextResponse.json(
-      { success: false, error: 'Kod doğrulama sırasında bir hata oluştu' },
-      { status: 500 }
+    return apiErrors.internalError(
+      'Kod doğrulama sırasında bir hata oluştu',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        userId: targetUserId,
+      },
+      request.nextUrl.pathname
     )
   }
 }

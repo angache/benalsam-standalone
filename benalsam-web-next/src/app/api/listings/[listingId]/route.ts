@@ -5,6 +5,7 @@ import { logger } from '@/utils/production-logger'
 import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
 import { validateParams, commonSchemas } from '@/lib/api-validation'
 import { z } from 'zod'
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 
 /**
  * Schema for listing ID parameter
@@ -57,11 +58,7 @@ export async function GET(
       .single();
 
     if (error || !listing) {
-      logger.error('[API] Listing not found', { error, listingId });
-      return NextResponse.json(
-        { error: 'Listing not found' },
-        { status: 404 }
-      );
+      return apiErrors.notFound('İlan', request.nextUrl.pathname)
     }
 
     // Optionally increment view count (only if user is not the owner)
@@ -98,10 +95,7 @@ export async function DELETE(
     const user = await getServerUser()
 
     if (!user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
     }
 
     const rawParams = await params
@@ -129,10 +123,7 @@ export async function DELETE(
     }
 
     if (listing.user_id !== user.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized to delete this listing' },
-        { status: 403 }
-      )
+      return apiErrors.forbidden('Bu ilanı silme yetkiniz yok', request.nextUrl.pathname)
     }
 
     // Delete the listing
@@ -142,27 +133,24 @@ export async function DELETE(
       .eq('id', listingId)
 
     if (deleteError) {
-      logger.error('[API] Error deleting listing', { error: deleteError, listingId, userId: user.id })
-      return NextResponse.json(
-        { error: 'Failed to delete listing' },
-        { status: 500 }
+      return apiErrors.databaseError(
+        'İlan silinirken bir hata oluştu',
+        { error: deleteError, listingId, userId: user.id },
+        request.nextUrl.pathname
       )
     }
 
     logger.debug('[API] Listing deleted successfully', { listingId, userId: user.id })
-    return NextResponse.json(
-      { success: true, message: 'Listing deleted successfully' },
-      { status: 200 }
-    )
+    return createSuccessResponse({ message: 'İlan başarıyla silindi' })
   } catch (error: unknown) {
-    logger.error('[API] Delete listing exception', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      listingId
-    })
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    return apiErrors.internalError(
+      'İlan silinirken bir hata oluştu',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        listingId,
+      },
+      request.nextUrl.pathname
     )
   }
 }
@@ -201,17 +189,11 @@ export async function PATCH(
       .single()
 
     if (fetchError || !listing) {
-      return NextResponse.json(
-        { error: 'Listing not found' },
-        { status: 404 }
-      )
+      return apiErrors.notFound('İlan', request.nextUrl.pathname)
     }
 
     if (listing.user_id !== user.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized to update this listing' },
-        { status: 403 }
-      )
+      return apiErrors.forbidden('Bu ilanı güncelleme yetkiniz yok', request.nextUrl.pathname)
     }
 
     // Update the listing
@@ -224,27 +206,24 @@ export async function PATCH(
       .eq('id', listingId)
 
     if (updateError) {
-      logger.error('[API] Error updating listing', { error: updateError, listingId, userId: user.id })
-      return NextResponse.json(
-        { error: 'Failed to update listing' },
-        { status: 500 }
+      return apiErrors.databaseError(
+        'İlan güncellenirken bir hata oluştu',
+        { error: updateError, listingId, userId: user.id },
+        request.nextUrl.pathname
       )
     }
 
     logger.debug('[API] Listing updated successfully', { listingId, userId: user.id })
-    return NextResponse.json(
-      { success: true, message: 'Listing updated successfully' },
-      { status: 200 }
-    )
+    return createSuccessResponse({ message: 'İlan başarıyla güncellendi' })
   } catch (error: unknown) {
-    logger.error('[API] Update listing exception', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      listingId
-    })
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    return apiErrors.internalError(
+      'İlan güncellenirken bir hata oluştu',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        listingId,
+      },
+      request.nextUrl.pathname
     )
   }
 }

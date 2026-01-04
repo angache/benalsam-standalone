@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { validateBody } from '@/lib/api-validation'
 import { z } from 'zod'
+import { createSuccessResponse, apiErrors, ApiErrorCode } from '@/lib/api-errors'
 
 /**
  * Schema for creating a listing
@@ -48,10 +49,7 @@ export async function POST(request: NextRequest) {
     const user = await getServerUser()
 
     if (!user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
     }
 
     // Validate request body
@@ -113,45 +111,38 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      logger.error('[API] Database error creating listing', {
-        userId: user.id,
-        error: {
+      return apiErrors.databaseError(
+        'İlan oluşturulurken bir hata oluştu',
+        {
           code: error.code,
           message: error.message,
           details: error.details,
-          hint: error.hint
-        }
-      })
-      return NextResponse.json(
-        { 
-          error: 'İlan oluşturulurken bir hata oluştu',
-          details: error.message,
-          code: error.code
+          hint: error.hint,
         },
-        { status: 500 }
+        request.nextUrl.pathname
       )
     }
 
     logger.debug('[API] Listing created successfully', { listingId: listing.id, userId: user.id })
 
-    return NextResponse.json({
-      success: true,
-      listing: {
+    return createSuccessResponse(
+      {
         id: listing.id,
         title: listing.title,
         status: listing.status,
-        message: 'İlanınız başarıyla oluşturuldu! Yönetici onayından sonra yayınlanacaktır.'
-      }
-    }, { status: 201 })
+        message: 'İlanınız başarıyla oluşturuldu! Yönetici onayından sonra yayınlanacaktır.',
+      },
+      { status: 201 }
+    )
 
   } catch (error: unknown) {
-    logger.error('[API] Create listing error', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    })
-    return NextResponse.json(
-      { error: 'İlan oluşturulurken bir hata oluştu' },
-      { status: 500 }
+    return apiErrors.internalError(
+      'İlan oluşturulurken bir hata oluştu',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
     )
   }
 }

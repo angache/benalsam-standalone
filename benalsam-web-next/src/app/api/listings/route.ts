@@ -9,6 +9,7 @@ import { fetchListingsWithFilters } from '@/services/listingService/fetchers'
 import { logger } from '@/utils/production-logger'
 import { validateQuery, commonSchemas } from '@/lib/api-validation'
 import { z } from 'zod'
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 
 /**
  * Schema for listing search/filter query parameters
@@ -106,28 +107,25 @@ export async function GET(request: NextRequest) {
       { page, limit: pageSize }
     )
 
-    return NextResponse.json({
-      success: true,
-      listings: result.listings,
-      pagination: {
-        page,
-        pageSize,
-        total: result.total,
-        totalPages: Math.ceil(result.total / pageSize),
-      },
-    })
-  } catch (error: unknown) {
-    logger.error('[API] /api/listings error', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    })
-    return NextResponse.json(
+    return createSuccessResponse(
+      result.listings,
       {
-        success: false,
-        error: 'Failed to fetch listings',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        meta: {
+          page,
+          pageSize,
+          total: result.total,
+          totalPages: Math.ceil(result.total / pageSize),
+        },
+      }
+    )
+  } catch (error: unknown) {
+    return apiErrors.internalError(
+      'İlanlar yüklenirken bir hata oluştu',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
       },
-      { status: 500 }
+      request.nextUrl.pathname
     )
   }
 }

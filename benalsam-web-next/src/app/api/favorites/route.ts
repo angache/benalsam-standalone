@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { validateBody, validateQuery, commonSchemas } from '@/lib/api-validation'
 import { z } from 'zod'
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 
 /**
  * Schema for adding a favorite
@@ -18,11 +19,7 @@ export async function POST(request: NextRequest) {
     const user = await getServerUser()
     
     if (!user?.id) {
-      logger.warn('[API] POST /api/favorites - No user found')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
     }
 
     // Validate request body
@@ -49,28 +46,25 @@ export async function POST(request: NextRequest) {
     if (error) {
       // Already exists
       if (error.code === '23505') {
-        return NextResponse.json(
-          { message: 'Already favorited', already_favorited: true },
-          { status: 200 }
-        )
+        return createSuccessResponse({ already_favorited: true, message: 'Zaten favorilerinizde' })
       }
       
-      logger.error('[API] Favorite add error', { error, userId: user.id, listingId })
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
+      return apiErrors.databaseError(
+        'Favori eklenirken bir hata oluştu',
+        { error: error.message, userId: user.id, listingId },
+        request.nextUrl.pathname
       )
     }
 
-    return NextResponse.json({ data, success: true })
+    return createSuccessResponse(data)
   } catch (error: unknown) {
-    logger.error('[API] Favorite add exception', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    })
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
+    return apiErrors.internalError(
+      'Favori eklenirken bir hata oluştu',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
     )
   }
 }
@@ -88,10 +82,7 @@ export async function DELETE(request: NextRequest) {
     const user = await getServerUser()
 
     if (!user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
     }
 
     // Validate query parameters
@@ -109,22 +100,22 @@ export async function DELETE(request: NextRequest) {
       .eq('listing_id', listingId)
 
     if (error) {
-      logger.error('[API] Favorite remove error', { error, userId: user.id, listingId })
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
+      return apiErrors.databaseError(
+        'Favori silinirken bir hata oluştu',
+        { error: error.message, userId: user.id, listingId },
+        request.nextUrl.pathname
       )
     }
 
-    return NextResponse.json({ success: true })
+    return createSuccessResponse({ message: 'Favori başarıyla silindi' })
   } catch (error: unknown) {
-    logger.error('[API] Favorite remove exception', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    })
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
+    return apiErrors.internalError(
+      'Favori silinirken bir hata oluştu',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
     )
   }
 }

@@ -5,6 +5,7 @@ import { generateUsername, ensureUniqueUsername } from '@/utils/username'
 import { logger } from '@/utils/production-logger'
 import { validateBody, commonSchemas } from '@/lib/api-validation'
 import { z } from 'zod'
+import { createSuccessResponse, apiErrors, ApiErrorCode } from '@/lib/api-errors'
 
 /**
  * Schema for user registration
@@ -41,10 +42,7 @@ export async function POST(request: NextRequest) {
     const userExists = existingAuthUser.users.some((u: { email?: string }) => u.email === body.email)
 
     if (userExists) {
-      return NextResponse.json(
-        { success: false, error: 'Bu email adresi zaten kullanılıyor' },
-        { status: 409 }
-      )
+      return apiErrors.duplicateEntry('Bu email adresi', request.nextUrl.pathname)
     }
 
     // Create user in Supabase Auth
@@ -58,10 +56,10 @@ export async function POST(request: NextRequest) {
     })
 
     if (authError) {
-      logger.error('[API] Supabase auth error during registration', { error: authError, email: body.email })
-      return NextResponse.json(
-        { success: false, error: 'Kullanıcı oluşturulamadı' },
-        { status: 500 }
+      return apiErrors.databaseError(
+        'Kullanıcı oluşturulamadı',
+        { error: authError, email: body.email },
+        request.nextUrl.pathname
       )
     }
 
@@ -90,18 +88,17 @@ export async function POST(request: NextRequest) {
     })
 
     if (profileError) {
-      logger.error('[API] Profile creation error during registration', { error: profileError, userId: authData.user.id })
       // Rollback: Delete auth user
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
-      return NextResponse.json(
-        { success: false, error: 'Profil oluşturulamadı' },
-        { status: 500 }
+      return apiErrors.databaseError(
+        'Profil oluşturulamadı',
+        { error: profileError, userId: authData.user.id },
+        request.nextUrl.pathname
       )
     }
 
-    return NextResponse.json(
+    return createSuccessResponse(
       {
-        success: true,
         message: 'Kayıt başarılı! Lütfen email adresinizi doğrulayın.',
         user: {
           id: authData.user.id,
@@ -112,13 +109,13 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
   } catch (error: unknown) {
-    logger.error('[API] Registration exception', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined
-    })
-    return NextResponse.json(
-      { success: false, error: 'Kayıt yapılırken bir hata oluştu' },
-      { status: 500 }
+    return apiErrors.internalError(
+      'Kayıt yapılırken bir hata oluştu',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request.nextUrl.pathname
     )
   }
 }
