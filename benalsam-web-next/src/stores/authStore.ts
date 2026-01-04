@@ -72,7 +72,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
     try {
       // Check if we have a session
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('🔐 [AuthStore] Session check result:', { 
+      logger.debug('[AuthStore] Session check result', { 
         hasSession: !!session, 
         userId: session?.user?.id,
         userEmail: session?.user?.email,
@@ -107,7 +107,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
       // Listen for auth state changes
       supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('🔐 [AuthStore] Auth state change:', { 
+        logger.debug('[AuthStore] Auth state change', { 
           event, 
           hasSession: !!session, 
           userId: session?.user?.id,
@@ -127,15 +127,15 @@ export const useAuthStore = create<AuthState>((set, get) => {
             created_at: session.user.created_at,
             updated_at: session.user.updated_at || session.user.created_at
           };
-          console.log('🔐 [AuthStore] User signed in, updating state:', { 
+          logger.debug('[AuthStore] User signed in, updating state', { 
             userId: basicUser.id, 
             userEmail: basicUser.email, 
             userName: basicUser.name 
           });
           set({ user: basicUser, currentUser: basicUser, loading: false });
-          console.log('🔐 [AuthStore] User signed in, state updated');
+          logger.debug('[AuthStore] User signed in, state updated');
         } else if (event === 'SIGNED_OUT') {
-          console.log('🔐 [AuthStore] User signed out');
+          logger.debug('[AuthStore] User signed out');
           set({ user: null, currentUser: null, loading: false });
         }
       });
@@ -155,7 +155,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
     initialized: false,
 
     signIn: async (email: string, password: string) => {
-      console.log('🔐 [AuthStore] Sign in attempt:', { email });
+      logger.debug('[AuthStore] Sign in attempt', { email });
       set({ loading: true });
       
       try {
@@ -172,7 +172,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
           rateLimitCheck.allowed = false;
         }
       }
-      console.log('🔐 [AuthStore] Rate limit check:', rateLimitCheck);
+      logger.debug('[AuthStore] Rate limit check', rateLimitCheck);
         
         if (!rateLimitCheck.allowed) {
           let errorMsg = '';
@@ -188,7 +188,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
             errorMsg = 'Çok fazla deneme yapıldı. Lütfen daha sonra tekrar deneyin.';
           }
           
-          console.log('🔐 [AuthStore] Rate limit exceeded:', errorMsg);
+          logger.warn('[AuthStore] Rate limit exceeded', { errorMsg });
           set({ loading: false });
           return { error: errorMsg };
         }
@@ -198,7 +198,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
           password,
         });
 
-        console.log('🔐 [AuthStore] Sign in result:', { 
+        logger.debug('[AuthStore] Sign in result', { 
           hasData: !!data, 
           hasError: !!error, 
           userId: data?.user?.id,
@@ -206,7 +206,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
         });
 
         if (error) {
-          console.error('🔐 [AuthStore] Sign in error:', error);
+          logger.error('[AuthStore] Sign in error', { error });
           
                   // Record failed attempt for rate limiting
         // Record failed attempt in localStorage
@@ -218,7 +218,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
         if (data.user && data.session) {
           // Enterprise Session Logging
-          console.log('🔐 [AuthStore] Enterprise Session: Logging login activity...');
+          logger.debug('[AuthStore] Enterprise Session: Logging login activity...');
           await sessionLoggerService.logSessionActivity(
             'login',
             { user_id: data.user.id, email: data.user.email }
@@ -232,7 +232,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
             .single();
 
           if (profile?.is_2fa_enabled) {
-            console.log('🔐 [AuthStore] 2FA enabled for user:', data.user.email);
+            logger.debug('[AuthStore] 2FA enabled for user', { email: data.user.email });
             // 2FA gerektiğinde session oluşturma, sadece bilgi döndür
             set({ loading: false });
             return { error: '2FA_REQUIRED', requires2FA: true, userId: data.user.id };
@@ -249,7 +249,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
             created_at: data.user.created_at,
             updated_at: data.user.updated_at || data.user.created_at
           };
-          console.log('🔐 [AuthStore] Setting user after sign in:', { 
+          logger.debug('[AuthStore] Setting user after sign in', { 
             userId: basicUser.id, 
             userEmail: basicUser.email, 
             userName: basicUser.name 
@@ -264,14 +264,14 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
         return {};
       } catch (error) {
-        console.error('🔐 [AuthStore] Sign in exception:', error);
+        logger.error('[AuthStore] Sign in exception', { error });
         set({ loading: false });
         return { error: 'Giriş yapılırken bir hata oluştu' };
       }
     },
 
         verify2FA: async (userId: string, code: string, email?: string, password?: string) => {
-      console.log('🔐 [AuthStore] 2FA verification attempt:', { userId });
+      logger.debug('[AuthStore] 2FA verification attempt', { userId });
       set({ loading: true });
       
       try {
@@ -290,14 +290,14 @@ export const useAuthStore = create<AuthState>((set, get) => {
         const result = await response.json();
 
         if (!response.ok) {
-          console.error('🔐 [AuthStore] 2FA verification failed:', result);
+          logger.error('[AuthStore] 2FA verification failed', { result });
           set({ loading: false });
           return { error: result.message || '2FA doğrulama başarısız' };
         }
 
         // Doğrulama başarılı, şimdi session oluştur
-        console.log('🔐 [AuthStore] 2FA verification successful, creating session...');
-        console.log('🔐 [AuthStore] Email and password check:', { hasEmail: !!email, hasPassword: !!password });
+        logger.debug('[AuthStore] 2FA verification successful, creating session...');
+        logger.debug('[AuthStore] Email and password check', { hasEmail: !!email, hasPassword: !!password });
         
         // Email ve password ile tekrar login yap
         if (email && password) {
@@ -307,7 +307,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
           });
 
           if (loginError) {
-            console.error('🔐 [AuthStore] Login after 2FA failed:', loginError);
+            logger.error('[AuthStore] Login after 2FA failed', { error: loginError });
             set({ loading: false });
             return { error: 'Giriş yapılamadı' };
           }
@@ -333,7 +333,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
                 updated_at: profile.updated_at
               };
 
-              console.log('🔐 [AuthStore] 2FA verification successful, setting user:', { 
+              logger.debug('[AuthStore] 2FA verification successful, setting user', { 
                 userId: basicUser.id, 
                 userEmail: basicUser.email 
               });
@@ -347,21 +347,21 @@ export const useAuthStore = create<AuthState>((set, get) => {
                 { user_id: basicUser.id, email: basicUser.email, method: '2fa_verified' }
               );
               
-              console.log('🔐 [AuthStore] 2FA session created successfully');
+              logger.debug('[AuthStore] 2FA session created successfully');
             }
           }
         }
 
         return {};
       } catch (error) {
-        console.error('🔐 [AuthStore] 2FA verification error:', error);
+        logger.error('[AuthStore] 2FA verification error', { error });
         set({ loading: false });
         return { error: '2FA doğrulama hatası' };
       }
     },
 
     signUp: async (email: string, password: string, name: string) => {
-      console.log('🔐 [AuthStore] Sign up attempt:', { email, name });
+      logger.debug('[AuthStore] Sign up attempt', { email, name });
       set({ loading: true });
       try {
         const avatar_url = `https://source.boringavatars.com/beam/120/${name.replace(/\s+/g, '') || 'benalsamUser'}?colors=ff6b35,f7931e,ff8c42,1a0f0a,2d1810`;
@@ -377,7 +377,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
           },
         });
 
-        console.log('🔐 [AuthStore] Sign up result:', { 
+        logger.debug('[AuthStore] Sign up result', { 
           hasData: !!data, 
           hasError: !!error, 
           userId: data?.user?.id,
@@ -385,14 +385,14 @@ export const useAuthStore = create<AuthState>((set, get) => {
         });
 
         if (error) {
-          console.error('🔐 [AuthStore] Sign up error:', error);
+          logger.error('[AuthStore] Sign up error', { error });
           set({ loading: false });
           return { error: error.message };
         }
 
         if (data.user && data.session) {
           // Enterprise Session Logging for signup
-          console.log('🔐 [AuthStore] Enterprise Session: Logging signup activity...');
+          logger.debug('[AuthStore] Enterprise Session: Logging signup activity...');
           await sessionLoggerService.logSessionActivity(
             'login',
             { user_id: data.user.id, email: data.user.email }
@@ -409,7 +409,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
             .eq('id', data.user.id);
 
           if (profileError) {
-            console.error("🔐 [AuthStore] Error updating profile on signup:", profileError);
+            logger.error('[AuthStore] Error updating profile on signup', { error: profileError });
           }
 
           const basicUser = {
@@ -423,7 +423,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
             created_at: data.user.created_at,
             updated_at: data.user.updated_at || data.user.created_at
           };
-          console.log('🔐 [AuthStore] Setting user after sign up:', { 
+          logger.debug('[AuthStore] Setting user after sign up', { 
             userId: basicUser.id, 
             userEmail: basicUser.email, 
             userName: basicUser.name 
@@ -433,14 +433,14 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
         return {};
       } catch (error) {
-        console.error('🔐 [AuthStore] Sign up exception:', error);
+        logger.error('[AuthStore] Sign up exception', { error });
         set({ loading: false });
         return { error: 'Kayıt olurken bir hata oluştu' };
       }
     },
 
     signOut: async () => {
-      console.log('🔐 [AuthStore] Starting robust sign out process');
+      logger.debug('[AuthStore] Starting robust sign out process');
       set({ loading: true });
       
       try {
@@ -461,16 +461,16 @@ export const useAuthStore = create<AuthState>((set, get) => {
             
             if (session && !error) {
               // Session geçerliyse logout logla
-              console.log('🔐 [AuthStore] Enterprise Session: Logging logout activity...');
+              logger.debug('[AuthStore] Enterprise Session: Logging logout activity...');
               await sessionLoggerService.logSessionActivity(
                 'logout',
                 { user_id: currentUser.id, email: currentUser.email }
               );
             } else {
-              console.warn('🔐 [AuthStore] No valid session for logging, skipping enterprise log');
+              logger.warn('[AuthStore] No valid session for logging, skipping enterprise log');
             }
           } catch (logError) {
-            console.warn('🔐 [AuthStore] Enterprise logging failed (continuing)', logError);
+            logger.warn('[AuthStore] Enterprise logging failed (continuing)', { error: logError });
           }
         }
         
@@ -481,17 +481,17 @@ export const useAuthStore = create<AuthState>((set, get) => {
           
           if (session && !sessionError) {
             // Session geçerliyse normal signOut
-            console.log('🔐 [AuthStore] Valid session found, attempting normal signOut');
+            logger.debug('[AuthStore] Valid session found, attempting normal signOut');
             const { error } = await supabase.auth.signOut({ scope: 'global' });
             
             if (error) {
-              console.warn('🔐 [AuthStore] Normal signOut failed, forcing client cleanup', error);
+              logger.warn('[AuthStore] Normal signOut failed, forcing client cleanup', { error });
               // Hata olsa bile client-side cleanup devam et
             } else {
-              console.log('🔐 [AuthStore] Normal signOut successful');
+              logger.debug('[AuthStore] Normal signOut successful');
             }
           } else {
-            console.warn('🔐 [AuthStore] No valid session found, performing client-side cleanup only');
+            logger.warn('[AuthStore] No valid session found, performing client-side cleanup only');
           }
           
           // FORCE CLIENT CLEANUP (session geçerli olsun olmasın)
@@ -503,7 +503,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
                 await (supabase.auth as any)._removeSession();
               }
             } catch (privateError) {
-              console.warn('🔐 [AuthStore] Private method cleanup failed, continuing with storage cleanup');
+              logger.warn('[AuthStore] Private method cleanup failed, continuing with storage cleanup');
             }
             
             // Storage'ı manuel temizle
@@ -517,16 +517,16 @@ export const useAuthStore = create<AuthState>((set, get) => {
                 await storage.removeItem('supabase.auth.expires_at');
               }
             } catch (storageError) {
-              console.warn('🔐 [AuthStore] Storage cleanup failed, continuing');
+              logger.warn('[AuthStore] Storage cleanup failed, continuing');
             }
             
-            console.log('🔐 [AuthStore] Forced client cleanup completed');
+            logger.debug('[AuthStore] Forced client cleanup completed');
           } catch (cleanupError) {
-            console.warn('🔐 [AuthStore] Force cleanup failed', cleanupError);
+            logger.warn('[AuthStore] Force cleanup failed', { error: cleanupError });
           }
           
         } catch (supabaseError) {
-          console.error('🔐 [AuthStore] Supabase signOut completely failed, doing manual cleanup', supabaseError);
+          logger.error('[AuthStore] Supabase signOut completely failed, doing manual cleanup', { error: supabaseError });
         }
         
         // 3. Local Storage cleanup (her zaman yap)
@@ -544,7 +544,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
             try {
               localStorage.removeItem(key);
             } catch (e) {
-              console.warn(`🔐 [AuthStore] Failed to remove ${key} from localStorage`);
+              logger.warn(`[AuthStore] Failed to remove ${key} from localStorage`);
             }
           });
           
@@ -553,13 +553,13 @@ export const useAuthStore = create<AuthState>((set, get) => {
             try {
               sessionStorage.removeItem(key);
             } catch (e) {
-              console.warn(`🔐 [AuthStore] Failed to remove ${key} from sessionStorage`);
+              logger.warn(`[AuthStore] Failed to remove ${key} from sessionStorage`);
             }
           });
           
-          console.log('🔐 [AuthStore] Local storage cleanup completed');
+          logger.debug('[AuthStore] Local storage cleanup completed');
         } catch (storageError) {
-          console.warn('🔐 [AuthStore] Local storage cleanup failed', storageError);
+          logger.warn('[AuthStore] Local storage cleanup failed', { error: storageError });
         }
         
         // 4. Cookies cleanup
@@ -575,13 +575,13 @@ export const useAuthStore = create<AuthState>((set, get) => {
             try {
               document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
             } catch (e) {
-              console.warn(`🔐 [AuthStore] Failed to remove cookie ${cookieName}`);
+              logger.warn(`[AuthStore] Failed to remove cookie ${cookieName}`);
             }
           });
           
-          console.log('🔐 [AuthStore] Cookies cleanup completed');
+          logger.debug('[AuthStore] Cookies cleanup completed');
         } catch (cookieError) {
-          console.warn('🔐 [AuthStore] Cookies cleanup failed', cookieError);
+          logger.warn('[AuthStore] Cookies cleanup failed', { error: cookieError });
         }
         
         // 5. Final state cleanup
@@ -591,7 +591,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
           loading: false 
         });
         
-        console.log('🔐 [AuthStore] User signed out successfully with comprehensive cleanup');
+        logger.debug('[AuthStore] User signed out successfully with comprehensive cleanup');
         
         // 6. Force page reload to clear any remaining state
         try {
@@ -600,18 +600,18 @@ export const useAuthStore = create<AuthState>((set, get) => {
             window.location.reload();
           }, 100);
         } catch (reloadError) {
-          console.warn('🔐 [AuthStore] Force reload failed', reloadError);
+          logger.warn('[AuthStore] Force reload failed', { error: reloadError });
         }
         
       } catch (error) {
-        console.error('🔐 [AuthStore] Sign out exception:', error);
+        logger.error('[AuthStore] Sign out exception', { error });
         set({ loading: false });
       }
     },
 
     initialize: async () => {
       // This function is kept for compatibility but auto-initialization is handled in store creation
-      console.log('🔐 [AuthStore] Manual initialize called (auto-initialization already running)');
+      logger.debug('[AuthStore] Manual initialize called (auto-initialization already running)');
     },
   };
 }); 
