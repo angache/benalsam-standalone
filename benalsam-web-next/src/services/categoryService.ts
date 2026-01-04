@@ -1,5 +1,6 @@
 import { categoriesServiceClient } from '@/lib/apiClient'
 import { categoryCacheService } from './categoryCacheService'
+import { logger } from '@/utils/production-logger'
 
 export interface CategoryAttribute {
   id: number
@@ -103,10 +104,10 @@ class CategoryService {
         .filter(cat => cat.level === 0)
         .slice(0, limit)
       
-      console.log('✅ Popular categories:', topLevelCategories.map(c => ({ name: c.name, id: c.id })))
+      logger.debug('[CategoryService] Popular categories', { categories: topLevelCategories.map(c => ({ name: c.name, id: c.id })) })
       return topLevelCategories
     } catch (error) {
-      console.error('Error fetching popular categories:', error)
+      logger.error('[CategoryService] Error fetching popular categories', { error })
       return []
     }
   }

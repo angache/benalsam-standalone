@@ -5,6 +5,7 @@
  */
 
 import { supabase } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
 
 const TRUST_SCORE_WEIGHTS = {
   profile_completeness: 15,
@@ -93,7 +94,7 @@ async function calculateListingsScore(userId: string): Promise<number> {
       .eq('status', 'active')
 
     if (error) {
-      console.error('Error counting listings:', error)
+      logger.error('[TrustScoreService] Error counting listings', { error })
       return 0
     }
 
@@ -103,7 +104,7 @@ async function calculateListingsScore(userId: string): Promise<number> {
     if (listingsCount >= 10) return 100
     return Math.round((listingsCount / 10) * 100)
   } catch (error) {
-    console.error('Error calculating listings score:', error)
+    logger.error('[TrustScoreService] Error calculating listings score', { error })
     return 0
   }
 }
@@ -254,7 +255,7 @@ export async function calculateTrustScore(userId: string): Promise<TrustScoreCal
       })
       
       if (insertError) {
-        console.error('Error initializing user statistics:', insertError)
+        logger.error('[TrustScoreService] Error initializing user statistics', { error: insertError })
       }
       
       // Try to fetch again
@@ -306,7 +307,7 @@ export async function calculateTrustScore(userId: string): Promise<TrustScoreCal
       progressToNextLevel,
     }
   } catch (error: any) {
-    console.error('Error calculating trust score:', error)
+    logger.error('[TrustScoreService] Error calculating trust score', { error })
     throw error
   }
 }
