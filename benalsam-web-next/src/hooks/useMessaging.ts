@@ -7,6 +7,7 @@ import {
   sendMessage as sendMessageAPI,
   markMessagesAsRead
 } from '@/services/conversationService';
+import { logger } from '@/utils/production-logger';
 
 /**
  * Hook for fetching conversation details
@@ -32,7 +33,7 @@ export function useMessages(conversationId: string | null) {
     queryKey: ['messages', conversationId],
     queryFn: async ({ pageParam = 0 }) => {
       if (!conversationId) throw new Error('No conversation ID');
-      console.log('🔵 [useMessages] Fetching from API...', { 
+      logger.debug('[useMessages] Fetching from API', { 
         conversationId, 
         offset: pageParam 
       });
@@ -57,7 +58,7 @@ export function useMessages(conversationId: string | null) {
         return loadedCount;
       }
       
-      console.log('📊 [useMessages] No more pages');
+      logger.debug('[useMessages] No more pages');
       return undefined;
     },
   });
@@ -84,7 +85,7 @@ export function useSendMessage() {
     
     // On success, update conversations list
     onSuccess: async (data, variables) => {
-      console.log('✅ [useSendMessage] Message sent successfully');
+      logger.debug('[useSendMessage] Message sent successfully');
       
       // Update conversations list to show latest message
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
@@ -92,7 +93,7 @@ export function useSendMessage() {
 
     // On error, log it
     onError: (err) => {
-      console.error('❌ [useSendMessage] Failed to send message:', err);
+      logger.error('[useSendMessage] Failed to send message', { error: err });
     },
   });
 }
@@ -115,7 +116,7 @@ export function useMarkAsRead() {
     },
     
     onSuccess: (_, variables) => {
-      console.log('✅ [useMarkAsRead] Messages marked as read');
+      logger.debug('[useMarkAsRead] Messages marked as read');
       // Invalidate to refresh unread counts
       queryClient.invalidateQueries({ queryKey: ['messages', variables.conversationId] });
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
@@ -131,7 +132,7 @@ export function useConversations(userId: string | undefined) {
     queryKey: ['conversations', userId],
     queryFn: async () => {
       if (!userId) throw new Error('No user ID');
-      console.log('🔵 [useConversations] Fetching from API...', { userId });
+      logger.debug('[useConversations] Fetching from API', { userId });
       const response = await fetch(`/api/messages?userId=${userId}`);
       if (!response.ok) throw new Error('Failed to fetch conversations');
       const { data } = await response.json();

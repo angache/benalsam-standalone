@@ -9,6 +9,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { listingService } from '@/services/listingService'
 import type { FilterState } from '@/components/home/FilterSidebar'
+import { logger } from '@/utils/production-logger'
 
 export type SortOption = 'newest' | 'price_low' | 'price_high' | 'popular'
 
@@ -49,7 +50,7 @@ export function useFilteredListings({
   return useInfiniteQuery({
     queryKey: ['filtered-listings', filters, userId, sortBy],
     queryFn: async ({ pageParam = 1 }) => {
-      console.log('🔍 [useFilteredListings] Fetching page:', pageParam, 'with filters:', filters, 'sortBy:', sortBy)
+      logger.debug('[useFilteredListings] Fetching page', { pageParam, filters, sortBy })
       
       const result = await listingService.getListingsWithFilters(
         userId || null,

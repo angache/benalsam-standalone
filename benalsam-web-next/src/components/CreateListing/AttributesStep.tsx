@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Shield } from 'lucide-react'
+import { logger } from '@/utils/production-logger'
 
 // Kategoriye özel attribute tanımları
 const categoryAttributes = {
@@ -222,24 +223,24 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
       console.log('🔍 [ATTRIBUTES] Finding attributes for category ID:', selectedCategoryId)
       
       if (!selectedCategoryId) {
-        console.log('❌ [ATTRIBUTES] No category ID provided')
+        logger.warn('[AttributesStep] No category ID provided')
         return []
       }
       
       const raw = localStorage.getItem('benalsam_categories_next_v1.0.0')
       if (!raw) {
-        console.log('❌ [ATTRIBUTES] No categories cache found')
+        logger.warn('[AttributesStep] No categories cache found')
         return []
       }
       
       const parsed = JSON.parse(raw)
       const categories: any[] = parsed?.data || []
-      console.log('🌳 [ATTRIBUTES] Total categories:', categories.length)
+      logger.debug('[AttributesStep] Total categories', { count: categories.length })
       
       const findById = (nodes: any[]): any | null => {
         for (const n of nodes) {
           if (String(n.id) === String(selectedCategoryId)) {
-            console.log('✅ [ATTRIBUTES] Found matching category:', { 
+            logger.debug('[AttributesStep] Found matching category', { 
               id: n.id, 
               name: n.name, 
               attributesCount: n.category_attributes?.length || 0 
@@ -255,10 +256,10 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
       
       const category = findById(categories)
       const attrs = category?.category_attributes || []
-      console.log('🎯 [ATTRIBUTES] Category attributes:', attrs)
+      logger.debug('[AttributesStep] Category attributes', { attrs })
       return attrs
     } catch (error) {
-      console.error('❌ [ATTRIBUTES] Error finding category attributes:', error)
+      logger.error('[AttributesStep] Error finding category attributes', { error })
       return []
     }
   }, [selectedCategoryId])
@@ -269,7 +270,7 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
   // Backend'den gelen attribute'ları kullan (eğer varsa), yoksa hardcoded olanları kullan
   const attributes = useMemo(() => {
     if (categoryAttributesFromBackend && categoryAttributesFromBackend.length > 0) {
-      console.log('✅ [ATTRIBUTES] Using backend attributes:', categoryAttributesFromBackend.length)
+      logger.debug('[AttributesStep] Using backend attributes', { count: categoryAttributesFromBackend.length })
       // Backend attribute'larını component'in beklediği formata çevir
       return categoryAttributesFromBackend.map((attr: any) => {
         const parsedOptions = attr.options ? JSON.parse(attr.options) : []
@@ -289,37 +290,37 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
     }
     
     // Fallback: Hardcoded attribute'lar
-    console.log('⚠️ [ATTRIBUTES] No backend attributes, using fallback')
+    logger.warn('[AttributesStep] No backend attributes, using fallback')
     const name = selectedCategoryName.toLowerCase()
     
     if (name.includes('telefon') || name.includes('smartphone')) {
-      console.log('📱 [ATTRIBUTES] Matched: smartphone')
+      logger.debug('[AttributesStep] Matched: smartphone')
       return categoryAttributes['smartphone']?.attributes || []
     }
     if (name.includes('laptop') || name.includes('bilgisayar')) {
-      console.log('💻 [ATTRIBUTES] Matched: laptop')
+      logger.debug('[AttributesStep] Matched: laptop')
       return categoryAttributes['laptop']?.attributes || []
     }
     if (name.includes('araç') || name.includes('otomobil')) {
-      console.log('🚗 [ATTRIBUTES] Matched: car')
+      logger.debug('[AttributesStep] Matched: car')
       return categoryAttributes['car']?.attributes || []
     }
     if (name.includes('emlak') || name.includes('daire') || name.includes('ev') || name.includes('dükkan') || name.includes('mağaza') || name.includes('ofis') || name.includes('arsa') || name.includes('bina')) {
-      console.log('🏠 [ATTRIBUTES] Matched: real_estate')
+      logger.debug('[AttributesStep] Matched: real_estate')
       return categoryAttributes['real_estate']?.attributes || []
     }
     
-    console.log('⚠️ [ATTRIBUTES] No match, no attributes')
+    logger.warn('[AttributesStep] No match, no attributes')
     return []
   }, [categoryAttributesFromBackend, selectedCategoryName])
 
   const handleAttributeChange = (key: string, value: any) => {
-    console.log('🔧 [ATTRIBUTES] Attribute changed:', { key, value })
+    logger.debug('[AttributesStep] Attribute changed', { key, value })
     onChange(key, value)
   }
 
   const handleNext = () => {
-    console.log('🚀 [ATTRIBUTES] Next button clicked:', { isFormValid, attributes: attributes.length })
+    logger.debug('[AttributesStep] Next button clicked', { isFormValid, attributesCount: attributes.length })
     onNext()
   }
 
