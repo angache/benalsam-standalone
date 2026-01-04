@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { categoryService } from '@/services/categoryService'
+import { logger } from '@/utils/production-logger'
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,8 +16,11 @@ export async function GET(request: NextRequest) {
     const categories = await categoryService.getPopularCategories(limit)
 
     return NextResponse.json(categories, { status: 200 })
-  } catch (error) {
-    console.error('Error fetching popular categories:', error)
+  } catch (error: unknown) {
+    logger.error('[API] Error fetching popular categories', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { error: 'Failed to fetch popular categories' },
       { status: 500 }

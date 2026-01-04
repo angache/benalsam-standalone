@@ -3,6 +3,15 @@ import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
+import { validateParams, commonSchemas } from '@/lib/api-validation'
+import { z } from 'zod'
+
+/**
+ * Schema for listing ID parameter
+ */
+const listingIdParamSchema = z.object({
+  listingId: commonSchemas.uuid,
+})
 
 // GET /api/listings/[listingId] - Get listing details
 export async function GET(
@@ -10,7 +19,15 @@ export async function GET(
   { params }: { params: Promise<{ listingId: string }> }
 ) {
   try {
-    const { listingId } = await params;
+    const rawParams = await params
+    
+    // Validate route parameters
+    const validation = validateParams(rawParams, listingIdParamSchema)
+    if (!validation.success) {
+      return validation.response
+    }
+
+    const { listingId } = validation.data
     
     // Rate limiting
     const user = await getServerUser();
@@ -87,7 +104,15 @@ export async function DELETE(
       )
     }
 
-    const { listingId } = await params
+    const rawParams = await params
+    
+    // Validate route parameters
+    const validation = validateParams(rawParams, listingIdParamSchema)
+    if (!validation.success) {
+      return validation.response
+    }
+
+    const { listingId } = validation.data
 
     // Verify listing ownership
     const { data: listing, error: fetchError } = await supabaseAdmin
@@ -117,19 +142,24 @@ export async function DELETE(
       .eq('id', listingId)
 
     if (deleteError) {
-      console.error('Error deleting listing:', deleteError)
+      logger.error('[API] Error deleting listing', { error: deleteError, listingId, userId: user.id })
       return NextResponse.json(
         { error: 'Failed to delete listing' },
         { status: 500 }
       )
     }
 
+    logger.debug('[API] Listing deleted successfully', { listingId, userId: user.id })
     return NextResponse.json(
       { success: true, message: 'Listing deleted successfully' },
       { status: 200 }
     )
-  } catch (error) {
-    console.error('Delete listing API error:', error)
+  } catch (error: unknown) {
+    logger.error('[API] Delete listing exception', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      listingId
+    })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -152,7 +182,15 @@ export async function PATCH(
       )
     }
 
-    const { listingId } = await params
+    const rawParams = await params
+    
+    // Validate route parameters
+    const validation = validateParams(rawParams, listingIdParamSchema)
+    if (!validation.success) {
+      return validation.response
+    }
+
+    const { listingId } = validation.data
     const body = await request.json()
 
     // Verify listing ownership
@@ -186,19 +224,24 @@ export async function PATCH(
       .eq('id', listingId)
 
     if (updateError) {
-      console.error('Error updating listing:', updateError)
+      logger.error('[API] Error updating listing', { error: updateError, listingId, userId: user.id })
       return NextResponse.json(
         { error: 'Failed to update listing' },
         { status: 500 }
       )
     }
 
+    logger.debug('[API] Listing updated successfully', { listingId, userId: user.id })
     return NextResponse.json(
       { success: true, message: 'Listing updated successfully' },
       { status: 200 }
     )
-  } catch (error) {
-    console.error('Update listing API error:', error)
+  } catch (error: unknown) {
+    logger.error('[API] Update listing exception', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      listingId
+    })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

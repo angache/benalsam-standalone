@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
 
 /**
  * POST /api/2fa/enable
@@ -26,19 +27,23 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
 
     if (error) {
-      console.error('2FA enable error:', error)
+      logger.error('[API] 2FA enable error', { error, userId: user.id })
       return NextResponse.json(
         { success: false, error: '2FA aktifleştirilemedi' },
         { status: 500 }
       )
     }
 
+    logger.debug('[API] 2FA enabled successfully', { userId: user.id })
     return NextResponse.json({
       success: true,
       message: '2FA başarıyla aktifleştirildi',
     })
-  } catch (error: any) {
-    console.error('2FA enable error:', error)
+  } catch (error: unknown) {
+    logger.error('[API] 2FA enable exception', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { success: false, error: '2FA aktifleştirme sırasında bir hata oluştu' },
       { status: 500 }

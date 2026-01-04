@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { logger } from '@/utils/production-logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
       .order('updated_at', { ascending: false });
 
     if (convError) {
-      console.error('Error fetching conversations:', convError);
+      logger.error('[API] Error fetching conversations', { error: convError, userId });
       return NextResponse.json(
         { error: 'Failed to fetch conversations' },
         { status: 500 }
@@ -66,8 +67,11 @@ export async function GET(request: NextRequest) {
       success: true,
       data: formattedConversations
     });
-  } catch (error) {
-    console.error('API Error:', error);
+  } catch (error: unknown) {
+    logger.error('[API] GET /api/messages error', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -133,7 +137,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (messageError) {
-      console.error('Error creating message:', messageError);
+      logger.error('[API] Error creating message', { error: messageError, conversationId, senderId });
       return NextResponse.json(
         { error: `Failed to send message: ${messageError.message}` },
         { status: 500 }
@@ -152,8 +156,11 @@ export async function POST(request: NextRequest) {
       success: true,
       data: message
     });
-  } catch (error) {
-    console.error('API Error:', error);
+  } catch (error: unknown) {
+    logger.error('[API] POST /api/messages error', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
       { error: `Internal server error: ${error instanceof Error ? error.message : 'Unknown'}` },
       { status: 500 }

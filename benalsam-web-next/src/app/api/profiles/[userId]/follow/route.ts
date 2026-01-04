@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
 
 export async function POST(
   request: NextRequest,
@@ -42,14 +43,18 @@ export async function POST(
       })
 
     if (followError) {
-      console.error('Follow error:', followError)
+      logger.error('[API] Follow error', { error: followError, followerId: currentUserId, followingId: userId })
       return NextResponse.json({ error: 'Failed to follow user' }, { status: 500 })
     }
 
+    logger.debug('[API] User followed successfully', { followerId: currentUserId, followingId: userId })
     return NextResponse.json({ success: true, message: 'User followed successfully' })
 
-  } catch (error) {
-    console.error('Follow API error:', error)
+  } catch (error: unknown) {
+    logger.error('[API] Follow exception', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -75,14 +80,18 @@ export async function DELETE(
       .eq('following_id', userId)
 
     if (unfollowError) {
-      console.error('Unfollow error:', unfollowError)
+      logger.error('[API] Unfollow error', { error: unfollowError, followerId: currentUserId, followingId: userId })
       return NextResponse.json({ error: 'Failed to unfollow user' }, { status: 500 })
     }
 
+    logger.debug('[API] User unfollowed successfully', { followerId: currentUserId, followingId: userId })
     return NextResponse.json({ success: true, message: 'User unfollowed successfully' })
 
-  } catch (error) {
-    console.error('Unfollow API error:', error)
+  } catch (error: unknown) {
+    logger.error('[API] Unfollow exception', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

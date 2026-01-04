@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Error fetching my listings:', error)
+      logger.error('[API] Error fetching my listings', { error, userId: user.id })
       return NextResponse.json(
         { error: 'Failed to fetch listings' },
         { status: 500 }
@@ -43,8 +44,11 @@ export async function GET(request: NextRequest) {
     })) || []
 
     return NextResponse.json({ listings: processedListings }, { status: 200 })
-  } catch (error) {
-    console.error('My listings API error:', error)
+  } catch (error: unknown) {
+    logger.error('[API] My listings exception', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

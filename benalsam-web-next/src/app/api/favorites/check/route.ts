@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
 
 // Check favorite status for multiple listings
 export async function POST(request: NextRequest) {
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
       .in('listing_id', listingIds)
 
     if (error) {
-      console.error('❌ [API] Favorite check error:', error)
+      logger.error('[API] Favorite check error', { error, userId: user.id })
       return NextResponse.json(
         { data: {} },
         { status: 200 } // Return empty instead of error
@@ -42,11 +43,14 @@ export async function POST(request: NextRequest) {
       favoritedMap[fav.listing_id] = true
     })
 
-    console.log('✅ [API] Favorite check:', { userId: user.id, count: data?.length, total: listingIds.length })
+    logger.debug('[API] Favorite check', { userId: user.id, count: data?.length, total: listingIds.length })
 
     return NextResponse.json({ data: favoritedMap })
   } catch (error: unknown) {
-    console.error('❌ [API] Favorite check exception:', error)
+    logger.error('[API] Favorite check exception', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { data: {} },
       { status: 200 }

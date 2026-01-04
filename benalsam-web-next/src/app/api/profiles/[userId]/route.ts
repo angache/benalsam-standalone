@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
 
 export async function GET(
   request: NextRequest,
@@ -13,7 +14,7 @@ export async function GET(
     }
 
     const { userId } = await params
-    console.log('🔍 [PROFILE API] userId:', userId)
+    logger.debug('[PROFILE API] Fetching profile', { userId })
 
     // Get profile data (try username first, then fallback to ID)
     let { data: profile, error: profileError } = await supabaseAdmin
@@ -35,11 +36,11 @@ export async function GET(
     }
 
     if (profileError) {
-      console.error('Profile fetch error:', profileError)
+      logger.error('[PROFILE API] Profile fetch error', { error: profileError, userId })
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
     }
 
-    console.log('🔍 [PROFILE API] Found profile:', profile?.id)
+    logger.debug('[PROFILE API] Found profile', { profileId: profile?.id })
 
     // Get user's listings
     const { data: listings, error: listingsError } = await supabaseAdmin
@@ -50,10 +51,10 @@ export async function GET(
       .order('created_at', { ascending: false })
       .limit(20)
 
-    console.log('🔍 [PROFILE API] Listings result:', { count: listings?.length, error: listingsError })
-
     if (listingsError) {
-      console.error('Listings fetch error:', listingsError)
+      logger.error('[PROFILE API] Listings fetch error', { error: listingsError, userId })
+    } else {
+      logger.debug('[PROFILE API] Listings fetched', { userId, count: listings?.length })
     }
 
     // Get user's reviews
@@ -75,7 +76,7 @@ export async function GET(
       .limit(10)
 
     if (reviewsError) {
-      console.error('Reviews fetch error:', reviewsError)
+      logger.error('[PROFILE API] Reviews fetch error', { error: reviewsError, userId })
     }
 
     // Check if current user is following this profile
@@ -98,8 +99,11 @@ export async function GET(
       isFollowing
     })
 
-  } catch (error) {
-    console.error('Profile API error:', error)
+  } catch (error: unknown) {
+    logger.error('[PROFILE API] Unexpected error', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

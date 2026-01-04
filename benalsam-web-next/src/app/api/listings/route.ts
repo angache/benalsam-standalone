@@ -6,29 +6,60 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { searchListingsWithElasticsearch } from '@/services/elasticsearchService'
 import { fetchListingsWithFilters } from '@/services/listingService/fetchers'
+import { logger } from '@/utils/production-logger'
+import { validateQuery, commonSchemas } from '@/lib/api-validation'
+import { z } from 'zod'
+
+/**
+ * Schema for listing search/filter query parameters
+ */
+const listingsQuerySchema = z.object({
+  q: z.string().max(200).optional().default(''),
+  categories: z.string().optional().transform((val) => {
+    if (!val) return []
+    return val.split(',').map(Number).filter((n) => !isNaN(n))
+  }),
+  city: z.string().max(200).optional(),
+  minPrice: z.coerce.number().int().min(0).optional(),
+  maxPrice: z.coerce.number().int().min(0).optional(),
+  urgency: z.enum(['very_urgent', 'urgent', 'normal', 'not_urgent']).optional(),
+  dateRange: z.enum(['all', 'today', 'week', 'month']).optional().default('all'),
+  featured: z.string().transform((val) => val === '1').optional().default(false),
+  showcase: z.string().transform((val) => val === '1').optional().default(false),
+  urgent: z.string().transform((val) => val === '1').optional().default(false),
+  sort: z.enum(['newest', 'oldest', 'price_low', 'price_high', 'popular']).optional().default('newest'),
+  page: z.coerce.number().int().min(1).optional().default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).optional().default(24),
+}).passthrough() // Allow additional query params (like attr_*)
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams
+    // Validate query parameters
+    const validation = validateQuery(request, listingsQuerySchema)
+    if (!validation.success) {
+      return validation.response
+    }
+
+    const params = validation.data
 
     // Extract filter parameters
-    const query = searchParams.get('q') || ''
-    const categories = searchParams.get('categories')?.split(',').map(Number) || []
-    const city = searchParams.get('city') || undefined
-    const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined
-    const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined
-    const urgency = searchParams.get('urgency') || undefined
-    const dateRange = searchParams.get('dateRange') || 'all'
-    const featured = searchParams.get('featured') === '1'
-    const showcase = searchParams.get('showcase') === '1'
-    const urgent = searchParams.get('urgent') === '1'
-    const sort = searchParams.get('sort') || 'newest'
-    const page = Number(searchParams.get('page')) || 1
-    const pageSize = Number(searchParams.get('pageSize')) || 24
+    const query = params.q
+    const categories = params.categories
+    const city = params.city
+    const minPrice = params.minPrice
+    const maxPrice = params.maxPrice
+    const urgency = params.urgency
+    const dateRange = params.dateRange
+    const featured = params.featured
+    const showcase = params.showcase
+    const urgent = params.urgent
+    const sort = params.sort
+    const page = params.page
+    const pageSize = params.pageSize
     
-    // 🆕 Parse attributes from query params
-    // Format: ?attributes=brand:Samsung,Apple&attributes=color:Siyah
+    // Parse attributes from query params
     const attributes: Record<string, string[]> = {}
+    const searchParams = request.nextUrl.searchParams
     searchParams.forEach((value, key) => {
       if (key.startsWith('attr_')) {
         const attrKey = key.replace('attr_', '')
@@ -85,8 +116,11 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(result.total / pageSize),
       },
     })
-  } catch (error) {
-    console.error('❌ [API] /api/listings error:', error)
+  } catch (error: unknown) {
+    logger.error('[API] /api/listings error', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       {
         success: false,

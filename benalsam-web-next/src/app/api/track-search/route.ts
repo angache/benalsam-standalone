@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/utils/production-logger'
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,14 +39,17 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       // Silent fail - table might not exist or RLS might block
-      console.log('Track search failed (expected if table not configured):', error.message)
+      logger.debug('[API] Track search failed (expected if table not configured)', { error: error.message })
       return NextResponse.json({ success: true }) // Return success anyway
     }
 
     return NextResponse.json({ success: true })
 
-  } catch (error) {
-    console.error('Track search API error:', error)
+  } catch (error: unknown) {
+    logger.error('[API] Track search exception', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     // Don't fail the request - tracking is optional
     return NextResponse.json({ success: true })
   }

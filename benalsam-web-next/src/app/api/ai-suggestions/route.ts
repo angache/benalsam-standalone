@@ -8,8 +8,11 @@
  * - Category-based suggestions
  */
 
+import { logger } from '@/utils/production-logger'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/utils/production-logger'
 
 export async function GET(request: NextRequest) {
   try {
@@ -167,7 +170,7 @@ export async function GET(request: NextRequest) {
           })
         }
       } catch (err) {
-        console.log('Popular suggestions not available, using fallback')
+        logger.debug('[API] Popular suggestions not available, using fallback')
         // Hardcoded fallback
         const fallbackKeywords = [
           { text: 'iPhone 13 Pro', type: 'popular', score: 0.9 },
@@ -199,8 +202,11 @@ export async function GET(request: NextRequest) {
       }
     })
 
-  } catch (error) {
-    console.error('AI Suggestions API error:', error)
+  } catch (error: unknown) {
+    logger.error('[API] AI Suggestions error', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       {
         success: false,

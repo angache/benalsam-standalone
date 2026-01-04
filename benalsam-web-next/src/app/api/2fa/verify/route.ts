@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
 import speakeasy from 'speakeasy'
 import { supabaseAdmin } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
+import { validateBody, commonSchemas } from '@/lib/api-validation'
+import { z } from 'zod'
+
+/**
+ * Schema for 2FA verification
+ */
+const verify2FASchema = z.object({
+  code: z.string().length(6, 'Kod 6 haneli olmalıdır').regex(/^\d+$/, 'Kod sadece rakamlardan oluşmalıdır'),
+  userId: commonSchemas.uuid.optional(),
+})
 
 /**
  * POST /api/2fa/verify
@@ -9,14 +20,13 @@ import { supabaseAdmin } from '@/lib/supabase'
  */
 export async function POST(request: NextRequest) {
   try {
-    const { code, userId } = await request.json()
-
-    if (!code) {
-      return NextResponse.json(
-        { success: false, error: 'Kod gereklidir' },
-        { status: 400 }
-      )
+    // Validate request body
+    const validation = await validateBody(request, verify2FASchema)
+    if (!validation.success) {
+      return validation.response
     }
+
+    const { code, userId } = validation.data
 
     // Get user session or use provided userId (for login flow)
     const user = await getServerUser()
@@ -119,8 +129,12 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Kod doğrulandı',
     })
-  } catch (error: any) {
-    console.error('2FA verification error:', error)
+  } catch (error: unknown) {
+    logger.error('[API] 2FA verification error', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      userId: targetUserId
+    })
     return NextResponse.json(
       { success: false, error: 'Kod doğrulama sırasında bir hata oluştu' },
       { status: 500 }

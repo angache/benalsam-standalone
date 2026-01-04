@@ -3,6 +3,7 @@ import { getServerUser } from '@/lib/supabase-server'
 import speakeasy from 'speakeasy'
 import QRCode from 'qrcode'
 import { supabaseAdmin } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
 
 /**
  * POST /api/2fa/setup
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
 
     if (error) {
-      console.error('2FA setup error:', error)
+      logger.error('[2FA Setup] Database error', { error, userId: user.id })
       return NextResponse.json(
         { success: false, error: '2FA kurulumu başarısız oldu' },
         { status: 500 }
@@ -70,8 +71,11 @@ export async function POST(request: NextRequest) {
         backupCodes,
       },
     })
-  } catch (error: any) {
-    console.error('2FA setup error:', error)
+  } catch (error: unknown) {
+    logger.error('[2FA Setup] Unexpected error', { 
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { success: false, error: '2FA kurulumu sırasında bir hata oluştu' },
       { status: 500 }

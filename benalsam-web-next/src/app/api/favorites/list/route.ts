@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
 
 /**
  * GET /api/favorites/list
@@ -39,7 +40,7 @@ export async function GET() {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('❌ [API] Error fetching favorites:', error)
+      logger.error('[API] Error fetching favorites', { error, userId: user.id })
       return NextResponse.json(
         { error: 'Failed to fetch favorites' },
         { status: 500 }
@@ -73,7 +74,7 @@ export async function GET() {
       }
     }).filter(Boolean) || []
 
-    console.log('✅ [API] Fetched favorites:', { userId: user.id, count: favoriteListings.length })
+    logger.debug('[API] Fetched favorites', { userId: user.id, count: favoriteListings.length })
 
     return NextResponse.json(
       { 
@@ -82,8 +83,11 @@ export async function GET() {
       },
       { status: 200 }
     )
-  } catch (error) {
-    console.error('❌ [API] Favorites list exception:', error)
+  } catch (error: unknown) {
+    logger.error('[API] Favorites list exception', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

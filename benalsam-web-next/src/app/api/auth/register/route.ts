@@ -2,6 +2,25 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import type { RegisterCredentials } from '@/types/auth'
 import { generateUsername, ensureUniqueUsername } from '@/utils/username'
+import { logger } from '@/utils/production-logger'
+import { validateBody, commonSchemas } from '@/lib/api-validation'
+import { z } from 'zod'
+
+/**
+ * Schema for user registration
+ */
+const registerSchema = z.object({
+  name: z.string().min(2, 'Ad en az 2 karakter olmalıdır').max(100, 'Ad en fazla 100 karakter olabilir'),
+  email: commonSchemas.email,
+  password: commonSchemas.password,
+  passwordConfirm: z.string(),
+  acceptTerms: z.boolean().refine((val) => val === true, {
+    message: 'Kullanım koşullarını kabul etmelisiniz',
+  }),
+}).refine((data) => data.password === data.passwordConfirm, {
+  message: 'Şifreler eşleşmiyor',
+  path: ['passwordConfirm'],
+})
 
 /**
  * POST /api/auth/register
@@ -9,36 +28,13 @@ import { generateUsername, ensureUniqueUsername } from '@/utils/username'
  */
 export async function POST(request: NextRequest) {
   try {
-    const body: RegisterCredentials = await request.json()
-
-    // Validate input
-    if (!body.name || !body.email || !body.password || !body.passwordConfirm) {
-      return NextResponse.json(
-        { success: false, error: 'Tüm alanlar zorunludur' },
-        { status: 400 }
-      )
+    // Validate request body
+    const validation = await validateBody(request, registerSchema)
+    if (!validation.success) {
+      return validation.response
     }
 
-    if (body.password !== body.passwordConfirm) {
-      return NextResponse.json(
-        { success: false, error: 'Şifreler eşleşmiyor' },
-        { status: 400 }
-      )
-    }
-
-    if (body.password.length < 8) {
-      return NextResponse.json(
-        { success: false, error: 'Şifre en az 8 karakter olmalıdır' },
-        { status: 400 }
-      )
-    }
-
-    if (!body.acceptTerms) {
-      return NextResponse.json(
-        { success: false, error: 'Kullanım koşullarını kabul etmelisiniz' },
-        { status: 400 }
-      )
-    }
+    const body = validation.data
 
     // Check if user already exists (check in auth.users via Supabase Auth)
     const { data: existingAuthUser } = await supabaseAdmin.auth.admin.listUsers()
@@ -62,7 +58,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (authError) {
-      console.error('Supabase auth error:', authError)
+      logger.error('[API] Supabase auth error during registration', { error: authError, email: body.email })
       return NextResponse.json(
         { success: false, error: 'Kullanıcı oluşturulamadı' },
         { status: 500 }
@@ -94,7 +90,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (profileError) {
-      console.error('Profile creation error:', profileError)
+      logger.error('[API] Profile creation error during registration', { error: profileError, userId: authData.user.id })
       // Rollback: Delete auth user
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
       return NextResponse.json(
@@ -115,8 +111,11 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     )
-  } catch (error: any) {
-    console.error('Registration error:', error)
+  } catch (error: unknown) {
+    logger.error('[API] Registration exception', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { success: false, error: 'Kayıt yapılırken bir hata oluştu' },
       { status: 500 }
