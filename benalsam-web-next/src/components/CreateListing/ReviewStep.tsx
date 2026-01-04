@@ -114,7 +114,7 @@ export default function ReviewStep({
 
   // Debug: Log images to console
   React.useEffect(() => {
-    console.log('🖼️ [REVIEW] Images data:', {
+    logger.debug('[ReviewStep] Images data', {
       images: formData.images,
       mainImageIndex: formData.mainImageIndex,
       count: Array.isArray(formData.images) ? formData.images.length : 'not an array'
