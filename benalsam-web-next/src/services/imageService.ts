@@ -70,7 +70,7 @@ export const deleteImages = async (urls: string[]): Promise<any> => {
         if (bucketIndex === -1) return null
         return pathParts.slice(bucketIndex + 1).join('/')
       } catch (e) {
-        console.error('Invalid URL for deletion:', url)
+        logger.error('[ImageService] Invalid URL for deletion', { url })
         return null
       }
     })
