@@ -30,9 +30,14 @@ export async function GET(
     const { conversationId } = validation.data;
     logger.startTimer('[API] GET /conversations/[conversationId]');
 
-    // Rate limiting - Check user or IP
+    // Check authentication
     const user = await getServerUser();
-    const identifier = getClientIdentifier(request, user?.id);
+    if (!user?.id) {
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
+    }
+
+    // Rate limiting
+    const identifier = getClientIdentifier(request, user.id);
     const allowed = await rateLimiters.messaging.check(identifier);
     
     if (!allowed) {

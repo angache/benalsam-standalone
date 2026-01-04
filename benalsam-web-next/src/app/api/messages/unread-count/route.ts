@@ -5,6 +5,7 @@ import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate
 import { validateQuery, commonSchemas } from '@/lib/api-validation';
 import { z } from 'zod';
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors';
+import { getServerUser } from '@/lib/supabase-server';
 
 /**
  * Schema for GET /api/messages/unread-count query parameters
@@ -15,6 +16,12 @@ const unreadCountQuerySchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication
+    const user = await getServerUser()
+    if (!user?.id) {
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
+    }
+
     // Validate query parameters
     const validation = validateQuery(request, unreadCountQuerySchema)
     if (!validation.success) {
@@ -22,6 +29,11 @@ export async function GET(request: NextRequest) {
     }
 
     const { userId } = validation.data
+
+    // Verify userId matches authenticated user
+    if (userId !== user.id) {
+      return apiErrors.forbidden('Sadece kendi okunmamış mesaj sayınızı görüntüleyebilirsiniz', request.nextUrl.pathname)
+    }
 
     // Rate limiting - 60 requests per minute per user
     const identifier = getClientIdentifier(request, userId);

@@ -4,6 +4,7 @@ import { logger } from '@/utils/production-logger';
 import { validateQuery, commonSchemas } from '@/lib/api-validation';
 import { z } from 'zod';
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors';
+import { getServerUser } from '@/lib/supabase-server';
 
 /**
  * Schema for GET /api/messages query parameters
@@ -14,6 +15,12 @@ const getMessagesQuerySchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication
+    const user = await getServerUser()
+    if (!user?.id) {
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
+    }
+
     // Validate query parameters
     const validation = validateQuery(request, getMessagesQuerySchema)
     if (!validation.success) {
@@ -21,6 +28,11 @@ export async function GET(request: NextRequest) {
     }
 
     const { userId } = validation.data
+
+    // Verify userId matches authenticated user
+    if (userId !== user.id) {
+      return apiErrors.forbidden('Sadece kendi mesajlarınızı görüntüleyebilirsiniz', request.nextUrl.pathname)
+    }
 
     if (!supabaseAdmin) {
       return apiErrors.internalError(
@@ -97,6 +109,12 @@ const createMessageSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const user = await getServerUser()
+    if (!user?.id) {
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
+    }
+
     // Validate request body
     const validation = await validateBody(request, createMessageSchema)
     if (!validation.success) {
@@ -104,6 +122,11 @@ export async function POST(request: NextRequest) {
     }
 
     const { conversationId, senderId, content, messageType } = validation.data
+
+    // Verify senderId matches authenticated user
+    if (senderId !== user.id) {
+      return apiErrors.forbidden('Sadece kendi adınıza mesaj gönderebilirsiniz', request.nextUrl.pathname)
+    }
 
     if (!supabaseAdmin) {
       return apiErrors.internalError(
