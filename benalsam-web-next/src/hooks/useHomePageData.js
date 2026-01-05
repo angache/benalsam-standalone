@@ -126,7 +126,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
           setTotalListings(result.total || 0);
           setHasMore((result.data || []).length === PAGE_SIZE);
         } catch (error) {
-          console.error('Error in search:', error);
+          logger.error('[useHomePageData] Error in search', { error });
           setDisplayedListings([]);
           setTotalListings(0);
           setHasMore(false);
