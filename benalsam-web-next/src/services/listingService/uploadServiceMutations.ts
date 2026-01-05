@@ -14,6 +14,7 @@ import { ListingStatus } from 'benalsam-shared-types';
 // import { categoriesConfig } from '@/config/categories'; // Removed - using dynamic categories
 import { CATEGORY } from '@/config/constants';
 import dynamicCategoryService from '../dynamicCategoryService';
+import { logger } from '@/utils/production-logger';
 
 const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1';
 
@@ -21,30 +22,30 @@ const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http:/
 const getCategoryIds = async (categoryString: string): Promise<{ category_id: number | null, category_path: number[] | null }> => {
   if (!categoryString) return { category_id: null, category_path: null };
   
-  console.log('Processing category string', { categoryString });
+  logger.debug('[UploadServiceMutations] Processing category string', { categoryString });
   
   // Kategori path'ini parçala (sadece ' > ' ve ' / ' ayırıcılarını kullan)
   const pathParts = categoryString.split(/\s*[>\/]\s*/).map(part => part.trim()).filter(part => part);
-  console.log('Category path parts', { pathParts });
+  logger.debug('[UploadServiceMutations] Category path parts', { pathParts });
   
   if (pathParts.length === 0) {
-    console.warn('No path parts found');
+    logger.warn('[UploadServiceMutations] No path parts found');
     return { category_id: null, category_path: null };
   }
   
   try {
     // Dinamik kategori servisinden kategorileri al
     const categories = await dynamicCategoryService.getCategories();
-    console.log('Categories from dynamic service', { categoriesCount: categories.length });
+    logger.debug('[UploadServiceMutations] Categories from dynamic service', { categoriesCount: categories.length });
     
     // Ana kategoriyi bul
     const mainCategory = categories.find(cat => cat.name === pathParts[0]);
     if (!mainCategory) {
-      console.warn('Main category not found', { categoryName: pathParts[0] });
+      logger.warn('[UploadServiceMutations] Main category not found', { categoryName: pathParts[0] });
       return { category_id: null, category_path: null };
     }
     
-    console.log('Main category found', { categoryName: pathParts[0], categoryId: mainCategory.id });
+    logger.debug('[UploadServiceMutations] Main category found', { categoryName: pathParts[0], categoryId: mainCategory.id });
 
     // N-seviye gezinme: her bir path parçasını sırayla subcategories içinde ara
     const categoryPath: number[] = [];
@@ -56,10 +57,10 @@ const getCategoryIds = async (categoryString: string): Promise<{ category_id: nu
     for (let i = 1; i < pathParts.length; i++) {
       const part = pathParts[i];
       const children = currentNode?.subcategories || [];
-      console.log('🔍 Traversing category level', { level: i + 1, lookingFor: part, childrenCount: children.length });
+      logger.debug('[UploadServiceMutations] Traversing category level', { level: i + 1, lookingFor: part, childrenCount: children.length });
       const next = children.find((c: any) => c.name === part);
       if (!next) {
-        console.warn('❌ Category level not found', { level: i + 1, part, available: children.map((c: any) => c.name) });
+        logger.warn('[UploadServiceMutations] Category level not found', { level: i + 1, part, available: children.map((c: any) => c.name) });
         break;
       }
       categoryPath.push(next.id);
@@ -68,11 +69,11 @@ const getCategoryIds = async (categoryString: string): Promise<{ category_id: nu
 
     const categoryId = categoryPath[categoryPath.length - 1] || null;
 
-    console.log('Final category IDs', { category_id: categoryId, category_path: categoryPath });
+    logger.debug('[UploadServiceMutations] Final category IDs', { category_id: categoryId, category_path: categoryPath });
     return { category_id: categoryId, category_path: categoryPath };
     
   } catch (error) {
-    console.error('Error getting category IDs from dynamic service:', error);
+    logger.error('[UploadServiceMutations] Error getting category IDs from dynamic service', { error });
     return { category_id: null, category_path: null };
   }
 };
@@ -108,7 +109,7 @@ export const createListingWithUploadService = async (
     // Check if Upload Service is available
     const isAvailable = await uploadService.isAvailable();
     if (!isAvailable) {
-      console.warn('⚠️ Upload Service not available, falling back to direct database creation');
+      logger.warn('[UploadServiceMutations] Upload Service not available, falling back to direct database creation');
       // Fallback to direct database creation
       const { createListing } = await import('./mutations');
       // Normalize camelCase vs snake_case from shared Listing type
@@ -138,7 +139,7 @@ export const createListingWithUploadService = async (
       return createListing(fallbackData, currentUserId, onProgress);
     }
 
-    console.log('🚀 Creating listing via Upload Service job system', {
+    logger.debug('[UploadServiceMutations] Creating listing via Upload Service job system', {
       title: listingData.title,
       category: listingData.category,
       category_id: listingData.category_id,
@@ -149,7 +150,7 @@ export const createListingWithUploadService = async (
     // First, upload images to Upload Service
     let uploadedImageUrls: string[] = [];
     if (listingData.images && listingData.images.length > 0) {
-      console.log('📸 Uploading images to Upload Service...');
+      logger.debug('[UploadServiceMutations] Uploading images to Upload Service');
       
       // Convert image data to File objects if needed
       const isFileLike = (obj: any): obj is File => {
@@ -188,12 +189,12 @@ export const createListingWithUploadService = async (
               }
               return imgObj.file as File;
             } else {
-              console.warn('Unknown image object structure:', imageData);
+              logger.warn('[UploadServiceMutations] Unknown image object structure', { imageData });
               return null;
             }
           } else {
             // Handle other image data types
-            console.warn('Unknown image data type:', typeof imageData, imageData);
+            logger.warn('[UploadServiceMutations] Unknown image data type', { type: typeof imageData, imageData });
             return null;
           }
         })
@@ -204,7 +205,7 @@ export const createListingWithUploadService = async (
         
         // Debug log for file types
         validImageFiles.forEach((file: File, index: number) => {
-          console.log(`📁 File ${index}:`, {
+          logger.debug(`[UploadServiceMutations] File ${index}`, {
             name: file.name,
             type: file.type,
             size: file.size,
@@ -240,12 +241,12 @@ export const createListingWithUploadService = async (
       }
 
       uploadedImageUrls = uploadResult.data.images.map((img: any) => img.url);
-      console.log('✅ Images uploaded successfully', { count: uploadedImageUrls.length });
+      logger.debug('[UploadServiceMutations] Images uploaded successfully', { count: uploadedImageUrls.length });
     }
 
     // Convert category string to numeric IDs
     const categoryIds = await getCategoryIds(listingData.category);
-    console.log('🏷️ Category IDs generated:', {
+    logger.debug('[UploadServiceMutations] Category IDs generated', {
       category: listingData.category,
       category_id: categoryIds.category_id,
       category_path: categoryIds.category_path
@@ -304,7 +305,7 @@ export const createListingWithUploadService = async (
       throw new Error(result.message || 'Listing creation failed');
     }
 
-    console.log('✅ Listing creation job started', {
+    logger.debug('[UploadServiceMutations] Listing creation job started', {
       jobId: result.data.jobId,
       status: result.data.status
     });
@@ -331,7 +332,7 @@ export const createListingWithUploadService = async (
     return listing;
 
   } catch (error) {
-    console.error('Error in createListingWithUploadService:', error);
+    logger.error('[UploadServiceMutations] Error in createListingWithUploadService', { error });
     toast({ 
       title: "Beklenmedik Hata", 
       description: error instanceof Error ? error.message : "İlan oluşturulurken bir sorun oluştu.", 
@@ -358,13 +359,13 @@ export const updateListingWithUploadService = async (
     // Check if Upload Service is available
     const isAvailable = await uploadService.isAvailable();
     if (!isAvailable) {
-      console.warn('⚠️ Upload Service not available, falling back to direct database update');
+      logger.warn('[UploadServiceMutations] Upload Service not available, falling back to direct database update');
       // Fallback to direct database update
       const { updateListing } = await import('./mutations');
       return updateListing(listingId, updates, userId);
     }
 
-    console.log('🔄 Updating listing via Upload Service job system', {
+    logger.debug('[UploadServiceMutations] Updating listing via Upload Service job system', {
       listingId,
       updateFields: Object.keys(updates)
     });
@@ -401,7 +402,7 @@ export const updateListingWithUploadService = async (
       throw new Error(result.message || 'Listing update failed');
     }
 
-    console.log('✅ Listing update job started', {
+    logger.debug('[UploadServiceMutations] Listing update job started', {
       jobId: result.data.jobId,
       status: result.data.status
     });
@@ -428,7 +429,7 @@ export const updateListingWithUploadService = async (
     return updatedListing;
 
   } catch (error) {
-    console.error('Error in updateListingWithUploadService:', error);
+    logger.error('[UploadServiceMutations] Error in updateListingWithUploadService', { error });
     toast({ 
       title: "Beklenmedik Hata", 
       description: error instanceof Error ? error.message : "İlan güncellenirken bir sorun oluştu.", 
@@ -463,7 +464,7 @@ async function pollListingJobStatus(
 
       // If Listing Service fails, try Upload Service (backward compatibility)
       if (!response.ok && response.status === 404) {
-        console.log('⚠️ Job not found in Listing Service, trying Upload Service...');
+        logger.warn('[UploadServiceMutations] Job not found in Listing Service, trying Upload Service');
         response = await fetch(`${UPLOAD_SERVICE_URL}/listings/status/${jobId}`, {
           headers: {
             'x-user-id': userId,
@@ -494,12 +495,12 @@ async function pollListingJobStatus(
       }
 
       if (status === 'completed') {
-        console.log('✅ Listing job completed successfully', { jobId });
+        logger.debug('[UploadServiceMutations] Listing job completed successfully', { jobId });
 
         // Extract listing ID from result
         const listingId = jobResult?.listingId || jobResult?.listing?.id;
         if (!listingId) {
-          console.warn('⚠️ No listing ID in job result', { jobResult });
+          logger.warn('[UploadServiceMutations] No listing ID in job result', { jobResult });
           return null;
         }
 
@@ -513,7 +514,7 @@ async function pollListingJobStatus(
             .single();
 
           if (fetchError) {
-            console.warn('⚠️ Could not fetch created listing', {
+            logger.warn('[UploadServiceMutations] Could not fetch created listing', {
               listingId,
               error: fetchError.message
             });
@@ -521,10 +522,10 @@ async function pollListingJobStatus(
             return { id: listingId, status: 'pending_approval' } as unknown as Listing;
           }
 
-          console.log('✅ Listing fetched successfully', { listingId, status: listing.status });
+          logger.debug('[UploadServiceMutations] Listing fetched successfully', { listingId, status: listing.status });
           return listing as Listing;
         } catch (fetchErr) {
-          console.warn('⚠️ Listing fetch threw', { listingId, error: String(fetchErr) });
+          logger.warn('[UploadServiceMutations] Listing fetch threw', { listingId, error: String(fetchErr) });
           return { id: listingId, status: 'pending_approval' } as unknown as Listing;
         }
       } else if (status === 'failed') {
@@ -535,7 +536,7 @@ async function pollListingJobStatus(
       await new Promise(resolve => setTimeout(resolve, pollInterval));
       
     } catch (error) {
-      console.error('❌ Error polling job status:', error);
+      logger.error('[UploadServiceMutations] Error polling job status', { error });
       // Don't throw immediately, wait and retry (might be temporary network issue)
       if (attempt === maxAttempts - 1) {
         throw error;
