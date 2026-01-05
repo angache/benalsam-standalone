@@ -54,7 +54,7 @@ const getCategoryIds = async (categoryString: string): Promise<{ category_id: nu
     for (let i = 1; i < pathParts.length; i++) {
       const part = pathParts[i];
       const children = currentNode?.children || [];
-      console.log('🔍 Traversing category level', { level: i + 1, lookingFor: part, childrenCount: children.length });
+      logger.debug('[CreateListingService] Traversing category level', { level: i + 1, lookingFor: part, childrenCount: children.length });
       const next = children.find((c: any) => c.name === part);
       if (!next) {
         logger.warn('[CreateListingService] Category level not found', { level: i + 1, part, available: children.map((c: any) => c.name) });
@@ -121,7 +121,7 @@ export async function createListingWithUploadService(
   onProgress?: (progress: number) => void
 ): Promise<any> {
   try {
-    console.log('🚀 Creating listing via Upload Service', {
+    logger.debug('[CreateListingService] Creating listing via Upload Service', {
       title: listingData.title,
       category: listingData.category,
       category_id: listingData.category_id,
@@ -183,7 +183,7 @@ export async function createListingWithUploadService(
     const category_id = listingData.category_id
     const category_path = listingData.category_path
     
-    console.log('🏷️ Category IDs from form:', {
+    logger.debug('[CreateListingService] Category IDs from form', {
       category: listingData.category,
       category_id,
       category_path
@@ -233,7 +233,7 @@ export async function createListingWithUploadService(
       throw new Error(result.message || 'Listing creation failed')
     }
 
-    console.log('✅ Listing job started', { jobId: result.data.jobId })
+    logger.debug('[CreateListingService] Listing job started', { jobId: result.data.jobId })
 
     // Step 3: Poll for job completion
     const listing = await pollListingJobStatus(result.data.jobId, currentUserId, onProgress)
@@ -241,7 +241,7 @@ export async function createListingWithUploadService(
     return listing
 
   } catch (error) {
-    console.error('❌ Error creating listing:', error)
+    logger.error('[CreateListingService] Error creating listing', { error })
     throw error
   }
 }
@@ -272,7 +272,7 @@ async function pollListingJobStatus(
 
       // If Listing Service fails, try Upload Service (backward compatibility)
       if (!response.ok && response.status === 404) {
-        console.log('⚠️ Job not found in Listing Service, trying Upload Service...')
+        logger.warn('[CreateListingService] Job not found in Listing Service, trying Upload Service')
         response = await fetch(`${UPLOAD_SERVICE_URL}/listings/status/${jobId}`, {
           headers: {
             'x-user-id': userId,
@@ -303,12 +303,12 @@ async function pollListingJobStatus(
       }
 
       if (status === 'completed') {
-        console.log('✅ Listing job completed', { jobId })
+        logger.debug('[CreateListingService] Listing job completed', { jobId })
         
         // Extract listing ID
         const listingId = jobResult?.listingId || jobResult?.listing?.id
         if (!listingId) {
-          console.warn('⚠️ No listing ID in job result', { jobResult })
+          logger.warn('[CreateListingService] No listing ID in job result', { jobResult })
           return null
         }
 
@@ -322,13 +322,13 @@ async function pollListingJobStatus(
             .single()
 
           if (fetchError) {
-            console.warn('⚠️ Could not fetch listing', { listingId, error: fetchError.message })
+            logger.warn('[CreateListingService] Could not fetch listing', { listingId, error: fetchError.message })
             return { id: listingId, status: 'pending_approval' }
           }
 
           return listing || { id: listingId, status: 'pending_approval' }
         } catch (fetchErr) {
-          console.warn('⚠️ Listing fetch error', { listingId, error: String(fetchErr) })
+          logger.warn('[CreateListingService] Listing fetch error', { listingId, error: String(fetchErr) })
           return { id: listingId, status: 'pending_approval' }
         }
       } else if (status === 'failed') {
@@ -339,7 +339,7 @@ async function pollListingJobStatus(
       await new Promise(resolve => setTimeout(resolve, pollInterval))
       
     } catch (error) {
-      console.error('❌ Error polling job status:', error)
+      logger.error('[CreateListingService] Error polling job status', { error })
       // Don't throw immediately, wait and retry (might be temporary network issue)
       if (attempt === maxAttempts - 1) {
         throw error
