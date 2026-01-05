@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/production-logger';
 const VALID_ACTIVITY_TYPES = [
   'listing_created',
   'listing_updated', 
@@ -23,13 +24,13 @@ export const getUserDashboardStats = async (userId) => {
     });
     
     if (error) {
-      console.error('Error getting dashboard stats:', error);
+      logger.error('[PremiumService] Error getting dashboard stats', { error });
       return null;
     }
     
     return data?.[0] || null;
   } catch (error) {
-    console.error('Error getting dashboard stats:', error);
+    logger.error('[PremiumService] Error getting dashboard stats', { error });
     return null;
   }
 };
@@ -44,13 +45,13 @@ export const getUserRecentActivities = async (userId, limit = 10) => {
     });
     
     if (error) {
-      console.error('Error getting recent activities:', error);
+      logger.error('[PremiumService] Error getting recent activities', { error });
       return [];
     }
     
     return data || [];
   } catch (error) {
-    console.error('Error getting recent activities:', error);
+    logger.error('[PremiumService] Error getting recent activities', { error });
     return [];
   }
 };
@@ -64,25 +65,25 @@ export const getUserCategoryStats = async (userId) => {
     });
     
     if (error) {
-      console.error('Error getting category stats:', error);
+      logger.error('[PremiumService] Error getting category stats', { error });
       return [];
     }
     
     return data || [];
   } catch (error) {
-    console.error('Error getting category stats:', error);
+    logger.error('[PremiumService] Error getting category stats', { error });
     return [];
   }
 };
 
 export const addUserActivity = async (userId, activityType, title, description = '', relatedId = null) => {
   if (!userId || !activityType || !title) {
-    console.error('Missing required parameters for user activity');
+    logger.error('[PremiumService] Missing required parameters for user activity');
     return false;
   }
   
   if (!VALID_ACTIVITY_TYPES.includes(activityType)) {
-    console.error(`Invalid activity type: ${activityType}. Valid types:`, VALID_ACTIVITY_TYPES);
+    logger.error('[PremiumService] Invalid activity type', { activityType, validTypes: VALID_ACTIVITY_TYPES });
     return false;
   }
   
@@ -98,13 +99,13 @@ export const addUserActivity = async (userId, activityType, title, description =
       });
     
     if (error) {
-      console.error('Error adding user activity:', error);
+      logger.error('[PremiumService] Error adding user activity', { error });
       return false;
     }
     
     return true;
   } catch (error) {
-    console.error('Error adding user activity:', error);
+    logger.error('[PremiumService] Error adding user activity', { error });
     return false;
   }
 };
@@ -122,13 +123,13 @@ export const updateUserStatistics = async (userId, updates) => {
       });
     
     if (error) {
-      console.error('Error updating user statistics:', error);
+      logger.error('[PremiumService] Error updating user statistics', { error });
       return false;
     }
     
     return true;
   } catch (error) {
-    console.error('Error updating user statistics:', error);
+    logger.error('[PremiumService] Error updating user statistics', { error });
     return false;
   }
 };
@@ -149,13 +150,13 @@ export const updateCategoryStats = async (userId, category, offerCount, successC
       });
     
     if (error) {
-      console.error('Error updating category stats:', error);
+      logger.error('[PremiumService] Error updating category stats', { error });
       return false;
     }
     
     return true;
   } catch (error) {
-    console.error('Error updating category stats:', error);
+    logger.error('[PremiumService] Error updating category stats', { error });
     return false;
   }
 };

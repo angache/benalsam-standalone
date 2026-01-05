@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/production-logger';
 
 // Premium abonelik oluştur
 export const createSubscription = async (userId, planSlug, paymentMethod = 'stripe') => {
@@ -14,7 +15,7 @@ export const createSubscription = async (userId, planSlug, paymentMethod = 'stri
       .single();
     
     if (planError || !plan) {
-      console.error('Plan not found:', planError);
+      logger.error('[PremiumService] Plan not found', { error: planError });
       return null;
     }
     
@@ -42,7 +43,7 @@ export const createSubscription = async (userId, planSlug, paymentMethod = 'stri
       .single();
     
     if (error) {
-      console.error('Error creating subscription:', error);
+      logger.error('[PremiumService] Error creating subscription', { error });
       return null;
     }
     
@@ -54,7 +55,7 @@ export const createSubscription = async (userId, planSlug, paymentMethod = 'stri
     
     return data;
   } catch (error) {
-    console.error('Error creating subscription:', error);
+    logger.error('[PremiumService] Error creating subscription', { error });
     return null;
   }
 };

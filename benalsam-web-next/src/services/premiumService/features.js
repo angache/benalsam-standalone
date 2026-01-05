@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { incrementUserUsage } from './usage';
+import { logger } from '@/utils/production-logger';
 
 // Teklifi öne çıkar
 export const featureOffer = async (offerId, userId, durationHours = 24) => {
@@ -20,7 +21,7 @@ export const featureOffer = async (offerId, userId, durationHours = 24) => {
       .single();
     
     if (error) {
-      console.error('Error featuring offer:', error);
+      logger.error('[PremiumService] Error featuring offer', { error });
       return false;
     }
     
@@ -38,7 +39,7 @@ export const featureOffer = async (offerId, userId, durationHours = 24) => {
     
     return data;
   } catch (error) {
-    console.error('Error featuring offer:', error);
+    logger.error('[PremiumService] Error featuring offer', { error });
     return false;
   }
 };
@@ -58,7 +59,7 @@ export const addOfferAttachment = async (offerId, file) => {
       .upload(filePath, file);
     
     if (uploadError) {
-      console.error('Error uploading file:', uploadError);
+      logger.error('[PremiumService] Error uploading file', { error: uploadError });
       return null;
     }
     
@@ -81,7 +82,7 @@ export const addOfferAttachment = async (offerId, file) => {
       .single();
     
     if (error) {
-      console.error('Error saving attachment:', error);
+      logger.error('[PremiumService] Error saving attachment', { error });
       return null;
     }
     
@@ -94,7 +95,7 @@ export const addOfferAttachment = async (offerId, file) => {
     
     return data;
   } catch (error) {
-    console.error('Error adding attachment:', error);
+    logger.error('[PremiumService] Error adding attachment', { error });
     return null;
   }
 };
