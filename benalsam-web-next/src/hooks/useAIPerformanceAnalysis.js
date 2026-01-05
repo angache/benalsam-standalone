@@ -371,16 +371,16 @@ export const useAIPerformanceAnalysis = () => {
         return newAnalyses.slice(-50);
       });
 
-      // Development modunda console'da göster
+      // Development modunda logger ile göster
       if (import.meta.env.DEV) {
-        console.group('🤖 AI Performance Analysis');
-        console.log('Route:', routePath);
-        console.log('Score:', analysis.score);
-        console.log('Severity:', analysis.severity);
-        console.log('Issues:', analysis.issues.length);
-        console.log('Recommendations:', analysis.recommendations.length);
-        console.log('Insights:', analysis.insights);
-        console.groupEnd();
+        logger.debug('[useAIPerformanceAnalysis] AI Performance Analysis', {
+          route: routePath,
+          score: analysis.score,
+          severity: analysis.severity,
+          issuesCount: analysis.issues.length,
+          recommendationsCount: analysis.recommendations.length,
+          insights: analysis.insights
+        });
       }
 
       return analysis;
