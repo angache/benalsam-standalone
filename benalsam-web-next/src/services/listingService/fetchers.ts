@@ -695,7 +695,7 @@ const fetchFilteredListingsFallback = async (
 
     return { listings, totalCount };
   } catch (error) {
-    console.error('❌ Error in fallback search:', error);
+    logger.error('[ListingService] Error in fallback search', { error });
     return { listings: [], totalCount: 0 };
   }
 };

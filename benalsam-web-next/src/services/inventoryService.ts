@@ -77,7 +77,7 @@ export const fetchInventoryItems = async (userId: string): Promise<InventoryItem
     }
     return (data || []) as InventoryItem[];
   } catch (error) {
-    console.error('Error in fetchInventoryItems:', error);
+    logger.error('[InventoryService] Error in fetchInventoryItems', { error });
     toast({ title: "Beklenmedik Envanter Hatası", description: "Envanter yüklenirken beklenmedik bir sorun oluştu.", variant: "destructive" });
     return [];
   }

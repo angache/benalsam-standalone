@@ -1,6 +1,7 @@
 import { supabase, db } from '@/lib/supabase';
 import type { User, ApiResponse } from '@/types';
 import { useState, useEffect } from 'react';
+import { logger } from '@/utils/production-logger';
 
 // ===========================
 // AUTH TYPES
@@ -76,7 +77,7 @@ export class AuthService {
       const user = await this.getUserProfile(authData.user.id);
       return { data: user };
     } catch (error) {
-      console.error('Sign up error:', error);
+      logger.error('[AuthService] Sign up error', { error });
       return { error: { message: 'Kayıt işlemi başarısız oldu', code: 'SIGNUP_FAILED' } };
     }
   }
@@ -104,7 +105,7 @@ export class AuthService {
       
       // 2FA kontrolü
       if (user.is_2fa_enabled) {
-        console.log('🔐 2FA enabled for user:', user.email);
+        logger.debug('[AuthService] 2FA enabled for user', { email: user.email });
         return { 
           error: { 
             message: '2FA doğrulaması gerekli', 
@@ -117,7 +118,7 @@ export class AuthService {
       
       return { data: user };
     } catch (error) {
-      console.error('Sign in error:', error);
+      logger.error('[AuthService] Sign in error', { error });
       return { error: { message: 'Giriş işlemi başarısız oldu', code: 'SIGNIN_ERROR' } };
     }
   }
@@ -135,7 +136,7 @@ export class AuthService {
 
       return { data: undefined };
     } catch (error) {
-      console.error('Sign out error:', error);
+      logger.error('[AuthService] Sign out error', { error });
       return { error: { message: 'Çıkış işlemi başarısız oldu', code: 'SIGNOUT_FAILED' } };
     }
   }
@@ -158,7 +159,7 @@ export class AuthService {
       const user = await this.getUserProfile(session.user.id);
       return { data: user };
     } catch (error) {
-      console.error('Get session error:', error);
+      logger.error('[AuthService] Get session error', { error });
       return { error: { message: 'Oturum bilgisi alınamadı', code: 'SESSION_ERROR' } };
     }
   }
@@ -191,7 +192,7 @@ export class AuthService {
       const user = await this.getUserProfile(userId);
       return { data: user };
     } catch (error) {
-      console.error('2FA verification error:', error);
+      logger.error('[AuthService] 2FA verification error', { error });
       return { error: { message: '2FA doğrulama hatası', code: '2FA_ERROR' } };
     }
   }
@@ -229,7 +230,7 @@ export class AuthService {
 
       return { data };
     } catch (error) {
-      console.error('Update profile error:', error);
+      logger.error('[AuthService] Update profile error', { error });
       return { error: { message: 'Profil güncellenemedi', code: 'PROFILE_UPDATE_FAILED' } };
     }
   }
@@ -249,7 +250,7 @@ export class AuthService {
 
       return { data: undefined };
     } catch (error) {
-      console.error('Reset password error:', error);
+      logger.error('[AuthService] Reset password error', { error });
       return { error: { message: 'Şifre sıfırlama e-postası gönderilemedi', code: 'RESET_PASSWORD_FAILED' } };
     }
   }
@@ -288,7 +289,7 @@ export class AuthService {
 
       return { data: undefined };
     } catch (error) {
-      console.error('Update password error:', error);
+      logger.error('[AuthService] Update password error', { error });
       return { error: { code: 'PASSWORD_UPDATE_FAILED', message: 'Şifre güncellenemedi' } };
     }
   }
@@ -310,7 +311,7 @@ export class AuthService {
 
       return { data: undefined };
     } catch (error) {
-      console.error('Verify email error:', error);
+      logger.error('[AuthService] Verify email error', { error });
       return { error: { message: 'E-posta doğrulanamadı', code: 'EMAIL_VERIFICATION_FAILED' } };
     }
   }
@@ -334,7 +335,7 @@ export const useAuth = () => {
           setUser(result.data);
         }
       } catch (error) {
-        console.error('Session check error:', error);
+        logger.error('[AuthService] Session check error', { error });
       } finally {
         setLoading(false);
         setInitialized(true);
