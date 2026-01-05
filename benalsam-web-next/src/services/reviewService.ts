@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/production-logger';
 
 // Review interface
 interface Review {
@@ -204,13 +205,13 @@ export const fetchUserReviews = async (userId: string): Promise<Review[]> => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error in fetchUserReviews:', error);
+      logger.error('[ReviewService] Error in fetchUserReviews', { error });
       return [];
     }
 
     return (data || []) as Review[];
   } catch (error) {
-    console.error('Error in fetchUserReviews:', error);
+    logger.error('[ReviewService] Error in fetchUserReviews', { error });
     return [];
   }
 };
@@ -233,13 +234,13 @@ export const getReviewById = async (reviewId: string): Promise<Review | null> =>
       .single();
 
     if (error) {
-      console.error('Error in getReviewById:', error);
+      logger.error('[ReviewService] Error in getReviewById', { error });
       return null;
     }
 
     return data as Review;
   } catch (error) {
-    console.error('Error in getReviewById:', error);
+    logger.error('[ReviewService] Error in getReviewById', { error });
     return null;
   }
 };
@@ -259,13 +260,13 @@ export const getListingReviews = async (listingId: string): Promise<Review[]> =>
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error in getListingReviews:', error);
+      logger.error('[ReviewService] Error in getListingReviews', { error });
       return [];
     }
 
     return (data || []) as Review[];
   } catch (error) {
-    console.error('Error in getListingReviews:', error);
+    logger.error('[ReviewService] Error in getListingReviews', { error });
     return [];
   }
 };
@@ -280,12 +281,12 @@ export const canUserReview = async (reviewerId: string, offerId: string): Promis
     .single();
 
   if (offerError || !offer) {
-    console.error("Error fetching offer for review check or offer not found:", offerError);
+    logger.error('[ReviewService] Error fetching offer for review check or offer not found', { error: offerError });
     return false;
   }
 
   if (offer.status !== 'accepted') {
-    console.log("Review check: Offer not accepted.");
+    logger.debug('[ReviewService] Review check: Offer not accepted');
     return false; // Only allow reviews for accepted offers
   }
   
@@ -295,12 +296,12 @@ export const canUserReview = async (reviewerId: string, offerId: string): Promis
   } else if (reviewerId === offer.listings.user_id) { 
     revieweeId = offer.offering_user_id; 
   } else {
-    console.log("Review check: Reviewer is not part of this offer.");
+    logger.debug('[ReviewService] Review check: Reviewer is not part of this offer');
     return false; 
   }
 
   if (reviewerId === revieweeId) {
-    console.log("Review check: User cannot review themselves.");
+    logger.debug('[ReviewService] Review check: User cannot review themselves');
     return false; 
   }
 
@@ -313,7 +314,7 @@ export const canUserReview = async (reviewerId: string, offerId: string): Promis
     .maybeSingle();
 
   if (reviewError) {
-    console.error("Error checking existing review:", reviewError);
+    logger.error('[ReviewService] Error checking existing review', { error: reviewError });
     return false;
   }
 
@@ -335,7 +336,7 @@ export const getUserReviewStats = async (userId: string): Promise<{
       .eq('reviewee_id', userId);
 
     if (error) {
-      console.error('Error in getUserReviewStats:', error);
+      logger.error('[ReviewService] Error in getUserReviewStats', { error });
       return null;
     }
 
@@ -356,7 +357,7 @@ export const getUserReviewStats = async (userId: string): Promise<{
       ratingDistribution
     };
   } catch (error) {
-    console.error('Error in getUserReviewStats:', error);
+    logger.error('[ReviewService] Error in getUserReviewStats', { error });
     return null;
   }
 }; 

@@ -207,7 +207,7 @@ export const getMutualFollowers = async (userId1: string, userId2: string): Prom
 
     return data.map(item => item.profiles) as User[];
   } catch (error) {
-    console.error('Error getting mutual followers:', error);
+    logger.error('[FollowService] Error getting mutual followers', { error });
     return [];
   }
 }; 

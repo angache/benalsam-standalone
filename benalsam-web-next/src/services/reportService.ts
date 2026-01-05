@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { ListingReport } from 'benalsam-shared-types';
+import { logger } from '@/utils/production-logger';
 
 // Report reason types
 export const REPORT_REASONS = {
@@ -36,7 +37,7 @@ export const createListingReport = async (reportData: Partial<ListingReport>): P
       .single();
 
     if (error) {
-      console.error('Error creating listing report:', error);
+      logger.error('[ReportService] Error creating listing report', { error });
       toast({ title: "Şikayet Oluşturulamadı", description: error.message, variant: "destructive" });
       return null;
     }
@@ -49,7 +50,7 @@ export const createListingReport = async (reportData: Partial<ListingReport>): P
 
     return data as ListingReport;
   } catch (error) {
-    console.error('Unexpected error in createListingReport:', error);
+    logger.error('[ReportService] Unexpected error in createListingReport', { error });
     toast({ title: "Beklenmedik Hata", description: "Şikayet oluşturulurken bir sorun oluştu.", variant: "destructive" });
     return null;
   }
@@ -67,13 +68,13 @@ export const getUserReports = async (userId: string): Promise<ListingReport[]> =
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching user reports:', error);
+      logger.error('[ReportService] Error fetching user reports', { error });
       return [];
     }
 
     return (data || []) as ListingReport[];
   } catch (error) {
-    console.error('Error in getUserReports:', error);
+    logger.error('[ReportService] Error in getUserReports', { error });
     return [];
   }
 };
@@ -89,13 +90,13 @@ export const getListingReports = async (listingId: string): Promise<ListingRepor
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching listing reports:', error);
+      logger.error('[ReportService] Error fetching listing reports', { error });
       return [];
     }
 
     return (data || []) as ListingReport[];
   } catch (error) {
-    console.error('Error in getListingReports:', error);
+    logger.error('[ReportService] Error in getListingReports', { error });
     return [];
   }
 };
@@ -123,14 +124,14 @@ export const updateReportStatus = async (
       .single();
 
     if (error) {
-      console.error('Error updating report status:', error);
+      logger.error('[ReportService] Error updating report status', { error });
       toast({ title: "Rapor Güncellenemedi", description: error.message, variant: "destructive" });
       return null;
     }
 
     return data as ListingReport;
   } catch (error) {
-    console.error('Error in updateReportStatus:', error);
+    logger.error('[ReportService] Error in updateReportStatus', { error });
     toast({ title: "Beklenmedik Hata", description: "Rapor güncellenirken bir sorun oluştu.", variant: "destructive" });
     return null;
   }
@@ -149,7 +150,7 @@ export const getReportStats = async (): Promise<{
       .select('*');
 
     if (error) {
-      console.error('Error getting report stats:', error);
+      logger.error('[ReportService] Error getting report stats', { error });
       return null;
     }
 
@@ -172,7 +173,7 @@ export const getReportStats = async (): Promise<{
       reportsByReason
     };
   } catch (error) {
-    console.error('Error in getReportStats:', error);
+    logger.error('[ReportService] Error in getReportStats', { error });
     return null;
   }
 }; 
