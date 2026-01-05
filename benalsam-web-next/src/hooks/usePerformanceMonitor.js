@@ -36,7 +36,7 @@ export const usePerformanceMonitor = () => {
     
     // Track Core Web Vitals if available (silent)
     if ('web-vital' in window && shouldLog) {
-      console.log('📈 Core Web Vitals tracking available');
+      logger.debug('[usePerformanceMonitor] Core Web Vitals tracking available');
     }
     
     // Track chunk loading performance
@@ -67,7 +67,7 @@ export const usePerformanceMonitor = () => {
   useEffect(() => {
     if (document.readyState === 'complete') {
       const loadTime = performance.now();
-      console.log(`🎯 Initial page load: ${loadTime.toFixed(2)}ms`);
+      logger.debug('[usePerformanceMonitor] Initial page load', { time: `${loadTime.toFixed(2)}ms` });
     } else {
       window.addEventListener('load', () => {
         const loadTime = performance.now();
