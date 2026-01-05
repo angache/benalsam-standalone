@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
 
 export interface FollowedCategory {
   category_name: string
@@ -26,13 +27,13 @@ export const followCategory = async (userId: string, categoryName: string) => {
       if (error.code === '23505') {
         return { user_id: userId, category_name: categoryName, already_following: true }
       }
-      console.error('Error following category:', error)
+      logger.error('[CategoryFollowService] Error following category', { error })
       return null
     }
 
     return data
   } catch (error: any) {
-    console.error('Error following category:', error)
+    logger.error('[CategoryFollowService] Error following category', { error })
     return null
   }
 }
@@ -50,13 +51,13 @@ export const unfollowCategory = async (userId: string, categoryName: string): Pr
       .eq('category_name', categoryName)
 
     if (error) {
-      console.error('Error unfollowing category:', error)
+      logger.error('[CategoryFollowService] Error unfollowing category', { error })
       return false
     }
 
     return true
   } catch (error: any) {
-    console.error('Error unfollowing category:', error)
+    logger.error('[CategoryFollowService] Error unfollowing category', { error })
     return false
   }
 }
@@ -72,13 +73,13 @@ export const fetchFollowedCategories = async (userId: string): Promise<FollowedC
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Error in fetchFollowedCategories:', error)
+      logger.error('[CategoryFollowService] Error in fetchFollowedCategories', { error })
       return []
     }
 
     return data || []
   } catch (error) {
-    console.error('Error in fetchFollowedCategories:', error)
+    logger.error('[CategoryFollowService] Error in fetchFollowedCategories', { error })
     return []
   }
 }
@@ -107,7 +108,7 @@ export const fetchListingsForFollowedCategories = async (
           .limit(limitPerCategory)
 
         if (listingsError) {
-          console.error(`Error fetching listings for category ${fc.category_name}:`, listingsError)
+          logger.error(`[CategoryFollowService] Error fetching listings for category ${fc.category_name}`, { error: listingsError, categoryName: fc.category_name })
           return { category_name: fc.category_name, listings: [] }
         }
         
@@ -143,7 +144,7 @@ export const fetchListingsForFollowedCategories = async (
     )
     return listingsByCategories.filter(cat => cat.listings.length > 0)
   } catch (e) {
-    console.error('Unexpected error in fetchListingsForFollowedCategories:', e)
+    logger.error('[CategoryFollowService] Unexpected error in fetchListingsForFollowedCategories', { error: e })
     return []
   }
 }

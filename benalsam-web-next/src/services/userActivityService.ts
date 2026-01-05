@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/production-logger';
 
 const VALID_ACTIVITY_TYPES = [
   'listing_created',
@@ -21,12 +22,12 @@ const LAST_SEARCH_KEY = 'benalsam_last_search';
 
 export const addUserActivity = async (userId: string, activityType: string, title: string, description: string = '', relatedId: string | null = null): Promise<boolean> => {
   if (!userId || !activityType || !title) {
-    console.error('Missing required parameters for user activity');
+    logger.error('[UserActivityService] Missing required parameters for user activity');
     return false;
   }
   
   if (!VALID_ACTIVITY_TYPES.includes(activityType)) {
-    console.error(`Invalid activity type: ${activityType}. Valid types:`, VALID_ACTIVITY_TYPES);
+    logger.error(`[UserActivityService] Invalid activity type: ${activityType}`, { validTypes: VALID_ACTIVITY_TYPES });
     return false;
   }
   
@@ -42,13 +43,13 @@ export const addUserActivity = async (userId: string, activityType: string, titl
       });
     
     if (error) {
-      console.error('Error adding user activity:', error);
+      logger.error('[UserActivityService] Error adding user activity', { error });
       return false;
     }
     
     return true;
   } catch (error) {
-    console.error('Error adding user activity:', error);
+    logger.error('[UserActivityService] Error adding user activity', { error });
     return false;
   }
 };
@@ -65,13 +66,13 @@ export const getUserActivities = async (userId: string, limit: number = 20) => {
       .limit(limit);
     
     if (error) {
-      console.error('Error getting user activities:', error);
+      logger.error('[UserActivityService] Error getting user activities', { error });
       return [];
     }
     
     return data || [];
   } catch (error) {
-    console.error('Error getting user activities:', error);
+    logger.error('[UserActivityService] Error getting user activities', { error });
     return [];
   }
 };
@@ -91,13 +92,13 @@ export const deleteUserActivity = async (activityId: string, userId: string): Pr
       .eq('user_id', userId);
     
     if (error) {
-      console.error('Error deleting user activity:', error);
+      logger.error('[UserActivityService] Error deleting user activity', { error });
       return false;
     }
     
     return true;
   } catch (error) {
-    console.error('Error deleting user activity:', error);
+    logger.error('[UserActivityService] Error deleting user activity', { error });
     return false;
   }
 };
@@ -112,13 +113,13 @@ export const clearUserActivities = async (userId: string): Promise<boolean> => {
       .eq('user_id', userId);
     
     if (error) {
-      console.error('Error clearing user activities:', error);
+      logger.error('[UserActivityService] Error clearing user activities', { error });
       return false;
     }
     
     return true;
   } catch (error) {
-    console.error('Error clearing user activities:', error);
+    logger.error('[UserActivityService] Error clearing user activities', { error });
     return false;
   }
 };
@@ -131,7 +132,7 @@ export const addToListingHistory = (listingId: string) => {
     const updatedHistory = [listingId, ...history.filter(id => id !== listingId)].slice(0, 20);
     localStorage.setItem(LISTING_HISTORY_KEY, JSON.stringify(updatedHistory));
   } catch (error) {
-    console.error('Error adding to listing history:', error);
+    logger.error('[UserActivityService] Error adding to listing history', { error });
   }
 };
 
@@ -140,7 +141,7 @@ export const getListingHistory = (): string[] => {
     const history = localStorage.getItem(LISTING_HISTORY_KEY);
     return history ? JSON.parse(history) : [];
   } catch (error) {
-    console.error('Error getting listing history:', error);
+    logger.error('[UserActivityService] Error getting listing history', { error });
     return [];
   }
 };
@@ -149,7 +150,7 @@ export const clearListingHistory = () => {
   try {
     localStorage.removeItem(LISTING_HISTORY_KEY);
   } catch (error) {
-    console.error('Error clearing listing history:', error);
+    logger.error('[UserActivityService] Error clearing listing history', { error });
   }
 };
 
@@ -163,7 +164,7 @@ export const saveLastSearch = (searchCriteria: any) => {
     };
     localStorage.setItem(LAST_SEARCH_KEY, JSON.stringify(searchData));
   } catch (error) {
-    console.error('Error saving last search:', error);
+    logger.error('[UserActivityService] Error saving last search', { error });
   }
 };
 
@@ -184,7 +185,7 @@ export const getLastSearch = () => {
     
     return searchData;
   } catch (error) {
-    console.error('Error getting last search:', error);
+    logger.error('[UserActivityService] Error getting last search', { error });
     return null;
   }
 };
@@ -193,6 +194,6 @@ export const clearLastSearch = () => {
   try {
     localStorage.removeItem(LAST_SEARCH_KEY);
   } catch (error) {
-    console.error('Error clearing last search:', error);
+    logger.error('[UserActivityService] Error clearing last search', { error });
   }
 }; 
