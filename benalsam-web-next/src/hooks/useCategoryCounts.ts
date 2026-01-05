@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { categoriesServiceClient } from '@/lib/apiClient'
 import { checkCategoryCountsVersion } from '@/services/cacheVersionService'
+import { logger } from '@/utils/production-logger'
 
 // Cache configuration
 const CACHE_KEY = 'category_counts_cache_v1'
