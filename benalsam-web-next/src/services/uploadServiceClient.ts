@@ -38,7 +38,7 @@ class UploadServiceClient {
 
       return await response.json();
     } catch (error) {
-      console.error('Upload Service API Error:', error);
+      logger.error('[UploadServiceClient] Upload Service API Error', { error });
       throw error;
     }
   }
@@ -163,7 +163,7 @@ export const uploadImagesWithProgress = async (
       onProgress(0);
     }
 
-    console.log('📤 Uploading images to Upload Service...', { count: images.length });
+    logger.debug('[UploadServiceClient] Uploading images to Upload Service', { count: images.length });
 
     const result = await uploadServiceClient.uploadListingImages(images, userId);
 
