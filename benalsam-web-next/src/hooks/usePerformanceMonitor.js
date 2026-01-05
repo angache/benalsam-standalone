@@ -48,11 +48,13 @@ export const usePerformanceMonitor = () => {
       );
       
       if (jsChunks.length > 0 && shouldLog) {
-        console.log('📦 Chunks loaded:', jsChunks.map(chunk => ({
-          name: chunk.name.split('/').pop(),
-          duration: chunk.duration.toFixed(2) + 'ms',
-          size: chunk.transferSize ? (chunk.transferSize / 1024).toFixed(2) + 'KB' : 'unknown'
-        })));
+        logger.debug('[usePerformanceMonitor] Chunks loaded', { 
+          chunks: jsChunks.map(chunk => ({
+            name: chunk.name.split('/').pop(),
+            duration: chunk.duration.toFixed(2) + 'ms',
+            size: chunk.transferSize ? (chunk.transferSize / 1024).toFixed(2) + 'KB' : 'unknown'
+          }))
+        });
       }
     };
     
