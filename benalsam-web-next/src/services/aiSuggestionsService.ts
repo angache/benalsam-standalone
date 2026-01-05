@@ -1,4 +1,5 @@
 import { Category } from 'benalsam-shared-types';
+import { logger } from '@/utils/production-logger';
 
 export interface AISuggestion {
   id: string;
@@ -54,10 +55,10 @@ class AISuggestionsService {
   async getSuggestions(query?: string, categoryId?: number): Promise<AISuggestion[]> {
     try {
       // Always fetch from API - disable cache temporarily
-      console.log('🔄 Fetching AI suggestions from API...');
+      logger.debug('[AISuggestionsService] Fetching AI suggestions from API');
       return await this.fetchSuggestionsFromAPI(query, categoryId);
     } catch (error) {
-      console.error('❌ Error getting AI suggestions:', error);
+      logger.error('[AISuggestionsService] Error getting AI suggestions', { error });
       return this.getFallbackSuggestions(query, categoryId);
     }
   }
@@ -67,7 +68,7 @@ class AISuggestionsService {
    */
   async getCategorySuggestions(categoryId: number): Promise<AISuggestion[]> {
     try {
-      console.log('🤖 Getting category AI suggestions for category:', categoryId);
+      logger.debug('[AISuggestionsService] Getting category AI suggestions', { categoryId });
       
       // Önce category AI suggestions'ları getir
       const categorySuggestions = await this.getCategoryAISuggestions(categoryId);
@@ -90,7 +91,7 @@ class AISuggestionsService {
 
       return [...categoryBasedSuggestions, ...generalSuggestions];
     } catch (error) {
-      console.error('❌ Error getting category suggestions:', error);
+      logger.error('[AISuggestionsService] Error getting category suggestions', { error });
       return [];
     }
   }
@@ -104,11 +105,11 @@ class AISuggestionsService {
       const cached = this.getCachedCategorySuggestions(categoryId);
       
       if (cached.length > 0) {
-        console.log('📦 Category AI suggestions loaded from cache');
+        logger.debug('[AISuggestionsService] Category AI suggestions loaded from cache');
         return cached;
       }
 
-      console.log('🤖 Fetching category AI suggestions from API...');
+      logger.debug('[AISuggestionsService] Fetching category AI suggestions from API');
       
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories/${categoryId}/ai-suggestions`);
       
@@ -125,10 +126,10 @@ class AISuggestionsService {
       // Cache the suggestions
       this.setCachedCategorySuggestions(categoryId, result.data.suggestions);
       
-      console.log(`✅ Fetched ${result.data.suggestions.length} category AI suggestions`);
+      logger.debug('[AISuggestionsService] Fetched category AI suggestions', { count: result.data.suggestions.length });
       return result.data.suggestions;
     } catch (error) {
-      console.error('❌ Error fetching category AI suggestions:', error);
+      logger.error('[AISuggestionsService] Error fetching category AI suggestions', { error });
       return [];
     }
   }
@@ -152,7 +153,7 @@ class AISuggestionsService {
         return 'AI Önerisi';
       }
     } catch (error) {
-      console.error('Error extracting suggestion text:', error);
+      logger.error('[AISuggestionsService] Error extracting suggestion text', { error });
       return 'AI Önerisi';
     }
   }
@@ -171,7 +172,7 @@ class AISuggestionsService {
       
       return [];
     } catch (error) {
-      console.error('Error getting trending suggestions:', error);
+      logger.error('[AISuggestionsService] Error getting trending suggestions', { error });
       return [];
     }
   }
@@ -190,7 +191,7 @@ class AISuggestionsService {
       
       return [];
     } catch (error) {
-      console.error('Error getting popular suggestions:', error);
+      logger.error('[AISuggestionsService] Error getting popular suggestions', { error });
       return [];
     }
   }
@@ -203,7 +204,7 @@ class AISuggestionsService {
     this.lastFetchTime = Date.now();
 
     try {
-      console.log('🤖 Fetching AI suggestions from API...');
+      logger.debug('[AISuggestionsService] Fetching AI suggestions from API');
       
       const params = new URLSearchParams();
       if (query) params.append('q', query);
@@ -226,10 +227,10 @@ class AISuggestionsService {
       // Cache the suggestions
       this.setCachedSuggestions(suggestions);
       
-      console.log(`✅ Fetched ${suggestions.length} AI suggestions from API`);
+      logger.debug('[AISuggestionsService] Fetched AI suggestions from API', { count: suggestions.length });
       return suggestions;
     } catch (error) {
-      console.error('❌ Error fetching AI suggestions from API:', error);
+      logger.error('[AISuggestionsService] Error fetching AI suggestions from API', { error });
       throw error;
     } finally {
       this.isFetching = false;
@@ -249,7 +250,7 @@ class AISuggestionsService {
         }
       }
     } catch (error) {
-      console.error('Error getting cached suggestions:', error);
+      logger.error('[AISuggestionsService] Error getting cached suggestions', { error });
     }
     return [];
   }
@@ -265,7 +266,7 @@ class AISuggestionsService {
       };
       localStorage.setItem(this.CACHE_KEY, JSON.stringify(cacheData));
     } catch (error) {
-      console.error('Error setting cached suggestions:', error);
+      logger.error('[AISuggestionsService] Error setting cached suggestions', { error });
     }
   }
 
@@ -283,7 +284,7 @@ class AISuggestionsService {
         }
       }
     } catch (error) {
-      console.error('Error getting cached category suggestions:', error);
+      logger.error('[AISuggestionsService] Error getting cached category suggestions', { error });
     }
     return [];
   }
@@ -300,7 +301,7 @@ class AISuggestionsService {
       };
       localStorage.setItem(cacheKey, JSON.stringify(cacheData));
     } catch (error) {
-      console.error('Error setting cached category suggestions:', error);
+      logger.error('[AISuggestionsService] Error setting cached category suggestions', { error });
     }
   }
 
@@ -308,7 +309,7 @@ class AISuggestionsService {
    * Get fallback suggestions
    */
   private getFallbackSuggestions(query?: string, categoryId?: number): AISuggestion[] {
-    console.log('🔄 Using fallback suggestions');
+    logger.debug('[AISuggestionsService] Using fallback suggestions');
     
     // Boş array döndür - gerçek veri kullan
     return [];
@@ -329,9 +330,9 @@ class AISuggestionsService {
         }
       });
       
-      console.log('🗑️ AI suggestions cache cleared');
+      logger.debug('[AISuggestionsService] AI suggestions cache cleared');
     } catch (error) {
-      console.error('Error clearing cache:', error);
+      logger.error('[AISuggestionsService] Error clearing cache', { error });
     }
   }
 
@@ -339,7 +340,7 @@ class AISuggestionsService {
    * Refresh suggestions (force fetch from API)
    */
   async refresh(): Promise<AISuggestion[]> {
-    console.log('🔄 Forcing AI suggestions refresh...');
+    logger.debug('[AISuggestionsService] Forcing AI suggestions refresh');
     this.clearCache();
     this.lastFetchTime = 0;
     return await this.fetchSuggestionsFromAPI();

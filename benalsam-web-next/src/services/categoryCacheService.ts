@@ -1,5 +1,6 @@
 import { Category } from './categoryService'
 import { checkCategoriesVersion } from './cacheVersionService'
+import { logger } from '@/utils/production-logger'
 
 // Cache configuration
 const CACHE_KEY = 'benalsam_categories_next_v1.0.0'
@@ -22,7 +23,7 @@ class CategoryCacheService {
   async getCategories(fetchFn: () => Promise<Category[]>): Promise<Category[]> {
     const startTime = Date.now()
     try {
-      console.log('🚀 [PERF] CategoryCache.getCategories started', {
+      logger.debug('[CategoryCache] getCategories started', {
         timestamp: new Date().toISOString()
       })
 
@@ -31,19 +32,19 @@ class CategoryCacheService {
       const versionChanged = await checkCategoriesVersion()
       const versionTime = Date.now() - versionStart
       
-      console.log('🔍 [PERF] Version check completed', {
+      logger.debug('[CategoryCache] Version check completed', {
         versionTime: `${versionTime}ms`,
         versionChanged
       })
 
       if (versionChanged) {
-        console.log('🔄 [PERF] Category version changed, clearing cache')
+        logger.debug('[CategoryCache] Category version changed, clearing cache')
         this.clearCache()
       }
 
       // Check if we're already fetching
       if (this.isFetching) {
-        console.log('⏳ [PERF] Category fetch already in progress, waiting...')
+        logger.debug('[CategoryCache] Category fetch already in progress, waiting')
         await this.waitForFetch()
         return this.getCachedData()
       }
@@ -51,12 +52,12 @@ class CategoryCacheService {
       // Check rate limiting
       const now = Date.now()
       if (now - this.lastFetchTime < RATE_LIMIT) {
-        console.log('⏱️ [PERF] Rate limit active, using cached data', {
+        logger.debug('[CategoryCache] Rate limit active, using cached data', {
           timeSinceLastFetch: `${now - this.lastFetchTime}ms`
         })
         const cached = this.getCachedData()
         if (cached && cached.length > 0) {
-          console.log('✅ [PERF] Returned cached data (rate limited)', {
+          logger.debug('[CategoryCache] Returned cached data (rate limited)', {
             categoryCount: cached.length,
             totalTime: `${Date.now() - startTime}ms`
           })
@@ -69,26 +70,26 @@ class CategoryCacheService {
       const cached = this.getCachedData()
       const cacheTime = Date.now() - cacheStart
       
-      console.log('📦 [PERF] Cache check completed', {
+      logger.debug('[CategoryCache] Cache check completed', {
         cacheTime: `${cacheTime}ms`,
         cacheHit: !!(cached && cached.length > 0),
         categoryCount: cached?.length || 0
       })
 
       if (cached && cached.length > 0) {
-        console.log('✅ [PERF] Categories loaded from cache', {
+        logger.debug('[CategoryCache] Categories loaded from cache', {
           categoryCount: cached.length,
           totalTime: `${Date.now() - startTime}ms`
         })
         return cached
       }
 
-      console.log('🔄 [PERF] Cache miss - fetching from API')
+      logger.debug('[CategoryCache] Cache miss - fetching from API')
       // Fetch from API
       return await this.fetchFromAPI(fetchFn)
     } catch (error) {
       const totalTime = Date.now() - startTime
-      console.error('❌ [PERF] Error in getCategories:', {
+      logger.error('[CategoryCache] Error in getCategories', {
         error,
         totalTime: `${totalTime}ms`
       })
@@ -96,7 +97,7 @@ class CategoryCacheService {
       // Fallback to cached data if available
       const cached = this.getCachedData()
       if (cached && cached.length > 0) {
-        console.log('🔄 [PERF] Falling back to cached data', {
+        logger.debug('[CategoryCache] Falling back to cached data', {
           categoryCount: cached.length,
           totalTime: `${totalTime}ms`
         })
@@ -116,7 +117,7 @@ class CategoryCacheService {
     this.lastFetchTime = Date.now()
 
     try {
-      console.log('🌐 [PERF] Fetching categories from API...', {
+      logger.debug('[CategoryCache] Fetching categories from API', {
         timestamp: new Date().toISOString()
       })
       
@@ -124,7 +125,7 @@ class CategoryCacheService {
       const categories = await fetchFn()
       const fetchTime = Date.now() - fetchStart
       
-      console.log('📥 [PERF] API fetch completed', {
+      logger.debug('[CategoryCache] API fetch completed', {
         fetchTime: `${fetchTime}ms`,
         categoryCount: categories.length
       })
@@ -135,7 +136,7 @@ class CategoryCacheService {
       const cacheTime = Date.now() - cacheStart
       
       const totalTime = Date.now() - startTime
-      console.log('✅ [PERF] fetchFromAPI completed', {
+      logger.debug('[CategoryCache] fetchFromAPI completed', {
         totalTime: `${totalTime}ms`,
         breakdown: {
           apiFetch: `${fetchTime}ms`,
@@ -147,7 +148,7 @@ class CategoryCacheService {
       return categories
     } catch (error) {
       const totalTime = Date.now() - startTime
-      console.error('❌ [PERF] Error fetching from API:', {
+      logger.error('[CategoryCache] Error fetching from API', {
         error,
         totalTime: `${totalTime}ms`
       })
@@ -171,20 +172,20 @@ class CategoryCacheService {
       
       // Check if cache is expired
       if (Date.now() - parsed.timestamp > CACHE_TTL) {
-        console.log('⏰ Cache expired, will fetch fresh data')
+        logger.debug('[CategoryCache] Cache expired, will fetch fresh data')
         return []
       }
 
       // Check version compatibility
       if (parsed.version !== 'v1.0.0') {
-        console.log('🔄 Cache version mismatch, clearing cache')
+        logger.debug('[CategoryCache] Cache version mismatch, clearing cache')
         this.clearCache()
         return []
       }
 
       return parsed.data
     } catch (error) {
-      console.error('❌ Error reading cache:', error)
+      logger.error('[CategoryCache] Error reading cache', { error })
       this.clearCache()
       return []
     }
@@ -204,9 +205,9 @@ class CategoryCacheService {
       }
       
       localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData))
-      console.log('💾 Categories cached successfully')
+      logger.debug('[CategoryCache] Categories cached successfully')
     } catch (error) {
-      console.error('❌ Error setting cache:', error)
+      logger.error('[CategoryCache] Error setting cache', { error })
     }
   }
 
@@ -218,9 +219,9 @@ class CategoryCacheService {
 
     try {
       localStorage.removeItem(CACHE_KEY)
-      console.log('🗑️ Category cache cleared')
+      logger.debug('[CategoryCache] Category cache cleared')
     } catch (error) {
-      console.error('❌ Error clearing cache:', error)
+      logger.error('[CategoryCache] Error clearing cache', { error })
     }
   }
 
@@ -228,7 +229,7 @@ class CategoryCacheService {
    * Refresh cache (force fetch from API)
    */
   async refresh(fetchFn: () => Promise<Category[]>): Promise<Category[]> {
-    console.log('🔄 Forcing category refresh...')
+    logger.debug('[CategoryCache] Forcing category refresh')
     this.clearCache()
     this.lastFetchTime = 0
     return await this.fetchFromAPI(fetchFn)

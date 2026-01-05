@@ -4,6 +4,7 @@
  */
 
 import { categoriesServiceClient } from '@/lib/apiClient'
+import { logger } from '@/utils/production-logger'
 
 // Cache version storage keys
 const CACHE_VERSION_KEYS = {
@@ -19,7 +20,7 @@ export const checkCacheVersion = async (cacheKey: string): Promise<boolean> => {
   if (typeof window === 'undefined') return false
 
   try {
-    console.log(`🔄 Checking cache version for: ${cacheKey}`)
+    logger.debug('[CacheVersionService] Checking cache version', { cacheKey })
     
     // Local storage'dan mevcut version'ı al
     const localVersion = localStorage.getItem(`${cacheKey}_version`) || '0'
@@ -29,7 +30,7 @@ export const checkCacheVersion = async (cacheKey: string): Promise<boolean> => {
     const hasCheckedThisSession = sessionStorage.getItem(sessionKey)
     
     if (hasCheckedThisSession) {
-      console.log(`⏰ Cache version already checked this session: ${cacheKey}`)
+      logger.debug('[CacheVersionService] Cache version already checked this session', { cacheKey })
       return false
     }
     
@@ -43,13 +44,13 @@ export const checkCacheVersion = async (cacheKey: string): Promise<boolean> => {
     const serverVersion = response.version || response.data?.version
     
     if (!serverVersion) {
-      console.warn(`⚠️ Version check failed for ${cacheKey}`)
+      logger.warn('[CacheVersionService] Version check failed', { cacheKey })
       return false
     }
     
     // Version karşılaştır
     if (localVersion !== serverVersion.toString()) {
-      console.log(`🔄 Version changed for ${cacheKey}: ${localVersion} → ${serverVersion}`)
+      logger.debug('[CacheVersionService] Version changed', { cacheKey, localVersion, serverVersion })
       
       // Cache temizle
       clearCache(cacheKey)
@@ -63,12 +64,12 @@ export const checkCacheVersion = async (cacheKey: string): Promise<boolean> => {
     
     // Version aynı, session'ı işaretle
     sessionStorage.setItem(sessionKey, 'true')
-    console.log(`✅ Cache version up to date: ${cacheKey}`)
+    logger.debug('[CacheVersionService] Cache version up to date', { cacheKey })
     
     return false
     
   } catch (error) {
-    console.error(`❌ Error checking cache version for ${cacheKey}:`, error)
+    logger.error('[CacheVersionService] Error checking cache version', { cacheKey, error })
     return false
   }
 }
@@ -80,7 +81,7 @@ export const clearCache = (cacheKey: string) => {
   if (typeof window === 'undefined') return
 
   try {
-    console.log(`🗑️ Clearing cache for: ${cacheKey}`)
+    logger.debug('[CacheVersionService] Clearing cache', { cacheKey })
     
     // Local storage'dan ilgili cache'leri temizle
     const keysToRemove: string[] = []
@@ -94,11 +95,11 @@ export const clearCache = (cacheKey: string) => {
     
     keysToRemove.forEach(key => {
       localStorage.removeItem(key)
-      console.log(`🗑️ Removed: ${key}`)
+      logger.debug('[CacheVersionService] Removed cache key', { key })
     })
     
   } catch (error) {
-    console.error(`❌ Error clearing cache for ${cacheKey}:`, error)
+    logger.error('[CacheVersionService] Error clearing cache', { cacheKey, error })
   }
 }
 
@@ -130,7 +131,7 @@ export const clearAllCache = () => {
   if (typeof window === 'undefined') return
 
   try {
-    console.log('🗑️ Clearing all cache')
+    logger.debug('[CacheVersionService] Clearing all cache')
     
     Object.values(CACHE_VERSION_KEYS).forEach(key => {
       clearCache(key)
@@ -149,10 +150,10 @@ export const clearAllCache = () => {
       sessionStorage.removeItem(sessionKey)
     })
     
-    console.log('✅ All cache cleared')
+    logger.debug('[CacheVersionService] All cache cleared')
     
   } catch (error) {
-    console.error('❌ Error clearing all cache:', error)
+    logger.error('[CacheVersionService] Error clearing all cache', { error })
   }
 }
 
@@ -185,7 +186,7 @@ export const getCacheStatus = () => {
 export const forceClearCache = (cacheKey: string) => {
   if (typeof window === 'undefined') return
 
-  console.log(`🔧 Force clearing cache: ${cacheKey}`)
+  logger.debug('[CacheVersionService] Force clearing cache', { cacheKey })
   clearCache(cacheKey)
   
   // Version'ı sıfırla
