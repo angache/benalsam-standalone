@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
 
 export const searchUnsplashImages = async (query: string) => {
   if (!query || query.trim() === '') {
@@ -10,12 +11,12 @@ export const searchUnsplashImages = async (query: string) => {
   })
 
   if (error) {
-    console.error('Error fetching from Unsplash edge function:', error)
+    logger.error('[UnsplashService] Error fetching from Unsplash edge function', { error })
     throw new Error(`Stok görselleri alınamadı: ${error.message}`)
   }
   
   if (data?.error) {
-    console.error('Error from Unsplash edge function:', data.error)
+    logger.error('[UnsplashService] Error from Unsplash edge function', { error: data.error })
     throw new Error(data.error)
   }
 

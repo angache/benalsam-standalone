@@ -4,6 +4,7 @@
  */
 
 import { CHATBOT_FAQ, type FAQItem } from '@/data/chatbotFAQ'
+import { logger } from '@/utils/production-logger'
 
 // ============================================================================
 // TYPES
@@ -354,7 +355,7 @@ export function saveChatHistory(messages: ChatMessage[]): void {
     try {
       localStorage.setItem('chatbot_history', JSON.stringify(messages))
     } catch (error) {
-      console.error('Failed to save chat history:', error)
+      logger.error('[ChatbotService] Failed to save chat history', { error })
     }
   }
 }
@@ -375,7 +376,7 @@ export function loadChatHistory(): ChatMessage[] {
         }))
       }
     } catch (error) {
-      console.error('Failed to load chat history:', error)
+      logger.error('[ChatbotService] Failed to load chat history', { error })
     }
   }
   return []
@@ -399,7 +400,7 @@ export function trackChatbotEvent(
 ): void {
   if (typeof window !== 'undefined') {
     // Integration with analytics (Google Analytics, Mixpanel, etc.)
-    console.log('[Chatbot Analytics]', event, data)
+    logger.debug('[ChatbotService] Analytics event', { event, data })
     
     // You can integrate with your analytics service here
     // Example: gtag('event', 'chatbot_' + event, data)
