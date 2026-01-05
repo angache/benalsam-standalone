@@ -51,7 +51,7 @@ export const getOrCreateConversation = async (
     }
 
     // Check for existing conversation
-    console.log('Searching for existing conversation between:', user1Id, user2Id, 'offerId:', offerId);
+    logger.debug('[ConversationService] Searching for existing conversation', { user1Id, user2Id, offerId });
     const { data: existingConversation, error: searchError } = await supabase
       .from('conversations')
       .select('id')
@@ -163,7 +163,7 @@ export const sendMessage = async (
       throw new ValidationError('Conversation ID, sender ID and content are required');
     }
 
-    console.log('📤 Sending message via API...', { conversationId, senderId });
+    logger.debug('[ConversationService] Sending message via API', { conversationId, senderId });
 
     // Send message via API (bypasses RLS)
     const response = await fetch('/api/messages', {
@@ -371,7 +371,7 @@ export const markMessagesAsRead = async (
     const result = await response.json();
     return result.success;
   } catch (error) {
-    console.error('Error in markMessagesAsRead:', error);
+    logger.error('[ConversationService] Error in markMessagesAsRead', { error });
     return false;
   }
 };
@@ -401,7 +401,7 @@ async function getUserProfile(userId: string) {
       return data;
     }
   } catch (err) {
-    console.error('Error fetching user profile:', err);
+    logger.error('[ConversationService] Error fetching user profile', { error: err });
   }
   return null;
 }
@@ -457,10 +457,10 @@ export const subscribeToMessages = (conversationId: string, onNewMessage: (messa
             ...newMessage,
             sender
           };
-          console.log('✅ New message received:', messageWithSender);
+          logger.debug('[ConversationService] New message received', { message: messageWithSender });
           onNewMessage(messageWithSender);
         } else {
-          console.warn('⚠️ Could not fetch sender profile:', newMessage.sender_id);
+          logger.warn('[ConversationService] Could not fetch sender profile', { senderId: newMessage.sender_id });
           // Still emit message without sender details
           onNewMessage(newMessage);
         }
@@ -468,15 +468,15 @@ export const subscribeToMessages = (conversationId: string, onNewMessage: (messa
     )
     .subscribe((status, err) => {
       if (status === 'SUBSCRIBED') {
-        console.log(`✅ [subscribeToMessages] Connected`, { conversationId });
+        logger.debug(`[ConversationService] subscribeToMessages Connected`, { conversationId });
       } else if (status === 'CHANNEL_ERROR') {
-        console.error(`❌ [subscribeToMessages] Channel error:`, err, { conversationId });
+        logger.error(`[ConversationService] subscribeToMessages Channel error`, { error: err, conversationId });
       } else if (status === 'TIMED_OUT') {
-        console.error(`⏱️ [subscribeToMessages] Connection timed out`, { conversationId });
+        logger.error(`[ConversationService] subscribeToMessages Connection timed out`, { conversationId });
       } else if (status === 'CLOSED') {
-        console.warn(`🔌 [subscribeToMessages] Connection closed`, { conversationId });
+        logger.warn(`[ConversationService] subscribeToMessages Connection closed`, { conversationId });
       } else {
-        console.log(`📡 [subscribeToMessages] Status: ${status}`, { conversationId });
+        logger.debug(`[ConversationService] subscribeToMessages Status: ${status}`, { conversationId });
       }
     });
 
