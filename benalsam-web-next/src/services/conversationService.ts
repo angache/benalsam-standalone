@@ -420,7 +420,7 @@ async function getUserProfile(userId: string) {
  * 
  * @example
  * const channel = subscribeToMessages('conv-123', (message) => {
- *   console.log('New message:', message)
+ *   logger.debug('[ConversationService] New message', { message })
  * })
  * 
  * // Cleanup
@@ -501,7 +501,7 @@ export const subscribeToMessageStatusChanges = (conversationId: string, onStatus
       }
     )
     .subscribe((status) => {
-      console.log(`📡 [subscribeToMessageStatusChanges] Subscription status: ${status}`);
+      logger.debug(`[ConversationService] subscribeToMessageStatusChanges Subscription status: ${status}`);
     });
 
   return channel;
@@ -543,7 +543,7 @@ export const getTotalUnreadMessages = async (userId: string): Promise<number> =>
 
     return count || 0;
   } catch (error) {
-    console.error('Error in getTotalUnreadMessages:', error);
+    logger.error('[ConversationService] Error in getTotalUnreadMessages', { error });
     return 0;
   }
 };
@@ -591,7 +591,7 @@ export const getUnreadMessageCounts = async (
 
     return counts;
   } catch (error) {
-    console.error('Error in getUnreadMessageCounts:', error);
+    logger.error('[ConversationService] Error in getUnreadMessageCounts', { error });
     return {};
   }
 };
@@ -655,7 +655,7 @@ export const findOrCreateConversation = async (
 
     return newConversation;
   } catch (error) {
-    console.error('Error in findOrCreateConversation:', error);
+    logger.error('[ConversationService] Error in findOrCreateConversation', { error });
     return null;
   }
 }; 
