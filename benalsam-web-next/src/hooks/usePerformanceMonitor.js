@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
+import { logger } from '@/utils/production-logger';
 
 export const usePerformanceMonitor = () => {
   const location = useLocation();
@@ -14,14 +15,14 @@ export const usePerformanceMonitor = () => {
     const shouldLog = import.meta.env.DEV && false; // Disabled by default
     
     if (shouldLog) {
-      console.log(`🚀 Navigation to ${location.pathname}: ${navigationTime.toFixed(2)}ms`);
+      logger.debug('[usePerformanceMonitor] Navigation', { pathname: location.pathname, time: `${navigationTime.toFixed(2)}ms` });
       
       // Track first load vs subsequent navigations
       if (isFirstLoad.current) {
-        console.log('📊 First page load completed');
+        logger.debug('[usePerformanceMonitor] First page load completed');
         isFirstLoad.current = false;
       } else {
-        console.log('📊 Client-side navigation completed');
+        logger.debug('[usePerformanceMonitor] Client-side navigation completed');
       }
     } else {
       // Just track first load status without logging
@@ -68,7 +69,7 @@ export const usePerformanceMonitor = () => {
     } else {
       window.addEventListener('load', () => {
         const loadTime = performance.now();
-        console.log(`🎯 Initial page load: ${loadTime.toFixed(2)}ms`);
+        logger.debug('[usePerformanceMonitor] Initial page load', { time: `${loadTime.toFixed(2)}ms` });
       });
     }
   }, []);
@@ -80,7 +81,7 @@ export const useComponentLoadTime = (componentName) => {
   
   useEffect(() => {
     const loadTime = performance.now() - startTime.current;
-    console.log(`⚡ ${componentName} loaded in: ${loadTime.toFixed(2)}ms`);
+    logger.debug('[usePerformanceMonitor] Component loaded', { componentName, time: `${loadTime.toFixed(2)}ms` });
   }, [componentName]);
 };
 
@@ -90,6 +91,6 @@ export const measureChunkLoad = (chunkName) => {
   
   return () => {
     const loadTime = performance.now() - startTime;
-    console.log(`📦 ${chunkName} chunk loaded in: ${loadTime.toFixed(2)}ms`);
+    logger.debug('[usePerformanceMonitor] Chunk loaded', { chunkName, time: `${loadTime.toFixed(2)}ms` });
   };
 }; 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/production-logger';
 
 export const useCategoryCounts = () => {
   const [categoryCounts, setCategoryCounts] = useState({});
@@ -32,7 +33,7 @@ export const useCategoryCounts = () => {
       }
       return data;
     } catch (error) {
-      console.error('Error reading from cache:', error);
+      logger.error('[useCategoryCounts] Error reading from cache', { error });
       return null;
     }
   }, []);
@@ -49,7 +50,7 @@ export const useCategoryCounts = () => {
       };
       localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
     } catch (error) {
-      console.error('Error writing to cache:', error);
+      logger.error('[useCategoryCounts] Error writing to cache', { error });
     }
   }, []);
 
@@ -79,7 +80,7 @@ export const useCategoryCounts = () => {
       
       if (response.ok) {
         const result = await response.json();
-        console.log('📊 Category counts fetched from service:', result);
+        logger.debug('[useCategoryCounts] Category counts fetched from service', { result });
         // Try several shapes: { data: { categoryCounts } } or { categoryCounts } or { aggregations }
         if (result?.data?.categoryCounts) return result.data.categoryCounts;
         if (result?.categoryCounts) return result.categoryCounts;
@@ -94,7 +95,7 @@ export const useCategoryCounts = () => {
         return {};
       }
     } catch (error) {
-      console.error('Elasticsearch category counts error:', error);
+      logger.error('[useCategoryCounts] Elasticsearch category counts error', { error });
     }
     return null;
   }, []);
@@ -117,10 +118,10 @@ export const useCategoryCounts = () => {
         }
       });
 
-      console.log('📊 Category counts fetched from Supabase');
+      logger.debug('[useCategoryCounts] Category counts fetched from Supabase');
       return counts;
     } catch (error) {
-      console.error('Supabase category counts error:', error);
+      logger.error('[useCategoryCounts] Supabase category counts error', { error });
       return {};
     }
   }, []);
@@ -131,7 +132,7 @@ export const useCategoryCounts = () => {
       // Rate limiting kontrol
       const now = Date.now();
       if (now - lastFetchTime.current < RATE_LIMIT) {
-        console.log('⏱️ Rate limit active, using cached data');
+        logger.debug('[useCategoryCounts] Rate limit active, using cached data');
         const cached = getCachedCategoryCounts();
         if (cached) return cached;
       }
@@ -139,7 +140,7 @@ export const useCategoryCounts = () => {
       // 1. Local cache kontrol
       const localCached = getCachedCategoryCounts();
       if (localCached) {
-        console.log('📦 Category counts loaded from local cache');
+        logger.debug('[useCategoryCounts] Category counts loaded from local cache');
         return localCached;
       }
       
@@ -149,13 +150,13 @@ export const useCategoryCounts = () => {
       const elasticsearchCounts = await fetchCategoryCountsFromElasticsearch();
       
       if (elasticsearchCounts && Object.keys(elasticsearchCounts).length > 0) {
-        console.log('💾 Caching Elasticsearch counts:', elasticsearchCounts);
+        logger.debug('[useCategoryCounts] Caching Elasticsearch counts', { elasticsearchCounts });
         setCachedCategoryCounts(elasticsearchCounts);
         return elasticsearchCounts;
       }
       
       // 3. Supabase fallback
-      console.log('🔄 Falling back to Supabase for category counts');
+      logger.debug('[useCategoryCounts] Falling back to Supabase for category counts');
       const supabaseCounts = await fetchCategoryCountsFromSupabase();
       
       if (supabaseCounts && Object.keys(supabaseCounts).length > 0) {
@@ -164,7 +165,7 @@ export const useCategoryCounts = () => {
       
       return supabaseCounts;
     } catch (error) {
-      console.error('Error in fetchCategoryCounts:', error);
+      logger.error('[useCategoryCounts] Error in fetchCategoryCounts', { error });
       return {};
     }
   }, [getCachedCategoryCounts, fetchCategoryCountsFromElasticsearch, fetchCategoryCountsFromSupabase, setCachedCategoryCounts]);
@@ -186,7 +187,7 @@ export const useCategoryCounts = () => {
 
     const key = String(categoryId);
     const count = categoryCounts[key] || 0;
-    console.log(`🔍 Category count for ID ${key}: ${count}`);
+    logger.debug('[useCategoryCounts] Category count', { categoryId: key, count });
     return count;
   }, [categoryCounts]);
 

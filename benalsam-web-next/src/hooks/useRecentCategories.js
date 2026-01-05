@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/utils/production-logger';
 
 export const useRecentCategories = () => {
   const [recentCategories, setRecentCategories] = useState([]);
@@ -17,7 +18,7 @@ export const useRecentCategories = () => {
         setRecentCategories(Array.isArray(parsed) ? parsed : []);
       }
     } catch (error) {
-      console.error('Error loading recent categories:', error);
+      logger.error('[useRecentCategories] Error loading recent categories', { error });
       setRecentCategories([]);
     }
   }, []);
@@ -27,7 +28,7 @@ export const useRecentCategories = () => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(categories));
     } catch (error) {
-      console.error('Error saving recent categories:', error);
+      logger.error('[useRecentCategories] Error saving recent categories', { error });
     }
   }, []);
 

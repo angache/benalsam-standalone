@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { logger } from '@/utils/production-logger';
 
 // Preload strategies for different routes
 const preloadStrategies = {
@@ -100,6 +101,6 @@ export const preloadChunk = (chunkName) => {
       preloadStrategies.premium();
       break;
     default:
-      console.warn(`Unknown chunk: ${chunkName}`);
+      logger.warn('[usePreload] Unknown chunk', { chunkName });
   }
 }; 

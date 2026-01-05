@@ -1,4 +1,5 @@
 import { useEffect, useCallback } from 'react';
+import { logger } from '@/utils/production-logger';
 
 // Performance monitoring hook
 export const usePerformance = () => {
@@ -14,7 +15,7 @@ export const usePerformance = () => {
         
         if (lastEntry) {
           const lcp = lastEntry.startTime;
-          console.log('🚀 LCP:', lcp, 'ms');
+          logger.debug('[usePerformance] LCP', { lcp: `${lcp}ms` });
           
           // Send to analytics
           if (window.gtag) {
@@ -32,7 +33,7 @@ export const usePerformance = () => {
         lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
         observers.push(lcpObserver);
       } catch (e) {
-        console.warn('LCP observer failed:', e);
+        logger.warn('[usePerformance] LCP observer failed', { error: e });
       }
 
       // FID (First Input Delay)
@@ -40,7 +41,7 @@ export const usePerformance = () => {
         const entries = list.getEntries();
         entries.forEach((entry) => {
           const fid = entry.processingStart - entry.startTime;
-          console.log('⚡ FID:', fid, 'ms');
+          logger.debug('[usePerformance] FID', { fid: `${fid}ms` });
           
           if (window.gtag) {
             window.gtag('event', 'core_web_vital', {
@@ -57,7 +58,7 @@ export const usePerformance = () => {
         fidObserver.observe({ entryTypes: ['first-input'] });
         observers.push(fidObserver);
       } catch (e) {
-        console.warn('FID observer failed:', e);
+        logger.warn('[usePerformance] FID observer failed', { error: e });
       }
 
       // CLS (Cumulative Layout Shift)
@@ -67,7 +68,7 @@ export const usePerformance = () => {
         entries.forEach((entry) => {
           if (!entry.hadRecentInput) {
             clsValue += entry.value;
-            console.log('📐 CLS:', clsValue);
+            logger.debug('[usePerformance] CLS', { clsValue });
             
             if (window.gtag) {
               window.gtag('event', 'core_web_vital', {
@@ -85,7 +86,7 @@ export const usePerformance = () => {
         clsObserver.observe({ entryTypes: ['layout-shift'] });
         observers.push(clsObserver);
       } catch (e) {
-        console.warn('CLS observer failed:', e);
+        logger.warn('[usePerformance] CLS observer failed', { error: e });
       }
       
       // Return cleanup function
@@ -94,7 +95,7 @@ export const usePerformance = () => {
           try {
             observer.disconnect();
           } catch (e) {
-            console.warn('Error disconnecting observer:', e);
+            logger.warn('[usePerformance] Error disconnecting observer', { error: e });
           }
         });
       };
@@ -117,7 +118,7 @@ export const usePerformance = () => {
               loadComplete: navigation.loadEventEnd - navigation.navigationStart,
             };
 
-            console.log('📊 Page Load Metrics:', metrics);
+            logger.debug('[usePerformance] Page Load Metrics', { metrics });
             
             // Send to analytics
             if (window.gtag) {
@@ -151,7 +152,7 @@ export const usePerformance = () => {
         entries.forEach((entry) => {
           // Track slow resources (> 1 second)
           if (entry.duration > 1000) {
-            console.log('🐌 Slow Resource:', entry.name, entry.duration, 'ms');
+            logger.debug('[usePerformance] Slow Resource', { name: entry.name, duration: `${entry.duration}ms` });
             
             if (window.gtag) {
               window.gtag('event', 'slow_resource', {
@@ -172,11 +173,11 @@ export const usePerformance = () => {
           try {
             resourceObserver.disconnect();
           } catch (e) {
-            console.warn('Error disconnecting resource observer:', e);
+            logger.warn('[usePerformance] Error disconnecting resource observer', { error: e });
           }
         };
       } catch (e) {
-        console.warn('Resource observer failed:', e);
+        logger.warn('[usePerformance] Resource observer failed', { error: e });
         return () => {}; // No-op cleanup on error
       }
     }
@@ -191,11 +192,11 @@ export const usePerformance = () => {
         const usedMB = Math.round(memory.usedJSHeapSize / 1024 / 1024);
         const totalMB = Math.round(memory.totalJSHeapSize / 1024 / 1024);
         
-        console.log('💾 Memory Usage:', usedMB, 'MB /', totalMB, 'MB');
+        logger.debug('[usePerformance] Memory Usage', { usedMB: `${usedMB}MB`, totalMB: `${totalMB}MB` });
         
         // Alert if memory usage is high
         if (usedMB > 100) {
-          console.warn('⚠️ High memory usage detected:', usedMB, 'MB');
+          logger.warn('[usePerformance] High memory usage detected', { usedMB: `${usedMB}MB` });
         }
       }, 30000); // Check every 30 seconds
       

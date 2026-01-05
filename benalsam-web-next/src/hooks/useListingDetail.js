@@ -88,7 +88,10 @@ export const useListingDetail = (listingId, setListings) => {
         .eq('listing_id', fetchedListing.id)
         .order('created_at', { ascending: false });
 
-      if (offersError) console.error("Error fetching offers:", offersError);
+      if (offersError) {
+        const { logger } = require('@/utils/production-logger');
+        logger.error('[useListingDetail] Error fetching offers', { error: offersError });
+      }
       else setOffers(offersData.map(o => ({ 
         ...o, 
         user: o.profiles, 

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../stores';
 import { calculateTrustScore, updateTrustScore } from '../services/trustScoreService';
+import { logger } from '@/utils/production-logger';
 
 // Query keys
 export const trustScoreKeys = {
@@ -86,7 +87,7 @@ export const useTrustScoreActions = () => {
       
       return { success: true };
     } catch (error) {
-      console.error('Error refreshing trust score:', error);
+      logger.error('[useTrustScore] Error refreshing trust score', { error });
       return { success: false, error: error.message };
     }
   };

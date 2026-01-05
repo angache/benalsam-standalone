@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { onCLS, onINP, onFCP, onLCP, onTTFB } from 'web-vitals';
 import useAIPerformanceAnalysis from './useAIPerformanceAnalysis.js';
+import { logger } from '@/utils/production-logger';
 
 const useRoutePerformance = () => {
   const location = useLocation();
@@ -31,16 +32,16 @@ const useRoutePerformance = () => {
     const debugMode = import.meta.env.DEV && false; // Disabled by default
     if (debugMode) {
       console.group(`📊 Route Performance: ${routePath}`);
-      console.log('Route Duration:', routeDuration + 'ms');
-      console.log('Route Metrics:', routeMetrics.current);
-      console.log('Route Type:', getRouteType(routePath));
+      logger.debug('[useRoutePerformance] Route Duration', { duration: `${routeDuration}ms` });
+      logger.debug('[useRoutePerformance] Route Metrics', { metrics: routeMetrics.current });
+      logger.debug('[useRoutePerformance] Route Type', { type: getRouteType(routePath) });
       console.groupEnd();
     }
 
     // AI Analysis'i çalıştır
     if (Object.keys(routeMetrics.current).length > 0) {
       addAnalysis(routeMetrics.current, routePath, routeDuration).catch(error => {
-        console.error('AI Analysis failed:', error);
+        logger.error('[useRoutePerformance] AI Analysis failed', { error });
       });
     }
 
