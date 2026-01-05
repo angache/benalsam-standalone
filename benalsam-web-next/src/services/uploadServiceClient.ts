@@ -1,4 +1,5 @@
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/production-logger';
 
 // Upload Service API Client
 class UploadServiceClient {
@@ -6,7 +7,7 @@ class UploadServiceClient {
 
   constructor() {
     this.baseUrl = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1';
-    console.log('🔗 Upload Service URL:', this.baseUrl);
+    logger.debug('[UploadServiceClient] Upload Service URL', { baseUrl: this.baseUrl });
   }
 
   private async makeRequest<T>(
@@ -170,7 +171,7 @@ export const uploadImagesWithProgress = async (
       onProgress(100);
     }
 
-    console.log('✅ Images uploaded successfully:', result);
+    logger.debug('[UploadServiceClient] Images uploaded successfully', { result });
 
     toast({
       title: "Görseller Yüklendi! 🎉",
@@ -179,7 +180,7 @@ export const uploadImagesWithProgress = async (
 
     return result;
   } catch (error) {
-    console.error('❌ Image upload failed:', error);
+    logger.error('[UploadServiceClient] Image upload failed', { error });
 
     toast({
       title: "Görsel Yükleme Hatası",

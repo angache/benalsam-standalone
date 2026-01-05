@@ -141,8 +141,6 @@ export const searchListingsWithElasticsearch = async (
     }
 
     // 🔍 DEBUG: Search Service RAW response (disabled after fix)
-    // console.log('🔍 [ES] RAW Search Service Response - FULL FIRST ITEM:');
-    // console.log(JSON.stringify(responseData.data?.[0], null, 2));
 
     // Process listings to add is_favorited and user profiles
     const processedListings = await processFetchedListings(docs, currentUserId);

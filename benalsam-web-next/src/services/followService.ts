@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { User } from 'benalsam-shared-types';
+import { logger } from '@/utils/production-logger';
 
 // Follow relationship interface
 interface FollowRelationship {
@@ -31,14 +32,14 @@ export const followUser = async (followerId: string, followingId: string): Promi
         toast({ title: "Bilgi", description: "Bu kullanıcıyı zaten takip ediyorsunuz." });
         return { follower_id: followerId, following_id: followingId, already_following: true };
       }
-      console.error('Error following user:', error);
+      logger.error('[FollowService] Error following user', { error });
       toast({ title: "Takip Edilemedi", description: error.message, variant: "destructive" });
       return null;
     }
     toast({ title: "Takip Edildi", description: "Kullanıcı başarıyla takip edildi." });
     return data as FollowRelationship;
   } catch (e) {
-    console.error('Unexpected error in followUser:', e);
+    logger.error('[FollowService] Unexpected error in followUser', { error: e });
     toast({ title: "Beklenmedik Hata", description: "Kullanıcı takip edilirken bir hata oluştu.", variant: "destructive" });
     return null;
   }
@@ -57,14 +58,14 @@ export const unfollowUser = async (followerId: string, followingId: string): Pro
       .eq('following_id', followingId);
 
     if (error) {
-      console.error('Error unfollowing user:', error);
+      logger.error('[FollowService] Error unfollowing user', { error });
       toast({ title: "Takipten Çıkılamadı", description: error.message, variant: "destructive" });
       return false;
     }
     toast({ title: "Takipten Çıkıldı", description: "Kullanıcı takipten çıkarıldı." });
     return true;
   } catch (e) {
-    console.error('Unexpected error in unfollowUser:', e);
+    logger.error('[FollowService] Unexpected error in unfollowUser', { error: e });
     toast({ title: "Beklenmedik Hata", description: "Kullanıcı takipten çıkarılırken bir hata oluştu.", variant: "destructive" });
     return false;
   }
@@ -82,12 +83,12 @@ export const checkIfFollowing = async (followerId: string, followingId: string):
       .eq('following_id', followingId);
 
     if (error) {
-      console.error('Error checking follow status:', error);
+      logger.error('[FollowService] Error checking follow status', { error });
       return false;
     }
     return (count || 0) > 0;
   } catch (e) {
-    console.error('Unexpected error in checkIfFollowing:', e);
+    logger.error('[FollowService] Unexpected error in checkIfFollowing', { error: e });
     return false;
   }
 };
@@ -106,7 +107,7 @@ export const fetchFollowingUsers = async (userId: string): Promise<User[]> => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching following users:', error);
+      logger.error('[FollowService] Error fetching following users', { error });
       toast({ title: "Takip Edilenler Yüklenemedi", description: error.message, variant: "destructive" });
       return [];
     }
@@ -116,7 +117,7 @@ export const fetchFollowingUsers = async (userId: string): Promise<User[]> => {
         followed_at: follow.created_at 
     })) as User[];
   } catch (e) {
-    console.error('Unexpected error in fetchFollowingUsers:', e);
+    logger.error('[FollowService] Unexpected error in fetchFollowingUsers', { error: e });
     toast({ title: "Beklenmedik Hata", description: "Takip edilenler yüklenirken bir hata oluştu.", variant: "destructive" });
     return [];
   }
@@ -136,7 +137,7 @@ export const fetchFollowers = async (userId: string): Promise<User[]> => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching followers:', error);
+      logger.error('[FollowService] Error fetching followers', { error });
       toast({ title: "Takipçiler Yüklenemedi", description: error.message, variant: "destructive" });
       return [];
     }
@@ -146,7 +147,7 @@ export const fetchFollowers = async (userId: string): Promise<User[]> => {
         followed_at: follow.created_at 
     })) as User[];
   } catch (e) {
-    console.error('Unexpected error in fetchFollowers:', e);
+    logger.error('[FollowService] Unexpected error in fetchFollowers', { error: e });
     toast({ title: "Beklenmedik Hata", description: "Takipçiler yüklenirken bir hata oluştu.", variant: "destructive" });
     return [];
   }
@@ -176,7 +177,7 @@ export const getFollowStats = async (userId: string): Promise<{
       followingCount: followingResult.count || 0
     };
   } catch (error) {
-    console.error('Error getting follow stats:', error);
+    logger.error('[FollowService] Error getting follow stats', { error });
     return null;
   }
 };
@@ -200,7 +201,7 @@ export const getMutualFollowers = async (userId1: string, userId2: string): Prom
       );
 
     if (error) {
-      console.error('Error getting mutual followers:', error);
+      logger.error('[FollowService] Error getting mutual followers', { error });
       return [];
     }
 
