@@ -166,7 +166,7 @@ export const useCreateListingStore = create<CreateListingState>()(
         })
         
         if (validateStep(currentStep) && currentStep < totalSteps) {
-          console.log(`✅ [NAVIGATION] Moving to step ${currentStep + 1}`)
+          logger.debug('[CreateListingStore] Moving to next step', { step: currentStep + 1 })
           set({ currentStep: currentStep + 1 })
         } else {
           logger.debug('[CreateListingStore] Cannot move to next step', {
