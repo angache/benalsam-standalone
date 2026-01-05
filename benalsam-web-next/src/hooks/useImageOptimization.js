@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/utils/production-logger';
 
 // Image format detection
 export const useImageFormat = () => {
@@ -81,7 +82,10 @@ export const useImageCompression = () => {
                   lastModified: Date.now()
                 });
 
-                console.log(`🖼️ Image compressed: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
+                logger.debug('[useImageOptimization] Image compressed', { 
+                  originalSize: `${(file.size / 1024 / 1024).toFixed(2)}MB`, 
+                  compressedSize: `${(compressedFile.size / 1024 / 1024).toFixed(2)}MB` 
+                });
                 setIsCompressing(false);
                 resolve(compressedFile);
               } else {
@@ -103,7 +107,7 @@ export const useImageCompression = () => {
       });
     } catch (error) {
       setIsCompressing(false);
-      console.error('Image compression error:', error);
+      logger.error('[useImageOptimization] Image compression error', { error });
       return file;
     }
   }, []);

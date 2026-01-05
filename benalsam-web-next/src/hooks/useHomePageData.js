@@ -4,6 +4,7 @@ import { fetchFilteredListings } from '@/services/listingService/fetchers';
 import { searchListingsWithElasticsearch } from '@/services/elasticsearchService';
 import { saveLastSearch } from '@/services/userActivityService';
 import { supabase } from '@/lib/supabase';
+import { logger } from '@/utils/production-logger';
 const PAGE_SIZE = 24;
 
 export const useHomePageData = ({ initialListings, currentUser }) => {
@@ -45,7 +46,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
         .or(`end_date.is.null,end_date.gte.${new Date().toISOString()}`);
       
       if (error) {
-        console.error('Error fetching native ads:', error);
+        logger.error('[useHomePageData] Error fetching native ads', { error });
       } else {
         setNativeAds(data);
       }
@@ -111,8 +112,8 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
             pageSize: PAGE_SIZE
           };
 
-          console.log('🔍 HomePage filtering - Elasticsearch params:', searchParams);
-          console.log('🔍 HomePage filtering - Selected categories:', {
+          logger.debug('[useHomePageData] HomePage filtering - Elasticsearch params', { searchParams });
+          logger.debug('[useHomePageData] HomePage filtering - Selected categories', {
             selectedCategories,
             categoryNames: selectedCategories.map(cat => cat.name),
             categoryIds: selectedCategories.map(cat => cat.id)
@@ -206,7 +207,7 @@ export const useHomePageData = ({ initialListings, currentUser }) => {
         setHasMore((nextPage * PAGE_SIZE) < totalCount);
       }
     } catch (error) {
-      console.error('Error in load more:', error);
+      logger.error('[useHomePageData] Error in load more', { error });
       // Fallback to Supabase
       const allFilters = {
           search: '',

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import performanceService from '../services/performanceService';
+import { logger } from '@/utils/production-logger';
 
 // Performance thresholds and scoring
 const PERFORMANCE_THRESHOLDS = {
@@ -359,9 +360,9 @@ export const useAIPerformanceAnalysis = () => {
       // Redis'e kaydet (Admin Backend üzerinden)
       try {
         await performanceService.saveAnalysis(analysis);
-        console.log('✅ Performance analysis saved to Redis');
+        logger.debug('[useAIPerformanceAnalysis] Performance analysis saved to Redis');
       } catch (error) {
-        console.warn('⚠️ Failed to save to Redis, keeping in memory only:', error);
+        logger.warn('[useAIPerformanceAnalysis] Failed to save to Redis, keeping in memory only', { error });
       }
       
       setAnalyses(prev => {
@@ -384,7 +385,7 @@ export const useAIPerformanceAnalysis = () => {
 
       return analysis;
     } catch (error) {
-      console.error('AI Analysis Error:', error);
+      logger.error('[useAIPerformanceAnalysis] AI Analysis Error', { error });
       return null;
     } finally {
       setIsAnalyzing(false);

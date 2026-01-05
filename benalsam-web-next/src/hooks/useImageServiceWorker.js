@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { logger } from '@/utils/production-logger';
 
 export const useImageServiceWorker = () => {
   const [isSupported, setIsSupported] = useState(false);
@@ -14,7 +15,7 @@ export const useImageServiceWorker = () => {
   // Register service worker
   const registerServiceWorker = useCallback(async () => {
     // Service worker'ı geçici olarak devre dışı bırakıyoruz
-    console.log('🖼️ Image Service Worker temporarily disabled');
+    logger.debug('[useImageServiceWorker] Image Service Worker temporarily disabled');
     return false;
   }, []);
 
@@ -26,10 +27,10 @@ export const useImageServiceWorker = () => {
       await registration.unregister();
       setRegistration(null);
       setIsRegistered(false);
-      console.log('🗑️ Image Service Worker unregistered');
+      logger.debug('[useImageServiceWorker] Image Service Worker unregistered');
       return true;
     } catch (error) {
-      console.error('❌ Failed to unregister Image Service Worker:', error);
+      logger.error('[useImageServiceWorker] Failed to unregister Image Service Worker', { error });
       return false;
     }
   }, [registration]);
@@ -37,7 +38,7 @@ export const useImageServiceWorker = () => {
   // Clear image cache
   const clearImageCache = useCallback(async () => {
     if (!registration || !registration.active) {
-      console.warn('No active Image Service Worker');
+      logger.warn('[useImageServiceWorker] No active Image Service Worker');
       return false;
     }
 
@@ -47,10 +48,10 @@ export const useImageServiceWorker = () => {
       return new Promise((resolve) => {
         messageChannel.port1.onmessage = (event) => {
           if (event.data.success) {
-            console.log('🗑️ Image cache cleared successfully');
+            logger.debug('[useImageServiceWorker] Image cache cleared successfully');
             resolve(true);
           } else {
-            console.error('❌ Failed to clear image cache');
+            logger.error('[useImageServiceWorker] Failed to clear image cache');
             resolve(false);
           }
         };
@@ -61,7 +62,7 @@ export const useImageServiceWorker = () => {
         );
       });
     } catch (error) {
-      console.error('❌ Error clearing image cache:', error);
+      logger.error('[useImageServiceWorker] Error clearing image cache', { error });
       return false;
     }
   }, [registration]);
@@ -86,7 +87,7 @@ export const useImageServiceWorker = () => {
       
       return null;
     } catch (error) {
-      console.error('❌ Error getting cache info:', error);
+      logger.error('[useImageServiceWorker] Error getting cache info', { error });
       return null;
     }
   }, [isSupported]);
@@ -118,7 +119,7 @@ export const useImageServiceWorker = () => {
         if (height) url.searchParams.set('h', height.toString());
         return url.toString();
       } catch (error) {
-        console.warn('URL parse error for image optimization:', error);
+        logger.warn('[useImageServiceWorker] URL parse error for image optimization', { error });
         return originalUrl;
       }
     }
@@ -135,7 +136,7 @@ export const useImageServiceWorker = () => {
       
       return url.toString();
     } catch (error) {
-      console.warn('URL parse error for service worker optimization:', error);
+      logger.warn('[useImageServiceWorker] URL parse error for service worker optimization', { error });
       return originalUrl;
     }
   }, [isRegistered]);
@@ -152,7 +153,7 @@ export const useImageServiceWorker = () => {
       const blobUrls = imageUrls.filter(url => url.startsWith('blob:'));
       
       if (blobUrls.length > 0) {
-        console.log(`🖼️ Skipping ${blobUrls.length} blob URLs for preloading`);
+        logger.debug('[useImageServiceWorker] Skipping blob URLs for preloading', { count: blobUrls.length });
       }
       
       const optimizedUrls = nonBlobUrls.map(url => 
@@ -172,10 +173,10 @@ export const useImageServiceWorker = () => {
       const results = await Promise.allSettled(preloadPromises);
       const successful = results.filter(result => result.status === 'fulfilled' && result.value);
       
-      console.log(`🖼️ Preloaded ${successful.length}/${nonBlobUrls.length} optimized images`);
+      logger.debug('[useImageServiceWorker] Preloaded optimized images', { successful: successful.length, total: nonBlobUrls.length });
       return successful.map(result => result.value);
     } catch (error) {
-      console.error('❌ Error preloading images:', error);
+      logger.error('[useImageServiceWorker] Error preloading images', { error });
       return [];
     }
   }, [isRegistered, getOptimizedImageUrl]);

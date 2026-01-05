@@ -4,6 +4,7 @@ import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores';
+import { logger } from '@/utils/production-logger';
 import { 
   fetchListings as fetchListingsService, 
   createListing as createListingService,
@@ -61,7 +62,7 @@ export const useAppData = (openAuthModal) => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching notifications:', error);
+      logger.error('[useAppData] Error fetching notifications', { error });
       return;
     }
     setNotifications(data);
@@ -259,7 +260,7 @@ export const useAppData = (openAuthModal) => {
         return null;
       }
     } catch (error) {
-      console.error('Error in handleCreateListing:', error);
+      logger.error('[useAppData] Error in handleCreateListing', { error });
       toast({ title: "İlan Oluşturulamadı", description: "Bir hata oluştu, lütfen tekrar deneyin.", variant: "destructive" });
       return null;
     } finally {

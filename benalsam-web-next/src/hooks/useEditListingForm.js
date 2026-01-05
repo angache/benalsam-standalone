@@ -8,6 +8,7 @@ import { turkishProvincesAndDistricts } from '@/config/locations';
 import { updateListing } from '@/services/listingService/mutations';
 import { processImagesForSupabase } from '@/services/imageService';
 import { useAuthStore } from '@/stores';
+import { logger } from '@/utils/production-logger';
 
 export const useEditListingForm = (listingId) => {
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ export const useEditListingForm = (listingId) => {
         const fetchedCategories = await dynamicCategoryService.getCategories();
         setCategories(fetchedCategories);
       } catch (error) {
-        console.error('Error loading categories:', error);
+        logger.error('[useEditListingForm] Error loading categories', { error });
         setCategories([]);
       }
     };
@@ -135,7 +136,7 @@ export const useEditListingForm = (listingId) => {
           }
         });
       } catch (error) {
-        console.error('Error fetching listing:', error);
+        logger.error('[useEditListingForm] Error fetching listing', { error });
         toast({ title: "Hata", description: "İlan bilgileri yüklenirken bir hata oluştu.", variant: "destructive" });
         navigate('/ilanlarim');
       } finally {
@@ -285,7 +286,7 @@ export const useEditListingForm = (listingId) => {
       }
       return false;
     } catch (error) {
-      console.error('Error updating listing:', error);
+      logger.error('[useEditListingForm] Error updating listing', { error });
       toast({ title: "Hata", description: "İlan güncellenirken bir sorun oluştu.", variant: "destructive" });
       return false;
     } finally {

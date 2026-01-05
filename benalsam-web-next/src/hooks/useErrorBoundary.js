@@ -1,11 +1,12 @@
 import { useCallback } from 'react';
+import { logger } from '@/utils/production-logger';
 
 /**
  * Error boundary'leri kolayca kullanmak için custom hook
  */
 export const useErrorBoundary = () => {
   const handleError = useCallback((error, errorInfo, context = '') => {
-    console.error(`Error in ${context}:`, error, errorInfo);
+    logger.error(`[useErrorBoundary] Error in ${context}`, { error, errorInfo });
     
     // Hata loglama servisi buraya eklenebilir
     // logErrorToService(error, errorInfo, context);
@@ -35,7 +36,7 @@ export const useAsyncError = () => {
     try {
       return await asyncFn();
     } catch (error) {
-      console.error(`Async error in ${context}:`, error);
+      logger.error(`[useAsyncError] Async error in ${context}`, { error });
       
       // Hata loglama servisi buraya eklenebilir
       // logAsyncErrorToService(error, context);
@@ -56,7 +57,7 @@ export const useEventHandlerError = () => {
       try {
         return eventHandler(...args);
       } catch (error) {
-        console.error(`Event handler error in ${context}:`, error);
+        logger.error(`[useEventHandlerError] Event handler error in ${context}`, { error });
         
         // Hata loglama servisi buraya eklenebilir
         // logEventErrorToService(error, context);
