@@ -33,7 +33,7 @@ export const processFetchedListings = async (
       .in('id', userIds);
 
     if (profilesError) {
-      console.error('Error fetching profiles for listings:', profilesError);
+      logger.error('[ListingService] Error fetching profiles for listings', { error: profilesError });
       toast({ title: "Profil Bilgisi Hatası", description: "İlan sahiplerinin bilgileri yüklenirken bir sorun oluştu.", variant: "destructive" });
     } else if (profilesData) {
       profilesMap = new Map(profilesData.map(p => [p.id, p]));
@@ -66,7 +66,7 @@ export const processFetchedListings = async (
       is_favorited: favoriteStatuses[l.id] || false
     }));
     
-    console.log('✅ [LISTING] Applied favorite statuses:', listings.map(l => ({ id: l.id, is_favorited: l.is_favorited })));
+    logger.debug('[ListingService] Applied favorite statuses', { listings: listings.map(l => ({ id: l.id, is_favorited: l.is_favorited })) });
   }
   
   return listings;
@@ -138,7 +138,7 @@ export const searchListingsFullText = async (
     const { data, error } = await query;
 
     if (error) {
-      console.error('Error searching listings:', error);
+      logger.error('[ListingService] Error searching listings', { error });
       toast({ title: "Arama Hatası", description: "İlanlar aranırken bir sorun oluştu.", variant: "destructive" });
       return { data: [] };
     }
