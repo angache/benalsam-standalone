@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { fetchUserFavoriteStatusForListings } from '@/services/favoriteService';
 import { Listing, UserProfile, ApiResponse } from '@/types';
+import { logger } from '@/utils/production-logger';
 
 // ListingWithUser artık Listing'den extend etmiyor çünkü user ve is_favorited zaten Listing içinde var
 export type ListingWithUser = Listing;
@@ -144,7 +145,7 @@ export const searchListingsFullText = async (
 
     return { data: data || [] };
   } catch (error) {
-    console.error('Error in searchListingsFullText:', error);
+    logger.error('[ListingService] Error in searchListingsFullText', { error });
     toast({ title: "Beklenmedik Hata", description: "Arama yapılırken bir sorun oluştu.", variant: "destructive" });
     return { data: [] };
   }

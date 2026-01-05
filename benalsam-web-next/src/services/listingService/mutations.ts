@@ -6,6 +6,7 @@ import { uploadImagesWithProgress } from '@/services/uploadServiceClient';
 import { listingServiceCircuitBreaker } from '@/utils/circuitBreaker';
 import { handleError, handleApiError, getUserFriendlyMessage } from '@/utils/errorHandler';
 import { logInfo, logDebug, logError, logWarn } from '@/utils/logger';
+import { logger } from '@/utils/production-logger';
 import { Listing } from '@/types';
 import { ListingStatus } from 'benalsam-shared-types';
 
@@ -383,7 +384,7 @@ export const updateListing = async (
   }
 
   try {
-    console.log('🚀 Updating listing via Listing Service...');
+    logger.debug('[ListingService] Updating listing via Listing Service');
     
     // For now, use direct database update until Listing Service supports updates
     // TODO: Implement update endpoint in Listing Service
@@ -445,7 +446,7 @@ export const updateListing = async (
 
     return data;
   } catch (error) {
-    console.error('Error in updateListing:', error);
+    logger.error('[ListingService] Error in updateListing', { error });
     toast({ 
       title: "Beklenmedik Hata", 
       description: "İlan güncellenirken bir sorun oluştu.", 
@@ -485,7 +486,7 @@ export const updateListingStatus = async (
       .single();
 
     if (error) {
-      console.error('Error updating listing status:', error);
+      logger.error('[ListingService] Error updating listing status', { error });
       toast({ title: "Durum Güncellenemedi", description: error.message, variant: "destructive" });
       return null;
     }
@@ -518,7 +519,7 @@ export const updateListingStatus = async (
 
     return data;
   } catch (error) {
-    console.error('Error in updateListingStatus:', error);
+    logger.error('[ListingService] Error in updateListingStatus', { error });
     toast({ title: "Beklenmedik Hata", description: "İlan durumu güncellenirken bir sorun oluştu.", variant: "destructive" });
     return null;
   }
@@ -539,7 +540,7 @@ export const deleteListing = async (listingId: string, userId: string): Promise<
       .single();
 
     if (fetchError) {
-      console.error('Error fetching listing for deletion:', fetchError);
+      logger.error('[ListingService] Error fetching listing for deletion', { error: fetchError });
       toast({ title: "İlan Bulunamadı", description: "Silinecek ilan bulunamadı.", variant: "destructive" });
       return false;
     }
@@ -551,7 +552,7 @@ export const deleteListing = async (listingId: string, userId: string): Promise<
       .eq('user_id', userId);
 
     if (error) {
-      console.error('Error deleting listing:', error);
+      logger.error('[ListingService] Error deleting listing', { error });
       toast({ title: "İlan Silinemedi", description: error.message, variant: "destructive" });
       return false;
     }
@@ -566,7 +567,7 @@ export const deleteListing = async (listingId: string, userId: string): Promise<
 
     return true;
   } catch (error) {
-    console.error('Error in deleteListing:', error);
+    logger.error('[ListingService] Error in deleteListing', { error });
     toast({ title: "Beklenmedik Hata", description: "İlan silinirken bir sorun oluştu.", variant: "destructive" });
     return false;
   }
@@ -595,7 +596,7 @@ export const toggleListingStatus = async (
       .single();
 
     if (error) {
-      console.error('Error toggling listing status:', error);
+      logger.error('[ListingService] Error toggling listing status', { error });
       toast({ title: "Durum Değiştirilemedi", description: error.message, variant: "destructive" });
       return null;
     }
@@ -617,7 +618,7 @@ export const toggleListingStatus = async (
 
     return data;
   } catch (error) {
-    console.error('Error in toggleListingStatus:', error);
+    logger.error('[ListingService] Error in toggleListingStatus', { error });
     toast({ title: "Beklenmedik Hata", description: "İlan durumu değiştirilirken bir sorun oluştu.", variant: "destructive" });
     return null;
   }
