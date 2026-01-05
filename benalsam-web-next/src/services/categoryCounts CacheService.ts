@@ -4,6 +4,7 @@
  */
 
 import { cacheVersionService } from './cacheVersionService'
+import { logger } from '@/utils/production-logger'
 
 const CACHE_KEY = 'benalsam_category_counts'
 const VERSION_KEY = 'category_counts_version'
@@ -24,7 +25,7 @@ class CategoryCountsCacheService {
     fetchFn: () => Promise<Record<number, number>>
   ): Promise<Record<number, number>> {
     const perfStart = performance.now()
-    console.log('🚀 [PERF] CategoryCountsCache.getCounts started', {
+    logger.debug('[CategoryCountsCache] getCounts started', {
       categoryIds: categoryIds.length,
       timestamp: new Date().toISOString()
     })
@@ -34,7 +35,7 @@ class CategoryCountsCacheService {
       const versionStart = performance.now()
       const versionChanged = await cacheVersionService.hasVersionChanged(VERSION_KEY)
       const versionTime = Math.round(performance.now() - versionStart)
-      console.log('🔍 [PERF] Version check completed', { 
+      logger.debug('[CategoryCountsCache] Version check completed', { 
         versionTime: `${versionTime}ms`,
         versionChanged 
       })
@@ -46,13 +47,13 @@ class CategoryCountsCacheService {
 
       // If version changed, clear cache
       if (versionChanged && cached) {
-        console.log('🔄 [CACHE] Version changed, clearing category counts cache')
+        logger.debug('[CategoryCountsCache] Version changed, clearing category counts cache')
         this.clearCache()
       }
 
       // Check if cache is valid
       if (cached && !versionChanged && this.isCacheValid(cached)) {
-        console.log('📦 [PERF] Cache check completed', {
+        logger.debug('[CategoryCountsCache] Cache check completed', {
           cacheTime: `${cacheTime}ms`,
           cacheHit: true,
           countsCount: Object.keys(cached.counts).length
@@ -63,7 +64,7 @@ class CategoryCountsCacheService {
         
         if (missingIds.length === 0) {
           const totalTime = Math.round(performance.now() - perfStart)
-          console.log('✅ [PERF] Category counts loaded from cache', {
+          logger.debug('[CategoryCountsCache] Category counts loaded from cache', {
             countsCount: categoryIds.length,
             totalTime: `${totalTime}ms`
           })
@@ -71,11 +72,11 @@ class CategoryCountsCacheService {
         }
 
         // Fetch only missing counts
-        console.log('⚠️ [CACHE] Partial cache hit, fetching missing counts', {
+        logger.debug('[CategoryCountsCache] Partial cache hit, fetching missing counts', {
           missing: missingIds.length
         })
       } else {
-        console.log('📦 [PERF] Cache check completed', {
+        logger.debug('[CategoryCountsCache] Cache check completed', {
           cacheTime: `${cacheTime}ms`,
           cacheHit: false,
           reason: cached ? 'expired' : 'empty'
@@ -86,7 +87,7 @@ class CategoryCountsCacheService {
       const fetchStart = performance.now()
       const freshCounts = await fetchFn()
       const fetchTime = Math.round(performance.now() - fetchStart)
-      console.log('🌐 [PERF] Fresh data fetched', {
+      logger.debug('[CategoryCountsCache] Fresh data fetched', {
         fetchTime: `${fetchTime}ms`,
         countsCount: Object.keys(freshCounts).length
       })
@@ -101,14 +102,14 @@ class CategoryCountsCacheService {
       await cacheVersionService.updateVersionTimestamp(VERSION_KEY)
 
       const totalTime = Math.round(performance.now() - perfStart)
-      console.log('✅ [PERF] Category counts loaded and cached', {
+      logger.debug('[CategoryCountsCache] Category counts loaded and cached', {
         countsCount: Object.keys(mergedCounts).length,
         totalTime: `${totalTime}ms`
       })
 
       return mergedCounts
     } catch (error) {
-      console.error('❌ [ERROR] CategoryCountsCache.getCounts failed:', error)
+      logger.error('[CategoryCountsCache] getCounts failed', { error })
       // Return empty counts on error
       return {}
     }
@@ -126,7 +127,7 @@ class CategoryCountsCacheService {
 
       return JSON.parse(cached)
     } catch (error) {
-      console.error('Error reading category counts cache:', error)
+      logger.error('[CategoryCountsCache] Error reading category counts cache', { error })
       return null
     }
   }
@@ -146,7 +147,7 @@ class CategoryCountsCacheService {
 
       localStorage.setItem(CACHE_KEY, JSON.stringify(cache))
     } catch (error) {
-      console.error('Error saving category counts cache:', error)
+      logger.error('[CategoryCountsCache] Error saving category counts cache', { error })
     }
   }
 
