@@ -89,7 +89,7 @@ const useRoutePerformance = () => {
       // Only log in debug mode
       const debugMode = import.meta.env.DEV && false; // Disabled by default
       if (debugMode) {
-        console.log(`📊 ${metric.name} for ${routePath}:`, metric.value + 'ms', `(${metric.rating})`);
+        logger.debug('[useRoutePerformance] Metric', { metric: metric.name, routePath, value: `${metric.value}ms`, rating: metric.rating });
       }
     };
 
