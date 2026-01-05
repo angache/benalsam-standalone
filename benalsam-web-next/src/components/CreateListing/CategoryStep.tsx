@@ -257,7 +257,7 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
             const categoriesWithSubcategories = parsedCache.data.map(mapSubcategories)
             setRootCategories(categoriesWithSubcategories)
             setCurrentLevel(categoriesWithSubcategories) // Start with root categories
-            console.log('✅ Categories loaded from cache:', categoriesWithSubcategories.length)
+            logger.debug('[CategoryStep] Categories loaded from cache', { count: categoriesWithSubcategories.length })
           } else {
             setRootCategories(hardcodedCategories)
             setCurrentLevel(hardcodedCategories)
@@ -330,7 +330,7 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
     const subcats = category.subcategories || category.children || []
     const isLeaf = subcats.length === 0
     
-    console.log('🔍 Category clicked:', { 
+    logger.debug('[CategoryStep] Category clicked', { 
       id: category.id, 
       name: category.name, 
       isLeaf, 

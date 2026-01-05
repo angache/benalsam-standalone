@@ -101,7 +101,7 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
     ) {
       // Only log when form is complete (all fields filled)
       if (currentValues.title && currentValues.description && currentValues.budget) {
-        console.log('📝 [FORM] Form completed:', currentValues)
+        logger.debug('[DetailsStep] Form completed', { currentValues })
       }
       onChange('title', currentValues.title)
       onChange('description', currentValues.description)
@@ -175,7 +175,7 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
         toast({ title: 'Öneri bulunamadı', variant: 'destructive' })
       }
     } catch (error: any) {
-      console.error('AI title suggestion error:', error)
+      logger.error('[DetailsStep] AI title suggestion error', { error })
       const errorMessage = error?.message?.includes('not authenticated') 
         ? 'Giriş yapmanız gerekiyor' 
         : 'Başlık önerisi alınamadı'

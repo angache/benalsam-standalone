@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import { logger } from '@/utils/production-logger'
 
 // Types
 interface CategoryData {
@@ -158,7 +159,7 @@ export const useCreateListingStore = create<CreateListingState>()(
       
       nextStep: () => {
         const { currentStep, totalSteps, validateStep } = get()
-        console.log(`🚀 [NAVIGATION] nextStep called:`, {
+        logger.debug('[CreateListingStore] nextStep called', {
           currentStep,
           totalSteps,
           isValid: validateStep(currentStep)
@@ -168,7 +169,7 @@ export const useCreateListingStore = create<CreateListingState>()(
           console.log(`✅ [NAVIGATION] Moving to step ${currentStep + 1}`)
           set({ currentStep: currentStep + 1 })
         } else {
-          console.log(`❌ [NAVIGATION] Cannot move to next step:`, {
+          logger.debug('[CreateListingStore] Cannot move to next step', {
             isValid: validateStep(currentStep),
             canMove: currentStep < totalSteps
           })
@@ -193,7 +194,7 @@ export const useCreateListingStore = create<CreateListingState>()(
           ? pathIds.map(p => parseInt(p)).filter(id => !isNaN(id))
           : (category_id ? [category_id] : [])
         
-        console.log('🏷️ [STORE] setCategory with hierarchy:', {
+        logger.debug('[CreateListingStore] setCategory with hierarchy', {
           id, name, pathNames, pathIds,
           category_id, category_path, categoryPath
         })
@@ -247,7 +248,7 @@ export const useCreateListingStore = create<CreateListingState>()(
       
       // Images actions - ESKİ SİSTEM YAKLAŞIMI
       setImages: (newImages: any[]) => {
-        console.log('🔄 [STORE] setImages called (old system):', { images: newImages.length })
+        logger.debug('[CreateListingStore] setImages called (old system)', { images: newImages.length })
         set(state => {
           let newMainImageIndex = state.mainImageIndex
           if (newImages.length > 0 && state.mainImageIndex === -1) {
@@ -262,7 +263,7 @@ export const useCreateListingStore = create<CreateListingState>()(
             images: newImages,
             mainImageIndex: newMainImageIndex
           }
-          console.log('✅ [STORE] setImages result:', { 
+          logger.debug('[CreateListingStore] setImages result', { 
             images: newState.images.length, 
             mainImageIndex: newState.mainImageIndex 
           })
@@ -333,7 +334,7 @@ export const useCreateListingStore = create<CreateListingState>()(
       validateStep: (step: number) => {
         const state = get()
         
-        console.log(`🔍 [VALIDATION] Validating step ${step}:`, {
+        logger.debug('[CreateListingStore] Validating step', { step, formData })
           step,
           category: state.category,
           details: state.details,
@@ -343,7 +344,7 @@ export const useCreateListingStore = create<CreateListingState>()(
         switch (step) {
           case 1: // Category
             const categoryValid = !!state.category.selectedCategoryId
-            console.log(`✅ [VALIDATION] Step 1 (Category): ${categoryValid}`)
+            logger.debug('[CreateListingStore] Step 1 (Category) validation', { valid: categoryValid })
             return categoryValid
           
           case 2: // Details
@@ -352,7 +353,7 @@ export const useCreateListingStore = create<CreateListingState>()(
               state.details.description.trim() &&
               state.details.budget.trim()
             )
-            console.log(`✅ [VALIDATION] Step 2 (Details): ${detailsValid}`, {
+            logger.debug('[CreateListingStore] Step 2 (Details) validation', {
               title: state.details.title,
               description: state.details.description,
               budget: state.details.budget
@@ -361,7 +362,7 @@ export const useCreateListingStore = create<CreateListingState>()(
           
           case 3: // Attributes
             // Attributes step is always valid (optional)
-            console.log(`✅ [VALIDATION] Step 3 (Attributes): true (optional)`)
+            logger.debug('[CreateListingStore] Step 3 (Attributes) validation', { valid: true, reason: 'optional' })
             return true
           
           case 4: // Images
@@ -422,12 +423,12 @@ export const useCreateListingStore = create<CreateListingState>()(
       // Auto-save
       saveDraft: () => {
         // Auto-save is handled by persist middleware
-        console.log('Draft saved automatically')
+        logger.debug('[CreateListingStore] Draft saved automatically')
       },
       
       loadDraft: () => {
         // Load is handled by persist middleware
-        console.log('Draft loaded automatically')
+        logger.debug('[CreateListingStore] Draft loaded automatically')
       }
     }),
     {

@@ -150,7 +150,7 @@ export default function ImagesStep({ formData, mainImageIndex, onChange, onSetMa
       const newImageObjects = await Promise.all(
         imagesToProcess.map(async (img) => {
           try {
-            console.log('🔄 [STOCK] Processing image:', img.id)
+            logger.debug('[ImagesStep] Processing stock image', { imageId: img.id })
             // Use download link with CORS-friendly parameters
             const downloadUrl = `${img.urls.regular}&fm=jpg&fit=max&w=1920`
             const response = await fetch(downloadUrl, {

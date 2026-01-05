@@ -325,7 +325,7 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
   }
 
   const isFormValid = useMemo(() => {
-    console.log('🔍 [VALIDATION] Attributes validation:', {
+    logger.debug('[AttributesStep] Attributes validation', {
       formData,
       attributes: attributes.length
     })
@@ -394,7 +394,7 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
         const isSelected = (optionValue: string) => selectedValues.includes(optionValue)
         
         const toggleOption = (optionValue: string) => {
-          console.log('🔄 [TOGGLE] Toggle option:', { optionValue, current: selectedValues, isSelected: isSelected(optionValue) })
+          logger.debug('[AttributesStep] Toggle option', { optionValue, current: selectedValues, isSelected: isSelected(optionValue) })
           const current = selectedValues
           let next = current
           if (isSelected(optionValue)) {
@@ -431,7 +431,7 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
                   <Checkbox
                     checked={isSelected(option.value)}
                     onCheckedChange={(checked) => {
-                      console.log('🔧 [CHECKBOX] Checkbox clicked:', { option: option.value, checked })
+                      logger.debug('[AttributesStep] Checkbox clicked', { option: option.value, checked })
                       toggleOption(option.value)
                     }}
                     className="mt-0.5 h-4 w-4"
