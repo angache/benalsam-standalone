@@ -422,7 +422,7 @@ export const updateListing = async (
       .single();
 
     if (error) {
-      console.error('Error updating listing:', error);
+      logger.error('[ListingService] Error updating listing', { error });
       toast({ 
         title: "İlan Güncellenemedi", 
         description: error.message, 

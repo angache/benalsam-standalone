@@ -5,6 +5,7 @@ import { getListingHistory, getLastSearch } from '@/services/userActivityService
 import { Listing, ApiResponse, QueryFilters } from '@/types';
 import { searchListingsWithElasticsearch, fetchListingByIdFromES } from '@/services/elasticsearchService';
 import { incrementSourceCount } from '@/lib/debugSource';
+import { logger } from '@/utils/production-logger';
 
 export const fetchListings = async (
   currentUserId: string | null = null, 
@@ -12,7 +13,7 @@ export const fetchListings = async (
 ): Promise<{ listings: Listing[]; total: number; hasMore: boolean }> => {
   try {
     const { page = 1, limit = 24 } = options;
-    console.log('🔍 fetchListings - Using Elasticsearch', { page, limit });
+    logger.debug('[ListingService] fetchListings - Using Elasticsearch', { page, limit });
     
     // Elasticsearch'ten çek
     const searchParams = {
@@ -32,7 +33,7 @@ export const fetchListings = async (
       // Check source from debug flag (set in dev mode)
       const source = (result.data[0] as any)?.__src === 'S' ? 'Supabase' : 
                      (result.data[0] as any)?.__src === 'E' ? 'Elasticsearch' : 'Unknown';
-      console.log(`✅ fetchListings - Found ${result.data.length} listings from ${source}, total:`, result.total);
+      logger.debug(`[ListingService] fetchListings - Found ${result.data.length} listings from ${source}`, { total: result.total });
       return {
         listings: result.data,
         total: result.total || 0,
@@ -41,7 +42,7 @@ export const fetchListings = async (
     }
 
     // Fallback to Supabase
-    console.log('⚠️ fetchListings - Elasticsearch failed, falling back to Supabase');
+    logger.warn('[ListingService] fetchListings - Elasticsearch failed, falling back to Supabase');
     
     // Count total listings first
     const { count: totalCount } = await supabase
@@ -64,7 +65,7 @@ export const fetchListings = async (
     const { data: listingsData, error: listingsError } = await query;
 
     if (listingsError) {
-      console.error('Error fetching listings from Supabase:', listingsError);
+      logger.error('[ListingService] Error fetching listings from Supabase', { error: listingsError });
       if (listingsError.message.toLowerCase().includes('failed to fetch')) {
         toast({ title: "Ağ Hatası", description: "İlanlar yüklenemedi. İnternet bağlantınızı kontrol edin.", variant: "destructive" });
       } else {
@@ -87,7 +88,7 @@ export const fetchListings = async (
     };
 
   } catch (e) {
-    console.error('Unexpected error in fetchListings:', e);
+    logger.error('[ListingService] Unexpected error in fetchListings', { error: e });
     toast({ title: "Beklenmedik İlan Hatası", description: "İlanlar yüklenirken beklenmedik bir sorun oluştu.", variant: "destructive" });
     return { listings: [], total: 0, hasMore: false };
   }
@@ -117,7 +118,7 @@ export const fetchListingsWithFilters = async (
 ): Promise<{ listings: Listing[]; total: number; hasMore: boolean }> => {
   try {
     const { page = 1, limit = 12 } = options;
-    console.log('🔍 fetchListingsWithFilters - Filters:', filters, 'Page:', page);
+    logger.debug('[ListingService] fetchListingsWithFilters - Filters', { filters, page });
     
     // Elasticsearch search params
     const searchParams = {
@@ -149,7 +150,7 @@ export const fetchListingsWithFilters = async (
       // Check source from debug flag (set in dev mode)
       const source = (result.data[0] as any)?.__src === 'S' ? 'Supabase' : 
                      (result.data[0] as any)?.__src === 'E' ? 'Elasticsearch' : 'Unknown';
-      console.log(`✅ fetchListings - Found ${result.data.length} listings from ${source}, total:`, result.total);
+      logger.debug(`[ListingService] fetchListings - Found ${result.data.length} listings from ${source}`, { total: result.total });
       return {
         listings: result.data,
         total: result.total || 0,
@@ -158,7 +159,7 @@ export const fetchListingsWithFilters = async (
     }
 
     // Fallback to Supabase WITH FILTERS
-    console.log('⚠️ fetchListingsWithFilters - ES failed, using Supabase fallback with filters');
+    logger.warn('[ListingService] fetchListingsWithFilters - ES failed, using Supabase fallback with filters');
     
     const offset = (page - 1) * limit;
     
@@ -208,7 +209,7 @@ export const fetchListingsWithFilters = async (
     const { data: listingsData, error: listingsError, count: totalCount } = await query;
 
     if (listingsError) {
-      console.error('Error fetching listings from Supabase:', listingsError);
+      logger.error('[ListingService] Error fetching listings from Supabase', { error: listingsError });
       toast({ title: "Veri Hatası", description: "İlanlar yüklenirken bir sorun oluştu.", variant: "destructive" });
       return { listings: [], total: 0, hasMore: false };
     }
@@ -221,7 +222,7 @@ export const fetchListingsWithFilters = async (
       incrementSourceCount('S', (processedListings as any[]).length);
     }
     
-    console.log(`✅ fetchListingsWithFilters - Got ${processedListings.length} from Supabase (total: ${totalCount})`);
+    logger.debug(`[ListingService] fetchListingsWithFilters - Got ${processedListings.length} from Supabase`, { total: totalCount });
     
     return {
       listings: processedListings,
@@ -230,7 +231,7 @@ export const fetchListingsWithFilters = async (
     };
 
   } catch (e) {
-    console.error('Unexpected error in fetchListingsWithFilters:', e);
+    logger.error('[ListingService] Unexpected error in fetchListingsWithFilters', { error: e });
     toast({ title: "Beklenmedik Hata", description: "İlanlar yüklenirken bir sorun oluştu.", variant: "destructive" });
     return { listings: [], total: 0, hasMore: false };
   }
@@ -245,7 +246,7 @@ export const fetchSingleListing = async (listingId: string, currentUserId: strin
       return processed[0] || null;
     }
 
-    console.log('🔍 [FETCH] fetchSingleListing started:', { listingId, currentUserId });
+    logger.debug('[ListingService] fetchSingleListing started', { listingId, currentUserId });
     
     // Fetch listing with favorite status in ONE query using LEFT JOIN
     let selectQuery = '*';
@@ -258,17 +259,17 @@ export const fetchSingleListing = async (listingId: string, currentUserId: strin
       `;
     }
     
-    console.log('🔍 [FETCH] Executing Supabase query...');
+    logger.debug('[ListingService] Executing Supabase query');
     const { data: listing, error } = await supabase
       .from('listings')
       .select(selectQuery)
       .eq('id', listingId)
       .maybeSingle();
 
-    console.log('🔍 [FETCH] Supabase response:', { listing: !!listing, error: !!error });
+    logger.debug('[ListingService] Supabase response', { hasListing: !!listing, hasError: !!error });
 
     if (error) {
-      console.error('Error fetching single listing:', error);
+      logger.error('[ListingService] Error fetching single listing', { error });
       toast({ title: "İlan Bulunamadı", description: "İlan detayları yüklenemedi.", variant: "destructive" });
       return null;
     }
@@ -284,16 +285,16 @@ export const fetchSingleListing = async (listingId: string, currentUserId: strin
         fav && fav.user_id === currentUserId && fav.listing_id === listingId
       );
       listing.is_favorited = isFavorited;
-      console.log('✅ [FETCH] Favorite status from JOIN:', { isFavorited, favoritesCount: favorites.length });
+      logger.debug('[ListingService] Favorite status from JOIN', { isFavorited, favoritesCount: favorites.length });
     } else {
       listing.is_favorited = false;
-      console.log('✅ [FETCH] No favorites (user not logged in or no favorites)');
+      logger.debug('[ListingService] No favorites (user not logged in or no favorites)');
     }
     
     // Remove the join data from the result
     delete listing.user_favorites;
 
-    console.log('🔍 [FETCH] Processing listings...');
+    logger.debug('[ListingService] Processing listings');
     // Process listing (add profile data, etc) WITHOUT fetching favorites again
     const processedListings = await processFetchedListings([listing], null); // Pass null to skip favorite check
     
@@ -302,7 +303,7 @@ export const fetchSingleListing = async (listingId: string, currentUserId: strin
       processedListings[0].is_favorited = listing.is_favorited;
     }
     
-    console.log('✅ [FETCH] fetchSingleListing completed:', { is_favorited: processedListings[0]?.is_favorited });
+    logger.debug('[ListingService] fetchSingleListing completed', { is_favorited: processedListings[0]?.is_favorited });
     return processedListings[0] || null;
 
   } catch (error) {
