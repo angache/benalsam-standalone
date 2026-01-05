@@ -304,3 +304,75 @@ TREND_THRESHOLDS = {
 - ✅ Enhanced UI with icons
 
 **📅 Son Güncelleme:** Bu dosya projenin mevcut durumunu yansıtır ve gelecekteki geliştirmeler için referans olarak kullanılabilir.
+
+---
+
+## 🔄 **DEVAM EDEN İŞ: Console.log Migration (Client-Side)**
+
+### **Durum:** ⏸️ YARIDA BIRAKILDI - DEVAM EDİLECEK
+
+**Tarih:** 2025-01-XX  
+**Branch:** `fix/project-improvements`  
+**İşlem:** Client-side console.log migration (logger utility kullan)
+
+### **Tamamlanan İşlemler:**
+- ✅ **Services klasörü**: Tamamlandı (tüm console.log → logger)
+- ✅ **CreateListing components**: Tamamlandı
+- ✅ **createListingStore**: Tamamlandı
+- ✅ **Components (diğer)**: Tamamlandı (17 dosya, 42 instance)
+- ✅ **TypeScript hooks**: Tamamlandı (8 dosya, 27 instance)
+- ✅ **JavaScript hooks**: Tamamlandı (15 dosya, 81 instance)
+  - usePerformance.js (13 instance)
+  - useCategoryCounts.js (12 instance)
+  - useImageServiceWorker.js (13 instance)
+  - useAIPerformanceAnalysis.js (9 instance)
+  - usePerformanceMonitor.js (9 instance)
+  - useRoutePerformance.js (5 instance)
+  - useHomePageData.js (5 instance)
+  - useErrorBoundary.js (3 instance)
+  - useEditListingForm.js (3 instance)
+  - useRecentCategories.js (2 instance)
+  - useImageOptimization.js (2 instance)
+  - useAppData.jsx (2 instance)
+  - useTrustScore.js (1 instance)
+  - usePreload.js (1 instance)
+  - useListingDetail.js (1 instance)
+
+### **İlerleme:**
+- **Tamamlanan:** ~845/1083 match (~78%)
+- **Kalan:**
+  - **Utils klasörü:** ~129 instance
+  - **App klasörü:** ~75 instance
+  - **Lib klasörü:** ~24 instance
+
+### **Son Commit:**
+```bash
+git log --oneline -1
+# refactor: Fix remaining console.error in useHomePageData.js - Hooks folder migration complete ✅
+```
+
+### **Sonraki Adım:**
+1. **Utils klasörüne geç** (~129 console.log instance)
+2. **App klasörüne geç** (~75 console.log instance)
+3. **Lib klasörüne geç** (~24 console.log instance)
+
+### **Komutlar:**
+```bash
+# Hangi klasörde console.log kaldığını kontrol et
+grep -r "console\.\(log\|error\|warn\|info\|debug\)" benalsam-web-next/src/utils --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" | wc -l
+grep -r "console\.\(log\|error\|warn\|info\|debug\)" benalsam-web-next/src/app --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" | wc -l
+grep -r "console\.\(log\|error\|warn\|info\|debug\)" benalsam-web-next/src/lib --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" | wc -l
+
+# Logger import pattern
+import { logger } from '@/utils/production-logger'
+
+# Migration pattern
+# Before: console.log('Message', data)
+# After: logger.debug('[ComponentName] Message', { data })
+```
+
+### **Notlar:**
+- Logger utility hem client hem server tarafında çalışıyor
+- Production'da loglar otomatik olarak devre dışı
+- Development'ta structured logging kullanılıyor
+- Her log mesajına component/service adı prefix ekleniyor
