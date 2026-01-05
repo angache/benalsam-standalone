@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/production-logger';
 
 // Kullanım artırma
 export const incrementUserUsage = async (userId: string, type: string): Promise<boolean> => {
@@ -12,13 +13,13 @@ export const incrementUserUsage = async (userId: string, type: string): Promise<
     });
     
     if (error) {
-      console.error('Error incrementing usage:', error);
+      logger.error('[PremiumService] Error incrementing usage', { error });
       return false;
     }
     
     return data || false;
   } catch (error) {
-    console.error('Error incrementing usage:', error);
+    logger.error('[PremiumService] Error incrementing usage', { error });
     return false;
   }
 };
@@ -37,10 +38,10 @@ export const addOfferAttachment = async (offerId: string, files: File[]): Promis
   try {
     // Bu fonksiyon şimdilik basit bir implementasyon
     // Gerçek implementasyonda dosyaları Supabase Storage'a yükler
-    console.log('Adding attachments to offer:', offerId, files);
+    logger.debug('[PremiumService] Adding attachments to offer', { offerId, fileCount: files.length });
     return true;
   } catch (error) {
-    console.error('Error adding offer attachments:', error);
+    logger.error('[PremiumService] Error adding offer attachments', { error });
     return false;
   }
 };
@@ -82,7 +83,7 @@ export const getUserDashboardStats = async (userId: string) => {
       conversionRate: 8.3
     };
   } catch (error) {
-    console.error('Error getting dashboard stats:', error);
+    logger.error('[PremiumService] Error getting dashboard stats', { error });
     return null;
   }
 };
@@ -97,7 +98,7 @@ export const getUserRecentActivities = async (userId: string) => {
       { id: 3, type: 'listing_viewed', title: 'İlan görüntülendi', timestamp: new Date(Date.now() - 7200000).toISOString() }
     ];
   } catch (error) {
-    console.error('Error getting recent activities:', error);
+    logger.error('[PremiumService] Error getting recent activities', { error });
     return [];
   }
 };
@@ -112,7 +113,7 @@ export const getUserCategoryStats = async (userId: string) => {
       { category: 'Spor', count: 2, views: 180 }
     ];
   } catch (error) {
-    console.error('Error getting category stats:', error);
+    logger.error('[PremiumService] Error getting category stats', { error });
     return [];
   }
 };
@@ -129,7 +130,7 @@ export const calculatePerformanceMetrics = async (userId: string) => {
       offerAcceptance: 12.3
     };
   } catch (error) {
-    console.error('Error calculating performance metrics:', error);
+    logger.error('[PremiumService] Error calculating performance metrics', { error });
     return null;
   }
 };
@@ -139,10 +140,10 @@ export const featureOffer = async (offerId: string, userId: string): Promise<boo
   try {
     // Bu fonksiyon şimdilik basit bir implementasyon
     // Gerçek implementasyonda teklifi öne çıkarır
-    console.log('Featuring offer:', offerId, 'for user:', userId);
+    logger.debug('[PremiumService] Featuring offer', { offerId, userId });
     return true;
   } catch (error) {
-    console.error('Error featuring offer:', error);
+    logger.error('[PremiumService] Error featuring offer', { error });
     return false;
   }
 }; 

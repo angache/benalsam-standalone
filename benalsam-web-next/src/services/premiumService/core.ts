@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/utils/production-logger';
 
 export const getUserPremiumStatus = async (userId: string) => {
   if (!userId) return null;
@@ -13,13 +14,13 @@ export const getUserPremiumStatus = async (userId: string) => {
       .single();
 
     if (error && error.code !== 'PGRST116') {
-      console.error('Error fetching premium status:', error);
+      logger.error('[PremiumService] Error fetching premium status', { error });
       return null;
     }
 
     return data;
   } catch (error) {
-    console.error('Error in getUserPremiumStatus:', error);
+    logger.error('[PremiumService] Error in getUserPremiumStatus', { error });
     return null;
   }
 };
@@ -92,13 +93,13 @@ export const getUserActivePlan = async (userId: string) => {
     });
     
     if (error) {
-      console.error('Error getting user plan:', error);
+      logger.error('[PremiumService] Error getting user plan', { error });
       return null;
     }
     
     return data?.[0] || null;
   } catch (error) {
-    console.error('Error getting user plan:', error);
+    logger.error('[PremiumService] Error getting user plan', { error });
     return null;
   }
 };
@@ -113,13 +114,13 @@ export const getUserMonthlyUsage = async (userId: string) => {
     });
     
     if (error) {
-      console.error('Error getting user usage:', error);
+      logger.error('[PremiumService] Error getting user usage', { error });
       return null;
     }
     
     return data?.[0] || null;
   } catch (error) {
-    console.error('Error getting user usage:', error);
+    logger.error('[PremiumService] Error getting user usage', { error });
     return null;
   }
 };
@@ -154,13 +155,13 @@ export const checkUserPremiumStatus = async (userId: string) => {
       if (error.code === 'PGRST116') {
         return false;
       }
-      console.error('Error checking premium status:', error);
+      logger.error('[PremiumService] Error checking premium status', { error });
       return false;
     }
     
     return data ? true : false;
   } catch (error) {
-    console.error('Error checking premium status:', error);
+    logger.error('[PremiumService] Error checking premium status', { error });
     return false;
   }
 };
@@ -206,7 +207,7 @@ export const getUserPremiumDetails = async (userId: string) => {
       .single();
     
     if (planError) {
-      console.error('Error getting plan details:', planError);
+      logger.error('[PremiumService] Error getting plan details', { error: planError });
       return {
         isPremium: true,
         plan: null,
@@ -227,7 +228,7 @@ export const getUserPremiumDetails = async (userId: string) => {
       expiresAt: data[0].expires_at
     };
   } catch (error) {
-    console.error('Error getting premium details:', error);
+    logger.error('[PremiumService] Error getting premium details', { error });
     return {
       isPremium: false,
       plan: null,
@@ -246,13 +247,13 @@ export const getSubscriptionPlans = async () => {
       .order('price_monthly', { ascending: true });
     
     if (error) {
-      console.error('Error getting subscription plans:', error);
+      logger.error('[PremiumService] Error getting subscription plans', { error });
       return [];
     }
     
     return data || [];
   } catch (error) {
-    console.error('Error getting subscription plans:', error);
+    logger.error('[PremiumService] Error getting subscription plans', { error });
     return [];
   }
 };
@@ -342,7 +343,7 @@ export const createSubscription = async (userId: string, planSlug: string, payme
       .single();
     
     if (planError || !plan) {
-      console.error('Plan not found:', planError);
+      logger.error('[PremiumService] Plan not found', { error: planError });
       toast({ title: "Plan Bulunamadı", description: "Seçilen plan bulunamadı.", variant: "destructive" });
       return null;
     }
@@ -371,7 +372,7 @@ export const createSubscription = async (userId: string, planSlug: string, payme
       .single();
     
     if (error) {
-      console.error('Error creating subscription:', error);
+      logger.error('[PremiumService] Error creating subscription', { error });
       toast({ title: "Abonelik Hatası", description: "Abonelik oluşturulurken bir sorun oluştu.", variant: "destructive" });
       return null;
     }
@@ -383,7 +384,7 @@ export const createSubscription = async (userId: string, planSlug: string, payme
     
     return data;
   } catch (error) {
-    console.error('Error creating subscription:', error);
+    logger.error('[PremiumService] Error creating subscription', { error });
     toast({ title: "Beklenmedik Hata", description: "Abonelik oluşturulurken bir sorun oluştu.", variant: "destructive" });
     return null;
   }
@@ -413,7 +414,7 @@ export const incrementUserUsage = async (userId: string, feature: string) => {
       .single();
     
     if (fetchError && fetchError.code !== 'PGRST116') {
-      console.error('Error fetching usage:', fetchError);
+      logger.error('[PremiumService] Error fetching usage', { error: fetchError });
       return false;
     }
     
@@ -428,7 +429,7 @@ export const incrementUserUsage = async (userId: string, feature: string) => {
         });
       
       if (insertError) {
-        console.error('Error creating usage record:', insertError);
+        logger.error('[PremiumService] Error creating usage record', { error: insertError });
         return false;
       }
     } else {
@@ -441,14 +442,14 @@ export const incrementUserUsage = async (userId: string, feature: string) => {
         .eq('id', usage.id);
       
       if (updateError) {
-        console.error('Error updating usage:', updateError);
+        logger.error('[PremiumService] Error updating usage', { error: updateError });
         return false;
       }
     }
     
     return true;
   } catch (error) {
-    console.error('Error incrementing usage:', error);
+    logger.error('[PremiumService] Error incrementing usage', { error });
     return false;
   }
 }; 

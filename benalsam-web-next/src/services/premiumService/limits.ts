@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { getUserActivePlan, getUserMonthlyUsage } from './core';
+import { logger } from '@/utils/production-logger';
 
 // İlan limiti kontrolü
 export const checkListingLimit = async (userId: string): Promise<boolean> => {
@@ -17,7 +18,7 @@ export const checkListingLimit = async (userId: string): Promise<boolean> => {
     const currentUsage = usage.listings_count || 0;
     return currentUsage < listingLimit;
   } catch (error) {
-    console.error('Error checking listing limit:', error);
+    logger.error('[PremiumService] Error checking listing limit', { error });
     return false;
   }
 };
@@ -32,13 +33,13 @@ export const checkOfferLimit = async (userId: string): Promise<boolean> => {
     });
     
     if (error) {
-      console.error('Error checking offer limit:', error);
+      logger.error('[PremiumService] Error checking offer limit', { error });
       return false;
     }
     
     return data || false;
   } catch (error) {
-    console.error('Error checking offer limit:', error);
+    logger.error('[PremiumService] Error checking offer limit', { error });
     return false;
   }
 };
@@ -59,7 +60,7 @@ export const checkMessageLimit = async (userId: string): Promise<boolean> => {
     const currentUsage = usage.messages_count || 0;
     return currentUsage < messageLimit;
   } catch (error) {
-    console.error('Error checking message limit:', error);
+    logger.error('[PremiumService] Error checking message limit', { error });
     return false;
   }
 };
@@ -77,7 +78,7 @@ export const checkImageLimit = async (userId: string, newImageCount: number = 1)
     
     return newImageCount <= imageLimit;
   } catch (error) {
-    console.error('Error checking image limit:', error);
+    logger.error('[PremiumService] Error checking image limit', { error });
     return newImageCount <= 2; // Hata durumunda varsayılan limit
   }
 };
@@ -100,7 +101,7 @@ export const checkFeaturedLimit = async (userId: string): Promise<boolean> => {
     const currentUsage = usage.featured_offers_count || 0;
     return currentUsage < monthlyFeaturedLimit;
   } catch (error) {
-    console.error('Error checking featured limit:', error);
+    logger.error('[PremiumService] Error checking featured limit', { error });
     return false;
   }
 };
@@ -118,7 +119,7 @@ export const checkFileAttachmentLimit = async (userId: string, fileCount: number
     
     return fileCount <= fileLimit;
   } catch (error) {
-    console.error('Error checking file attachment limit:', error);
+    logger.error('[PremiumService] Error checking file attachment limit', { error });
     return false;
   }
 }; 
