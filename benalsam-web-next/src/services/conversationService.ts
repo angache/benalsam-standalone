@@ -444,7 +444,7 @@ export const subscribeToMessages = (conversationId: string, onNewMessage: (messa
         filter: `conversation_id=eq.${conversationId}`
       },
       async (payload) => {
-        console.log('🔔 INSERT event received:', payload);
+        logger.debug('[ConversationService] INSERT event received', { payload });
         
         // Use payload data directly and fetch sender from cache
         const newMessage = payload.new as any;
