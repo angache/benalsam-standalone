@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import type { Category } from '@/services/categoryService'
+import { logger } from '@/utils/production-logger'
 
 interface InventoryCategorySelectorProps {
   selectedMain: string
@@ -170,7 +171,7 @@ const InventoryCategorySelector: React.FC<InventoryCategorySelectorProps> = ({
               return result
             }
             setAllCategoriesFlat(flatten(categoriesWithSubcategories))
-            console.log('✅ [InventoryCategorySelector] Categories loaded from localStorage:', {
+            logger.debug('[InventoryCategorySelector] Categories loaded from localStorage', {
               rootCount: categoriesWithSubcategories.length,
               totalCount: flatten(categoriesWithSubcategories).length,
             })
@@ -179,7 +180,7 @@ const InventoryCategorySelector: React.FC<InventoryCategorySelectorProps> = ({
         }
 
         // Cache is empty or invalid, try to fetch from API
-        console.log('📦 [InventoryCategorySelector] No cached categories, fetching from API...')
+        logger.debug('[InventoryCategorySelector] No cached categories, fetching from API')
         const { categoryService } = await import('@/services/categoryService')
         const flatCategories = await categoryService.getCategories()
         
@@ -233,15 +234,15 @@ const InventoryCategorySelector: React.FC<InventoryCategorySelectorProps> = ({
             return result
           }
           setAllCategoriesFlat(flatten(treeCategories))
-          console.log('✅ [InventoryCategorySelector] Categories loaded from API:', {
+          logger.debug('[InventoryCategorySelector] Categories loaded from API', {
             rootCount: treeCategories.length,
             totalCount: flatten(treeCategories).length,
           })
         } else {
-          console.warn('⚠️ [InventoryCategorySelector] No categories available from API')
+          logger.warn('[InventoryCategorySelector] No categories available from API')
         }
       } catch (error) {
-        console.error('❌ [InventoryCategorySelector] Error loading categories:', error)
+        logger.error('[InventoryCategorySelector] Error loading categories', { error })
       }
     }
     loadCategories()

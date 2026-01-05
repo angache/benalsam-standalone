@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import { logger } from '@/utils/production-logger'
 
 interface AttributeDefinition {
   key: string
@@ -58,7 +59,7 @@ export function AttributeFilters({
       // Get categories from localStorage cache
       const cachedCategories = localStorage.getItem('benalsam_categories_next_v1.0.0')
       if (!cachedCategories) {
-        console.warn('No cached categories found')
+        logger.warn('[AttributeFilters] No cached categories found')
         return
       }
 
@@ -80,13 +81,13 @@ export function AttributeFilters({
 
       const selectedCategory = findCategory(categories, categoryId)
       
-      console.log('🔍 Selected category:', selectedCategory?.name, 'ID:', categoryId)
-      console.log('📦 Category attributes:', selectedCategory?.category_attributes)
+      logger.debug('[AttributeFilters] Selected category', { name: selectedCategory?.name, categoryId })
+      logger.debug('[AttributeFilters] Category attributes', { attributes: selectedCategory?.category_attributes })
       
       // Check for category_attributes (from backend)
       const categoryAttrs = selectedCategory?.category_attributes || selectedCategory?.attributes || []
       
-      console.log('✅ Found', categoryAttrs.length, 'attributes')
+      logger.debug('[AttributeFilters] Found attributes', { count: categoryAttrs.length })
       
       if (categoryAttrs.length > 0) {
         // Build attributes object from category definition
@@ -118,7 +119,7 @@ export function AttributeFilters({
         setAttributeLabels({})
       }
     } catch (error) {
-      console.error('Error loading attributes from cache:', error)
+      logger.error('[AttributeFilters] Error loading attributes from cache', { error })
     } finally {
       setLoading(false)
     }

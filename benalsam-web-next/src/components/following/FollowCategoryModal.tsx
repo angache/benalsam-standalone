@@ -21,6 +21,7 @@ import {
 import { followCategory } from '@/services/categoryFollowService'
 import { categoryService } from '@/services/categoryService'
 import { Loader2, PlusCircle } from 'lucide-react'
+import { logger } from '@/utils/production-logger'
 
 interface FollowCategoryModalProps {
   isOpen: boolean
@@ -48,7 +49,7 @@ const FollowCategoryModal: React.FC<FollowCategoryModalProps> = ({
         const fetchedCategories = await categoryService.getCategories()
         setCategories(fetchedCategories || [])
       } catch (error) {
-        console.error('Error loading categories:', error)
+        logger.error('[FollowCategoryModal] Error loading categories', { error })
         setCategories([])
       } finally {
         setIsLoadingCategories(false)

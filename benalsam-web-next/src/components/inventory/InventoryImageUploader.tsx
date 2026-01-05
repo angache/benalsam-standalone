@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { Upload, Star as StarIcon, CheckCircle, Trash2 } from 'lucide-react'
 import { compressImage } from '@/lib/imageUtils'
 import Image from 'next/image'
+import { logger } from '@/utils/production-logger'
 
 interface ImageItem {
   file?: File
@@ -102,7 +103,7 @@ const InventoryImageUploader: React.FC<InventoryImageUploaderProps> = ({
           reader.readAsDataURL(file)
         })
       } catch (error) {
-        console.error('Error processing images:', error)
+        logger.error('[InventoryImageUploader] Error processing images', { error })
         toast({
           title: 'Hata',
           description: 'Görseller işlenirken bir sorun oluştu.',

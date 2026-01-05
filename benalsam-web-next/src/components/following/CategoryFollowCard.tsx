@@ -8,6 +8,7 @@ import ListingCard from '@/components/ListingCard'
 import { unfollowCategory } from '@/services/categoryFollowService'
 import { categoryService } from '@/services/categoryService'
 import { getCategoryIcon } from '@/lib/category-icons'
+import { logger } from '@/utils/production-logger'
 
 interface CategoryFollowCardProps {
   category: { category_name: string }
@@ -34,7 +35,7 @@ const CategoryFollowCard: React.FC<CategoryFollowCardProps> = ({
         const found = categories.find((cat) => cat.name === category.category_name)
         setCategoryDetails(found)
       } catch (error) {
-        console.error('Error loading category details:', error)
+        logger.error('[CategoryFollowCard] Error loading category details', { error })
       }
     }
     loadCategoryDetails()

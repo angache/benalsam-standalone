@@ -6,6 +6,7 @@ import { ListingCard } from '@/components/ListingCard';
 import { TrendingUp, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import type { Listing } from '@/types';
+import { logger } from '@/utils/production-logger';
 
 interface PopularListingsProps {
   /**
@@ -24,7 +25,7 @@ export function PopularListings({ listings: propListings, isLoading: propIsLoadi
   const { data: queryListings, isLoading: queryIsLoading } = useQuery({
     queryKey: ['popular-listings'],
     queryFn: async () => {
-      console.log('🔥 [PopularListings] Fetching popular listings...');
+      logger.debug('[PopularListings] Fetching popular listings');
       
       // Fetch listings sorted by view_count
       const result = await listingService.getListingsWithFilters(
@@ -38,7 +39,7 @@ export function PopularListings({ listings: propListings, isLoading: propIsLoadi
         }
       );
       
-      console.log('🔥 [PopularListings] Loaded', { count: result.listings.length });
+      logger.debug('[PopularListings] Loaded', { count: result.listings.length });
       return result.listings;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes - popular listings don't change often

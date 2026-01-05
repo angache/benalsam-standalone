@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { unfollowUser } from '@/services/followService'
 import { useToast } from '@/components/ui/use-toast'
+import { logger } from '@/utils/production-logger'
 
 interface User {
   id: string
@@ -56,7 +57,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, currentUserId, onUnfollow }) 
         })
       }
     } catch (error) {
-      console.error('Error unfollowing user:', error)
+      logger.error('[UserCard] Error unfollowing user', { error })
       toast({
         title: 'Hata',
         description: 'Takipten çıkılırken bir sorun oluştu.',

@@ -10,6 +10,7 @@ import { toast } from '@/components/ui/use-toast'
 import { dopingOptions, DopingOption, DopingPrice } from '@/config/dopingOptions'
 import { Badge } from '@/components/ui/badge'
 import { ShoppingCart, Loader2 } from 'lucide-react'
+import { logger } from '@/utils/production-logger'
 
 interface SelectedDoping extends DopingOption {
   selectedPrice: DopingPrice
@@ -128,7 +129,7 @@ const DopingModal = ({ isOpen, onClose, listing, onSuccess }: DopingModalProps) 
         onClose()
       }
     } catch (error) {
-      console.error('Doping purchase error:', error)
+      logger.error('[DopingModal] Doping purchase error', { error })
       toast({ 
         title: 'Hata', 
         description: 'Doping güncellenirken bir hata oluştu.', 

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import type { ChatMessage } from '@/services/chatbotService'
 import { trackChatbotEvent } from '@/services/chatbotService'
+import { logger } from '@/utils/production-logger'
 
 interface ChatbotMessagesProps {
   messages: ChatMessage[]
@@ -34,7 +35,7 @@ export function ChatbotMessages({ messages, isTyping }: ChatbotMessagesProps) {
         break
       case 'modal':
         // Trigger modal open (integrate with your modal system)
-        console.log('Open modal:', action.value)
+        logger.debug('[ChatbotMessages] Open modal', { value: action.value })
         break
       case 'copy':
         navigator.clipboard.writeText(action.value)

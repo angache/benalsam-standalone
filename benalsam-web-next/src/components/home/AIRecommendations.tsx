@@ -7,6 +7,7 @@ import { Sparkles, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import type { Listing } from '@/types';
+import { logger } from '@/utils/production-logger';
 
 interface AIRecommendationsProps {
   /**
@@ -37,7 +38,7 @@ export function AIRecommendations({ recommendations: propRecommendations, isLoad
   const { data: queryRecommendations, isLoading: queryIsLoading } = useQuery({
     queryKey: ['ai-recommendations', user?.id],
     queryFn: async () => {
-      console.log('✨ [AIRecommendations] Generating recommendations...');
+      logger.debug('[AIRecommendations] Generating recommendations');
       
       // For now, use a simple hybrid approach
       // TODO: Implement ML-based recommendations in backend
@@ -52,7 +53,7 @@ export function AIRecommendations({ recommendations: propRecommendations, isLoad
         }
       );
       
-      console.log('✨ [AIRecommendations] Generated', { count: result.listings.length });
+      logger.debug('[AIRecommendations] Generated', { count: result.listings.length });
       return result.listings;
     },
     enabled: !!user && !propRecommendations, // Only fetch if user exists and no prop data provided

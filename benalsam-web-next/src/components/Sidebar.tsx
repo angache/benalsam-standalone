@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { categoryService, type Category } from '@/services/categoryService'
+import { logger } from '@/utils/production-logger'
 import { useCategoryCounts } from '@/hooks/useCategoryCounts'
 
 // Icon mapping for categories
@@ -43,7 +44,7 @@ export default function Sidebar() {
     const startTime = Date.now()
     try {
       setIsLoading(true)
-      console.log('🚀 [PERF] Sidebar.fetchCategories started', {
+      logger.debug('[Sidebar] fetchCategories started', {
         timestamp: new Date().toISOString()
       })
 
@@ -52,7 +53,7 @@ export default function Sidebar() {
       const allCategories = await categoryService.getCategories()
       const fetchTime = Date.now() - fetchStart
       
-      console.log('📥 [PERF] Categories fetched from service', {
+      logger.debug('[Sidebar] Categories fetched from service', {
         fetchTime: `${fetchTime}ms`,
         totalCategories: allCategories.length
       })
@@ -62,7 +63,7 @@ export default function Sidebar() {
       const filterTime = Date.now() - filterStart
       
       const totalTime = Date.now() - startTime
-      console.log('✅ [PERF] Sidebar.fetchCategories completed', {
+      logger.debug('[Sidebar] fetchCategories completed', {
         totalTime: `${totalTime}ms`,
         breakdown: {
           serviceFetch: `${fetchTime}ms`,
@@ -75,7 +76,7 @@ export default function Sidebar() {
       setCategories(topLevelCategories)
     } catch (error) {
       const totalTime = Date.now() - startTime
-      console.error('❌ [PERF] Error loading categories:', {
+      logger.error('[Sidebar] Error loading categories', {
         error,
         totalTime: `${totalTime}ms`
       })

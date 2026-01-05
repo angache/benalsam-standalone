@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { logger } from '@/utils/production-logger'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { formatDistanceToNow } from 'date-fns'
@@ -137,7 +138,7 @@ const MyListingCard = ({
         <CardContent className="flex-1 flex flex-col pb-4">
           {listing.main_image_url ? (
             (() => {
-              console.log('🖼️ [IMAGE] Processing:', { 
+              logger.debug('[MyListingCard] Processing image', { 
                 id: listing.id, 
                 main_image_url: listing.main_image_url,
                 type: typeof listing.main_image_url 
@@ -151,7 +152,7 @@ const MyListingCard = ({
                   validUrl = `${window.location.origin}${listing.main_image_url.startsWith('/') ? '' : '/'}${listing.main_image_url}`
                 }
                 new URL(validUrl) // Validate
-                console.log('✅ [IMAGE] Valid URL:', validUrl)
+                logger.debug('[MyListingCard] Valid URL', { validUrl })
                 
                 return (
                   <div className="w-full h-40 bg-muted rounded-lg mb-4 overflow-hidden relative">
@@ -167,7 +168,7 @@ const MyListingCard = ({
                 )
               } catch (error) {
                 // Invalid URL, show placeholder
-                console.warn('❌ [IMAGE] Invalid URL:', listing.main_image_url, error)
+                logger.warn('[MyListingCard] Invalid URL', { url: listing.main_image_url, error })
                 return (
                   <div className="w-full h-40 bg-muted rounded-lg mb-4 overflow-hidden relative flex items-center justify-center bg-muted">
                     <ImageIcon className="w-12 h-12 text-muted-foreground opacity-50" />

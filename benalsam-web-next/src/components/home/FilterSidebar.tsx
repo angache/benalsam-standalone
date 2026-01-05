@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Separator } from '@/components/ui/separator'
 import { X, SlidersHorizontal, Search } from 'lucide-react'
+import { logger } from '@/utils/production-logger'
 
 export interface FilterState {
   categoryId?: number | null
@@ -99,11 +100,11 @@ export default function FilterSidebar({
     
     // For price inputs, don't immediately update parent (debounce will handle it)
     if (key === 'minPrice' || key === 'maxPrice') {
-      console.log('💰 [FilterSidebar] Price changed (debouncing):', { [key]: value })
+      logger.debug('[FilterSidebar] Price changed (debouncing)', { [key]: value })
       return
     }
     
-    console.log('✅ [FilterSidebar] Filter changed:', { key, value, newFilters })
+    logger.debug('[FilterSidebar] Filter changed', { key, value, newFilters })
     onFiltersChange(newFilters)
   }
 

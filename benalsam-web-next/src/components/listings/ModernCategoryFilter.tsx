@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useCategories } from '@/hooks/useCategories'
 import { cn } from '@/lib/utils'
 import { categoryCountsCacheService } from '@/services/categoryCountsCacheService'
+import { logger } from '@/utils/production-logger'
 
 interface Category {
   id: number | string
@@ -70,7 +71,7 @@ export function ModernCategoryFilter({
         
         setCategoryCounts(counts)
       } catch (error) {
-        console.error('Error fetching category counts:', error)
+        logger.error('[ModernCategoryFilter] Error fetching category counts', { error })
       }
     }
     
@@ -158,7 +159,7 @@ export function ModernCategoryFilter({
     const categoryId = Number(category.id)
     const subcats = category.subcategories || []
     
-    console.log('🔍 Category clicked:', {
+    logger.debug('[ModernCategoryFilter] Category clicked', {
       categoryId,
       categoryName: category.name,
       hasSubcategories: subcats.length > 0,

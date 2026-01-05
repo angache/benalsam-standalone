@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase';
 import { realtimeManager } from '@/lib/realtime-manager';
 import { ListingInfoModal } from './ListingInfoModal';
 import { MessageBubble } from './MessageBubble';
+import { logger } from '@/utils/production-logger';
 
 interface Message {
   id: string;
@@ -128,7 +129,7 @@ export const ChatArea = memo(function ChatArea({
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
-      console.log('🔄 [ChatArea] Loading more messages (infinite scroll)...');
+      logger.debug('[ChatArea] Loading more messages (infinite scroll)');
       
       // Save current scroll position before loading
       if (messagesContainerRef.current) {
@@ -148,7 +149,7 @@ export const ChatArea = memo(function ChatArea({
       if (scrollDiff > 0) {
         // Adjust scroll position to maintain user's view
         messagesContainerRef.current.scrollTop += scrollDiff;
-        console.log('📍 [ChatArea] Scroll position restored', { scrollDiff });
+        logger.debug('[ChatArea] Scroll position restored', { scrollDiff });
       }
       
       previousScrollHeightRef.current = 0;

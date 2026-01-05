@@ -13,6 +13,7 @@ import { Search, Sparkles, TrendingUp, Clock, Zap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
+import { logger } from '@/utils/production-logger'
 
 interface Suggestion {
   text: string
@@ -42,7 +43,7 @@ export default function SearchWithAI() {
         const result = await response.json()
         return result.success ? result.data.suggestions : []
       } catch (err) {
-        console.log('ℹ️ AI suggestions API not available')
+        logger.debug('[SearchWithAI] AI suggestions API not available')
         return []
       }
     },
@@ -111,7 +112,8 @@ export default function SearchWithAI() {
       (aiSuggestions && aiSuggestions.length > 0) ||
       (popularKeywords && popularKeywords.length > 0)
     )
-    console.log('🔍 hasSuggestions:', has, {
+    logger.debug('[SearchWithAI] hasSuggestions', {
+      has,
       recent: recentSearches?.length || 0,
       trending: trendingSearches?.length || 0,
       ai: aiSuggestions?.length || 0,
@@ -140,7 +142,7 @@ export default function SearchWithAI() {
             }}
             onFocus={() => {
               setShowSuggestions(true) // Always show on focus
-              console.log('🔍 Search input focused, showSuggestions:', true)
+              logger.debug('[SearchWithAI] Search input focused', { showSuggestions: true })
             }}
           />
           

@@ -12,6 +12,7 @@ import ListingCard from '@/components/ListingCard'
 import { Loader2 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
+import { logger } from '@/utils/production-logger'
 
 interface FeaturedListingsProps {
   title?: string
@@ -27,7 +28,7 @@ export default function FeaturedListings({
   const { data: listings, isLoading, error } = useQuery({
     queryKey: ['featured-listings', limit, user?.id],
     queryFn: async () => {
-      console.log('🔍 [FeaturedListings] Starting fetch...', { limit, userId: user?.id })
+      logger.debug('[FeaturedListings] Starting fetch', { limit, userId: user?.id })
       
       try {
         // Fetch listings using listingService (handles ES + Supabase fallback internally)
@@ -39,15 +40,15 @@ export default function FeaturedListings({
         if (result?.listings && result.listings.length > 0) {
           // Check source (listingService marks source in dev mode)
           const source = (result.listings[0] as any)?.__src === 'S' ? 'Supabase' : 'Elasticsearch'
-          console.log(`✅ [FeaturedListings] Got ${result.listings.length} listings from ${source}`)
+          logger.debug('[FeaturedListings] Got listings', { count: result.listings.length, source })
           return result.listings
         }
         
-        console.log('⚠️ [FeaturedListings] No listings found')
+        logger.debug('[FeaturedListings] No listings found')
         return []
         
       } catch (err) {
-        console.error('❌ [FeaturedListings] Total failure:', err)
+        logger.error('[FeaturedListings] Total failure', { error: err })
         throw err
       }
     },
@@ -55,7 +56,7 @@ export default function FeaturedListings({
     retry: 1,
   })
   
-  console.log('📊 [FeaturedListings] Render:', { 
+  logger.debug('[FeaturedListings] Render', { 
     isLoading, 
     hasError: !!error, 
     count: listings?.length || 0 
@@ -92,7 +93,7 @@ export default function FeaturedListings({
             currentUser={user}
             onToggleFavorite={async (listingId, isFavorited) => {
               // Favorite toggle will be handled by ListingCard internally
-              console.log('Toggle favorite:', listingId, isFavorited)
+              logger.debug('[FeaturedListings] Toggle favorite', { listingId, isFavorited })
             }}
             size="normal"
           />
