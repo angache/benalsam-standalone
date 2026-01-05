@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import aiSuggestionsService, { AISuggestion } from '../services/aiSuggestionsService';
+import { logger } from '@/utils/production-logger';
 
 export const useAISuggestions = (query = '', categoryId = null) => {
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
@@ -24,7 +25,7 @@ export const useAISuggestions = (query = '', categoryId = null) => {
     setError(null);
 
     try {
-      console.log('🤖 Fetching AI suggestions:', { query: debouncedQuery, categoryId });
+      logger.debug('[useAISuggestions] Fetching AI suggestions', { query: debouncedQuery, categoryId });
       
       let results: AISuggestion[] = [];
       
@@ -42,9 +43,9 @@ export const useAISuggestions = (query = '', categoryId = null) => {
       setSuggestions(results);
       setLastQuery(debouncedQuery);
       
-      console.log('✅ AI suggestions fetched:', results.length);
+      logger.debug('[useAISuggestions] AI suggestions fetched', { count: results.length });
     } catch (err) {
-      console.error('❌ Error fetching AI suggestions:', err);
+      logger.error('[useAISuggestions] Error fetching AI suggestions', { error: err });
       setError(err.message);
       setSuggestions([]);
     } finally {
@@ -61,7 +62,7 @@ export const useAISuggestions = (query = '', categoryId = null) => {
       const results = await aiSuggestionsService.getTrendingSuggestions();
       setSuggestions(results);
     } catch (err) {
-      console.error('Error fetching trending suggestions:', err);
+      logger.error('[useAISuggestions] Error fetching trending suggestions', { error: err });
       setError(err.message);
       setSuggestions([]);
     } finally {
@@ -78,7 +79,7 @@ export const useAISuggestions = (query = '', categoryId = null) => {
       const results = await aiSuggestionsService.getPopularSuggestions();
       setSuggestions(results);
     } catch (err) {
-      console.error('Error fetching popular suggestions:', err);
+      logger.error('[useAISuggestions] Error fetching popular suggestions', { error: err });
       setError(err.message);
       setSuggestions([]);
     } finally {
@@ -97,7 +98,7 @@ export const useAISuggestions = (query = '', categoryId = null) => {
       const results = await aiSuggestionsService.getCategorySuggestions(catId);
       setSuggestions(results);
     } catch (err) {
-      console.error('Error fetching category suggestions:', err);
+      logger.error('[useAISuggestions] Error fetching category suggestions', { error: err });
       setError(err.message);
       setSuggestions([]);
     } finally {
@@ -120,7 +121,7 @@ export const useAISuggestions = (query = '', categoryId = null) => {
       await aiSuggestionsService.refresh();
       await fetchSuggestions();
     } catch (err) {
-      console.error('Error refreshing suggestions:', err);
+      logger.error('[useAISuggestions] Error refreshing suggestions', { error: err });
       setError(err.message);
     } finally {
       setIsLoading(false);

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { listingServiceClient } from '@/services/listingServiceClient';
+import { logger } from '@/utils/production-logger';
 
 interface JobStatus {
   status: 'pending' | 'processing' | 'completed' | 'failed';
@@ -103,7 +104,7 @@ export const useJobStatus = ({
       setIsPolling(false);
       return result.success;
     } catch (error) {
-      console.error('Failed to cancel job:', error);
+      logger.error('[useJobStatus] Failed to cancel job', { error });
       return false;
     }
   }, [jobId, userId]);
@@ -120,7 +121,7 @@ export const useJobStatus = ({
         error: status.error
       });
     } catch (error) {
-      console.error('Failed to refresh job status:', error);
+      logger.error('[useJobStatus] Failed to refresh job status', { error });
     }
   }, [jobId, userId]);
 

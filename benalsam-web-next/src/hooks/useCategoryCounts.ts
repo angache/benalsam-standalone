@@ -45,7 +45,7 @@ export const useCategoryCounts = () => {
 
       return data
     } catch (error) {
-      console.error('Error reading from cache:', error)
+      logger.error('[useCategoryCounts] Error reading from cache', { error })
       return null
     }
   }, [])
@@ -65,9 +65,9 @@ export const useCategoryCounts = () => {
         timestamp: Date.now()
       }
       localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData))
-      console.log('💾 Category counts cached successfully')
+      logger.debug('[useCategoryCounts] Category counts cached successfully')
     } catch (error) {
-      console.error('Error writing to cache:', error)
+      logger.error('[useCategoryCounts] Error writing to cache', { error })
     }
   }, [])
 
@@ -85,7 +85,7 @@ export const useCategoryCounts = () => {
       
       return {}
     } catch (error) {
-      console.error('Error fetching category counts from service:', error)
+      logger.error('[useCategoryCounts] Error fetching category counts from service', { error })
       return null
     }
   }, [])
@@ -96,7 +96,7 @@ export const useCategoryCounts = () => {
       // 🔄 Backend'den version kontrolü yap (sadece ilk seferde)
       const versionChanged = await checkCategoryCountsVersion()
       if (versionChanged) {
-        console.log('🔄 Category counts version changed, clearing cache')
+        logger.debug('[useCategoryCounts] Category counts version changed, clearing cache')
         if (typeof window !== 'undefined') {
           localStorage.removeItem(CACHE_KEY)
         }
@@ -105,7 +105,7 @@ export const useCategoryCounts = () => {
       // Rate limiting check
       const now = Date.now()
       if (now - lastFetchTime.current < RATE_LIMIT) {
-        console.log('⏱️ Rate limit active, using cached data')
+        logger.debug('[useCategoryCounts] Rate limit active, using cached data')
         const cached = getCachedCategoryCounts()
         if (cached) return cached
       }
@@ -113,7 +113,7 @@ export const useCategoryCounts = () => {
       // 1. Check local cache
       const localCached = getCachedCategoryCounts()
       if (localCached) {
-        console.log('📦 Category counts loaded from local cache')
+        logger.debug('[useCategoryCounts] Category counts loaded from local cache')
         return localCached
       }
       
@@ -123,14 +123,14 @@ export const useCategoryCounts = () => {
       const serviceCounts = await fetchCategoryCountsFromService()
       
       if (serviceCounts && Object.keys(serviceCounts).length > 0) {
-        console.log('💾 Caching service counts:', serviceCounts)
+        logger.debug('[useCategoryCounts] Caching service counts', { serviceCounts })
         setCachedCategoryCounts(serviceCounts)
         return serviceCounts
       }
       
       return {}
     } catch (error) {
-      console.error('Error in fetchCategoryCounts:', error)
+      logger.error('[useCategoryCounts] Error in fetchCategoryCounts', { error })
       return {}
     }
   }, [getCachedCategoryCounts, fetchCategoryCountsFromService, setCachedCategoryCounts])

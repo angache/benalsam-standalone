@@ -8,6 +8,7 @@
 
 import { useEffect, useRef } from 'react'
 import { useInView } from 'react-intersection-observer'
+import { logger } from '@/utils/production-logger'
 
 interface UseInfiniteScrollParams {
   hasNextPage: boolean
@@ -72,7 +73,7 @@ export function useInfiniteScroll({
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
-            console.log('🔮 [useInfiniteScroll] Prefetching next page...')
+            logger.debug('[useInfiniteScroll] Prefetching next page')
             fetchNextPage()
           }
         })

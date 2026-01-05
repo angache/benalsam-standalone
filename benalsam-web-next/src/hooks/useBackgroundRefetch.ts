@@ -9,6 +9,7 @@
 
 import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { logger } from '@/utils/production-logger'
 
 interface UseBackgroundRefetchOptions {
   /**
@@ -79,7 +80,7 @@ export function useBackgroundRefetch(options: UseBackgroundRefetchOptions) {
         return
       }
 
-      console.log('🔄 [BackgroundRefetch] Refetching queries:', queryKeysRef.current)
+      logger.debug('[BackgroundRefetch] Refetching queries', { queryKeys: queryKeysRef.current })
       
       queryKeysRef.current.forEach((queryKey) => {
         queryClient.refetchQueries({

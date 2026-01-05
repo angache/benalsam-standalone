@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { getInventoryItemById, addInventoryItem, updateInventoryItem } from '@/services/inventoryService'
 import { categoryService } from '@/services/categoryService'
 import type { Category } from '@/services/categoryService'
+import { logger } from '@/utils/production-logger'
 
 interface ImageItem {
   file?: File
@@ -135,7 +136,7 @@ export const useInventoryForm = (itemId?: string) => {
                 : -1,
           })
         } catch (error) {
-          console.error('Error loading inventory item:', error)
+          logger.error('[useInventoryForm] Error loading inventory item', { error })
           toast({
             title: 'Hata',
             description: 'Ürün bilgileri yüklenirken bir sorun oluştu.',
@@ -231,7 +232,7 @@ export const useInventoryForm = (itemId?: string) => {
         }
       }
     } catch (error) {
-      console.error('Error getting category path from cache:', error)
+      logger.error('[useInventoryForm] Error getting category path from cache', { error })
     }
     
     // Fallback: build path from flat categories
@@ -336,7 +337,7 @@ export const useInventoryForm = (itemId?: string) => {
           router.push('/envanterim')
         }
       } catch (error) {
-        console.error('Error submitting inventory item:', error)
+        logger.error('[useInventoryForm] Error submitting inventory item', { error })
         toast({
           title: 'Hata',
           description: 'Ürün kaydedilirken bir sorun oluştu. Lütfen tekrar deneyin.',

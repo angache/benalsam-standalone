@@ -50,7 +50,7 @@ export function useMessages(conversationId: string | null) {
       
       // If there are more messages, return next offset
       if (lastPage.hasMore && loadedCount < lastPage.total) {
-        console.log('📊 [useMessages] Next page', { 
+        logger.debug('[useMessages] Next page', { 
           loadedCount, 
           total: lastPage.total, 
           nextOffset: loadedCount 

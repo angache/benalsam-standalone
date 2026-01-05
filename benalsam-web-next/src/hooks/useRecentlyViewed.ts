@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { logger } from '@/utils/production-logger';
 
 const STORAGE_KEY = 'benalsam_recently_viewed';
 const MAX_ITEMS = 20;
@@ -25,7 +26,7 @@ export function useRecentlyViewed() {
         setItems(parsed);
       }
     } catch (error) {
-      console.error('Error loading recently viewed:', error);
+      logger.error('[useRecentlyViewed] Error loading recently viewed', { error });
     }
   }, []);
 
@@ -48,7 +49,7 @@ export function useRecentlyViewed() {
         return newItems;
       });
     } catch (error) {
-      console.error('Error saving recently viewed:', error);
+      logger.error('[useRecentlyViewed] Error saving recently viewed', { error });
     }
   };
 
@@ -58,7 +59,7 @@ export function useRecentlyViewed() {
       localStorage.removeItem(STORAGE_KEY);
       setItems([]);
     } catch (error) {
-      console.error('Error clearing recently viewed:', error);
+      logger.error('[useRecentlyViewed] Error clearing recently viewed', { error });
     }
   };
 
