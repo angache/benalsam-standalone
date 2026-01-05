@@ -307,7 +307,7 @@ export const fetchSingleListing = async (listingId: string, currentUserId: strin
     return processedListings[0] || null;
 
   } catch (error) {
-    console.error('Unexpected error in fetchSingleListing:', error);
+    logger.error('[ListingService] Unexpected error in fetchSingleListing', { error });
     toast({ title: "Beklenmedik Hata", description: "İlan detayları yüklenirken bir sorun oluştu.", variant: "destructive" });
     return null;
   }
@@ -332,7 +332,7 @@ export const fetchPopularListings = async (currentUserId: string | null = null):
     }
     return processed;
   } catch (e) {
-    console.error('Unexpected error in fetchPopularListings:', e);
+    logger.error('[ListingService] Unexpected error in fetchPopularListings', { error: e });
     toast({ title: "Beklenmedik Hata", description: "Popüler ilanlar yüklenirken bir sorun oluştu.", variant: "destructive" });
     return [];
   }
@@ -350,7 +350,7 @@ export const fetchMostOfferedListings = async (currentUserId: string | null = nu
       .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
 
     if (listingsError) {
-      console.error('Error fetching most offered listings:', listingsError);
+      logger.error('[ListingService] Error fetching most offered listings', { error: listingsError });
       toast({ title: "En Çok Teklif Alanlar Yüklenemedi", description: listingsError.message, variant: "destructive" });
       return [];
     }
@@ -397,7 +397,7 @@ export const fetchMostOfferedListings = async (currentUserId: string | null = nu
       const { data: fallbackData, error: fallbackError } = await fallbackQuery;
       
       if (fallbackError) {
-        console.error('Error fetching fallback listings:', fallbackError);
+        logger.error('[ListingService] Error fetching fallback listings', { error: fallbackError });
         return [];
       }
       
@@ -406,7 +406,7 @@ export const fetchMostOfferedListings = async (currentUserId: string | null = nu
 
     return await processFetchedListings(sortedListings, currentUserId);
   } catch (e) {
-    console.error('Unexpected error in fetchMostOfferedListings:', e);
+    logger.error('[ListingService] Unexpected error in fetchMostOfferedListings', { error: e });
     toast({ title: "Beklenmedik Hata", description: "En çok teklif alan ilanlar yüklenirken bir sorun oluştu.", variant: "destructive" });
     return [];
   }
@@ -432,7 +432,7 @@ export const fetchTodaysDeals = async (currentUserId: string | null = null): Pro
     }
     return processed;
   } catch (e) {
-    console.error('Unexpected error in fetchTodaysDeals:', e);
+    logger.error('[ListingService] Unexpected error in fetchTodaysDeals', { error: e });
     toast({ title: "Beklenmedik Hata", description: "Günün fırsatları yüklenirken bir sorun oluştu.", variant: "destructive" });
     return [];
   }
@@ -456,7 +456,7 @@ export const fetchRecentlyViewedListings = async (currentUserId: string): Promis
     }
     return processed;
   } catch (e) {
-    console.error('Unexpected error in fetchRecentlyViewedListings:', e);
+    logger.error('[ListingService] Unexpected error in fetchRecentlyViewedListings', { error: e });
     return [];
   }
 };
@@ -492,7 +492,7 @@ export const fetchListingsMatchingLastSearch = async (currentUserId: string): Pr
     });
     
     if (error) {
-      console.error('Error fetching listings by last search:', error);
+      logger.error('[ListingService] Error fetching listings by last search', { error });
       return { listings: [], totalCount: 0 };
     }
 
@@ -505,7 +505,7 @@ export const fetchListingsMatchingLastSearch = async (currentUserId: string): Pr
 
     return { listings, totalCount };
   } catch (e) {
-    console.error('Unexpected error in fetchListingsMatchingLastSearch:', e);
+    logger.error('[ListingService] Unexpected error in fetchListingsMatchingLastSearch', { error: e });
     return { listings: [], totalCount: 0 };
   }
 };
@@ -521,14 +521,14 @@ export const fetchMyListings = async (userId: string): Promise<Listing[]> => {
       .order('created_at', { ascending: false });
 
     if (listingsError) {
-      console.error('Error fetching my listings:', listingsError);
+      logger.error('[ListingService] Error fetching my listings', { error: listingsError });
       toast({ title: "İlanlarım Yüklenemedi", description: listingsError.message, variant: "destructive" });
       return [];
     }
 
     return await processFetchedListings(listingsData, userId);
   } catch (error) {
-    console.error('Unexpected error in fetchMyListings:', error);
+    logger.error('[ListingService] Unexpected error in fetchMyListings', { error });
     toast({ title: "Beklenmedik Hata", description: "İlanlarım yüklenirken bir sorun oluştu.", variant: "destructive" });
     return [];
   }
@@ -541,7 +541,7 @@ export const fetchFilteredListings = async (
   pageSize = 20
 ): Promise<{ listings: Listing[], totalCount: number }> => {
   try {
-    console.log('🔍 fetchFilteredListings - Input params:', {
+    logger.debug('[ListingService] fetchFilteredListings - Input params', {
       filterParams,
       currentUserId,
       page,
@@ -568,7 +568,7 @@ export const fetchFilteredListings = async (
       sort_direction: filterParams.sortOrder || 'desc'
     };
 
-    console.log('🔍 fetchFilteredListings - RPC category params:', {
+    logger.debug('[ListingService] fetchFilteredListings - RPC category params', {
       selectedCategories: filterParams.selectedCategories,
       lastCategoryId: filterParams.selectedCategories && filterParams.selectedCategories.length > 0 
         ? filterParams.selectedCategories[filterParams.selectedCategories.length - 1].id
@@ -576,14 +576,14 @@ export const fetchFilteredListings = async (
       p_categories: rpcParams.p_categories
     });
 
-    console.log('🔍 fetchFilteredListings - RPC params:', rpcParams);
+    logger.debug('[ListingService] fetchFilteredListings - RPC params', { rpcParams });
 
     const { data, error } = await supabase.rpc('search_listings_with_attributes', rpcParams);
 
-    console.log('🔍 fetchFilteredListings - Response:', { data, error });
+    logger.debug('[ListingService] fetchFilteredListings - Response', { hasData: !!data, hasError: !!error });
 
     if (error) {
-      console.error('❌ Error calling search_listings_with_attributes:', error);
+      logger.error('[ListingService] Error calling search_listings_with_attributes', { error });
       // Fallback to basic search
       return await fetchFilteredListingsFallback(filterParams, currentUserId, page, pageSize);
     }
@@ -595,14 +595,14 @@ export const fetchFilteredListings = async (
     const listings = await processFetchedListings(data, currentUserId);
     const totalCount = data[0]?.total_count || 0;
 
-    console.log('🔍 fetchFilteredListings - Processed results:', { 
+    logger.debug('[ListingService] fetchFilteredListings - Processed results', { 
       listingsCount: listings.length, 
       totalCount 
     });
 
     return { listings, totalCount };
   } catch (error) {
-    console.error('❌ Unexpected error in fetchFilteredListings:', error);
+    logger.error('[ListingService] Unexpected error in fetchFilteredListings', { error });
     toast({ title: "Arama Hatası", description: "İlanlar aranırken bir sorun oluştu.", variant: "destructive" });
     return { listings: [], totalCount: 0 };
   }
@@ -615,7 +615,7 @@ const fetchFilteredListingsFallback = async (
   pageSize = 20
 ): Promise<{ listings: Listing[], totalCount: number }> => {
   try {
-    console.log('🔄 Using fallback search method');
+    logger.debug('[ListingService] Using fallback search method');
 
     let query = supabase
       .from('listings')
@@ -631,7 +631,7 @@ const fetchFilteredListingsFallback = async (
     // Apply category filter - use ONLY category_id for exact match
     if (filterParams.selectedCategories && filterParams.selectedCategories.length > 0) {
       const lastCategory = filterParams.selectedCategories[filterParams.selectedCategories.length - 1];
-      console.log('🔍 Category filtering - selectedCategories:', {
+      logger.debug('[ListingService] Category filtering - selectedCategories', {
         selectedCategories: filterParams.selectedCategories,
         lastCategory,
         lastCategoryId: lastCategory?.id,
@@ -640,18 +640,18 @@ const fetchFilteredListingsFallback = async (
       
       // Use ONLY category_id for exact match
       if (lastCategory.id && lastCategory.id !== null) {
-        console.log('🔍 Category filtering - using ONLY category_id:', lastCategory.id);
+        logger.debug('[ListingService] Category filtering - using ONLY category_id', { categoryId: lastCategory.id });
         query = query.eq('category_id', lastCategory.id);
       } else {
-        console.log('⚠️ Category filtering - lastCategory.id is null or undefined:', lastCategory.id);
+        logger.warn('[ListingService] Category filtering - lastCategory.id is null or undefined', { categoryId: lastCategory.id });
       }
     } else if (filterParams.category) {
       // Fallback for single category string - try to find category_id first
-      console.log('🔍 Category filtering - fallback category:', filterParams.category);
+      logger.debug('[ListingService] Category filtering - fallback category', { category: filterParams.category });
       // For now, skip category filtering if only category name is provided
-      console.log('⚠️ Category name filtering skipped - need category_id for exact match');
+      logger.warn('[ListingService] Category name filtering skipped - need category_id for exact match');
     } else {
-      console.log('🔍 Category filtering - no category filters applied');
+      logger.debug('[ListingService] Category filtering - no category filters applied');
     }
 
     // Apply location filter
@@ -685,7 +685,7 @@ const fetchFilteredListingsFallback = async (
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('❌ Error in fallback search:', error);
+      logger.error('[ListingService] Error in fallback search', { error });
       toast({ title: "Arama Hatası", description: "İlanlar aranırken bir sorun oluştu.", variant: "destructive" });
       return { listings: [], totalCount: 0 };
     }
@@ -715,7 +715,7 @@ export const fetchAttributeStatistics = async (category?: string): Promise<any[]
     const { data, error } = await query;
 
     if (error) {
-      console.error('Error fetching attribute statistics:', error);
+      logger.error('[ListingService] Error fetching attribute statistics', { error });
       return [];
     }
 
@@ -743,7 +743,7 @@ export const fetchAttributeStatistics = async (category?: string): Promise<any[]
       values: Object.entries(values).map(([value, count]) => ({ value, count }))
     }));
   } catch (error) {
-    console.error('Error in fetchAttributeStatistics:', error);
+    logger.error('[ListingService] Error in fetchAttributeStatistics', { error });
     return [];
   }
 };
@@ -760,7 +760,7 @@ export const searchByAttributeValues = async (
       .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
 
     if (error) {
-      console.error('Error searching by attribute values:', error);
+      logger.error('[ListingService] Error searching by attribute values', { error });
       return [];
     }
 
@@ -778,7 +778,7 @@ export const searchByAttributeValues = async (
 
     return await processFetchedListings(filteredListings, null);
   } catch (error) {
-    console.error('Error in searchByAttributeValues:', error);
+    logger.error('[ListingService] Error in searchByAttributeValues', { error });
     return [];
   }
 }; 
