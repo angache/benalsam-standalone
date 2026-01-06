@@ -38,11 +38,11 @@ export async function POST(request: NextRequest) {
       return validation.response
     }
 
-    const { code, userId } = validation.data
+    const { code, userId: providedUserId } = validation.data
 
     // Get user session or use provided userId (for login flow)
     const user = await getServerUser()
-    const targetUserId = userId || user?.id
+    const targetUserId = providedUserId || user?.id
 
     if (!targetUserId) {
       return apiErrors.unauthorized('Kullanıcı bulunamadı', request.nextUrl.pathname)
@@ -132,12 +132,20 @@ export async function POST(request: NextRequest) {
       message: 'Kod doğrulandı',
     })
   } catch (error: unknown) {
+    // Get userId from error context or try to get from session
+    let errorUserId = 'unknown'
+    try {
+      const user = await getServerUser()
+      errorUserId = user?.id || 'unknown'
+    } catch {
+      // Ignore errors when trying to get user in catch block
+    }
     return apiErrors.internalError(
       'Kod doğrulama sırasında bir hata oluştu',
       {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
-        userId: targetUserId,
+        userId: errorUserId,
       },
       request.nextUrl.pathname
     )
