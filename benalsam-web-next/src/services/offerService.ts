@@ -5,11 +5,12 @@ import { Offer, ApiResponse } from '@/types';
 import { logger } from '@/utils/production-logger';
 
 // Error handling helper
-const handleError = (error: any, title = "Hata", description = "Bir sorun oluştu") => {
-  logger.error(`[OfferService] Error in ${title}`, { error });
+const handleError = (error: unknown, title = "Hata", description = "Bir sorun oluştu") => {
+  const errorMessage = error instanceof Error ? error.message : String(error)
+  logger.error(`[OfferService] Error in ${title}`, { error: errorMessage });
   toast({ 
     title: title, 
-    description: error?.message || description, 
+    description: errorMessage || description, 
     variant: "destructive" 
   });
   return null;
@@ -37,9 +38,22 @@ export const createOffer = async (offerData: Partial<Offer>): Promise<Offer | nu
   }
 
   try {
-    const insertPayload: any = {
-      listing_id: offerData.listing_id,
-      offering_user_id: offerData.offering_user_id,
+    interface OfferInsertPayload {
+      listing_id: string
+      offering_user_id: string
+      message: string
+      status: string
+      created_at: string
+      updated_at: string
+      offered_item_id?: string
+      offered_price?: number
+      attachments?: string
+      ai_suggestion?: string
+    }
+
+    const insertPayload: OfferInsertPayload = {
+      listing_id: offerData.listing_id!,
+      offering_user_id: offerData.offering_user_id!,
       message: offerData.message || '',
       status: 'pending',
       created_at: new Date().toISOString(),
@@ -55,7 +69,7 @@ export const createOffer = async (offerData: Partial<Offer>): Promise<Offer | nu
     }
     
     if (offerData.attachments && offerData.attachments.length > 0) {
-      insertPayload.attachments = JSON.stringify(offerData.attachments.map((file: any) => ({
+      insertPayload.attachments = JSON.stringify(offerData.attachments.map((file: File | { name: string; size: number; type: string }) => ({
         name: file.name,
         size: file.size,
         type: file.type
@@ -321,12 +335,17 @@ export const fetchSentOffers = async (userId: string): Promise<Offer[]> => {
     }
 
     // Format data like mobile version
-    const formattedData = data?.map((offer: any) => ({
+    interface OfferWithRelations extends Offer {
+      listings?: Listing & { profiles?: { id: string; name: string; avatar_url?: string | null } }
+      inventory_items?: { id: string; name: string; category: string; main_image_url?: string; image_url?: string }
+    }
+    
+    const formattedData = (data as OfferWithRelations[])?.map((offer) => ({
       ...offer,
-      listing: {
+      listing: offer.listings ? {
         ...offer.listings,
-        user: offer.listings?.profiles
-      },
+        user: offer.listings.profiles
+      } : undefined,
       inventory_item: offer.inventory_items
     })) || [];
 
@@ -362,7 +381,7 @@ export const fetchReceivedOffers = async (userId: string): Promise<Offer[]> => {
       return [];
     }
 
-    const listingIds = userListings.map((listing: any) => listing.id);
+    const listingIds = userListings.map((listing: { id: string }) => listing.id);
 
     const { data, error } = await supabase
       .from('offers')
@@ -404,12 +423,18 @@ export const fetchReceivedOffers = async (userId: string): Promise<Offer[]> => {
     }
 
     // Format data like mobile version
-    const formattedData = data?.map((offer: any) => ({
+    interface OfferWithRelationsReceived extends Offer {
+      listings?: Listing & { profiles?: { id: string; name: string; avatar_url?: string | null } }
+      profiles?: { id: string; name: string; avatar_url?: string | null; rating?: number; total_ratings?: number }
+      inventory_items?: { id: string; name: string; category: string; main_image_url?: string; image_url?: string }
+    }
+    
+    const formattedData = (data as OfferWithRelationsReceived[])?.map((offer) => ({
       ...offer,
-      listing: {
+      listing: offer.listings ? {
         ...offer.listings,
-        user: offer.listings?.profiles
-      },
+        user: offer.listings.profiles
+      } : undefined,
       user: offer.profiles,
       inventory_item: offer.inventory_items
     })) || [];
@@ -566,7 +591,12 @@ export const getOffersForListing = async (listingId: string): Promise<Offer[]> =
     }
 
     // Format data
-    const formattedData = data?.map((offer: any) => ({
+    interface OfferWithUser extends Offer {
+      profiles?: { id: string; name: string; avatar_url?: string | null; rating?: number; total_ratings?: number }
+      inventory_items?: { id: string; name: string; category: string; main_image_url?: string; image_url?: string }
+    }
+    
+    const formattedData = (data as OfferWithUser[])?.map((offer) => ({
       ...offer,
       user: offer.profiles,
       inventory_item: offer.inventory_items

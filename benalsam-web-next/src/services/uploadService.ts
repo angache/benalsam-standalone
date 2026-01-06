@@ -30,6 +30,20 @@ interface UploadResponse {
   message?: string;
 }
 
+interface ImageItem {
+  file?: File;
+  isUploaded?: boolean;
+  preview?: string;
+  uri?: string;
+  name?: string;
+}
+
+interface FileLike {
+  name: string;
+  size: number;
+  type?: string;
+}
+
 const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1';
 
 export class UploadService {
@@ -235,10 +249,10 @@ export const processImagesForUploadService = async (
     // More robust File check: File objects have name, size, type properties
     const isFileArray = images.length > 0 && (
       images[0] instanceof File ||
-      (images[0] && typeof images[0] === 'object' && 
+      (images[0] && typeof images[0] === 'object' && images[0] !== null &&
        'name' in images[0] && 'size' in images[0] && 'type' in images[0] &&
-       typeof (images[0] as any).name === 'string' &&
-       typeof (images[0] as any).size === 'number')
+       typeof (images[0] as FileLike).name === 'string' &&
+       typeof (images[0] as FileLike).size === 'number')
     );
     
     let filesToUpload: File[] = [];
@@ -258,8 +272,8 @@ export const processImagesForUploadService = async (
       keptImageUrls = [];
     } else {
       // images is ImageItem[] (has file, isUploaded, preview properties)
-      filesToUpload = (images as any[])
-        .filter(img => !img.isUploaded && (img.file || img.uri))
+      filesToUpload = (images as ImageItem[])
+        .filter((img): img is ImageItem => !img.isUploaded && (img.file !== undefined || img.uri !== undefined))
         .map(img => {
           if (img.file) {
             return img.file;
@@ -273,9 +287,12 @@ export const processImagesForUploadService = async (
           }
           return null;
         })
-        .filter(Boolean) as File[];
+        .filter((file): file is File => file !== null);
 
-      keptImageUrls = (images as any[]).filter(img => img.isUploaded).map(img => img.preview || img.uri);
+      keptImageUrls = (images as ImageItem[])
+        .filter(img => img.isUploaded)
+        .map(img => img.preview || img.uri || '')
+        .filter(Boolean);
     }
     
     const urlsToDelete = initialImageUrls.filter(url => !keptImageUrls.includes(url));
@@ -341,7 +358,7 @@ export const uploadImages = async (
 /**
  * Delete images (replaces deleteImages from imageService)
  */
-export const deleteImages = async (urls: string[]): Promise<any> => {
+export const deleteImages = async (urls: string[]): Promise<void> => {
   if (!urls || urls.length === 0) return;
 
   try {

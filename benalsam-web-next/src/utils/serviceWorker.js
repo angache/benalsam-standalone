@@ -1,4 +1,6 @@
 // Service Worker Registration
+import { logger } from '@/utils/production-logger';
+
 export const registerServiceWorker = async () => {
   if ('serviceWorker' in navigator) {
     try {
@@ -7,7 +9,7 @@ export const registerServiceWorker = async () => {
         updateViaCache: 'none'
       });
 
-      console.log('Service Worker registered successfully:', registration);
+      logger.debug('[ServiceWorker] Registered successfully', { registration });
 
       // Handle updates
       registration.addEventListener('updatefound', () => {
@@ -22,7 +24,7 @@ export const registerServiceWorker = async () => {
 
       return registration;
     } catch (error) {
-      console.error('Service Worker registration failed:', error);
+      logger.error('[ServiceWorker] Registration failed', { error });
       return null;
     }
   }
@@ -42,9 +44,9 @@ export const unregisterServiceWorker = async () => {
     try {
       const registration = await navigator.serviceWorker.ready;
       await registration.unregister();
-      console.log('Service Worker unregistered');
+      logger.debug('[ServiceWorker] Unregistered');
     } catch (error) {
-      console.error('Service Worker unregistration failed:', error);
+      logger.error('[ServiceWorker] Unregistration failed', { error });
     }
   }
 };
@@ -60,7 +62,7 @@ export const getServiceWorkerRegistration = async () => {
     try {
       return await navigator.serviceWorker.ready;
     } catch (error) {
-      console.error('Failed to get service worker registration:', error);
+      logger.error('[ServiceWorker] Failed to get registration', { error });
       return null;
     }
   }
@@ -75,9 +77,9 @@ export const clearAllCaches = async () => {
       await Promise.all(
         cacheNames.map(cacheName => caches.delete(cacheName))
       );
-      console.log('All caches cleared');
+      logger.debug('[ServiceWorker] All caches cleared');
     } catch (error) {
-      console.error('Failed to clear caches:', error);
+      logger.error('[ServiceWorker] Failed to clear caches', { error });
     }
   }
 };
@@ -92,7 +94,7 @@ export const cacheManager = {
         await cache.put(request, response);
         return true;
       } catch (error) {
-        console.error('Failed to add to cache:', error);
+        logger.error('[ServiceWorker] Failed to add to cache', { error });
         return false;
       }
     }
@@ -105,7 +107,7 @@ export const cacheManager = {
       try {
         return await caches.match(request);
       } catch (error) {
-        console.error('Failed to get from cache:', error);
+        logger.error('[ServiceWorker] Failed to get from cache', { error });
         return null;
       }
     }
@@ -124,7 +126,7 @@ export const cacheManager = {
         );
         return true;
       } catch (error) {
-        console.error('Failed to delete from cache:', error);
+        logger.error('[ServiceWorker] Failed to delete from cache', { error });
         return false;
       }
     }

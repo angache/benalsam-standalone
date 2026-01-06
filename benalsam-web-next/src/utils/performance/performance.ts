@@ -3,6 +3,7 @@
 // ===========================
 
 import { Metric } from 'web-vitals';
+import { logger } from '@/utils/production-logger';
 import { PerformanceMetrics, PerformanceTrackingOptions } from './types';
 import metricsService from './services/MetricsService';
 import metricsCollector from './utils/metricsCollector';
@@ -13,41 +14,41 @@ import analyticsService from './services/AnalyticsService';
 // Initialize Core Web Vitals tracking
 export const initPerformanceTracking = () => {
   try {
-    console.log('🚀 Initializing Core Web Vitals tracking');
+    logger.debug('[Performance] Initializing Core Web Vitals tracking');
 
     // Initialize metrics collector
     metricsCollector.initialize();
 
     // Set up Core Web Vitals collection
     metricsCollector.onLCP((metric) => {
-      console.log('📊 LCP Metric:', metric);
+      logger.debug('[Performance] LCP Metric', { metric });
       metricsService.collectMetric(metric);
     });
 
     metricsCollector.onFCP((metric) => {
-      console.log('📊 FCP Metric:', metric);
+      logger.debug('[Performance] FCP Metric', { metric });
       metricsService.collectMetric(metric);
     });
 
     metricsCollector.onCLS((metric) => {
-      console.log('📊 CLS Metric:', metric);
+      logger.debug('[Performance] CLS Metric', { metric });
       metricsService.collectMetric(metric);
     });
 
     metricsCollector.onTTFB((metric) => {
-      console.log('📊 TTFB Metric:', metric);
+      logger.debug('[Performance] TTFB Metric', { metric });
       metricsService.collectMetric(metric);
     });
 
     metricsCollector.onINP((metric) => {
-      console.log('📊 INP Metric:', metric);
+      logger.debug('[Performance] INP Metric', { metric });
       metricsService.collectMetric(metric);
     });
 
-    console.log('✅ Core Web Vitals tracking initialized');
+    logger.debug('[Performance] Core Web Vitals tracking initialized');
 
   } catch (error) {
-    console.error('❌ Failed to initialize performance tracking:', error);
+    logger.error('[Performance] Failed to initialize performance tracking', { error });
   }
 };
 
@@ -132,7 +133,16 @@ export const testAnalyticsConnection = () => {
 };
 
 // Update configuration
-export const updatePerformanceConfig = (config: any) => {
+interface PerformanceConfig {
+  enableLCP?: boolean
+  enableFCP?: boolean
+  enableCLS?: boolean
+  enableTTFB?: boolean
+  enableINP?: boolean
+  [key: string]: unknown
+}
+
+export const updatePerformanceConfig = (config: PerformanceConfig) => {
   // Update metrics collector config
   metricsCollector.updateConfig(config.metricsCollector);
   
@@ -142,7 +152,7 @@ export const updatePerformanceConfig = (config: any) => {
   // Update analytics service config
   analyticsService.updateConfig(config.analytics);
   
-  console.log('📊 Performance configuration updated');
+  logger.debug('[Performance] Configuration updated');
 };
 
 // Get performance trends
@@ -168,7 +178,7 @@ export const getScoreBreakdown = (metrics: PerformanceMetrics) => {
 // Cleanup performance tracking
 export const cleanupPerformanceTracking = () => {
   metricsService.destroy();
-  console.log('🧹 Performance tracking cleaned up');
+  logger.debug('[Performance] Tracking cleaned up');
 };
 
 // Export types

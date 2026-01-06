@@ -94,7 +94,7 @@ export default function SecuritySettingsClient({ userId }: { userId: string }) {
       })
       
       setTwoFactorEnabled(isEnabled)
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('[SecuritySettings] Error loading 2FA status', {
         error,
         message: error?.message,
@@ -184,8 +184,8 @@ export default function SecuritySettingsClient({ userId }: { userId: string }) {
         newPassword: '',
         confirmPassword: '',
       })
-    } catch (error: any) {
-      console.error('Error changing password:', error)
+    } catch (error: unknown) {
+      logger.error('[SecuritySettings] Error changing password', { error })
       toast({
         title: 'Hata',
         description: error.message || 'Şifre değiştirilirken bir hata oluştu',
@@ -217,7 +217,7 @@ export default function SecuritySettingsClient({ userId }: { userId: string }) {
         })
         setTwoFactorEnabled(false)
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('[SecuritySettings] Error toggling 2FA', { error })
       toast({
         title: 'Hata',

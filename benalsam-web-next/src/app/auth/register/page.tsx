@@ -80,10 +80,12 @@ export default function RegisterPage() {
         // Redirect to login page
         router.push('/auth/login?registered=true')
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Hata',
-        description: error.response?.data?.error || 'Kayıt yapılırken bir hata oluştu',
+        description: (error instanceof Error && 'response' in error && typeof (error as { response?: { data?: { error?: string } } }).response?.data?.error === 'string') 
+          ? (error as { response: { data: { error: string } } }).response.data.error 
+          : 'Kayıt yapılırken bir hata oluştu',
         variant: 'destructive',
       })
     } finally {

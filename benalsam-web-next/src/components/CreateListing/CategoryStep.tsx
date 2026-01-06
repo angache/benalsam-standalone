@@ -8,7 +8,7 @@ import { Search, Smartphone, Building, Car, WashingMachine, Shirt, GraduationCap
 import { logger } from '@/utils/production-logger'
 
 // Icon mapping for API categories
-const iconMap: { [key: string]: React.ComponentType<any> } = {
+const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
   'smartphone': Smartphone,
   'building': Building,
   'car': Car,
@@ -30,7 +30,7 @@ const iconMap: { [key: string]: React.ComponentType<any> } = {
 }
 
 // Get icon component from string or component
-const getIconComponent = (icon: string | React.ComponentType<any> | undefined): React.ComponentType<any> => {
+const getIconComponent = (icon: string | React.ComponentType<{ className?: string }> | undefined): React.ComponentType<{ className?: string }> => {
   if (typeof icon === 'string') {
     return iconMap[icon.toLowerCase()] || Smartphone
   }
@@ -60,7 +60,7 @@ const getDefaultColors = (categoryName: string) => {
 interface Category {
   id: string | number
   name: string
-  icon?: string | React.ComponentType<any>
+  icon?: string | React.ComponentType<{ className?: string }>
   color?: string
   bgColor?: string
   subcategories?: Category[]
@@ -246,7 +246,14 @@ export default function CategoryStep({ selectedCategory, onCategorySelect, onNex
           const parsedCache = JSON.parse(cachedCategories)
           if (parsedCache.data && Array.isArray(parsedCache.data)) {
             // Recursive function to map children/subcategories at all levels
-            const mapSubcategories = (cat: any): any => {
+            interface CategoryNode {
+              id: string | number
+              name: string
+              children?: CategoryNode[]
+              subcategories?: CategoryNode[]
+              [key: string]: unknown
+            }
+            const mapSubcategories = (cat: CategoryNode): CategoryNode => {
               const subcategories = cat.children || cat.subcategories || []
               return {
                 ...cat,

@@ -3,13 +3,13 @@
  * Ensures all required environment variables are present
  */
 
+import { logger } from '@/utils/production-logger';
+
 // Helper function to get env var (works in both browser and server)
-const getEnv = (key: string) => {
-  if (typeof window !== 'undefined') {
-    // Browser - can only access NEXT_PUBLIC_ vars
-    return (window as any).__NEXT_DATA__?.props?.env?.[key] || process.env[key]
-  }
-  // Server
+// Next.js automatically replaces process.env.NEXT_PUBLIC_* at build time
+const getEnv = (key: string): string | undefined => {
+  // Both client and server can access process.env
+  // Next.js only exposes NEXT_PUBLIC_* vars to the client
   return process.env[key]
 }
 
@@ -45,10 +45,10 @@ export function validateEnv() {
   const missing = allRequired.filter((key) => !env[key as keyof typeof env])
 
   if (missing.length > 0) {
-    console.error(
-      `Missing required environment variables: ${missing.join(', ')}\n` +
-        'Please check your .env.local file.'
-    )
+    logger.error('[Env] Missing required environment variables', { 
+      missing: missing.join(', '),
+      message: 'Please check your .env.local file.'
+    })
     // Don't throw on client side, just log
     if (typeof window === 'undefined') {
       throw new Error(

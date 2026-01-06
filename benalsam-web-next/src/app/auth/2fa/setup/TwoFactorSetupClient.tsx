@@ -97,7 +97,7 @@ export default function TwoFactorSetupClient() {
 
       setSetupData(result.data)
       setStep('qr')
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('[2FASetup] 2FA setup error', { error })
       setError('2FA kurulumu sırasında bir hata oluştu')
       setStep('loading')
@@ -178,7 +178,7 @@ export default function TwoFactorSetupClient() {
 
       // Verification successful, move to success step
       setStep('success')
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('[2FASetup] 2FA verification error', { error })
       setError('Doğrulama sırasında bir hata oluştu')
       setVerificationCode(['', '', '', '', '', ''])

@@ -3,6 +3,7 @@ import { toast } from '@/hooks/use-toast';
 import { addUserActivity } from '@/services/userActivityService';
 import { Conversation, Message } from '@/types';
 import { logger } from '@/utils/production-logger';
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 // Custom error classes for better error handling
 class ValidationError extends Error {
@@ -13,14 +14,14 @@ class ValidationError extends Error {
 }
 
 class DatabaseError extends Error {
-  constructor(message: string, public originalError?: any) {
+  constructor(message: string, public originalError?: unknown) {
     super(message);
     this.name = 'DatabaseError';
   }
 }
 
 // Error handling helper
-const handleError = (error: any, title = "Hata", description = "Bir sorun oluştu") => {
+const handleError = (error: unknown, title = "Hata", description = "Bir sorun oluştu") => {
   logger.error(`[ConversationService] Error in ${title}`, { error });
   toast({ 
     title: title, 
@@ -443,11 +444,11 @@ export const subscribeToMessages = (conversationId: string, onNewMessage: (messa
         table: 'messages',
         filter: `conversation_id=eq.${conversationId}`
       },
-      async (payload) => {
+      async (payload: RealtimePostgresChangesPayload<Message>) => {
         logger.debug('[ConversationService] INSERT event received', { payload });
         
         // Use payload data directly and fetch sender from cache
-        const newMessage = payload.new as any;
+        const newMessage = payload.new;
         
         // Get sender profile (from cache or fetch)
         const sender = await getUserProfile(newMessage.sender_id);

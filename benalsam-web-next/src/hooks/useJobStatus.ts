@@ -5,7 +5,7 @@ import { logger } from '@/utils/production-logger';
 interface JobStatus {
   status: 'pending' | 'processing' | 'completed' | 'failed';
   progress: number;
-  result?: any;
+  result?: Record<string, unknown>;
   error?: string;
 }
 
@@ -15,7 +15,7 @@ interface UseJobStatusOptions {
   autoPoll?: boolean;
   pollInterval?: number;
   maxAttempts?: number;
-  onComplete?: (result: any) => void;
+  onComplete?: (result: Record<string, unknown> | undefined) => void;
   onError?: (error: string) => void;
   onProgress?: (progress: number) => void;
 }
@@ -47,7 +47,7 @@ export const useJobStatus = ({
         const status = await listingServiceClient.getJobStatus(jobId, userId);
         
         setJobStatus({
-          status: status.status as any,
+          status: status.status as 'pending' | 'processing' | 'completed' | 'failed',
           progress: status.progress,
           result: status.result,
           error: status.error
@@ -115,7 +115,7 @@ export const useJobStatus = ({
     try {
       const status = await listingServiceClient.getJobStatus(jobId, userId);
       setJobStatus({
-        status: status.status as any,
+        status: status.status as 'pending' | 'processing' | 'completed' | 'failed',
         progress: status.progress,
         result: status.result,
         error: status.error

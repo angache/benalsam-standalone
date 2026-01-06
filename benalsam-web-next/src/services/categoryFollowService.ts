@@ -1,14 +1,27 @@
 import { supabase } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
+import type { Listing } from '@/types'
 
 export interface FollowedCategory {
   category_name: string
   created_at?: string
 }
 
+export interface ListingWithUser extends Listing {
+  user?: {
+    id: string
+    name: string
+    avatar_url?: string | null
+    rating?: number | null
+    total_ratings?: number
+    rating_sum?: number
+  }
+  is_favorited: boolean
+}
+
 export interface CategoryWithListings {
   category_name: string
-  listings: any[]
+  listings: ListingWithUser[]
 }
 
 export const followCategory = async (userId: string, categoryName: string) => {
@@ -32,8 +45,9 @@ export const followCategory = async (userId: string, categoryName: string) => {
     }
 
     return data
-  } catch (error: any) {
-    logger.error('[CategoryFollowService] Error following category', { error })
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    logger.error('[CategoryFollowService] Error following category', { error: errorMessage })
     return null
   }
 }
@@ -56,8 +70,9 @@ export const unfollowCategory = async (userId: string, categoryName: string): Pr
     }
 
     return true
-  } catch (error: any) {
-    logger.error('[CategoryFollowService] Error unfollowing category', { error })
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    logger.error('[CategoryFollowService] Error unfollowing category', { error: errorMessage })
     return false
   }
 }
@@ -112,28 +127,28 @@ export const fetchListingsForFollowedCategories = async (
           return { category_name: fc.category_name, listings: [] }
         }
         
-        let listingsWithUser = listingsData?.map((listing: any) => ({
+        let listingsWithUser: ListingWithUser[] = listingsData?.map((listing: Listing & { profiles?: ListingWithUser['user'] }) => ({
           ...listing,
           user: listing.profiles,
           is_favorited: false
         })) || []
 
         if (currentUserId && listingsWithUser.length > 0) {
-          const listingIds = listingsWithUser.map((l: any) => l.id)
+          const listingIds = listingsWithUser.map((l) => l.id)
           const { data: favoriteStatusesData } = await supabase
             .from('user_favorites')
             .select('listing_id')
             .eq('user_id', currentUserId)
             .in('listing_id', listingIds)
 
-          const favoriteStatuses: { [key: string]: boolean } = {}
+          const favoriteStatuses: Record<string, boolean> = {}
           if (favoriteStatusesData) {
-            favoriteStatusesData.forEach((fav: any) => {
+            favoriteStatusesData.forEach((fav: { listing_id: string }) => {
               favoriteStatuses[fav.listing_id] = true
             })
           }
           
-          listingsWithUser = listingsWithUser.map((l: any) => ({
+          listingsWithUser = listingsWithUser.map((l) => ({
             ...l,
             is_favorited: favoriteStatuses[l.id] || false
           }))

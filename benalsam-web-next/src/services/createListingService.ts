@@ -5,6 +5,9 @@
 
 import { uploadServiceClient } from '@/lib/uploadServiceClient'
 import { logger } from '@/utils/production-logger'
+import type { Category } from './categoryService'
+import type { Listing } from '@/types'
+import type { ImageFile } from '@/types/listing'
 
 const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1'
 
@@ -31,8 +34,8 @@ const getCategoryIds = async (categoryString: string): Promise<{ category_id: nu
       return { category_id: null, category_path: null }
     }
     
-    const parsed = JSON.parse(raw)
-    const categories: any[] = parsed?.data || []
+    const parsed = JSON.parse(raw) as { data?: Category[] }
+    const categories: Category[] = parsed?.data || []
     logger.debug('[CreateListingService] Categories from cache', { categoriesCount: categories.length });
     
     // Ana kategoriyi bul
@@ -46,21 +49,25 @@ const getCategoryIds = async (categoryString: string): Promise<{ category_id: nu
 
     // N-seviye gezinme: her bir path parçasını sırayla children içinde ara
     const categoryPath: number[] = [];
-    let currentNode: any = mainCategory;
+    let currentNode: Category | undefined = mainCategory;
     
     // Ana kategoriyi ekle
-    categoryPath.push(currentNode.id);
+    if (currentNode?.id) {
+      categoryPath.push(Number(currentNode.id));
+    }
     
     for (let i = 1; i < pathParts.length; i++) {
       const part = pathParts[i];
       const children = currentNode?.children || [];
       logger.debug('[CreateListingService] Traversing category level', { level: i + 1, lookingFor: part, childrenCount: children.length });
-      const next = children.find((c: any) => c.name === part);
+      const next = children.find((c: Category) => c.name === part);
       if (!next) {
-        logger.warn('[CreateListingService] Category level not found', { level: i + 1, part, available: children.map((c: any) => c.name) });
+        logger.warn('[CreateListingService] Category level not found', { level: i + 1, part, available: children.map((c: Category) => c.name) });
         break;
       }
-      categoryPath.push(next.id);
+      if (next.id) {
+        categoryPath.push(Number(next.id));
+      }
       currentNode = next;
     }
 
@@ -97,8 +104,8 @@ interface CreateListingInput {
   listings_neighborhood?: string | null
   urgency?: string
   condition?: string[]
-  attributes?: Record<string, any>
-  images: any[] // Image objects from form
+  attributes?: Record<string, unknown>
+  images: ImageFile[] // Image objects from form
   mainImageIndex: number
   duration?: number
   accept_terms?: boolean
@@ -119,7 +126,7 @@ export async function createListingWithUploadService(
   listingData: CreateListingInput,
   currentUserId: string,
   onProgress?: (progress: number) => void
-): Promise<any> {
+): Promise<Listing | null> {
   try {
     logger.debug('[CreateListingService] Creating listing via Upload Service', {
       title: listingData.title,
@@ -254,7 +261,7 @@ async function pollListingJobStatus(
   jobId: string,
   userId: string,
   onProgress?: (progress: number) => void
-): Promise<any> {
+): Promise<Listing | null> {
   const maxAttempts = 60 // 5 minutes max
   const pollInterval = 5000 // 5 seconds
   

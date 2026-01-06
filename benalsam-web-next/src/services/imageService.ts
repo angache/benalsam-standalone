@@ -56,7 +56,7 @@ export const uploadImages = async (
 /**
  * Delete images from Supabase Storage
  */
-export const deleteImages = async (urls: string[]): Promise<any> => {
+export const deleteImages = async (urls: string[]): Promise<{ path: string }[] | null> => {
   if (!urls || urls.length === 0) return
 
   const filePaths = urls
@@ -90,8 +90,16 @@ export const deleteImages = async (urls: string[]): Promise<any> => {
 /**
  * Process images for Supabase Storage (legacy function for compatibility)
  */
+interface ImageItem {
+  file?: File
+  uri?: string
+  name?: string
+  isUploaded?: boolean
+  preview?: string
+}
+
 export const processImagesForSupabase = async (
-  images: any[],
+  images: ImageItem[],
   mainImageIndex: number,
   bucket: string,
   context_unused: string,

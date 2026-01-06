@@ -86,7 +86,7 @@ export default function TodaysListings({ listings: propListings, isLoading: prop
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {listings.slice(0, 8).map((listing: any) => (
+        {listings.slice(0, 8).map((listing: Listing) => (
           <ListingCard key={listing.id} listing={listing} />
         ))}
       </div>

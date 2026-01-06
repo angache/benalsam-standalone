@@ -45,7 +45,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Process listings to include counts
-    const processedListings = listings?.map((listing: any) => ({
+    interface ListingWithCounts {
+      offers?: Array<{ count: number }>
+      favorites?: Array<{ count: number }>
+      [key: string]: unknown
+    }
+    const processedListings = listings?.map((listing: ListingWithCounts) => ({
       ...listing,
       offers_count: listing.offers?.[0]?.count || 0,
       favorites_count: listing.favorites?.[0]?.count || 0

@@ -5,13 +5,15 @@
  * Useful for scenarios where multiple components request the same data simultaneously
  */
 
+import { logger } from '@/utils/production-logger';
+
 interface PendingRequest<T> {
   promise: Promise<T>
   timestamp: number
 }
 
 class RequestDeduplicator {
-  private pendingRequests = new Map<string, PendingRequest<any>>()
+  private pendingRequests = new Map<string, PendingRequest<unknown>>()
   private readonly REQUEST_TIMEOUT = 5000 // 5 seconds
 
   /**
@@ -33,7 +35,7 @@ class RequestDeduplicator {
       // Check if request is still valid (not too old)
       const age = Date.now() - pending.timestamp
       if (age < this.REQUEST_TIMEOUT) {
-        console.log(`🔄 [Deduplication] Reusing pending request: ${key}`)
+        logger.debug('[RequestDeduplication] Reusing pending request', { key })
         return pending.promise
       } else {
         // Request is too old, remove it
@@ -110,7 +112,7 @@ export const requestDeduplicator = new RequestDeduplicator()
  * const data2 = await fetchData('123') // Uses same request as data1
  * ```
  */
-export function createDeduplicatedRequest<TArgs extends any[], TReturn>(
+export function createDeduplicatedRequest<TArgs extends unknown[], TReturn>(
   keyFn: (...args: TArgs) => string,
   requestFn: (...args: TArgs) => Promise<TReturn>
 ): (...args: TArgs) => Promise<TReturn> {

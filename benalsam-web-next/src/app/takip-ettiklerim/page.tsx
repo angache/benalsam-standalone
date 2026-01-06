@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { fetchFollowingUsers } from '@/services/followService'
 import { fetchListingsForFollowedCategories } from '@/services/categoryFollowService'
+import { logger } from '@/utils/production-logger'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { EmptyStateList } from '@/components/ui/empty-state'
 import UserCard from '@/components/following/UserCard'
@@ -23,7 +24,11 @@ const FollowingPage = () => {
 
   const [activeTab, setActiveTab] = useState<'users' | 'categories'>('users')
   const [followingUsers, setFollowingUsers] = useState<User[]>([])
-  const [followedCategoriesWithListings, setFollowedCategoriesWithListings] = useState<any[]>([])
+  interface CategoryWithListings {
+    category_name: string
+    listings: Array<{ id: string; title: string; [key: string]: unknown }>
+  }
+  const [followedCategoriesWithListings, setFollowedCategoriesWithListings] = useState<CategoryWithListings[]>([])
   const [loadingUsers, setLoadingUsers] = useState(true)
   const [loadingCategories, setLoadingCategories] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -52,7 +57,7 @@ const FollowingPage = () => {
         setFollowingUsers(usersData || [])
         setFollowedCategoriesWithListings(categoriesData || [])
       } catch (err) {
-        console.error('Error loading following data:', err)
+        logger.error('[Following] Error loading following data', { error: err })
         setError('Takip edilenler yüklenirken bir sorun oluştu.')
         toast({
           title: 'Hata',
@@ -84,7 +89,7 @@ const FollowingPage = () => {
       const updatedCategoriesListings = await fetchListingsForFollowedCategories(user.id, 3, user.id)
       setFollowedCategoriesWithListings(updatedCategoriesListings || [])
     } catch (error) {
-      console.error('Error refreshing categories:', error)
+      logger.error('[Following] Error refreshing categories', { error })
       toast({
         title: 'Hata',
         description: 'Kategoriler güncellenirken bir sorun oluştu.',

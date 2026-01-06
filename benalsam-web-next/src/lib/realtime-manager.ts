@@ -41,12 +41,12 @@ export type RealtimeEvent =
 export type RealtimeEventData = {
   'message:new': {
     conversationId: string
-    message: any
+    message: Message
   }
   'message:update': {
     conversationId: string
     messageId: string
-    updates: any
+    updates: Partial<Message>
   }
   'message:status': {
     conversationId: string
@@ -55,11 +55,11 @@ export type RealtimeEventData = {
   }
   'conversation:update': {
     conversationId: string
-    updates: any
+    updates: Partial<Conversation>
   }
   'notification:new': {
     type: string
-    data: any
+    data: Record<string, unknown>
   }
   'user:online': {
     userId: string
@@ -74,7 +74,7 @@ type EventCallback<T extends RealtimeEvent> = (data: RealtimeEventData[T]) => vo
 class RealtimeManager {
   private static instance: RealtimeManager
   private channel: RealtimeChannel | null = null
-  private listeners: Map<RealtimeEvent, Set<EventCallback<any>>> = new Map()
+  private listeners: Map<RealtimeEvent, Set<EventCallback<RealtimeEvent>>> = new Map()
   private userId: string | null = null
   private reconnectAttempts = 0
   private maxReconnectAttempts = RECONNECT_MAX_ATTEMPTS
@@ -332,8 +332,8 @@ class RealtimeManager {
   /**
    * Handle message insert event
    */
-  private handleMessageInsert(payload: any): void {
-    const message = payload.new
+  private handleMessageInsert(payload: RealtimePostgresChangesPayload<Message>): void {
+    const message = payload.new as Message
     logger.debug('[RealtimeManager] Message inserted', { messageId: message.id })
 
     this.emit('message:new', {
@@ -345,22 +345,23 @@ class RealtimeManager {
   /**
    * Handle message update event
    */
-  private handleMessageUpdate(payload: any): void {
-    const message = payload.new
+  private handleMessageUpdate(payload: RealtimePostgresChangesPayload<Message>): void {
+    const message = payload.new as Message
+    const oldMessage = payload.old as Message
     logger.debug('[RealtimeManager] Message updated', { messageId: message.id })
 
     this.emit('message:update', {
       conversationId: message.conversation_id,
       messageId: message.id,
-      updates: message
+      updates: message as Partial<Message>
     })
 
     // Also emit status change if status changed
-    if (payload.old.status !== message.status) {
+    if (oldMessage?.status !== message.status) {
       this.emit('message:status', {
         conversationId: message.conversation_id,
         messageId: message.id,
-        status: message.status
+        status: message.status || ''
       })
     }
   }
@@ -368,13 +369,13 @@ class RealtimeManager {
   /**
    * Handle conversation update event
    */
-  private handleConversationUpdate(payload: any): void {
-    const conversation = payload.new
+  private handleConversationUpdate(payload: RealtimePostgresChangesPayload<Conversation>): void {
+    const conversation = payload.new as Conversation
     logger.debug('[RealtimeManager] Conversation updated', { conversationId: conversation.id })
 
     this.emit('conversation:update', {
       conversationId: conversation.id,
-      updates: conversation
+      updates: conversation as Partial<Conversation>
     })
   }
 

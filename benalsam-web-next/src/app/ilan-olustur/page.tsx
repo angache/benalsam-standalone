@@ -242,7 +242,7 @@ export default function CreateListingPage() {
         geolocation: location.coordinates?.lat && location.coordinates?.lng ? `POINT(${location.coordinates.lng} ${location.coordinates.lat})` : null
       }
 
-      console.log('📤 [SUBMIT] Creating listing:', listingData)
+      logger.debug('[CreateListing] Creating listing', { listingData })
 
       // Call the service (handles upload + create + polling)
       const result = await createListingWithUploadService(

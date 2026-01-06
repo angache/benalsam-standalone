@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Sparkles, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import type { Listing } from '@/types'
 
 export default function PersonalizedSection() {
   const { user } = useAuth()
@@ -75,7 +76,7 @@ export default function PersonalizedSection() {
 
         {/* Listings Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          {listings.slice(0, 8).map((listing: any) => (
+          {listings.slice(0, 8).map((listing: Listing) => (
             <div key={listing.id} className="relative">
               <div className="absolute top-2 left-2 z-10 bg-purple-600 text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1">
                 <Sparkles className="w-2.5 h-2.5" />

@@ -217,7 +217,7 @@ export const createListing = async (
             throw new UploadError(ERROR_MESSAGES.VALIDATION.IMAGE_TOO_LARGE, { fileName: file.name, size: file.size });
           }
           
-          if (!UPLOAD_CONFIG.VALIDATION.ALLOWED_MIME_TYPES.includes(file.type as any)) {
+          if (!UPLOAD_CONFIG.VALIDATION.ALLOWED_MIME_TYPES.includes(file.type)) {
             throw new UploadError(ERROR_MESSAGES.VALIDATION.INVALID_IMAGE_TYPE, { fileName: file.name, type: file.type });
           }
           
@@ -388,7 +388,7 @@ export const updateListing = async (
     
     // For now, use direct database update until Listing Service supports updates
     // TODO: Implement update endpoint in Listing Service
-    const dbUpdates: any = {
+    const dbUpdates: Record<string, unknown> = {
       title: updates.title,
       description: updates.description,
       category: updates.category,
@@ -468,7 +468,7 @@ export const updateListingStatus = async (
   }
 
   try {
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       status: status,
       updated_at: new Date().toISOString()
     };

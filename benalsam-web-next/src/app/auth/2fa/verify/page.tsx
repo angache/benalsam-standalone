@@ -161,7 +161,7 @@ function TwoFactorVerifyPageContent() {
       // Redirect to intended page or home
       router.push(redirectTo)
       router.refresh()
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('[2FAVerify] 2FA verification error', { error })
       setAttempts((prev) => prev + 1)
       setError('Doğrulama sırasında bir hata oluştu')

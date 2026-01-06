@@ -2,6 +2,7 @@
 // PERFORMANCE CONFIG UTILITY
 // ===========================
 
+import { logger } from '@/utils/production-logger';
 import { PerformanceConfig, MetricsCollectorConfig, BackendServiceConfig, AnalyticsServiceConfig } from '../types';
 
 // Main performance configuration
@@ -123,13 +124,13 @@ export const validateConfig = (config: PerformanceConfig): boolean => {
 
   for (const field of requiredFields) {
     if (config[field as keyof PerformanceConfig] === undefined) {
-      console.error(`❌ Missing required config field: ${field}`);
+      logger.error('[PerformanceConfig] Missing required config field', { field });
       return false;
     }
   }
 
   if (config.LCP_THRESHOLD <= 0 || config.INP_THRESHOLD <= 0 || config.CLS_THRESHOLD <= 0) {
-    console.error('❌ Invalid threshold values in config');
+    logger.error('[PerformanceConfig] Invalid threshold values', { config });
     return false;
   }
 
@@ -144,7 +145,7 @@ export const updateConfig = (
   const newConfig = { ...currentConfig, ...updates };
   
   if (!validateConfig(newConfig)) {
-    console.warn('⚠️ Invalid config updates, using current config');
+    logger.warn('[PerformanceConfig] Invalid config updates, using current config');
     return currentConfig;
   }
   

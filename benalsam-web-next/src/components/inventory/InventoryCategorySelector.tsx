@@ -146,7 +146,14 @@ const InventoryCategorySelector: React.FC<InventoryCategorySelectorProps> = ({
           const parsedCache = JSON.parse(cachedCategories)
           if (parsedCache.data && Array.isArray(parsedCache.data) && parsedCache.data.length > 0) {
             // Recursive function to map children/subcategories at all levels
-            const mapSubcategories = (cat: any): CategoryWithChildren => {
+            interface CategoryNode {
+              id: string | number
+              name: string
+              children?: CategoryNode[]
+              subcategories?: CategoryNode[]
+              [key: string]: unknown
+            }
+            const mapSubcategories = (cat: CategoryNode): CategoryWithChildren => {
               const subcategories = cat.children || cat.subcategories || []
               return {
                 ...cat,

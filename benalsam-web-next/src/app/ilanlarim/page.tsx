@@ -13,6 +13,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyStateList } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
+import type { Listing } from '@/types'
 
 // Skeleton card for listing
 const SkeletonCard = () => (
@@ -51,12 +52,12 @@ const MyListingsSkeleton = () => (
 const MyListingsPage = () => {
   const router = useRouter()
   const { user, isLoading: loadingAuth } = useAuth()
-  const [myListings, setMyListings] = useState<any[]>([])
+  const [myListings, setMyListings] = useState<Partial<Listing>[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const [dopingModalOpen, setDopingModalOpen] = useState(false)
-  const [selectedListingForDoping, setSelectedListingForDoping] = useState<any | null>(null)
+  const [selectedListingForDoping, setSelectedListingForDoping] = useState<Partial<Listing> | null>(null)
 
   useEffect(() => {
     if (loadingAuth || !user) return
@@ -190,7 +191,7 @@ const MyListingsPage = () => {
     }
   }
 
-  const handleDopingClick = (listing: any) => {
+  const handleDopingClick = (listing: Partial<Listing>) => {
     setSelectedListingForDoping(listing)
     setDopingModalOpen(true)
   }

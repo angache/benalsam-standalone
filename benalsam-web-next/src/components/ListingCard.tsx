@@ -80,7 +80,7 @@ interface ListingCardProps {
   listing: Listing
   size?: 'small' | 'normal' | 'large'
   onToggleFavorite?: (listingId: string) => void
-  currentUser?: any
+  currentUser?: { id: string; name?: string; avatar_url?: string | null }
   isFavoritedOverride?: boolean
   priority?: boolean
   showActions?: boolean
@@ -90,7 +90,7 @@ interface ListingCardProps {
   onToggleStatus?: (listing: Listing) => void
   isDeleting?: boolean
   getStatusBadge?: (listing: Listing) => React.ReactNode
-  getPremiumBadges?: (listing: Listing) => Array<{ icon: React.ComponentType<any>, label: string, color: string }>
+  getPremiumBadges?: (listing: Listing) => Array<{ icon: React.ComponentType<{ className?: string }>, label: string, color: string }>
   onDopingClick?: (listing: Listing) => void
   onMarkAsCompleted?: (listing: Listing) => void
 }
@@ -194,7 +194,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({
     }
 
     // Find categories by IDs in category_path
-    const findCategoryById = (id: number, cats: any[]): any => {
+    interface CategoryNode {
+      id: string | number
+      name: string
+      subcategories?: CategoryNode[]
+    }
+    const findCategoryById = (id: number, cats: CategoryNode[]): CategoryNode | null => {
       for (const cat of cats) {
         if (Number(cat.id) === id) return cat
         if (cat.subcategories && cat.subcategories.length > 0) {

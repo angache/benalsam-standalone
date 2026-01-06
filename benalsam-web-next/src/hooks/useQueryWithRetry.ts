@@ -79,7 +79,10 @@ export function useQueryWithRetry<TData = unknown, TError = Error>(
 
       // Check if error is a response with 5xx status
       if (error && typeof error === 'object' && 'status' in error) {
-        const status = (error as any).status
+        interface ErrorWithStatus extends Error {
+          status?: number;
+        }
+        const status = (error as ErrorWithStatus).status
         if (status >= 500 && status < 600) {
           return true
         }

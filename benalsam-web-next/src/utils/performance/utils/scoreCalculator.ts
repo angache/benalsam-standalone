@@ -105,7 +105,7 @@ class ScoreCalculator {
     const thresholds = CORE_WEB_VITALS_THRESHOLDS[name as keyof typeof CORE_WEB_VITALS_THRESHOLDS];
     
     if (!thresholds) {
-      return 'unknown' as any;
+      return 'poor' as 'good' | 'needs-improvement' | 'poor';
     }
 
     if (value <= thresholds.good) return 'good';

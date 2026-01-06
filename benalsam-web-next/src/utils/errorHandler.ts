@@ -1,5 +1,6 @@
 // Unified Error Handling System
 import { toast } from '@/components/ui/use-toast';
+import { logger } from '@/utils/production-logger';
 import { 
   ValidationError, 
   UploadError, 
@@ -288,9 +289,9 @@ export class UnifiedErrorHandler {
     };
 
     if (this.getLogLevel(error) === 'error') {
-      console.error('🚨 Error:', logData);
+      logger.error('[ErrorHandler] Error occurred', logData);
     } else {
-      console.warn('⚠️ Warning:', logData);
+      logger.warn('[ErrorHandler] Warning occurred', logData);
     }
   }
 
@@ -300,7 +301,7 @@ export class UnifiedErrorHandler {
   private reportToService(error: Error, context: ErrorContext): void {
     // TODO: Implement Sentry or other error reporting service
     // For now, just log to console
-    console.log('📊 Error reported to service:', {
+    logger.debug('[ErrorHandler] Error reported to service', {
       error: error.name,
       message: error.message,
       context: context.component,

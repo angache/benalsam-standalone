@@ -60,7 +60,7 @@ export interface JobStatusResponse {
     jobId: string;
     status: 'pending' | 'processing' | 'completed' | 'failed';
     progress: number;
-    result: any;
+    result: Record<string, unknown> | null;
     error: string | null;
     createdAt: string;
     updatedAt: string;

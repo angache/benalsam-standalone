@@ -9,10 +9,27 @@ import { searchUnsplashImages } from '@/services/unsplashService'
 import { Loader2, Search, CheckCircle } from 'lucide-react'
 import OptimizedImage from '@/components/OptimizedImage'
 
+interface UnsplashImage {
+  id: string
+  urls: {
+    small: string
+    regular?: string
+    full?: string
+    thumb?: string
+  }
+  description?: string | null
+  user: {
+    name: string
+    username?: string
+  }
+  width?: number
+  height?: number
+}
+
 interface StockImageSearchModalProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  onImagesSelect: (images: any[]) => void
+  onImagesSelect: (images: UnsplashImage[]) => void
   initialSearchQuery?: string
 }
 
@@ -23,8 +40,8 @@ export default function StockImageSearchModal({
   initialSearchQuery = '' 
 }: StockImageSearchModalProps) {
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery)
-  const [images, setImages] = useState<any[]>([])
-  const [selectedImages, setSelectedImages] = useState<any[]>([])
+  const [images, setImages] = useState<UnsplashImage[]>([])
+  const [selectedImages, setSelectedImages] = useState<UnsplashImage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [hasSearched, setHasSearched] = useState(false)
 
@@ -58,10 +75,11 @@ export default function StockImageSearchModal({
           description: 'Farklı bir arama terimi deneyin.'
         })
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Bilinmeyen bir hata oluştu'
       toast({
         title: 'Arama Hatası',
-        description: error.message,
+        description: errorMessage,
         variant: 'destructive'
       })
     } finally {
@@ -69,7 +87,7 @@ export default function StockImageSearchModal({
     }
   }, [searchQuery])
 
-  const toggleImageSelection = (image: any) => {
+  const toggleImageSelection = (image: UnsplashImage) => {
     setSelectedImages(prev => {
       if (prev.find(img => img.id === image.id)) {
         return prev.filter(img => img.id !== image.id)

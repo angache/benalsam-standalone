@@ -154,7 +154,7 @@ export const clearListingHistory = () => {
   }
 };
 
-export const saveLastSearch = (searchCriteria: any) => {
+export const saveLastSearch = (searchCriteria: Record<string, unknown>) => {
   if (!searchCriteria) return;
   
   try {

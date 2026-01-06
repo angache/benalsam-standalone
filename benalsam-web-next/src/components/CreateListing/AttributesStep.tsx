@@ -11,6 +11,38 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Shield } from 'lucide-react'
 import { logger } from '@/utils/production-logger'
+import type { Category } from '@/services/categoryService'
+
+// Type definitions
+interface CategoryAttributeOption {
+  value: string
+  label: string
+  description: string
+}
+
+interface CategoryAttribute {
+  key: string
+  label: string
+  type: 'text' | 'textarea' | 'select' | 'checkbox' | 'checkbox-grid'
+  required: boolean
+  placeholder?: string
+  options?: CategoryAttributeOption[]
+}
+
+interface CategoryWithAttributes extends Category {
+  category_attributes?: Array<{
+    key: string
+    label: string
+    type: string
+    required: boolean
+    options?: string
+  }>
+  children?: CategoryWithAttributes[]
+}
+
+interface AttributesFormData {
+  [key: string]: string | string[] | boolean | undefined
+}
 
 // Kategoriye özel attribute tanımları
 const categoryAttributes = {
@@ -208,8 +240,8 @@ const categoryAttributes = {
 }
 
 interface AttributesStepProps {
-  formData: Record<string, any>
-  onChange: (key: string, value: any) => void
+  formData: AttributesFormData
+  onChange: (key: string, value: string | string[] | boolean) => void
   onNext: () => void
   onBack: () => void
   selectedCategoryId?: string | null
@@ -233,11 +265,11 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
         return []
       }
       
-      const parsed = JSON.parse(raw)
-      const categories: any[] = parsed?.data || []
+      const parsed = JSON.parse(raw) as { data?: CategoryWithAttributes[] }
+      const categories: CategoryWithAttributes[] = parsed?.data || []
       logger.debug('[AttributesStep] Total categories', { count: categories.length })
       
-      const findById = (nodes: any[]): any | null => {
+      const findById = (nodes: CategoryWithAttributes[]): CategoryWithAttributes | null => {
         for (const n of nodes) {
           if (String(n.id) === String(selectedCategoryId)) {
             logger.debug('[AttributesStep] Found matching category', { 
@@ -272,7 +304,7 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
     if (categoryAttributesFromBackend && categoryAttributesFromBackend.length > 0) {
       logger.debug('[AttributesStep] Using backend attributes', { count: categoryAttributesFromBackend.length })
       // Backend attribute'larını component'in beklediği formata çevir
-      return categoryAttributesFromBackend.map((attr: any) => {
+      return categoryAttributesFromBackend.map((attr): CategoryAttribute => {
         const parsedOptions = attr.options ? JSON.parse(attr.options) : []
         return {
           key: attr.key,
@@ -314,7 +346,7 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
     return []
   }, [categoryAttributesFromBackend, selectedCategoryName])
 
-  const handleAttributeChange = (key: string, value: any) => {
+  const handleAttributeChange = (key: string, value: string | string[] | boolean) => {
     logger.debug('[AttributesStep] Attribute changed', { key, value })
     onChange(key, value)
   }
@@ -335,7 +367,7 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
     return true
   }, [formData, attributes])
 
-  const renderAttributeField = (attr: any) => {
+  const renderAttributeField = (attr: CategoryAttribute) => {
     const value = formData[attr.key] || ''
 
     switch (attr.type) {
@@ -419,7 +451,7 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
               <span>{attr.label} (Opsiyonel)</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {attr.options.map((option: any) => (
+              {attr.options?.map((option: CategoryAttributeOption) => (
                 <label
                   key={option.value}
                   className={`flex items-start gap-3 p-3 rounded-lg border-2 transition-colors cursor-pointer ${
@@ -451,7 +483,7 @@ export default function AttributesStep({ formData, onChange, onNext, onBack, sel
                 </span>
               ) : (
                 selectedValues.filter(c => c !== 'any').map((selectedValue) => {
-                  const option = attr.options.find((opt: any) => opt.value === selectedValue)
+                  const option = attr.options?.find((opt: CategoryAttributeOption) => opt.value === selectedValue)
                   return (
                     <span 
                       key={selectedValue}

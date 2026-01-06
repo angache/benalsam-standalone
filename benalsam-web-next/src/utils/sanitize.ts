@@ -86,7 +86,7 @@ export const sanitizeUrl = (url: string | null | undefined): string => {
  * Sanitize object - recursively sanitizes all string values
  * Use for: API responses, user-provided objects
  */
-export const sanitizeObject = <T extends Record<string, any>>(obj: T): T => {
+export const sanitizeObject = <T extends Record<string, unknown>>(obj: T): T => {
   if (!obj || typeof obj !== 'object') return obj
   
   const sanitized = { ...obj }
@@ -95,9 +95,9 @@ export const sanitizeObject = <T extends Record<string, any>>(obj: T): T => {
     const value = sanitized[key]
     
     if (typeof value === 'string') {
-      sanitized[key] = sanitizeText(value) as any
+      sanitized[key] = sanitizeText(value as string) as T[Extract<keyof T, string>]
     } else if (typeof value === 'object' && value !== null) {
-      sanitized[key] = sanitizeObject(value) as any
+      sanitized[key] = sanitizeObject(value as Record<string, unknown>) as T[Extract<keyof T, string>]
     }
   }
   

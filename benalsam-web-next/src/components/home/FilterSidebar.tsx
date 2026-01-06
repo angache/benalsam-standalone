@@ -40,7 +40,7 @@ export default function FilterSidebar({
   const [localFilters, setLocalFilters] = useState<FilterState>(filters)
 
   // Debounce hook for price inputs
-  const useDebounce = (value: any, delay: number) => {
+  const useDebounce = <T,>(value: T, delay: number): T => {
     const [debouncedValue, setDebouncedValue] = useState(value)
 
     useEffect(() => {
@@ -94,7 +94,7 @@ export default function FilterSidebar({
   // Get root categories (parent_id is null)
   const rootCategories = categories?.filter(cat => !cat.parent_id) || []
 
-  const handleFilterChange = (key: keyof FilterState, value: any) => {
+  const handleFilterChange = (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
     const newFilters = { ...localFilters, [key]: value }
     setLocalFilters(newFilters)
     

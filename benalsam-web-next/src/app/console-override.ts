@@ -29,11 +29,11 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
     // Silently suppress all other errors in production
   }
   
-  console.warn = (...args: any[]) => {
+  console.warn = (...args: unknown[]) => {
     // Suppress ALL warnings in production
   }
   
-  console.log = (...args: any[]) => {
+  console.log = (...args: unknown[]) => {
     // Suppress ALL logs in production
   }
 }

@@ -19,7 +19,7 @@ interface SelectedDoping extends DopingOption {
 interface DopingModalProps {
   isOpen: boolean
   onClose: () => void
-  listing: any | null
+  listing: Partial<{ id: string; title: string; [key: string]: unknown }> | null
   onSuccess: () => void
 }
 

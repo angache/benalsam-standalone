@@ -25,8 +25,8 @@ interface ReviewStepProps {
       price: string
       urgency: 'normal' | 'urgent'
     }
-    attributes: Record<string, any>
-    images: any[]
+    attributes: Record<string, string | string[] | boolean>
+    images: Array<{ file?: File; preview?: string; uri?: string; name?: string; isUploaded?: boolean }>
     mainImageIndex: number
     location: {
       city: string
@@ -42,7 +42,7 @@ interface ReviewStepProps {
 }
 
 const ReviewItem = ({ icon: Icon, label, value, children }: { 
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   label: string
   value?: string
   children?: React.ReactNode

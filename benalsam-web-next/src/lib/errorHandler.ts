@@ -6,6 +6,7 @@
  */
 
 import { toast } from '@/components/ui/use-toast';
+import { logger } from '@/utils/production-logger';
 import { ApiError } from './apiClient';
 import { errorHandler, ErrorContext } from '@/utils/errorHandler';
 
@@ -62,7 +63,7 @@ export class ErrorHandler {
     }
 
     if (this.options.logToConsole) {
-      console.error(`🔴 API Error${context ? ` (${context})` : ''}:`, error);
+      logger.error('[ErrorHandler] API Error', { context, error });
     }
   }
 
@@ -179,7 +180,7 @@ export class ErrorHandler {
   /**
    * Format error message
    */
-  private formatErrorMessage(error: any, context?: string): string {
+  private formatErrorMessage(error: unknown, context?: string): string {
     if (typeof error === 'string') {
       return error;
     }
@@ -200,11 +201,11 @@ export class ErrorHandler {
   /**
    * Handle network errors
    */
-  handleNetworkError(error: any, context?: string): void {
+  handleNetworkError(error: unknown, context?: string): void {
     const message = 'İnternet bağlantınızı kontrol edin ve tekrar deneyin.';
     
     if (this.options.logToConsole) {
-      console.error(`🌐 Network Error${context ? ` (${context})` : ''}:`, error);
+      logger.error('[ErrorHandler] Network Error', { context, error });
     }
 
     if (this.options.showToast) {
@@ -223,7 +224,7 @@ export class ErrorHandler {
     const message = 'İşlem zaman aşımına uğradı. Lütfen tekrar deneyin.';
     
     if (this.options.logToConsole) {
-      console.error(`⏰ Timeout Error${context ? ` (${context})` : ''}`);
+      logger.error('[ErrorHandler] Timeout Error', { context });
     }
 
     if (this.options.showToast) {

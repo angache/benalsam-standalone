@@ -177,20 +177,26 @@ export const fetchUserProfile = async (userId: string): Promise<Profile | null> 
       .single();
 
     logger.debug('[ProfileService] Profile fetch promise created, racing with timeout...');
-    let result: { data: any; error: any; status: number } | null = null;
+    interface ProfileFetchResult {
+      data: { id: string; name: string; avatar_url?: string | null; [key: string]: unknown } | null
+      error: { message?: string; code?: string; [key: string]: unknown } | null
+      status: number
+    }
+    
+    let result: ProfileFetchResult | null = null;
     
     try {
       result = await Promise.race([
         fetchPromise,
         timeoutPromise
-      ]) as { data: any; error: any; status: number };
+      ]) as ProfileFetchResult;
       
       // Clear timeout on success
       if (timeoutId) {
         clearTimeout(timeoutId);
         timeoutId = null;
       }
-    } catch (timeoutError: any) {
+    } catch (timeoutError: unknown) {
       // Clear timeout
       if (timeoutId) {
         clearTimeout(timeoutId);

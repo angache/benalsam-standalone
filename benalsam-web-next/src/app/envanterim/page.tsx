@@ -51,7 +51,7 @@ const InventoryPage = () => {
           setInventoryItems(items || [])
         })
         .catch((error) => {
-          console.error('Error fetching inventory:', error)
+          logger.error('[InventoryPage] Error fetching inventory', { error })
           toast({
             title: 'Hata',
             description: 'Envanter yüklenirken bir sorun oluştu.',
@@ -95,8 +95,7 @@ const InventoryPage = () => {
 
   const handleDelete = async (itemId: string) => {
     try {
-      console.log('🗑️ [InventoryPage] Deleting item with ID:', itemId)
-      console.log('🗑️ [InventoryPage] Current user ID:', user.id)
+      logger.debug('[InventoryPage] Deleting item', { itemId, userId: user.id })
 
       const success = await deleteInventoryItem(itemId, user.id)
       if (success) {
@@ -113,7 +112,7 @@ const InventoryPage = () => {
         })
       }
     } catch (error) {
-      console.error('Error deleting inventory item:', error)
+      logger.error('[InventoryPage] Error deleting inventory item', { error })
       toast({
         title: 'Hata',
         description: 'Ürün silinirken bir sorun oluştu.',

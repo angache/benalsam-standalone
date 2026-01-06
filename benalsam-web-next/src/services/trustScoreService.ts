@@ -48,10 +48,35 @@ export interface TrustScoreCalculation {
   progressToNextLevel: number
 }
 
+// Profile type for trust score calculation
+interface ProfileForTrustScore {
+  full_name?: string
+  first_name?: string
+  name?: string
+  bio?: string | null
+  avatar_url?: string | null
+  location?: string | null
+  province?: string | null
+  district?: string | null
+  phone?: string | null
+  email_confirmed_at?: string | null
+  is_verified?: boolean
+  phone_verified?: boolean
+  user_statistics?: {
+    accepted_offers?: number
+    avg_response_time_hours?: number
+  }
+  average_rating?: number
+  total_reviews?: number
+  created_at?: string
+  social_links?: Record<string, string | null>
+  is_premium?: boolean
+}
+
 /**
  * Calculate profile completeness score (0-100)
  */
-function calculateProfileCompleteness(profile: any): number {
+function calculateProfileCompleteness(profile: ProfileForTrustScore): number {
   let score = 0
   const fields = [
     profile?.full_name || profile?.first_name || profile?.name,
@@ -70,7 +95,7 @@ function calculateProfileCompleteness(profile: any): number {
 /**
  * Calculate email verification score (0 or 100)
  */
-function calculateEmailVerification(profile: any): number {
+function calculateEmailVerification(profile: ProfileForTrustScore): number {
   // Check if email is verified (from auth.users or profile)
   return profile?.email_confirmed_at || profile?.is_verified ? 100 : 0
 }
@@ -78,7 +103,7 @@ function calculateEmailVerification(profile: any): number {
 /**
  * Calculate phone verification score (0 or 100)
  */
-function calculatePhoneVerification(profile: any): number {
+function calculatePhoneVerification(profile: ProfileForTrustScore): number {
   return profile?.phone_verified ? 100 : 0
 }
 
@@ -112,7 +137,7 @@ async function calculateListingsScore(userId: string): Promise<number> {
 /**
  * Calculate completed trades score
  */
-function calculateCompletedTradesScore(profile: any): number {
+function calculateCompletedTradesScore(profile: ProfileForTrustScore): number {
   const completedTrades = profile?.user_statistics?.accepted_offers || 0
   
   // Max score at 20+ trades
@@ -123,7 +148,7 @@ function calculateCompletedTradesScore(profile: any): number {
 /**
  * Calculate reviews score based on rating and review count
  */
-function calculateReviewsScore(profile: any): number {
+function calculateReviewsScore(profile: ProfileForTrustScore): number {
   const rating = profile?.average_rating || 0
   const reviewCount = profile?.total_reviews || 0
   
@@ -137,7 +162,7 @@ function calculateReviewsScore(profile: any): number {
 /**
  * Calculate response time score
  */
-function calculateResponseTimeScore(profile: any): number {
+function calculateResponseTimeScore(profile: ProfileForTrustScore): number {
   const avgResponseTime = profile?.user_statistics?.avg_response_time_hours || 999
   
   // Lower response time = higher score
@@ -151,7 +176,7 @@ function calculateResponseTimeScore(profile: any): number {
 /**
  * Calculate account age score
  */
-function calculateAccountAgeScore(profile: any): number {
+function calculateAccountAgeScore(profile: ProfileForTrustScore): number {
   if (!profile?.created_at) return 0
   
   const accountAgeDays = (Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24)
@@ -164,7 +189,7 @@ function calculateAccountAgeScore(profile: any): number {
 /**
  * Calculate social links score
  */
-function calculateSocialLinksScore(profile: any): number {
+function calculateSocialLinksScore(profile: ProfileForTrustScore): number {
   const socialLinks = profile?.social_links || {}
   const linkCount = Object.keys(socialLinks).filter(key => socialLinks[key]).length
   
@@ -306,7 +331,7 @@ export async function calculateTrustScore(userId: string): Promise<TrustScoreCal
       nextLevelScore,
       progressToNextLevel,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[TrustScoreService] Error calculating trust score', { error })
     throw error
   }

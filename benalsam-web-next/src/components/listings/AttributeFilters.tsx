@@ -68,7 +68,14 @@ export function AttributeFilters({
       const categories = parsed.data || parsed
       
       // Find the selected category
-      const findCategory = (cats: any[], id: number): any => {
+      interface CategoryNode {
+        id: number | string
+        name: string
+        subcategories?: CategoryNode[]
+        category_attributes?: Array<{ key: string; label: string; type: string; options?: unknown }>
+        attributes?: Array<{ key: string; label: string; type: string; options?: unknown }>
+      }
+      const findCategory = (cats: CategoryNode[], id: number): CategoryNode | null => {
         for (const cat of cats) {
           if (cat.id === id) return cat
           if (cat.subcategories) {
@@ -94,7 +101,7 @@ export function AttributeFilters({
         const result: Record<string, string[]> = {}
         const labels: Record<string, string> = {}
         
-        categoryAttrs.forEach((attr: any) => {
+        categoryAttrs.forEach((attr: { key: string; label: string; type: string; options?: string | unknown[] }) => {
           // Parse options if it's a JSON string
           let options = attr.options
           if (typeof options === 'string') {

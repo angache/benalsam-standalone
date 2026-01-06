@@ -4,10 +4,14 @@ import { createContext, useContext, useEffect, useState, useRef, ReactNode } fro
 import { useRouter } from 'next/navigation'
 import type { LoginCredentials, User } from '@/types/auth'
 import { supabase } from '@/lib/supabase'
-import type { Session } from '@supabase/supabase-js'
+import type { Session, User as SupabaseUser, AuthError } from '@supabase/supabase-js'
 import { logger } from '@/utils/production-logger'
 import { realtimeManager } from '@/lib/realtime-manager'
 import { runSupabaseDiagnostics } from '@/utils/supabaseDiagnostics'
+
+// Type helpers for Supabase auth responses
+type GetUserResponse = { data: { user: SupabaseUser | null }, error: AuthError | null }
+type GetSessionResponse = { data: { session: Session | null }, error: AuthError | null }
 
 interface AuthContextType {
   session: Session | null
@@ -15,7 +19,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   initialized: boolean
-  login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string; requires2FA?: boolean; user?: any }>
+  login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string; requires2FA?: boolean; user?: SupabaseUser }>
   logout: () => Promise<void>
 }
 
@@ -68,28 +72,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const getUserStart = Date.now()
         logger.debug('[AuthContext] Attempting getUser() with 2s timeout...')
         
-        let validatedUser: any = null
-        let userError: any = null
+        let validatedUser: SupabaseUser | null = null
+        let userError: AuthError | null = null
         
         try {
           const getUserPromise = supabase.auth.getUser()
-          const timeoutPromise = new Promise((_, reject) => 
+          const timeoutPromise = new Promise<GetUserResponse>((_, reject) => 
             setTimeout(() => reject(new Error('getUser timeout after 2s')), 2000)
           )
           
-          const getUserResult = await Promise.race([getUserPromise, timeoutPromise]) as any
+          const getUserResult = await Promise.race([getUserPromise, timeoutPromise]) as GetUserResponse
           
-          validatedUser = getUserResult?.data?.user
-          userError = getUserResult?.error
+          validatedUser = getUserResult?.data?.user ?? null
+          userError = getUserResult?.error ?? null
           
           logger.debug('[AuthContext] getUser() completed', {
             elapsed: `${Date.now() - getUserStart}ms`,
             hasUser: !!validatedUser,
             hasError: !!userError
           })
-        } catch (error: any) {
+        } catch (error: unknown) {
           const elapsed = Date.now() - getUserStart
-          logger.warn(`[AuthContext] getUser() timeout or error after ${elapsed}ms:`, { error: error?.message || error })
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          logger.warn(`[AuthContext] getUser() timeout or error after ${elapsed}ms:`, { error: errorMessage })
           // Timeout is not an error - just means no user or slow network
           // Continue with null user
           validatedUser = null
@@ -114,10 +119,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           try {
             const sessionResult = await Promise.race([
               supabase.auth.getSession(),
-              new Promise((resolve) => 
+              new Promise<GetSessionResponse>((resolve) => 
                 setTimeout(() => resolve({ data: { session: null }, error: null }), 2000)
               )
-            ]) as any
+            ]) as GetSessionResponse
             
             const initialSession = sessionResult?.data?.session
             // Use session if available, otherwise create minimal session from user
@@ -146,27 +151,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 } else {
                   logger.debug('[AuthContext] Could not refresh session, using user data', { error: refreshError?.message })
                   // Create minimal session from user data
-                  setSession({
+                  // Create minimal session from user data
+                  const minimalSession: Session = {
                     user: validatedUser,
                     access_token: '',
                     refresh_token: '',
                     expires_at: Math.floor(Date.now() / 1000) + 3600, // 1 hour
                     expires_in: 3600,
                     token_type: 'bearer'
-                  } as any)
+                  }
+                  setSession(minimalSession)
                 }
               }
             } else {
               // getSession() timed out or failed, create minimal session from user
               logger.warn('[AuthContext] getSession() timed out, using user data only')
-              setSession({
+              const minimalSession: Session = {
                 user: validatedUser,
                 access_token: '',
                 refresh_token: '',
                 expires_at: Math.floor(Date.now() / 1000) + 3600, // 1 hour
                 expires_in: 3600,
                 token_type: 'bearer'
-              } as any)
+              }
+              setSession(minimalSession)
             }
             
             logger.debug('[AuthContext] Fetching user profile...', { userId: validatedUser.id })
@@ -177,17 +185,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               logger.error('[AuthContext] Failed to fetch user profile', { error: profileError })
             }
             sessionInitializedRef.current = true
-          } catch (sessionError: any) {
-            logger.error('[AuthContext] Error getting session:', { error: sessionError })
+          } catch (sessionError: unknown) {
+            const errorMessage = sessionError instanceof Error ? sessionError.message : String(sessionError)
+            logger.error('[AuthContext] Error getting session:', { error: errorMessage })
             // Even if session fails, we have user, so create minimal session
-            setSession({
+            const minimalSession: Session = {
               user: validatedUser,
               access_token: '',
               refresh_token: '',
               expires_at: Math.floor(Date.now() / 1000) + 3600,
               expires_in: 3600,
               token_type: 'bearer'
-            } as any)
+            }
+            setSession(minimalSession)
             await fetchUserProfile(validatedUser.id)
             sessionInitializedRef.current = true
           }
@@ -200,10 +210,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const sessionStart = Date.now()
             const sessionResult = await Promise.race([
               supabase.auth.getSession(),
-              new Promise((resolve) => 
+              new Promise<GetSessionResponse>((resolve) => 
                 setTimeout(() => resolve({ data: { session: null }, error: null }), 2000)
               )
-            ]) as any
+            ]) as GetSessionResponse
             
             const fallbackSession = sessionResult?.data?.session
             const sessionTime = Date.now() - sessionStart
@@ -257,8 +267,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               setSession(null)
               setUser(null)
             }
-          } catch (sessionError: any) {
-            logger.error('[AuthContext] getSession() fallback also failed:', { error: sessionError })
+          } catch (sessionError: unknown) {
+            const errorMessage = sessionError instanceof Error ? sessionError.message : String(sessionError)
+            logger.error('[AuthContext] getSession() fallback also failed:', { error: errorMessage })
             setSession(null)
             setUser(null)
           }
@@ -281,10 +292,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           logger.warn('[AuthContext] Initialization skipped - component unmounted')
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        const errorStack = error instanceof Error ? error.stack : undefined
         logger.error('[AuthContext] Initialize error', {
-          error: error?.message || String(error),
-          stack: error?.stack,
+          error: errorMessage,
+          stack: errorStack,
           totalElapsed: `${Date.now() - startTime}ms`
         })
         if (isSubscribed) {
@@ -340,20 +353,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           
           // Validate user with getUser() for security, but with timeout protection
           // Login is critical, so we should use the session even if getUser() times out
-          let validatedUser: any = null
-          let validateError: any = null
+          let validatedUser: SupabaseUser | null = null
+          let validateError: AuthError | null = null
           
           try {
             const getUserPromise = supabase.auth.getUser()
-            const timeoutPromise = new Promise((_, reject) => 
+            const timeoutPromise = new Promise<GetUserResponse>((_, reject) => 
               setTimeout(() => reject(new Error('getUser timeout after 2s')), 2000)
             )
             
-            const getUserResult = await Promise.race([getUserPromise, timeoutPromise]) as any
-            validatedUser = getUserResult?.data?.user
-            validateError = getUserResult?.error
-          } catch (error: any) {
-            logger.warn('[AuthContext] getUser() timeout during login, using session anyway:', { error: error?.message })
+            const getUserResult = await Promise.race([getUserPromise, timeoutPromise]) as GetUserResponse
+            validatedUser = getUserResult?.data?.user ?? null
+            validateError = getUserResult?.error ?? null
+          } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : String(error)
+            logger.warn('[AuthContext] getUser() timeout during login, using session anyway:', { error: errorMessage })
             // Timeout is not critical - we have a valid session from SIGNED_IN event
             // Use the user from the session
             validatedUser = currentSession.user
@@ -619,10 +633,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })
         fetchedUserIds.current.delete(userId)
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      const errorStack = error instanceof Error ? error.stack : undefined
       logger.error('[AuthContext] Error fetching user profile', { 
-        error: error?.message || String(error),
-        stack: error?.stack,
+        error: errorMessage,
+        stack: errorStack,
         userId,
         totalElapsed: `${Date.now() - fetchStart}ms`
       })
@@ -662,7 +678,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setTimeout(() => resolve({ data: { session: null }, error: null }), 1000)
           )
           
-          const verifyResult = await Promise.race([getSessionPromise, timeoutPromise]) as any
+          const verifyResult = await Promise.race([getSessionPromise, timeoutPromise]) as GetSessionResponse
           const verifySession = verifyResult?.data?.session
           
           if (!verifySession) {
@@ -671,10 +687,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await new Promise(resolve => setTimeout(resolve, 200))
             try {
               const retryPromise = supabase.auth.getSession()
-              const retryTimeoutPromise = new Promise((resolve) => 
+              const retryTimeoutPromise = new Promise<GetSessionResponse>((resolve) => 
                 setTimeout(() => resolve({ data: { session: null }, error: null }), 1000)
               )
-              const retryResult = await Promise.race([retryPromise, retryTimeoutPromise]) as any
+              const retryResult = await Promise.race([retryPromise, retryTimeoutPromise]) as GetSessionResponse
               const retrySession = retryResult?.data?.session
               if (retrySession) {
                 setSession(retrySession)
@@ -750,9 +766,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       logger.warn('[AuthContext] Login successful but no session returned')
       return { success: false, error: 'Giriş yapılırken bir hata oluştu' }
-    } catch (error: any) {
-      logger.error('[AuthContext] Login exception', { error: error.message, stack: error.stack })
-      return { success: false, error: error.message || 'Giriş yapılırken bir hata oluştu' }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Giriş yapılırken bir hata oluştu'
+      const errorStack = error instanceof Error ? error.stack : undefined
+      logger.error('[AuthContext] Login exception', { error: errorMessage, stack: errorStack })
+      return { success: false, error: errorMessage }
     } finally {
       setLoading(false)
     }
@@ -769,7 +787,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setTimeout(() => reject(new Error('Logout timeout')), 5000)
       )
       
-      const { error } = await Promise.race([signOutPromise, timeoutPromise]) as any
+      const signOutResult = await Promise.race([signOutPromise, timeoutPromise]) as { error: AuthError | null }
+      const { error } = signOutResult
       
       if (error) {
         logger.error('[AuthContext] Logout error', { error })

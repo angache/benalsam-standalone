@@ -370,7 +370,7 @@ export function loadChatHistory(): ChatMessage[] {
       if (saved) {
         const parsed = JSON.parse(saved)
         // Convert timestamp strings back to Date objects
-        return parsed.map((msg: any) => ({
+        return parsed.map((msg: { id?: string; role?: string; content?: string; timestamp?: string | Date; action?: unknown; relatedQuestions?: string[] }) => ({
           ...msg,
           timestamp: new Date(msg.timestamp)
         }))

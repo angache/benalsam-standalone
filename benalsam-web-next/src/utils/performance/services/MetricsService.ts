@@ -2,6 +2,7 @@
 // METRICS SERVICE
 // ===========================
 
+import { logger } from '@/utils/production-logger';
 import { Metric, PerformanceMetrics, MetricsState, PerformanceScore } from '../types';
 import { PERFORMANCE_CONFIG } from '../utils/config';
 import scoreCalculator from '../utils/scoreCalculator';
@@ -106,7 +107,7 @@ class MetricsService {
 
   forceSend(route: string): void {
     const score = this.calculateScore();
-    console.log('⏰ Force sending performance data after timeout');
+    logger.debug('[MetricsService] Force sending performance data after timeout');
     this.sendToBackend(route);
     
     // Reset metrics after force send
@@ -177,7 +178,7 @@ class MetricsService {
       try {
         callback(state);
       } catch (error) {
-        console.error('❌ Error in metrics subscriber callback:', error);
+        logger.error('[MetricsService] Error in metrics subscriber callback', { error });
       }
     });
   }
@@ -194,12 +195,18 @@ class MetricsService {
   // Manual CLS handling
   setManualCLS(value: number): void {
     this.metrics.CLS = value;
-    (window as any).simulatedCLS = value;
+    interface WindowWithSimulatedCLS extends Window {
+      simulatedCLS?: number;
+    }
+    (window as WindowWithSimulatedCLS).simulatedCLS = value;
     this.notifySubscribers();
   }
 
   getManualCLS(): number {
-    return (window as any).simulatedCLS || 0;
+    interface WindowWithSimulatedCLS extends Window {
+      simulatedCLS?: number;
+    }
+    return (window as WindowWithSimulatedCLS).simulatedCLS || 0;
   }
 
   // Service status

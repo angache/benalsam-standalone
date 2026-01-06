@@ -11,6 +11,7 @@ import InventoryFormField from '@/components/inventory/InventoryFormField'
 import InventoryCategorySelector from '@/components/inventory/InventoryCategorySelector'
 import InventoryImageUploader from '@/components/inventory/InventoryImageUploader'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { logger } from '@/utils/production-logger'
 
 const MAX_IMAGES_INVENTORY = 3
 
@@ -114,7 +115,7 @@ const InventoryFormPage = () => {
             errors={errors}
             disabled={isUploading}
             onLeafCategorySelect={(categoryId, pathNames, pathIds) => {
-              console.log('✅ [InventoryForm] Leaf category selected:', { categoryId, pathNames, pathIds })
+              logger.debug('[InventoryForm] Leaf category selected', { categoryId, pathNames, pathIds })
               // Leaf kategori seçildiğinde, en son seviyeyi set et
               if (pathIds.length === 1) {
                 setSelectedMainCategory(pathIds[0])

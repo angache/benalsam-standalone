@@ -14,10 +14,21 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, Inbox, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { Listing } from '@/types'
 
 // Temporary fetch function - will be replaced with proper service
+interface AdvancedFilters {
+  categoryId?: number | null
+  minPrice?: number | null
+  maxPrice?: number | null
+  location?: string | null
+  search?: string | null
+  sortBy?: string
+  [key: string]: unknown
+}
+
 async function fetchListingsWithAdvancedFilters(
-  filters: any,
+  filters: AdvancedFilters,
   userId: string | undefined,
   page: number
 ) {
@@ -251,7 +262,7 @@ export function ListingsGrid() {
 
       {/* Grid */}
       <div className={gridClass}>
-        {listings.map((listing: any, index: number) => (
+        {listings.map((listing: Listing, index: number) => (
           <ListingCard
             key={`${listing.id}-${index}`}
             listing={listing}

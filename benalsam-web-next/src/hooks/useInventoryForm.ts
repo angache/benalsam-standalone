@@ -206,7 +206,13 @@ export const useInventoryForm = (itemId?: string) => {
       if (cachedCategories) {
         const parsedCache = JSON.parse(cachedCategories)
         if (parsedCache.data && Array.isArray(parsedCache.data)) {
-          const findCategoryPath = (nodes: any[], targetId: string, currentPath: string[] = []): string[] | null => {
+          interface CategoryNode {
+            id: string | number
+            name: string
+            children?: CategoryNode[]
+            subcategories?: CategoryNode[]
+          }
+          const findCategoryPath = (nodes: CategoryNode[], targetId: string, currentPath: string[] = []): string[] | null => {
             for (const node of nodes) {
               const newPath = [...currentPath, node.name]
               if (String(node.id) === targetId) {
@@ -304,7 +310,14 @@ export const useInventoryForm = (itemId?: string) => {
         const imageFiles = imagesToUpload.map((img) => img.file!).filter(Boolean)
 
         // Prepare item data
-        const itemData: any = {
+        interface InventoryItemData {
+          name: string
+          category: string
+          description: string
+          images: File[]
+          mainImageIndex: number
+        }
+        const itemData: InventoryItemData = {
           name: formData.name,
           category: categoryPath,
           description: formData.description,

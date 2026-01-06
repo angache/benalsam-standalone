@@ -4,6 +4,8 @@
  * Only active in development mode
  */
 
+import { logger } from '@/utils/production-logger';
+
 interface SourceCounts {
   elasticsearch: number
   supabase: number
@@ -17,7 +19,11 @@ let sourceCounts: SourceCounts = {
 export function incrementSourceCount(source: 'elasticsearch' | 'supabase'): void {
   if (process.env.NODE_ENV === 'development') {
     sourceCounts[source]++
-    console.log(`📊 Data Source: ${source} (ES: ${sourceCounts.elasticsearch}, Supabase: ${sourceCounts.supabase})`)
+    logger.debug('[DebugSource] Data source used', { 
+      source, 
+      elasticsearch: sourceCounts.elasticsearch, 
+      supabase: sourceCounts.supabase 
+    })
   }
 }
 
@@ -33,8 +39,15 @@ export function resetSourceCounts(): void {
 }
 
 // Export for debugging in browser console
+interface WindowWithDebugSource extends Window {
+  debugSource?: {
+    getCounts: () => SourceCounts
+    reset: () => void
+  }
+}
+
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  (window as any).debugSource = {
+  (window as WindowWithDebugSource).debugSource = {
     getCounts: getSourceCounts,
     reset: resetSourceCounts,
   }

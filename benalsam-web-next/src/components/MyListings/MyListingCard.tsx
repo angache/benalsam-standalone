@@ -24,18 +24,19 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { formatDistanceToNow } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import Image from 'next/image'
+import type { Listing } from '@/types'
 
 interface MyListingCardProps {
-  listing: any
+  listing: Partial<Listing>
   status: string
   onView: (id: string) => void
   onEdit: () => void
   onToggleStatus: (id: string, currentStatus: string) => void
   onDelete: (id: string) => void
   isDeleting: string | null
-  getStatusBadge: (listing: any) => React.ReactNode
-  getPremiumBadges: (listing: any) => { icon: any, label: string, color: string }[]
-  onDopingClick: (listing: any) => void
+  getStatusBadge: (listing: Partial<Listing>) => React.ReactNode
+  getPremiumBadges: (listing: Partial<Listing>) => { icon: React.ComponentType<{ className?: string }>, label: string, color: string }[]
+  onDopingClick: (listing: Partial<Listing>) => void
   onMarkAsCompleted: (id: string) => void
 }
 

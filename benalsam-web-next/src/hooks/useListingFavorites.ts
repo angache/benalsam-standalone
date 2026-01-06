@@ -73,16 +73,23 @@ export function useListingFavorites({
       await queryClient.cancelQueries({ queryKey: ['filtered-listings'] })
 
       // Optimistically update ALL filtered-listings queries
+      interface InfiniteQueryData {
+        pages: Array<{
+          listings: Array<{ id: string; is_favorited?: boolean; [key: string]: unknown }>
+          [key: string]: unknown
+        }>
+        [key: string]: unknown
+      }
       queryClient.setQueriesData(
         { queryKey: ['filtered-listings'] },
-        (old: any) => {
+        (old: InfiniteQueryData | undefined) => {
           if (!old) return old
 
           return {
             ...old,
-            pages: old.pages.map((page: any) => ({
+            pages: old.pages.map((page) => ({
               ...page,
-              listings: page.listings.map((listing: any) =>
+              listings: page.listings.map((listing) =>
                 listing.id === listingId
                   ? { ...listing, is_favorited: isFavorited }
                   : listing

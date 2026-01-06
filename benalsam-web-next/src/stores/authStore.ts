@@ -499,8 +499,12 @@ export const useAuthStore = create<AuthState>((set, get) => {
             // Manual cleanup - Supabase'in private method'larını kullanmaya çalış
             try {
               // @ts-ignore - private method but necessary for cleanup
-              if ((supabase.auth as any)._removeSession) {
-                await (supabase.auth as any)._removeSession();
+              interface SupabaseAuthWithPrivate {
+                _removeSession?: () => Promise<void>;
+              }
+              const authWithPrivate = supabase.auth as unknown as SupabaseAuthWithPrivate;
+              if (authWithPrivate._removeSession) {
+                await authWithPrivate._removeSession();
               }
             } catch (privateError) {
               logger.warn('[AuthStore] Private method cleanup failed, continuing with storage cleanup');

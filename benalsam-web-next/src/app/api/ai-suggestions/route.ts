@@ -14,6 +14,7 @@ import { createClient } from '@supabase/supabase-js'
 import { validateQuery } from '@/lib/api-validation'
 import { z } from 'zod'
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
+import type { AISuggestion } from '@/services/aiSuggestionsService'
 
 /**
  * Schema for AI suggestions query parameters
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    const suggestions: any[] = []
+    const suggestions: AISuggestion[] = []
 
     // 1. Trending suggestions from user_behavior_logs (if available)
     // Since table might be empty/not configured, this is optional
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
 
         if (!error && trendingData && trendingData.length > 0) {
           const searchCounts = new Map<string, number>()
-          trendingData.forEach((log: any) => {
+          trendingData.forEach((log: { search_query?: string | null }) => {
             const q = log.search_query?.trim()
             if (q) searchCounts.set(q, (searchCounts.get(q) || 0) + 1)
           })
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
         .eq('status', 'active')
         .limit(10)
 
-      listings?.forEach((listing: any, index: number) => {
+      listings?.forEach((listing: { title: string }, index: number) => {
         suggestions.push({
           id: `listing-${index}`,
           text: listing.title,
@@ -130,7 +131,14 @@ export async function GET(request: NextRequest) {
         .order('confidence_score', { ascending: false })
         .limit(5)
 
-      categoryData?.forEach((cat: any) => {
+      interface CategoryAISuggestionData {
+        suggestion_data?: {
+          suggestions?: string[]
+        }
+        confidence_score?: number
+      }
+      
+      categoryData?.forEach((cat: CategoryAISuggestionData) => {
         const suggestionTexts = cat.suggestion_data?.suggestions || []
         suggestionTexts.forEach((text: string, index: number) => {
           suggestions.push({
@@ -156,7 +164,7 @@ export async function GET(request: NextRequest) {
           .limit(5)
 
         if (popularListings && popularListings.length > 0) {
-          popularListings.forEach((item: any, index: number) => {
+          popularListings.forEach((item: { title: string; view_count?: number | null }, index: number) => {
             suggestions.push({
               id: `popular-listing-${index}`,
               text: item.title,

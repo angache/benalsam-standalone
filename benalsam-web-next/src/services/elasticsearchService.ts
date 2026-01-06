@@ -41,7 +41,7 @@ export interface ElasticsearchSearchResult {
     budget: number;
     location: string;
     urgency: string;
-    attributes: any;
+    attributes: Record<string, unknown>;
     user_id: string;
     status: string;
     created_at: string;
@@ -54,6 +54,11 @@ export interface ElasticsearchSearchResult {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+// Type helper for listings with debug source marker
+interface ListingWithSource extends Listing {
+  __src?: 'E' | 'S';
 }
 
 /**
@@ -72,7 +77,24 @@ export const searchListingsWithElasticsearch = async (
     const sortOrder = params.sort?.order || 'desc';
 
     // Search Service expected payload
-    const servicePayload = {
+    interface SearchServicePayload {
+      query: string;
+      page: number;
+      pageSize: number;
+      sortBy: string;
+      sortOrder: 'asc' | 'desc';
+      categoryIds?: number[];
+      location?: string;
+      minPrice?: number;
+      maxPrice?: number;
+      urgency?: string;
+      dateRange?: string;
+      featured?: boolean;
+      showcase?: boolean;
+      urgent?: boolean;
+    }
+
+    const servicePayload: SearchServicePayload = {
       query,
       page,
       pageSize: limit,
@@ -89,7 +111,7 @@ export const searchListingsWithElasticsearch = async (
       featured: params.filters?.featured,
       showcase: params.filters?.showcase,
       urgent: params.filters?.urgent,
-    } as any;
+    };
 
     logger.debug('[ElasticsearchService] Search payload', { payload: servicePayload });
 
@@ -147,7 +169,11 @@ export const searchListingsWithElasticsearch = async (
 
     // Mark source for debug (only used in development)
     if (process.env.NODE_ENV !== 'production') {
-      processedListings.forEach((l: any) => { try { l.__src = 'E'; } catch (_) {} });
+      processedListings.forEach((l) => { 
+        try { 
+          (l as ListingWithSource).__src = 'E'; 
+        } catch (_) {} 
+      });
       incrementSourceCount('E', processedListings.length);
     }
 
@@ -203,7 +229,11 @@ const searchListingsWithSupabase = async (
     
     // Mark source for debug (only used in development)
     if (process.env.NODE_ENV !== 'production') {
-      result.listings.forEach((l: any) => { try { l.__src = 'S'; } catch (_) {} });
+      result.listings.forEach((l) => { 
+        try { 
+          (l as ListingWithSource).__src = 'S'; 
+        } catch (_) {} 
+      });
       incrementSourceCount('S', result.listings.length);
     }
     
@@ -242,12 +272,15 @@ export const fetchListingByIdFromES = async (listingId: string): Promise<Listing
       return null;
     }
     const data = await res.json();
-    const doc = data?.data;
+    const doc = data?.data as Listing | undefined;
     if (!doc) return null;
-    if (import.meta.env.MODE !== 'production') {
-      try { (doc as any).__src = 'E'; incrementSourceCount('E', 1); } catch (_) {}
+    if (process.env.NODE_ENV !== 'production') {
+      try { 
+        (doc as ListingWithSource).__src = 'E'; 
+        incrementSourceCount('E', 1); 
+      } catch (_) {}
     }
-    return doc as Listing;
+    return doc;
   } catch {
     return null;
   }

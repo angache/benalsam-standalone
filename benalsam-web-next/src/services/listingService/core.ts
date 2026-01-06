@@ -7,7 +7,12 @@ import { logger } from '@/utils/production-logger';
 // ListingWithUser artık Listing'den extend etmiyor çünkü user ve is_favorited zaten Listing içinde var
 export type ListingWithUser = Listing;
 
-export const addPremiumSorting = (query: any) => {
+// Type for Supabase query builder that supports order method
+interface QueryBuilderWithOrder {
+  order(column: string, options?: { ascending?: boolean; nullsLast?: boolean }): QueryBuilderWithOrder;
+}
+
+export const addPremiumSorting = <T extends QueryBuilderWithOrder>(query: T): T => {
   return query
     .order('is_urgent_premium', { ascending: false, nullsLast: true })
     .order('is_featured', { ascending: false, nullsLast: true })

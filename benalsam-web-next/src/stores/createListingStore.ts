@@ -24,6 +24,14 @@ interface AttributesData {
 
 // Images are now stored as an array of image objects
 // Each image object has: { file, preview, name, isUploaded }
+interface ImageItem {
+  file?: File
+  preview?: string
+  name?: string
+  isUploaded?: boolean
+  uri?: string
+  url?: string
+}
 
 interface LocationData {
   city: string
@@ -48,7 +56,7 @@ interface CreateListingState {
   category: CategoryData
   details: DetailsData
   attributes: AttributesData
-  images: any[] // Array of image objects
+  images: ImageItem[] // Array of image objects
   mainImageIndex: number // Moved out of images
   location: LocationData
   review: ReviewData
@@ -76,7 +84,7 @@ interface CreateListingState {
   updateAttribute: (key: string, value: string | number | boolean | string[]) => void
   
   // Images actions
-  setImages: (newImages: any[]) => void
+  setImages: (newImages: ImageItem[]) => void
   addImages: (files: File[]) => void
   removeImage: (index: number) => void
   setMainImage: (index: number) => void
@@ -247,7 +255,7 @@ export const useCreateListingStore = create<CreateListingState>()(
       },
       
       // Images actions - ESKİ SİSTEM YAKLAŞIMI
-      setImages: (newImages: any[]) => {
+      setImages: (newImages: ImageItem[]) => {
         logger.debug('[CreateListingStore] setImages called (old system)', { images: newImages.length })
         set(state => {
           let newMainImageIndex = state.mainImageIndex
@@ -442,7 +450,7 @@ export const useCreateListingStore = create<CreateListingState>()(
         attributes: state.attributes,
         // Persist only serializable image metadata (no File objects)
         images: Array.isArray(state.images)
-          ? state.images.map((img: any) => ({
+          ? state.images.map((img: ImageItem) => ({
               preview: img?.preview ?? null,
               name: img?.name ?? null,
               isUploaded: !!img?.isUploaded,

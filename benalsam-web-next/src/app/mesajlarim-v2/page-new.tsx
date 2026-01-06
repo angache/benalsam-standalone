@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { MessagingErrorBoundary } from '@/components/ErrorBoundary';
 import { ConversationList } from '@/components/messaging/ConversationList';
 import { ChatArea } from '@/components/messaging/ChatArea';
+import type { Message } from '@/types';
 
 interface ConversationPreview {
   id: string;
@@ -83,7 +84,7 @@ export default function MessagesV2Page() {
           table: 'messages',
         },
         async (payload) => {
-          const newMessage = payload.new as any;
+          const newMessage = payload.new as Message;
           
           if (newMessage?.conversation_id === selectedConversationId) {
             setTimeout(async () => {

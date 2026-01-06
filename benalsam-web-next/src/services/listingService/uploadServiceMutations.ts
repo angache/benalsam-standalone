@@ -15,6 +15,7 @@ import { ListingStatus } from 'benalsam-shared-types';
 import { CATEGORY } from '@/config/constants';
 import dynamicCategoryService from '../dynamicCategoryService';
 import { logger } from '@/utils/production-logger';
+import type { Category } from '../categoryService';
 
 const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1';
 
@@ -49,21 +50,25 @@ const getCategoryIds = async (categoryString: string): Promise<{ category_id: nu
 
     // N-seviye gezinme: her bir path parçasını sırayla subcategories içinde ara
     const categoryPath: number[] = [];
-    let currentNode: any = mainCategory;
+    let currentNode: Category | undefined = mainCategory;
     
     // Ana kategoriyi ekle
-    categoryPath.push(currentNode.id);
+    if (currentNode?.id) {
+      categoryPath.push(Number(currentNode.id));
+    }
     
     for (let i = 1; i < pathParts.length; i++) {
       const part = pathParts[i];
-      const children = currentNode?.subcategories || [];
+      const children = currentNode?.subcategories || currentNode?.children || [];
       logger.debug('[UploadServiceMutations] Traversing category level', { level: i + 1, lookingFor: part, childrenCount: children.length });
-      const next = children.find((c: any) => c.name === part);
+      const next = children.find((c: Category) => c.name === part);
       if (!next) {
-        logger.warn('[UploadServiceMutations] Category level not found', { level: i + 1, part, available: children.map((c: any) => c.name) });
+        logger.warn('[UploadServiceMutations] Category level not found', { level: i + 1, part, available: children.map((c: Category) => c.name) });
         break;
       }
-      categoryPath.push(next.id);
+      if (next.id) {
+        categoryPath.push(Number(next.id));
+      }
       currentNode = next;
     }
 
@@ -113,10 +118,10 @@ export const createListingWithUploadService = async (
       // Fallback to direct database creation
       const { createListing } = await import('./mutations');
       // Normalize camelCase vs snake_case from shared Listing type
-      const acceptTerms = (listingData as any).acceptTerms ?? (listingData as any).accept_terms ?? true;
-      const autoRepublish = (listingData as any).autoRepublish ?? (listingData as any).auto_republish;
-      const contactPreference = (listingData as any).contactPreference ?? (listingData as any).contact_preference;
-      const fallbackData: any = {
+      const acceptTerms = listingData.acceptTerms ?? true;
+      const autoRepublish = listingData.autoRepublish;
+      const contactPreference = listingData.contactPreference;
+      const fallbackData: Parameters<typeof createListing>[0] = {
         title: listingData.title,
         description: listingData.description,
         category: listingData.category,
@@ -153,8 +158,8 @@ export const createListingWithUploadService = async (
       logger.debug('[UploadServiceMutations] Uploading images to Upload Service');
       
       // Convert image data to File objects if needed
-      const isFileLike = (obj: any): obj is File => {
-        return !!obj && typeof obj === 'object' && 'name' in obj && 'size' in obj && 'type' in obj;
+      const isFileLike = (obj: unknown): obj is File => {
+        return !!obj && typeof obj === 'object' && obj !== null && 'name' in obj && 'size' in obj && 'type' in obj;
       };
       const imageFiles = await Promise.all(
         listingData.images.map(async (imageData, index) => {
@@ -235,12 +240,18 @@ export const createListingWithUploadService = async (
         throw new Error(`Image upload failed: ${uploadResponse.statusText}`);
       }
 
-      const uploadResult = await uploadResponse.json();
+      const uploadResult = await uploadResponse.json() as {
+        success: boolean
+        message?: string
+        data: {
+          images: Array<{ url: string }>
+        }
+      };
       if (!uploadResult.success) {
-        throw new Error(`Image upload failed: ${uploadResult.message}`);
+        throw new Error(`Image upload failed: ${uploadResult.message || 'Unknown error'}`);
       }
 
-      uploadedImageUrls = uploadResult.data.images.map((img: any) => img.url);
+      uploadedImageUrls = uploadResult.data.images.map((img) => img.url);
       logger.debug('[UploadServiceMutations] Images uploaded successfully', { count: uploadedImageUrls.length });
     }
 
@@ -274,7 +285,7 @@ export const createListingWithUploadService = async (
           ? Object.entries(listingData.attributes).reduce((acc, [key, value]) => {
               const normalized = Array.isArray(value) ? value : [value];
               // Ensure all values are strings for ES mapping consistency
-              acc[key] = normalized.map((v: any) => String(v));
+              acc[key] = normalized.map((v: unknown) => String(v));
               return acc;
             }, {} as Record<string, string[]>)
           : null,

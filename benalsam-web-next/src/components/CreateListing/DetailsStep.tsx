@@ -50,8 +50,14 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
       const raw = localStorage.getItem('benalsam_categories_next_v1.0.0')
       if (!raw) return ''
       const parsed = JSON.parse(raw)
-      const roots: any[] = parsed?.data || []
-      const findById = (nodes: any[]): any | null => {
+      interface CategoryNode {
+        id: string | number
+        name: string
+        subcategories?: CategoryNode[]
+        children?: CategoryNode[]
+      }
+      const roots: CategoryNode[] = parsed?.data || []
+      const findById = (nodes: CategoryNode[]): CategoryNode | null => {
         for (const n of nodes) {
           if (String(n.id) === String(selectedCategoryId)) return n
           const subs = n.subcategories || n.children || []
@@ -174,9 +180,9 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
       } else {
         toast({ title: 'Öneri bulunamadı', variant: 'destructive' })
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('[DetailsStep] AI title suggestion error', { error })
-      const errorMessage = error?.message?.includes('not authenticated') 
+      const errorMessage = (error instanceof Error && error.message?.includes('not authenticated')) 
         ? 'Giriş yapmanız gerekiyor' 
         : 'Başlık önerisi alınamadı'
       toast({ title: 'Hata', description: errorMessage, variant: 'destructive' })
@@ -208,9 +214,9 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
         onChange('description', description)
         toast({ title: 'Açıklama oluşturuldu', variant: 'default' })
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('[DetailsStep] AI description suggestion error', { error })
-      const errorMessage = error?.message?.includes('not authenticated') 
+      const errorMessage = (error instanceof Error && error.message?.includes('not authenticated')) 
         ? 'Giriş yapmanız gerekiyor' 
         : 'Açıklama oluşturulamadı'
       toast({ title: 'Hata', description: errorMessage, variant: 'destructive' })
@@ -262,11 +268,11 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
         description: 'Tüm alanlar otomatik dolduruldu',
         variant: 'default'
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('[DetailsStep] AI generate all error', { error })
       let errorMessage = 'İlan oluşturulamadı'
       
-      if (error?.message?.includes('not authenticated')) {
+      if (error instanceof Error && error.message?.includes('not authenticated')) {
         errorMessage = 'Giriş yapmanız gerekiyor'
       } else if (error?.message?.includes('kullanılamıyor') || error?.message?.includes('Failed to fetch')) {
         errorMessage = 'AI servisi şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.'
@@ -433,7 +439,7 @@ export default function DetailsStep({ formData, onChange, onNext, onBack, select
                 <Select
                   value={watch('urgency')}
                   onValueChange={(v) => {
-                    setValue('urgency', v as any)
+                    setValue('urgency', v as 'low' | 'medium' | 'high')
                     onChange('urgency', v)
                   }}
                 >

@@ -3,13 +3,14 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { extractIdFromSlug, generateListingUrl } from '@/lib/slugify'
 import { ListingDetailClient } from './ListingDetailClient'
 import { notFound, redirect } from 'next/navigation'
+import { logger } from '@/utils/production-logger'
 
 export default async function ListingDetailPage({ 
   params 
 }: { 
   params: Promise<{ id: string }> 
 }) {
-  console.log('🚀 [SSR] ListingDetailPage rendering on server')
+  logger.debug('[ListingDetailPage] Rendering on server')
   
   const currentUser = await getServerUser()
   const { id } = await params
@@ -54,7 +55,7 @@ export default async function ListingDetailPage({
     .single()
 
   if (error || !listing) {
-    console.error('❌ [SSR] Error fetching listing:', error)
+    logger.error('[ListingDetailPage] Error fetching listing', { error })
     notFound()
   }
 
@@ -107,7 +108,7 @@ export default async function ListingDetailPage({
     is_favorited, // ✅ Server'da hesaplandı, ilk render'da doğru!
   }
 
-  console.log('✅ [SSR] Listing fetched:', { 
+  logger.debug('[ListingDetailPage] Listing fetched', { 
     id: listingId, 
     is_favorited, 
     hasUser: !!user,

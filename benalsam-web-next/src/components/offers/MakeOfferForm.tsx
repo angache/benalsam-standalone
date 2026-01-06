@@ -12,11 +12,18 @@ import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Image from 'next/image'
+import type { Listing, User } from '@/types'
+
+interface InventoryItem {
+  id: string
+  name: string
+  [key: string]: unknown
+}
 
 interface MakeOfferFormProps {
-  listing: any
-  inventoryItems: any[]
-  currentUser: any
+  listing: Partial<Listing>
+  inventoryItems: InventoryItem[]
+  currentUser: Partial<User>
   onSubmit: (offerData: {
     selectedItemId?: string
     offeredPrice?: number

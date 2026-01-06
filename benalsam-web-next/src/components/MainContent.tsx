@@ -32,7 +32,17 @@ export default function MainContent() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['listings', { selectedCategory, minPrice, maxPrice, city, sortBy, page, limit }],
     queryFn: async () => {
-      const filters: any = {
+      interface ListingFilters {
+        page: number
+        limit: number
+        sort?: string
+        category_id?: number
+        min_price?: number
+        max_price?: number
+        city?: string
+        [key: string]: unknown
+      }
+      const filters: ListingFilters = {
         page,
         limit,
         sort: sortBy,

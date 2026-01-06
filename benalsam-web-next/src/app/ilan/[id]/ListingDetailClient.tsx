@@ -29,9 +29,10 @@ import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
+import type { Listing } from '@/types'
 
 interface ListingDetailClientProps {
-  listing: any
+  listing: Partial<Listing>
   listingId: string
 }
 
@@ -91,7 +92,7 @@ export function ListingDetailClient({ listing: initialListing, listingId }: List
     },
     onSuccess: (isFavorited) => {
       // Update local state immediately
-      setListing((prev: any) => ({
+      setListing((prev: Partial<Listing>) => ({
         ...prev,
         is_favorited: isFavorited
       }))
@@ -101,10 +102,10 @@ export function ListingDetailClient({ listing: initialListing, listingId }: List
         description: isFavorited ? 'İlan favorilerinize eklendi' : 'İlan favorilerinizden kaldırıldı',
       })
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: 'Hata',
-        description: error.message || 'Favori işlemi başarısız',
+        description: (error instanceof Error ? error.message : 'Favori işlemi başarısız') || 'Favori işlemi başarısız',
         variant: 'destructive'
       })
     }

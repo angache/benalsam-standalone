@@ -13,10 +13,11 @@ import {
   ArrowLeftRight
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import type { Listing } from '@/types'
 
 export interface StatusConfig {
   label: string
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   color: string
 }
 
@@ -33,7 +34,7 @@ export const statusConfig: Record<string, StatusConfig> = {
   in_transaction: { label: 'Alışverişte', icon: ArrowLeftRight, color: 'info' }
 }
 
-export const getListingStatus = (listing: any): string => {
+export const getListingStatus = (listing: Partial<Listing>): string => {
   const { status, expires_at, offer_accepted_at, accepted_offer_id } = listing
   
   // Normalize status to lowercase for comparison
@@ -72,7 +73,7 @@ export const getListingStatus = (listing: any): string => {
   return 'pending'
 }
 
-export const getStatusBadge = (listing: any) => {
+export const getStatusBadge = (listing: Partial<Listing>) => {
   const status = getListingStatus(listing)
   const config = statusConfig[status]
 
@@ -87,7 +88,7 @@ export const getStatusBadge = (listing: any) => {
   
   const Icon = config.icon
 
-  const variantMap: Record<string, any> = {
+  const variantMap: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
     success: 'default',
     warning: 'secondary',
     destructive: 'destructive',
@@ -111,7 +112,7 @@ export const getStatusBadge = (listing: any) => {
   )
 }
 
-export const getPremiumBadges = (listing: any) => {
+export const getPremiumBadges = (listing: Partial<Listing>) => {
   const badges = []
   if (listing.is_featured) badges.push({ icon: Star, label: 'Öne Çıkar', color: 'bg-yellow-500' })
   if (listing.is_urgent_premium) badges.push({ icon: Zap, label: 'Acil', color: 'bg-red-500' })

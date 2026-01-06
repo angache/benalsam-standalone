@@ -16,7 +16,7 @@ export interface TitleSuggestion {
 
 export interface AttributeSuggestion {
   key: string;
-  value: any;
+  value: string | number | boolean | string[];
   confidence: number;
   reason: string;
 }
@@ -37,7 +37,7 @@ export interface CompletionSuggestion {
 export interface AISuggestionRequest {
   category: string;
   categoryId?: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, string | number | boolean | string[]>;
   userInput?: string;
   currentTitle?: string;
   currentDescription?: string;
@@ -45,7 +45,7 @@ export interface AISuggestionRequest {
     title: string;
     description: string;
     budget: number;
-    attributes: Record<string, any>;
+    attributes: Record<string, string | number | boolean | string[]>;
   }>;
 }
 
@@ -74,16 +74,20 @@ class ListingAIServiceClient {
       });
       
       logger.debug('[ListingAIService] Response status', { status: response.status, statusText: response.statusText });
-    } catch (fetchError: any) {
+    } catch (fetchError: unknown) {
+      const errorMessage = fetchError instanceof Error ? fetchError.message : String(fetchError)
+      const errorName = fetchError instanceof Error ? fetchError.name : 'UnknownError'
+      const errorStack = fetchError instanceof Error ? fetchError.stack : undefined
+      
       logger.error('[ListingAIService] Fetch error', {
-        message: fetchError.message,
-        name: fetchError.name,
-        stack: fetchError.stack,
+        message: errorMessage,
+        name: errorName,
+        stack: errorStack,
         url: `${LISTING_SERVICE_URL}/listings/ai${endpoint}`
       });
       
       // Network error - service might be down
-      if (fetchError.message?.includes('Failed to fetch') || fetchError.name === 'TypeError') {
+      if (errorMessage?.includes('Failed to fetch') || errorName === 'TypeError') {
         throw new Error('AI servisi şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin.');
       }
       throw fetchError;
@@ -196,7 +200,7 @@ class ListingAIServiceClient {
     title: string;
     description: string;
     price: number;
-    attributes: Record<string, any>;
+    attributes: Record<string, string | number | boolean | string[]>;
   }> {
     // Use same parameters for consistency
     const titleRequest = {
@@ -222,7 +226,7 @@ class ListingAIServiceClient {
     ]);
 
     // Build attributes from suggestions
-    const attributes: Record<string, any> = { ...request.attributes };
+    const attributes: Record<string, string | number | boolean | string[]> = { ...request.attributes };
     for (const suggestion of attributeSuggestions) {
       if (suggestion.confidence > 0.7) {
         attributes[suggestion.key] = suggestion.value;

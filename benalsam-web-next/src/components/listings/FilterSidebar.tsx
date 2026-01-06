@@ -160,7 +160,7 @@ export function FilterSidebar() {
         <Label>İlan Tarihi</Label>
         <Select
           value={dateRange}
-          onValueChange={(value: any) => setDateRange(value)}
+          onValueChange={(value: string) => setDateRange(value)}
         >
           <SelectTrigger>
             <SelectValue />

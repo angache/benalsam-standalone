@@ -23,6 +23,7 @@ import { useProfileData } from '@/hooks/useProfileData'
 import { useToast } from '@/hooks/use-toast'
 import { EmptyStateProfileListings, EmptyStateProfileReviews } from '@/components/ui/empty-state'
 import ListingCard from '@/components/ListingCard'
+import { logger } from '@/utils/production-logger'
 
 // Helper function to generate boring avatar URL
 const generateBoringAvatarUrl = (name: string, userId: string) => {
@@ -104,16 +105,16 @@ export default function ProfilePage() {
       const hasViewed = sessionStorage.getItem(`viewed_profile_${userId}`)
       if (!hasViewed) {
         // TODO: Call API to increment view count
-        console.log(`Incrementing view for profile: ${userId}`)
+        logger.debug('[ProfilePage] Incrementing view', { userId })
         sessionStorage.setItem(`viewed_profile_${userId}`, 'true')
       }
     }
   }, [userId, currentUser])
 
   useEffect(() => {
-    console.log(`🔍 [PROFILE] Loading: ${isLoading}, Error: ${isError}, Tab: ${activeTab}, Listings: ${listings.length}`)
+    logger.debug('[ProfilePage] State', { isLoading, isError, activeTab, listingCount: listings.length })
     if (listings.length > 0) {
-      console.log('📋 Listings:', listings.map(l => `${l.id} - ${l.title}`))
+      logger.debug('[ProfilePage] Listings', { listings: listings.map(l => ({ id: l.id, title: l.title })) })
     }
   }, [isLoading, listings, activeTab, isError])
 

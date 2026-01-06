@@ -37,7 +37,13 @@ const FollowCategoryModal: React.FC<FollowCategoryModalProps> = ({
   onCategoryFollowed,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState('')
-  const [categories, setCategories] = useState<any[]>([])
+  interface CategoryNode {
+    id: string | number
+    name: string
+    children?: CategoryNode[]
+    [key: string]: unknown
+  }
+  const [categories, setCategories] = useState<CategoryNode[]>([])
   const [isLoadingCategories, setIsLoadingCategories] = useState(true)
   const [isFollowing, setIsFollowing] = useState(false)
   const { toast } = useToast()
@@ -105,7 +111,7 @@ const FollowCategoryModal: React.FC<FollowCategoryModalProps> = ({
     setIsFollowing(false)
   }
   
-  const renderCategoryOptions = (cats: any[], parentPath = ''): React.ReactNode[] => {
+  const renderCategoryOptions = (cats: CategoryNode[], parentPath = ''): React.ReactNode[] => {
     let options: React.ReactNode[] = []
     cats.forEach((cat) => {
       const currentPath = parentPath ? `${parentPath} > ${cat.name}` : cat.name
@@ -122,9 +128,9 @@ const FollowCategoryModal: React.FC<FollowCategoryModalProps> = ({
   }
 
   // Build category tree from flat list
-  const buildCategoryTree = (flatCategories: any[]) => {
-    const categoryMap = new Map()
-    const roots: any[] = []
+  const buildCategoryTree = (flatCategories: CategoryNode[]) => {
+    const categoryMap = new Map<string | number, CategoryNode & { children: CategoryNode[] }>()
+    const roots: (CategoryNode & { children: CategoryNode[] })[] = []
 
     flatCategories.forEach((cat) => {
       categoryMap.set(cat.id, { ...cat, children: [] })

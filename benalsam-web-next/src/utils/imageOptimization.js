@@ -1,4 +1,5 @@
 // Browser-compatible image optimization utilities
+import { logger } from '@/utils/production-logger';
 
 // WebP optimization configuration
 const WEBP_CONFIG = {
@@ -36,7 +37,7 @@ export const convertToWebP = async (imageElement, options = {}) => {
     const webpDataUrl = canvas.toDataURL('image/webp', config.quality);
     return webpDataUrl;
   } catch (error) {
-    console.error('WebP conversion failed:', error);
+    logger.error('[ImageOptimization] WebP conversion failed', { error });
     return null;
   }
 };
@@ -45,7 +46,7 @@ export const convertToWebP = async (imageElement, options = {}) => {
 export const optimizeImage = async (imageElement, originalFormat, options = {}) => {
   try {
     if (!SUPPORTED_FORMATS.includes(originalFormat.toLowerCase())) {
-      console.warn(`Unsupported format: ${originalFormat}`);
+      logger.warn('[ImageOptimization] Unsupported format', { format: originalFormat });
       return imageElement.src;
     }
 
@@ -69,7 +70,7 @@ export const optimizeImage = async (imageElement, originalFormat, options = {}) 
     const optimizedDataUrl = canvas.toDataURL(`image/${originalFormat}`, 0.85);
     return optimizedDataUrl;
   } catch (error) {
-    console.error('Image optimization failed:', error);
+    logger.error('[ImageOptimization] Image optimization failed', { error });
     return imageElement.src;
   }
 };
@@ -105,7 +106,7 @@ export const generateResponsiveSizes = async (imageElement, sizes = []) => {
     
     return responsiveImages;
   } catch (error) {
-    console.error('Responsive image generation failed:', error);
+    logger.error('[ImageOptimization] Responsive image generation failed', { error });
     return [];
   }
 };
@@ -123,7 +124,7 @@ export const generateSrcSet = (src, format = 'webp') => {
     
     return srcSetParts.join(', ');
   } catch (error) {
-    console.error('SrcSet generation failed:', error);
+    logger.error('[ImageOptimization] SrcSet generation failed', { error });
     return '';
   }
 };
@@ -164,7 +165,7 @@ export const useImageOptimization = () => {
       
       return new Blob([optimizedBuffer], { type: 'image/webp' });
     } catch (error) {
-      console.error('File optimization failed:', error);
+      logger.error('[ImageOptimization] File optimization failed', { error });
       return file;
     }
   };

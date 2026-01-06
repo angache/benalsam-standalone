@@ -128,8 +128,8 @@ export default function ProfileSettingsClient({ userId }: { userId: string }) {
         title: 'Avatar yüklendi',
         description: 'Profil fotoğrafınız başarıyla güncellendi',
       })
-    } catch (error: any) {
-      console.error('Error uploading avatar:', error)
+    } catch (error: unknown) {
+      logger.error('[ProfileSettings] Error uploading avatar', { error })
       toast({
         title: 'Hata',
         description: error.message || 'Avatar yüklenirken bir hata oluştu',
@@ -172,7 +172,7 @@ export default function ProfileSettingsClient({ userId }: { userId: string }) {
         // Refresh the page to show updated data
         router.refresh()
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('[ProfileSettings] Error updating profile', { error })
       toast({
         title: 'Hata',

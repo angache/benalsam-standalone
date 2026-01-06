@@ -97,7 +97,7 @@ function LoginPageContent() {
           variant: 'destructive',
         })
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('[LoginPage] Login error', { error })
       toast({
         title: 'Hata',

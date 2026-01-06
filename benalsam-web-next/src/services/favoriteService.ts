@@ -4,7 +4,7 @@ import { Listing, ApiResponse } from '@/types';
 import { logger } from '@/utils/production-logger';
 
 // Error handling helper
-const handleError = (error: any, title = "Hata", description = "Bir sorun oluştu") => {
+const handleError = (error: unknown, title = "Hata", description = "Bir sorun oluştu") => {
   logger.error(`[FavoriteService] Error in ${title}`, { error });
   toast({ 
     title: title, 

@@ -293,7 +293,10 @@ export const usePerformanceMonitoring = () => {
   React.useEffect(() => {
     const updateMetrics = () => {
       // Manuel CLS değerini kontrol et
-      const manualCLS = (window as any).simulatedCLS || 0;
+      interface WindowWithSimulatedCLS extends Window {
+        simulatedCLS?: number;
+      }
+      const manualCLS = (window as WindowWithSimulatedCLS).simulatedCLS || 0;
       const effectiveCLS = metrics.CLS || manualCLS;
       
       const newMetrics = {

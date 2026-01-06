@@ -11,7 +11,7 @@ import { Grid2x2, LayoutGrid, Grid3x3, List } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState, useEffect } from 'react'
 
-const VIEW_OPTIONS: { value: ViewMode; icon: any; label: string }[] = [
+const VIEW_OPTIONS: { value: ViewMode; icon: React.ComponentType<{ className?: string }>; label: string }[] = [
   { value: 'grid-2', icon: Grid2x2, label: '2 Kolon' },
   { value: 'grid-3', icon: Grid3x3, label: '3 Kolon' },
   { value: 'grid-4', icon: LayoutGrid, label: '4 Kolon' },

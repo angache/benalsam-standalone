@@ -23,9 +23,13 @@ export function ChatbotInput({ onSend }: ChatbotInputProps) {
       handleSend(e.detail)
     }
     
-    window.addEventListener('chatbot:quick-reply' as any, handleQuickReply as any)
+    interface WindowWithChatbotEvent extends Window {
+      addEventListener(type: 'chatbot:quick-reply', listener: (event: CustomEvent) => void): void
+      removeEventListener(type: 'chatbot:quick-reply', listener: (event: CustomEvent) => void): void
+    }
+    (window as WindowWithChatbotEvent).addEventListener('chatbot:quick-reply', handleQuickReply as (event: CustomEvent) => void)
     return () => {
-      window.removeEventListener('chatbot:quick-reply' as any, handleQuickReply as any)
+      (window as WindowWithChatbotEvent).removeEventListener('chatbot:quick-reply', handleQuickReply as (event: CustomEvent) => void)
     }
   }, [])
 

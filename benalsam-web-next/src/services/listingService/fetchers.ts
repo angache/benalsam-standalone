@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { addPremiumSorting, processFetchedListings } from './core';
@@ -6,6 +7,12 @@ import { Listing, ApiResponse, QueryFilters } from '@/types';
 import { searchListingsWithElasticsearch, fetchListingByIdFromES } from '@/services/elasticsearchService';
 import { incrementSourceCount } from '@/lib/debugSource';
 import { logger } from '@/utils/production-logger';
+
+// Type helpers for listing operations
+type ListingWithSource = Listing & { __src?: 'S' | 'E' };
+type Favorite = { user_id: string; listing_id: string };
+type ListingWithOfferCount = Listing & { actual_offers_count: number };
+type AttributeStatistic = { attribute: string; values: Array<{ value: string; count: number }> };
 
 export const fetchListings = async (
   currentUserId: string | null = null, 
@@ -31,8 +38,9 @@ export const fetchListings = async (
     
     if (result.data && result.data.length > 0) {
       // Check source from debug flag (set in dev mode)
-      const source = (result.data[0] as any)?.__src === 'S' ? 'Supabase' : 
-                     (result.data[0] as any)?.__src === 'E' ? 'Elasticsearch' : 'Unknown';
+      const firstListing = result.data[0] as ListingWithSource;
+      const source = firstListing?.__src === 'S' ? 'Supabase' : 
+                     firstListing?.__src === 'E' ? 'Elasticsearch' : 'Unknown';
       logger.debug(`[ListingService] fetchListings - Found ${result.data.length} listings from ${source}`, { total: result.total });
       return {
         listings: result.data,
@@ -77,8 +85,12 @@ export const fetchListings = async (
     const processedListings = await processFetchedListings(listingsData, currentUserId);
     // Mark source for debug (only used in development)
     if (process.env.NODE_ENV !== 'production') {
-      (processedListings as any[]).forEach(l => { try { (l as any).__src = 'S'; } catch (_) {} });
-      incrementSourceCount('S', (processedListings as any[]).length);
+      (processedListings as ListingWithSource[]).forEach(l => { 
+        try { 
+          (l as ListingWithSource).__src = 'S'; 
+        } catch (_) {} 
+      });
+      incrementSourceCount('S', processedListings.length);
     }
     
     return {
@@ -148,8 +160,9 @@ export const fetchListingsWithFilters = async (
     
     if (result.data && result.data.length > 0) {
       // Check source from debug flag (set in dev mode)
-      const source = (result.data[0] as any)?.__src === 'S' ? 'Supabase' : 
-                     (result.data[0] as any)?.__src === 'E' ? 'Elasticsearch' : 'Unknown';
+      const firstListing = result.data[0] as ListingWithSource;
+      const source = firstListing?.__src === 'S' ? 'Supabase' : 
+                     firstListing?.__src === 'E' ? 'Elasticsearch' : 'Unknown';
       logger.debug(`[ListingService] fetchListings - Found ${result.data.length} listings from ${source}`, { total: result.total });
       return {
         listings: result.data,
@@ -218,8 +231,12 @@ export const fetchListingsWithFilters = async (
     
     // Mark source for debug
     if (process.env.NODE_ENV !== 'production') {
-      (processedListings as any[]).forEach(l => { try { (l as any).__src = 'S'; } catch (_) {} });
-      incrementSourceCount('S', (processedListings as any[]).length);
+      (processedListings as ListingWithSource[]).forEach(l => { 
+        try { 
+          (l as ListingWithSource).__src = 'S'; 
+        } catch (_) {} 
+      });
+      incrementSourceCount('S', processedListings.length);
     }
     
     logger.debug(`[ListingService] fetchListingsWithFilters - Got ${processedListings.length} from Supabase`, { total: totalCount });
@@ -281,7 +298,7 @@ export const fetchSingleListing = async (listingId: string, currentUserId: strin
     // Check if favorite exists from the JOIN
     if (currentUserId && listing.user_favorites) {
       const favorites = Array.isArray(listing.user_favorites) ? listing.user_favorites : [listing.user_favorites];
-      const isFavorited = favorites.some((fav: any) => 
+      const isFavorited = (favorites as Favorite[]).some((fav) => 
         fav && fav.user_id === currentUserId && fav.listing_id === listingId
       );
       listing.is_favorited = isFavorited;
@@ -323,12 +340,20 @@ export const fetchPopularListings = async (currentUserId: string | null = null):
     }, currentUserId);
 
     const docs = es.data || [];
-    if (import.meta.env.MODE !== 'production') {
-      (docs as any[]).forEach(d => { try { (d as any).__src = 'E'; } catch (_) {} });
+    if (process.env.NODE_ENV !== 'production') {
+      (docs as ListingWithSource[]).forEach(d => { 
+        try { 
+          (d as ListingWithSource).__src = 'E'; 
+        } catch (_) {} 
+      });
     }
     const processed = await processFetchedListings(docs, currentUserId);
-    if (import.meta.env.MODE !== 'production') {
-      (processed as any[]).forEach(d => { try { (d as any).__src = 'E'; } catch (_) {} });
+    if (process.env.NODE_ENV !== 'production') {
+      (processed as ListingWithSource[]).forEach(d => { 
+        try { 
+          (d as ListingWithSource).__src = 'E'; 
+        } catch (_) {} 
+      });
     }
     return processed;
   } catch (e) {
@@ -355,7 +380,7 @@ export const fetchMostOfferedListings = async (currentUserId: string | null = nu
       return [];
     }
 
-    const listingsWithOfferCounts = listingsData.reduce((acc: any[], listing: any) => {
+    const listingsWithOfferCounts = listingsData.reduce((acc: ListingWithOfferCount[], listing: Listing) => {
       const existingListing = acc.find(l => l.id === listing.id);
       if (existingListing) {
         existingListing.actual_offers_count = (existingListing.actual_offers_count || 0) + 1;
@@ -423,12 +448,20 @@ export const fetchTodaysDeals = async (currentUserId: string | null = null): Pro
     }, currentUserId);
 
     const docs = es.data || [];
-    if (import.meta.env.MODE !== 'production') {
-      (docs as any[]).forEach(d => { try { (d as any).__src = 'E'; } catch (_) {} });
+    if (process.env.NODE_ENV !== 'production') {
+      (docs as ListingWithSource[]).forEach(d => { 
+        try { 
+          (d as ListingWithSource).__src = 'E'; 
+        } catch (_) {} 
+      });
     }
     const processed = await processFetchedListings(docs, currentUserId);
-    if (import.meta.env.MODE !== 'production') {
-      (processed as any[]).forEach(d => { try { (d as any).__src = 'E'; } catch (_) {} });
+    if (process.env.NODE_ENV !== 'production') {
+      (processed as ListingWithSource[]).forEach(d => { 
+        try { 
+          (d as ListingWithSource).__src = 'E'; 
+        } catch (_) {} 
+      });
     }
     return processed;
   } catch (e) {
@@ -447,12 +480,20 @@ export const fetchRecentlyViewedListings = async (currentUserId: string): Promis
   try {
     // Fetch each id from ES (keeps order by history)
     const docs = (await Promise.all(history.map(id => fetchListingByIdFromES(id)))).filter(Boolean) as Listing[];
-    if (import.meta.env.MODE !== 'production') {
-      (docs as any[]).forEach(d => { try { (d as any).__src = 'E'; } catch (_) {} });
+    if (process.env.NODE_ENV !== 'production') {
+      (docs as ListingWithSource[]).forEach(d => { 
+        try { 
+          (d as ListingWithSource).__src = 'E'; 
+        } catch (_) {} 
+      });
     }
     const processed = await processFetchedListings(docs, currentUserId);
-    if (import.meta.env.MODE !== 'production') {
-      (processed as any[]).forEach(d => { try { (d as any).__src = 'E'; } catch (_) {} });
+    if (process.env.NODE_ENV !== 'production') {
+      (processed as ListingWithSource[]).forEach(d => { 
+        try { 
+          (d as ListingWithSource).__src = 'E'; 
+        } catch (_) {} 
+      });
     }
     return processed;
   } catch (e) {
@@ -535,7 +576,7 @@ export const fetchMyListings = async (userId: string): Promise<Listing[]> => {
 };
 
 export const fetchFilteredListings = async (
-  filterParams: QueryFilters & { selectedCategories?: Array<{ name: string; icon?: any }> },
+  filterParams: QueryFilters & { selectedCategories?: Array<{ name: string; icon?: string | ComponentType | null }> },
   currentUserId: string | null = null,
   page = 1,
   pageSize = 20
@@ -609,7 +650,7 @@ export const fetchFilteredListings = async (
 };
 
 const fetchFilteredListingsFallback = async (
-  filterParams: QueryFilters & { selectedCategories?: Array<{ name: string; icon?: any }> },
+  filterParams: QueryFilters & { selectedCategories?: Array<{ name: string; icon?: string | ComponentType | null }> },
   currentUserId: string | null = null,
   page = 1,
   pageSize = 20
@@ -700,7 +741,7 @@ const fetchFilteredListingsFallback = async (
   }
 };
 
-export const fetchAttributeStatistics = async (category?: string): Promise<any[]> => {
+export const fetchAttributeStatistics = async (category?: string): Promise<AttributeStatistic[]> => {
   try {
     let query = supabase
       .from('listings')
@@ -722,7 +763,7 @@ export const fetchAttributeStatistics = async (category?: string): Promise<any[]
     // Process attributes to get statistics
     const attributeStats: { [key: string]: { [value: string]: number } } = {};
 
-    data?.forEach((listing: any) => {
+    data?.forEach((listing: { attributes?: string | Record<string, unknown> }) => {
       if (listing.attributes) {
         const attributes = typeof listing.attributes === 'string' 
           ? JSON.parse(listing.attributes) 
@@ -765,7 +806,7 @@ export const searchByAttributeValues = async (
     }
 
     // Filter listings by attribute values
-    const filteredListings = data?.filter((listing: any) => {
+    const filteredListings = data?.filter((listing: Listing) => {
       if (!listing.attributes) return false;
       
       const attributes = typeof listing.attributes === 'string' 

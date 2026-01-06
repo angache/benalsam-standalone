@@ -45,7 +45,7 @@ const isTest = getIsTest()
 const isLoggingEnabled = isDevelopment && !isTest
 
 interface LogContext {
-  [key: string]: any
+  [key: string]: unknown
 }
 
 class ProductionLogger {
@@ -101,7 +101,7 @@ class ProductionLogger {
   /**
    * Log a value for inspection
    */
-  inspect(label: string, value: any): void {
+  inspect(label: string, value: unknown): void {
     if (!isLoggingEnabled) return
     console.log(`🔍 [${label}]`, value)
   }
@@ -125,7 +125,7 @@ class ProductionLogger {
   /**
    * Log a table (useful for arrays of objects)
    */
-  table(data: any): void {
+  table(data: unknown): void {
     if (!isLoggingEnabled) return
     console.table(data)
   }

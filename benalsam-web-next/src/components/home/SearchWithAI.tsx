@@ -59,10 +59,10 @@ export default function SearchWithAI() {
     }
     
     return {
-      recent: apiSuggestions.filter((s: any) => s.type === 'recent'),
-      trending: apiSuggestions.filter((s: any) => s.type === 'trending'),
-      ai: apiSuggestions.filter((s: any) => s.type === 'ai'),
-      popular: apiSuggestions.filter((s: any) => s.type === 'popular'),
+      recent: apiSuggestions.filter((s: Suggestion) => s.type === 'recent'),
+      trending: apiSuggestions.filter((s: Suggestion) => s.type === 'trending'),
+      ai: apiSuggestions.filter((s: Suggestion) => s.type === 'ai'),
+      popular: apiSuggestions.filter((s: Suggestion) => s.type === 'popular'),
     }
   }, [apiSuggestions])
 

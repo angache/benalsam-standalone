@@ -21,6 +21,7 @@
 
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
+import { logger } from '@/utils/production-logger'
 import { generateMetadata as generateSEOMetadata } from '@/lib/seo'
 import { StructuredData } from '@/components/seo/StructuredData'
 import { generateHomepageStructuredData, generateOrganizationStructuredData } from '@/lib/seo'
@@ -59,7 +60,7 @@ export default async function HomePage() {
   try {
     stats = await fetchHomePageStats()
   } catch (error) {
-    console.error('Failed to fetch homepage stats:', error)
+    logger.error('[HomePage] Failed to fetch homepage stats', { error })
     stats = {
       totalListings: 2500,
       totalCategories: 50,

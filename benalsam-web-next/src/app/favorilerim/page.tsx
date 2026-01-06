@@ -59,7 +59,7 @@ const FavoritesPage = () => {
     if (!searchQuery.trim()) return favorites
 
     const query = searchQuery.toLowerCase()
-    return favorites.filter((listing: any) => {
+    return favorites.filter((listing: Partial<Listing>) => {
       const title = listing.title?.toLowerCase() || ''
       const description = listing.description?.toLowerCase() || ''
       const category = listing.category?.toLowerCase() || ''
@@ -78,7 +78,7 @@ const FavoritesPage = () => {
     removeFavoriteMutation.mutate(listingId)
   }
 
-  const handleViewListing = (listing: any) => {
+  const handleViewListing = (listing: Partial<Listing>) => {
     router.push(generateListingUrl(listing.title, listing.id))
   }
 

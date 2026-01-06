@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
 import { generateListingUrl } from '@/lib/slugify';
+import type { Listing } from '@/types';
 
 interface QuickViewModalProps {
-  listing: any;
+  listing: Partial<Listing>;
   isOpen: boolean;
   onClose: () => void;
   onToggleFavorite?: () => void;
@@ -24,7 +25,12 @@ export function QuickViewModal({
 }: QuickViewModalProps) {
   if (!listing) return null;
 
-  const mainImage = listing.images?.find((img: any) => img.is_main)?.url || listing.images?.[0]?.url;
+  interface ImageItem {
+    url?: string
+    is_main?: boolean
+    [key: string]: unknown
+  }
+  const mainImage = (listing.images as ImageItem[] | undefined)?.find((img: ImageItem) => img.is_main)?.url || (listing.images as ImageItem[] | undefined)?.[0]?.url;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

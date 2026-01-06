@@ -134,7 +134,7 @@ export default function FlashDeals({ listings: propListings, isLoading: propIsLo
 
         {/* Listings Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
-          {listings.map((listing: any) => (
+          {listings.map((listing: Listing) => (
             <ListingCard key={listing.id} listing={listing} />
           ))}
         </div>

@@ -12,7 +12,7 @@ import { logger } from '@/utils/production-logger'
 
 interface CategoryFollowCardProps {
   category: { category_name: string }
-  listings: any[]
+  listings: Array<{ id: string; title: string; [key: string]: unknown }>
   currentUserId?: string
   onUnfollowCategory: (categoryName: string) => void
   onToggleFavorite?: (listingId: string) => void
@@ -26,7 +26,12 @@ const CategoryFollowCard: React.FC<CategoryFollowCardProps> = ({
   onToggleFavorite,
 }) => {
   const [isUnfollowing, setIsUnfollowing] = useState(false)
-  const [categoryDetails, setCategoryDetails] = useState<any>(null)
+  interface CategoryDetails {
+    id: string | number
+    name: string
+    [key: string]: unknown
+  }
+  const [categoryDetails, setCategoryDetails] = useState<CategoryDetails | null>(null)
   
   useEffect(() => {
     const loadCategoryDetails = async () => {

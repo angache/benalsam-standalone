@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase'
 import { fetchInventoryItems } from '@/services/inventoryService'
 import { createOffer } from '@/services/offerService'
 import MakeOfferForm from '@/components/offers/MakeOfferForm'
+import { logger } from '@/utils/production-logger'
 
 const MakeOfferPage = () => {
   const params = useParams()
@@ -19,8 +20,22 @@ const MakeOfferPage = () => {
   const { toast } = useToast()
   const listingId = params?.listingId as string
 
-  const [listing, setListing] = useState<any>(null)
-  const [inventoryItems, setInventoryItems] = useState<any[]>([])
+  interface ListingForOffer {
+    id: string
+    title: string
+    description: string
+    budget: number
+    user_id: string
+    status: string
+    main_image_url?: string | null
+  }
+  interface InventoryItem {
+    id: string
+    name: string
+    [key: string]: unknown
+  }
+  const [listing, setListing] = useState<ListingForOffer | null>(null)
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([])
   const [loadingListing, setLoadingListing] = useState(false)
   const [isFetchingInventory, setIsFetchingInventory] = useState(false)
   const [isSubmittingOffer, setIsSubmittingOffer] = useState(false)
@@ -72,7 +87,7 @@ const MakeOfferPage = () => {
 
         setListing(data)
       } catch (error) {
-        console.error('Error fetching listing:', error)
+        logger.error('[MakeOffer] Error fetching listing', { error })
         toast({
           title: 'Hata',
           description: 'İlan yüklenirken bir sorun oluştu.',
@@ -97,7 +112,7 @@ const MakeOfferPage = () => {
         const data = await fetchInventoryItems(user.id)
         setInventoryItems(data || [])
       } catch (error) {
-        console.error('Error fetching inventory:', error)
+        logger.error('[MakeOffer] Error fetching inventory', { error })
         setInventoryItems([])
       } finally {
         setIsFetchingInventory(false)
@@ -117,7 +132,15 @@ const MakeOfferPage = () => {
 
     setIsSubmittingOffer(true)
     try {
-      const offerPayload: any = {
+      interface OfferPayload {
+        listing_id: string
+        offering_user_id: string
+        message: string
+        status: string
+        offered_item_id?: string
+        offered_price?: number
+      }
+      const offerPayload: OfferPayload = {
         listing_id: listing.id,
         offering_user_id: user.id,
         message: offerData.message.trim(),
@@ -141,8 +164,8 @@ const MakeOfferPage = () => {
         })
         router.push(`/ilan/${listing.id}`)
       }
-    } catch (error: any) {
-      console.error('Error submitting offer:', error)
+    } catch (error: unknown) {
+      logger.error('[MakeOffer] Error submitting offer', { error })
       toast({
         title: 'Hata',
         description: error.message || 'Teklif gönderilirken bir sorun oluştu.',

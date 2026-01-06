@@ -2,6 +2,7 @@
 // BACKEND SERVICE
 // ===========================
 
+import { logger } from '@/utils/production-logger';
 import { PerformanceData, BackendServiceConfig } from '../types';
 import { BACKEND_SERVICE_CONFIG } from '../utils/config';
 
@@ -16,26 +17,26 @@ class BackendService {
   // Send performance data to backend
   async send(data: PerformanceData): Promise<boolean> {
     if (!this.isEnabled()) {
-      console.log('📊 Backend service disabled, skipping data send');
+      logger.debug('[BackendService] Service disabled, skipping data send');
       return false;
     }
 
     try {
-      console.log('📤 Sending performance data to backend');
+      logger.debug('[BackendService] Sending performance data to backend');
 
       const response = await this.makeRequest(data);
 
       if (response.ok) {
-        console.log('✅ Performance data sent to backend successfully');
+        logger.debug('[BackendService] Performance data sent successfully');
         this.retryCount = 0; // Reset retry count on success
         return true;
       } else {
-        console.warn(`⚠️ Failed to send performance data to backend: ${response.status}`);
+        logger.warn('[BackendService] Failed to send performance data', { status: response.status });
         return await this.handleRetry(data);
       }
 
     } catch (error) {
-      console.error('❌ Error sending performance data to backend:', error);
+      logger.error('[BackendService] Error sending performance data', { error });
       return await this.handleRetry(data);
     }
   }
@@ -67,12 +68,12 @@ class BackendService {
   // Handle retry logic
   private async handleRetry(data: PerformanceData): Promise<boolean> {
     if (this.retryCount >= this.config.retryAttempts) {
-      console.error(`❌ Max retry attempts (${this.config.retryAttempts}) reached`);
+      logger.error('[BackendService] Max retry attempts reached', { maxAttempts: this.config.retryAttempts });
       return false;
     }
 
     this.retryCount++;
-    console.log(`🔄 Retrying performance data send (attempt ${this.retryCount}/${this.config.retryAttempts})`);
+    logger.debug('[BackendService] Retrying performance data send', { attempt: this.retryCount, maxAttempts: this.config.retryAttempts });
 
     // Exponential backoff
     const delay = this.config.retryDelay * Math.pow(2, this.retryCount - 1);
@@ -95,7 +96,7 @@ class BackendService {
   // Update configuration
   updateConfig(config: Partial<BackendServiceConfig>): void {
     this.config = { ...this.config, ...config };
-    console.log('📊 Backend service config updated:', this.config);
+    logger.debug('[BackendService] Config updated', { config: this.config });
   }
 
   // Test backend connection
@@ -120,10 +121,13 @@ class BackendService {
         return { success: false, error: `HTTP ${response.status}` };
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error 
+        ? (error.name === 'AbortError' ? 'Timeout' : error.message)
+        : 'Unknown error';
       return { 
         success: false, 
-        error: error.name === 'AbortError' ? 'Timeout' : error.message 
+        error: errorMessage
       };
     }
   }
@@ -153,11 +157,11 @@ class BackendService {
   // Batch send multiple performance data entries
   async sendBatch(dataArray: PerformanceData[]): Promise<{ success: number; failed: number }> {
     if (!this.isEnabled()) {
-      console.log('📊 Backend service disabled, skipping batch send');
+      logger.debug('[BackendService] Service disabled, skipping batch send');
       return { success: 0, failed: dataArray.length };
     }
 
-    console.log(`📤 Sending batch of ${dataArray.length} performance data entries`);
+    logger.debug('[BackendService] Sending batch of performance data', { count: dataArray.length });
 
     const results = await Promise.allSettled(
       dataArray.map(data => this.send(data))
@@ -166,7 +170,7 @@ class BackendService {
     const success = results.filter(result => result.status === 'fulfilled' && result.value).length;
     const failed = results.length - success;
 
-    console.log(`📊 Batch send completed: ${success} success, ${failed} failed`);
+    logger.debug('[BackendService] Batch send completed', { success, failed });
 
     return { success, failed };
   }

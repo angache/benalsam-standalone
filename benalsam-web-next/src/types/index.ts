@@ -31,5 +31,5 @@ export { formatDate } from 'benalsam-shared-types';
 
 // Extended QueryFilters for web-specific functionality
 export interface ExtendedQueryFilters extends QueryFilters {
-  selectedCategories?: Array<{ name: string; icon?: any }>;
+  selectedCategories?: Array<{ name: string; icon?: React.ComponentType<{ className?: string }> | string | null }>;
 } 

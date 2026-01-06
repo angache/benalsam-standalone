@@ -3,6 +3,8 @@
  * Adapted from benalsam-web/src/services/uploadService.ts
  */
 
+import { logger } from '@/utils/production-logger';
+
 const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1'
 
 interface UploadedImage {
@@ -64,7 +66,7 @@ class UploadServiceClient {
       // Add type parameter
       formData.append('type', type)
 
-      console.log(`🚀 [UploadService] Uploading ${files.length} files to Upload Service...`)
+      logger.debug('[UploadServiceClient] Uploading files to Upload Service', { count: files.length })
 
       // Upload to Upload Service
       const response = await fetch(`${UPLOAD_SERVICE_URL}/upload/${type}`, {
@@ -86,7 +88,7 @@ class UploadServiceClient {
         throw new Error(result.message || 'Upload failed')
       }
 
-      console.log(`✅ [UploadService] Upload successful:`, result.data.images.length, 'images')
+      logger.debug('[UploadServiceClient] Upload successful', { imageCount: result.data.images.length })
 
       // Simulate progress completion
       if (onProgress) {
@@ -96,7 +98,7 @@ class UploadServiceClient {
       return result.data.images
 
     } catch (error) {
-      console.error('❌ [UploadService] Upload error:', error)
+      logger.error('[UploadServiceClient] Upload error', { error })
       throw error
     }
   }
@@ -112,7 +114,7 @@ class UploadServiceClient {
 
       return response.ok
     } catch (error) {
-      console.warn('⚠️ [UploadService] Service not available:', error)
+      logger.warn('[UploadServiceClient] Service not available', { error })
       return false
     }
   }

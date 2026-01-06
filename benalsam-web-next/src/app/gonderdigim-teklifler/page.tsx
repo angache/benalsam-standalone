@@ -11,6 +11,7 @@ import { fetchSentOffers, deleteOffer } from '@/services/offerService'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { EmptyStateList } from '@/components/ui/empty-state'
 import OfferCard from '@/components/offers/OfferCard'
+import { logger } from '@/utils/production-logger'
 
 interface Offer {
   id: string
@@ -67,7 +68,7 @@ const SentOffersPage = () => {
           setOffers(fetchedOffers || [])
         })
         .catch((error) => {
-          console.error('Error fetching sent offers:', error)
+          logger.error('[SentOffers] Error fetching sent offers', { error })
           toast({
             title: 'Hata',
             description: 'Teklifler yüklenirken bir sorun oluştu.',
@@ -98,7 +99,7 @@ const SentOffersPage = () => {
         })
       }
     } catch (error) {
-      console.error('Error deleting offer:', error)
+      logger.error('[SentOffers] Error deleting offer', { error })
     } finally {
       setDeletingOfferId(null)
     }

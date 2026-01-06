@@ -25,7 +25,10 @@ export interface CategoryAISuggestion {
   id: number;
   categoryId: number;
   suggestionType: 'title' | 'description' | 'attributes' | 'keywords';
-  suggestionData: any;
+  suggestionData: {
+    suggestions?: string[];
+    [key: string]: unknown;
+  };
   confidenceScore: number;
   isApproved: boolean;
   createdAt: string;
@@ -82,11 +85,11 @@ class AISuggestionsService {
         text: this.extractSuggestionText(suggestion),
         type: 'category' as const,
         score: suggestion.confidenceScore,
-        category: { id: suggestion.categoryId } as any,
+        category: { id: suggestion.categoryId } as Category,
         metadata: {
           suggestionType: suggestion.suggestionType,
           isApproved: suggestion.isApproved
-        } as any
+        }
       }));
 
       return [...categoryBasedSuggestions, ...generalSuggestions];

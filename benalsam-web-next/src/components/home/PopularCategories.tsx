@@ -16,9 +16,10 @@ import {
   Briefcase, Bike, Watch, Gift, TrendingUp, Flame
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import type { Category } from '@/types'
 
 // Icon mapping for categories
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   'car': Car,
   'home': Home,
   'laptop': Laptop,
@@ -43,7 +44,7 @@ interface PopularCategoriesProps {
    * Pre-fetched categories from batch API
    * If provided, component won't make its own API call
    */
-  categories?: any[]
+  categories?: Category[]
   /**
    * Loading state from batch API
    */
@@ -72,10 +73,10 @@ export default function PopularCategories({ categories: propCategories, isLoadin
 
   // Get top-level categories (level 0) and limit to 8
   const popularCategories = categories
-    ?.filter((cat: any) => cat.level === 0 && cat.is_active)
+    ?.filter((cat: Category) => cat.level === 0 && cat.is_active)
     .slice(0, 8) || []
 
-  const getIconForCategory = (category: any) => {
+  const getIconForCategory = (category: Category) => {
     const iconKey = category.icon?.toLowerCase() || category.slug?.toLowerCase() || ''
     return ICON_MAP[iconKey] || Gift
   }

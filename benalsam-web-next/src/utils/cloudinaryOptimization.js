@@ -1,5 +1,6 @@
 // Cloudinary image optimization utilities
 // Optimize Cloudinary URLs for better performance
+import { logger } from '@/utils/production-logger';
 
 const CLOUDINARY_BASE_URL = 'https://res.cloudinary.com/classibuy/image/upload/';
 
@@ -116,7 +117,7 @@ export const preloadCloudinaryImages = async (images, preset = 'medium') => {
     await Promise.all(promises);
     return true;
   } catch (error) {
-    console.warn('Some images failed to preload:', error);
+    logger.warn('[CloudinaryOptimization] Some images failed to preload', { error });
     return false;
   }
 };

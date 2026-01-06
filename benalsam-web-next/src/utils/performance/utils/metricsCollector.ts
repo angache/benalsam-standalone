@@ -2,6 +2,7 @@
 // METRICS COLLECTOR UTILITY
 // ===========================
 
+import { logger } from '@/utils/production-logger';
 import { onCLS, onINP, onFCP, onLCP, onTTFB, type Metric } from 'web-vitals';
 import { MetricsCollectorConfig } from '../types';
 import { METRICS_COLLECTOR_CONFIG } from './config';
@@ -74,10 +75,13 @@ class MetricsCollector {
   // Manual CLS management
   setManualCLS(value: number): void {
     this.manualCLS = value;
-    (window as any).simulatedCLS = value;
+    interface WindowWithSimulatedCLS extends Window {
+      simulatedCLS?: number;
+    }
+    (window as WindowWithSimulatedCLS).simulatedCLS = value;
     
     if (this.config.enableCLS) {
-      console.log(`📊 Manual CLS set to: ${value}`);
+      logger.debug('[MetricsCollector] Manual CLS set', { value });
     }
   }
 
@@ -92,12 +96,12 @@ class MetricsCollector {
 
   updateConfig(config: Partial<MetricsCollectorConfig>): void {
     this.config = { ...this.config, ...config };
-    console.log('📊 Metrics collector config updated:', this.config);
+    logger.debug('[MetricsCollector] Config updated', { config: this.config });
   }
 
   // Initialize all metrics collection
   initialize(): void {
-    console.log('🚀 Initializing Core Web Vitals collection');
+    logger.debug('[MetricsCollector] Initializing Core Web Vitals collection');
     
     // Initialize all enabled metrics
     if (this.config.enableLCP) {
@@ -135,7 +139,7 @@ class MetricsCollector {
       });
     }
 
-    console.log('✅ Core Web Vitals collection initialized');
+    logger.debug('[MetricsCollector] Core Web Vitals collection initialized');
   }
 
   // Utility methods
@@ -153,7 +157,7 @@ class MetricsCollector {
         try {
           callback(metric);
         } catch (error) {
-          console.error(`❌ Error in ${metricName} callback:`, error);
+          logger.error(`[MetricsCollector] Error in ${metricName} callback`, { error });
         }
       });
     }
@@ -163,7 +167,7 @@ class MetricsCollector {
     const { value, rating } = metric;
     const emoji = rating === 'good' ? '🟢' : rating === 'needs-improvement' ? '🟡' : '🔴';
     
-    console.log(`${emoji} ${name}: ${value}${name === 'CLS' ? '' : 'ms'} (${rating})`);
+    logger.debug(`[MetricsCollector] ${name} metric`, { value, rating, unit: name === 'CLS' ? '' : 'ms' });
   }
 
   // Get all registered callbacks

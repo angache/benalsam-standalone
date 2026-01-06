@@ -29,7 +29,7 @@ export const PERFORMANCE_CONFIG = {
 };
 
 // Check if performance tracking should be enabled
-export const shouldEnablePerformanceTracking = (user?: any): boolean => {
+export const shouldEnablePerformanceTracking = (user?: { role?: string; [key: string]: unknown }): boolean => {
   const isDevelopment = import.meta.env.DEV;
   const isAdmin = user?.role === 'admin' || user?.role === 'moderator';
   const isProduction = import.meta.env.PROD;

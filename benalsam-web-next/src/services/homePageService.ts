@@ -7,14 +7,14 @@
 
 import { listingService } from './listingService'
 import { categoryService } from './categoryService'
-import type { Listing } from '@/types'
+import type { Listing, Category } from '@/types'
 import { logger } from '@/utils/production-logger'
 
 export interface HomePageData {
   todaysListings: Listing[]
   flashDeals: Listing[]
   popularListings: Listing[]
-  popularCategories: any[]
+  popularCategories: Category[]
   recommendations?: Listing[]
   stats?: {
     totalListings: number

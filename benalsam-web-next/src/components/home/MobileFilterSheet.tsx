@@ -59,7 +59,7 @@ export function MobileFilterSheet({
 
   const rootCategories = categories?.filter(cat => cat.level === 0 && cat.is_active) || []
 
-  const handleFilterChange = (key: keyof FilterState, value: any) => {
+  const handleFilterChange = (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
     const newFilters = { ...localFilters, [key]: value }
     setLocalFilters(newFilters)
   }

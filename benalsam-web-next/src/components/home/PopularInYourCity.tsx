@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { MapPin, ArrowRight, Navigation } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import type { Listing } from '@/types'
 
 const CITIES = ['İzmir', 'İstanbul', 'Ankara', 'Bursa', 'Antalya']
 
@@ -92,7 +93,7 @@ export default function PopularInYourCity() {
 
       {/* Listings Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        {listings.slice(0, 8).map((listing: any) => (
+        {listings.slice(0, 8).map((listing: Listing) => (
           <ListingCard key={listing.id} listing={listing} />
         ))}
       </div>

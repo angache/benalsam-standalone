@@ -5,8 +5,54 @@
  * Run this in browser console to check Supabase client health
  */
 
-export const runSupabaseDiagnostics = async () => {
-  const diagnostics: any = {
+import type { Session, User as SupabaseUser, AuthError } from '@supabase/supabase-js'
+
+interface DiagnosticsCheck {
+  success?: boolean
+  error?: string
+  timeout?: boolean
+  time?: string
+  hasSession?: boolean
+  hasError?: boolean
+  hasUser?: boolean
+  status?: number
+  statusText?: string
+  exists?: boolean
+  hasAuth?: boolean
+  hasStorage?: boolean
+  hasFrom?: boolean
+  hasUrl?: boolean
+  hasKey?: boolean
+  urlLength?: number
+  keyLength?: number
+  urlPreview?: string
+  hasLocalStorage?: boolean
+  hasSessionStorage?: boolean
+  cookieCount?: number
+  supabaseCookies?: number
+}
+
+interface Diagnostics {
+  timestamp: string
+  checks: {
+    env?: DiagnosticsCheck
+    client?: DiagnosticsCheck
+    getSession?: DiagnosticsCheck
+    getUser?: DiagnosticsCheck
+    network?: DiagnosticsCheck
+    storage?: DiagnosticsCheck
+  }
+}
+
+type GetSessionResponse = { data: { session: Session | null }, error: AuthError | null }
+type GetUserResponse = { data: { user: SupabaseUser | null }, error: AuthError | null }
+
+interface WindowWithDiagnostics extends Window {
+  runSupabaseDiagnostics?: typeof runSupabaseDiagnostics
+}
+
+export const runSupabaseDiagnostics = async (): Promise<Diagnostics> => {
+  const diagnostics: Diagnostics = {
     timestamp: new Date().toISOString(),
     checks: {}
   }
@@ -35,10 +81,10 @@ export const runSupabaseDiagnostics = async () => {
       const sessionStart = Date.now()
       const sessionResult = await Promise.race([
         supabase.auth.getSession(),
-        new Promise((_, reject) => 
+        new Promise<GetSessionResponse>((_, reject) => 
           setTimeout(() => reject(new Error('getSession timeout')), 3000)
         )
-      ]) as any
+      ]) as GetSessionResponse
       const sessionTime = Date.now() - sessionStart
       
       diagnostics.checks.getSession = {
@@ -48,11 +94,12 @@ export const runSupabaseDiagnostics = async () => {
         hasError: !!sessionResult?.error,
         error: sessionResult?.error?.message
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
       diagnostics.checks.getSession = {
         success: false,
-        error: error?.message || String(error),
-        timeout: error?.message?.includes('timeout')
+        error: errorMessage,
+        timeout: errorMessage.includes('timeout')
       }
     }
 
@@ -61,10 +108,10 @@ export const runSupabaseDiagnostics = async () => {
       const getUserStart = Date.now()
       const userResult = await Promise.race([
         supabase.auth.getUser(),
-        new Promise((_, reject) => 
+        new Promise<GetUserResponse>((_, reject) => 
           setTimeout(() => reject(new Error('getUser timeout')), 3000)
         )
-      ]) as any
+      ]) as GetUserResponse
       const getUserTime = Date.now() - getUserStart
       
       diagnostics.checks.getUser = {
@@ -74,11 +121,12 @@ export const runSupabaseDiagnostics = async () => {
         hasError: !!userResult?.error,
         error: userResult?.error?.message
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
       diagnostics.checks.getUser = {
         success: false,
-        error: error?.message || String(error),
-        timeout: error?.message?.includes('timeout')
+        error: errorMessage,
+        timeout: errorMessage.includes('timeout')
       }
     }
 
@@ -99,10 +147,11 @@ export const runSupabaseDiagnostics = async () => {
         status: response.status,
         statusText: response.statusText
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
       diagnostics.checks.network = {
         success: false,
-        error: error?.message || String(error)
+        error: errorMessage
       }
     }
 
@@ -116,10 +165,11 @@ export const runSupabaseDiagnostics = async () => {
       ).length
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
     diagnostics.checks.client = {
       exists: false,
-      error: error?.message || String(error)
+      error: errorMessage
     }
   }
 
@@ -128,6 +178,6 @@ export const runSupabaseDiagnostics = async () => {
 
 // Make it available globally for console debugging
 if (typeof window !== 'undefined') {
-  (window as any).runSupabaseDiagnostics = runSupabaseDiagnostics
+  (window as WindowWithDiagnostics).runSupabaseDiagnostics = runSupabaseDiagnostics
 }
 

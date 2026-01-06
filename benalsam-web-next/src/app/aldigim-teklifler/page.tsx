@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { fetchReceivedOffers, updateOfferStatus } from '@/services/offerService'
+import { logger } from '@/utils/production-logger'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { EmptyStateList } from '@/components/ui/empty-state'
 import OfferCard from '@/components/offers/OfferCard'
@@ -67,7 +68,7 @@ const ReceivedOffersPage = () => {
           setOffers(fetchedOffers || [])
         })
         .catch((error) => {
-          console.error('Error fetching received offers:', error)
+          logger.error('[ReceivedOffers] Error fetching received offers', { error })
           toast({
             title: 'Hata',
             description: 'Teklifler yüklenirken bir sorun oluştu.',
@@ -94,7 +95,7 @@ const ReceivedOffersPage = () => {
         )
       }
     } catch (error) {
-      console.error('Error updating offer status:', error)
+      logger.error('[ReceivedOffers] Error updating offer status', { error })
     } finally {
       setUpdatingOfferId(null)
     }

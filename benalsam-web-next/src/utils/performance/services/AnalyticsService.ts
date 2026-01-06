@@ -2,6 +2,7 @@
 // ANALYTICS SERVICE
 // ===========================
 
+import { logger } from '@/utils/production-logger';
 import { Metric, AnalyticsServiceConfig } from '../types';
 import { ANALYTICS_SERVICE_CONFIG } from '../utils/config';
 
@@ -34,7 +35,7 @@ class AnalyticsService {
       return;
     }
 
-    console.log(`📊 Sending batch of ${metrics.length} metrics to analytics`);
+    logger.debug('[AnalyticsService] Sending batch of metrics', { count: metrics.length });
 
     switch (this.config.provider) {
       case 'google-analytics':
@@ -47,7 +48,7 @@ class AnalyticsService {
         this.sendToCustomAnalytics(metrics);
         break;
       default:
-        console.warn(`⚠️ Unknown analytics provider: ${this.config.provider}`);
+        logger.warn('[AnalyticsService] Unknown analytics provider', { provider: this.config.provider });
     }
   }
 
@@ -73,7 +74,7 @@ class AnalyticsService {
   updateConfig(config: Partial<AnalyticsServiceConfig>): void {
     this.config = { ...this.config, ...config };
     this.initializeFlushInterval();
-    console.log('📊 Analytics service config updated:', this.config);
+    logger.debug('[AnalyticsService] Config updated', { config: this.config });
   }
 
   // Private methods
@@ -91,26 +92,38 @@ class AnalyticsService {
 
   private sendToGoogleAnalytics(metrics: Metric[]): void {
     // Google Analytics 4 implementation
-    if (typeof window !== 'undefined' && (window as any).gtag) {
+    interface WindowWithGtag extends Window {
+      gtag?: (command: string, targetId: string, config?: Record<string, unknown>) => void
+    }
+    
+    if (typeof window !== 'undefined' && (window as WindowWithGtag).gtag) {
       metrics.forEach(metric => {
-        (window as any).gtag('event', 'web_vitals', {
+        (window as WindowWithGtag).gtag!('event', 'web_vitals', {
           event_category: 'Web Vitals',
           event_label: metric.name,
           value: Math.round(metric.value),
           non_interaction: true,
         });
       });
-      console.log(`📊 Sent ${metrics.length} metrics to Google Analytics`);
+      logger.debug('[AnalyticsService] Sent metrics to Google Analytics', { count: metrics.length });
     } else {
-      console.warn('⚠️ Google Analytics not available (gtag not found)');
+      logger.warn('[AnalyticsService] Google Analytics not available', { reason: 'gtag not found' });
     }
   }
 
   private sendToSentry(metrics: Metric[]): void {
     // Sentry implementation
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
+    interface WindowWithSentry extends Window {
+      Sentry?: {
+        metrics: {
+          increment: (name: string, options?: Record<string, unknown>) => void
+        }
+      }
+    }
+    
+    if (typeof window !== 'undefined' && (window as WindowWithSentry).Sentry) {
       metrics.forEach(metric => {
-        (window as any).Sentry.metrics.increment('web_vitals', {
+        (window as WindowWithSentry).Sentry!.metrics.increment('web_vitals', {
           tags: {
             metric: metric.name,
             rating: metric.rating,
@@ -118,9 +131,9 @@ class AnalyticsService {
           value: metric.value,
         });
       });
-      console.log(`📊 Sent ${metrics.length} metrics to Sentry`);
+      logger.debug('[AnalyticsService] Sent metrics to Sentry', { count: metrics.length });
     } else {
-      console.warn('⚠️ Sentry not available (Sentry not found)');
+      logger.warn('[AnalyticsService] Sentry not available', { reason: 'Sentry not found' });
     }
   }
 
@@ -140,17 +153,17 @@ class AnalyticsService {
       })
         .then(response => {
           if (response.ok) {
-            console.log(`📊 Sent ${metrics.length} metrics to custom analytics`);
+            logger.debug('[AnalyticsService] Sent metrics to custom analytics', { count: metrics.length });
           } else {
-            console.warn(`⚠️ Failed to send metrics to custom analytics: ${response.status}`);
+            logger.warn('[AnalyticsService] Failed to send metrics to custom analytics', { status: response.status });
           }
         })
         .catch(error => {
-          console.error('❌ Error sending metrics to custom analytics:', error);
+          logger.error('[AnalyticsService] Error sending metrics to custom analytics', { error });
         });
     } else {
       // Fallback to console logging
-      console.log('📊 Analytics metrics:', metrics);
+      logger.debug('[AnalyticsService] Analytics metrics', { metrics });
     }
   }
 
@@ -211,8 +224,9 @@ class AnalyticsService {
 
       this.send(testMetric);
       return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      return { success: false, error: errorMessage };
     }
   }
 

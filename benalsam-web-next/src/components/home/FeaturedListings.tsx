@@ -39,7 +39,10 @@ export default function FeaturedListings({
         
         if (result?.listings && result.listings.length > 0) {
           // Check source (listingService marks source in dev mode)
-          const source = (result.listings[0] as any)?.__src === 'S' ? 'Supabase' : 'Elasticsearch'
+          interface ListingWithSource extends Listing {
+            __src?: 'S' | 'E'
+          }
+          const source = (result.listings[0] as ListingWithSource)?.__src === 'S' ? 'Supabase' : 'Elasticsearch'
           logger.debug('[FeaturedListings] Got listings', { count: result.listings.length, source })
           return result.listings
         }
@@ -86,7 +89,7 @@ export default function FeaturedListings({
       </h2>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {listings.map((listing: any) => (
+        {listings.map((listing: Listing) => (
           <ListingCard
             key={listing.id}
             listing={listing}

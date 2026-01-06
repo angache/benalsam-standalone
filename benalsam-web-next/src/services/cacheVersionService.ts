@@ -163,7 +163,7 @@ export const clearAllCache = () => {
 export const getCacheStatus = () => {
   if (typeof window === 'undefined') return {}
 
-  const status: Record<string, any> = {}
+  const status: Record<string, { version: number; checkedThisSession: boolean; lastCheck: string }> = {}
   
   Object.values(CACHE_VERSION_KEYS).forEach(key => {
     const version = localStorage.getItem(`${key}_version`) || '0'
@@ -198,8 +198,19 @@ export const forceClearCache = (cacheKey: string) => {
 }
 
 // Debug fonksiyonları (development'ta)
+interface WindowWithCacheVersionService extends Window {
+  cacheVersionService?: {
+    checkCategoriesVersion: () => Promise<boolean>
+    checkCategoryCountsVersion: () => Promise<boolean>
+    checkListingsVersion: () => Promise<boolean>
+    clearAllCache: () => void
+    getCacheStatus: () => Record<string, { version: number; checkedThisSession: boolean; lastCheck: string }>
+    forceClearCache: (cacheKey: string) => void
+  }
+}
+
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  (window as any).cacheVersionService = {
+  (window as WindowWithCacheVersionService).cacheVersionService = {
     checkCategoriesVersion,
     checkCategoryCountsVersion,
     checkListingsVersion,

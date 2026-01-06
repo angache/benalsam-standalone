@@ -3,6 +3,7 @@
 // ===========================
 
 import React from 'react';
+import { logger } from '@/utils/production-logger';
 import { PerformanceHookResult } from '../types';
 import metricsService from '../services/MetricsService';
 import metricsCollector from '../utils/metricsCollector';
@@ -95,17 +96,17 @@ export const usePerformanceMonitoring = (): PerformanceHookResult => {
 // Hook for manual performance tracking
 export const useManualPerformanceTracking = () => {
   const [isTracking, setIsTracking] = React.useState(false);
-  const [trackedMetrics, setTrackedMetrics] = React.useState<any>({});
+  const [trackedMetrics, setTrackedMetrics] = React.useState<Record<string, number>>({});
 
   const startTracking = React.useCallback(() => {
     setIsTracking(true);
     setTrackedMetrics({});
-    console.log('📊 Manual performance tracking started');
+    logger.debug('[usePerformanceMonitoring] Manual performance tracking started');
   }, []);
 
   const stopTracking = React.useCallback(() => {
     setIsTracking(false);
-    console.log('📊 Manual performance tracking stopped');
+    logger.debug('[usePerformanceMonitoring] Manual performance tracking stopped');
   }, []);
 
   const trackMetric = React.useCallback((name: string, value: number) => {

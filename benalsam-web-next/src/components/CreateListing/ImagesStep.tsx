@@ -12,14 +12,15 @@ import OptimizedImage from '@/components/OptimizedImage'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import StockImageSearchModal from '@/components/CreateListing/StockImageSearchModal'
 import { logger } from '@/utils/production-logger'
+import type { ImageItem } from '@/types/listing'
 
 const MAX_IMAGES_DEFAULT = 5
 const MAX_FILE_SIZE_MB_DEFAULT = 2
 
 interface ImagesStepProps {
-  formData: any[]
+  formData: ImageItem[]
   mainImageIndex: number
-  onChange: (newImages: any[]) => void
+  onChange: (newImages: ImageItem[]) => void
   onSetMainImage: (index: number) => void
   onNext: () => void
   onBack: () => void
@@ -128,7 +129,7 @@ export default function ImagesStep({ formData, mainImageIndex, onChange, onSetMa
     return parts.join(' ')
   }, [selectedCategoryName])
 
-  const handleStockImageSelect = async (selectedImages: any[]) => {
+  const handleStockImageSelect = async (selectedImages: Array<{ id: string; urls: { small: string; regular: string }; description: string | null; user: { name: string } }>) => {
     if (selectedImages.length === 0) return
 
     const availableSlots = userMaxImages - images.length

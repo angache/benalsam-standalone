@@ -4,6 +4,8 @@
  * Functions for smooth scrolling behavior
  */
 
+import { logger } from '@/utils/production-logger';
+
 /**
  * Smooth scroll to an element
  * 
@@ -29,7 +31,7 @@ export function smoothScrollTo(
     : element
 
   if (!targetElement) {
-    console.warn(`Element not found: ${element}`)
+    logger.warn('[SmoothScroll] Element not found', { element })
     return
   }
 
