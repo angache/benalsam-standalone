@@ -36,8 +36,12 @@ test.describe('Favorite Toggle Flow', () => {
       // Login failed - tests will skip
       isLoggedIn = false;
       console.log('Login failed in beforeEach - test user may not exist');
+    } else if (currentUrl.includes('/auth/2fa/verify')) {
+      // User has 2FA enabled - skip tests (would need TOTP code)
+      isLoggedIn = false;
+      console.log('User has 2FA enabled - skipping tests (would need TOTP code)');
     } else {
-      // Wait for redirect
+      // Wait for redirect to home
       await expect(page).toHaveURL(/.*\/$/, { timeout: 15000 });
       isLoggedIn = true;
     }

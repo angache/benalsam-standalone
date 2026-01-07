@@ -180,7 +180,7 @@ export async function createTestUser(): Promise<string | null> {
       // Ensure profile exists
       const { data: profile, error: profileCheckError } = await supabaseAdmin
         .from('profiles')
-        .select('id, username, name')
+        .select('id, username, name, is_2fa_enabled')
         .eq('id', existingUser.id)
         .single();
 
@@ -207,7 +207,7 @@ export async function createTestUser(): Promise<string | null> {
           name: TEST_USER.name,
           username: uniqueUsername,
           role: 'user',
-          is_2fa_enabled: false,
+          is_2fa_enabled: false, // Disable 2FA for test user
           status: 'active',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -216,6 +216,21 @@ export async function createTestUser(): Promise<string | null> {
         if (profileError) {
           console.error('❌ Failed to create profile for existing user:', profileError.message);
           console.error('   Profile error details:', JSON.stringify(profileError, null, 2));
+        }
+      } else {
+        // Ensure 2FA is disabled for test user (E2E tests can't handle TOTP codes)
+        if (profile.is_2fa_enabled) {
+          console.log('⚠️  Test user has 2FA enabled - disabling for E2E tests');
+          const { error: disable2FAError } = await supabaseAdmin
+            .from('profiles')
+            .update({ is_2fa_enabled: false })
+            .eq('id', existingUser.id);
+          
+          if (disable2FAError) {
+            console.warn('⚠️  Failed to disable 2FA for test user:', disable2FAError.message);
+          } else {
+            console.log('✅ 2FA disabled for test user');
+          }
         }
       }
 
@@ -323,18 +338,19 @@ export async function createTestUser(): Promise<string | null> {
       .single();
 
     if (!existingProfile) {
-      // Create profile with all required fields (matching register route)
-      const { error: profileError } = await supabaseAdmin.from('profiles').insert({
-        id: authData.user.id,
-        email: TEST_USER.email,
-        name: TEST_USER.name,
-        username: uniqueUsername,
-        role: 'user',
-        is_2fa_enabled: false,
-        status: 'active',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
+        // Create profile with all required fields (matching register route)
+        // Disable 2FA for test user (E2E tests can't handle TOTP codes)
+        const { error: profileError } = await supabaseAdmin.from('profiles').insert({
+          id: authData.user.id,
+          email: TEST_USER.email,
+          name: TEST_USER.name,
+          username: uniqueUsername,
+          role: 'user',
+          is_2fa_enabled: false, // Disable 2FA for test user
+          status: 'active',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
 
       if (profileError) {
         console.error('❌ Failed to create test user profile:', profileError.message);

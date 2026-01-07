@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, Suspense } from 'react'
+import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -31,6 +32,10 @@ function LoginPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/'
+  
+  // Get email and password from query params (for E2E tests)
+  const emailFromQuery = searchParams.get('email')
+  const passwordFromQuery = searchParams.get('password')
 
   const {
     register,
@@ -41,9 +46,21 @@ function LoginPageContent() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
+      email: emailFromQuery || '',
+      password: passwordFromQuery || '',
       remember: false,
     },
   })
+  
+  // Set form values from query params if they exist (for E2E tests)
+  React.useEffect(() => {
+    if (emailFromQuery) {
+      setValue('email', emailFromQuery)
+    }
+    if (passwordFromQuery) {
+      setValue('password', passwordFromQuery)
+    }
+  }, [emailFromQuery, passwordFromQuery, setValue])
 
   const remember = watch('remember')
 

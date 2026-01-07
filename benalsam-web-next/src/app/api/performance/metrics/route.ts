@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/auth'
 import { supabaseAdmin } from '@/lib/supabase'
-import { createSuccessResponse, apiErrors } from '@/lib/api-responses'
+import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 import { logger } from '@/utils/production-logger'
 import { z } from 'zod'
 
