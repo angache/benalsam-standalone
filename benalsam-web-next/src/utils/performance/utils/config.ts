@@ -15,11 +15,11 @@ export const PERFORMANCE_CONFIG: PerformanceConfig = {
   // Logging configuration - Reduced verbosity
   LOG_TO_CONSOLE: false, // Disable console logging by default
   SEND_TO_ANALYTICS: false, // Disable analytics to reduce noise
-  SEND_TO_BACKEND: import.meta.env.DEV ? false : true, // Only in production
+  SEND_TO_BACKEND: process.env.NODE_ENV === 'production', // Only in production
   
   // Backend API configuration
-  BACKEND_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002',
-  API_ENDPOINT: '/trends/performance-data',
+  BACKEND_URL: typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+  API_ENDPOINT: '/api/performance/metrics',
   
   // Timeout configuration for metrics collection
   METRICS_TIMEOUT: 10000, // 10 seconds
@@ -95,9 +95,9 @@ export const SCORE_WEIGHTS = {
 
 // Environment-specific configurations
 export const getEnvironmentConfig = () => {
-  const isDevelopment = import.meta.env.DEV;
-  const isProduction = import.meta.env.PROD;
-  const isTest = import.meta.env.MODE === 'test';
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isProduction = process.env.NODE_ENV === 'production';
+  const isTest = process.env.NODE_ENV === 'test';
 
   return {
     isDevelopment,

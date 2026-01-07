@@ -188,6 +188,16 @@ describe('POST /api/messages', () => {
   })
 
   it('should create a message with valid data', async () => {
+    // Mock validateBody to return success
+    vi.mocked(validateBody).mockResolvedValue({
+      success: true,
+      data: {
+        conversationId: 'conv-1',
+        senderId: 'test-user-id',
+        content: 'Test message',
+      },
+    })
+
     const mockMessage = {
       id: 'message-id',
       conversation_id: 'conv-1',

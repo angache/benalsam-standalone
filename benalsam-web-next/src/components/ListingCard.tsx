@@ -164,7 +164,48 @@ const formatDate = (dateString?: string) => {
   }
 }
 
-// Main ListingCard component
+/**
+ * ListingCard Component
+ * 
+ * Displays a listing card with image, title, price, location, and user information.
+ * Supports multiple sizes (small, normal, large) and various interactive features.
+ * 
+ * Features:
+ * - Favorite toggle functionality
+ * - Category breadcrumb display
+ * - User avatar and rating
+ * - Urgency badges
+ * - Premium badges (featured, showcase, etc.)
+ * - Action menu (edit, delete, toggle status)
+ * - Responsive design with framer-motion animations
+ * 
+ * @param listing - The listing object to display
+ * @param size - Card size: 'small', 'normal', or 'large' (default: 'normal')
+ * @param onToggleFavorite - Callback when favorite button is clicked
+ * @param currentUser - Current user object (for favorite status)
+ * @param isFavoritedOverride - Override favorite status (optional)
+ * @param priority - Whether to show priority styling
+ * @param showActions - Whether to show action menu (edit/delete)
+ * @param onView - Callback when card is viewed
+ * @param onEdit - Callback when edit is clicked
+ * @param onDelete - Callback when delete is clicked
+ * @param onToggleStatus - Callback when status is toggled
+ * @param isDeleting - Whether listing is currently being deleted
+ * @param getStatusBadge - Custom function to render status badge
+ * @param getPremiumBadges - Custom function to get premium badges
+ * @param onDopingClick - Callback when premium features are clicked
+ * @param onMarkAsCompleted - Callback when listing is marked as completed
+ * 
+ * @example
+ * ```tsx
+ * <ListingCard
+ *   listing={listing}
+ *   size="normal"
+ *   onToggleFavorite={(id) => toggleFavorite(id)}
+ *   currentUser={user}
+ * />
+ * ```
+ */
 export const ListingCard: React.FC<ListingCardProps> = ({
   listing,
   size = 'normal',

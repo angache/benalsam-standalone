@@ -68,11 +68,18 @@ function LoginPageContent() {
         await new Promise(resolve => setTimeout(resolve, 100))
 
         if (result.requires2FA) {
+          // Clear any existing 2FA verification cookie before new login
+          if (typeof window !== 'undefined' && result.user?.id) {
+            const cookieName = `2fa_verified_${result.user.id}`
+            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+            logger.debug('[LoginPage] Cleared existing 2FA cookie', { cookieName, userId: result.user.id })
+          }
+          
           // Store credentials temporarily in sessionStorage for 2FA verification
           // This is more secure than passing in URL
           if (typeof window !== 'undefined') {
-            sessionStorage.setItem('2fa_pending_email', email)
-            sessionStorage.setItem('2fa_pending_password', password)
+            sessionStorage.setItem('2fa_pending_email', data.email)
+            sessionStorage.setItem('2fa_pending_password', data.password)
             sessionStorage.setItem('2fa_pending_redirect', callbackUrl)
           }
           
@@ -137,6 +144,7 @@ function LoginPageContent() {
                 id="email"
                 type="email"
                 placeholder="ornek@email.com"
+                autoComplete="email"
                 {...register('email')}
                 disabled={isLoading}
               />
@@ -155,6 +163,7 @@ function LoginPageContent() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
+                  autoComplete="current-password"
                   {...register('password')}
                   disabled={isLoading}
                 />

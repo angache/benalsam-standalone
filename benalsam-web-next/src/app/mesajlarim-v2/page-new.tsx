@@ -8,6 +8,7 @@ import { MessagingErrorBoundary } from '@/components/ErrorBoundary';
 import { ConversationList } from '@/components/messaging/ConversationList';
 import { ChatArea } from '@/components/messaging/ChatArea';
 import type { Message } from '@/types';
+import { usePerformanceMonitoring } from '@/utils/performance/performance';
 
 interface ConversationPreview {
   id: string;
@@ -38,6 +39,20 @@ export default function MessagesV2Page() {
 
   const { user, isLoading } = useAuth();
   const { setActiveConversation, refreshUnreadCount } = useNotifications();
+  
+  // Performance monitoring for critical page
+  const { metrics, score, forceSend } = usePerformanceMonitoring();
+  
+  // Track performance when page is fully loaded
+  useEffect(() => {
+    if (metrics && score !== undefined) {
+      const timer = setTimeout(() => {
+        forceSend('/mesajlarim-v2')
+      }, 2000) // Wait 2 seconds for all metrics to stabilize
+      
+      return () => clearTimeout(timer)
+    }
+  }, [metrics, score, forceSend])
   
   const [conversations, setConversations] = useState<ConversationPreview[]>([]);
   const [loading, setLoading] = useState(true);

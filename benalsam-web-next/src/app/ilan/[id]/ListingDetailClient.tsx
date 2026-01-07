@@ -30,6 +30,7 @@ import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import type { Listing } from '@/types'
+import { usePerformanceMonitoring } from '@/utils/performance/performance'
 
 interface ListingDetailClientProps {
   listing: Partial<Listing>
@@ -46,6 +47,21 @@ export function ListingDetailClient({ listing: initialListing, listingId }: List
   
   // Use initialListing from SSR
   const [listing, setListing] = useState(initialListing)
+  
+  // Performance monitoring for critical page
+  const { metrics, score, forceSend } = usePerformanceMonitoring()
+  
+  // Track performance when page is fully loaded
+  useEffect(() => {
+    if (isMounted && metrics && score !== undefined) {
+      // Force send metrics after page load
+      const timer = setTimeout(() => {
+        forceSend(`/ilan/${listingId}`)
+      }, 2000) // Wait 2 seconds for all metrics to stabilize
+      
+      return () => clearTimeout(timer)
+    }
+  }, [isMounted, metrics, score, forceSend, listingId])
   
   // Mark component as mounted to prevent hydration mismatch
   useEffect(() => {

@@ -342,7 +342,7 @@ export const useCreateListingStore = create<CreateListingState>()(
       validateStep: (step: number) => {
         const state = get()
         
-        logger.debug('[CreateListingStore] Validating step', { step, formData })
+        logger.debug('[CreateListingStore] Validating step', {
           step,
           category: state.category,
           details: state.details,

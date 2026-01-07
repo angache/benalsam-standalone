@@ -245,6 +245,31 @@ function calculateProgressToNextLevel(
 /**
  * Calculate trust score for a user
  */
+/**
+ * Calculates the trust score for a user based on multiple factors.
+ * 
+ * Factors considered:
+ * - Profile completeness (name, bio, avatar, etc.)
+ * - Email and phone verification status
+ * - Number and quality of listings
+ * - Completed trades count
+ * - Reviews and ratings
+ * - Average response time
+ * - Account age
+ * - Social links presence
+ * - Premium status
+ * 
+ * @param userId - The UUID of the user to calculate trust score for
+ * @returns Promise resolving to TrustScoreCalculation with total score, breakdown, level, and progress
+ * @throws {Error} If user ID is missing or user profile not found
+ * 
+ * @example
+ * ```typescript
+ * const calculation = await calculateTrustScore('user-123')
+ * console.log(`Trust Score: ${calculation.totalScore}`)
+ * console.log(`Level: ${calculation.level}`)
+ * ```
+ */
 export async function calculateTrustScore(userId: string): Promise<TrustScoreCalculation> {
   try {
     if (!userId) {
@@ -338,7 +363,22 @@ export async function calculateTrustScore(userId: string): Promise<TrustScoreCal
 }
 
 /**
- * Update trust score in database
+ * Calculates and updates the trust score in the database for a user.
+ * 
+ * This function:
+ * 1. Calculates the current trust score
+ * 2. Updates the user's profile with the new score and breakdown
+ * 3. Returns the calculation result
+ * 
+ * @param userId - The UUID of the user to update trust score for
+ * @returns Promise resolving to TrustScoreCalculation
+ * @throws {Error} If calculation or database update fails
+ * 
+ * @example
+ * ```typescript
+ * const calculation = await updateTrustScore('user-123')
+ * // Profile is now updated with new trust_score and trust_score_breakdown
+ * ```
  */
 export async function updateTrustScore(userId: string): Promise<TrustScoreCalculation> {
   const calculation = await calculateTrustScore(userId)

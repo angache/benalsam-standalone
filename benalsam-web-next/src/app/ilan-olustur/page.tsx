@@ -9,11 +9,12 @@ import LocationStep from '@/components/CreateListing/LocationStep'
 import ReviewStep from '@/components/CreateListing/ReviewStep'
 import ProgressModal, { ProgressPhase } from '@/components/CreateListing/ProgressModal'
 import { useCreateListingStore } from '@/stores'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { createListingWithUploadService } from '@/services/createListingService'
 import { logger } from '@/utils/production-logger'
+import { usePerformanceMonitoring } from '@/utils/performance/performance'
 
 export default function CreateListingPage() {
   const router = useRouter()
@@ -26,6 +27,20 @@ export default function CreateListingPage() {
   const [progressPhase, setProgressPhase] = useState<ProgressPhase>('idle')
   const [progressMessage, setProgressMessage] = useState('')
   const [uploadProgress, setUploadProgress] = useState(0)
+  
+  // Performance monitoring for critical page
+  const { metrics, score, forceSend } = usePerformanceMonitoring()
+  
+  // Track performance when page is fully loaded
+  useEffect(() => {
+    if (metrics && score !== undefined) {
+      const timer = setTimeout(() => {
+        forceSend('/ilan-olustur')
+      }, 2000) // Wait 2 seconds for all metrics to stabilize
+      
+      return () => clearTimeout(timer)
+    }
+  }, [metrics, score, forceSend])
   
   const {
     currentStep,

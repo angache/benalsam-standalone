@@ -29,7 +29,7 @@ const useRoutePerformance = () => {
     };
 
     // Console'da göster (sadece debug modunda)
-    const debugMode = import.meta.env.DEV && false; // Disabled by default
+    const debugMode = process.env.NODE_ENV === 'development' && false; // Disabled by default
     if (debugMode) {
       console.group(`📊 Route Performance: ${routePath}`);
       logger.debug('[useRoutePerformance] Route Duration', { duration: `${routeDuration}ms` });
@@ -87,7 +87,7 @@ const useRoutePerformance = () => {
       };
 
       // Only log in debug mode
-      const debugMode = import.meta.env.DEV && false; // Disabled by default
+      const debugMode = process.env.NODE_ENV === 'development' && false; // Disabled by default
       if (debugMode) {
         logger.debug('[useRoutePerformance] Metric', { metric: metric.name, routePath, value: `${metric.value}ms`, rating: metric.rating });
       }

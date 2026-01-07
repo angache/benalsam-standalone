@@ -79,7 +79,11 @@ class ProductionLogger {
    */
   error(message: string, context?: LogContext): void {
     // Always log errors, even in production
-    console.error(`❌ [ERROR] ${message}`, context || '')
+    if (context && Object.keys(context).length > 0) {
+      console.error(`❌ [ERROR] ${message}`, context)
+    } else {
+      console.error(`❌ [ERROR] ${message}`)
+    }
   }
 
   /**

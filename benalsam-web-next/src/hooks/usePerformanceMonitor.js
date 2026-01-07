@@ -12,7 +12,7 @@ export const usePerformanceMonitor = () => {
     const navigationTime = navigationEnd - navigationStart.current;
     
     // Only log in development and when performance monitoring is enabled
-    const shouldLog = import.meta.env.DEV && false; // Disabled by default
+    const shouldLog = process.env.NODE_ENV === 'development' && false; // Disabled by default
     
     if (shouldLog) {
       logger.debug('[usePerformanceMonitor] Navigation', { pathname: location.pathname, time: `${navigationTime.toFixed(2)}ms` });

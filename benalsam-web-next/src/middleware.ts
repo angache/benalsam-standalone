@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
 /**
  * Middleware for route protection using Supabase Auth
@@ -97,6 +98,56 @@ export async function middleware(req: NextRequest) {
   if (user && isAuth && !path.startsWith('/auth/2fa/')) {
     console.log('🔒 [Middleware] Redirecting to home - already authenticated')
     return NextResponse.redirect(new URL('/', req.url))
+  }
+
+  // Check 2FA requirement for authenticated users accessing protected routes
+  if (user && isProtected && !path.startsWith('/auth/2fa/')) {
+    // Check if 2FA is enabled for this user
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }
+    )
+
+    try {
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .select('is_2fa_enabled, last_2fa_used')
+        .eq('id', user.id)
+        .single()
+
+      if (!profileError && profile?.is_2fa_enabled) {
+        // Check if 2FA was verified in this session (check cookie)
+        const twoFactorVerified = req.cookies.get(`2fa_verified_${user.id}`)?.value === 'true'
+        
+        // Also check if 2FA was used recently (within last 30 minutes)
+        const last2FAUsed = profile.last_2fa_used
+        const isRecent2FA = last2FAUsed 
+          ? (Date.now() - new Date(last2FAUsed).getTime()) < 30 * 60 * 1000 // 30 minutes
+          : false
+
+        if (!twoFactorVerified && !isRecent2FA) {
+          console.log('🔒 [Middleware] 2FA required but not verified, redirecting to 2FA page', {
+            userId: user.id,
+            hasCookie: !!twoFactorVerified,
+            last2FAUsed: last2FAUsed || 'never'
+          })
+          
+          const twoFactorUrl = new URL('/auth/2fa/verify', req.url)
+          twoFactorUrl.searchParams.set('userId', user.id)
+          twoFactorUrl.searchParams.set('redirect', path)
+          return NextResponse.redirect(twoFactorUrl)
+        }
+      }
+    } catch (error) {
+      // If profile check fails, log but don't block access (fail open for now)
+      console.error('🔒 [Middleware] Error checking 2FA status:', error)
+    }
   }
 
   return response

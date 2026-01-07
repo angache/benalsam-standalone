@@ -30,9 +30,9 @@ export const PERFORMANCE_CONFIG = {
 
 // Check if performance tracking should be enabled
 export const shouldEnablePerformanceTracking = (user?: { role?: string; [key: string]: unknown }): boolean => {
-  const isDevelopment = import.meta.env.DEV;
+  const isDevelopment = process.env.NODE_ENV === 'development';
   const isAdmin = user?.role === 'admin' || user?.role === 'moderator';
-  const isProduction = import.meta.env.PROD;
+  const isProduction = process.env.NODE_ENV === 'production';
   
   // Enable in development only when explicitly enabled
   if (isDevelopment && PERFORMANCE_CONFIG.ENABLE_IN_DEV) {

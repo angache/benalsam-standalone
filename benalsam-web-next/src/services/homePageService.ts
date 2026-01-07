@@ -29,6 +29,26 @@ export interface HomePageData {
  * @param userId - Optional user ID for personalized recommendations
  * @returns Combined homepage data
  */
+/**
+ * Fetches all data needed for the home page.
+ * 
+ * Fetches in parallel:
+ * - Today's listings (last 24 hours)
+ * - Flash deals (urgent listings)
+ * - Popular listings (by view count)
+ * - Categories with counts
+ * - Personalized recommendations (if userId provided)
+ * 
+ * @param userId - Optional user ID for personalized recommendations
+ * @returns Promise resolving to HomePageData object with all sections
+ * 
+ * @example
+ * ```typescript
+ * const data = await fetchHomePageData('user-123')
+ * console.log(data.todaysListings.length)
+ * console.log(data.popularCategories.length)
+ * ```
+ */
 export async function fetchHomePageData(
   userId?: string | null
 ): Promise<HomePageData> {

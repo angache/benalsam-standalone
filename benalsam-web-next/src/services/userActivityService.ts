@@ -20,6 +20,33 @@ const VALID_ACTIVITY_TYPES = [
 const LISTING_HISTORY_KEY = 'benalsam_listing_history';
 const LAST_SEARCH_KEY = 'benalsam_last_search';
 
+/**
+ * Adds a user activity to the database.
+ * 
+ * Valid activity types:
+ * - listing_created, listing_updated, listing_deleted
+ * - offer_sent, offer_received, offer_accepted, offer_rejected
+ * - message_sent, profile_updated, favorite_added
+ * - review_given, review_received, listing_viewed
+ * 
+ * @param userId - The UUID of the user
+ * @param activityType - Type of activity (must be in VALID_ACTIVITY_TYPES)
+ * @param title - Activity title
+ * @param description - Optional activity description
+ * @param relatedId - Optional related entity ID (e.g., listing ID, message ID)
+ * @returns Promise resolving to true if successful, false otherwise
+ * 
+ * @example
+ * ```typescript
+ * await addUserActivity(
+ *   'user-123',
+ *   'listing_created',
+ *   'Yeni İlan Oluşturuldu',
+ *   'iPhone 13 ilanı oluşturuldu',
+ *   'listing-456'
+ * )
+ * ```
+ */
 export const addUserActivity = async (userId: string, activityType: string, title: string, description: string = '', relatedId: string | null = null): Promise<boolean> => {
   if (!userId || !activityType || !title) {
     logger.error('[UserActivityService] Missing required parameters for user activity');
@@ -54,6 +81,22 @@ export const addUserActivity = async (userId: string, activityType: string, titl
   }
 };
 
+/**
+ * Fetches user activities from the database.
+ * Returns activities ordered by creation date (newest first).
+ * 
+ * @param userId - The UUID of the user
+ * @param limit - Maximum number of activities to return (default: 20)
+ * @returns Promise resolving to array of activity objects
+ * 
+ * @example
+ * ```typescript
+ * const activities = await getUserActivities('user-123', 50)
+ * activities.forEach(activity => {
+ *   console.log(activity.activity_title)
+ * })
+ * ```
+ */
 export const getUserActivities = async (userId: string, limit: number = 20) => {
   if (!userId) return [];
   
@@ -124,6 +167,18 @@ export const clearUserActivities = async (userId: string): Promise<boolean> => {
   }
 };
 
+/**
+ * Adds a listing ID to the user's viewing history in localStorage.
+ * Maintains a maximum of 20 most recent listings.
+ * 
+ * @param listingId - The UUID of the listing to add
+ * 
+ * @example
+ * ```typescript
+ * addToListingHistory('listing-123')
+ * const history = getListingHistory() // ['listing-123', ...]
+ * ```
+ */
 export const addToListingHistory = (listingId: string) => {
   if (!listingId) return;
   

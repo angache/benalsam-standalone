@@ -128,9 +128,23 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', targetUserId)
 
-    return createSuccessResponse({
+    // Create response with success
+    const response = createSuccessResponse({
       message: 'Kod doğrulandı',
     })
+
+    // Set cookie to mark 2FA as verified for this session
+    // This cookie will be checked in middleware to allow access to protected routes
+    // httpOnly: false so client-side can read it for UI updates
+    response.cookies.set(`2fa_verified_${targetUserId}`, 'true', {
+      httpOnly: false, // Allow client-side reading for Header component
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 60, // 30 minutes
+      path: '/',
+    })
+
+    return response
   } catch (error: unknown) {
     // Get userId from error context or try to get from session
     let errorUserId = 'unknown'

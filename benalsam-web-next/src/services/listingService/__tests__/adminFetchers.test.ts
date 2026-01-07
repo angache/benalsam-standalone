@@ -2,7 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AdminListingFetchers } from '../adminFetchers';
 import { apiClient } from '../../../lib/apiClient';
 
-vi.mock('../../../lib/apiClient');
+vi.mock('../../../lib/apiClient', () => ({
+  apiClient: {
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+  },
+}));
 
 const mockListing = {
   id: '1',

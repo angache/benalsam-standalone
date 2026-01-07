@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, memo, useMemo, useCallback } from 'react'
+import { useState, memo, useMemo, useCallback, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Search, Plus, User, Menu, LogIn, LogOut, Settings, UserCircle, MessageCircle, FileText, Package, Heart, Users, MessageSquare, Send, Crown, Grid3x3, ChevronDown, ArrowRight, Sparkles } from 'lucide-react'
@@ -43,6 +43,58 @@ const Header = memo(function Header() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const { isScrolled } = useStickyHeader({ threshold: 10 })
+
+  // Check if 2FA is verified - STRICT: If 2FA is enabled, hide menu unless cookie is present
+  const is2FAVerified = useMemo(() => {
+    // Always log for debugging
+    logger.debug('[Header] 2FA verification check START', {
+      hasUser: !!user,
+      userId: user?.id,
+      is2FAEnabled: user?.is_2fa_enabled,
+      pathname
+    })
+    
+    // If 2FA is not enabled, show menu
+    if (!user?.is_2fa_enabled || !user?.id) {
+      logger.debug('[Header] 2FA not enabled, showing menu')
+      return true
+    }
+    
+    // If 2FA is enabled, check cookie immediately
+    try {
+      const cookieName = `2fa_verified_${user.id}`
+      const cookies = typeof document !== 'undefined' ? document.cookie.split('; ') : []
+      const cookie = cookies.find(c => c.trim().startsWith(`${cookieName}=`))
+      const cookieValue = cookie?.split('=')[1]?.trim()
+      const isVerified = cookieValue === 'true'
+      
+      logger.debug('[Header] 2FA verification check RESULT', {
+        userId: user.id,
+        is2FAEnabled: user.is_2fa_enabled,
+        cookieName,
+        cookieFound: !!cookie,
+        cookieValue,
+        isVerified,
+        willHideMenu: !isVerified, // If not verified, menu will be hidden
+        cookieString: typeof document !== 'undefined' ? document.cookie.substring(0, 300) : 'N/A'
+      })
+      
+      // STRICT: If 2FA is enabled and cookie is not found, return false (hide menu)
+      if (!isVerified) {
+        logger.warn('[Header] ⚠️ 2FA NOT verified - menu items will be HIDDEN', {
+          userId: user.id,
+          cookieName,
+          cookieFound: !!cookie,
+          is2FAEnabled: user.is_2fa_enabled
+        })
+      }
+      return isVerified
+    } catch (error) {
+      logger.error('[Header] Error checking 2FA cookie', { error })
+      // On error, be conservative and hide menu
+      return false
+    }
+  }, [user?.is_2fa_enabled, user?.id, pathname])
 
   // Fetch categories for mega menu
   const { data: categories } = useQuery({
@@ -225,6 +277,7 @@ const Header = memo(function Header() {
               <User className="h-4 w-4 animate-pulse" />
             </Button>
           ) : isAuthenticated && user ? (
+            // Always show dropdown menu, but conditionally show menu items based on 2FA
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
@@ -256,60 +309,78 @@ const Header = memo(function Header() {
                   <UserCircle className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                   <span>Profilim</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigate('/mesajlarim-v2')}>
-                  <MessageCircle className="mr-2 h-4 w-4" style={{color: 'var(--primary)'}} />
-                  <span className="flex items-center gap-2">
-                    Mesajlarım
-                    {unreadCount > 0 && (
-                      <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                        {unreadCount > 99 ? '99+' : unreadCount}
+                {(() => {
+                  const shouldShowMenu = is2FAVerified || !user?.is_2fa_enabled
+                  logger.debug('[Header] Menu items visibility check', {
+                    is2FAVerified,
+                    is2FAEnabled: user?.is_2fa_enabled,
+                    shouldShowMenu,
+                    userId: user?.id
+                  })
+                  return shouldShowMenu
+                })() ? (
+                  <>
+                    <DropdownMenuItem onClick={() => handleNavigate('/mesajlarim-v2')}>
+                      <MessageCircle className="mr-2 h-4 w-4" style={{color: 'var(--primary)'}} />
+                      <span className="flex items-center gap-2">
+                        Mesajlarım
+                        {unreadCount > 0 && (
+                          <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                          </span>
+                        )}
                       </span>
-                    )}
-                  </span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigate('/ilanlarim')}>
-                  <FileText className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
-                  <span>İlanlarım</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigate('/envanterim')}>
-                  <Package className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
-                  <span>Envanterim</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigate('/favorilerim')}>
-                  <Heart className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
-                  <span>Favorilerim</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigate('/takip-ettiklerim')}>
-                  <Users className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
-                  <span>Takip Ettiklerim</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleNavigate('/aldigim-teklifler')}>
-                  <MessageSquare className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
-                  <span>Aldığım Teklifler</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigate('/gonderdigim-teklifler')}>
-                  <Send className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
-                  <span>Gönderdiğim Teklifler</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleNavigate('/premium/dashboard')}>
-                  <Crown className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
-                  <span>Premium Dashboard</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigate('/premium/settings')}>
-                  <Settings className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
-                  <span>Premium Ayarlar</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleNavigate('/ayarlar')}>
-                  <Settings className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
-                  <span>Ayarlar</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={requestPermission}>
-                  <MessageSquare className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
-                  <span>Bildirimler</span>
-                </DropdownMenuItem>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate('/ilanlarim')}>
+                      <FileText className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                      <span>İlanlarım</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate('/envanterim')}>
+                      <Package className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                      <span>Envanterim</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate('/favorilerim')}>
+                      <Heart className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                      <span>Favorilerim</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate('/takip-ettiklerim')}>
+                      <Users className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                      <span>Takip Ettiklerim</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => handleNavigate('/aldigim-teklifler')}>
+                      <MessageSquare className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                      <span>Aldığım Teklifler</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate('/gonderdigim-teklifler')}>
+                      <Send className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                      <span>Gönderdiğim Teklifler</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => handleNavigate('/premium/dashboard')}>
+                      <Crown className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                      <span>Premium Dashboard</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleNavigate('/premium/settings')}>
+                      <Settings className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                      <span>Premium Ayarlar</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => handleNavigate('/ayarlar')}>
+                      <Settings className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                      <span>Ayarlar</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={requestPermission}>
+                      <MessageSquare className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
+                      <span>Bildirimler</span>
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <DropdownMenuItem disabled className="text-muted-foreground">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>2FA doğrulaması gerekli</span>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4 text-red-600" />
                   <span className="text-red-600">Çıkış Yap</span>
@@ -396,44 +467,101 @@ const Header = memo(function Header() {
                   </Button>
                   {isAuthenticated && (
                     <>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start"
-                        onClick={() => {
-                          setShowMobileMenu(false)
-                          handleNavigate('/mesajlarim-v2')
-                        }}
-                      >
-                        <MessageCircle className="mr-2 h-4 w-4" />
-                        <span className="flex-1 text-left">Mesajlarım</span>
-                        {unreadCount > 0 && (
-                          <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                            {unreadCount > 9 ? '9+' : unreadCount}
-                          </span>
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start"
-                        onClick={() => {
-                          setShowMobileMenu(false)
-                          handleNavigate('/ilanlarim')
-                        }}
-                      >
-                        <FileText className="mr-2 h-4 w-4" />
-                        İlanlarım
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start"
-                        onClick={() => {
-                          setShowMobileMenu(false)
-                          handleNavigate('/favorilerim')
-                        }}
-                      >
-                        <Heart className="mr-2 h-4 w-4" />
-                        Favorilerim
-                      </Button>
+                      {is2FAVerified || !user?.is_2fa_enabled ? (
+                        <>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              setShowMobileMenu(false)
+                              handleNavigate('/mesajlarim-v2')
+                            }}
+                          >
+                            <MessageCircle className="mr-2 h-4 w-4" />
+                            <span className="flex-1 text-left">Mesajlarım</span>
+                            {unreadCount > 0 && (
+                              <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                {unreadCount > 9 ? '9+' : unreadCount}
+                              </span>
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              setShowMobileMenu(false)
+                              handleNavigate('/ilanlarim')
+                            }}
+                          >
+                            <FileText className="mr-2 h-4 w-4" />
+                            İlanlarım
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              setShowMobileMenu(false)
+                              handleNavigate('/favorilerim')
+                            }}
+                          >
+                            <Heart className="mr-2 h-4 w-4" />
+                            Favorilerim
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              setShowMobileMenu(false)
+                              handleNavigate('/envanterim')
+                            }}
+                          >
+                            <Package className="mr-2 h-4 w-4" />
+                            Envanterim
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              setShowMobileMenu(false)
+                              handleNavigate('/takip-ettiklerim')
+                            }}
+                          >
+                            <Users className="mr-2 h-4 w-4" />
+                            Takip Ettiklerim
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              setShowMobileMenu(false)
+                              handleNavigate('/aldigim-teklifler')
+                            }}
+                          >
+                            <MessageSquare className="mr-2 h-4 w-4" />
+                            Aldığım Teklifler
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start"
+                            onClick={() => {
+                              setShowMobileMenu(false)
+                              handleNavigate('/gonderdigim-teklifler')
+                            }}
+                          >
+                            <Send className="mr-2 h-4 w-4" />
+                            Gönderdiğim Teklifler
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-muted-foreground"
+                          disabled
+                        >
+                          <Settings className="mr-2 h-4 w-4" />
+                          2FA doğrulaması gerekli
+                        </Button>
+                      )}
                     </>
                   )}
                 </div>

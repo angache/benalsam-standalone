@@ -11,7 +11,18 @@ import scoreCalculator from './utils/scoreCalculator';
 import backendService from './services/BackendService';
 import analyticsService from './services/AnalyticsService';
 
-// Initialize Core Web Vitals tracking
+/**
+ * Initializes Core Web Vitals tracking for the application.
+ * Sets up listeners for LCP, FCP, CLS, TTFB, and INP metrics.
+ * 
+ * @throws {Error} If initialization fails (logged but not thrown)
+ * 
+ * @example
+ * ```typescript
+ * // Initialize on app startup
+ * initPerformanceTracking()
+ * ```
+ */
 export const initPerformanceTracking = () => {
   try {
     logger.debug('[Performance] Initializing Core Web Vitals tracking');
@@ -52,13 +63,38 @@ export const initPerformanceTracking = () => {
   }
 };
 
-// Hook for React components
+/**
+ * React hook for performance monitoring in components.
+ * Provides real-time performance metrics and insights.
+ * 
+ * @returns Performance monitoring hook instance
+ * 
+ * @example
+ * ```typescript
+ * function MyComponent() {
+ *   const { metrics, score } = usePerformanceMonitoring()
+ *   return <div>Performance: {score}</div>
+ * }
+ * ```
+ */
 export const usePerformanceMonitoring = () => {
   const { usePerformanceMonitoring: useHook } = require('./hooks/usePerformanceMonitoring');
   return useHook();
 };
 
-// Manual performance tracking
+/**
+ * Manually tracks performance metrics for a specific route.
+ * Combines collected metrics with custom metrics and sends to backend.
+ * 
+ * @param route - The route path to track (e.g., '/ilan/123')
+ * @param customMetrics - Optional custom metrics to override collected ones
+ * @returns Object containing current metrics and calculated score
+ * 
+ * @example
+ * ```typescript
+ * const { metrics, score } = trackPerformance('/ilan/123', { LCP: 1500 })
+ * ```
+ */
 export const trackPerformance = (
   route: string, 
   customMetrics?: Partial<PerformanceMetrics>
@@ -93,12 +129,33 @@ export const setManualCLS = (value: number): void => {
   metricsService.setManualCLS(value);
 };
 
-// Get current performance state
+/**
+ * Gets the current performance tracking state.
+ * 
+ * @returns Current state object with all collected metrics
+ * 
+ * @example
+ * ```typescript
+ * const state = getPerformanceState()
+ * console.log(state.metrics.LCP)
+ * ```
+ */
 export const getPerformanceState = () => {
   return metricsService.getState();
 };
 
-// Get performance insights
+/**
+ * Gets performance insights and optimization suggestions.
+ * Analyzes collected metrics and provides actionable recommendations.
+ * 
+ * @returns Object containing insights and suggestions
+ * 
+ * @example
+ * ```typescript
+ * const { insights, suggestions } = getPerformanceInsights()
+ * suggestions.forEach(suggestion => console.log(suggestion))
+ * ```
+ */
 export const getPerformanceInsights = () => {
   return {
     insights: metricsService.getPerformanceInsights(),
@@ -116,7 +173,21 @@ export const resetPerformanceMetrics = () => {
   metricsService.reset();
 };
 
-// Force send performance data
+/**
+ * Forces immediate sending of performance data to backend.
+ * Useful for testing or when you need to send data before page unload.
+ * 
+ * @param route - Optional route path (defaults to current window location)
+ * 
+ * @example
+ * ```typescript
+ * // Send current page metrics
+ * forceSendPerformanceData()
+ * 
+ * // Send for specific route
+ * forceSendPerformanceData('/ilan/123')
+ * ```
+ */
 export const forceSendPerformanceData = (route?: string) => {
   const targetRoute = route || window.location.pathname;
   metricsService.forceSend(targetRoute);

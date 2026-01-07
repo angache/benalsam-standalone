@@ -14,7 +14,34 @@ interface ProtectedRouteProps {
 
 /**
  * Protected Route Component
- * Wraps content that requires authentication or specific roles
+ * 
+ * Wraps content that requires authentication, admin role, or 2FA verification.
+ * Automatically redirects unauthorized users to appropriate pages.
+ * 
+ * Features:
+ * - Authentication check (optional)
+ * - Admin/moderator role check (optional)
+ * - 2FA verification check (optional)
+ * - Loading state while checking authentication
+ * - Automatic redirects for unauthorized access
+ * 
+ * @param children - React children to render if access is granted
+ * @param requireAuth - Whether authentication is required (default: true)
+ * @param requireAdmin - Whether admin/moderator role is required (default: false)
+ * @param require2FA - Whether 2FA verification is required (default: false)
+ * 
+ * @example
+ * ```tsx
+ * // Require authentication
+ * <ProtectedRoute>
+ *   <MyComponent />
+ * </ProtectedRoute>
+ * 
+ * // Require admin role
+ * <ProtectedRoute requireAdmin>
+ *   <AdminPanel />
+ * </ProtectedRoute>
+ * ```
  */
 export function ProtectedRoute({
   children,

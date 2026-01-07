@@ -32,6 +32,29 @@ interface FormErrors {
   [key: string]: string | undefined
 }
 
+/**
+ * Custom hook for managing inventory item form state and operations.
+ * Handles both create and edit modes with image upload, category selection,
+ * validation, and submission.
+ * 
+ * @param itemId - Optional item ID for edit mode. If provided, loads existing item data.
+ * @returns Object containing form state, handlers, and utility functions
+ * 
+ * @example
+ * ```typescript
+ * // Create mode
+ * const form = useInventoryForm()
+ * 
+ * // Edit mode
+ * const form = useInventoryForm('item-123')
+ * 
+ * // Usage
+ * <input 
+ *   value={form.formData.name} 
+ *   onChange={form.handleChange}
+ * />
+ * ```
+ */
 export const useInventoryForm = (itemId?: string) => {
   const router = useRouter()
   const { user, isLoading: loadingAuth } = useAuth()
@@ -364,6 +387,40 @@ export const useInventoryForm = (itemId?: string) => {
     [isUploading, validate, formData, selectedMainCategory, selectedSubCategory, selectedSubSubCategory, isEditMode, user, router, toast, getCategoryPath]
   )
 
+  const updateFormData = useCallback((updates: Partial<FormData>) => {
+    setFormData((prev) => ({ ...prev, ...updates }))
+  }, [])
+
+  const addImages = useCallback((files: File[]) => {
+    const newImages: ImageItem[] = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+      name: file.name,
+      isUploaded: false,
+    }))
+    handleImageArrayChange([...formData.images, ...newImages])
+  }, [formData.images, handleImageArrayChange])
+
+  const removeImage = useCallback((index: number) => {
+    handleRemoveImageFromArray(index)
+  }, [handleRemoveImageFromArray])
+
+  const setMainImage = useCallback((index: number) => {
+    handleSetMainImage(index)
+  }, [handleSetMainImage])
+
+  const validateForm = useCallback(() => {
+    return validate()
+  }, [validate])
+
+  const setFormErrors = useCallback((newErrors: FormErrors) => {
+    setErrors(newErrors)
+  }, [])
+
+  const clearErrors = useCallback(() => {
+    setErrors({})
+  }, [])
+
   return {
     formData,
     selectedMainCategory,
@@ -382,6 +439,15 @@ export const useInventoryForm = (itemId?: string) => {
     handleRemoveImageFromArray,
     handleSetMainImage,
     handleSubmit,
+    updateFormData,
+    setUploadProgress,
+    setIsUploading,
+    addImages,
+    removeImage,
+    setMainImage,
+    validateForm,
+    setErrors: setFormErrors,
+    clearErrors,
   }
 }
 

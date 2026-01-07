@@ -372,7 +372,7 @@ export const useAIPerformanceAnalysis = () => {
       });
 
       // Development modunda logger ile göster
-      if (import.meta.env.DEV) {
+      if (process.env.NODE_ENV === 'development') {
         logger.debug('[useAIPerformanceAnalysis] AI Performance Analysis', {
           route: routePath,
           score: analysis.score,

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { logger } from '@/utils/production-logger';
-import { validateQuery, commonSchemas } from '@/lib/api-validation';
+import { validateBody, validateQuery, commonSchemas } from '@/lib/api-validation';
 import { z } from 'zod';
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors';
 import { getServerUser } from '@/lib/supabase-server';

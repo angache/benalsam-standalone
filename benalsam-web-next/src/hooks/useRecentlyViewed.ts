@@ -14,6 +14,29 @@ export interface RecentlyViewedItem {
   viewedAt: string;
 }
 
+/**
+ * Custom hook for managing recently viewed items.
+ * Stores and retrieves recently viewed listings from localStorage.
+ * Automatically limits to MAX_ITEMS (20) most recent items.
+ * 
+ * @returns Object containing items array, addItem function, and clearAll function
+ * 
+ * @example
+ * ```typescript
+ * const { items, addItem, clearAll } = useRecentlyViewed()
+ * 
+ * // Add a viewed item
+ * addItem({
+ *   id: 'listing-123',
+ *   title: 'iPhone 13',
+ *   price: 15000,
+ *   image_url: 'https://...'
+ * })
+ * 
+ * // Clear all
+ * clearAll()
+ * ```
+ */
 export function useRecentlyViewed() {
   const [items, setItems] = useState<RecentlyViewedItem[]>([]);
 
@@ -30,7 +53,13 @@ export function useRecentlyViewed() {
     }
   }, []);
 
-  // Add item to recently viewed
+  /**
+   * Adds an item to the recently viewed list.
+   * If the item already exists, it's moved to the top.
+   * Automatically maintains MAX_ITEMS limit.
+   * 
+   * @param item - Item to add (without viewedAt timestamp, which is auto-generated)
+   */
   const addItem = (item: Omit<RecentlyViewedItem, 'viewedAt'>) => {
     try {
       setItems(prevItems => {
@@ -43,17 +72,23 @@ export function useRecentlyViewed() {
           ...filtered
         ].slice(0, MAX_ITEMS); // Keep only last N items
 
-        // Save to localStorage
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(newItems));
+        // Save to localStorage (outside setState to avoid issues)
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(newItems));
+        } catch (storageError) {
+          logger.error('[useRecentlyViewed] Error saving recently viewed', { error: storageError });
+        }
         
         return newItems;
       });
     } catch (error) {
-      logger.error('[useRecentlyViewed] Error saving recently viewed', { error });
+      logger.error('[useRecentlyViewed] Error adding recently viewed item', { error });
     }
   };
 
-  // Clear all recently viewed
+  /**
+   * Clears all recently viewed items from both state and localStorage.
+   */
   const clearAll = () => {
     try {
       localStorage.removeItem(STORAGE_KEY);

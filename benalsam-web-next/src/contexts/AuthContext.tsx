@@ -608,6 +608,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           district: data.district,
           created_at: data.created_at,
           updated_at: data.updated_at,
+          is_2fa_enabled: data.is_2fa_enabled || false, // Include 2FA status
         } as User
         
         logger.debug('[AuthContext] Setting user state...', { userId })
@@ -657,12 +658,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
 
       if (error) {
+        // Check if error is due to email not confirmed
+        const isEmailNotConfirmed = error.message?.toLowerCase().includes('email not confirmed') || 
+                                   error.message?.toLowerCase().includes('email_not_confirmed') ||
+                                   error.status === 400 && error.message?.toLowerCase().includes('invalid');
+        
         logger.error('[AuthContext] Login error from Supabase', { 
           error: error.message, 
           code: error.name,
-          status: error.status 
+          status: error.status,
+          email: credentials.email,
+          errorDetails: error,
+          isEmailNotConfirmed
         })
-        return { success: false, error: error.message }
+        
+        // Provide more helpful error message
+        let userFriendlyError = error.message;
+        if (isEmailNotConfirmed || (error.status === 400 && error.message?.toLowerCase().includes('invalid'))) {
+          userFriendlyError = 'Email adresiniz doğrulanmamış olabilir. Lütfen e-postanızı kontrol edin veya yönetici ile iletişime geçin.';
+        }
+        
+        return { success: false, error: userFriendlyError }
       }
 
       if (data.session) {

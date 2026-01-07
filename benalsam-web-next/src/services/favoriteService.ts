@@ -23,6 +23,22 @@ const validateFavoriteData = (userId: string, listingId: string): boolean => {
   return true;
 };
 
+/**
+ * Adds a listing to user's favorites.
+ * 
+ * @param userId - The UUID of the user
+ * @param listingId - The UUID of the listing to add
+ * @returns Promise resolving to favorite object or null if failed
+ * @returns Returns object with `already_favorited: true` if listing is already in favorites
+ * 
+ * @example
+ * ```typescript
+ * const result = await addFavorite('user-123', 'listing-456')
+ * if (result?.already_favorited) {
+ *   console.log('Already in favorites')
+ * }
+ * ```
+ */
 export const addFavorite = async (userId: string, listingId: string) => {
   if (!validateFavoriteData(userId, listingId)) {
     return null;
@@ -55,6 +71,21 @@ export const addFavorite = async (userId: string, listingId: string) => {
   }
 };
 
+/**
+ * Removes a listing from user's favorites.
+ * 
+ * @param userId - The UUID of the user
+ * @param listingId - The UUID of the listing to remove
+ * @returns Promise resolving to true if successful, false otherwise
+ * 
+ * @example
+ * ```typescript
+ * const success = await removeFavorite('user-123', 'listing-456')
+ * if (success) {
+ *   console.log('Removed from favorites')
+ * }
+ * ```
+ */
 export const removeFavorite = async (userId: string, listingId: string): Promise<boolean> => {
   if (!validateFavoriteData(userId, listingId)) {
     return false;
@@ -82,6 +113,21 @@ export const removeFavorite = async (userId: string, listingId: string): Promise
   }
 };
 
+/**
+ * Checks if a listing is in user's favorites.
+ * 
+ * @param userId - The UUID of the user
+ * @param listingId - The UUID of the listing to check
+ * @returns Promise resolving to true if listing is favorited, false otherwise
+ * 
+ * @example
+ * ```typescript
+ * const favorited = await isFavorite('user-123', 'listing-456')
+ * if (favorited) {
+ *   console.log('This listing is in favorites')
+ * }
+ * ```
+ */
 export const isFavorite = async (userId: string, listingId: string): Promise<boolean> => {
   try {
     if (!userId || !listingId) {
@@ -107,6 +153,20 @@ export const isFavorite = async (userId: string, listingId: string): Promise<boo
   }
 };
 
+/**
+ * Fetches favorite status for multiple listings at once.
+ * More efficient than calling isFavorite multiple times.
+ * 
+ * @param userId - The UUID of the user
+ * @param listingIds - Array of listing UUIDs to check
+ * @returns Promise resolving to object mapping listing IDs to favorite status
+ * 
+ * @example
+ * ```typescript
+ * const statuses = await fetchUserFavoriteStatusForListings('user-123', ['listing-1', 'listing-2'])
+ * // { data: { 'listing-1': true, 'listing-2': false } }
+ * ```
+ */
 export const fetchUserFavoriteStatusForListings = async (userId: string, listingIds: string[]): Promise<{ data: { [key: string]: boolean } }> => {
   if (!userId || !listingIds || listingIds.length === 0) {
     return { data: {} };
@@ -136,6 +196,21 @@ export const fetchUserFavoriteStatusForListings = async (userId: string, listing
   }
 };
 
+/**
+ * Fetches all favorite listings for a user.
+ * Returns listings with user profile information and favorite metadata.
+ * 
+ * @param userId - The UUID of the user
+ * @returns Promise resolving to array of Listing objects with favorite metadata
+ * 
+ * @example
+ * ```typescript
+ * const favorites = await fetchUserFavoriteListings('user-123')
+ * favorites.forEach(listing => {
+ *   console.log(listing.title, listing.favorited_at)
+ * })
+ * ```
+ */
 export const fetchUserFavoriteListings = async (userId: string): Promise<Listing[]> => {
   if (!userId) return [];
   
@@ -172,6 +247,20 @@ export const fetchUserFavoriteListings = async (userId: string): Promise<Listing
   }
 };
 
+/**
+ * Toggles favorite status for a listing.
+ * If listing is favorited, removes it. If not, adds it.
+ * 
+ * @param userId - The UUID of the user
+ * @param listingId - The UUID of the listing to toggle
+ * @returns Promise resolving to true if listing is now favorited, false if removed
+ * 
+ * @example
+ * ```typescript
+ * const isNowFavorite = await toggleFavorite('user-123', 'listing-456')
+ * console.log(`Listing is now ${isNowFavorite ? 'favorited' : 'unfavorited'}`)
+ * ```
+ */
 export const toggleFavorite = async (userId: string, listingId: string): Promise<boolean> => {
   try {
     if (!userId || !listingId) {

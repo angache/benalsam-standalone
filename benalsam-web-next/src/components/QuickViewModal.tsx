@@ -132,6 +132,7 @@ export function QuickViewModal({
                     url: `${window.location.origin}${generateListingUrl(listing.title, listing.id)}`
                   });
                 }}
+                aria-label="Paylaş"
               >
                 <Share2 size={20} />
               </Button>

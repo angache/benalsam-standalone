@@ -54,7 +54,19 @@ export const uploadImages = async (
 }
 
 /**
- * Delete images from Supabase Storage
+ * Deletes images from Supabase Storage by their public URLs.
+ * Extracts file paths from URLs and removes them from the storage bucket.
+ * 
+ * @param urls - Array of public image URLs to delete
+ * @returns Promise resolving to array of deleted file paths, or null if no valid URLs
+ * 
+ * @example
+ * ```typescript
+ * const deleted = await deleteImages([
+ *   'https://...supabase.co/storage/v1/object/public/item_images/user123/image.jpg'
+ * ])
+ * console.log(`Deleted ${deleted?.length || 0} images`)
+ * ```
  */
 export const deleteImages = async (urls: string[]): Promise<{ path: string }[] | null> => {
   if (!urls || urls.length === 0) return
@@ -88,7 +100,35 @@ export const deleteImages = async (urls: string[]): Promise<{ path: string }[] |
 }
 
 /**
- * Process images for Supabase Storage (legacy function for compatibility)
+ * Processes images for Supabase Storage upload.
+ * Handles both new file uploads and existing image URLs.
+ * Manages main image selection and deletion of old images.
+ * 
+ * This is a legacy function maintained for compatibility with existing code.
+ * 
+ * @param images - Array of image items (can be File objects or existing URLs)
+ * @param mainImageIndex - Index of the main image in the images array
+ * @param bucket - Storage bucket name (default: 'item_images')
+ * @param context_unused - Unused parameter (kept for compatibility)
+ * @param userId - User ID for organizing uploaded files
+ * @param category_unused - Unused parameter (kept for compatibility)
+ * @param onProgress - Optional progress callback (not currently used)
+ * @param initialImageUrls - Array of existing image URLs to compare against (for deletion)
+ * @returns Promise resolving to object with mainImageUrl, additionalImageUrls, and urlsToDelete
+ * 
+ * @example
+ * ```typescript
+ * const result = await processImagesForSupabase(
+ *   imageItems,
+ *   0, // main image index
+ *   'item_images',
+ *   '',
+ *   'user-123',
+ *   '',
+ *   undefined,
+ *   existingImageUrls
+ * )
+ * ```
  */
 interface ImageItem {
   file?: File

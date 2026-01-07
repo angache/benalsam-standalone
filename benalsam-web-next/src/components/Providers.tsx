@@ -7,7 +7,37 @@ import { Toaster } from '@/components/ui/toaster'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { NotificationProvider } from '@/contexts/NotificationContext'
 import { ChatbotProvider } from '@/contexts/ChatbotContext'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { initPerformanceTracking } from '@/utils/performance/performance'
+import { shouldEnablePerformanceTracking } from '@/config/performance'
+import { useAuth } from '@/hooks/useAuth'
+
+/**
+ * Performance Tracking Initializer Component
+ * Initializes performance tracking based on user role and environment
+ */
+function PerformanceTrackingInitializer() {
+  const { user } = useAuth()
+
+  useEffect(() => {
+    // Only initialize on client-side
+    if (typeof window === 'undefined') return
+
+    // Check if performance tracking should be enabled
+    const isEnabled = shouldEnablePerformanceTracking(user)
+
+    if (isEnabled) {
+      try {
+        initPerformanceTracking()
+      } catch (error) {
+        // Silently fail - performance tracking is non-critical
+        console.error('[Providers] Failed to initialize performance tracking', error)
+      }
+    }
+  }, [user])
+
+  return null
+}
 
 /**
  * All app providers combined
@@ -16,6 +46,7 @@ import { useState } from 'react'
  * - ThemeProvider for dark/light mode
  * - QueryClientProvider for React Query
  * - Toaster for toast notifications
+ * - Performance tracking initialization
  */
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -49,6 +80,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             disableTransitionOnChange
           >
             <ChatbotProvider>
+              <PerformanceTrackingInitializer />
               {children}
               <Toaster />
             </ChatbotProvider>

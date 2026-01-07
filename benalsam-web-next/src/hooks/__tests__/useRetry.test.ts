@@ -2,11 +2,9 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useRetry } from '../useRetry'
 
-// Mock setTimeout
-vi.useFakeTimers()
-
 describe('useRetry', () => {
   beforeEach(() => {
+    vi.useFakeTimers()
     vi.clearAllMocks()
     vi.clearAllTimers()
   })
@@ -130,12 +128,26 @@ describe('useRetry', () => {
     })
   })
 
-  it('should reset retry state', () => {
+  it('should reset retry state', async () => {
     const { result } = renderHook(() => useRetry())
+    const mockFn = vi.fn().mockRejectedValue(new Error('Test error'))
 
-    // Manually set retry count (simulating a retry)
-    act(() => {
-      result.current.retryState.retryCount = 2
+    // Trigger a retry to set retry count
+    await act(async () => {
+      try {
+        await result.current.retry(mockFn)
+      } catch (e) {
+        // Expected to throw
+      }
+    })
+
+    await act(async () => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    // Wait for state to update
+    await waitFor(() => {
+      expect(result.current.retryState.retryCount).toBeGreaterThan(0)
     })
 
     act(() => {
@@ -230,18 +242,32 @@ describe('useRetry', () => {
     })
   })
 
-  it('should calculate remaining retries correctly', () => {
+  it('should calculate remaining retries correctly', async () => {
     const { result } = renderHook(() => useRetry({ maxRetries: 5 }))
 
     expect(result.current.remainingRetries).toBe(5)
 
-    // Simulate retries
-    act(() => {
-      result.current.retryState.retryCount = 2
+    // Simulate retries by calling retry with failing function
+    const mockFn = vi.fn().mockRejectedValue(new Error('Test error'))
+    
+    await act(async () => {
+      try {
+        await result.current.retry(mockFn)
+      } catch (e) {
+        // Expected to throw
+      }
     })
 
-    // Note: remainingRetries is calculated, so we need to check the actual value
-    // The hook recalculates this, so we check canRetry instead
+    await act(async () => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    await waitFor(() => {
+      expect(result.current.retryState.retryCount).toBeGreaterThan(0)
+    })
+
+    // remainingRetries should be calculated correctly
+    expect(result.current.remainingRetries).toBe(5 - result.current.retryState.retryCount)
     expect(result.current.canRetry).toBe(true)
   })
 })
