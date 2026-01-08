@@ -19,13 +19,11 @@ export async function GET(
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
+    // Profile pages are public - no auth required
     const user = await getServerUser()
-    if (!user) {
-      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
-    }
-
-    // Rate limiting
-    const identifier = getClientIdentifier(request, user.id)
+    
+    // Rate limiting (use IP if no user)
+    const identifier = getClientIdentifier(request, user?.id)
     const allowed = await rateLimiters.standard.check(identifier)
     
     if (!allowed) {
@@ -51,19 +49,41 @@ export async function GET(
       .eq('username', userId)
       .single()
 
+    logger.debug('[PROFILE API] Username lookup result', { 
+      userId, 
+      found: !!profile, 
+      error: profileError?.code,
+      errorMessage: profileError?.message 
+    })
+
     // If username not found, try as UUID
     if (profileError && profileError.code === 'PGRST116') {
+      logger.debug('[PROFILE API] Username not found, trying as UUID', { userId })
       const { data: profileById, error: profileByIdError } = await supabaseAdmin
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single()
       
+      logger.debug('[PROFILE API] UUID lookup result', { 
+        userId, 
+        found: !!profileById, 
+        error: profileByIdError?.code,
+        errorMessage: profileByIdError?.message 
+      })
+      
       profile = profileById
       profileError = profileByIdError
     }
 
-    if (profileError) {
+    if (profileError || !profile) {
+      logger.error('[PROFILE API] Profile not found', { 
+        userId, 
+        error: profileError?.code,
+        errorMessage: profileError?.message,
+        triedUsername: true,
+        triedUUID: true
+      })
       return apiErrors.notFound('Profile', request.nextUrl.pathname)
     }
 
@@ -84,7 +104,7 @@ export async function GET(
       logger.debug('[PROFILE API] Listings fetched', { userId, count: listings?.length })
     }
 
-    // Get user's reviews
+    // Get user's reviews (use profile.id, not userId)
     const { data: reviews, error: reviewsError } = await supabaseAdmin
       .from('user_reviews')
       .select(`
@@ -98,22 +118,22 @@ export async function GET(
           avatar_url
         )
       `)
-      .eq('reviewee_id', userId)
+      .eq('reviewee_id', profile.id)
       .order('created_at', { ascending: false })
       .limit(10)
 
     if (reviewsError) {
-      logger.error('[PROFILE API] Reviews fetch error', { error: reviewsError, userId })
+      logger.error('[PROFILE API] Reviews fetch error', { error: reviewsError, profileId: profile.id })
     }
 
-    // Check if current user is following this profile
+    // Check if current user is following this profile (only if authenticated)
     let isFollowing = false
-    if (user.id !== userId) {
+    if (user && user.id !== profile.id) {
       const { data: followData } = await supabaseAdmin
         .from('follows')
         .select('id')
         .eq('follower_id', user.id)
-        .eq('following_id', userId)
+        .eq('following_id', profile.id)
         .single()
 
       isFollowing = !!followData

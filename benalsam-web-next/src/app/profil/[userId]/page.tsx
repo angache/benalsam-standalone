@@ -82,6 +82,19 @@ export default function ProfilePage() {
   const { toast } = useToast()
   
   const [activeTab, setActiveTab] = useState<'ilanlar' | 'yorumlar'>('ilanlar')
+  const [isMounted, setIsMounted] = useState(false)
+  
+  // Fix hydration mismatch - wait for client-side mount
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+  
+  // Debug: Log userId
+  useEffect(() => {
+    if (userId) {
+      logger.debug('[ProfilePage] userId from params', { userId, isMounted })
+    }
+  }, [userId, isMounted])
   
   // Use the real hook
   const { 
@@ -142,11 +155,13 @@ export default function ProfilePage() {
     return [province, district, neighborhood].filter(Boolean).join(' / ') || "Konum belirtilmemiş"
   }
 
-  if (isLoading) {
+  // Show skeleton until mounted to prevent hydration mismatch
+  if (!isMounted || isLoading) {
     return <ProfileSkeleton />
   }
 
-  if (isError || !profile) {
+  // Show error state only after mounted
+  if (isMounted && (isError || !profile)) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
         <EmptyStateProfileListings 

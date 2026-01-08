@@ -13,6 +13,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyStateList } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
+import { logger } from '@/utils/production-logger'
 import type { Listing } from '@/types'
 
 // Skeleton card for listing
@@ -60,7 +61,11 @@ const MyListingsPage = () => {
   const [selectedListingForDoping, setSelectedListingForDoping] = useState<Partial<Listing> | null>(null)
 
   useEffect(() => {
-    if (loadingAuth || !user) return
+    if (loadingAuth) return
+    if (!user) {
+      setIsLoading(false)
+      return
+    }
     fetchMyListings()
   }, [user, loadingAuth])
 
@@ -72,16 +77,25 @@ const MyListingsPage = () => {
       const response = await fetch('/api/listings/my-listings')
       
       if (!response.ok) {
-        throw new Error('Failed to fetch listings')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error?.message || 'Failed to fetch listings')
       }
 
       const data = await response.json()
-      setMyListings(data.listings || [])
+      // API returns { data: { listings: [...] } } format
+      const listings = data.data?.listings || data.listings || []
+      setMyListings(listings)
+      
+      if (listings.length === 0) {
+        logger.debug('[MyListingsPage] No listings found', { userId: user.id })
+      } else {
+        logger.debug('[MyListingsPage] Listings fetched', { count: listings.length, userId: user.id })
+      }
     } catch (error) {
-      console.error('Error fetching listings:', error)
+      logger.error('[MyListingsPage] Error fetching listings', { error, userId: user?.id })
       toast({
         title: 'İlanlar Yüklenemedi',
-        description: 'İlanlarınız yüklenirken bir hata oluştu.',
+        description: error instanceof Error ? error.message : 'İlanlarınız yüklenirken bir hata oluştu.',
         variant: 'destructive'
       })
     } finally {
@@ -202,12 +216,38 @@ const MyListingsPage = () => {
     fetchMyListings()
   }
 
-  if (loadingAuth || isLoading) {
+  if (loadingAuth) {
     return (
       <div className="min-h-screen bg-background">
         <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
           <LoadingSpinner size="xl" />
         </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
+          <EmptyStateList
+            title="Giriş Yapmalısınız"
+            description="İlanlarınızı görmek için giriş yapmanız gerekiyor."
+            action={
+              <Button onClick={() => router.push('/auth/login')}>
+                Giriş Yap
+              </Button>
+            }
+          />
+        </div>
+      </div>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <MyListingsSkeleton />
       </div>
     )
   }

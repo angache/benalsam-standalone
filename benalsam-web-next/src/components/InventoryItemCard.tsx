@@ -31,9 +31,75 @@ interface InventoryItemCardProps {
   item: InventoryItem
   onEdit: (item: InventoryItem) => void
   onDelete: (itemId: string) => void
+  viewMode?: 'grid' | 'list'
 }
 
-const InventoryItemCard: React.FC<InventoryItemCardProps> = ({ item, onEdit, onDelete }) => {
+const InventoryItemCard: React.FC<InventoryItemCardProps> = ({ item, onEdit, onDelete, viewMode = 'grid' }) => {
+  if (viewMode === 'list') {
+    return (
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.2 }}
+        className="bg-card rounded-lg p-4 border hover:shadow-md transition-shadow flex items-center gap-4"
+      >
+        <div className="w-24 h-24 bg-muted rounded-lg flex items-center justify-center overflow-hidden relative flex-shrink-0">
+          {item.main_image_url ? (
+            <Image
+              src={item.main_image_url}
+              alt={item.name}
+              fill
+              className="object-cover"
+              sizes="96px"
+            />
+          ) : item.image_url ? (
+            <Image
+              src={item.image_url}
+              alt={item.name}
+              fill
+              className="object-cover"
+              sizes="96px"
+            />
+          ) : (
+            <ImageIcon className="w-8 h-8 text-muted-foreground" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-foreground mb-1 truncate">{item.name}</h3>
+          <p className="text-sm text-muted-foreground mb-2">{item.category}</p>
+          {item.description && (
+            <p className="text-sm text-muted-foreground line-clamp-2">{item.description}</p>
+          )}
+          {item.estimated_value && (
+            <p className="text-sm font-medium text-primary mt-2">
+              Tahmini Değer: ₺{item.estimated_value.toLocaleString('tr-TR')}
+            </p>
+          )}
+        </div>
+        <div className="flex gap-2 flex-shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onEdit(item)}
+            className="border-primary/50 text-primary hover:bg-primary/10"
+          >
+            <Edit3 className="w-4 h-4 mr-1.5" /> Düzenle
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onDelete(item.id)}
+            className="border-destructive/50 text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="w-4 h-4 mr-1.5" /> Sil
+          </Button>
+        </div>
+      </motion.div>
+    )
+  }
+
   return (
     <motion.div
       layout

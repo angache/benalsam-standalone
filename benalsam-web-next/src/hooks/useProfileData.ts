@@ -83,15 +83,38 @@ export function useProfileData(userId: string | undefined, currentUserId: string
       if (!userId) throw new Error('User ID is required')
       
       const response = await fetch(`/api/profiles/${userId}`)
+      
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to fetch profile')
+        const errorData = await response.json().catch(() => ({}))
+        
+        // Handle different error formats
+        const errorMessage = errorData?.error?.message || 
+                            errorData?.error || 
+                            errorData?.message ||
+                            `Failed to fetch profile (${response.status})`
+        throw new Error(errorMessage)
       }
-      return response.json()
+      
+      const result = await response.json()
+      
+      // Handle both { success: true, data: {...} } and direct response
+      if (result.success && result.data) {
+        return result.data
+      }
+      if (result.profile) {
+        return result
+      }
+      
+      console.warn('[useProfileData] Unexpected response format', result)
+      return result
     },
-    enabled: !!userId && isAuthenticated,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    enabled: !!userId, // Public profiles - no auth required
+    staleTime: 2 * 60 * 1000, // 2 minutes (reduced to prevent stale cache issues)
+    gcTime: 5 * 60 * 1000, // 5 minutes (reduced to prevent stale cache issues)
+    retry: 1, // Only retry once
+    retryDelay: 1000,
+    refetchOnMount: true, // Always refetch on mount to ensure fresh data
+    refetchOnWindowFocus: false, // Don't refetch on window focus (prevents unnecessary requests)
   })
 
   // Follow mutation
