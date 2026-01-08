@@ -231,6 +231,16 @@ export async function createTestUser(): Promise<string | null> {
           } else {
             console.log('✅ 2FA disabled for test user');
           }
+        } else {
+          // Explicitly ensure 2FA is disabled (in case it was enabled before)
+          const { error: ensure2FADisabledError } = await supabaseAdmin
+            .from('profiles')
+            .update({ is_2fa_enabled: false })
+            .eq('id', existingUser.id);
+          
+          if (ensure2FADisabledError) {
+            console.warn('⚠️  Failed to ensure 2FA is disabled:', ensure2FADisabledError.message);
+          }
         }
       }
 

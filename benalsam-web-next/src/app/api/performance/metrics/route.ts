@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerUser } from '@/lib/auth'
+import { getServerUser } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 import { logger } from '@/utils/production-logger'
