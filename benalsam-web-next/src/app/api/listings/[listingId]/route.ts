@@ -224,6 +224,12 @@ export async function PATCH(
     delete updatePayload.user_id
     delete updatePayload.id
     delete updatePayload.created_at
+    
+    // Remove payment metadata fields if they don't exist in the database
+    // These fields are not yet added to the listings table schema
+    delete updatePayload.payment_id
+    delete updatePayload.payment_provider
+    delete updatePayload.payment_transaction_id
 
     // Update the listing
     const { error: updateError } = await supabaseAdmin

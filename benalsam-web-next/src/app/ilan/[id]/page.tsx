@@ -106,6 +106,15 @@ export default async function ListingDetailPage({
     },
     user,
     is_favorited, // ✅ Server'da hesaplandı, ilk render'da doğru!
+    // Doping information
+    is_showcase: listing.is_showcase || false,
+    showcase_expires_at: listing.showcase_expires_at || null,
+    is_urgent_premium: listing.is_urgent_premium || false,
+    urgent_expires_at: listing.urgent_expires_at || null,
+    is_featured: listing.is_featured || false,
+    featured_expires_at: listing.featured_expires_at || null,
+    upped_at: listing.upped_at || null,
+    has_bold_border: listing.has_bold_border || false,
   }
 
   logger.debug('[ListingDetailPage] Listing fetched', { 

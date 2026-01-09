@@ -3,6 +3,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { logger } from '@/utils/production-logger'
 import { 
   MapPin, 
@@ -224,6 +225,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
   onDopingClick,
   onMarkAsCompleted
 }) => {
+  const router = useRouter()
   const { categories: allCategories } = useCategories()
   const isSmall = size === 'small'
   const isLarge = size === 'large'
@@ -299,6 +301,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({
   const handleCardClick = () => {
     if (onView) {
       onView(listing)
+    } else {
+      // Default: Navigate to listing detail page
+      const url = generateListingUrl(listing.title || 'ilan', listing.id)
+      router.push(url)
     }
   }
 

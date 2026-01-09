@@ -22,7 +22,15 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
-  Handshake
+  Handshake,
+  Zap,
+  Award,
+  Siren,
+  Rocket,
+  Palette,
+  CalendarClock,
+  X,
+  Loader2
 } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
@@ -31,6 +39,8 @@ import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import type { Listing } from '@/types'
 import { usePerformanceMonitoring } from '@/utils/performance/performance'
+import { dopingOptions } from '@/config/dopingOptions'
+import { logger } from '@/utils/production-logger'
 
 interface ListingDetailClientProps {
   listing: Partial<Listing>
@@ -44,6 +54,7 @@ export function ListingDetailClient({ listing: initialListing, listingId }: List
   const queryClient = useQueryClient()
   const [selectedImage, setSelectedImage] = useState(0)
   const [isMounted, setIsMounted] = useState(false)
+  const [cancellingDoping, setCancellingDoping] = useState<string | null>(null)
   
   // Use initialListing from SSR
   const [listing, setListing] = useState(initialListing)
@@ -70,6 +81,152 @@ export function ListingDetailClient({ listing: initialListing, listingId }: List
   
   // Check if user owns this listing (only after auth is loaded to prevent hydration mismatch)
   const isOwnListing = isMounted && !isLoading && user?.id && listing?.user?.id && listing.user.id === user.id
+
+  // Get active dopings for this listing
+  const getActiveDopings = () => {
+    const activeDopings: Array<{
+      id: string
+      title: string
+      icon: React.ComponentType<{ className?: string }>
+      expiresAt: string | null
+      isExpired: boolean
+    }> = []
+
+    const now = new Date()
+
+    dopingOptions.forEach(option => {
+      const isActive = listing[option.db_field as keyof typeof listing] === true
+      
+      if (isActive) {
+        let expiresAt: string | null = null
+        let isExpired = false
+
+        // Check expiration dates
+        if (option.id === 'showcase' && listing.showcase_expires_at) {
+          expiresAt = listing.showcase_expires_at as string
+          isExpired = new Date(expiresAt) < now
+        } else if (option.id === 'urgent' && listing.urgent_expires_at) {
+          expiresAt = listing.urgent_expires_at as string
+          isExpired = new Date(expiresAt) < now
+        } else if (option.id === 'featured' && listing.featured_expires_at) {
+          expiresAt = listing.featured_expires_at as string
+          isExpired = new Date(expiresAt) < now
+        } else if (option.id === 'up_to_date' && listing.upped_at) {
+          expiresAt = listing.upped_at as string
+        }
+
+        // Only show if not expired (or if it's a permanent doping like bold_border)
+        if (!isExpired || option.id === 'bold_border' || option.id === 'up_to_date') {
+          activeDopings.push({
+            id: option.id,
+            title: option.title,
+            icon: option.icon,
+            expiresAt,
+            isExpired: false,
+          })
+        }
+      }
+    })
+
+    return activeDopings
+  }
+
+  const activeDopings = getActiveDopings()
+  const hasActiveDopings = activeDopings.length > 0
+
+  /**
+   * Cancel a specific doping
+   */
+  const handleCancelDoping = async (dopingId: string) => {
+    if (!listingId || cancellingDoping) return
+
+    setCancellingDoping(dopingId)
+
+    try {
+      // Find the doping option to get db_field
+      const dopingOption = dopingOptions.find(opt => opt.id === dopingId)
+      if (!dopingOption) {
+        throw new Error('Doping seçeneği bulunamadı')
+      }
+
+      // Prepare update payload based on doping type
+      const updatePayload: Record<string, unknown> = {
+        [dopingOption.db_field]: false,
+        updated_at: new Date().toISOString()
+      }
+
+      // Clear expiration dates
+      if (dopingId === 'showcase') {
+        updatePayload.showcase_expires_at = null
+      } else if (dopingId === 'urgent') {
+        updatePayload.urgent_expires_at = null
+      } else if (dopingId === 'featured') {
+        updatePayload.featured_expires_at = null
+      } else if (dopingId === 'up_to_date') {
+        updatePayload.upped_at = null
+      }
+
+      logger.debug('[ListingDetailClient] Sending cancellation request', { updatePayload, listingId })
+
+      const response = await fetch(`/api/listings/${listingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatePayload)
+      })
+
+      logger.debug('[ListingDetailClient] Received response', { status: response.status, ok: response.ok })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        logger.error('[ListingDetailClient] API error response', { errorData, status: response.status })
+        throw new Error(errorData.error?.message || `Doping iptal edilemedi (${response.status})`)
+      }
+
+      const result = await response.json()
+      logger.debug('[ListingDetailClient] Cancellation successful', { result })
+
+      toast({
+        title: 'Başarılı',
+        description: 'Doping başarıyla iptal edildi. (Not: Para iadesi yapılmaz)',
+        variant: 'default',
+      })
+
+      // Update local state
+      setListing((prev: Partial<Listing>) => {
+        const updated = { ...prev }
+        if (dopingOption.db_field) {
+          updated[dopingOption.db_field as keyof typeof updated] = false as never
+        }
+        if (dopingId === 'showcase') {
+          updated.showcase_expires_at = null
+        } else if (dopingId === 'urgent') {
+          updated.urgent_expires_at = null
+        } else if (dopingId === 'featured') {
+          updated.featured_expires_at = null
+        } else if (dopingId === 'up_to_date') {
+          updated.upped_at = null
+        }
+        return updated
+      })
+
+      // Refresh query cache
+      queryClient.invalidateQueries({ queryKey: ['listing', listingId] })
+    } catch (error) {
+      logger.error('[ListingDetailClient] Error cancelling doping', { 
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        dopingId, 
+        listingId 
+      })
+      toast({
+        title: 'Hata',
+        description: error instanceof Error ? error.message : 'Doping iptal edilirken bir hata oluştu.',
+        variant: 'destructive',
+      })
+    } finally {
+      setCancellingDoping(null)
+    }
+  }
 
   // Favorite toggle mutation
   const toggleFavoriteMutation = useMutation({
@@ -428,6 +585,63 @@ export function ListingDetailClient({ listing: initialListing, listingId }: List
                 )}
               </CardContent>
             </Card>
+
+            {/* Doping Management Card - Only for own listings */}
+            {isOwnListing && hasActiveDopings && (
+              <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-yellow-500" />
+                    Aktif Doping'ler
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    {activeDopings.map((doping) => {
+                      const Icon = doping.icon
+                      const isCancelling = cancellingDoping === doping.id
+                      return (
+                        <div
+                          key={doping.id}
+                          className="flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-gray-800 rounded-md border border-blue-200 dark:border-blue-700 group relative"
+                        >
+                          <Icon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                          <span className="text-sm font-medium text-foreground">{doping.title}</span>
+                          {doping.expiresAt && (
+                            <span className="text-xs text-muted-foreground">
+                              ({format(new Date(doping.expiresAt), 'dd.MM.yyyy', { locale: tr })})
+                            </span>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              e.preventDefault()
+                              if (window.confirm('Doping\'i iptal etmek istediğinize emin misiniz?\n\nNot: Para iadesi yapılmaz.')) {
+                                handleCancelDoping(doping.id)
+                              }
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            disabled={isCancelling}
+                            className="ml-1 opacity-70 hover:opacity-100 transition-opacity p-1 hover:bg-red-100 dark:hover:bg-red-900 rounded text-red-600 dark:text-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Doping'i İptal Et"
+                            type="button"
+                          >
+                            {isCancelling ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <X className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    💡 Doping'leri buradan yönetebilirsiniz. İptal ettiğinizde para iadesi yapılmaz.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* User Card */}
             {listing.user && (
