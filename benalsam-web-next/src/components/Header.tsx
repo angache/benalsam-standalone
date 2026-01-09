@@ -357,13 +357,9 @@ const Header = memo(function Header() {
                       <span>Gönderdiğim Teklifler</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => handleNavigate('/premium/dashboard')}>
+                    <DropdownMenuItem onClick={() => handleNavigate('/premium-dashboard')}>
                       <Crown className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
                       <span>Premium Dashboard</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleNavigate('/premium/settings')}>
-                      <Settings className="mr-2 h-4 w-4" style={{color: 'var(--secondary)'}} />
-                      <span>Premium Ayarlar</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => handleNavigate('/ayarlar')}>

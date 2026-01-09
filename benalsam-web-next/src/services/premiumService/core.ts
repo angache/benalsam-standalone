@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { logger } from '@/utils/production-logger';
+import { format } from 'date-fns';
+import { tr } from 'date-fns/locale';
 
 export const getUserPremiumStatus = async (userId: string) => {
   if (!userId) return null;
@@ -399,6 +401,116 @@ export const checkOfferLimit = async (userId: string) => {
   const limit = usage.offers_limit || 10; // Varsayılan limit
   
   return currentOffers < limit;
+};
+
+// Abonelik iptal et
+export const cancelSubscription = async (userId: string) => {
+  if (!userId) return false;
+  
+  try {
+    const { data, error } = await supabase
+      .from('premium_subscriptions')
+      .update({ status: 'cancelled' })
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .select();
+    
+    if (error) {
+      logger.error('[PremiumService] Error cancelling subscription', { error });
+      toast({ 
+        title: "İptal Hatası", 
+        description: "Abonelik iptal edilirken bir sorun oluştu.", 
+        variant: "destructive" 
+      });
+      return false;
+    }
+    
+    if (!data || data.length === 0) {
+      toast({ 
+        title: "Bilgi", 
+        description: "Aktif aboneliğiniz bulunmuyor." 
+      });
+      return false;
+    }
+    
+    toast({ 
+      title: "Abonelik İptal Edildi", 
+      description: "Aboneliğiniz başarıyla iptal edildi. Mevcut aboneliğiniz bitiş tarihine kadar devam edecek." 
+    });
+    
+    return true;
+  } catch (error) {
+    logger.error('[PremiumService] Error cancelling subscription', { error });
+    toast({ 
+      title: "Beklenmedik Hata", 
+      description: "Abonelik iptal edilirken bir sorun oluştu.", 
+      variant: "destructive" 
+    });
+    return false;
+  }
+};
+
+// Abonelik yenile
+export const renewSubscription = async (userId: string) => {
+  if (!userId) return false;
+  
+  try {
+    // Mevcut aboneliği bul
+    const { data: currentSubscription, error: fetchError } = await supabase
+      .from('premium_subscriptions')
+      .select('*, subscription_plans(*)')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .single();
+    
+    if (fetchError || !currentSubscription) {
+      logger.error('[PremiumService] No active subscription found', { error: fetchError });
+      toast({ 
+        title: "Hata", 
+        description: "Aktif aboneliğiniz bulunmuyor.", 
+        variant: "destructive" 
+      });
+      return false;
+    }
+    
+    // Bitiş tarihini 1 ay uzat
+    const currentExpiresAt = new Date(currentSubscription.expires_at);
+    const newExpiresAt = new Date(currentExpiresAt);
+    newExpiresAt.setMonth(newExpiresAt.getMonth() + 1);
+    
+    const { error: updateError } = await supabase
+      .from('premium_subscriptions')
+      .update({ 
+        expires_at: newExpiresAt.toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', currentSubscription.id);
+    
+    if (updateError) {
+      logger.error('[PremiumService] Error renewing subscription', { error: updateError });
+      toast({ 
+        title: "Yenileme Hatası", 
+        description: "Abonelik yenilenirken bir sorun oluştu.", 
+        variant: "destructive" 
+      });
+      return false;
+    }
+    
+    toast({ 
+      title: "Abonelik Yenilendi! 🎉", 
+      description: `Aboneliğiniz başarıyla yenilendi. Yeni bitiş tarihi: ${format(newExpiresAt, 'dd MMMM yyyy', { locale: tr })}` 
+    });
+    
+    return true;
+  } catch (error) {
+    logger.error('[PremiumService] Error renewing subscription', { error });
+    toast({ 
+      title: "Beklenmedik Hata", 
+      description: "Abonelik yenilenirken bir sorun oluştu.", 
+      variant: "destructive" 
+    });
+    return false;
+  }
 };
 
 // Kullanıcı kullanımını artır
