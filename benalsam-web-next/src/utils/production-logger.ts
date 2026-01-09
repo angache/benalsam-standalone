@@ -80,10 +80,59 @@ class ProductionLogger {
   error(message: string, context?: LogContext): void {
     // Always log errors, even in production
     if (context && Object.keys(context).length > 0) {
-      console.error(`❌ [ERROR] ${message}`, context)
+      // Serialize error objects properly
+      const serializedContext = this.serializeContext(context)
+      
+      // Check if serialized context is empty or invalid
+      if (serializedContext && typeof serializedContext === 'object' && Object.keys(serializedContext).length > 0) {
+        console.error(`❌ [ERROR] ${message}`, serializedContext)
+      } else {
+        // Fallback: log original context directly
+        console.error(`❌ [ERROR] ${message}`, context)
+      }
     } else {
       console.error(`❌ [ERROR] ${message}`)
     }
+  }
+
+  /**
+   * Serialize context object for logging
+   * Handles Error objects, circular references, etc.
+   */
+  private serializeContext(context: LogContext): Record<string, unknown> {
+    const result: Record<string, unknown> = {}
+    
+    for (const [key, value] of Object.entries(context)) {
+      try {
+        if (value instanceof Error) {
+          result[key] = {
+            name: value.name,
+            message: value.message,
+            stack: value.stack,
+          }
+        } else if (value === null) {
+          result[key] = null
+        } else if (value === undefined) {
+          result[key] = '[undefined]'
+        } else if (typeof value === 'function') {
+          result[key] = '[Function]'
+        } else if (typeof value === 'object') {
+          // Try to serialize object, but catch circular references
+          try {
+            JSON.stringify(value)
+            result[key] = value
+          } catch {
+            result[key] = '[Circular or non-serializable object]'
+          }
+        } else {
+          result[key] = value
+        }
+      } catch (err) {
+        result[key] = `[Serialization error: ${err instanceof Error ? err.message : String(err)}]`
+      }
+    }
+    
+    return result
   }
 
   /**

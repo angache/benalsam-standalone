@@ -1,9 +1,9 @@
 # 📚 Benalsam Web Next.js API Documentation
 
-**Son Güncelleme:** 2025-01-XX  
-**Versiyon:** 1.0.0  
+**Son Güncelleme:** 2026-01-09  
+**Versiyon:** 1.1.0  
 **Base URL:** `/api`  
-**Toplam Endpoint Sayısı:** 24
+**Toplam Endpoint Sayısı:** 28
 
 ---
 
@@ -282,6 +282,71 @@ Tek ilan detayını getirir.
   }
 }
 ```
+
+---
+
+### **PATCH /api/listings/[listingId]**
+İlan bilgilerini günceller (doping uygulama dahil).
+
+**Auth:** Gerekli (sadece ilan sahibi)
+
+**Path Parameters:**
+- `listingId` (string, UUID)
+
+**Request Body:**
+```json
+{
+  "is_showcase": true,
+  "showcase_expires_at": "2026-01-15T00:00:00.000Z",
+  "is_urgent_premium": true,
+  "urgent_expires_at": "2026-01-20T00:00:00.000Z",
+  "is_featured": false,
+  "featured_expires_at": null,
+  "upped_at": "2026-01-09T00:00:00.000Z"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "İlan başarıyla güncellendi"
+  }
+}
+```
+
+**Status Codes:**
+- `200`: İlan güncellendi
+- `401`: Authentication gerekli
+- `403`: Bu ilanı güncelleme yetkiniz yok
+- `404`: İlan bulunamadı
+
+---
+
+### **DELETE /api/listings/[listingId]**
+İlanı siler.
+
+**Auth:** Gerekli (sadece ilan sahibi)
+
+**Path Parameters:**
+- `listingId` (string, UUID)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "İlan başarıyla silindi"
+  }
+}
+```
+
+**Status Codes:**
+- `200`: İlan silindi
+- `401`: Authentication gerekli
+- `403`: Bu ilanı silme yetkiniz yok
+- `404`: İlan bulunamadı
 
 ---
 
@@ -831,6 +896,218 @@ Arama sorgusunu kaydeder (analytics için).
 
 ---
 
+## 💳 **PAYMENTS**
+
+### **POST /api/payments/create-intent**
+Payment intent oluşturur (doping satın alma için).
+
+**Auth:** Gerekli
+
+**Rate Limiting:** Strict (10 req/min)
+
+**Request Body:**
+```json
+{
+  "amount": 13500, // Kuruş cinsinden (135.00 TL)
+  "currency": "TRY",
+  "items": [
+    {
+      "id": "showcase",
+      "name": "Kategori Vitrini",
+      "description": "İlanınız kategori sayfalarında görüntülensin",
+      "amount": 13500,
+      "quantity": 1
+    }
+  ],
+  "description": "İlan başlığı için doping",
+  "metadata": {
+    "listingId": "uuid",
+    "listingTitle": "İlan Başlığı",
+    "dopingIds": "showcase"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "paymentIntent": {
+      "id": "mock_pi_1234567890_abc123",
+      "clientSecret": "mock_cs_mock_pi_1234567890_abc123",
+      "amount": 13500,
+      "currency": "TRY",
+      "status": "requires_confirmation",
+      "metadata": {
+        "listingId": "uuid",
+        "userId": "uuid"
+      }
+    }
+  }
+}
+```
+
+**Status Codes:**
+- `200`: Payment intent oluşturuldu
+- `400`: Validation hatası
+- `401`: Authentication gerekli
+- `429`: Rate limit aşıldı
+
+---
+
+### **POST /api/payments/verify**
+Payment'i doğrular ve sonucu döner.
+
+**Auth:** Gerekli
+
+**Rate Limiting:** Strict (10 req/min)
+
+**Request Body:**
+```json
+{
+  "paymentIntentId": "mock_pi_1234567890_abc123"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Ödeme başarıyla doğrulandı",
+    "paymentResult": {
+      "id": "mock_pi_1234567890_abc123",
+      "status": "succeeded",
+      "message": "Mock payment successful",
+      "paymentIntent": {
+        "id": "mock_pi_1234567890_abc123",
+        "status": "succeeded",
+        "amount": 13500,
+        "currency": "TRY"
+      }
+    }
+  }
+}
+```
+
+**Status Codes:**
+- `200`: Payment doğrulandı
+- `400`: Payment doğrulama başarısız
+- `401`: Authentication gerekli
+- `429`: Rate limit aşıldı
+
+---
+
+## 🎯 **DOPING MANAGEMENT**
+
+### **POST /api/doping/check-expiration**
+Süresi dolan doping'leri kontrol eder ve otomatik olarak iptal eder.
+
+**Auth:** Opsiyonel (sistem/cron için)
+
+**Request Body:** Yok
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Doping expiration check completed",
+    "stats": {
+      "expiredShowcase": 5,
+      "expiredUrgent": 3,
+      "expiredFeatured": 2,
+      "notificationsSent": 10,
+      "errors": 0
+    }
+  }
+}
+```
+
+**Status Codes:**
+- `200`: Expiration check tamamlandı
+- `500`: Internal server error
+
+**Not:** Bu endpoint scheduled task (cron job) tarafından günlük olarak çağrılmalıdır.
+
+---
+
+### **GET /api/doping/check-expiration**
+Süresi dolan doping istatistiklerini döner (expire etmeden).
+
+**Auth:** Opsiyonel
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Doping expiration statistics",
+    "stats": {
+      "expiredShowcase": 5,
+      "expiredUrgent": 3,
+      "expiredFeatured": 2,
+      "totalExpired": 10
+    },
+    "timestamp": "2026-01-09T07:30:00.000Z"
+  }
+}
+```
+
+---
+
+### **GET /api/doping/status**
+Bir ilanın doping durumunu görüntüler.
+
+**Auth:** Gerekli (sadece ilan sahibi)
+
+**Query Parameters:**
+- `listingId` (string, UUID)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "listingId": "uuid",
+    "listingTitle": "İlan Başlığı",
+    "status": {
+      "showcase": {
+        "active": true,
+        "expiresAt": "2026-01-15T00:00:00.000Z",
+        "expired": false,
+        "daysRemaining": 5
+      },
+      "urgent": {
+        "active": false,
+        "expiresAt": null,
+        "expired": false,
+        "daysRemaining": null
+      },
+      "featured": {
+        "active": true,
+        "expiresAt": "2026-01-20T00:00:00.000Z",
+        "expired": false,
+        "daysRemaining": 10
+      },
+      "upToDate": {
+        "active": true,
+        "uppedAt": "2026-01-09T00:00:00.000Z"
+      }
+    }
+  }
+}
+```
+
+**Status Codes:**
+- `200`: Doping durumu getirildi
+- `401`: Authentication gerekli
+- `403`: Bu ilanın doping durumunu görüntüleme yetkiniz yok
+- `404`: İlan bulunamadı
+
+---
+
 ## 📈 **PERFORMANCE METRICS**
 
 ### **POST /api/performance/metrics**
@@ -907,6 +1184,15 @@ Performance metriklerini getirir (admin only).
 ---
 
 ## 🔄 **CHANGELOG**
+
+### **2026-01-09**
+- ✅ Payment gateway altyapısı eklendi (Mock/Stripe/İyzico providers)
+- ✅ Payment intent creation endpoint eklendi (`/api/payments/create-intent`)
+- ✅ Payment verification endpoint eklendi (`/api/payments/verify`)
+- ✅ Doping expiration tracking endpoint eklendi (`/api/doping/check-expiration`)
+- ✅ Doping status endpoint eklendi (`/api/doping/status`)
+- ✅ Listing update endpoint eklendi (`PATCH /api/listings/[listingId]`)
+- ✅ Listing delete endpoint eklendi (`DELETE /api/listings/[listingId]`)
 
 ### **2025-01-XX**
 - ✅ Performance metrics endpoint eklendi

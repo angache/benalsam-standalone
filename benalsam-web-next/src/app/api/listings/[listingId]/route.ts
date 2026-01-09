@@ -160,14 +160,13 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ listingId: string }> }
 ) {
+  let listingId: string | undefined
+  
   try {
     const user = await getServerUser()
 
     if (!user?.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return apiErrors.unauthorized('Oturum açmanız gerekiyor', request.nextUrl.pathname)
     }
 
     const rawParams = await params
@@ -178,8 +177,25 @@ export async function PATCH(
       return validation.response
     }
 
-    const { listingId } = validation.data
-    const body = await request.json()
+    listingId = validation.data.listingId
+    
+    // Parse request body
+    let body: Record<string, unknown>
+    try {
+      body = await request.json()
+    } catch (parseError) {
+      logger.error('[API] Failed to parse request body', {
+        error: parseError instanceof Error ? parseError.message : String(parseError),
+        listingId,
+      })
+      return apiErrors.badRequest(
+        'Geçersiz istek gövdesi',
+        { reason: 'Request body must be valid JSON' },
+        request.nextUrl.pathname
+      )
+    }
+
+    logger.debug('[API] Updating listing', { listingId, userId: user.id, updateFields: Object.keys(body) })
 
     // Verify listing ownership
     const { data: listing, error: fetchError } = await supabaseAdmin
@@ -189,23 +205,39 @@ export async function PATCH(
       .single()
 
     if (fetchError || !listing) {
+      logger.warn('[API] Listing not found', { listingId, fetchError })
       return apiErrors.notFound('İlan', request.nextUrl.pathname)
     }
 
     if (listing.user_id !== user.id) {
+      logger.warn('[API] Unauthorized listing update attempt', { listingId, userId: user.id, ownerId: listing.user_id })
       return apiErrors.forbidden('Bu ilanı güncelleme yetkiniz yok', request.nextUrl.pathname)
     }
+
+    // Prepare update payload (exclude sensitive fields)
+    const updatePayload: Record<string, unknown> = {
+      ...body,
+      updated_at: new Date().toISOString()
+    }
+
+    // Remove fields that shouldn't be updated directly
+    delete updatePayload.user_id
+    delete updatePayload.id
+    delete updatePayload.created_at
 
     // Update the listing
     const { error: updateError } = await supabaseAdmin
       .from('listings')
-      .update({
-        ...body,
-        updated_at: new Date().toISOString()
-      })
+      .update(updatePayload)
       .eq('id', listingId)
 
     if (updateError) {
+      logger.error('[API] Database error updating listing', {
+        error: updateError,
+        listingId,
+        userId: user.id,
+        updatePayload,
+      })
       return apiErrors.databaseError(
         'İlan güncellenirken bir hata oluştu',
         { error: updateError, listingId, userId: user.id },
@@ -216,12 +248,17 @@ export async function PATCH(
     logger.debug('[API] Listing updated successfully', { listingId, userId: user.id })
     return createSuccessResponse({ message: 'İlan başarıyla güncellendi' })
   } catch (error: unknown) {
+    logger.error('[API] Error updating listing', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      listingId,
+    })
     return apiErrors.internalError(
       'İlan güncellenirken bir hata oluştu',
       {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
-        listingId,
+        listingId: listingId || 'unknown',
       },
       request.nextUrl.pathname
     )

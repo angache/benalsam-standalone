@@ -95,6 +95,31 @@ NODE_ENV=development
 
 Bu değişkenler **isteğe bağlıdır** ve varsayılan değerlerle çalışır.
 
+### Payment Configuration (Optional - Mock Mode Default)
+
+```env
+# Payment Provider
+# Options: mock, stripe, iyzico
+# Default: mock (development mode - no real payment required)
+PAYMENT_PROVIDER=mock
+
+# Stripe Configuration (Only if PAYMENT_PROVIDER=stripe)
+# Get from: https://dashboard.stripe.com/apikeys
+STRIPE_SECRET_KEY=sk_test_...  # Server-only, SECRET
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...  # Client-safe
+
+# İyzico Configuration (Only if PAYMENT_PROVIDER=iyzico)
+# Get from: https://dev.iyzipay.com/tr
+IYZICO_API_KEY=your-iyzico-api-key  # Server-only, SECRET
+IYZICO_SECRET_KEY=your-iyzico-secret-key  # Server-only, SECRET
+IYZICO_BASE_URL=https://sandbox-api.iyzipay.com  # Sandbox for testing
+```
+
+**Payment Provider Notes:**
+- **Mock Mode (Default)**: No real payment accounts needed. Perfect for development/testing.
+- **Stripe**: International payments. Set `PAYMENT_PROVIDER=stripe` and add Stripe keys.
+- **İyzico**: Turkish market payments. Set `PAYMENT_PROVIDER=iyzico` and add İyzico keys.
+
 ### Feature Flags
 
 ```env
