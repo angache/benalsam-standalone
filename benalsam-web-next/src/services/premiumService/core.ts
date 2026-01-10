@@ -9,7 +9,7 @@ export const getUserPremiumStatus = async (userId: string) => {
 
   try {
     const { data, error } = await supabase
-      .from('user_premium_subscriptions')
+      .from('premium_subscriptions')
       .select('*')
       .eq('user_id', userId)
       .eq('status', 'active')
@@ -90,18 +90,32 @@ export const getUserActivePlan = async (userId: string) => {
   if (!userId) return null;
   
   try {
+    logger.debug('[PremiumService] Getting user active plan', { userId });
     const { data, error } = await supabase.rpc('get_user_active_plan', {
       p_user_id: userId
     });
     
     if (error) {
-      logger.error('[PremiumService] Error getting user plan', { error });
+      logger.error('[PremiumService] Error getting user plan', { error, userId });
       return null;
     }
     
-    return data?.[0] || null;
+    const planData = data?.[0] || null;
+    
+    logger.debug('[PremiumService] User active plan retrieved', { 
+      rawData: planData,
+      userId,
+      dataLength: data?.length,
+      hasPlan: !!planData,
+      planSlug: planData?.plan_slug,
+      planName: planData?.plan_name
+    });
+    
+    // RPC fonksiyonu doğrudan döndürüyor, mapping'e gerek yok
+    // Ancak features ve limits JSONB olarak geliyor, bunlar zaten doğru format
+    return planData;
   } catch (error) {
-    logger.error('[PremiumService] Error getting user plan', { error });
+    logger.error('[PremiumService] Error getting user plan', { error, userId });
     return null;
   }
 };
@@ -111,18 +125,25 @@ export const getUserMonthlyUsage = async (userId: string) => {
   if (!userId) return null;
   
   try {
+    logger.debug('[PremiumService] Getting user monthly usage', { userId });
     const { data, error } = await supabase.rpc('get_or_create_monthly_usage', {
       p_user_id: userId
     });
     
     if (error) {
-      logger.error('[PremiumService] Error getting user usage', { error });
+      logger.error('[PremiumService] Error getting user usage', { error, userId });
       return null;
     }
     
+    logger.debug('[PremiumService] User monthly usage retrieved', { 
+      usage: data?.[0],
+      userId,
+      dataLength: data?.length 
+    });
+    
     return data?.[0] || null;
   } catch (error) {
-    logger.error('[PremiumService] Error getting user usage', { error });
+    logger.error('[PremiumService] Error getting user usage', { error, userId });
     return null;
   }
 };
@@ -416,36 +437,20 @@ export const cancelSubscription = async (userId: string) => {
       .select();
     
     if (error) {
-      logger.error('[PremiumService] Error cancelling subscription', { error });
-      toast({ 
-        title: "İptal Hatası", 
-        description: "Abonelik iptal edilirken bir sorun oluştu.", 
-        variant: "destructive" 
-      });
+      logger.error('[PremiumService] Error cancelling subscription', { error, userId });
       return false;
     }
     
     if (!data || data.length === 0) {
-      toast({ 
-        title: "Bilgi", 
-        description: "Aktif aboneliğiniz bulunmuyor." 
-      });
+      logger.warn('[PremiumService] No active subscription found to cancel', { userId });
       return false;
     }
     
-    toast({ 
-      title: "Abonelik İptal Edildi", 
-      description: "Aboneliğiniz başarıyla iptal edildi. Mevcut aboneliğiniz bitiş tarihine kadar devam edecek." 
-    });
+    logger.debug('[PremiumService] Subscription cancelled successfully', { userId, subscriptionId: data[0].id });
     
     return true;
   } catch (error) {
-    logger.error('[PremiumService] Error cancelling subscription', { error });
-    toast({ 
-      title: "Beklenmedik Hata", 
-      description: "Abonelik iptal edilirken bir sorun oluştu.", 
-      variant: "destructive" 
-    });
+    logger.error('[PremiumService] Error cancelling subscription', { error, userId });
     return false;
   }
 };
@@ -464,12 +469,7 @@ export const renewSubscription = async (userId: string) => {
       .single();
     
     if (fetchError || !currentSubscription) {
-      logger.error('[PremiumService] No active subscription found', { error: fetchError });
-      toast({ 
-        title: "Hata", 
-        description: "Aktif aboneliğiniz bulunmuyor.", 
-        variant: "destructive" 
-      });
+      logger.error('[PremiumService] No active subscription found', { error: fetchError, userId });
       return false;
     }
     
@@ -477,6 +477,12 @@ export const renewSubscription = async (userId: string) => {
     const currentExpiresAt = new Date(currentSubscription.expires_at);
     const newExpiresAt = new Date(currentExpiresAt);
     newExpiresAt.setMonth(newExpiresAt.getMonth() + 1);
+    
+    logger.debug('[PremiumService] Renewing subscription', { 
+      userId, 
+      currentExpiresAt: currentExpiresAt.toISOString(),
+      newExpiresAt: newExpiresAt.toISOString()
+    });
     
     const { error: updateError } = await supabase
       .from('premium_subscriptions')
@@ -487,42 +493,45 @@ export const renewSubscription = async (userId: string) => {
       .eq('id', currentSubscription.id);
     
     if (updateError) {
-      logger.error('[PremiumService] Error renewing subscription', { error: updateError });
-      toast({ 
-        title: "Yenileme Hatası", 
-        description: "Abonelik yenilenirken bir sorun oluştu.", 
-        variant: "destructive" 
-      });
+      logger.error('[PremiumService] Error renewing subscription', { error: updateError, userId });
       return false;
     }
     
-    toast({ 
-      title: "Abonelik Yenilendi! 🎉", 
-      description: `Aboneliğiniz başarıyla yenilendi. Yeni bitiş tarihi: ${format(newExpiresAt, 'dd MMMM yyyy', { locale: tr })}` 
+    logger.debug('[PremiumService] Subscription renewed successfully', { 
+      userId, 
+      newExpiresAt: newExpiresAt.toISOString()
     });
     
     return true;
   } catch (error) {
-    logger.error('[PremiumService] Error renewing subscription', { error });
-    toast({ 
-      title: "Beklenmedik Hata", 
-      description: "Abonelik yenilenirken bir sorun oluştu.", 
-      variant: "destructive" 
-    });
+    logger.error('[PremiumService] Error renewing subscription', { error, userId });
     return false;
   }
 };
 
 // Kullanıcı kullanımını artır
+// NOT: RPC fonksiyonu get_or_create_monthly_usage monthly_usage_stats tablosunu kullanıyor
+// Bu fonksiyon da aynı tabloyu kullanmalı (monthly_usage_stats, month_year kolonu)
 export const incrementUserUsage = async (userId: string, feature: string) => {
   if (!userId || !feature) return false;
   
   try {
+    const monthYear = new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0');
+    
+    // Feature ismini doğru kolon ismine çevir
+    let columnName = feature;
+    if (feature === 'offers' || feature === 'offer') columnName = 'offers_count';
+    else if (feature === 'messages' || feature === 'message') columnName = 'messages_count';
+    else if (feature === 'listings' || feature === 'listing') columnName = 'listings_count';
+    else if (feature === 'featured_offers' || feature === 'featured_offer') columnName = 'featured_offers_count';
+    else if (!feature.endsWith('_count')) columnName = `${feature}_count`;
+    
+    // Mevcut kullanımı kontrol et
     const { data: usage, error: fetchError } = await supabase
-      .from('user_monthly_usage')
+      .from('monthly_usage_stats')
       .select('*')
       .eq('user_id', userId)
-      .eq('month', new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0'))
+      .eq('month_year', monthYear)
       .single();
     
     if (fetchError && fetchError.code !== 'PGRST116') {
@@ -532,13 +541,19 @@ export const incrementUserUsage = async (userId: string, feature: string) => {
     
     if (!usage) {
       // Yeni kullanım kaydı oluştur
+      const insertData: Record<string, unknown> = {
+        user_id: userId,
+        month_year: monthYear,
+        offers_count: 0,
+        messages_count: 0,
+        listings_count: 0,
+        featured_offers_count: 0
+      };
+      insertData[columnName] = 1;
+      
       const { error: insertError } = await supabase
-        .from('user_monthly_usage')
-        .insert({
-          user_id: userId,
-          month: new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0'),
-          [`${feature}_count`]: 1
-        });
+        .from('monthly_usage_stats')
+        .insert(insertData);
       
       if (insertError) {
         logger.error('[PremiumService] Error creating usage record', { error: insertError });
@@ -546,11 +561,15 @@ export const incrementUserUsage = async (userId: string, feature: string) => {
       }
     } else {
       // Mevcut kullanımı artır
+      const currentValue = (usage[columnName as keyof typeof usage] as number) || 0;
+      const updateData: Record<string, unknown> = {
+        [columnName]: currentValue + 1,
+        updated_at: new Date().toISOString()
+      };
+      
       const { error: updateError } = await supabase
-        .from('user_monthly_usage')
-        .update({
-          [`${feature}_count`]: (usage[`${feature}_count`] || 0) + 1
-        })
+        .from('monthly_usage_stats')
+        .update(updateData)
         .eq('id', usage.id);
       
       if (updateError) {

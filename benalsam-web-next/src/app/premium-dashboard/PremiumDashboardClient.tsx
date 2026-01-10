@@ -28,20 +28,27 @@ import {
   Users
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
-import { toast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/use-toast'
 import { 
   getUserActivePlan, 
   getUserMonthlyUsage,
-  getPlanFeatures,
   createSubscription,
   cancelSubscription,
   renewSubscription
 } from '@/services/premiumService/core'
-import { getPlanBadges, getFeatureComparison } from '@/services/premiumService/ui'
+import { getPlanFeatures, getPlanBadges, getFeatureComparison } from '@/services/premiumService/ui'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { logger } from '@/utils/production-logger'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 interface PlanData {
   plan_slug: string
@@ -61,6 +68,7 @@ interface UsageData {
 
 export default function PremiumDashboardClient() {
   const { user } = useAuth()
+  const { toast } = useToast() // Use useToast hook instead of direct toast import
   const [loading, setLoading] = useState(true)
   const [upgrading, setUpgrading] = useState<string | null>(null)
   const [currentPlan, setCurrentPlan] = useState<PlanData | null>(null)
@@ -70,6 +78,8 @@ export default function PremiumDashboardClient() {
   const [comparison] = useState(getFeatureComparison())
   const [cancelling, setCancelling] = useState(false)
   const [renewing, setRenewing] = useState(false)
+  const [showRenewDialog, setShowRenewDialog] = useState(false)
+  const [showCancelDialog, setShowCancelDialog] = useState(false)
 
   useEffect(() => {
     if (user?.id) {
@@ -78,19 +88,38 @@ export default function PremiumDashboardClient() {
   }, [user])
 
   const loadUserData = async () => {
-    if (!user?.id) return
+    if (!user?.id) {
+      logger.debug('[PremiumDashboard] No user ID, skipping data load')
+      return
+    }
 
     setLoading(true)
+    logger.debug('[PremiumDashboard] Loading user data', { userId: user.id })
+    
     try {
       const [planData, usageData] = await Promise.all([
         getUserActivePlan(user.id),
         getUserMonthlyUsage(user.id)
       ])
 
+      logger.debug('[PremiumDashboard] User data loaded', {
+        userId: user.id,
+        hasPlan: !!planData,
+        hasUsage: !!usageData,
+        planData,
+        usageData,
+        planSlug: planData?.plan_slug,
+        planName: planData?.plan_name,
+        planLimits: planData?.limits,
+        planFeatures: planData?.features
+      })
+
+      // RPC'den gelen veriyi doğrudan kullan, mapping'e gerek yok
+      // Ancak UI'den plans objesi ile de limit bilgilerini kullanabiliriz
       setCurrentPlan(planData as PlanData | null)
       setUsage(usageData as UsageData | null)
     } catch (error) {
-      logger.error('[PremiumDashboard] Error loading user data', { error })
+      logger.error('[PremiumDashboard] Error loading user data', { error, userId: user.id })
       toast({
         title: 'Hata',
         description: 'Veriler yüklenirken bir hata oluştu.',
@@ -136,19 +165,41 @@ export default function PremiumDashboardClient() {
 
   const handleCancelSubscription = async () => {
     if (!user?.id || cancelling) return
+    setShowCancelDialog(true)
+  }
 
-    if (!window.confirm('Aboneliğinizi iptal etmek istediğinize emin misiniz?\n\nMevcut aboneliğiniz bitiş tarihine kadar devam edecek.')) {
-      return
-    }
+  const confirmCancelSubscription = async () => {
+    if (!user?.id || cancelling) return
 
+    setShowCancelDialog(false)
     setCancelling(true)
+    logger.debug('[PremiumDashboard] Attempting to cancel subscription', { userId: user.id })
+    
     try {
       const success = await cancelSubscription(user.id)
       if (success) {
+        logger.debug('[PremiumDashboard] Subscription cancelled successfully', { userId: user.id })
+        toast({
+          title: 'Abonelik İptal Edildi',
+          description: 'Aboneliğiniz iptal edildi. Mevcut aboneliğiniz bitiş tarihine kadar devam edecek.',
+          variant: 'default',
+        })
         await loadUserData()
+      } else {
+        logger.warn('[PremiumDashboard] Subscription cancellation returned false', { userId: user.id })
+        toast({
+          title: 'Hata',
+          description: 'Abonelik iptal edilirken bir sorun oluştu. Lütfen tekrar deneyin.',
+          variant: 'destructive',
+        })
       }
     } catch (error) {
-      logger.error('[PremiumDashboard] Error cancelling subscription', { error })
+      logger.error('[PremiumDashboard] Error cancelling subscription', { error, userId: user.id })
+      toast({
+        title: 'Hata',
+        description: 'Abonelik iptal edilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
+        variant: 'destructive',
+      })
     } finally {
       setCancelling(false)
     }
@@ -156,15 +207,41 @@ export default function PremiumDashboardClient() {
 
   const handleRenewSubscription = async () => {
     if (!user?.id || renewing) return
+    setShowRenewDialog(true)
+  }
 
+  const confirmRenewSubscription = async () => {
+    if (!user?.id || renewing) return
+
+    setShowRenewDialog(false)
     setRenewing(true)
+    logger.debug('[PremiumDashboard] Attempting to renew subscription', { userId: user.id })
+    
     try {
       const success = await renewSubscription(user.id)
       if (success) {
+        logger.debug('[PremiumDashboard] Subscription renewed successfully', { userId: user.id })
         await loadUserData()
+        toast({
+          title: 'Başarılı! ✅',
+          description: 'Aboneliğiniz başarıyla yenilendi. Yeni bitiş tarihi yukarıda görüntüleniyor.',
+          variant: 'default',
+        })
+      } else {
+        logger.warn('[PremiumDashboard] Subscription renewal returned false', { userId: user.id })
+        toast({
+          title: 'Hata',
+          description: 'Abonelik yenilenirken bir sorun oluştu. Lütfen tekrar deneyin.',
+          variant: 'destructive',
+        })
       }
     } catch (error) {
-      logger.error('[PremiumDashboard] Error renewing subscription', { error })
+      logger.error('[PremiumDashboard] Error renewing subscription', { error, userId: user.id })
+      toast({
+        title: 'Hata',
+        description: 'Abonelik yenilenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
+        variant: 'destructive',
+      })
     } finally {
       setRenewing(false)
     }
@@ -188,6 +265,28 @@ export default function PremiumDashboardClient() {
     const currentSlug = getCurrentPlanSlug()
     const planOrder = ['basic', 'advanced', 'corporate']
     return planOrder.indexOf(planSlug) < planOrder.indexOf(currentSlug)
+  }
+
+  // Aboneliği yenileme butonu ne zaman görünmeli?
+  // Son 14 gün kala görünsün (veya abonelik bitmişse)
+  const shouldShowRenewButton = () => {
+    if (currentSlug === 'basic' || !currentPlan?.expires_at) {
+      return false // Basic plan'da veya süresiz abonelikte gösterilmez
+    }
+
+    const expiresAt = new Date(currentPlan.expires_at)
+    const now = new Date()
+    const daysUntilExpiry = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+
+    logger.debug('[PremiumDashboard] Renew button visibility check', {
+      expiresAt: expiresAt.toISOString(),
+      now: now.toISOString(),
+      daysUntilExpiry,
+      shouldShow: daysUntilExpiry <= 14
+    })
+
+    // Son 14 gün içindeyse veya abonelik bitmişse göster
+    return daysUntilExpiry <= 14
   }
 
   const getUsagePercentage = (used: number, limit: number) => {
@@ -252,7 +351,21 @@ export default function PremiumDashboardClient() {
                 </CardTitle>
                 <CardDescription className="mt-2">
                   {currentPlan?.expires_at 
-                    ? `Abonelik bitiş tarihi: ${format(new Date(currentPlan.expires_at), 'dd MMMM yyyy', { locale: tr })}`
+                    ? (() => {
+                        const expiresAt = new Date(currentPlan.expires_at)
+                        const now = new Date()
+                        const daysUntilExpiry = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+                        
+                        if (daysUntilExpiry < 0) {
+                          return `⚠️ Abonelik bitmiş (${format(expiresAt, 'dd MMMM yyyy', { locale: tr })})`
+                        } else if (daysUntilExpiry <= 7) {
+                          return `🔴 Abonelik bitiş tarihi: ${format(expiresAt, 'dd MMMM yyyy', { locale: tr })} (${daysUntilExpiry} gün kaldı)`
+                        } else if (daysUntilExpiry <= 14) {
+                          return `🟡 Abonelik bitiş tarihi: ${format(expiresAt, 'dd MMMM yyyy', { locale: tr })} (${daysUntilExpiry} gün kaldı)`
+                        } else {
+                          return `Abonelik bitiş tarihi: ${format(expiresAt, 'dd MMMM yyyy', { locale: tr })} (${daysUntilExpiry} gün kaldı)`
+                        }
+                      })()
                     : 'Süresiz abonelik'}
                 </CardDescription>
               </div>
@@ -275,29 +388,31 @@ export default function PremiumDashboardClient() {
             </div>
             {currentSlug !== 'basic' && currentPlan?.expires_at && (
               <div className="flex gap-2 mt-4 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={handleRenewSubscription}
-                  disabled={renewing}
-                  className="flex-1"
-                >
-                  {renewing ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Yenileniyor...
-                    </>
-                  ) : (
-                    <>
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Aboneliği Yenile
-                    </>
-                  )}
-                </Button>
+                {shouldShowRenewButton() && (
+                  <Button
+                    variant="outline"
+                    onClick={handleRenewSubscription}
+                    disabled={renewing}
+                    className="flex-1"
+                  >
+                    {renewing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Yenileniyor...
+                      </>
+                    ) : (
+                      <>
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Aboneliği Yenile
+                      </>
+                    )}
+                  </Button>
+                )}
                 <Button
                   variant="destructive"
                   onClick={handleCancelSubscription}
                   disabled={cancelling}
-                  className="flex-1"
+                  className={shouldShowRenewButton() ? "flex-1" : "w-full"}
                 >
                   {cancelling ? (
                     <>
@@ -317,84 +432,153 @@ export default function PremiumDashboardClient() {
         </Card>
 
         {/* Usage Statistics */}
-        {usage && currentPlan && (
+        {usage ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-            {/* Listings Usage */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4" />
-                  İlanlar
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {usage.listings_count || 0} / {formatLimit(currentPlan.limits?.listings_per_month || 5)}
-                </div>
-                <Progress 
-                  value={getUsagePercentage(usage.listings_count || 0, currentPlan.limits?.listings_per_month || 5)} 
-                  className="mt-2"
-                />
-              </CardContent>
-            </Card>
+              {/* Get plan limits with fallback */}
+              {(() => {
+                // Önce RPC'den gelen limits'i kullan, yoksa UI plans objesinden al
+                const rpcLimits = currentPlan?.limits || {}
+                const uiLimits = plans[currentSlug]?.limits || {}
+                
+                logger.debug('[PremiumDashboard] Plan limits calculation', {
+                  currentSlug,
+                  rpcLimits,
+                  uiLimits,
+                  rpcListings: rpcLimits.listings_per_month,
+                  rpcOffers: rpcLimits.offers_per_month,
+                  rpcMessages: rpcLimits.messages_per_month,
+                  uiListings: uiLimits.listings_per_month,
+                  uiOffers: uiLimits.offers_per_month,
+                  uiMessages: uiLimits.messages_per_month
+                })
+                
+                // Corporate plan için özel kontrol:
+                // - listings_per_month: Database'de 50, her zaman UI'dan al (Corporate plan'da sınırsız değil!)
+                // - offers_per_month: -1 ise sınırsız (Corporate plan'da sınırsız)
+                // - messages_per_month: -1 ise sınırsız (Corporate plan'da sınırsız)
+                const planLimits = {
+                  // listings_per_month: Corporate plan'da 50, diğer planlarda database'den geliyorsa onu kullan
+                  listings_per_month: currentSlug === 'corporate' 
+                    ? (uiLimits.listings_per_month ?? 50) // Corporate için her zaman UI'dan al (50)
+                    : (rpcLimits.listings_per_month !== undefined && rpcLimits.listings_per_month !== -1
+                        ? rpcLimits.listings_per_month
+                        : (uiLimits.listings_per_month ?? 5)),
+                  // offers_per_month: -1 ise sınırsız, aksi halde RPC'den gelen değeri kullan
+                  offers_per_month: rpcLimits.offers_per_month === -1 
+                    ? -1 // Sınırsız
+                    : (rpcLimits.offers_per_month !== undefined 
+                        ? rpcLimits.offers_per_month 
+                        : (uiLimits.offers_per_month ?? 10)),
+                  // messages_per_month: -1 ise sınırsız, aksi halde RPC'den gelen değeri kullan
+                  messages_per_month: rpcLimits.messages_per_month === -1
+                    ? -1 // Sınırsız
+                    : (rpcLimits.messages_per_month !== undefined
+                        ? rpcLimits.messages_per_month
+                        : (uiLimits.messages_per_month ?? 50)),
+                  // featured_offers_per_day: Normal değer kullan
+                  featured_offers_per_day: rpcLimits.featured_offers_per_day ?? uiLimits.featured_offers_per_day ?? 0
+                }
+                
+                logger.debug('[PremiumDashboard] Final plan limits', { 
+                  planLimits,
+                  listings: planLimits.listings_per_month,
+                  offers: planLimits.offers_per_month,
+                  messages: planLimits.messages_per_month,
+                  featured: planLimits.featured_offers_per_day
+                })
+              
+              return (
+                <>
+                  {/* Listings Usage */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <BarChart3 className="w-4 h-4" />
+                        İlanlar
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {usage.listings_count || 0} / {formatLimit(planLimits.listings_per_month || 5)}
+                      </div>
+                      <Progress 
+                        value={getUsagePercentage(usage.listings_count || 0, planLimits.listings_per_month || 5)} 
+                        className="mt-2"
+                      />
+                    </CardContent>
+                  </Card>
 
-            {/* Offers Usage */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Zap className="w-4 h-4" />
-                  Teklifler
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {usage.offers_count || 0} / {formatLimit(currentPlan.limits?.offers_per_month || 10)}
-                </div>
-                <Progress 
-                  value={getUsagePercentage(usage.offers_count || 0, currentPlan.limits?.offers_per_month || 10)} 
-                  className="mt-2"
-                />
-              </CardContent>
-            </Card>
+                  {/* Offers Usage */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <Zap className="w-4 h-4" />
+                        Teklifler
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {usage.offers_count || 0} / {formatLimit(planLimits.offers_per_month || 10)}
+                      </div>
+                      <Progress 
+                        value={getUsagePercentage(usage.offers_count || 0, planLimits.offers_per_month || 10)} 
+                        className="mt-2"
+                      />
+                    </CardContent>
+                  </Card>
 
-            {/* Messages Usage */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" />
-                  Mesajlar
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {usage.messages_count || 0} / {formatLimit(currentPlan.limits?.messages_per_month || 50)}
-                </div>
-                <Progress 
-                  value={getUsagePercentage(usage.messages_count || 0, currentPlan.limits?.messages_per_month || 50)} 
-                  className="mt-2"
-                />
-              </CardContent>
-            </Card>
+                  {/* Messages Usage */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4" />
+                        Mesajlar
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {usage.messages_count || 0} / {formatLimit(planLimits.messages_per_month || 50)}
+                      </div>
+                      <Progress 
+                        value={getUsagePercentage(usage.messages_count || 0, planLimits.messages_per_month || 50)} 
+                        className="mt-2"
+                      />
+                    </CardContent>
+                  </Card>
 
-            {/* Featured Offers Usage */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Star className="w-4 h-4" />
-                  Öne Çıkanlar
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {usage.featured_offers_count || 0} / {formatLimit(currentPlan.limits?.featured_offers_per_day || 0)}
-                </div>
-                <Progress 
-                  value={getUsagePercentage(usage.featured_offers_count || 0, currentPlan.limits?.featured_offers_per_day || 0)} 
-                  className="mt-2"
-                />
-              </CardContent>
-            </Card>
+                  {/* Featured Offers Usage */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <Star className="w-4 h-4" />
+                        Öne Çıkanlar
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {usage.featured_offers_count || 0} / {formatLimit(planLimits.featured_offers_per_day || 0)}
+                      </div>
+                      <Progress 
+                        value={getUsagePercentage(usage.featured_offers_count || 0, planLimits.featured_offers_per_day || 0)} 
+                        className="mt-2"
+                      />
+                    </CardContent>
+                  </Card>
+                </>
+              )
+            })()}
           </div>
+        ) : (
+          <Card className="mb-10 border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-950">
+            <CardHeader>
+              <CardTitle className="text-lg text-yellow-800 dark:text-yellow-200">
+                ⚠️ Kullanım istatistikleri yüklenemedi
+              </CardTitle>
+              <CardDescription className="text-yellow-700 dark:text-yellow-300">
+                Lütfen sayfayı yenileyin veya daha sonra tekrar deneyin.
+              </CardDescription>
+            </CardHeader>
+          </Card>
         )}
 
         {/* Plan Comparison */}
@@ -565,6 +749,125 @@ export default function PremiumDashboardClient() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Renew Subscription Confirmation Dialog */}
+      <Dialog open={showRenewDialog} onOpenChange={setShowRenewDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Aboneliği Yenile
+            </DialogTitle>
+            <DialogDescription>
+              Aboneliğinizi yenilemek istediğinize emin misiniz?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-2">
+            {currentPlan?.expires_at && (
+              <>
+                <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
+                  <span className="text-sm font-medium">Mevcut Bitiş Tarihi:</span>
+                  <span className="text-sm">
+                    {format(new Date(currentPlan.expires_at), 'dd MMMM yyyy', { locale: tr })}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <span className="text-sm font-medium">Yeni Bitiş Tarihi:</span>
+                  <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                    {format(
+                      new Date(new Date(currentPlan.expires_at).setMonth(new Date(currentPlan.expires_at).getMonth() + 1)),
+                      'dd MMMM yyyy',
+                      { locale: tr }
+                    )}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Aboneliğiniz 1 ay uzatılacaktır.
+                </p>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowRenewDialog(false)}
+              disabled={renewing}
+            >
+              İptal
+            </Button>
+            <Button
+              onClick={confirmRenewSubscription}
+              disabled={renewing}
+            >
+              {renewing ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Yenileniyor...
+                </>
+              ) : (
+                <>
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Yenile
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Subscription Confirmation Dialog */}
+      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <X className="w-5 h-5 text-destructive" />
+              Aboneliği İptal Et
+            </DialogTitle>
+            <DialogDescription>
+              Aboneliğinizi iptal etmek istediğinize emin misiniz?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Mevcut aboneliğiniz bitiş tarihine kadar devam edecek. İptal işleminden sonra aboneliğiniz otomatik olarak yenilenmeyecektir.
+            </p>
+            {currentPlan?.expires_at && (
+              <div className="mt-4 p-3 bg-muted rounded-lg">
+                <span className="text-sm font-medium">Bitiş Tarihi: </span>
+                <span className="text-sm">
+                  {format(new Date(currentPlan.expires_at), 'dd MMMM yyyy', { locale: tr })}
+                </span>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowCancelDialog(false)}
+              disabled={cancelling}
+            >
+              Vazgeç
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmCancelSubscription}
+              disabled={cancelling}
+            >
+              {cancelling ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  İptal Ediliyor...
+                </>
+              ) : (
+                <>
+                  <X className="w-4 h-4 mr-2" />
+                  İptal Et
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
