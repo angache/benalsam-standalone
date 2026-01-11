@@ -15,6 +15,7 @@ import trendAnalysisRoutes from './trendAnalysis';
 import aiSuggestionsRoutes from './aiSuggestions';
 import inventoryRoutes from './inventory';
 import { serviceRegistryRoutes } from './serviceRegistry';
+import sentryRoutes from './sentry';
 
 const router: IRouter = Router();
 
@@ -65,6 +66,9 @@ router.use('/inventory', inventoryRoutes);
 
 // Service Registry routes
 router.use('/service-registry', serviceRegistryRoutes);
+
+// Sentry routes
+router.use('/sentry', sentryRoutes);
 
 router.get('/reports', (req, res) => {
   res.status(501).json({

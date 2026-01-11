@@ -1,70 +1,70 @@
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth';
 import logger from '../config/logger';
+import { getSentryApiService } from '../services/sentryApi';
 
 const router = Router();
 
 // Get Sentry metrics overview
-router.get('/metrics', authenticateToken, (req, res) => {
+router.get('/metrics', authenticateToken, async (req, res) => {
   try {
     const { timeRange = '24h' } = req.query;
-    
-    // Real metrics - empty for now, will be populated by actual Sentry integration
-    const mockMetrics = {
-      errorRate: 0,
-      totalErrors: 0,
-      activeErrors: 0,
-      resolvedErrors: 0,
-      performanceScore: 100,
-      userImpact: 0,
-      releaseHealth: {
-        healthy: 0,
-        degraded: 0,
-        unhealthy: 0
-      }
-    };
+
+    // Get Sentry API service
+    const sentryApi = getSentryApiService();
+    const metrics = await sentryApi.getMetrics(timeRange as string);
 
     logger.info('📊 Sentry metrics requested', {
       timeRange,
-      errorRate: mockMetrics.errorRate,
-      totalErrors: mockMetrics.totalErrors
+      errorRate: metrics.errorRate,
+      totalErrors: metrics.totalErrors
     });
 
     res.json({
       success: true,
-      data: mockMetrics,
+      data: metrics,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    logger.error('❌ Error getting Sentry metrics:', error);
+    logger.error('❌ Error getting Sentry metrics:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      details: error
+    });
     res.status(500).json({
       success: false,
       message: 'Failed to get Sentry metrics',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
+      details: error instanceof Error && error.message.includes('configuration') ? 'Check environment variables (SENTRY_ORG_SLUG, SENTRY_PROJECT_SLUG, SENTRY_AUTH_TOKEN)' : undefined
     });
   }
 });
 
 // Get Sentry errors
-router.get('/errors', authenticateToken, (req, res) => {
+router.get('/errors', authenticateToken, async (req, res) => {
   try {
     const { timeRange = '24h' } = req.query;
-    
-    // Real error data - empty for now, will be populated by actual Sentry integration
-    const mockErrors: any[] = [];
+
+    // Get Sentry API service
+    const sentryApi = getSentryApiService();
+    const errors = await sentryApi.getErrors(timeRange as string);
 
     logger.info('📊 Sentry errors requested', {
       timeRange,
-      errorCount: mockErrors.length
+      errorCount: errors.length
     });
 
     res.json({
       success: true,
-      data: mockErrors,
+      data: errors,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    logger.error('❌ Error getting Sentry errors:', error);
+    logger.error('❌ Error getting Sentry errors:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      details: error
+    });
     res.status(500).json({
       success: false,
       message: 'Failed to get Sentry errors',
@@ -74,50 +74,30 @@ router.get('/errors', authenticateToken, (req, res) => {
 });
 
 // Get Sentry performance data
-router.get('/performance', authenticateToken, (req, res) => {
+router.get('/performance', authenticateToken, async (req, res) => {
   try {
     const { timeRange = '24h' } = req.query;
-    
-    // Mock data for now - in production this would fetch from Sentry API
-    const mockPerformance = [
-      {
-        transaction: '/api/v1/listings',
-        avgDuration: 245,
-        p95Duration: 890,
-        errorRate: 0.2,
-        throughput: 1250,
-        timestamp: new Date().toISOString()
-      },
-      {
-        transaction: '/api/v1/users',
-        avgDuration: 180,
-        p95Duration: 650,
-        errorRate: 0.1,
-        throughput: 890,
-        timestamp: new Date().toISOString()
-      },
-      {
-        transaction: '/api/v1/analytics',
-        avgDuration: 1200,
-        p95Duration: 2500,
-        errorRate: 1.5,
-        throughput: 45,
-        timestamp: new Date().toISOString()
-      }
-    ];
+
+    // Get Sentry API service
+    const sentryApi = getSentryApiService();
+    const performance = await sentryApi.getPerformance(timeRange as string);
 
     logger.info('📊 Sentry performance requested', {
       timeRange,
-      transactionCount: mockPerformance.length
+      transactionCount: performance.length
     });
 
     res.json({
       success: true,
-      data: mockPerformance,
+      data: performance,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    logger.error('❌ Error getting Sentry performance:', error);
+    logger.error('❌ Error getting Sentry performance:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      details: error
+    });
     res.status(500).json({
       success: false,
       message: 'Failed to get Sentry performance',
@@ -127,44 +107,27 @@ router.get('/performance', authenticateToken, (req, res) => {
 });
 
 // Get Sentry releases
-router.get('/releases', authenticateToken, (req, res) => {
+router.get('/releases', authenticateToken, async (req, res) => {
   try {
-    // Mock data for now - in production this would fetch from Sentry API
-    const mockReleases = [
-      {
-        version: '1.2.0',
-        date: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-        health: 'healthy' as const,
-        errorCount: 2,
-        userCount: 15
-      },
-      {
-        version: '1.1.5',
-        date: new Date(Date.now() - 604800000).toISOString(), // 1 week ago
-        health: 'degraded' as const,
-        errorCount: 8,
-        userCount: 32
-      },
-      {
-        version: '1.1.0',
-        date: new Date(Date.now() - 2592000000).toISOString(), // 1 month ago
-        health: 'healthy' as const,
-        errorCount: 1,
-        userCount: 5
-      }
-    ];
+    // Get Sentry API service
+    const sentryApi = getSentryApiService();
+    const releases = await sentryApi.getReleases();
 
     logger.info('📊 Sentry releases requested', {
-      releaseCount: mockReleases.length
+      releaseCount: releases.length
     });
 
     res.json({
       success: true,
-      data: mockReleases,
+      data: releases,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    logger.error('❌ Error getting Sentry releases:', error);
+    logger.error('❌ Error getting Sentry releases:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      details: error
+    });
     res.status(500).json({
       success: false,
       message: 'Failed to get Sentry releases',
