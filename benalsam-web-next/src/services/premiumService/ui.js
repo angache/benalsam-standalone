@@ -20,7 +20,8 @@ export const getPlanFeatures = () => {
         messages_per_month: 50,
         images_per_offer: 1,
         featured_offers_per_day: 0,
-        files_per_offer: 0
+        files_per_offer: 0,
+        listings_per_month: -1 // Sınırsız - platform için daha fazla ilan = daha fazla trafik
       }
     },
     advanced: {
@@ -29,6 +30,7 @@ export const getPlanFeatures = () => {
       period: 'ay',
       popular: true,
       features: [
+        'Sınırsız ilan verme',
         'Aylık 100 teklif hakkı',
         'Tüm tekliflerde 3 resim ekleyebilme',
         'Günde 1 öne çıkarılmış teklif',
@@ -41,7 +43,8 @@ export const getPlanFeatures = () => {
         messages_per_month: 200,
         images_per_offer: 3,
         featured_offers_per_day: 1,
-        files_per_offer: 0
+        files_per_offer: 0,
+        listings_per_month: -1 // Sınırsız - platform için daha fazla ilan = daha fazla trafik
       }
     },
     corporate: {
@@ -50,7 +53,8 @@ export const getPlanFeatures = () => {
       period: 'ay',
       popular: false,
       features: [
-        'Sınırsız teklif hakkı',
+        'Sınırsız ilan verme',
+        'Sınırsız teklif hakkı (Oto galeriler, emlakçılar, inşaat firmaları için ideal)',
         'Tüm tekliflerde 5 resim ve dosya ekleme',
         'Günde 5 öne çıkarılmış teklif',
         'Öncelikli sıralama ve "🔰 Güvenilir Tedarikçi" rozeti',
@@ -58,14 +62,16 @@ export const getPlanFeatures = () => {
         'Detaylı teklif performans raporları',
         'Direkt iletişim (İlan sahibine anında mesaj)',
         'Kurumsal profil ve faturalandırma',
-        'Premium canlı destek'
+        'Premium canlı destek',
+        'API erişimi (toplu ilan yönetimi için)'
       ],
       limits: {
-        offers_per_month: -1, // Sınırsız
+        offers_per_month: -1, // Sınırsız - kurumsal müşteriler için (oto galeriler, emlakçılar, inşaat firmaları)
         messages_per_month: -1, // Sınırsız
         images_per_offer: 5,
         featured_offers_per_day: 5,
-        files_per_offer: 3
+        files_per_offer: 3,
+        listings_per_month: -1 // Sınırsız - platform için daha fazla ilan = daha fazla trafik
       }
     }
   };
@@ -94,13 +100,24 @@ export const getPlanBadges = () => {
 export const getFeatureComparison = () => {
   return [
     {
+      category: 'İlan Verme',
+      features: [
+        {
+          name: 'Aylık İlan Hakkı',
+          basic: 'Sınırsız',
+          advanced: 'Sınırsız',
+          corporate: 'Sınırsız'
+        },
+      ]
+    },
+    {
       category: 'Teklif Verme',
       features: [
         {
           name: 'Aylık Teklif Hakkı',
           basic: '10 teklif',
           advanced: '100 teklif',
-          corporate: 'Sınırsız'
+          corporate: 'Sınırsız (Oto galeriler, emlakçılar, inşaat firmaları için ideal)'
         },
         {
           name: 'Resim Ekleme',

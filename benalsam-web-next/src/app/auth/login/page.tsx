@@ -32,6 +32,7 @@ function LoginPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/'
+  const registered = searchParams.get('registered') === 'true'
   
   // Get email and password from query params (for E2E tests)
   const emailFromQuery = searchParams.get('email')
@@ -61,6 +62,18 @@ function LoginPageContent() {
       setValue('password', passwordFromQuery)
     }
   }, [emailFromQuery, passwordFromQuery, setValue])
+
+  // Show success message if user just registered
+  React.useEffect(() => {
+    if (registered) {
+      toast({
+        title: 'Kayıt Başarılı! 🎉',
+        description: 'Hesabınız başarıyla oluşturuldu. Lütfen email adresinizi doğrulayın ve giriş yapın.',
+      })
+      // Clean up URL parameter
+      router.replace('/auth/login', { scroll: false })
+    }
+  }, [registered, toast, router])
 
   const remember = watch('remember')
 

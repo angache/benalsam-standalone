@@ -1,13 +1,15 @@
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { logger } from '@/utils/production-logger';
+import { format } from 'date-fns';
+import { tr } from 'date-fns/locale';
 
 export const getUserPremiumStatus = async (userId: string) => {
   if (!userId) return null;
 
   try {
     const { data, error } = await supabase
-      .from('user_premium_subscriptions')
+      .from('premium_subscriptions')
       .select('*')
       .eq('user_id', userId)
       .eq('status', 'active')
@@ -83,23 +85,108 @@ export const getPremiumLimits = async (userId: string) => {
   }
 };
 
-// Kullanıcının aktif planını getir
+// Kullanıcının aktif planını getir (payment_method dahil)
 export const getUserActivePlan = async (userId: string) => {
   if (!userId) return null;
   
   try {
-    const { data, error } = await supabase.rpc('get_user_active_plan', {
-      p_user_id: userId
-    });
+    logger.debug('[PremiumService] Getting user active plan', { userId });
     
-    if (error) {
-      logger.error('[PremiumService] Error getting user plan', { error });
-      return null;
+    // RPC fonksiyonu payment_method döndürmeyebilir, direkt subscription tablosundan okuyalım
+    const { data: subscription, error: subError } = await supabase
+      .from('premium_subscriptions')
+      .select(`
+        id,
+        plan_id,
+        status,
+        expires_at,
+        payment_method,
+        created_at,
+        subscription_plans (
+          id,
+          name,
+          slug,
+          limits,
+          features
+        )
+      `)
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (subError && subError.code !== 'PGRST116') {
+      logger.debug('[PremiumService] No active subscription found, trying RPC', { error: subError, userId });
+      
+      // Aktif abonelik yoksa RPC ile basic plan döndür
+      const { data: rpcData } = await supabase.rpc('get_user_active_plan', {
+        p_user_id: userId
+      });
+      
+      const planData = rpcData?.[0] || null;
+      
+      if (planData) {
+        return {
+          ...planData,
+          payment_method: null,
+          is_free_trial: false
+        };
+      }
+      
+      return {
+        plan_slug: 'basic',
+        plan_name: 'Temel Plan',
+        expires_at: null,
+        limits: {},
+        features: [],
+        payment_method: null,
+        is_free_trial: false
+      };
     }
     
-    return data?.[0] || null;
+    if (!subscription || !subscription.subscription_plans) {
+      logger.debug('[PremiumService] No subscription with plan found, returning basic', { userId });
+      return {
+        plan_slug: 'basic',
+        plan_name: 'Temel Plan',
+        expires_at: null,
+        limits: {},
+        features: [],
+        payment_method: null,
+        is_free_trial: false
+      };
+    }
+    
+    const plan = subscription.subscription_plans as {
+      id: string
+      name: string
+      slug: string
+      limits: Record<string, number>
+      features: Record<string, boolean>
+    };
+    
+    const result = {
+      plan_slug: plan.slug,
+      plan_name: plan.name,
+      expires_at: subscription.expires_at,
+      limits: plan.limits || {},
+      features: plan.features || {},
+      payment_method: subscription.payment_method || 'stripe',
+      is_free_trial: subscription.payment_method === 'free_trial'
+    };
+    
+    logger.debug('[PremiumService] User active plan retrieved', { 
+      userId, 
+      plan: result,
+      isFreeTrial: result.is_free_trial,
+      paymentMethod: result.payment_method
+    });
+    
+    return result;
   } catch (error) {
-    logger.error('[PremiumService] Error getting user plan', { error });
+    logger.error('[PremiumService] Error getting user plan', { error, userId });
     return null;
   }
 };
@@ -109,18 +196,25 @@ export const getUserMonthlyUsage = async (userId: string) => {
   if (!userId) return null;
   
   try {
+    logger.debug('[PremiumService] Getting user monthly usage', { userId });
     const { data, error } = await supabase.rpc('get_or_create_monthly_usage', {
       p_user_id: userId
     });
     
     if (error) {
-      logger.error('[PremiumService] Error getting user usage', { error });
+      logger.error('[PremiumService] Error getting user usage', { error, userId });
       return null;
     }
     
+    logger.debug('[PremiumService] User monthly usage retrieved', { 
+      usage: data?.[0],
+      userId,
+      dataLength: data?.length 
+    });
+    
     return data?.[0] || null;
   } catch (error) {
-    logger.error('[PremiumService] Error getting user usage', { error });
+    logger.error('[PremiumService] Error getting user usage', { error, userId });
     return null;
   }
 };
@@ -401,16 +495,114 @@ export const checkOfferLimit = async (userId: string) => {
   return currentOffers < limit;
 };
 
+// Abonelik iptal et
+export const cancelSubscription = async (userId: string) => {
+  if (!userId) return false;
+  
+  try {
+    const { data, error } = await supabase
+      .from('premium_subscriptions')
+      .update({ status: 'cancelled' })
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .select();
+    
+    if (error) {
+      logger.error('[PremiumService] Error cancelling subscription', { error, userId });
+      return false;
+    }
+    
+    if (!data || data.length === 0) {
+      logger.warn('[PremiumService] No active subscription found to cancel', { userId });
+      return false;
+    }
+    
+    logger.debug('[PremiumService] Subscription cancelled successfully', { userId, subscriptionId: data[0].id });
+    
+    return true;
+  } catch (error) {
+    logger.error('[PremiumService] Error cancelling subscription', { error, userId });
+    return false;
+  }
+};
+
+// Abonelik yenile
+export const renewSubscription = async (userId: string) => {
+  if (!userId) return false;
+  
+  try {
+    // Mevcut aboneliği bul
+    const { data: currentSubscription, error: fetchError } = await supabase
+      .from('premium_subscriptions')
+      .select('*, subscription_plans(*)')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .single();
+    
+    if (fetchError || !currentSubscription) {
+      logger.error('[PremiumService] No active subscription found', { error: fetchError, userId });
+      return false;
+    }
+    
+    // Bitiş tarihini 1 ay uzat
+    const currentExpiresAt = new Date(currentSubscription.expires_at);
+    const newExpiresAt = new Date(currentExpiresAt);
+    newExpiresAt.setMonth(newExpiresAt.getMonth() + 1);
+    
+    logger.debug('[PremiumService] Renewing subscription', { 
+      userId, 
+      currentExpiresAt: currentExpiresAt.toISOString(),
+      newExpiresAt: newExpiresAt.toISOString()
+    });
+    
+    const { error: updateError } = await supabase
+      .from('premium_subscriptions')
+      .update({ 
+        expires_at: newExpiresAt.toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', currentSubscription.id);
+    
+    if (updateError) {
+      logger.error('[PremiumService] Error renewing subscription', { error: updateError, userId });
+      return false;
+    }
+    
+    logger.debug('[PremiumService] Subscription renewed successfully', { 
+      userId, 
+      newExpiresAt: newExpiresAt.toISOString()
+    });
+    
+    return true;
+  } catch (error) {
+    logger.error('[PremiumService] Error renewing subscription', { error, userId });
+    return false;
+  }
+};
+
 // Kullanıcı kullanımını artır
+// NOT: RPC fonksiyonu get_or_create_monthly_usage monthly_usage_stats tablosunu kullanıyor
+// Bu fonksiyon da aynı tabloyu kullanmalı (monthly_usage_stats, month_year kolonu)
 export const incrementUserUsage = async (userId: string, feature: string) => {
   if (!userId || !feature) return false;
   
   try {
+    const monthYear = new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0');
+    
+    // Feature ismini doğru kolon ismine çevir
+    let columnName = feature;
+    if (feature === 'offers' || feature === 'offer') columnName = 'offers_count';
+    else if (feature === 'messages' || feature === 'message') columnName = 'messages_count';
+    else if (feature === 'listings' || feature === 'listing') columnName = 'listings_count';
+    else if (feature === 'featured_offers' || feature === 'featured_offer') columnName = 'featured_offers_count';
+    else if (!feature.endsWith('_count')) columnName = `${feature}_count`;
+    
+    // Mevcut kullanımı kontrol et
     const { data: usage, error: fetchError } = await supabase
-      .from('user_monthly_usage')
+      .from('monthly_usage_stats')
       .select('*')
       .eq('user_id', userId)
-      .eq('month', new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0'))
+      .eq('month_year', monthYear)
       .single();
     
     if (fetchError && fetchError.code !== 'PGRST116') {
@@ -420,13 +612,19 @@ export const incrementUserUsage = async (userId: string, feature: string) => {
     
     if (!usage) {
       // Yeni kullanım kaydı oluştur
+      const insertData: Record<string, unknown> = {
+        user_id: userId,
+        month_year: monthYear,
+        offers_count: 0,
+        messages_count: 0,
+        listings_count: 0,
+        featured_offers_count: 0
+      };
+      insertData[columnName] = 1;
+      
       const { error: insertError } = await supabase
-        .from('user_monthly_usage')
-        .insert({
-          user_id: userId,
-          month: new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0'),
-          [`${feature}_count`]: 1
-        });
+        .from('monthly_usage_stats')
+        .insert(insertData);
       
       if (insertError) {
         logger.error('[PremiumService] Error creating usage record', { error: insertError });
@@ -434,11 +632,15 @@ export const incrementUserUsage = async (userId: string, feature: string) => {
       }
     } else {
       // Mevcut kullanımı artır
+      const currentValue = (usage[columnName as keyof typeof usage] as number) || 0;
+      const updateData: Record<string, unknown> = {
+        [columnName]: currentValue + 1,
+        updated_at: new Date().toISOString()
+      };
+      
       const { error: updateError } = await supabase
-        .from('user_monthly_usage')
-        .update({
-          [`${feature}_count`]: (usage[`${feature}_count`] || 0) + 1
-        })
+        .from('monthly_usage_stats')
+        .update(updateData)
         .eq('id', usage.id);
       
       if (updateError) {
