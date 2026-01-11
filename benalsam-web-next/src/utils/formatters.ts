@@ -1,22 +1,12 @@
 /**
  * Utility functions for formatting data
+ * 
+ * NOTE: This file is maintained for backward compatibility.
+ * New code should use @/utils/formatUtils instead.
  */
 
-/**
- * Format price with Turkish locale
- */
-export function formatPrice(price: number): string {
-  if (typeof price !== 'number' || isNaN(price)) {
-    return 'Fiyat Belirtilmemiş'
-  }
-
-  return new Intl.NumberFormat('tr-TR', {
-    style: 'currency',
-    currency: 'TRY',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price)
-}
+// Re-export from formatUtils for backward compatibility
+export { formatListingPrice as formatPrice, formatDateRelative } from './formatUtils'
 
 /**
  * Format number with Turkish locale
@@ -30,7 +20,8 @@ export function formatNumber(num: number): string {
 }
 
 /**
- * Format date with Turkish locale
+ * Format date with Turkish locale (legacy function)
+ * @deprecated Use formatDateRelative from @/utils/formatUtils instead
  */
 export function formatDate(date: Date | string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date

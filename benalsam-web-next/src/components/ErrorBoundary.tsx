@@ -16,6 +16,7 @@ import React, { Component, ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, RefreshCw, Home } from 'lucide-react'
 import { logger } from '@/utils/production-logger'
+import { captureException } from '@/lib/sentry'
 
 interface Props {
   children: ReactNode
@@ -100,8 +101,11 @@ export class ErrorBoundary extends Component<Props, State> {
       errorInfo,
     })
 
-    // TODO: Send to error reporting service (Sentry, etc.)
-    // sendToErrorReporting(error, errorInfo)
+    // Send to error reporting service (Sentry)
+    captureException(error, {
+      componentStack: errorInfo.componentStack,
+      errorBoundary: true,
+    })
   }
 
   handleReset = () => {

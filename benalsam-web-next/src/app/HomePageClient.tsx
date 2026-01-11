@@ -13,16 +13,18 @@ import { TrendingUp, Sparkles, Grid3x3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
-// Critical components - load immediately
-import PopularCategories from '@/components/home/PopularCategories'
+// Critical components - load immediately (only truly critical ones)
 import SmartSearchBox from '@/components/home/SmartSearchBox'
 import { ScrollToTop } from '@/components/ScrollToTop'
 import { LazySection } from '@/components/home/LazySection'
 import { CriticalResources } from '@/components/home/CriticalResources'
 import { HomepageSection } from '@/components/home/HomepageErrorBoundary'
-import { HomepageListingsWithFilters } from '@/components/home/HomepageListingsWithFilters'
 import { useHomePageData } from '@/hooks/useHomePageData'
 import { useBackgroundRefetch } from '@/hooks/useBackgroundRefetch'
+
+// Semi-critical components - lazy load but with higher priority
+const PopularCategories = lazy(() => import('@/components/home/PopularCategories').then(m => ({ default: m.default })))
+const HomepageListingsWithFilters = lazy(() => import('@/components/home/HomepageListingsWithFilters').then(m => ({ default: m.HomepageListingsWithFilters })))
 
 // Lazy load heavy components - reduce initial bundle size
 const TrustBadges = lazy(() => import('@/components/home/TrustBadges').then(m => ({ default: m.default })))
@@ -147,7 +149,15 @@ function HomePageContent({ initialStats }: { initialStats?: HomePageClientProps[
 
       {/* Listings with Filters - New comprehensive filtering experience */}
       <HomepageSection componentName="Filtrelenmiş İlanlar">
-        <HomepageListingsWithFilters />
+        <LazySection
+          fallback={<div className="h-96 bg-muted animate-pulse rounded-lg" />}
+          rootMargin="200px"
+          minHeight="400px"
+        >
+          <Suspense fallback={<div className="h-96 bg-muted animate-pulse rounded-lg" />}>
+            <HomepageListingsWithFilters />
+          </Suspense>
+        </LazySection>
       </HomepageSection>
 
       {/* Listings Tabs - Öne Çıkanlar, Yeni İlanlar, Popüler (Alternative view) */}
@@ -162,17 +172,23 @@ function HomePageContent({ initialStats }: { initialStats?: HomePageClientProps[
         </section>
       </HomepageSection>
 
-      {/* Popular Categories - Critical, load immediately but using batch data */}
+      {/* Popular Categories - Semi-critical, lazy load with higher priority */}
       <HomepageSection componentName="Popüler Kategoriler">
-        <section id="categories" className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12 scroll-mt-16">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-2">Popüler Kategoriler</h2>
-            <p className="text-muted-foreground">Hızlı erişim için kategoriye göz atın</p>
-          </div>
-          <Suspense fallback={<div className="h-64 bg-muted animate-pulse rounded-lg" />}>
-            <PopularCategories categories={homepageData?.popularCategories} isLoading={isLoadingData} />
-          </Suspense>
-        </section>
+        <LazySection
+          fallback={<div className="h-64 bg-muted animate-pulse rounded-lg" />}
+          rootMargin="150px"
+          minHeight="300px"
+        >
+          <section id="categories" className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12 scroll-mt-16">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-2">Popüler Kategoriler</h2>
+              <p className="text-muted-foreground">Hızlı erişim için kategoriye göz atın</p>
+            </div>
+            <Suspense fallback={<div className="h-64 bg-muted animate-pulse rounded-lg" />}>
+              <PopularCategories categories={homepageData?.popularCategories} isLoading={isLoadingData} />
+            </Suspense>
+          </section>
+        </LazySection>
       </HomepageSection>
 
       {/* Recently Viewed */}

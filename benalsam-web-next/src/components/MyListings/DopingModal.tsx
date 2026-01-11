@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { LazyAnimatePresence, LazyMotionWrapper } from '@/utils/lazyFramerMotion'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -586,7 +586,7 @@ const DopingModal = ({ isOpen, onClose, listing, onSuccess }: DopingModalProps) 
                   const Icon = doping.icon
                   const isCancelling = cancellingDoping === doping.id
                   return (
-                    <motion.div
+                    <LazyMotionWrapper
                       key={doping.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -629,7 +629,7 @@ const DopingModal = ({ isOpen, onClose, listing, onSuccess }: DopingModalProps) 
                           </Button>
                         </div>
                       </div>
-                    </motion.div>
+                    </LazyMotionWrapper>
                   )
                 })}
               </div>
@@ -642,7 +642,7 @@ const DopingModal = ({ isOpen, onClose, listing, onSuccess }: DopingModalProps) 
               {activeDopings.length > 0 ? 'Yeni Doping Ekle' : 'Doping Seçenekleri'}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <AnimatePresence>
+              <LazyAnimatePresence>
                 {dopingOptions
                   .filter(option => {
                     // Only show options that are not active (or allow repurchase)
@@ -653,7 +653,7 @@ const DopingModal = ({ isOpen, onClose, listing, onSuccess }: DopingModalProps) 
                     const isSelected = !!selectedDopings[option.id]
                     const Icon = option.icon
                     return (
-                      <motion.div
+                      <LazyMotionWrapper
                         key={option.id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -681,7 +681,7 @@ const DopingModal = ({ isOpen, onClose, listing, onSuccess }: DopingModalProps) 
                               <p className="text-sm text-muted-foreground mb-4">{option.description}</p>
                               
                               {isSelected && (
-                                <motion.div
+                                <LazyMotionWrapper
                                   initial={{ opacity: 0, height: 0 }}
                                   animate={{ opacity: 1, height: 'auto' }}
                                   exit={{ opacity: 0, height: 0 }}
@@ -704,15 +704,15 @@ const DopingModal = ({ isOpen, onClose, listing, onSuccess }: DopingModalProps) 
                                       ))}
                                     </SelectContent>
                                   </Select>
-                                </motion.div>
+                                </LazyMotionWrapper>
                               )}
                             </div>
                           </div>
                         </div>
-                      </motion.div>
+                      </LazyMotionWrapper>
                     )
                   })}
-              </AnimatePresence>
+              </LazyAnimatePresence>
             </div>
           </div>
         </div>

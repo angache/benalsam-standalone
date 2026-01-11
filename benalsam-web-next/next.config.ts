@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'framer-motion'],
   },
   
+  // Turbopack configuration (Next.js 16+)
+  // Note: turbopack.root is set via environment or inferred automatically
+  // To fix workspace root warning, ensure you're running from the correct directory
+  
   // TypeScript - Strict type checking enabled
   typescript: {
     ignoreBuildErrors: false, // Enforce TypeScript checks during build

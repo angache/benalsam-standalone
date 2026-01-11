@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query'
 import { listingService } from '@/services/listingService'
 import { useFilterStore } from '@/stores/filterStore'
 import { useRouter } from 'next/navigation'
+import { formatPriceAbbreviated, formatDateSimple } from '@/utils/formatUtils'
 
 interface Listing {
   id: string
@@ -61,28 +62,8 @@ export default function MainContent() {
   const listings = data?.data || []
   const totalPages = data?.pagination?.totalPages || 1
 
-  const formatPrice = (price: number) => {
-    if (price >= 1_000_000) {
-      return `${(price / 1_000_000).toFixed(1)} Mn ₺`
-    } else if (price >= 1_000) {
-      return `${(price / 1_000).toFixed(0)} Bin ₺`
-    }
-    return `${price.toLocaleString('tr-TR')} ₺`
-  }
-
-  const getTimeAgo = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMins / 60)
-    const diffDays = Math.floor(diffHours / 24)
-    
-    if (diffDays > 0) return `${diffDays} gün önce`
-    if (diffHours > 0) return `${diffHours} saat önce`
-    if (diffMins > 0) return `${diffMins} dakika önce`
-    return 'Az önce'
-  }
+  const formatPrice = formatPriceAbbreviated
+  const getTimeAgo = formatDateSimple
 
   if (isLoading) {
     return (

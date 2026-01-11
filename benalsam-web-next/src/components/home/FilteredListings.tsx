@@ -268,7 +268,7 @@ export default function FilteredListings({ filters, onClearFilters }: FilteredLi
               <ListingCard
                 listing={listing}
                 currentUser={user}
-                priority={index < 6} // First 6 cards load with priority
+                priority={index < 4} // First 4 cards load with priority (LCP optimization)
                 onToggleFavorite={handleToggleFavorite}
                 onView={(listing) => setQuickViewListing(listing as QuickViewListing)}
                 getPremiumBadges={getPremiumBadges}

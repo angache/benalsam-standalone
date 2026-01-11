@@ -1,9 +1,9 @@
 'use client'
 
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { LazyMotionWrapper, MotionFallback } from '@/utils/lazyFramerMotion'
 import { logger } from '@/utils/production-logger'
 import { 
   MapPin, 
@@ -29,8 +29,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
-import { formatDistanceToNow } from 'date-fns'
-import { tr } from 'date-fns/locale'
+import { formatListingPrice, formatDateRelative } from '@/utils/formatUtils'
 import Image from 'next/image'
 import { useCategories } from '@/hooks/useCategories'
 import { generateListingUrl } from '@/lib/slugify'
@@ -146,24 +145,9 @@ const getStatusInfo = (status?: string) => {
   }
 }
 
-const formatPrice = (listing: Listing) => {
-  const price = listing.price || listing.budget
-  const currency = listing.currency || 'TL'
-  if (!price) return 'Fiyat belirtilmemiş'
-  return new Intl.NumberFormat('tr-TR').format(price) + ' ' + currency
-}
-
-const formatDate = (dateString?: string) => {
-  if (!dateString) return ''
-  try {
-    return formatDistanceToNow(new Date(dateString), { 
-      addSuffix: true, 
-      locale: tr 
-    })
-  } catch {
-    return ''
-  }
-}
+// Format functions - use centralized utilities
+const formatPrice = formatListingPrice
+const formatDate = formatDateRelative
 
 /**
  * ListingCard Component
@@ -338,7 +322,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
   // Card content based on size
   if (isSmall) {
     return (
-      <motion.div
+      <LazyMotionWrapper
         whileHover={{ y: -2 }}
         className={cn(
           'listing-card rounded-lg overflow-hidden card-hover group bg-card border border-border transition-all duration-300 ease-out h-full flex flex-col shadow-sm',
@@ -425,7 +409,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
               )}
               {listing.created_at && (
                 <div className="text-xs opacity-80">
-                  {formatDistanceToNow(new Date(listing.created_at), { addSuffix: true, locale: tr })}
+                  {formatDateRelative(listing.created_at)}
                 </div>
               )}
               <div className="flex gap-2 mt-2">
@@ -529,13 +513,13 @@ export const ListingCard: React.FC<ListingCardProps> = ({
             </div>
           </div>
         </div>
-      </motion.div>
+      </LazyMotionWrapper>
     )
   }
 
   // Normal and large size cards
   return (
-    <motion.div
+    <LazyMotionWrapper
       whileHover={{ y: -3, boxShadow: "0 8px 15px rgba(255, 107, 53, 0.15), 0 4px 4px rgba(247, 147, 30, 0.1)" }}
       className={cn(
         'listing-card rounded-lg overflow-hidden card-hover group bg-card border border-border transition-all duration-300 ease-out h-full flex flex-col shadow-sm',
@@ -668,7 +652,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           </div>
         </div>
       </div>
-    </motion.div>
+    </LazyMotionWrapper>
   )
 }
 

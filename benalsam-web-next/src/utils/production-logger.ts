@@ -140,7 +140,10 @@ class ProductionLogger {
    */
   startTimer(label: string): void {
     if (!isLoggingEnabled) return
-    console.time(`⏱️  ${label}`)
+    // Only use console.time in development to reduce TBT
+    if (process.env.NODE_ENV === 'development') {
+      console.time(`⏱️  ${label}`)
+    }
   }
 
   /**
@@ -148,7 +151,10 @@ class ProductionLogger {
    */
   endTimer(label: string): void {
     if (!isLoggingEnabled) return
-    console.timeEnd(`⏱️  ${label}`)
+    // Only use console.timeEnd in development to reduce TBT
+    if (process.env.NODE_ENV === 'development') {
+      console.timeEnd(`⏱️  ${label}`)
+    }
   }
 
   /**

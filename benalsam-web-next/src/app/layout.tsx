@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
+import { SentryClientInit } from "./sentry-client-init";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <SentryClientInit />
         <ErrorBoundary>
           <Providers>
             <Header />

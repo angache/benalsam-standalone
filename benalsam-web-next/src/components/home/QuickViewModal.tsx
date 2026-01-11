@@ -6,9 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { sanitizeText } from '@/utils/sanitize'
-import { formatPrice } from '@/utils/formatters'
-import { formatDistanceToNow } from 'date-fns'
-import { tr } from 'date-fns/locale'
+import { formatListingPrice, formatDateRelative } from '@/utils/formatUtils'
 import Image from 'next/image'
 
 interface Listing {
@@ -119,7 +117,7 @@ export const QuickViewModal = memo(function QuickViewModal({
           {/* Price & Location */}
           <div className="flex items-center justify-between">
             <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              {listing.budget ? formatPrice(listing.budget) : 'Fiyat Belirtilmemiş'}
+              {listing.budget ? formatListingPrice({ price: listing.budget, currency: listing.currency }) : 'Fiyat Belirtilmemiş'}
             </div>
             {listing.location && (
               <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
@@ -155,10 +153,7 @@ export const QuickViewModal = memo(function QuickViewModal({
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
                 <span>
-                  {formatDistanceToNow(new Date(listing.created_at), { 
-                    addSuffix: true, 
-                    locale: tr 
-                  })}
+                  {formatDateRelative(listing.created_at)}
                 </span>
               </div>
             )}

@@ -28,27 +28,43 @@ import { generateHomepageStructuredData, generateOrganizationStructuredData } fr
 import { fetchHomePageStats } from '@/services/homePageService'
 import HomePageClient from './HomePageClient'
 
+// Preload critical resources for LCP
+export function generateViewport() {
+  return {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+  }
+}
+
 // Generate metadata for SEO
-export const metadata: Metadata = generateSEOMetadata({
-  title: 'BenAlsam - Türkiye\'nin En Güvenilir Alım-Satım Platformu',
-  description: 'Binlerce ilan arasından ihtiyacınıza uygun olanı bulun. Emlak, araç, elektronik ve daha fazlası. Güvenli alım-satım platformu. İkinci el alışveriş için güvenilir pazar yeri.',
-  keywords: [
-    'ikinci el',
-    'alım satım',
-    'ilan',
-    'emlak',
-    'araç',
-    'otomotiv',
-    'elektronik',
-    'telefon',
-    'bilgisayar',
-    'mobilya',
-    'güvenli alışveriş',
-    'Türkiye',
-  ],
-  url: '/',
-  type: 'website',
-})
+export const metadata: Metadata = {
+  ...generateSEOMetadata({
+    title: 'BenAlsam - Türkiye\'nin En Güvenilir Alım-Satım Platformu',
+    description: 'Binlerce ilan arasından ihtiyacınıza uygun olanı bulun. Emlak, araç, elektronik ve daha fazlası. Güvenli alım-satım platformu. İkinci el alışveriş için güvenilir pazar yeri.',
+    keywords: [
+      'ikinci el',
+      'alım satım',
+      'ilan',
+      'emlak',
+      'araç',
+      'otomotiv',
+      'elektronik',
+      'telefon',
+      'bilgisayar',
+      'mobilya',
+      'güvenli alışveriş',
+      'Türkiye',
+    ],
+    url: '/',
+    type: 'website',
+  }),
+  // Performance optimizations for LCP
+  other: {
+    'dns-prefetch': 'https://res.cloudinary.com https://images.unsplash.com',
+    'preconnect': 'https://res.cloudinary.com',
+  },
+}
 
 /**
  * Homepage Server Component

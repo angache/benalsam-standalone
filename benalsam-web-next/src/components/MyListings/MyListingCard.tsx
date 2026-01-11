@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { motion } from 'framer-motion'
+import { LazyMotionWrapper } from '@/utils/lazyFramerMotion'
 import { 
   Eye, 
   EyeOff, 
@@ -214,7 +214,7 @@ const MyListingCard = ({
   }
 
   return (
-    <motion.div
+    <LazyMotionWrapper
       layout
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -474,7 +474,7 @@ const MyListingCard = ({
           )}
         </CardFooter>
       </Card>
-    </motion.div>
+    </LazyMotionWrapper>
   )
 }
 

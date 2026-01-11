@@ -120,6 +120,32 @@ IYZICO_BASE_URL=https://sandbox-api.iyzipay.com  # Sandbox for testing
 - **Stripe**: International payments. Set `PAYMENT_PROVIDER=stripe` and add Stripe keys.
 - **İyzico**: Turkish market payments. Set `PAYMENT_PROVIDER=iyzico` and add İyzico keys.
 
+### Sentry Error Tracking (Optional)
+
+```env
+# Sentry DSN (Data Source Name)
+# Get from: https://sentry.io/settings/[org]/projects/[project]/keys/
+# Leave empty to disable error tracking
+NEXT_PUBLIC_SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
+
+# Sentry Release (Optional)
+# Used for release tracking and source maps
+# Example: benalsam-web-next@1.0.0
+NEXT_PUBLIC_SENTRY_RELEASE=
+
+# Enable Sentry in development (Optional)
+# Default: false (disabled in development)
+# Set to true to test Sentry in development mode
+NEXT_PUBLIC_SENTRY_ENABLE_DEV=false
+```
+
+**Sentry Notes:**
+- **Error Tracking**: Automatically captures unhandled errors and exceptions
+- **Performance Monitoring**: Tracks performance metrics and slow operations
+- **Session Replay**: Records user sessions for debugging (privacy-aware)
+- **Release Tracking**: Associates errors with specific app versions
+- **Development Mode**: Disabled by default to avoid noise during development
+
 ### Feature Flags
 
 ```env

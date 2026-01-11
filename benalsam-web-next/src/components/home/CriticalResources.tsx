@@ -50,6 +50,8 @@ export function CriticalResources() {
     const dnsPrefetchDomains = [
       'https://fonts.googleapis.com',
       'https://fonts.gstatic.com',
+      'https://res.cloudinary.com', // Cloudinary for images
+      'https://images.unsplash.com', // Unsplash for images
     ]
 
     dnsPrefetchDomains.forEach((domain) => {
@@ -58,6 +60,20 @@ export function CriticalResources() {
       link.href = domain
       document.head.appendChild(link)
     })
+
+    // Preload LCP image (if known)
+    // This should be the first large image that appears on the page
+    // Typically the hero image or first listing image
+    // Note: Update this with actual LCP image URL when known
+    const lcpImageUrl = '/images/hero-placeholder.jpg' // Replace with actual LCP image
+    if (lcpImageUrl) {
+      const preloadLink = document.createElement('link')
+      preloadLink.rel = 'preload'
+      preloadLink.as = 'image'
+      preloadLink.href = lcpImageUrl
+      preloadLink.fetchPriority = 'high'
+      document.head.appendChild(preloadLink)
+    }
 
     // Cleanup function
     return () => {
