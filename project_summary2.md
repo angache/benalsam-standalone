@@ -655,9 +655,98 @@ Bu kapsamlı refactoring çalışması ile Benalsam projesi:
 
 ---
 
-**Son Güncelleme**: 8 Ekim 2025  
+## 🔍 SENTRY ENTEGRASYONU - 11 Ocak 2026
+
+### ✅ Sentry REST API Entegrasyonu (Admin Backend)
+
+#### **1. Sentry REST API Service Oluşturuldu**
+- **Dosya**: `benalsam-admin-backend/src/services/sentryApi.ts`
+- **Özellikler**:
+  - Sentry REST API client oluşturuldu
+  - Metrics, errors, performance, releases endpoint'leri
+  - Time range filtering desteği
+  - Error handling ve logging
+
+#### **2. Backend Endpoint'leri Güncellendi**
+- **Dosya**: `benalsam-admin-backend/src/routes/sentry.ts`
+- **Değişiklikler**:
+  - Mock data yerine gerçek Sentry API kullanımı
+  - `/api/v1/sentry/metrics` - Metrics overview
+  - `/api/v1/sentry/errors` - Error listesi
+  - `/api/v1/sentry/performance` - Performance data
+  - `/api/v1/sentry/releases` - Release tracking
+- **Route Registration**: `benalsam-admin-backend/src/routes/index.ts` güncellendi
+
+#### **3. Environment Variables Eklendi**
+- **Dosya**: `benalsam-admin-backend/env.example`
+- **Eklenen Variables**:
+  ```env
+  SENTRY_ORG_SLUG=benalsam
+  SENTRY_PROJECT_SLUG=benalsam
+  SENTRY_AUTH_TOKEN=your-auth-token-here
+  ```
+- **Not**: `.env` dosyasına manuel olarak eklenmesi gerekiyor
+
+#### **4. Documentation Eklendi**
+- **SENTRY_API_SETUP.md** - Sentry API token oluşturma rehberi
+- **SENTRY_SETUP_COMPLETE.md** - Kurulum tamamlama rehberi
+- **SENTRY_SLUG_GUIDE.md** - Organization ve Project slug bulma rehberi
+
+### ✅ Sentry Client-Side Entegrasyonu (Web Next)
+
+#### **1. Sentry DSN Eklendi**
+- **Dosya**: `benalsam-web-next/.env.local`
+- **Eklenen Variables**:
+  ```env
+  NEXT_PUBLIC_SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
+  NEXT_PUBLIC_SENTRY_ENABLE_DEV=false
+  NEXT_PUBLIC_SENTRY_RELEASE=
+  ```
+- **Not**: `.env.local` dosyası `.gitignore`'da, commit edilmedi (normal)
+
+#### **2. Sentry Entegrasyonu Mevcut**
+- **Dosya**: `benalsam-web-next/src/lib/sentry.ts`
+- **Durum**: Zaten implementasyon mevcut, sadece DSN eklendi
+- **Development Modu**: Sentry development modunda devre dışı (normal)
+- **Production Modu**: Production'da otomatik aktif olacak
+
+### ✅ Commit Yapıldı
+
+**Commit Hash**: `691983b`  
+**Branch**: `fix/technical-debt-refactor`  
+**Commit Message**: `feat: integrate Sentry REST API with admin backend`
+
+**Commit Edilen Dosyalar**:
+- `benalsam-admin-backend/src/services/sentryApi.ts` (yeni)
+- `benalsam-admin-backend/src/routes/sentry.ts` (güncellendi)
+- `benalsam-admin-backend/src/routes/index.ts` (güncellendi)
+- `benalsam-admin-backend/env.example` (güncellendi)
+- `benalsam-admin-backend/SENTRY_API_SETUP.md` (yeni)
+- `benalsam-admin-backend/SENTRY_SETUP_COMPLETE.md` (yeni)
+- `benalsam-admin-backend/SENTRY_SLUG_GUIDE.md` (yeni)
+
+### 📝 Sonraki Adımlar
+
+1. **Admin Backend `.env` Güncelleme**: 
+   - `SENTRY_ORG_SLUG`, `SENTRY_PROJECT_SLUG`, `SENTRY_AUTH_TOKEN` eklenmeli
+   - Backend yeniden başlatılmalı
+
+2. **Admin UI Test**:
+   - Sentry Dashboard sayfasında verilerin görüntülenmesi test edilmeli
+   - API endpoint'lerinin çalıştığı doğrulanmalı
+
+3. **Production Deployment**:
+   - Production environment variables güncellenmeli
+   - Sentry DSN production'da aktif olacak
+
+---
+
+**Son Güncelleme**: 11 Ocak 2026  
 **Proje Durumu**: ✅ PRODUCTION READY  
 **Firebase Migration**: ✅ TAMAMLANDI  
 **Service Health**: ✅ %100 HEALTHY  
 **Graceful Shutdown**: ✅ TAMAMLANDI  
-**Environment Variables**: ✅ DÜZELTİLDİ
+**Environment Variables**: ✅ DÜZELTİLDİ  
+**Sentry Integration**: ✅ TAMAMLANDI (Admin Backend + Web Next)  
+**Current Branch**: `fix/technical-debt-refactor`  
+**Last Commit**: `691983b - feat: integrate Sentry REST API with admin backend`
