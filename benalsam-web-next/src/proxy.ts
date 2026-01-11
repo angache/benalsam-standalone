@@ -3,12 +3,13 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 /**
- * Middleware for route protection using Supabase Auth
+ * Next.js 16 Proxy Pattern
+ * Replaces deprecated middleware.ts for route protection
  * 
  * Protected routes require authentication
  * Public routes are accessible without authentication
  */
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: req.headers,
@@ -77,7 +78,7 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
-  console.log('🔒 [Middleware]', { 
+  console.log('🔒 [Proxy]', { 
     path, 
     hasUser: !!user,
     hasSession: !!session, 
@@ -88,7 +89,7 @@ export async function middleware(req: NextRequest) {
 
   // If no authenticated user and trying to access protected route, redirect to login
   if (!user && isProtected) {
-    console.log('🔒 [Middleware] Redirecting to login - no authenticated user')
+    console.log('🔒 [Proxy] Redirecting to login - no authenticated user')
     const loginUrl = new URL('/auth/login', req.url)
     loginUrl.searchParams.set('callbackUrl', path)
     return NextResponse.redirect(loginUrl)
@@ -96,7 +97,7 @@ export async function middleware(req: NextRequest) {
 
   // If authenticated user exists but trying to access auth pages (except 2FA), redirect to home
   if (user && isAuth && !path.startsWith('/auth/2fa/')) {
-    console.log('🔒 [Middleware] Redirecting to home - already authenticated')
+    console.log('🔒 [Proxy] Redirecting to home - already authenticated')
     return NextResponse.redirect(new URL('/', req.url))
   }
 
@@ -132,7 +133,7 @@ export async function middleware(req: NextRequest) {
           : false
 
         if (!twoFactorVerified && !isRecent2FA) {
-          console.log('🔒 [Middleware] 2FA required but not verified, redirecting to 2FA page', {
+          console.log('🔒 [Proxy] 2FA required but not verified, redirecting to 2FA page', {
             userId: user.id,
             hasCookie: !!twoFactorVerified,
             last2FAUsed: last2FAUsed || 'never'
@@ -146,7 +147,7 @@ export async function middleware(req: NextRequest) {
       }
     } catch (error) {
       // If profile check fails, log but don't block access (fail open for now)
-      console.error('🔒 [Middleware] Error checking 2FA status:', error)
+      console.error('🔒 [Proxy] Error checking 2FA status:', error)
     }
   }
 
@@ -178,7 +179,7 @@ function isAuthRoute(path: string): boolean {
 }
 
 /**
- * Routes that the middleware should run on
+ * Routes that the proxy should run on
  */
 export const config = {
   matcher: [
@@ -193,3 +194,4 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
+

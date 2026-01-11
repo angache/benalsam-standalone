@@ -56,6 +56,8 @@ interface PlanData {
   expires_at: string | null
   limits: Record<string, number>
   features: Record<string, boolean>
+  payment_method?: string | null
+  is_free_trial?: boolean
 }
 
 interface UsageData {
@@ -350,6 +352,11 @@ export default function PremiumDashboardClient() {
                   Mevcut Plan: {currentPlanData?.name || 'Temel Plan'}
                 </CardTitle>
                 <CardDescription className="mt-2">
+                  {currentPlan?.is_free_trial && (
+                    <Badge className="mb-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                      🎁 Ücretsiz Deneme - 6 Ay
+                    </Badge>
+                  )}
                   {currentPlan?.expires_at 
                     ? (() => {
                         const expiresAt = new Date(currentPlan.expires_at)
@@ -357,13 +364,13 @@ export default function PremiumDashboardClient() {
                         const daysUntilExpiry = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
                         
                         if (daysUntilExpiry < 0) {
-                          return `⚠️ Abonelik bitmiş (${format(expiresAt, 'dd MMMM yyyy', { locale: tr })})`
+                          return `⚠️ ${currentPlan.is_free_trial ? 'Ücretsiz deneme' : 'Abonelik'} bitmiş (${format(expiresAt, 'dd MMMM yyyy', { locale: tr })})`
                         } else if (daysUntilExpiry <= 7) {
-                          return `🔴 Abonelik bitiş tarihi: ${format(expiresAt, 'dd MMMM yyyy', { locale: tr })} (${daysUntilExpiry} gün kaldı)`
+                          return `🔴 ${currentPlan.is_free_trial ? 'Ücretsiz deneme' : 'Abonelik'} bitiş tarihi: ${format(expiresAt, 'dd MMMM yyyy', { locale: tr })} (${daysUntilExpiry} gün kaldı)`
                         } else if (daysUntilExpiry <= 14) {
-                          return `🟡 Abonelik bitiş tarihi: ${format(expiresAt, 'dd MMMM yyyy', { locale: tr })} (${daysUntilExpiry} gün kaldı)`
+                          return `🟡 ${currentPlan.is_free_trial ? 'Ücretsiz deneme' : 'Abonelik'} bitiş tarihi: ${format(expiresAt, 'dd MMMM yyyy', { locale: tr })} (${daysUntilExpiry} gün kaldı)`
                         } else {
-                          return `Abonelik bitiş tarihi: ${format(expiresAt, 'dd MMMM yyyy', { locale: tr })} (${daysUntilExpiry} gün kaldı)`
+                          return `${currentPlan.is_free_trial ? '🎁 Ücretsiz deneme' : 'Abonelik'} bitiş tarihi: ${format(expiresAt, 'dd MMMM yyyy', { locale: tr })} (${daysUntilExpiry} gün kaldı)`
                         }
                       })()
                     : 'Süresiz abonelik'}
@@ -452,17 +459,12 @@ export default function PremiumDashboardClient() {
                   uiMessages: uiLimits.messages_per_month
                 })
                 
-                // Corporate plan için özel kontrol:
-                // - listings_per_month: Database'de 50, her zaman UI'dan al (Corporate plan'da sınırsız değil!)
-                // - offers_per_month: -1 ise sınırsız (Corporate plan'da sınırsız)
-                // - messages_per_month: -1 ise sınırsız (Corporate plan'da sınırsız)
+                // Yeni strateji: Tüm planlarda listings_per_month sınırsız (-1)
+                // Premium özellik: offers_per_month (Basic: 10, Advanced: 100, Corporate: sınırsız)
+                // Hedef müşteri: Oto galeriler, emlakçılar, inşaat firmaları (çok teklif verirler)
                 const planLimits = {
-                  // listings_per_month: Corporate plan'da 50, diğer planlarda database'den geliyorsa onu kullan
-                  listings_per_month: currentSlug === 'corporate' 
-                    ? (uiLimits.listings_per_month ?? 50) // Corporate için her zaman UI'dan al (50)
-                    : (rpcLimits.listings_per_month !== undefined && rpcLimits.listings_per_month !== -1
-                        ? rpcLimits.listings_per_month
-                        : (uiLimits.listings_per_month ?? 5)),
+                  // listings_per_month: Tüm planlarda sınırsız (platform için daha fazla ilan = daha fazla trafik)
+                  listings_per_month: -1, // Her zaman sınırsız
                   // offers_per_month: -1 ise sınırsız, aksi halde RPC'den gelen değeri kullan
                   offers_per_month: rpcLimits.offers_per_month === -1 
                     ? -1 // Sınırsız
@@ -489,7 +491,7 @@ export default function PremiumDashboardClient() {
               
               return (
                 <>
-                  {/* Listings Usage */}
+                  {/* Listings Usage - Artık sınırsız, sadece bilgi amaçlı göster */}
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -499,11 +501,14 @@ export default function PremiumDashboardClient() {
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
-                        {usage.listings_count || 0} / {formatLimit(planLimits.listings_per_month || 5)}
+                        {usage.listings_count || 0} / Sınırsız
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Platform için daha fazla ilan = daha fazla trafik
                       </div>
                       <Progress 
-                        value={getUsagePercentage(usage.listings_count || 0, planLimits.listings_per_month || 5)} 
-                        className="mt-2"
+                        value={0} 
+                        className="mt-2 opacity-50"
                       />
                     </CardContent>
                   </Card>

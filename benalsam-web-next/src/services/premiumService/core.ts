@@ -85,35 +85,106 @@ export const getPremiumLimits = async (userId: string) => {
   }
 };
 
-// Kullanıcının aktif planını getir
+// Kullanıcının aktif planını getir (payment_method dahil)
 export const getUserActivePlan = async (userId: string) => {
   if (!userId) return null;
   
   try {
     logger.debug('[PremiumService] Getting user active plan', { userId });
-    const { data, error } = await supabase.rpc('get_user_active_plan', {
-      p_user_id: userId
-    });
     
-    if (error) {
-      logger.error('[PremiumService] Error getting user plan', { error, userId });
-      return null;
+    // RPC fonksiyonu payment_method döndürmeyebilir, direkt subscription tablosundan okuyalım
+    const { data: subscription, error: subError } = await supabase
+      .from('premium_subscriptions')
+      .select(`
+        id,
+        plan_id,
+        status,
+        expires_at,
+        payment_method,
+        created_at,
+        subscription_plans (
+          id,
+          name,
+          slug,
+          limits,
+          features
+        )
+      `)
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (subError && subError.code !== 'PGRST116') {
+      logger.debug('[PremiumService] No active subscription found, trying RPC', { error: subError, userId });
+      
+      // Aktif abonelik yoksa RPC ile basic plan döndür
+      const { data: rpcData } = await supabase.rpc('get_user_active_plan', {
+        p_user_id: userId
+      });
+      
+      const planData = rpcData?.[0] || null;
+      
+      if (planData) {
+        return {
+          ...planData,
+          payment_method: null,
+          is_free_trial: false
+        };
+      }
+      
+      return {
+        plan_slug: 'basic',
+        plan_name: 'Temel Plan',
+        expires_at: null,
+        limits: {},
+        features: [],
+        payment_method: null,
+        is_free_trial: false
+      };
     }
     
-    const planData = data?.[0] || null;
+    if (!subscription || !subscription.subscription_plans) {
+      logger.debug('[PremiumService] No subscription with plan found, returning basic', { userId });
+      return {
+        plan_slug: 'basic',
+        plan_name: 'Temel Plan',
+        expires_at: null,
+        limits: {},
+        features: [],
+        payment_method: null,
+        is_free_trial: false
+      };
+    }
+    
+    const plan = subscription.subscription_plans as {
+      id: string
+      name: string
+      slug: string
+      limits: Record<string, number>
+      features: Record<string, boolean>
+    };
+    
+    const result = {
+      plan_slug: plan.slug,
+      plan_name: plan.name,
+      expires_at: subscription.expires_at,
+      limits: plan.limits || {},
+      features: plan.features || {},
+      payment_method: subscription.payment_method || 'stripe',
+      is_free_trial: subscription.payment_method === 'free_trial'
+    };
     
     logger.debug('[PremiumService] User active plan retrieved', { 
-      rawData: planData,
-      userId,
-      dataLength: data?.length,
-      hasPlan: !!planData,
-      planSlug: planData?.plan_slug,
-      planName: planData?.plan_name
+      userId, 
+      plan: result,
+      isFreeTrial: result.is_free_trial,
+      paymentMethod: result.payment_method
     });
     
-    // RPC fonksiyonu doğrudan döndürüyor, mapping'e gerek yok
-    // Ancak features ve limits JSONB olarak geliyor, bunlar zaten doğru format
-    return planData;
+    return result;
   } catch (error) {
     logger.error('[PremiumService] Error getting user plan', { error, userId });
     return null;

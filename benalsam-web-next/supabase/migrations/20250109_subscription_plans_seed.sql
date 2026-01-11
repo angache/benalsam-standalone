@@ -30,7 +30,7 @@ SELECT
     "images_per_offer": 1,
     "featured_offers_per_day": 0,
     "files_per_offer": 0,
-    "listings_per_month": 5
+    "listings_per_month": -1
   }'::jsonb,
   true
 WHERE NOT EXISTS (
@@ -60,7 +60,7 @@ SELECT
     "images_per_offer": 3,
     "featured_offers_per_day": 1,
     "files_per_offer": 0,
-    "listings_per_month": 20
+    "listings_per_month": -1
   }'::jsonb,
   true
 WHERE NOT EXISTS (
@@ -95,7 +95,7 @@ SELECT
     "images_per_offer": 5,
     "featured_offers_per_day": 5,
     "files_per_offer": 3,
-    "listings_per_month": 50
+    "listings_per_month": -1
   }'::jsonb,
   true
 WHERE NOT EXISTS (
