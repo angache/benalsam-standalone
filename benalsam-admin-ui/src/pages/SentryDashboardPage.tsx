@@ -129,119 +129,8 @@ const SentryDashboardPage: React.FC = () => {
     refetchIntervalInBackground: true
   });
 
-  // Real data - empty for now, will be populated by actual Sentry integration
-  const mockTrends: any[] = [];
-  const mockAlertRules: any[] = [];
-
-  // Mock data for new components
-  const mockStackTrace = {
-    frames: [
-      {
-        filename: 'src/services/authService.ts',
-        function: 'validateToken',
-        lineno: 45,
-        colno: 12,
-        in_app: true,
-        context_line: 'const token = req.headers.authorization?.split(\' \')[1];',
-        pre_context: [
-          'export const validateToken = (req: Request, res: Response, next: NextFunction) => {',
-          '  try {',
-          '    // Extract token from Authorization header'
-        ],
-        post_context: [
-          '    if (!token) {',
-          '      throw new Error(\'No token provided\');',
-          '    }'
-        ]
-      },
-      {
-        filename: 'src/middleware/auth.ts',
-        function: 'authenticateToken',
-        lineno: 23,
-        colno: 8,
-        in_app: true,
-        context_line: 'return validateToken(req, res, next);',
-        pre_context: [
-          'export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {',
-          '  // Validate JWT token'
-        ],
-        post_context: [
-          '};'
-        ]
-      }
-    ],
-    registers: {
-      'rax': '0x7fff5fbff8c8',
-      'rbx': '0x7fff5fbff8d0',
-      'rcx': '0x7fff5fbff8d8'
-    },
-    has_system_frames: false
-  };
-
-  const mockTeamMembers = [
-    {
-      id: '1',
-      name: 'Ali Tuna',
-      email: 'ali@benalsam.com',
-      avatar: '',
-      role: 'admin' as const,
-      status: 'online' as const,
-      lastActive: new Date().toISOString()
-    },
-    {
-      id: '2',
-      name: 'Developer 1',
-      email: 'dev1@benalsam.com',
-      avatar: '',
-      role: 'developer' as const,
-      status: 'away' as const,
-      lastActive: new Date(Date.now() - 300000).toISOString()
-    }
-  ];
-
-  const mockComments = [
-    {
-      id: '1',
-      author: mockTeamMembers[0],
-      content: 'Bu hata JWT token validation ile ilgili görünüyor. Token süresi dolmuş olabilir.',
-      timestamp: new Date(Date.now() - 3600000).toISOString(),
-      type: 'comment' as const
-    },
-    {
-      id: '2',
-      author: mockTeamMembers[1],
-      content: 'Token refresh mechanism\'i kontrol edilmeli.',
-      timestamp: new Date(Date.now() - 1800000).toISOString(),
-      type: 'assignment' as const
-    }
-  ];
-
-  const mockAssignments = [
-    {
-      id: '1',
-      errorId: 'error-1',
-      assignedTo: mockTeamMembers[1],
-      assignedBy: mockTeamMembers[0],
-      assignedAt: new Date(Date.now() - 7200000).toISOString(),
-      status: 'in_progress' as const,
-      priority: 'high' as const,
-      dueDate: new Date(Date.now() + 86400000).toISOString()
-    }
-  ];
-
-  const mockAnalyticsData = {
-    totalErrors: 0,
-    errorRate: 0,
-    userImpact: 0,
-    avgResolutionTime: 0,
-    topErrorTypes: [],
-    topAffectedUsers: [],
-    topAffectedEndpoints: [],
-    browserBreakdown: [],
-    deviceBreakdown: [],
-    geographicBreakdown: [],
-    timeDistribution: []
-  };
+  // Get first error for stack trace viewer (if available)
+  const firstError = errors?.data && errors.data.length > 0 ? errors.data[0] : null;
 
   const getErrorLevelColor = (level: string) => {
     switch (level) {
@@ -337,20 +226,31 @@ const SentryDashboardPage: React.FC = () => {
             color="error"
             onClick={async () => {
               try {
-                await fetch('http://localhost:3002/api/v1/sentry-test/generate-error', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer test-token'
-                  },
-                  body: JSON.stringify({
-                    errorType: 'TestError',
-                    message: 'Bu bir test hatasıdır - ' + new Date().toLocaleString()
-                  })
+                console.log('🧪 Generating test error...');
+                const result = await apiService.generateSentryTestError(
+                  'TestError',
+                  'Bu bir test hatasıdır - ' + new Date().toLocaleString('tr-TR')
+                );
+                console.log('✅ Test error generated successfully:', result);
+                
+                // Wait a bit for Sentry to process
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Refresh errors after generating test error
+                await refetchErrors();
+                await refetchMetrics();
+                
+                // Show success message (you can add a toast notification here)
+                alert('Test hatası başarıyla oluşturuldu! Sentry Dashboard\'da görünecek.');
+              } catch (error: any) {
+                console.error('❌ Test error generation failed:', error);
+                console.error('Error details:', {
+                  message: error?.message,
+                  response: error?.response?.data,
+                  status: error?.response?.status,
+                  statusText: error?.response?.statusText
                 });
-                refetchErrors();
-              } catch (error) {
-                console.error('Test error generation failed:', error);
+                alert(`Hata oluştu: ${error?.response?.data?.message || error?.message || 'Bilinmeyen hata'}`);
               }
             }}
             startIcon={<Bug size={16} />}
@@ -657,7 +557,7 @@ const SentryDashboardPage: React.FC = () => {
         {/* Error Trends */}
         <Grid item xs={12} md={6}>
           <ErrorTrends
-            trends={mockTrends}
+            trends={[]}
             timeRange={timeRange}
             onTimeRangeChange={setTimeRange}
           />
@@ -668,7 +568,7 @@ const SentryDashboardPage: React.FC = () => {
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12}>
           <CustomAlertRules
-            rules={mockAlertRules}
+            rules={[]}
             onAddRule={(rule) => {
               console.log('Add rule:', rule);
               // TODO: Implement add rule functionality
@@ -690,50 +590,76 @@ const SentryDashboardPage: React.FC = () => {
       </Grid>
 
       {/* NEW ADVANCED COMPONENTS */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        {/* Stack Trace Viewer */}
-        <Grid item xs={12} md={6}>
-          <StackTraceViewer
-            stackTrace={mockStackTrace}
-            errorTitle="JWT Token Validation Error"
-            errorMessage="Token validation failed: token expired"
-            errorLevel="error"
-            timestamp={new Date().toISOString()}
-          />
-        </Grid>
+      {firstError && firstError.id && (
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          {/* Stack Trace Viewer */}
+          <Grid item xs={12} md={6}>
+            <StackTraceViewer
+              stackTrace={{
+                frames: (firstError.metadata && firstError.metadata.filename) ? [{
+                  filename: firstError.metadata.filename || 'unknown',
+                  function: firstError.metadata.function || 'unknown',
+                  lineno: firstError.metadata.lineno || 0,
+                  colno: 0,
+                  in_app: true,
+                  context_line: firstError.message || '',
+                  pre_context: Array.isArray(firstError.metadata.pre_context) ? firstError.metadata.pre_context : [],
+                  post_context: Array.isArray(firstError.metadata.post_context) ? firstError.metadata.post_context : [],
+                }] : [],
+                has_system_frames: false,
+              }}
+              errorTitle={firstError.title || 'Unknown Error'}
+              errorMessage={firstError.message || 'No error message available'}
+              errorLevel={firstError.level || 'error'}
+              timestamp={firstError.timestamp || new Date().toISOString()}
+            />
+          </Grid>
 
-        {/* Team Collaboration */}
-        <Grid item xs={12} md={6}>
-          <TeamCollaboration
-            errorId="error-1"
-            teamMembers={mockTeamMembers}
-            comments={mockComments}
-            assignments={mockAssignments}
-            onAddComment={(content) => {
-              console.log('Add comment:', content);
-              // TODO: Implement add comment functionality
-            }}
-            onAssignError={(memberId, priority, dueDate) => {
-              console.log('Assign error:', memberId, priority, dueDate);
-              // TODO: Implement assign error functionality
-            }}
-            onUpdateAssignment={(assignmentId, status) => {
-              console.log('Update assignment:', assignmentId, status);
-              // TODO: Implement update assignment functionality
-            }}
-            onAddTeamMember={(member) => {
-              console.log('Add team member:', member);
-              // TODO: Implement add team member functionality
-            }}
-          />
+          {/* Team Collaboration */}
+          <Grid item xs={12} md={6}>
+            <TeamCollaboration
+              errorId={firstError.id}
+              teamMembers={[]}
+              comments={[]}
+              assignments={[]}
+              onAddComment={(content) => {
+                console.log('Add comment:', content);
+                // TODO: Implement add comment functionality
+              }}
+              onAssignError={(memberId, priority, dueDate) => {
+                console.log('Assign error:', memberId, priority, dueDate);
+                // TODO: Implement assign error functionality
+              }}
+              onUpdateAssignment={(assignmentId, status) => {
+                console.log('Update assignment:', assignmentId, status);
+                // TODO: Implement update assignment functionality
+              }}
+              onAddTeamMember={(member) => {
+                console.log('Add team member:', member);
+                // TODO: Implement add team member functionality
+              }}
+            />
+          </Grid>
         </Grid>
-      </Grid>
+      )}
 
       {/* Error Analytics */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12}>
           <ErrorAnalytics
-            data={mockAnalyticsData}
+            data={{
+              totalErrors: metrics?.data?.totalErrors || 0,
+              errorRate: metrics?.data?.errorRate || 0,
+              userImpact: metrics?.data?.userImpact || 0,
+              avgResolutionTime: 0,
+              topErrorTypes: [],
+              topAffectedUsers: [],
+              topAffectedEndpoints: [],
+              browserBreakdown: [],
+              deviceBreakdown: [],
+              geographicBreakdown: [],
+              timeDistribution: []
+            }}
             timeRange={timeRange}
             onTimeRangeChange={setTimeRange}
           />

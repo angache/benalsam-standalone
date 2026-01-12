@@ -5,9 +5,13 @@ import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-type
 import { errorHandler } from './middleware/errorHandler';
 import routes from './routes';
 import logger from './config/logger';
+import { initializeSentry } from './config/sentry';
 
 const app = express();
 const PORT = process.env.PORT || 3002;
+
+// Initialize Sentry BEFORE other middleware
+initializeSentry(app);
 
 const environment = process.env.NODE_ENV || 'development';
 const securityConfig = SECURITY_CONFIGS[environment as keyof typeof SECURITY_CONFIGS] || SECURITY_CONFIGS.development;

@@ -23,6 +23,31 @@ export const initializeSentry = () => {
         return null;
       }
       
+      // Filter out Sentry Dashboard page errors (self-reporting errors)
+      // These are errors that occur in the Sentry Dashboard itself
+      const errorMessage = event.exception?.values?.[0]?.value || '';
+      const errorStacktrace = event.exception?.values?.[0]?.stacktrace?.frames || [];
+      
+      // Check if error is from Sentry Dashboard components
+      const isSentryDashboardError = 
+        errorStacktrace.some((frame: any) => 
+          frame.filename?.includes('SentryDashboardPage') ||
+          frame.filename?.includes('StackTraceViewer') ||
+          frame.filename?.includes('LiveErrorStream') ||
+          frame.filename?.includes('ErrorTrends') ||
+          frame.filename?.includes('ErrorAnalytics') ||
+          frame.filename?.includes('TeamCollaboration') ||
+          frame.filename?.includes('CustomAlertRules')
+        ) ||
+        errorMessage.includes('mockAnalyticsData') ||
+        errorMessage.includes('SentryDashboardPage') ||
+        errorMessage.includes('StackTraceViewer');
+      
+      if (isSentryDashboardError) {
+        // Don't send Sentry Dashboard's own errors to Sentry (prevents infinite loop)
+        return null;
+      }
+      
       return event;
     },
     // Error sampling

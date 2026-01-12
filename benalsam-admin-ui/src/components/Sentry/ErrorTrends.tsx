@@ -65,7 +65,7 @@ const ErrorTrends: React.FC<ErrorTrendsProps> = ({ trends, timeRange, onTimeRang
   };
 
   const calculateAverages = () => {
-    if (trends.length === 0) return null;
+    if (!trends || !Array.isArray(trends) || trends.length === 0) return null;
 
     const totals = trends.reduce((acc, trend) => ({
       fatal: acc.fatal + trend.fatal,

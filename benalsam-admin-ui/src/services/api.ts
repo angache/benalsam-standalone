@@ -737,6 +737,14 @@ export const apiService = {
               return response.data;
             },
 
+            async generateSentryTestError(errorType: string = 'TestError', message: string = 'This is a test error'): Promise<any> {
+              const response = await apiClient.post('/sentry-test/generate-error', {
+                errorType,
+                message
+              });
+              return response.data;
+            },
+
             // Hybrid Monitoring Integration
             async getHybridOverview(timeRange: string = '24h'): Promise<any> {
               const response = await apiClient.get(`/hybrid-monitoring/overview?timeRange=${timeRange}`);

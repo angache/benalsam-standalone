@@ -16,6 +16,8 @@ import aiSuggestionsRoutes from './aiSuggestions';
 import inventoryRoutes from './inventory';
 import { serviceRegistryRoutes } from './serviceRegistry';
 import sentryRoutes from './sentry';
+import sentryTestRoutes from './sentry-test';
+import analyticsRoutes from './analytics';
 
 const router: IRouter = Router();
 
@@ -70,18 +72,16 @@ router.use('/service-registry', serviceRegistryRoutes);
 // Sentry routes
 router.use('/sentry', sentryRoutes);
 
+// Sentry test routes (for generating test errors)
+router.use('/sentry-test', sentryTestRoutes);
+
+// Analytics routes
+router.use('/analytics', analyticsRoutes);
+
 router.get('/reports', (req, res) => {
   res.status(501).json({
     success: false,
     message: 'Reports module not implemented yet',
-    error: 'NOT_IMPLEMENTED',
-  });
-});
-
-router.get('/analytics', (req, res) => {
-  res.status(501).json({
-    success: false,
-    message: 'Analytics module not implemented yet',
     error: 'NOT_IMPLEMENTED',
   });
 });

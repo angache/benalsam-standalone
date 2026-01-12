@@ -54,7 +54,7 @@ const LiveErrorStream: React.FC<LiveErrorStreamProps> = ({ errors, isConnected, 
 
   useEffect(() => {
     // Show real errors only - no simulation
-    if (errors.length > 0) {
+    if (errors && Array.isArray(errors) && errors.length > 0) {
       setNewErrors(errors.slice(0, 10).map(error => ({
         ...error,
         isNew: false
@@ -152,8 +152,8 @@ const LiveErrorStream: React.FC<LiveErrorStreamProps> = ({ errors, isConnected, 
                 </ListItemIcon>
                 <ListItemText
                   primary={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2" fontWeight="medium">
+                    <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body2" fontWeight="medium" component="span">
                         {error.title}
                       </Typography>
                       {error.isNew && (
@@ -162,16 +162,16 @@ const LiveErrorStream: React.FC<LiveErrorStreamProps> = ({ errors, isConnected, 
                     </Box>
                   }
                   secondary={
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">
+                    <Box component="span">
+                      <Typography variant="caption" color="text.secondary" component="span" display="block">
                         {error.message}
                       </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
-                        <Typography variant="caption" color="text.secondary">
+                      <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
+                        <Typography variant="caption" color="text.secondary" component="span">
                           {formatTime(error.timestamp)}
                         </Typography>
                         {error.user && (
-                          <Typography variant="caption" color="text.secondary">
+                          <Typography variant="caption" color="text.secondary" component="span">
                             User: {error.user.email || error.user.username || error.user.id}
                           </Typography>
                         )}

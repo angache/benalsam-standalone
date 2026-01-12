@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Card,
@@ -40,13 +40,13 @@ interface StackFrame {
 }
 
 interface StackTrace {
-  frames: StackFrame[];
+  frames?: StackFrame[];
   registers?: Record<string, string>;
-  has_system_frames: boolean;
+  has_system_frames?: boolean;
 }
 
 interface StackTraceViewerProps {
-  stackTrace: StackTrace;
+  stackTrace?: StackTrace | null;
   errorTitle: string;
   errorMessage: string;
   errorLevel: string;
@@ -62,6 +62,23 @@ const StackTraceViewer: React.FC<StackTraceViewerProps> = ({
 }) => {
   const [expandedFrames, setExpandedFrames] = useState<Set<number>>(new Set([0]));
   const [copiedFrame, setCopiedFrame] = useState<number | null>(null);
+
+  // Ensure stackTrace has frames array - with comprehensive null checks
+  const safeStackTrace = useMemo(() => {
+    if (!stackTrace) {
+      return {
+        frames: [],
+        registers: {},
+        has_system_frames: false,
+      };
+    }
+    
+    return {
+      frames: Array.isArray(stackTrace.frames) ? stackTrace.frames : [],
+      registers: stackTrace.registers && typeof stackTrace.registers === 'object' ? stackTrace.registers : {},
+      has_system_frames: Boolean(stackTrace.has_system_frames),
+    };
+  }, [stackTrace]);
 
   const toggleFrame = (index: number) => {
     const newExpanded = new Set(expandedFrames);
@@ -109,8 +126,24 @@ const StackTraceViewer: React.FC<StackTraceViewerProps> = ({
   };
 
   const isInAppFrame = (frame: StackFrame) => {
-    return frame.in_app && !frame.filename.includes('node_modules');
+    return frame?.in_app && frame?.filename && !frame.filename.includes('node_modules');
   };
+
+  // Ensure safeStackTrace is always defined
+  if (!safeStackTrace || !Array.isArray(safeStackTrace.frames)) {
+    return (
+      <Card>
+        <CardContent>
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Code size={48} color="#757575" />
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              No stack trace available
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -143,7 +176,7 @@ const StackTraceViewer: React.FC<StackTraceViewerProps> = ({
           Stack Trace
         </Typography>
 
-        {stackTrace.frames.length === 0 ? (
+        {!safeStackTrace.frames || safeStackTrace.frames.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <Code size={48} color="#757575" />
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
@@ -152,7 +185,11 @@ const StackTraceViewer: React.FC<StackTraceViewerProps> = ({
           </Box>
         ) : (
           <List sx={{ p: 0 }}>
-            {stackTrace.frames.map((frame, index) => (
+            {safeStackTrace.frames.map((frame: StackFrame, index: number) => {
+              // Ensure frame is valid
+              if (!frame || !frame.filename) return null;
+              
+              return (
               <ListItem
                 key={index}
                 sx={{
@@ -257,7 +294,7 @@ const StackTraceViewer: React.FC<StackTraceViewerProps> = ({
                     {/* Context Lines */}
                     {(frame.pre_context || frame.post_context) && (
                       <Box sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
-                        {frame.pre_context && frame.pre_context.length > 0 && (
+                        {frame.pre_context && Array.isArray(frame.pre_context) && frame.pre_context.length > 0 && (
                           <Box sx={{ mb: 1 }}>
                             <Typography variant="caption" color="text.secondary">
                               Previous lines:
@@ -277,7 +314,7 @@ const StackTraceViewer: React.FC<StackTraceViewerProps> = ({
                             ))}
                           </Box>
                         )}
-                        {frame.post_context && frame.post_context.length > 0 && (
+                        {frame.post_context && Array.isArray(frame.post_context) && frame.post_context.length > 0 && (
                           <Box>
                             <Typography variant="caption" color="text.secondary">
                               Next lines:
@@ -325,19 +362,20 @@ const StackTraceViewer: React.FC<StackTraceViewerProps> = ({
                   </Box>
                 </Collapse>
               </ListItem>
-            ))}
+              );
+            })}
           </List>
         )}
 
         {/* Registers (if available) */}
-        {stackTrace.registers && Object.keys(stackTrace.registers).length > 0 && (
+        {safeStackTrace.registers && Object.keys(safeStackTrace.registers).length > 0 && (
           <Box sx={{ mt: 3 }}>
             <Typography variant="h6" gutterBottom>
               CPU Registers
             </Typography>
             <Paper variant="outlined" sx={{ p: 2 }}>
               <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
-                {Object.entries(stackTrace.registers).map(([register, value]) => (
+                {Object.entries(safeStackTrace.registers).map(([register, value]) => (
                   <Box key={register}>
                     <Typography variant="caption" color="text.secondary">
                       {register.toUpperCase()}

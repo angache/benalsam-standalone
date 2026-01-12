@@ -31,11 +31,20 @@ router.get('/metrics', authenticateToken, async (req, res) => {
       stack: error instanceof Error ? error.stack : undefined,
       details: error
     });
+    
+    // Check if it's an axios error with response
+    const axiosError = error as any;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorDetails = axiosError.response?.data || axiosError.response?.statusText || errorMessage;
+    
     res.status(500).json({
       success: false,
       message: 'Failed to get Sentry metrics',
-      error: error instanceof Error ? error.message : 'Unknown error',
-      details: error instanceof Error && error.message.includes('configuration') ? 'Check environment variables (SENTRY_ORG_SLUG, SENTRY_PROJECT_SLUG, SENTRY_AUTH_TOKEN)' : undefined
+      error: errorMessage,
+      details: typeof errorDetails === 'object' ? JSON.stringify(errorDetails) : errorDetails,
+      statusCode: axiosError.response?.status,
+      sentryApiError: axiosError.response?.data,
+      configCheck: error instanceof Error && error.message.includes('configuration') ? 'Check environment variables (SENTRY_ORG_SLUG, SENTRY_PROJECT_SLUG, SENTRY_AUTH_TOKEN)' : undefined
     });
   }
 });
@@ -65,10 +74,19 @@ router.get('/errors', authenticateToken, async (req, res) => {
       stack: error instanceof Error ? error.stack : undefined,
       details: error
     });
+    
+    // Check if it's an axios error with response
+    const axiosError = error as any;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorDetails = axiosError.response?.data || axiosError.response?.statusText || errorMessage;
+    
     res.status(500).json({
       success: false,
       message: 'Failed to get Sentry errors',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: errorMessage,
+      details: typeof errorDetails === 'object' ? JSON.stringify(errorDetails) : errorDetails,
+      statusCode: axiosError.response?.status,
+      sentryApiError: axiosError.response?.data
     });
   }
 });
@@ -128,10 +146,19 @@ router.get('/releases', authenticateToken, async (req, res) => {
       stack: error instanceof Error ? error.stack : undefined,
       details: error
     });
+    
+    // Check if it's an axios error with response
+    const axiosError = error as any;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorDetails = axiosError.response?.data || axiosError.response?.statusText || errorMessage;
+    
     res.status(500).json({
       success: false,
       message: 'Failed to get Sentry releases',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: errorMessage,
+      details: typeof errorDetails === 'object' ? JSON.stringify(errorDetails) : errorDetails,
+      statusCode: axiosError.response?.status,
+      sentryApiError: axiosError.response?.data
     });
   }
 });

@@ -73,6 +73,8 @@ class SentryApiService {
   private client: AxiosInstance;
   private config: SentryApiConfig;
   private baseUrl = 'https://sentry.io/api/0';
+  private lastRequestTime: number = 0;
+  private minRequestInterval: number = 250; // 250ms between requests (4 requests/second max)
 
   constructor(config: SentryApiConfig) {
     this.config = config;
@@ -86,9 +88,18 @@ class SentryApiService {
       },
     });
 
-    // Request interceptor for logging
+    // Request interceptor for rate limiting and logging
     this.client.interceptors.request.use(
-      (config) => {
+      async (config) => {
+        // Rate limiting: ensure minimum interval between requests
+        const now = Date.now();
+        const timeSinceLastRequest = now - this.lastRequestTime;
+        if (timeSinceLastRequest < this.minRequestInterval) {
+          const waitTime = this.minRequestInterval - timeSinceLastRequest;
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+        }
+        this.lastRequestTime = Date.now();
+
         logger.debug('[SentryApi] Request', {
           method: config.method,
           url: config.url,
@@ -101,10 +112,31 @@ class SentryApiService {
       }
     );
 
-    // Response interceptor for error handling
+    // Response interceptor for error handling and retry
     this.client.interceptors.response.use(
       (response) => response,
-      (error) => {
+      async (error) => {
+        const config = error.config;
+        
+        // Handle rate limiting (429)
+        if (error.response?.status === 429) {
+          const retryAfter = error.response.headers['retry-after'] || error.response.headers['x-sentry-rate-limit-reset'];
+          const waitTime = retryAfter ? (parseInt(retryAfter) * 1000) : 2000; // Default 2 seconds
+          
+          logger.warn('[SentryApi] Rate limit hit, waiting', {
+            waitTime,
+            retryAfter,
+            url: config.url,
+          });
+          
+          // Wait and retry once
+          if (!config._retry) {
+            config._retry = true;
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+            return this.client(config);
+          }
+        }
+
         logger.error('[SentryApi] Response error', {
           status: error.response?.status,
           statusText: error.response?.statusText,
@@ -151,13 +183,23 @@ class SentryApiService {
       const orgSlug = this.config.orgSlug;
       const projectSlug = this.config.projectSlug;
 
+      // Log query parameters for debugging
+      logger.debug('[SentryApi] Getting metrics', {
+        orgSlug,
+        projectSlug,
+        timeRange,
+        startTime: startTime,
+        query: 'is:unresolved error.type:error',
+      });
+
       // Get project issues count (correct endpoint format: /projects/{org}/{project}/issues/)
+      // Query: unresolved errors only (exclude resolved/archived)
       const issuesResponse = await this.client.get(
         `/projects/${orgSlug}/${projectSlug}/issues/`,
         {
           params: {
             statsPeriod: timeRange,
-            query: 'is:unresolved',
+            query: 'is:unresolved error.type:error',
           },
         }
       );
@@ -170,7 +212,7 @@ class SentryApiService {
         {
           params: {
             statsPeriod: timeRange,
-            query: 'is:resolved',
+            query: 'is:resolved error.type:error',
           },
         }
       );
@@ -207,19 +249,32 @@ class SentryApiService {
       const orgSlug = this.config.orgSlug;
       const projectSlug = this.config.projectSlug;
 
+      // Log query parameters for debugging
+      logger.debug('[SentryApi] Getting errors', {
+        orgSlug,
+        projectSlug,
+        timeRange,
+        query: 'is:unresolved error.type:error',
+      });
+
       const response = await this.client.get(
         `/projects/${orgSlug}/${projectSlug}/issues/`,
         {
           params: {
             statsPeriod: timeRange,
-            query: 'is:unresolved',
-            sort: '-lastSeen',
+            // Query: unresolved errors only (exclude resolved/archived)
+            query: 'is:unresolved error.type:error',
+            // Sort parameter removed - Sentry API doesn't support '-lastSeen'
+            // Results are returned in default order (most recent first)
             limit: 100,
           },
         }
       );
 
-      const issues = response.data || [];
+      // Sentry API may return paginated response or array directly
+      const issues = Array.isArray(response.data) 
+        ? response.data 
+        : (response.data?.results || response.data || []);
 
       // Transform Sentry issues to our format
       const errors: SentryError[] = issues.map((issue: any) => ({
@@ -239,6 +294,13 @@ class SentryApiService {
         lastSeen: issue.lastSeen,
         firstSeen: issue.firstSeen,
       }));
+
+      // Sort by lastSeen descending (most recent first)
+      errors.sort((a, b) => {
+        const dateA = new Date(a.lastSeen).getTime();
+        const dateB = new Date(b.lastSeen).getTime();
+        return dateB - dateA; // Descending order
+      });
 
       return errors;
     } catch (error) {
@@ -313,18 +375,21 @@ class SentryApiService {
       const orgSlug = this.config.orgSlug;
       const projectSlug = this.config.projectSlug;
 
+      // Get project-specific releases
       const response = await this.client.get(
-        `/organizations/${orgSlug}/releases/`,
+        `/projects/${orgSlug}/${projectSlug}/releases/`,
         {
           params: {
-            query: `project:${projectSlug}`,
-            sort: '-dateCreated',
+            // Query parameter removed - project-specific endpoint doesn't need it
             limit: 10,
           },
         }
       );
 
-      const releases = response.data || [];
+      // Sentry API may return paginated response or array directly
+      const releases = Array.isArray(response.data) 
+        ? response.data 
+        : (response.data?.results || response.data || []);
 
       // Transform Sentry releases to our format
       const transformedReleases: SentryRelease[] = releases.map((release: any) => {
@@ -370,17 +435,45 @@ export function getSentryApiService(): SentryApiService {
   const projectSlug = process.env.SENTRY_PROJECT_SLUG;
   const authToken = process.env.SENTRY_AUTH_TOKEN;
 
-  if (!orgSlug || !projectSlug || !authToken) {
-    throw new Error('Sentry API configuration is missing. Please set SENTRY_ORG_SLUG, SENTRY_PROJECT_SLUG, and SENTRY_AUTH_TOKEN environment variables.');
-  }
-
-  sentryApiInstance = new SentryApiService({
-    orgSlug,
-    projectSlug,
-    authToken,
+  logger.debug('🔍 Sentry API Configuration Check', {
+    orgSlug: orgSlug ? `${orgSlug.substring(0, 3)}...` : 'MISSING',
+    projectSlug: projectSlug ? `${projectSlug.substring(0, 3)}...` : 'MISSING',
+    authToken: authToken ? `${authToken.substring(0, 10)}...` : 'MISSING',
   });
 
-  return sentryApiInstance;
+  if (!orgSlug || !projectSlug || !authToken) {
+    const missing = [];
+    if (!orgSlug) missing.push('SENTRY_ORG_SLUG');
+    if (!projectSlug) missing.push('SENTRY_PROJECT_SLUG');
+    if (!authToken) missing.push('SENTRY_AUTH_TOKEN');
+    
+    logger.error('❌ Sentry API configuration is missing', {
+      missing: missing.join(', '),
+      orgSlug: !!orgSlug,
+      projectSlug: !!projectSlug,
+      authToken: !!authToken,
+    });
+    
+    throw new Error(`Sentry API configuration is missing. Please set the following environment variables: ${missing.join(', ')}`);
+  }
+
+  try {
+    sentryApiInstance = new SentryApiService({
+      orgSlug,
+      projectSlug,
+      authToken,
+    });
+
+    logger.info('✅ Sentry API service initialized successfully', {
+      orgSlug,
+      projectSlug,
+    });
+
+    return sentryApiInstance;
+  } catch (error) {
+    logger.error('❌ Failed to initialize Sentry API service', error);
+    throw error;
+  }
 }
 
 // Export types
