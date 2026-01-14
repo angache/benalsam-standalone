@@ -45,6 +45,7 @@ const nextConfig: NextConfig = {
             rule.exclude = [
               originalExclude,
               /e2e/,
+              /scripts/,
               /\.(spec|test)\.(ts|tsx|js|jsx)$/,
               /__tests__/,
               /playwright\.config\.ts$/,
