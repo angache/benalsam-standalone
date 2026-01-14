@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
   // Experimental features for better performance
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'framer-motion'],
+    // Exclude test files from build
+    outputFileTracingExcludes: {
+      '*': [
+        '**/e2e/**/*',
+        '**/*.spec.ts',
+        '**/*.test.ts',
+        '**/__tests__/**/*',
+      ],
+    },
   },
   
   // Turbopack configuration (Next.js 16+)
@@ -32,6 +41,25 @@ const nextConfig: NextConfig = {
   
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
+    // Exclude test files and e2e directory from production build
+    if (!dev) {
+      // Modify existing rules to exclude e2e and test files
+      if (config.module && config.module.rules) {
+        config.module.rules.forEach((rule: any) => {
+          if (rule.test && rule.test.toString().includes('tsx|ts')) {
+            // Add exclude pattern for e2e and test files
+            const originalExclude = rule.exclude;
+            rule.exclude = [
+              originalExclude,
+              /e2e/,
+              /\.(spec|test)\.(ts|tsx|js|jsx)$/,
+              /__tests__/,
+            ].filter(Boolean);
+          }
+        });
+      }
+    }
+    
     // Production optimizations
     if (!dev && !isServer) {
       config.optimization = {
@@ -150,7 +178,7 @@ const nextConfig: NextConfig = {
                   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                   "img-src 'self' data: blob: https: http:",
                   "font-src 'self' data: https://fonts.gstatic.com",
-                  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://images.unsplash.com https://api.unsplash.com https://nominatim.openstreetmap.org data: blob:",
+                  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://images.unsplash.com https://api.unsplash.com https://nominatim.openstreetmap.org https://api.benalsam.com wss://api.benalsam.com data: blob:",
                   "frame-src 'self' https://accounts.google.com",
                   "object-src 'none'",
                   "base-uri 'self'",
@@ -167,7 +195,7 @@ const nextConfig: NextConfig = {
                   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                   "img-src 'self' data: blob: https: http:",
                   "font-src 'self' data: https://fonts.gstatic.com",
-                  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://images.unsplash.com https://api.unsplash.com https://nominatim.openstreetmap.org data: blob: http://localhost:* ws://localhost:* wss://localhost:* ws://0.0.0.0:*",
+                  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://images.unsplash.com https://api.unsplash.com https://nominatim.openstreetmap.org https://api.benalsam.com wss://api.benalsam.com data: blob: http://localhost:* ws://localhost:* wss://localhost:* ws://0.0.0.0:*",
                   "frame-src 'self' https://accounts.google.com",
                   "object-src 'none'",
                   "base-uri 'self'",
