@@ -42,9 +42,10 @@ export interface EnvironmentConfig {
  * Get environment configuration
  */
 export const getEnvironmentConfig = (): EnvironmentConfig => {
-  const isDevelopment = (import.meta as any).env?.DEV || false;
-  const isProduction = (import.meta as any).env?.PROD || false;
-  const isStaging = (import.meta as any).env?.VITE_STAGING === 'true';
+  // Next.js environment detection
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isProduction = process.env.NODE_ENV === 'production';
+  const isStaging = process.env.NEXT_PUBLIC_APP_ENV === 'staging';
 
   // Check if we're running on VPS (by checking if we can access VPS IP)
   const isVPS = typeof window !== 'undefined' && (
@@ -58,14 +59,14 @@ export const getEnvironmentConfig = (): EnvironmentConfig => {
   return {
     // Supabase configuration (existing)
     supabase: {
-      url: (import.meta as any).env?.VITE_SUPABASE_URL || 'https://dnwreckpeenhbdtapmxr.supabase.co',
-      anonKey: (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRud3JlY2twZWVuaGJkdGFwbXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTgwNzAsImV4cCI6MjA2NTU3NDA3MH0.2lzsxTj4hoKTcZeoCGMsUC3Cmsm1pgcqXP-3j_GV_Ys',
+      url: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://dnwreckpeenhbdtapmxr.supabase.co',
+      anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRud3JlY2twZWVuaGJkdGFwbXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTgwNzAsImV4cCI6MjA2NTU3NDA3MH0.2lzsxTj4hoKTcZeoCGMsUC3Cmsm1pgcqXP-3j_GV_Ys',
     },
 
     // Admin Backend configuration (new)
     adminApi: {
-      url: (import.meta as any).env?.VITE_API_URL || 'http://localhost:3002/api/v1',
-      wsUrl: (import.meta as any).env?.VITE_WS_URL || 'ws://localhost:3002',
+      url: process.env.NEXT_PUBLIC_ADMIN_BACKEND_URL || 'http://localhost:3002/api/v1',
+      wsUrl: process.env.NEXT_PUBLIC_ADMIN_BACKEND_WS_URL || (process.env.NEXT_PUBLIC_ADMIN_BACKEND_URL?.replace('https://', 'wss://').replace('http://', 'ws://').replace('/api/v1', '') || 'ws://localhost:3002'),
     },
 
     // Environment detection
@@ -76,17 +77,17 @@ export const getEnvironmentConfig = (): EnvironmentConfig => {
 
     // Feature flags
     features: {
-      enableAnalytics: (import.meta as any).env?.VITE_ENABLE_ANALYTICS === 'true' || isProduction,
-      enableAdminFeatures: (import.meta as any).env?.VITE_ENABLE_ADMIN_FEATURES !== 'false',
-      enableAnalyticsCharts: (import.meta as any).env?.VITE_ENABLE_ANALYTICS_CHARTS !== 'false',
-      enableBulkOperations: (import.meta as any).env?.VITE_ENABLE_BULK_OPERATIONS !== 'false',
+      enableAnalytics: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true' || isProduction,
+      enableAdminFeatures: process.env.NEXT_PUBLIC_ENABLE_ADMIN_FEATURES !== 'false',
+      enableAnalyticsCharts: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS_CHARTS !== 'false',
+      enableBulkOperations: process.env.NEXT_PUBLIC_ENABLE_BULK_OPERATIONS !== 'false',
     },
 
     // Performance & Monitoring
     monitoring: {
-      enablePerformanceMonitoring: (import.meta as any).env?.VITE_ENABLE_PERFORMANCE_MONITORING === 'true' || isProduction,
+      enablePerformanceMonitoring: process.env.NEXT_PUBLIC_ENABLE_PERFORMANCE_MONITORING === 'true' || isProduction,
       enableErrorTracking: isProduction,
-      sentryDsn: (import.meta as any).env?.VITE_SENTRY_DSN,
+      sentryDsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
     },
   };
 };

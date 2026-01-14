@@ -12,20 +12,13 @@ const nextConfig: NextConfig = {
   // Experimental features for better performance
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'framer-motion'],
-    // Exclude test files from build
-    outputFileTracingExcludes: {
-      '*': [
-        '**/e2e/**/*',
-        '**/*.spec.ts',
-        '**/*.test.ts',
-        '**/__tests__/**/*',
-      ],
-    },
   },
   
   // Turbopack configuration (Next.js 16+)
   // Note: turbopack.root is set via environment or inferred automatically
   // To fix workspace root warning, ensure you're running from the correct directory
+  // Empty turbopack config to silence webpack config warning
+  turbopack: {},
   
   // TypeScript - Strict type checking enabled
   typescript: {
