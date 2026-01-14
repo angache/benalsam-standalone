@@ -20,3 +20,14 @@ export const supabaseAdmin: SupabaseClient | null = typeof window === 'undefined
       }
     )
   : null // On client side, this should never be used
+
+/**
+ * Get supabaseAdmin with null check
+ * Throws error if supabaseAdmin is null (should only happen in client-side or missing env)
+ */
+export function getSupabaseAdmin(): SupabaseClient {
+  if (!supabaseAdmin) {
+    throw new Error('supabaseAdmin is not available. This should only be used server-side with SUPABASE_SERVICE_ROLE_KEY set.')
+  }
+  return supabaseAdmin
+}

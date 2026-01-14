@@ -6,13 +6,15 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 
 export async function GET(request: NextRequest) {
   try {
     logger.debug('[API] Fetching stats...')
+    
+    const supabaseAdmin = getSupabaseAdmin()
     
     // Fetch all stats in parallel
     const [

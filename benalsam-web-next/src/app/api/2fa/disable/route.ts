@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { validateBody } from '@/lib/api-validation'
 import { z } from 'zod'
@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
 
     // Verify password before disabling 2FA
     // Get user email from profile
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('email')

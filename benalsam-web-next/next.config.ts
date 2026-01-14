@@ -22,7 +22,9 @@ const nextConfig: NextConfig = {
   
   // TypeScript - Strict type checking enabled
   typescript: {
-    ignoreBuildErrors: false, // Enforce TypeScript checks during build
+    // Temporarily ignore build errors to get deployment working
+    // TODO: Fix all TypeScript errors and set back to false
+    ignoreBuildErrors: false, // Set to false to see all errors
   },
   
   // Compiler optimizations
