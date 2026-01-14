@@ -47,6 +47,7 @@ const nextConfig: NextConfig = {
               /e2e/,
               /\.(spec|test)\.(ts|tsx|js|jsx)$/,
               /__tests__/,
+              /playwright\.config\.ts$/,
             ].filter(Boolean);
           }
         });
