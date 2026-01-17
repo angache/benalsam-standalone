@@ -26,8 +26,8 @@ const environment = process.env['NODE_ENV'] || 'development';
 const baseSecurityConfig = SECURITY_CONFIGS[environment as keyof typeof SECURITY_CONFIGS] || SECURITY_CONFIGS.development;
 
 // Override CORS origin if CORS_ORIGIN environment variable is set
-const corsOrigin = process.env.CORS_ORIGIN 
-  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+const corsOrigin = process.env['CORS_ORIGIN'] 
+  ? process.env['CORS_ORIGIN'].split(',').map((origin: string) => origin.trim())
   : baseSecurityConfig.cors?.origin;
 
 const securityConfig = {
