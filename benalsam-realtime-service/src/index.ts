@@ -7,7 +7,7 @@ import express from 'express';
 import { createServer } from 'http';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
-import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types/server';
+import { createSecurityMiddleware, SECURITY_CONFIGS } from './sharedTypesServer';
 import logger from './config/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { healthRoutes } from './routes/health';
@@ -39,7 +39,7 @@ const securityConfig = {
 };
 
 const securityMiddleware = createSecurityMiddleware(securityConfig as any);
-securityMiddleware.getAllMiddleware().forEach(m => app.use(m));
+securityMiddleware.getAllMiddleware().forEach((m: any) => app.use(m));
 
 app.use(compression());
 
