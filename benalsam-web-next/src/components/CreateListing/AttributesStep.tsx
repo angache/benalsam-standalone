@@ -41,7 +41,7 @@ interface CategoryWithAttributes extends Category {
 }
 
 interface AttributesFormData {
-  [key: string]: string | string[] | boolean | undefined
+  [key: string]: string | number | string[] | boolean | undefined
 }
 
 // Kategoriye özel attribute tanımları
