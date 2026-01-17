@@ -1,5 +1,5 @@
 import { getServerUser } from '@/lib/supabase-server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { extractIdFromSlug, generateListingUrl } from '@/lib/slugify'
 import { ListingDetailClient } from './ListingDetailClient'
 import { notFound, redirect } from 'next/navigation'
