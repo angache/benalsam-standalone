@@ -21,15 +21,15 @@ const baseSecurityConfig = SECURITY_CONFIGS[environment as keyof typeof SECURITY
 
 // Override CORS origin if CORS_ORIGIN environment variable is set
 const corsOriginEnv = process.env.CORS_ORIGIN;
-const corsOrigin = corsOriginEnv 
-  ? corsOriginEnv.split(',').map(origin => origin.trim())
-  : (baseSecurityConfig.cors?.origin || ['http://localhost:3000', 'http://localhost:5173']);
+const corsAllowedOrigins = corsOriginEnv 
+  ? corsOriginEnv.split(',').map((origin: string) => origin.trim())
+  : ['http://localhost:3000', 'http://localhost:5173', 'https://benalsam.vercel.app'];
 
 // Debug: Log CORS configuration
 console.log('🔒 CORS Configuration', {
   CORS_ORIGIN_ENV: corsOriginEnv || 'not set',
-  corsOrigin: corsOrigin,
-  corsOriginType: Array.isArray(corsOrigin) ? 'array' : typeof corsOrigin,
+  corsAllowedOrigins: corsAllowedOrigins,
+  corsOriginType: Array.isArray(corsAllowedOrigins) ? 'array' : typeof corsAllowedOrigins,
   baseConfigOrigin: baseSecurityConfig.cors?.origin,
   environment: environment
 });
@@ -38,7 +38,7 @@ const securityConfig = {
   ...baseSecurityConfig,
   cors: {
     ...baseSecurityConfig.cors,
-    origin: corsOrigin, // Direct array - cors paketi bunu handle edecek
+    origin: corsAllowedOrigins, // Direct array - cors paketi bunu handle edecek
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key', 'x-user-id', 'Accept'],
@@ -50,11 +50,6 @@ const securityMiddleware = createSecurityMiddleware(securityConfig as any);
 
 // Apply CORS middleware FIRST (before other security middleware)
 // Bu, CORS'un kesinlikle çalışmasını garanti eder
-const corsOriginEnv = process.env.CORS_ORIGIN;
-const corsAllowedOrigins = corsOriginEnv 
-  ? corsOriginEnv.split(',').map(origin => origin.trim())
-  : ['http://localhost:3000', 'http://localhost:5173', 'https://benalsam.vercel.app'];
-
 console.log('🔒 Direct CORS Middleware', {
   allowedOrigins: corsAllowedOrigins
 });

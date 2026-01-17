@@ -38,6 +38,7 @@
     "dist",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "src/**/deprecated/**/*"
+    "src/**/deprecated/**/*",
+    "src/test/**/*"
   ]
 } 

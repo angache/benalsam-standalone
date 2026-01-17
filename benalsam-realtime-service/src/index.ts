@@ -5,10 +5,9 @@ config();
 
 import express from 'express';
 import { createServer } from 'http';
-import cors from 'cors';
-import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
+import { createSecurityMiddleware, SECURITY_CONFIGS } from 'benalsam-shared-types/server';
 import logger from './config/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { healthRoutes } from './routes/health';
@@ -22,12 +21,26 @@ import jobCleanupService from './services/jobCleanupService';
 const app = express();
 const PORT = process.env['PORT'] || 3007;
 
-// Security middleware
-app.use(helmet());
-app.use(cors({
-  origin: process.env['CORS_ORIGIN']?.split(',') || ['http://localhost:3000'],
-  credentials: true
-}));
+// Security middleware configuration
+const environment = process.env['NODE_ENV'] || 'development';
+const baseSecurityConfig = SECURITY_CONFIGS[environment as keyof typeof SECURITY_CONFIGS] || SECURITY_CONFIGS.development;
+
+// Override CORS origin if CORS_ORIGIN environment variable is set
+const corsOrigin = process.env.CORS_ORIGIN 
+  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+  : baseSecurityConfig.cors?.origin;
+
+const securityConfig = {
+  ...baseSecurityConfig,
+  cors: {
+    ...baseSecurityConfig.cors,
+    origin: corsOrigin || baseSecurityConfig.cors?.origin,
+  }
+};
+
+const securityMiddleware = createSecurityMiddleware(securityConfig as any);
+securityMiddleware.getAllMiddleware().forEach(m => app.use(m));
+
 app.use(compression());
 
 // Rate limiting
