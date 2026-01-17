@@ -132,7 +132,7 @@ export default function ProfileSettingsClient({ userId }: { userId: string }) {
       logger.error('[ProfileSettings] Error uploading avatar', { error })
       toast({
         title: 'Hata',
-        description: error.message || 'Avatar yüklenirken bir hata oluştu',
+        description: error instanceof Error ? error.message : 'Avatar yüklenirken bir hata oluştu',
         variant: 'destructive',
       })
     } finally {
@@ -176,7 +176,7 @@ export default function ProfileSettingsClient({ userId }: { userId: string }) {
       logger.error('[ProfileSettings] Error updating profile', { error })
       toast({
         title: 'Hata',
-        description: error.message || 'Profil güncellenirken bir hata oluştu',
+        description: error instanceof Error ? error.message : 'Profil güncellenirken bir hata oluştu',
         variant: 'destructive',
       })
     } finally {
@@ -335,7 +335,7 @@ export default function ProfileSettingsClient({ userId }: { userId: string }) {
               maxLength={500}
             />
             <p className="text-sm text-muted-foreground">
-              {profile.bio.length}/500 karakter
+              {(profile.bio || '').length}/500 karakter
             </p>
           </div>
 

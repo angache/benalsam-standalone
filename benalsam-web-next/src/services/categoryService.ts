@@ -2,6 +2,11 @@ import { categoriesServiceClient } from '@/lib/apiClient'
 import { categoryCacheService } from './categoryCacheService'
 import { logger } from '@/utils/production-logger'
 
+// VPS veya local kullanımı kontrolü
+const useVpsServices = process.env.USE_VPS_SERVICES === 'true' || 
+                       process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true' ||
+                       (process.env.NODE_ENV === 'production' && process.env.USE_VPS_SERVICES !== 'false');
+
 export interface CategoryAttribute {
   id: number
   key: string
@@ -14,7 +19,7 @@ export interface CategoryAttribute {
   sort_order: number
   ai_enhanced: boolean
   category_id: number
-  ai_suggestions?: Record<string, any>
+  ai_suggestions?: Record<string, unknown>
 }
 
 export interface Category {
@@ -45,8 +50,26 @@ class CategoryService {
    */
   async getCategories(): Promise<Category[]> {
     return categoryCacheService.getCategories(async () => {
-      const response = await categoriesServiceClient.get<{ success: boolean; data: Category[] }>('/api/v1/categories')
-      return response.data || []
+      try {
+        // baseURL: https://api.benalsam.com/api/v1/categories (VPS) veya http://localhost:3015/api/v1 (local)
+        // Categories Service route: /api/v1/categories -> getCategories()
+        // VPS'de: baseURL /api/v1/categories, endpoint '/' -> Final: /api/v1/categories/ -> Nginx proxy (no rewrite) ✅
+        // Local'de: baseURL /api/v1, endpoint '/categories' -> Final: http://localhost:3015/api/v1/categories ✅
+        const endpoint = useVpsServices ? '/' : '/categories'
+        const response = await categoriesServiceClient.get<{ success: boolean; data: Category[] }>(endpoint)
+        return response.data || []
+      } catch (error) {
+        logger.error('[CategoryService] Error fetching categories from API', {
+          error: error instanceof Error ? {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+          } : error,
+          errorString: String(error),
+          baseURL: categoriesServiceClient['client'].defaults?.baseURL || 'unknown'
+        })
+        throw error
+      }
     })
   }
 
@@ -55,7 +78,11 @@ class CategoryService {
    */
   async getCategoryTree(): Promise<CategoryTree[]> {
     try {
-      const response = await categoriesServiceClient.get<{ data: CategoryTree[] }>('/api/v1/categories/tree')
+      // Categories Service'de /tree route'u yok, getCategories() zaten tree structure döndürüyor
+      // VPS'de: baseURL /api/v1/categories, endpoint '/' -> Final: /api/v1/categories/ -> Nginx proxy (no rewrite) ✅
+      // Local'de: baseURL /api/v1, endpoint '/categories' -> Final: http://localhost:3015/api/v1/categories ✅
+      const endpoint = useVpsServices ? '/' : '/categories'
+      const response = await categoriesServiceClient.get<{ success: boolean; data: CategoryTree[] }>(endpoint)
       return response.data || []
     } catch (error) {
       logger.error('[CategoryService] Error fetching category tree', { error })
@@ -68,7 +95,10 @@ class CategoryService {
    */
   async getCategoryById(id: string): Promise<Category | null> {
     try {
-      const response = await categoriesServiceClient.get<{ data: Category }>(`/api/v1/categories/${id}`)
+      // VPS'de: baseURL /api/v1/categories, endpoint `/${id}` -> Final: /api/v1/categories/${id} -> Nginx proxy (no rewrite) ✅
+      // Local'de: baseURL /api/v1, endpoint `/categories/${id}` -> Final: http://localhost:3015/api/v1/categories/${id} ✅
+      const endpoint = useVpsServices ? `/${id}` : `/categories/${id}`
+      const response = await categoriesServiceClient.get<{ data: Category }>(endpoint)
       return response.data
     } catch (error) {
       logger.error(`[CategoryService] Error fetching category ${id}`, { error, categoryId: id })
@@ -81,7 +111,11 @@ class CategoryService {
    */
   async getCategoryBySlug(slug: string): Promise<Category | null> {
     try {
-      const response = await categoriesServiceClient.get<{ data: Category }>(`/api/v1/categories/slug/${slug}`)
+      // Categories Service'de /:id(*) route'u hem ID hem slug/path kabul ediyor
+      // VPS'de: baseURL /api/v1/categories, endpoint `/${slug}` -> Final: /api/v1/categories/${slug} -> Nginx proxy (no rewrite) ✅
+      // Local'de: baseURL /api/v1, endpoint `/categories/${slug}` -> Final: http://localhost:3015/api/v1/categories/${slug} ✅
+      const endpoint = useVpsServices ? `/${slug}` : `/categories/${slug}`
+      const response = await categoriesServiceClient.get<{ data: Category }>(endpoint)
       return response.data
     } catch (error) {
       logger.error(`[CategoryService] Error fetching category by slug ${slug}`, { error, slug })
@@ -117,8 +151,12 @@ class CategoryService {
    */
   async searchCategories(query: string): Promise<Category[]> {
     try {
-      const response = await categoriesServiceClient.get<{ data: Category[] }>(`/api/v1/categories/search`, {
-        params: { q: query },
+      // Categories Service'de /all route'u search query parametresi ile kullanılıyor
+      // VPS'de: baseURL /api/v1/categories, endpoint `/all` -> Final: /api/v1/categories/all -> Nginx proxy (no rewrite) ✅
+      // Local'de: baseURL /api/v1, endpoint `/categories/all` -> Final: http://localhost:3015/api/v1/categories/all ✅
+      const endpoint = useVpsServices ? '/all' : '/categories/all'
+      const response = await categoriesServiceClient.get<{ data: Category[] }>(endpoint, {
+        params: { search: query },
       })
       return response.data || []
     } catch (error) {
@@ -132,7 +170,13 @@ class CategoryService {
    */
   async getCategoryChildren(parentId: string): Promise<Category[]> {
     try {
-      const response = await categoriesServiceClient.get<{ data: Category[] }>(`/api/v1/categories/${parentId}/children`)
+      // Categories Service'de /children route'u yok, /all route'u parent_id query parametresi ile kullanılıyor
+      // VPS'de: baseURL /api/v1/categories, endpoint `/all` -> Final: /api/v1/categories/all -> Nginx proxy (no rewrite) ✅
+      // Local'de: baseURL /api/v1, endpoint `/categories/all` -> Final: http://localhost:3015/api/v1/categories/all ✅
+      const endpoint = useVpsServices ? '/all' : '/categories/all'
+      const response = await categoriesServiceClient.get<{ data: Category[] }>(endpoint, {
+        params: { parent_id: parentId },
+      })
       return response.data || []
     } catch (error) {
       logger.error(`[CategoryService] Error fetching children for category ${parentId}`, { error, parentId })

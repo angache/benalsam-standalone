@@ -219,8 +219,8 @@ const InventoryPage = () => {
       <div className="flex flex-col md:flex-row justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            Envanterim
-          </h1>
+          Envanterim
+        </h1>
           <p className="text-muted-foreground text-sm">
             {filteredAndSortedItems.length} ürün {activeFilterCount > 0 && `(${activeFilterCount} filtre aktif)`}
           </p>
@@ -258,13 +258,13 @@ const InventoryPage = () => {
               <List className="w-4 h-4" />
             </Button>
           </div>
-          <Button
-            onClick={() => router.push('/envanter/yeni')}
-            className="text-primary-foreground"
-          >
-            <Plus className="w-5 h-5 mr-2" /> Yeni Ürün Ekle
-          </Button>
-        </div>
+        <Button
+          onClick={() => router.push('/envanter/yeni')}
+          className="text-primary-foreground"
+        >
+          <Plus className="w-5 h-5 mr-2" /> Yeni Ürün Ekle
+        </Button>
+      </div>
       </div>
 
       {/* Search Bar */}
@@ -385,18 +385,18 @@ const InventoryPage = () => {
                 ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'
                 : 'space-y-4'
             }>
-              <AnimatePresence>
+          <AnimatePresence>
                 {filteredAndSortedItems.map((item) => (
-                  <InventoryItemCard
-                    key={item.id}
-                    item={item}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
+              <InventoryItemCard
+                key={item.id}
+                item={item}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
                     viewMode={viewMode}
-                  />
-                ))}
-              </AnimatePresence>
-            </div>
+              />
+            ))}
+          </AnimatePresence>
+        </div>
           )}
         </>
       )}

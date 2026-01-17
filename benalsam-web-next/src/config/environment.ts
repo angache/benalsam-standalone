@@ -47,14 +47,21 @@ export const getEnvironmentConfig = (): EnvironmentConfig => {
   const isProduction = process.env.NODE_ENV === 'production';
   const isStaging = process.env.NEXT_PUBLIC_APP_ENV === 'staging';
 
+  // Check if we should use VPS services (override for local testing)
+  // Set USE_VPS_SERVICES=true to use VPS even in development
+  // Set USE_VPS_SERVICES=false to use local services even in production
+  const useVpsServices = process.env.USE_VPS_SERVICES === 'true' || 
+                         process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true' ||
+                         (isProduction && process.env.USE_VPS_SERVICES !== 'false');
+
   // Check if we're running on VPS (by checking if we can access VPS IP)
   const isVPS = typeof window !== 'undefined' && (
     window.location.hostname !== 'localhost' && 
     window.location.hostname !== '127.0.0.1'
   );
 
-  // Production domain (replace with your actual domain)
-  const PRODUCTION_DOMAIN = 'your-domain.com';
+  // Production domain (VPS API domain)
+  const PRODUCTION_DOMAIN = 'api.benalsam.com';
 
   return {
     // Supabase configuration (existing)
@@ -64,9 +71,15 @@ export const getEnvironmentConfig = (): EnvironmentConfig => {
     },
 
     // Admin Backend configuration (new)
+    // Use VPS if: production mode OR USE_VPS_SERVICES=true
+    // Use local if: development mode AND USE_VPS_SERVICES not set to true
     adminApi: {
-      url: process.env.NEXT_PUBLIC_ADMIN_BACKEND_URL || 'http://localhost:3002/api/v1',
-      wsUrl: process.env.NEXT_PUBLIC_ADMIN_BACKEND_WS_URL || (process.env.NEXT_PUBLIC_ADMIN_BACKEND_URL?.replace('https://', 'wss://').replace('http://', 'ws://').replace('/api/v1', '') || 'ws://localhost:3002'),
+      url: useVpsServices
+        ? `https://${PRODUCTION_DOMAIN}/api/v1/admin`
+        : (process.env.NEXT_PUBLIC_ADMIN_BACKEND_URL || 'http://localhost:3002/api/v1'),
+      wsUrl: useVpsServices
+        ? `wss://${PRODUCTION_DOMAIN}`
+        : (process.env.NEXT_PUBLIC_ADMIN_BACKEND_WS_URL || (process.env.NEXT_PUBLIC_ADMIN_BACKEND_URL?.replace('https://', 'wss://').replace('http://', 'ws://').replace('/api/v1', '') || 'ws://localhost:3002')),
     },
 
     // Environment detection
@@ -160,15 +173,19 @@ export const env = {
    */
   logEnvironment: () => {
     if (config.isDevelopment) {
+      const useVps = process.env.USE_VPS_SERVICES === 'true' || 
+                     process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true';
       console.log('🔧 Environment Config:', {
         environment: config.isProduction ? 'production' : config.isStaging ? 'staging' : 'development',
         adminApiUrl: config.adminApi.url,
         adminWsUrl: config.adminApi.wsUrl,
         supabaseUrl: config.supabase.url,
         hostname: typeof window !== 'undefined' ? window.location.hostname : 'server',
+        useVpsServices: useVps ? '✅ VPS' : '❌ Local',
         features: config.features,
         monitoring: config.monitoring,
       });
+      console.log('🌐 API Source:', useVps ? 'VPS (api.benalsam.com)' : 'Local (localhost)');
     }
   },
 };
@@ -176,6 +193,26 @@ export const env = {
 // Log environment info in development
 if (typeof window !== 'undefined') {
   env.logEnvironment();
+  
+  // Browser console'da kullanım için window object'e ekle
+  (window as any).checkApiSource = () => {
+    const useVps = config.adminApi.url.includes('api.benalsam.com');
+    console.log('🔍 API Source Check:');
+    console.log('===================');
+    console.log('📍 Admin API URL:', config.adminApi.url);
+    console.log('📍 WebSocket URL:', config.adminApi.wsUrl);
+    console.log('🌐 Source:', useVps ? '✅ VPS (api.benalsam.com)' : '❌ Local (localhost)');
+    console.log('🔧 Environment:', config.isProduction ? 'Production' : 'Development');
+    console.log('===================');
+    return {
+      url: config.adminApi.url,
+      wsUrl: config.adminApi.wsUrl,
+      isVps: useVps,
+      environment: config.isProduction ? 'production' : 'development'
+    };
+  };
+  
+  (window as any).getApiConfig = () => config;
 }
 
 export default config; 

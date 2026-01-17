@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { validateParams } from '@/lib/api-validation'
 import { z } from 'zod'
@@ -43,6 +43,7 @@ export async function GET(
     logger.debug('[PROFILE API] Fetching profile', { userId })
 
     // Get profile data (try username first, then fallback to ID)
+    const supabaseAdmin = getSupabaseAdmin()
     let { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('*')

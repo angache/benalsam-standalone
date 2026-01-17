@@ -17,7 +17,15 @@ import dynamicCategoryService from '../dynamicCategoryService';
 import { logger } from '@/utils/production-logger';
 import type { Category } from '../categoryService';
 
-const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1';
+// VPS veya local kullanımı kontrolü
+const useVpsServices = process.env.USE_VPS_SERVICES === 'true' || 
+                       process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true' ||
+                       (process.env.NODE_ENV === 'production' && process.env.USE_VPS_SERVICES !== 'false');
+
+const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 
+  (useVpsServices
+    ? 'https://api.benalsam.com/api/v1/upload'
+    : 'http://localhost:3007/api/v1');
 
 // Kategori path'ini ID'lere çevir
 const getCategoryIds = async (categoryString: string): Promise<{ category_id: number | null, category_path: number[] | null }> => {
@@ -228,7 +236,10 @@ export const createListingWithUploadService = async (
         formData.append('images', file);
       });
 
-      const uploadResponse = await fetch(`${UPLOAD_SERVICE_URL}/upload/listings`, {
+      // VPS: /api/v1/upload + /listings -> /api/v1/upload/listings ✅
+      // Local: /api/v1 + /upload/listings -> /api/v1/upload/listings ✅
+      const imageUploadEndpoint = useVpsServices ? '/listings' : '/upload/listings';
+      const uploadResponse = await fetch(`${UPLOAD_SERVICE_URL}${imageUploadEndpoint}`, {
         method: 'POST',
         headers: {
           'x-user-id': currentUserId,
@@ -264,7 +275,10 @@ export const createListingWithUploadService = async (
     });
 
     // Create listing via Upload Service with uploaded image URLs
-    const response = await fetch(`${UPLOAD_SERVICE_URL}/listings/create`, {
+    // VPS: /api/v1/upload + /listings/create -> /api/v1/upload/listings/create ✅
+    // Local: /api/v1 + /listings/create -> /api/v1/listings/create ✅
+    const createEndpoint = '/listings/create';
+    const response = await fetch(`${UPLOAD_SERVICE_URL}${createEndpoint}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -382,7 +396,10 @@ export const updateListingWithUploadService = async (
     });
 
     // Update listing via Upload Service
-    const response = await fetch(`${UPLOAD_SERVICE_URL}/listings/${listingId}`, {
+    // VPS: /api/v1/upload + /listings/${id} -> /api/v1/upload/listings/${id} ✅
+    // Local: /api/v1 + /listings/${id} -> /api/v1/listings/${id} ✅
+    const updateEndpoint = `/listings/${listingId}`;
+    const response = await fetch(`${UPLOAD_SERVICE_URL}${updateEndpoint}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -476,7 +493,8 @@ async function pollListingJobStatus(
       // If Listing Service fails, try Upload Service (backward compatibility)
       if (!response.ok && response.status === 404) {
         logger.warn('[UploadServiceMutations] Job not found in Listing Service, trying Upload Service');
-        response = await fetch(`${UPLOAD_SERVICE_URL}/listings/status/${jobId}`, {
+        const statusEndpoint = `/listings/status/${jobId}`;
+        response = await fetch(`${UPLOAD_SERVICE_URL}${statusEndpoint}`, {
           headers: {
             'x-user-id': userId,
           },

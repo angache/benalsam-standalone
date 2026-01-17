@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 import { getServerUser } from '@/lib/supabase-server'
@@ -24,6 +24,7 @@ import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate
  * 4. Returns statistics
  */
 async function checkAndExpireDopings() {
+  const supabaseAdmin = getSupabaseAdmin()
   const now = new Date().toISOString()
   const stats = {
     expiredShowcase: 0,
@@ -201,6 +202,7 @@ async function sendExpirationNotification(
     // Create notification record in notifications table
     // Note: Using existing schema: recipient_user_id, data jsonb, is_read
     try {
+      const supabaseAdmin = getSupabaseAdmin()
       const { error: notificationError } = await supabaseAdmin
         .from('notifications')
         .insert({
@@ -314,6 +316,7 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const now = new Date().toISOString()
     const stats = {
       expiredShowcase: 0,

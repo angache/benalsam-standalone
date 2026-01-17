@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
       const { data: categoryData } = await supabase
         .from('category_ai_suggestions')
         .select('*')
-        .eq('category_id', parseInt(categoryId))
+        .eq('category_id', categoryId.toString())
         .eq('is_approved', true)
         .order('confidence_score', { ascending: false })
         .limit(5)
@@ -170,12 +170,12 @@ export async function GET(request: NextRequest) {
               text: item.title,
               type: 'popular',
               score: Math.min((item.view_count || 0) / 100, 0.9),
-              metadata: { viewCount: item.view_count }
+              metadata: { viewCount: item.view_count ?? undefined }
             })
           })
         } else {
           // Hardcoded fallback if no listings
-          const fallbackKeywords = [
+          const fallbackKeywords: Array<{ text: string; type: 'popular'; score: number }> = [
             { text: 'iPhone 13 Pro', type: 'popular', score: 0.9 },
             { text: 'Kiralık Daire İstanbul', type: 'popular', score: 0.85 },
             { text: 'MacBook Air M2', type: 'popular', score: 0.8 },
@@ -193,7 +193,7 @@ export async function GET(request: NextRequest) {
       } catch (err) {
         logger.debug('[API] Popular suggestions not available, using fallback')
         // Hardcoded fallback
-        const fallbackKeywords = [
+        const fallbackKeywords: Array<{ text: string; type: 'popular'; score: number }> = [
           { text: 'iPhone 13 Pro', type: 'popular', score: 0.9 },
           { text: 'Kiralık Daire İstanbul', type: 'popular', score: 0.85 },
           { text: 'MacBook Air M2', type: 'popular', score: 0.8 },

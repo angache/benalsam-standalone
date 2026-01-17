@@ -9,7 +9,15 @@ import type { Category } from './categoryService'
 import type { Listing } from '@/types'
 import type { ImageFile } from '@/types/listing'
 
-const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1'
+// VPS veya local kullanımı kontrolü
+const useVpsServices = process.env.USE_VPS_SERVICES === 'true' || 
+                       process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true' ||
+                       (process.env.NODE_ENV === 'production' && process.env.USE_VPS_SERVICES !== 'false');
+
+const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 
+  (useVpsServices
+    ? 'https://api.benalsam.com/api/v1/upload'
+    : 'http://localhost:3007/api/v1')
 
 // EXACT COPY from old system - getCategoryIds function
 const getCategoryIds = async (categoryString: string): Promise<{ category_id: number | null, category_path: number[] | null }> => {
@@ -197,7 +205,10 @@ export async function createListingWithUploadService(
     });
 
     // Step 3: Create listing via Upload Service
-    const response = await fetch(`${UPLOAD_SERVICE_URL}/listings/create`, {
+    // VPS: /api/v1/upload + /listings/create -> /api/v1/upload/listings/create ✅
+    // Local: /api/v1 + /listings/create -> /api/v1/listings/create ✅
+    const createEndpoint = useVpsServices ? '/listings/create' : '/listings/create';
+    const response = await fetch(`${UPLOAD_SERVICE_URL}${createEndpoint}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -280,7 +291,8 @@ async function pollListingJobStatus(
       // If Listing Service fails, try Upload Service (backward compatibility)
       if (!response.ok && response.status === 404) {
         logger.warn('[CreateListingService] Job not found in Listing Service, trying Upload Service')
-        response = await fetch(`${UPLOAD_SERVICE_URL}/listings/status/${jobId}`, {
+        const statusEndpoint = useVpsServices ? `/listings/status/${jobId}` : `/listings/status/${jobId}`;
+        response = await fetch(`${UPLOAD_SERVICE_URL}${statusEndpoint}`, {
           headers: {
             'x-user-id': userId,
           },

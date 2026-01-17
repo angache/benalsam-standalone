@@ -4,13 +4,14 @@ import { logger } from '@/utils/production-logger';
 export interface AISuggestion {
   id: string;
   text: string;
-  type: 'category' | 'search' | 'trending' | 'popular';
+  type: 'category' | 'search' | 'trending' | 'popular' | 'ai';
   score: number;
   category?: Category;
   metadata?: {
     searchCount?: number;
     lastSearched?: string;
     trending?: boolean;
+    viewCount?: number;
   };
 }
 

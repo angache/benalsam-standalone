@@ -9,7 +9,7 @@ const router = Router();
 router.get('/metrics', authenticateToken, async (req, res) => {
   try {
     const { timeRange = '24h' } = req.query;
-
+    
     // Get Sentry API service
     const sentryApi = getSentryApiService();
     const metrics = await sentryApi.getMetrics(timeRange as string);
@@ -53,7 +53,7 @@ router.get('/metrics', authenticateToken, async (req, res) => {
 router.get('/errors', authenticateToken, async (req, res) => {
   try {
     const { timeRange = '24h' } = req.query;
-
+    
     // Get Sentry API service
     const sentryApi = getSentryApiService();
     const errors = await sentryApi.getErrors(timeRange as string);
@@ -95,7 +95,7 @@ router.get('/errors', authenticateToken, async (req, res) => {
 router.get('/performance', authenticateToken, async (req, res) => {
   try {
     const { timeRange = '24h' } = req.query;
-
+    
     // Get Sentry API service
     const sentryApi = getSentryApiService();
     const performance = await sentryApi.getPerformance(timeRange as string);

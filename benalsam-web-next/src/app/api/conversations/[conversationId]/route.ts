@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabase';
 import { logger } from '@/utils/production-logger';
 import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit';
 import { getServerUser } from '@/lib/supabase-server';
@@ -45,13 +45,7 @@ export async function GET(
       return rateLimitExceeded();
     }
 
-    if (!supabaseAdmin) {
-      return apiErrors.internalError(
-        'Server configuration error',
-        {},
-        request.nextUrl.pathname
-      )
-    }
+    const supabaseAdmin = getSupabaseAdmin()
 
     // Fetch conversation details - use admin client to bypass RLS
     const { data: conversation, error: convError } = await supabaseAdmin

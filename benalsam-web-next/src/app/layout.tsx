@@ -9,6 +9,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ChatbotWidget from "@/components/chatbot/ChatbotWidget";
 import { SentryClientInit } from "./sentry-client-init";
+import "@/utils/check-api-source"; // Browser console'da checkApiSource() kullanımı için
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

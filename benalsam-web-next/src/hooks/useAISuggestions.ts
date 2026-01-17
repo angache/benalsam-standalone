@@ -134,7 +134,8 @@ export const useAISuggestions = (query = '', categoryId = null) => {
       trending: [],
       popular: [],
       category: [],
-      search: []
+      search: [],
+      ai: []
     };
 
     suggestions.forEach(suggestion => {

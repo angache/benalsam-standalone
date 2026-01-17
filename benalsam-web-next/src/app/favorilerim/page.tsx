@@ -12,6 +12,7 @@ import { EmptyStateList } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
 import { Heart, Search, Grid, List } from 'lucide-react'
 import { generateListingUrl } from '@/lib/slugify'
+import type { Listing } from '@/types'
 
 // Skeleton card for listing
 const SkeletonCard = () => (

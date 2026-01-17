@@ -591,10 +591,10 @@ const SentryDashboardPage: React.FC = () => {
 
       {/* NEW ADVANCED COMPONENTS */}
       {firstError && firstError.id && (
-        <Grid container spacing={3} sx={{ mb: 3 }}>
-          {/* Stack Trace Viewer */}
-          <Grid item xs={12} md={6}>
-            <StackTraceViewer
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        {/* Stack Trace Viewer */}
+        <Grid item xs={12} md={6}>
+          <StackTraceViewer
               stackTrace={{
                 frames: (firstError.metadata && firstError.metadata.filename) ? [{
                   filename: firstError.metadata.filename || 'unknown',
@@ -612,35 +612,35 @@ const SentryDashboardPage: React.FC = () => {
               errorMessage={firstError.message || 'No error message available'}
               errorLevel={firstError.level || 'error'}
               timestamp={firstError.timestamp || new Date().toISOString()}
-            />
-          </Grid>
+          />
+        </Grid>
 
-          {/* Team Collaboration */}
-          <Grid item xs={12} md={6}>
-            <TeamCollaboration
+        {/* Team Collaboration */}
+        <Grid item xs={12} md={6}>
+          <TeamCollaboration
               errorId={firstError.id}
               teamMembers={[]}
               comments={[]}
               assignments={[]}
-              onAddComment={(content) => {
-                console.log('Add comment:', content);
-                // TODO: Implement add comment functionality
-              }}
-              onAssignError={(memberId, priority, dueDate) => {
-                console.log('Assign error:', memberId, priority, dueDate);
-                // TODO: Implement assign error functionality
-              }}
-              onUpdateAssignment={(assignmentId, status) => {
-                console.log('Update assignment:', assignmentId, status);
-                // TODO: Implement update assignment functionality
-              }}
-              onAddTeamMember={(member) => {
-                console.log('Add team member:', member);
-                // TODO: Implement add team member functionality
-              }}
-            />
-          </Grid>
+            onAddComment={(content) => {
+              console.log('Add comment:', content);
+              // TODO: Implement add comment functionality
+            }}
+            onAssignError={(memberId, priority, dueDate) => {
+              console.log('Assign error:', memberId, priority, dueDate);
+              // TODO: Implement assign error functionality
+            }}
+            onUpdateAssignment={(assignmentId, status) => {
+              console.log('Update assignment:', assignmentId, status);
+              // TODO: Implement update assignment functionality
+            }}
+            onAddTeamMember={(member) => {
+              console.log('Add team member:', member);
+              // TODO: Implement add team member functionality
+            }}
+          />
         </Grid>
+      </Grid>
       )}
 
       {/* Error Analytics */}

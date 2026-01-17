@@ -10,7 +10,7 @@
  * Note: To disable free trial for new users, set ENABLE_FREE_TRIAL=false in environment variables
  */
 
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 
 /**
@@ -53,6 +53,8 @@ export const createFreeTrialSubscription = async (userId: string): Promise<boole
 
   try {
     logger.debug('[FreeTrial] Creating free trial subscription', { userId })
+
+    const supabaseAdmin = getSupabaseAdmin()
 
     // Check if user already has an active subscription
     const { data: existingSubscription } = await supabaseAdmin

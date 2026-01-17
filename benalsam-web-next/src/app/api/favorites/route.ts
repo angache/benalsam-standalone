@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { validateBody, validateQuery, commonSchemas } from '@/lib/api-validation'
 import { z } from 'zod'
@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
 
     logger.debug('[API] Inserting favorite', { userId: user.id, listingId })
 
+    const supabaseAdmin = getSupabaseAdmin()
     const { data, error } = await supabaseAdmin
       .from('user_favorites')
       .insert([{ 
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
       
       return apiErrors.databaseError(
         'Favori eklenirken bir hata oluştu',
-        { error: error.message, userId: user.id, listingId },
+        { error: error instanceof Error ? error.message : String(error), userId: user.id, listingId },
         request.nextUrl.pathname
       )
     }
@@ -112,6 +113,7 @@ export async function DELETE(request: NextRequest) {
 
     const { listingId } = validation.data
 
+    const supabaseAdmin = getSupabaseAdmin()
     const { error } = await supabaseAdmin
       .from('user_favorites')
       .delete()
@@ -121,7 +123,7 @@ export async function DELETE(request: NextRequest) {
     if (error) {
       return apiErrors.databaseError(
         'Favori silinirken bir hata oluştu',
-        { error: error.message, userId: user.id, listingId },
+        { error: error instanceof Error ? error.message : String(error), userId: user.id, listingId },
         request.nextUrl.pathname
       )
     }

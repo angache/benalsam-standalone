@@ -60,7 +60,7 @@ interface ToggleItem {
 }
 
 export default function SettingsClient() {
-  const { user, session, signOut } = useAuth()
+  const { user, session, logout } = useAuth()
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -76,7 +76,7 @@ export default function SettingsClient() {
 
   const handleLogout = async () => {
     try {
-      await signOut()
+      await logout()
       toast({
         title: 'Çıkış yapıldı',
         description: 'Hesabınızdan başarıyla çıkış yaptınız',
@@ -359,7 +359,7 @@ export default function SettingsClient() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.1 }}
       >
-        <EmailInfo user={user} />
+        {session?.user && <EmailInfo user={session.user} />}
       </motion.div>
 
       {/* Account Settings */}

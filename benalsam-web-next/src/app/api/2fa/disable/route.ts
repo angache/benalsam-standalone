@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       return apiErrors.databaseError(
         '2FA devre dışı bırakılamadı',
-        { error: error.message, userId: user.id },
+        { error: (error as { message?: string })?.message || String(error), userId: user.id },
         request.nextUrl.pathname
       )
     }

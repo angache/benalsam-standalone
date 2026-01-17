@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { getPaymentService } from '@/services/paymentService'
 import { validateBody, commonSchemas } from '@/lib/api-validation'
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
@@ -155,6 +156,14 @@ export async function POST(request: NextRequest) {
       itemCount: items.length 
     })
 
+    // Get user name from profiles table
+    const supabaseAdmin = getSupabaseAdmin()
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('name')
+      .eq('id', user.id)
+      .single()
+
     // Get payment service (automatically uses mock/stripe/iyzico based on config)
     logger.debug('[Payment API] Getting payment service', { 
       provider: process.env.PAYMENT_PROVIDER || 'mock' 
@@ -179,7 +188,7 @@ export async function POST(request: NextRequest) {
       items,
       customerId: user.id,
       customerEmail: user.email || '',
-      customerName: user.name || undefined,
+      customerName: profile?.name || user.user_metadata?.name || undefined,
       description: description || `Payment for ${items.map(i => i.name).join(', ')}`,
       metadata: {
         ...metadata,

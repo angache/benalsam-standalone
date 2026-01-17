@@ -12,7 +12,9 @@ export const securityConfig = {
     ? [
         'https://benalsam.com',
         'https://admin.benalsam.com',
-        'https://www.benalsam.com'
+        'https://www.benalsam.com',
+        'https://benalsam.vercel.app', // Vercel deployment
+        ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : []) // Additional origins from env
       ]
     : [
         'http://localhost:3003',

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { validateBody } from '@/lib/api-validation'
 import { z } from 'zod'
@@ -13,7 +13,10 @@ import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate
 const createListingSchema = z.object({
   title: z.string().min(3, 'Başlık en az 3 karakter olmalıdır').max(200, 'Başlık en fazla 200 karakter olabilir'),
   description: z.string().min(10, 'Açıklama en az 10 karakter olmalıdır').max(5000, 'Açıklama en fazla 5000 karakter olabilir'),
-  category: z.union([z.string(), z.number()], { required_error: 'Kategori seçilmelidir' }),
+  category: z.union([
+    z.string().min(1, 'Kategori seçilmelidir'),
+    z.number().int().positive('Kategori seçilmelidir')
+  ]),
   budget: z.union([z.string(), z.number()]).transform((val) => {
     const num = typeof val === 'string' ? parseInt(val, 10) : val
     return isNaN(num) ? 0 : Math.max(0, num)
@@ -21,7 +24,7 @@ const createListingSchema = z.object({
   location: z.string().min(1, 'Konum belirtilmelidir').max(200),
   urgency: z.enum(['very_urgent', 'urgent', 'normal', 'not_urgent']).optional().default('normal'),
   condition: z.array(z.string()).optional().default(['İkinci El']),
-  attributes: z.record(z.unknown()).optional().default({}),
+  attributes: z.record(z.string(), z.unknown()).optional().default({}),
   images: z.array(z.union([
     z.object({ uri: z.string().url() }),
     z.object({ url: z.string().url() }),
@@ -114,6 +117,7 @@ export async function POST(request: NextRequest) {
 
     logger.debug('[API] Inserting listing', { userId: user.id, title: listingData.title })
     
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: listing, error } = await supabaseAdmin
       .from('listings')
       .insert([listingData])

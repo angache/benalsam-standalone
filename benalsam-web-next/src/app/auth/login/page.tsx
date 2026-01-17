@@ -138,7 +138,7 @@ function LoginPageContent() {
       logger.error('[LoginPage] Login error', { error })
       toast({
         title: 'Hata',
-        description: error.message || 'Giriş yapılırken bir hata oluştu',
+        description: error instanceof Error ? error.message : 'Giriş yapılırken bir hata oluştu',
         variant: 'destructive',
       })
     } finally {

@@ -44,7 +44,15 @@ interface FileLike {
   type?: string;
 }
 
-const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1';
+// VPS veya local kullanımı kontrolü
+const useVpsServices = process.env.USE_VPS_SERVICES === 'true' || 
+                       process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true' ||
+                       (process.env.NODE_ENV === 'production' && process.env.USE_VPS_SERVICES !== 'false');
+
+const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 
+  (useVpsServices
+    ? 'https://api.benalsam.com/api/v1/upload'
+    : 'http://localhost:3007/api/v1');
 
 export class UploadService {
   private static instance: UploadService;
@@ -95,7 +103,10 @@ export class UploadService {
       logger.debug('[UploadService] Uploading files to Upload Service', { fileCount: files.length });
 
       // Upload to Upload Service
-      const response = await fetch(`${UPLOAD_SERVICE_URL}/upload/${type}`, {
+      // VPS: /api/v1/upload + /${type} -> /api/v1/upload/${type} ✅
+      // Local: /api/v1 + /upload/${type} -> /api/v1/upload/${type} ✅
+      const uploadEndpoint = useVpsServices ? `/${type}` : `/upload/${type}`;
+      const response = await fetch(`${UPLOAD_SERVICE_URL}${uploadEndpoint}`, {
         method: 'POST',
         headers: {
           'x-user-id': userId,
@@ -145,7 +156,8 @@ export class UploadService {
    */
   async deleteImage(imageId: string): Promise<boolean> {
     try {
-      const response = await fetch(`${UPLOAD_SERVICE_URL}/upload/images/${imageId}`, {
+      const deleteEndpoint = useVpsServices ? `/images/${imageId}` : `/upload/images/${imageId}`;
+      const response = await fetch(`${UPLOAD_SERVICE_URL}${deleteEndpoint}`, {
         method: 'DELETE',
         headers: {
           'x-user-id': this.getUserId(),
@@ -171,7 +183,8 @@ export class UploadService {
    */
   async getQuota(): Promise<{ used: number; limit: number; remaining: number }> {
     try {
-      const response = await fetch(`${UPLOAD_SERVICE_URL}/upload/quota`, {
+      const quotaEndpoint = useVpsServices ? '/quota' : '/upload/quota';
+      const response = await fetch(`${UPLOAD_SERVICE_URL}${quotaEndpoint}`, {
         headers: {
           'x-user-id': this.getUserId(),
         },
@@ -195,7 +208,8 @@ export class UploadService {
    */
   async isAvailable(): Promise<boolean> {
     try {
-      const response = await fetch(`${UPLOAD_SERVICE_URL}/health`, {
+      const healthEndpoint = '/health';
+      const response = await fetch(`${UPLOAD_SERVICE_URL}${healthEndpoint}`, {
         method: 'GET',
         timeout: 5000,
       });

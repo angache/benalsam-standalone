@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       // Silent fail - table might not exist or RLS might block
-      logger.debug('[API] Track search failed (expected if table not configured)', { error: error.message })
+      logger.debug('[API] Track search failed (expected if table not configured)', { error: (error as { message?: string })?.message || String(error) })
       return createSuccessResponse({ tracked: false }) // Return success anyway
     }
 

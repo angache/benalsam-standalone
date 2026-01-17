@@ -71,7 +71,7 @@ export default function SecuritySettingsClient({ userId }: { userId: string }) {
       const profile = await fetchUserProfile(userId)
       
       if (!profile) {
-        logger.warn('[SecuritySettings] Profile not found, defaulting to disabled')
+        console.warn('[SecuritySettings] Profile not found, defaulting to disabled')
         setTwoFactorEnabled(false)
         return
       }
@@ -83,7 +83,7 @@ export default function SecuritySettingsClient({ userId }: { userId: string }) {
         profile.is_2fa_enabled === true || 
         profile.security_settings?.two_factor_enabled === true
       
-      logger.debug('[SecuritySettings] Loading 2FA status', {
+      console.debug('[SecuritySettings] Loading 2FA status', {
         userId,
         profileExists: !!profile,
         is_2fa_enabled: profile.is_2fa_enabled,
@@ -95,10 +95,10 @@ export default function SecuritySettingsClient({ userId }: { userId: string }) {
       
       setTwoFactorEnabled(isEnabled)
     } catch (error: unknown) {
-      logger.error('[SecuritySettings] Error loading 2FA status', {
+      console.error('[SecuritySettings] Error loading 2FA status', {
         error,
-        message: error?.message,
-        stack: error?.stack,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
         userId
       })
       toast({
@@ -185,10 +185,10 @@ export default function SecuritySettingsClient({ userId }: { userId: string }) {
         confirmPassword: '',
       })
     } catch (error: unknown) {
-      logger.error('[SecuritySettings] Error changing password', { error })
+      console.error('[SecuritySettings] Error changing password', error)
       toast({
         title: 'Hata',
-        description: error.message || 'Şifre değiştirilirken bir hata oluştu',
+        description: error instanceof Error ? error.message : 'Şifre değiştirilirken bir hata oluştu',
         variant: 'destructive',
       })
     } finally {
@@ -218,10 +218,10 @@ export default function SecuritySettingsClient({ userId }: { userId: string }) {
         setTwoFactorEnabled(false)
       }
     } catch (error: unknown) {
-      logger.error('[SecuritySettings] Error toggling 2FA', { error })
+      console.error('[SecuritySettings] Error toggling 2FA', error)
       toast({
         title: 'Hata',
-        description: error.message || '2FA ayarı değiştirilirken bir hata oluştu',
+        description: error instanceof Error ? error.message : '2FA ayarı değiştirilirken bir hata oluştu',
         variant: 'destructive',
       })
     } finally {

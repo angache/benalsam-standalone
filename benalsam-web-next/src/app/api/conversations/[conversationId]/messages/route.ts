@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabase';
 import { logger } from '@/utils/production-logger';
 import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit';
 import { getServerUser } from '@/lib/supabase-server';
@@ -61,13 +61,7 @@ export async function GET(
       return rateLimitExceeded();
     }
 
-    if (!supabaseAdmin) {
-      return apiErrors.internalError(
-        'Server configuration error',
-        {},
-        request.nextUrl.pathname
-      )
-    }
+    const supabaseAdmin = getSupabaseAdmin()
 
     // Get total count first
     const { count: totalCount, error: countError } = await supabaseAdmin
@@ -96,7 +90,7 @@ export async function GET(
     if (error) {
       return apiErrors.databaseError(
         'Failed to fetch messages',
-        { error: error.message, conversationId },
+        { error: (error as { message?: string })?.message || String(error), conversationId },
         request.nextUrl.pathname
       )
     }

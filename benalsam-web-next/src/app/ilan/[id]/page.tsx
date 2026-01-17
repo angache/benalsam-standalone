@@ -24,6 +24,7 @@ export default async function ListingDetailPage({
   const isUuidOnly = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
   if (isUuidOnly) {
     // Fetch listing title to generate SEO-friendly URL
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: listingForRedirect } = await supabaseAdmin
       .from('listings')
       .select('title')
@@ -37,6 +38,7 @@ export default async function ListingDetailPage({
   }
 
   // Server-side: Tek query ile her şeyi çek
+  const supabaseAdmin = getSupabaseAdmin()
   const { data: listing, error } = await supabaseAdmin
     .from('listings')
     .select(`

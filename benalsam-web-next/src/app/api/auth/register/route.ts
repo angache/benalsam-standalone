@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import type { RegisterCredentials } from '@/types/auth'
 import { generateUsername, ensureUniqueUsername } from '@/utils/username'
 import { logger } from '@/utils/production-logger'
@@ -38,15 +38,8 @@ export async function POST(request: NextRequest) {
 
     const body = validation.data
 
-    // Check if supabaseAdmin is available
-    if (!supabaseAdmin) {
-      logger.error('[Register] supabaseAdmin is null - SUPABASE_SERVICE_ROLE_KEY missing?')
-      return apiErrors.internalError(
-        'Sunucu yapılandırma hatası',
-        { error: 'Supabase admin client is not available. Check SUPABASE_SERVICE_ROLE_KEY environment variable.' },
-        request.nextUrl.pathname
-      )
-    }
+    // Get supabaseAdmin (will throw if not available)
+    const supabaseAdmin = getSupabaseAdmin()
 
     // Check if user already exists (check in auth.users via Supabase Auth)
     const { data: existingAuthUser } = await supabaseAdmin.auth.admin.listUsers()
@@ -90,8 +83,7 @@ export async function POST(request: NextRequest) {
         errorCode: authError.code,
         errorMessage: authError.message,
         errorStatus: authError.status,
-        email: body.email,
-        isAuthError: authError.__isAuthError
+        email: body.email
       })
       
       return apiErrors.databaseError(
@@ -153,7 +145,7 @@ export async function POST(request: NextRequest) {
         .select('username')
         .not('username', 'is', null)
       
-      const usernameList = existingUsernames?.map((p: { username: string | null }) => p.username) || []
+      const usernameList = existingUsernames?.map((p: { username: string | null }) => p.username).filter((u): u is string => u !== null) || []
       const uniqueUsername = ensureUniqueUsername(baseUsername, usernameList)
       
       const { error: insertError } = await supabaseAdmin.from('profiles').insert({
@@ -193,7 +185,7 @@ export async function POST(request: NextRequest) {
         .select('username')
         .not('username', 'is', null)
       
-      const usernameList = existingUsernames?.map((p: { username: string | null }) => p.username) || []
+      const usernameList = existingUsernames?.map((p: { username: string | null }) => p.username).filter((u): u is string => u !== null) || []
       const uniqueUsername = ensureUniqueUsername(baseUsername, usernameList)
 
       // Update the profile created by trigger

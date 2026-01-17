@@ -5,7 +5,15 @@
 
 import { logger } from '@/utils/production-logger';
 
-const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1'
+// VPS veya local kullanımı kontrolü
+const useVpsServices = process.env.USE_VPS_SERVICES === 'true' || 
+                       process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true' ||
+                       (process.env.NODE_ENV === 'production' && process.env.USE_VPS_SERVICES !== 'false');
+
+const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 
+  (useVpsServices
+    ? 'https://api.benalsam.com/api/v1/upload'
+    : 'http://localhost:3007/api/v1')
 
 interface UploadedImage {
   id: string

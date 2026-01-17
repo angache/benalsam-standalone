@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { validateParams, commonSchemas } from '@/lib/api-validation'
 import { z } from 'zod'
@@ -54,6 +54,7 @@ export async function POST(
     }
 
     // Check if already following
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: existingFollow } = await supabaseAdmin
       .from('follows')
       .select('id')
@@ -128,6 +129,7 @@ export async function DELETE(
     const currentUserId = user.id
 
     // Remove follow relationship
+    const supabaseAdmin = getSupabaseAdmin()
     const { error: unfollowError } = await supabaseAdmin
       .from('follows')
       .delete()

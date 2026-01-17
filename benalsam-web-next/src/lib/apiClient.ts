@@ -245,21 +245,38 @@ class ApiClient {
   }
 }
 
+// VPS veya local kullanımı kontrolü
+const useVpsServices = process.env.USE_VPS_SERVICES === 'true' || 
+                       process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true' ||
+                       (process.env.NODE_ENV === 'production' && process.env.USE_VPS_SERVICES !== 'false');
+
 // API Clients
 export const adminBackendClient = new ApiClient({
-  baseURL: process.env.NEXT_PUBLIC_ADMIN_BACKEND_URL || 'http://localhost:3002',
+  baseURL: process.env.NEXT_PUBLIC_ADMIN_BACKEND_URL || 
+    (useVpsServices
+      ? 'https://api.benalsam.com/api/v1/admin'
+      : 'http://localhost:3002'),
 })
 
 export const categoriesServiceClient = new ApiClient({
-  baseURL: process.env.NEXT_PUBLIC_CATEGORIES_SERVICE_URL || 'http://localhost:3015',
+  baseURL: process.env.NEXT_PUBLIC_CATEGORIES_SERVICE_URL || 
+    (useVpsServices
+      ? 'https://api.benalsam.com/api/v1/categories' // Nginx rewrite: /api/v1/categories/(.*) -> /api/v1/$1
+      : 'http://localhost:3015/api/v1'), // Local'de direkt servis endpoint'i
 })
 
 export const searchServiceClient = new ApiClient({
-  baseURL: process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || 'http://localhost:3016',
+  baseURL: process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || 
+    (useVpsServices
+      ? 'https://api.benalsam.com/api/v1/search' // Nginx rewrite: /api/v1/search/(.*) -> /api/v1/$1
+      : 'http://localhost:3016/api/v1'), // Local'de direkt servis endpoint'i
 })
 
 export const listingServiceClient = new ApiClient({
-  baseURL: process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || 'http://localhost:3008/api/v1',
+  baseURL: process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || 
+    (useVpsServices
+      ? 'https://api.benalsam.com/api/v1/listings'
+      : 'http://localhost:3008/api/v1'),
 })
 
 export const uploadServiceClient = new ApiClient({

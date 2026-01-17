@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user to enable 2FA
+    const supabaseAdmin = getSupabaseAdmin()
     const { error } = await supabaseAdmin
       .from('profiles')
       .update({
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       return apiErrors.databaseError(
         '2FA aktifleştirilemedi',
-        { error: error.message, userId: user.id },
+        { error: (error as { message?: string })?.message || String(error), userId: user.id },
         request.nextUrl.pathname
       )
     }

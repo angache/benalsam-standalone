@@ -149,8 +149,13 @@ class CategoryCacheService {
     } catch (error) {
       const totalTime = Date.now() - startTime
       logger.error('[CategoryCache] Error fetching from API', {
-        error,
-        totalTime: `${totalTime}ms`
+        error: error instanceof Error ? {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        } : error,
+        totalTime: `${totalTime}ms`,
+        errorString: String(error)
       })
       throw error
     } finally {

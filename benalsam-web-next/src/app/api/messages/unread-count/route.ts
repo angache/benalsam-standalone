@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabase';
 import { logger } from '@/utils/production-logger';
 import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit';
 import { validateQuery, commonSchemas } from '@/lib/api-validation';
@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all conversations where user is participant
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: conversations, error: convError } = await supabaseAdmin
       .from('conversations')
       .select('id')

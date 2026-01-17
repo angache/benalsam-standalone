@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { validateBody, commonSchemas } from '@/lib/api-validation'
 import { z } from 'zod'
@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
 
     const { listingIds } = validation.data
 
+    const supabaseAdmin = getSupabaseAdmin()
     const { data, error } = await supabaseAdmin
       .from('user_favorites')
       .select('listing_id')
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
       .in('listing_id', listingIds)
 
     if (error) {
-      logger.warn('[API] Favorite check error (non-critical)', { error: error.message, userId: user.id })
+      logger.warn('[API] Favorite check error (non-critical)', { error: (error as { message?: string })?.message || String(error), userId: user.id })
       // Return empty instead of error (non-critical operation)
       return createSuccessResponse({ data: {} })
     }

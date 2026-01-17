@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 import { logger } from '@/utils/production-logger'
 import { z } from 'zod'
@@ -50,10 +50,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Store in database (performance_metrics table)
-    if (supabaseAdmin) {
-      const { error } = await supabaseAdmin
-        .from('performance_metrics')
-        .insert({
+    const supabaseAdmin = getSupabaseAdmin()
+    const { error } = await supabaseAdmin
+      .from('performance_metrics')
+      .insert({
           user_id: userId,
           route: validatedData.route,
           timestamp: validatedData.timestamp,
@@ -68,10 +68,9 @@ export async function POST(request: NextRequest) {
           viewport_height: validatedData.viewport?.height,
         })
 
-      if (error) {
-        logger.error('[PerformanceMetrics] Database insert error', { error, route: validatedData.route })
-        // Don't fail the request if DB insert fails - metrics are non-critical
-      }
+    if (error) {
+      logger.error('[PerformanceMetrics] Database insert error', { error, route: validatedData.route })
+      // Don't fail the request if DB insert fails - metrics are non-critical
     }
 
     // Check for performance alerts (threshold violations)
@@ -120,7 +119,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return apiErrors.validationError(
         'Invalid performance metrics data',
-        error.errors,
+        { issues: error.issues },
         request.nextUrl.pathname
       )
     }
@@ -152,13 +151,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '100')
     const offset = parseInt(searchParams.get('offset') || '0')
 
-    if (!supabaseAdmin) {
-      return apiErrors.internalError(
-        'Database connection unavailable',
-        {},
-        request.nextUrl.pathname
-      )
-    }
+    const supabaseAdmin = getSupabaseAdmin()
 
     let query = supabaseAdmin
       .from('performance_metrics')
@@ -176,7 +169,7 @@ export async function GET(request: NextRequest) {
       logger.error('[PerformanceMetrics] Database query error', { error })
       return apiErrors.internalError(
         'Failed to retrieve performance metrics',
-        { error: error.message },
+        { error: error instanceof Error ? error.message : String(error) },
         request.nextUrl.pathname
       )
     }

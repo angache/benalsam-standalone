@@ -98,7 +98,7 @@ export default function TwoFactorSetupClient() {
       setSetupData(result.data)
       setStep('qr')
     } catch (error: unknown) {
-      logger.error('[2FASetup] 2FA setup error', { error })
+      console.error('[2FASetup] 2FA setup error', error)
       setError('2FA kurulumu sırasında bir hata oluştu')
       setStep('loading')
     } finally {
@@ -179,7 +179,7 @@ export default function TwoFactorSetupClient() {
       // Verification successful, move to success step
       setStep('success')
     } catch (error: unknown) {
-      logger.error('[2FASetup] 2FA verification error', { error })
+      console.error('[2FASetup] 2FA verification error', error)
       setError('Doğrulama sırasında bir hata oluştu')
       setVerificationCode(['', '', '', '', '', ''])
       setTimeout(() => {
@@ -200,7 +200,7 @@ export default function TwoFactorSetupClient() {
         description: 'Secret key panoya kopyalandı',
       })
     } catch (error) {
-      logger.error('[2FASetup] Copy failed', { error })
+      console.error('[2FASetup] Copy failed', error)
       toast({
         title: 'Hata',
         description: 'Kopyalama başarısız',
@@ -225,7 +225,7 @@ export default function TwoFactorSetupClient() {
         })
       }, 2000)
     } catch (error) {
-      logger.error('[2FASetup] Copy failed', { error })
+      console.error('[2FASetup] Copy failed', error)
     }
   }
 
@@ -260,6 +260,29 @@ export default function TwoFactorSetupClient() {
 
   // Loading step
   if (step === 'loading' || isLoading) {
+    // Show error if exists during loading
+    if (error) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle className="text-destructive">Hata</CardTitle>
+              <CardDescription>{error}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-2">
+                <Button onClick={handleSetup} variant="outline" className="flex-1">
+                  Tekrar Dene
+                </Button>
+                <Button onClick={() => router.push('/ayarlar/guvenlik')} variant="outline" className="flex-1">
+                  İptal
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )
+    }
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
         <Card className="w-full max-w-md">
@@ -558,8 +581,8 @@ export default function TwoFactorSetupClient() {
     )
   }
 
-  // Error state
-  if (error && step === 'loading') {
+  // Fallback: Show error if exists (should not reach here normally)
+  if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
         <Card className="w-full max-w-md">

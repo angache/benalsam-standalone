@@ -276,7 +276,7 @@ export async function validateBody<T extends z.ZodType>(
     }
 
     if (!result.success) {
-      const errors: ValidationError[] = result.error.errors.map((err) => ({
+      const errors: ValidationError[] = result.error.issues.map((err) => ({
         field: err.path.join('.'),
         message: err.message,
         code: err.code,
@@ -354,7 +354,7 @@ export function validateQuery<T extends z.ZodType>(
     const result = schema.safeParse(query)
 
     if (!result.success) {
-      const errors: ValidationError[] = result.error.errors.map((err) => ({
+      const errors: ValidationError[] = result.error.issues.map((err) => ({
         field: `query.${err.path.join('.')}`,
         message: err.message,
         code: err.code,
@@ -417,7 +417,7 @@ export function validateParams<T extends z.ZodType>(
     const result = schema.safeParse(params)
 
     if (!result.success) {
-      const errors: ValidationError[] = result.error.errors.map((err) => ({
+      const errors: ValidationError[] = result.error.issues.map((err) => ({
         field: `params.${err.path.join('.')}`,
         message: err.message,
         code: err.code,

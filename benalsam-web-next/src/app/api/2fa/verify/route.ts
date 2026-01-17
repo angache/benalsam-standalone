@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
 import speakeasy from 'speakeasy'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { validateBody, commonSchemas } from '@/lib/api-validation'
 import { z } from 'zod'
@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
 
     // Get user from database (profiles table)
     // Using existing column names: totp_secret, backup_codes
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: profile, error: userError } = await supabaseAdmin
       .from('profiles')
       .select('id, totp_secret, backup_codes, is_2fa_enabled')

@@ -6,7 +6,16 @@
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/utils/production-logger';
 
-const LISTING_SERVICE_URL = process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || 'http://localhost:3008/api/v1';
+// Listing Service URL - VPS veya local kullanımı
+// USE_VPS_SERVICES=true ise VPS, değilse local
+const useVpsServices = process.env.USE_VPS_SERVICES === 'true' || 
+                       process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true' ||
+                       (process.env.NODE_ENV === 'production' && process.env.USE_VPS_SERVICES !== 'false');
+
+const LISTING_SERVICE_URL = process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || 
+  (useVpsServices
+    ? 'https://api.benalsam.com/api/v1/listings'
+    : 'http://localhost:3008/api/v1');
 
 export interface TitleSuggestion {
   title: string;
@@ -61,7 +70,10 @@ class ListingAIServiceClient {
 
     let response: Response;
     try {
-      const url = `${LISTING_SERVICE_URL}/listings/ai${endpoint}`;
+      // VPS: /api/v1/listings + /ai${endpoint} -> /api/v1/listings/ai${endpoint} ✅
+      // Local: /api/v1 + /listings/ai${endpoint} -> /api/v1/listings/ai${endpoint} ✅
+      const aiEndpoint = useVpsServices ? `/ai${endpoint}` : `/listings/ai${endpoint}`;
+      const url = `${LISTING_SERVICE_URL}${aiEndpoint}`;
       logger.debug('[ListingAIService] Requesting', { url, userId, method: options.method || 'GET' });
       
       response = await fetch(url, {
@@ -83,7 +95,7 @@ class ListingAIServiceClient {
         message: errorMessage,
         name: errorName,
         stack: errorStack,
-        url: `${LISTING_SERVICE_URL}/listings/ai${endpoint}`
+        url
       });
       
       // Network error - service might be down

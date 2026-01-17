@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
 import speakeasy from 'speakeasy'
 import QRCode from 'qrcode'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user email from profiles table
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('email')
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       return apiErrors.databaseError(
         '2FA kurulumu başarısız oldu',
-        { error: error.message, userId: user.id },
+        { error: (error as { message?: string })?.message || String(error), userId: user.id },
         request.nextUrl.pathname
       )
     }

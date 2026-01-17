@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';
 import { Listing, ApiResponse } from '@/types';
 import { logger } from '@/utils/production-logger';

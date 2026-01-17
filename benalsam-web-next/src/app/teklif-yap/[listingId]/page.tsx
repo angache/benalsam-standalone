@@ -168,7 +168,7 @@ const MakeOfferPage = () => {
       logger.error('[MakeOffer] Error submitting offer', { error })
       toast({
         title: 'Hata',
-        description: error.message || 'Teklif gönderilirken bir sorun oluştu.',
+        description: error instanceof Error ? error.message : 'Teklif gönderilirken bir sorun oluştu.',
         variant: 'destructive',
       })
     } finally {

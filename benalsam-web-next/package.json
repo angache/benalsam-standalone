@@ -20,7 +20,12 @@
     "seed:test": "tsx scripts/seed-test-listing.ts",
     "seed:realistic": "tsx scripts/seed-realistic-listings.ts",
     "seed:10": "tsx scripts/seed-10-listings.ts",
-    "seed:100": "tsx scripts/seed-100-listings.ts"
+    "seed:100": "tsx scripts/seed-100-listings.ts",
+    "env:local": "bash scripts/switch-env.sh local",
+    "env:vps": "bash scripts/switch-env.sh vps",
+    "toggle:vps": "node scripts/toggle-vps.js vps",
+    "toggle:local": "node scripts/toggle-vps.js local",
+    "toggle": "node scripts/toggle-vps.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

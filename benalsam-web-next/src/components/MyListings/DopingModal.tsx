@@ -650,68 +650,68 @@ const DopingModal = ({ isOpen, onClose, listing, onSuccess }: DopingModalProps) 
                     return !isActive || !!selectedDopings[option.id]
                   })
                   .map((option) => {
-                    const isSelected = !!selectedDopings[option.id]
-                    const Icon = option.icon
-                    return (
+              const isSelected = !!selectedDopings[option.id]
+              const Icon = option.icon
+              return (
                       <LazyMotionWrapper
-                        key={option.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <div className={`rounded-lg border p-4 transition-all h-full ${isSelected ? 'border-blue-700 ring-2 ring-blue-700/50 bg-blue-700/5' : 'bg-card'}`}>
-                          <div className="flex items-start gap-4">
-                            <Checkbox
-                              id={option.id}
-                              checked={isSelected}
-                              onCheckedChange={(checked) => handleCheckboxChange(checked as boolean, option)}
-                              className="mt-1 h-5 w-5"
-                            />
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className="w-12 h-12 bg-blue-700/10 rounded-lg flex items-center justify-center">
-                                  <Icon className="w-6 h-6 text-blue-700" />
-                                </div>
-                                <div>
-                                  <label htmlFor={option.id} className="font-semibold text-lg text-foreground cursor-pointer">
-                                    {option.title}
-                                  </label>
-                                </div>
-                              </div>
-                              <p className="text-sm text-muted-foreground mb-4">{option.description}</p>
-                              
-                              {isSelected && (
-                                <LazyMotionWrapper
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: 'auto' }}
-                                  exit={{ opacity: 0, height: 0 }}
-                                >
-                                  <Select
-                                    value={`${selectedDopings[option.id].selectedPrice.duration}-${selectedDopings[option.id].selectedPrice.price}`}
-                                    onValueChange={(value) => handlePriceChange(option.id, value)}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {option.prices.map((p, index) => (
-                                        <SelectItem key={index} value={`${p.duration}-${p.price}`}>
-                                          <div className="flex justify-between w-full gap-4">
-                                            <span>{p.label}</span>
-                                            <span className="font-bold text-blue-700">{p.price} TL</span>
-                                          </div>
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </LazyMotionWrapper>
-                              )}
-                            </div>
+                  key={option.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className={`rounded-lg border p-4 transition-all h-full ${isSelected ? 'border-blue-700 ring-2 ring-blue-700/50 bg-blue-700/5' : 'bg-card'}`}>
+                    <div className="flex items-start gap-4">
+                      <Checkbox
+                        id={option.id}
+                        checked={isSelected}
+                        onCheckedChange={(checked) => handleCheckboxChange(checked as boolean, option)}
+                        className="mt-1 h-5 w-5"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-12 h-12 bg-blue-700/10 rounded-lg flex items-center justify-center">
+                            <Icon className="w-6 h-6 text-blue-700" />
+                          </div>
+                          <div>
+                            <label htmlFor={option.id} className="font-semibold text-lg text-foreground cursor-pointer">
+                              {option.title}
+                            </label>
                           </div>
                         </div>
+                        <p className="text-sm text-muted-foreground mb-4">{option.description}</p>
+                        
+                        {isSelected && (
+                                <LazyMotionWrapper
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                          >
+                            <Select
+                              value={`${selectedDopings[option.id].selectedPrice.duration}-${selectedDopings[option.id].selectedPrice.price}`}
+                              onValueChange={(value) => handlePriceChange(option.id, value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {option.prices.map((p, index) => (
+                                  <SelectItem key={index} value={`${p.duration}-${p.price}`}>
+                                    <div className="flex justify-between w-full gap-4">
+                                      <span>{p.label}</span>
+                                      <span className="font-bold text-blue-700">{p.price} TL</span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                                </LazyMotionWrapper>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                       </LazyMotionWrapper>
-                    )
-                  })}
+              )
+            })}
               </LazyAnimatePresence>
             </div>
           </div>

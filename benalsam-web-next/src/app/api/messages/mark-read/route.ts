@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { getServerUser } from '@/lib/supabase-server'
 import { logger } from '@/utils/production-logger'
 import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
     const { conversationId } = validation.data
 
     // Use admin client to bypass RLS and mark messages as read
+    const supabaseAdmin = getSupabaseAdmin()
     const { error } = await supabaseAdmin
       .from('messages')
       .update({ 
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       return apiErrors.databaseError(
         'Failed to mark messages as read',
-        { error: error.message, conversationId, userId: user.id },
+        { error: (error as { message?: string })?.message || String(error), conversationId, userId: user.id },
         request.nextUrl.pathname
       )
     }

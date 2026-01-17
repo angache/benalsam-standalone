@@ -9,15 +9,15 @@ export type ListingWithUser = Listing;
 
 // Type for Supabase query builder that supports order method
 interface QueryBuilderWithOrder {
-  order(column: string, options?: { ascending?: boolean; nullsLast?: boolean }): QueryBuilderWithOrder;
+  order(column: string, options?: { ascending?: boolean; nullsFirst?: boolean }): QueryBuilderWithOrder;
 }
 
 export const addPremiumSorting = <T extends QueryBuilderWithOrder>(query: T): T => {
   return query
-    .order('is_urgent_premium', { ascending: false, nullsLast: true })
-    .order('is_featured', { ascending: false, nullsLast: true })
-    .order('is_showcase', { ascending: false, nullsLast: true })
-    .order('upped_at', { ascending: false, nullsLast: true });
+    .order('is_urgent_premium', { ascending: false })
+    .order('is_featured', { ascending: false })
+    .order('is_showcase', { ascending: false })
+    .order('upped_at', { ascending: false });
 };
 
 export const processFetchedListings = async (

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getSupabaseAdmin } from '@/lib/supabase';
 import { logger } from '@/utils/production-logger';
 import { validateBody, validateQuery, commonSchemas } from '@/lib/api-validation';
 import { z } from 'zod';
@@ -44,13 +44,7 @@ export async function GET(request: NextRequest) {
       return apiErrors.forbidden('Sadece kendi mesajlarınızı görüntüleyebilirsiniz', request.nextUrl.pathname)
     }
 
-    if (!supabaseAdmin) {
-      return apiErrors.internalError(
-        'Server configuration error',
-        {},
-        request.nextUrl.pathname
-      )
-    }
+    const supabaseAdmin = getSupabaseAdmin()
 
     // Fetch conversations where user is participant - use admin client to bypass RLS
     const { data: conversations, error: convError } = await supabaseAdmin
@@ -90,7 +84,7 @@ export async function GET(request: NextRequest) {
         created_at: conv.created_at,
         updated_at: conv.updated_at,
         last_message_at: conv.last_message_at,
-        unreadCount: messages.filter(m => !m.is_read && m.sender_id !== userId).length
+        unreadCount: messages.filter((m: { is_read?: boolean; sender_id?: string }) => !m.is_read && m.sender_id !== userId).length
       };
     });
 
@@ -147,13 +141,7 @@ export async function POST(request: NextRequest) {
       return apiErrors.forbidden('Sadece kendi adınıza mesaj gönderebilirsiniz', request.nextUrl.pathname)
     }
 
-    if (!supabaseAdmin) {
-      return apiErrors.internalError(
-        'Server configuration error',
-        {},
-        request.nextUrl.pathname
-      )
-    }
+    const supabaseAdmin = getSupabaseAdmin()
 
     // Verify user is participant in conversation
     const { data: conversation, error: convError } = await supabaseAdmin

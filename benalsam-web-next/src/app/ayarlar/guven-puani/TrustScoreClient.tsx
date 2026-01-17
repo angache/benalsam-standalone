@@ -112,7 +112,7 @@ export default function TrustScoreClient({ userId }: { userId: string }) {
         description: 'Güven puanınız başarıyla yenilendi.',
       })
     } catch (error: unknown) {
-      logger.error('[TrustScore] Error refreshing trust score', { error })
+      console.error('[TrustScore] Error refreshing trust score', error)
       toast({
         title: 'Hata',
         description: 'Güven puanı güncellenirken bir hata oluştu.',

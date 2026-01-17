@@ -4,9 +4,16 @@ import { incrementSourceCount } from '@/lib/debugSource';
 import { processFetchedListings } from './listingService/core';
 import { logger } from '@/utils/production-logger';
 
-// Search Service API endpoint'i
-const SEARCH_SERVICE_URL = process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || 'http://localhost:3016';
-const ELASTICSEARCH_PUBLIC_URL = process.env.NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL || 'http://localhost:3016';
+// Search Service API endpoint'i - VPS veya local kullanımı
+const useVpsServices = process.env.USE_VPS_SERVICES === 'true' || 
+                       process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true' ||
+                       (process.env.NODE_ENV === 'production' && process.env.USE_VPS_SERVICES !== 'false');
+
+const SEARCH_SERVICE_URL = process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || 
+  (useVpsServices
+    ? 'https://api.benalsam.com/api/v1/search' // Nginx rewrite: /api/v1/search/(.*) -> /api/v1/$1
+    : 'http://localhost:3016/api/v1'); // Local'de direkt servis endpoint'i
+const ELASTICSEARCH_PUBLIC_URL = process.env.NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL || SEARCH_SERVICE_URL;
 
 export interface ElasticsearchSearchParams {
   query?: string;
@@ -116,7 +123,11 @@ export const searchListingsWithElasticsearch = async (
     logger.debug('[ElasticsearchService] Search payload', { payload: servicePayload });
 
     // Call Search Service
-    const response = await fetch(`${SEARCH_SERVICE_URL}/api/v1/search/listings`, {
+    // SEARCH_SERVICE_URL: https://api.benalsam.com/api/v1/search (VPS) veya http://localhost:3016/api/v1 (local)
+    // VPS'de Nginx proxy (no rewrite): /api/v1/search + /listings -> /api/v1/search/listings ✅
+    // Local'de: /api/v1 + /search/listings -> http://localhost:3016/api/v1/search/listings ✅
+    const searchEndpoint = useVpsServices ? '/listings' : '/search/listings';
+    const response = await fetch(`${SEARCH_SERVICE_URL}${searchEndpoint}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -249,7 +260,11 @@ const searchListingsWithSupabase = async (
  */
 export const checkElasticsearchHealth = async (): Promise<boolean> => {
   try {
-    const response = await fetch(`${SEARCH_SERVICE_URL}/api/v1/health`);
+    // Health endpoint - VPS'de Nginx proxy (no rewrite)
+    // VPS: /api/v1/search + /health -> /api/v1/search/health ✅
+    // Local: /api/v1 + /health -> /api/v1/health ✅
+    const healthEndpoint = '/health';
+    const response = await fetch(`${SEARCH_SERVICE_URL}${healthEndpoint}`);
     const data = await response.json();
     return data.status === 'healthy';
   } catch (error) {
@@ -263,7 +278,11 @@ export const checkElasticsearchHealth = async (): Promise<boolean> => {
  */
 export const fetchListingByIdFromES = async (listingId: string): Promise<Listing | null> => {
   try {
-    const res = await fetch(`${ELASTICSEARCH_PUBLIC_URL}/api/v1/search/listings/${listingId}`, {
+    // Get listing by ID endpoint
+    // VPS: /api/v1/search + /listings/{id} -> /api/v1/search/listings/{id} ✅
+    // Local: /api/v1 + /search/listings/{id} -> /api/v1/search/listings/{id} ✅
+    const listingEndpoint = useVpsServices ? `/listings/${listingId}` : `/search/listings/${listingId}`;
+    const res = await fetch(`${ELASTICSEARCH_PUBLIC_URL}${listingEndpoint}`, {
       // Suppress 404 errors in console (normal for new listings not yet indexed)
       signal: AbortSignal.timeout(5000)
     });

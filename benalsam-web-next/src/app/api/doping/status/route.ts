@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { validateQuery, commonSchemas } from '@/lib/api-validation'
 import { z } from 'zod'
@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
     const { listingId } = validation.data
 
     // Fetch listing with doping fields
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: listing, error } = await supabaseAdmin
       .from('listings')
       .select('id, user_id, title, is_showcase, is_urgent_premium, is_featured, showcase_expires_at, urgent_expires_at, featured_expires_at, upped_at')

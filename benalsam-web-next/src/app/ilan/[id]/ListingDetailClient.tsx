@@ -655,7 +655,7 @@ export function ListingDetailClient({ listing: initialListing, listingId }: List
                       {listing.user.name?.[0]?.toUpperCase() || 'U'}
                     </div>
                     <div>
-                      <p className="font-semibold">{listing.user.name}</p>
+                      <p className="font-semibold">{listing.user.name || 'Kullanıcı'}</p>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                         <span>{listing.user.rating?.toFixed(1) || '0.0'}</span>

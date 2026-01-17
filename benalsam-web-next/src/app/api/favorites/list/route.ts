@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { createSuccessResponse, apiErrors } from '@/lib/api-errors'
 import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch favorites with full listing details
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: favorites, error } = await supabaseAdmin
       .from('user_favorites')
       .select(`
@@ -50,29 +51,20 @@ export async function GET(request: NextRequest) {
     if (error) {
       return apiErrors.databaseError(
         'Failed to fetch favorites',
-        { error: error.message, userId: user.id },
+        { error: (error as { message?: string })?.message || String(error), userId: user.id },
         request.nextUrl.pathname
       )
     }
 
     // Process favorites to include full listing data
-    const favoriteListings = favorites?.map((fav: {
-      listing_id: string
-      created_at: string
-      listings: {
-        profiles?: {
-          id: string
-          name: string
-          avatar_url?: string
-          rating?: number
-          total_ratings?: number
-          rating_sum?: number
-        }
-        [key: string]: unknown
+    // Supabase join returns listings as array, but we expect single object
+    const favoriteListings = favorites?.map((fav: any) => {
+      // Handle both array and object cases from Supabase
+      const listing = Array.isArray(fav.listings) ? fav.listings[0] : fav.listings
+      
+      if (!listing) {
+        return null
       }
-    }) => {
-      const listing = fav.listings
-      if (!listing) return null
 
       return {
         ...listing,

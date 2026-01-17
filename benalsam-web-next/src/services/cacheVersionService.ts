@@ -35,11 +35,12 @@ export const checkCacheVersion = async (cacheKey: string): Promise<boolean> => {
     }
     
     // Categories Service'den güncel version'ı al
+    // baseURL zaten /api/v1/categories olduğu için sadece /version yeterli
     const response = await categoriesServiceClient.get<{ 
       success: boolean
       version?: number
       data?: { version: number }
-    }>('/api/v1/categories/version')
+    }>('/version')
     
     const serverVersion = response.version || response.data?.version
     

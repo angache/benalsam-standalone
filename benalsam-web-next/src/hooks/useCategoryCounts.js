@@ -71,8 +71,11 @@ export const useCategoryCounts = () => {
       }
 
       // 2) Fallback to Search Service / ES Service stats if categories service unavailable
-      const ES_PUBLIC_URL = process.env.NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL || 'http://localhost:3016';
-      const SEARCH_SERVICE_URL = process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || '';
+      const SEARCH_SERVICE_URL = process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || 
+        (useVpsServices
+          ? 'https://api.benalsam.com/api/v1/search'
+          : 'http://localhost:3016');
+      const ES_PUBLIC_URL = process.env.NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL || SEARCH_SERVICE_URL;
       const statsUrl = SEARCH_SERVICE_URL
         ? `${SEARCH_SERVICE_URL}/api/v1/search/stats`
         : `${ES_PUBLIC_URL}/api/v1/search/stats`;

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/supabase-server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/utils/production-logger'
 import { rateLimiters, getClientIdentifier, rateLimitExceeded } from '@/lib/rate-limit'
 import { validateParams, commonSchemas } from '@/lib/api-validation'
@@ -43,6 +43,7 @@ export async function GET(
     logger.info('[API] Fetching listing', { listingId });
 
     // Fetch listing with user profile
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: listing, error } = await supabaseAdmin
       .from('listings')
       .select(`
@@ -91,6 +92,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ listingId: string }> }
 ) {
+  let listingId: string | undefined
   try {
     const user = await getServerUser()
 
@@ -106,9 +108,10 @@ export async function DELETE(
       return validation.response
     }
 
-    const { listingId } = validation.data
+    listingId = validation.data.listingId
 
     // Verify listing ownership
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: listing, error: fetchError } = await supabaseAdmin
       .from('listings')
       .select('user_id')
@@ -188,7 +191,7 @@ export async function PATCH(
         error: parseError instanceof Error ? parseError.message : String(parseError),
         listingId,
       })
-      return apiErrors.badRequest(
+      return apiErrors.validationError(
         'Geçersiz istek gövdesi',
         { reason: 'Request body must be valid JSON' },
         request.nextUrl.pathname
@@ -198,6 +201,7 @@ export async function PATCH(
     logger.debug('[API] Updating listing', { listingId, userId: user.id, updateFields: Object.keys(body) })
 
     // Verify listing ownership
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: listing, error: fetchError } = await supabaseAdmin
       .from('listings')
       .select('user_id')
