@@ -13,17 +13,25 @@ Vercel Dashboard → Project Settings → Environment Variables bölümüne aşa
 NEXT_PUBLIC_SUPABASE_URL=https://dnwreckpeenhbdtapmxr.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRud3JlY2twZWVuaGJkdGFwbXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk5OTgwNzAsImV4cCI6MjA2NTU3NDA3MH0.2lzsxTj4hoKTcZeoCGMsUC3Cmsm1pgcqXP-3j_GV_Ys
 
+# VPS Services Flag (VPS servislerini kullanmak için true yapın)
+NEXT_PUBLIC_USE_VPS_SERVICES=true
+
 # Admin Backend API URL (Production - VPS'deki servislere işaret ediyor)
-NEXT_PUBLIC_ADMIN_BACKEND_URL=https://api.benalsam.com/api/v1
+NEXT_PUBLIC_API_URL=https://api.benalsam.com/api/v1/admin
+NEXT_PUBLIC_API_BASE_URL=https://api.benalsam.com
+NEXT_PUBLIC_ADMIN_BACKEND_URL=https://api.benalsam.com/api/v1/admin
 
 # Admin Backend WebSocket URL (Production - VPS'deki servislere işaret ediyor)
 NEXT_PUBLIC_ADMIN_BACKEND_WS_URL=wss://api.benalsam.com
 
 # Microservice URLs (Production - VPS'deki servislere işaret ediyor)
 # Not: Bu servisler Nginx reverse proxy üzerinden erişilebilir
-NEXT_PUBLIC_LISTING_SERVICE_URL=https://api.benalsam.com/api/v1/listings
-NEXT_PUBLIC_UPLOAD_SERVICE_URL=https://api.benalsam.com/api/v1/upload
+NEXT_PUBLIC_CATEGORIES_SERVICE_URL=https://api.benalsam.com/api/v1/categories
 NEXT_PUBLIC_SEARCH_SERVICE_URL=https://api.benalsam.com/api/v1/search
+NEXT_PUBLIC_UPLOAD_SERVICE_URL=https://api.benalsam.com/api/v1/upload
+NEXT_PUBLIC_LISTING_SERVICE_URL=https://api.benalsam.com/api/v1/listings
+NEXT_PUBLIC_ELASTICSEARCH_URL=https://api.benalsam.com/api/v1/elasticsearch
+NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL=https://api.benalsam.com/api/v1/elasticsearch
 
 # Environment
 NODE_ENV=production

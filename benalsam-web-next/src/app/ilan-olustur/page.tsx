@@ -127,7 +127,7 @@ export default function CreateListingPage() {
             onChange={(field, value) => setDetails({ [field]: value })}
             onNext={handleNext}
             onBack={handleBack}
-            selectedCategoryId={category.selectedCategoryId}
+            selectedCategoryId={category.selectedCategoryId ?? undefined}
           />
         )
       case 3:
@@ -137,8 +137,8 @@ export default function CreateListingPage() {
             onChange={(key, value) => updateAttribute(key, value)}
             onNext={handleNext}
             onBack={handleBack}
-            selectedCategoryId={category.selectedCategoryId}
-            selectedCategoryName={category.selectedCategoryName}
+            selectedCategoryId={category.selectedCategoryId ?? undefined}
+            selectedCategoryName={category.selectedCategoryName ?? undefined}
           />
         )
       case 4:
@@ -154,7 +154,7 @@ export default function CreateListingPage() {
             onSetMainImage={setMainImage}
             onNext={handleNext}
             onBack={handleBack}
-            selectedCategoryName={category.selectedCategoryName}
+            selectedCategoryName={category.selectedCategoryName ?? undefined}
           />
         )
       case 5:
