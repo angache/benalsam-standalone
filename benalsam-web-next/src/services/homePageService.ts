@@ -92,7 +92,7 @@ export async function fetchHomePageData(
       listingService.getListingsWithFilters(
         userId || null,
         {
-          sortBy: 'view_count',
+          sortBy: 'views_count',
           sortOrder: 'desc',
         },
         {
