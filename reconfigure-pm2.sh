@@ -55,6 +55,15 @@ reconfigure_service() {
   # Build and start from benalsam-standalone
   cd "$SERVICE_DIR"
   
+  echo -e "${YELLOW}  → Installing dependencies...${NC}"
+  if npm install --legacy-peer-deps; then
+    echo -e "${GREEN}  ✅ Dependencies installed${NC}"
+  else
+    echo -e "${RED}  ❌ npm install failed${NC}"
+    cd - > /dev/null
+    return 1
+  fi
+  
   echo -e "${YELLOW}  → Building...${NC}"
   if npm run build; then
     echo -e "${GREEN}  ✅ Build successful${NC}"
