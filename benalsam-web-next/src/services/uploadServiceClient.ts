@@ -88,7 +88,7 @@ class UploadServiceClient {
         remaining: number;
       };
       expiresAt: string;
-    }>('/upload/listings', {
+    }>('/listings', {
       method: 'POST',
       body: formData,
     }, userId);

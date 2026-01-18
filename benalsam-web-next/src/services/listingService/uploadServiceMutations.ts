@@ -228,7 +228,7 @@ export const createListingWithUploadService = async (
         formData.append('images', file);
       });
 
-      const uploadResponse = await fetch(`${UPLOAD_SERVICE_URL}/upload/listings`, {
+      const uploadResponse = await fetch(`${UPLOAD_SERVICE_URL}/listings`, {
         method: 'POST',
         headers: {
           'x-user-id': currentUserId,
