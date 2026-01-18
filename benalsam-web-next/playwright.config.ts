@@ -35,9 +35,6 @@ export default defineConfig({
     navigationTimeout: 30000, // 30 seconds for navigation
   },
   
-  /* Global setup for each test file */
-  setupFilesAfterEnv: ['./e2e/setup.ts'],
-  
   /* Global test timeout */
   timeout: 60000, // 60 seconds per test
 
