@@ -413,7 +413,7 @@ export async function performLogin(page: Page): Promise<boolean> {
     console.warn('   Has session cookie:', hasSessionCookie);
     // Even if UI elements aren't visible, if we're not on login page and have session cookie, login was successful
     // This allows tests to continue even if auth state takes longer to load
-    return !currentUrl.includes('/auth/login') && (hasSessionCookie || true); // Allow if not on login page
+    return !currentUrl.includes('/auth/login') && (Boolean(hasSessionCookie) || true); // Allow if not on login page
   }
   
   return true;
