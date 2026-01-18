@@ -65,15 +65,16 @@ export function CriticalResources() {
     // This should be the first large image that appears on the page
     // Typically the hero image or first listing image
     // Note: Update this with actual LCP image URL when known
-    const lcpImageUrl = '/images/hero-placeholder.jpg' // Replace with actual LCP image
-    if (lcpImageUrl) {
-      const preloadLink = document.createElement('link')
-      preloadLink.rel = 'preload'
-      preloadLink.as = 'image'
-      preloadLink.href = lcpImageUrl
-      preloadLink.fetchPriority = 'high'
-      document.head.appendChild(preloadLink)
-    }
+    // TODO: Add actual hero image when available
+    // const lcpImageUrl = '/images/hero-placeholder.jpg'
+    // if (lcpImageUrl) {
+    //   const preloadLink = document.createElement('link')
+    //   preloadLink.rel = 'preload'
+    //   preloadLink.as = 'image'
+    //   preloadLink.href = lcpImageUrl
+    //   preloadLink.fetchPriority = 'high'
+    //   document.head.appendChild(preloadLink)
+    // }
 
     // Cleanup function
     return () => {
