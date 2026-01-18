@@ -95,7 +95,10 @@ export class UploadService {
       logger.debug('[UploadService] Uploading files to Upload Service', { fileCount: files.length });
 
       // Upload to Upload Service
-      const response = await fetch(`${UPLOAD_SERVICE_URL}/upload/${type}`, {
+      // VPS'te UPLOAD_SERVICE_URL zaten /api/v1/upload içeriyor, duplicate path önle
+      const useVpsServices = process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true';
+      const uploadEndpoint = useVpsServices ? `/${type}` : `/upload/${type}`;
+      const response = await fetch(`${UPLOAD_SERVICE_URL}${uploadEndpoint}`, {
         method: 'POST',
         headers: {
           'x-user-id': userId,
@@ -145,7 +148,10 @@ export class UploadService {
    */
   async deleteImage(imageId: string): Promise<boolean> {
     try {
-      const response = await fetch(`${UPLOAD_SERVICE_URL}/upload/images/${imageId}`, {
+      // VPS'te UPLOAD_SERVICE_URL zaten /api/v1/upload içeriyor, duplicate path önle
+      const useVpsServices = process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true';
+      const deleteEndpoint = useVpsServices ? `/images/${imageId}` : `/upload/images/${imageId}`;
+      const response = await fetch(`${UPLOAD_SERVICE_URL}${deleteEndpoint}`, {
         method: 'DELETE',
         headers: {
           'x-user-id': this.getUserId(),
@@ -171,7 +177,10 @@ export class UploadService {
    */
   async getQuota(): Promise<{ used: number; limit: number; remaining: number }> {
     try {
-      const response = await fetch(`${UPLOAD_SERVICE_URL}/upload/quota`, {
+      // VPS'te UPLOAD_SERVICE_URL zaten /api/v1/upload içeriyor, duplicate path önle
+      const useVpsServices = process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true';
+      const quotaEndpoint = useVpsServices ? '/quota' : '/upload/quota';
+      const response = await fetch(`${UPLOAD_SERVICE_URL}${quotaEndpoint}`, {
         headers: {
           'x-user-id': this.getUserId(),
         },
