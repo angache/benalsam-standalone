@@ -286,7 +286,13 @@ export const SECURITY_CONFIGS = {
             legacyHeaders: false
         },
         cors: {
-            origin: ['https://admin.benalsam.com', 'https://benalsam.com'],
+            origin: [
+                'https://admin.benalsam.com',
+                'https://benalsam.com',
+                'https://www.benalsam.com',
+                // Vercel preview deployments
+                /^https:\/\/.*\.vercel\.app$/
+            ],
             credentials: true,
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
             allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key', 'x-user-id']

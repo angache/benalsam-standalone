@@ -119,7 +119,7 @@ export declare const SECURITY_CONFIGS: {
             legacyHeaders: boolean;
         };
         cors: {
-            origin: string[];
+            origin: (string | RegExp)[];
             credentials: boolean;
             methods: string[];
             allowedHeaders: string[];
