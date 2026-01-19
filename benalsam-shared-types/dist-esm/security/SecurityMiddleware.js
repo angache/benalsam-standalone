@@ -290,6 +290,8 @@ export const SECURITY_CONFIGS = {
                 'https://admin.benalsam.com',
                 'https://benalsam.com',
                 'https://www.benalsam.com',
+                // Local development with VPS services
+                'http://localhost:3000',
                 // Vercel preview deployments
                 /^https:\/\/.*\.vercel\.app$/
             ],
