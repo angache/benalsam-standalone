@@ -33,7 +33,7 @@ for service in "${SERVICES[@]}"; do
         cd "$SERVICE_PATH" || { echo "   ❌ Dizine geçilemedi"; continue; }
 
         echo "   📦 benalsam-shared-types güncelleniyor..."
-        npm update benalsam-shared-types@"$SHARED_TYPES_VERSION"
+        npm install benalsam-shared-types@"$SHARED_TYPES_VERSION"
 
         if [ $? -eq 0 ]; then
             echo "   ✅ Package güncellendi"

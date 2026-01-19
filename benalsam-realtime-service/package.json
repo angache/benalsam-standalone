@@ -48,7 +48,8 @@
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^4.2.1",
     "uuid": "^13.0.0",
-    "winston": "^3.18.2"
+    "winston": "^3.18.2",
+    "benalsam-shared-types": "^1.1.6"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.7",
