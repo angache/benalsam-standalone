@@ -6,6 +6,9 @@
 import { categoriesServiceClient } from '@/lib/apiClient'
 import { logger } from '@/utils/production-logger'
 
+// VPS mode flag - when true, service URLs already contain the full path
+const useVpsServices = process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true'
+
 // Cache version storage keys
 const CACHE_VERSION_KEYS = {
   CATEGORIES: 'categories_version',
@@ -35,11 +38,14 @@ export const checkCacheVersion = async (cacheKey: string): Promise<boolean> => {
     }
     
     // Categories Service'den güncel version'ı al
+    // VPS mode: URL already contains /api/v1/categories, so use '/version'
+    // Local mode: Need full path /api/v1/categories/version
+    const versionEndpoint = useVpsServices ? '/version' : '/api/v1/categories/version'
     const response = await categoriesServiceClient.get<{ 
       success: boolean
       version?: number
       data?: { version: number }
-    }>('/api/v1/categories/version')
+    }>(versionEndpoint)
     
     const serverVersion = response.version || response.data?.version
     
