@@ -38,9 +38,8 @@ export const checkCacheVersion = async (cacheKey: string): Promise<boolean> => {
     }
     
     // Categories Service'den güncel version'ı al
-    // VPS mode: URL already contains /api/v1/categories, so use '/version'
-    // Local mode: Need full path /api/v1/categories/version
-    const versionEndpoint = useVpsServices ? '/version' : '/api/v1/categories/version'
+    // Both modes: Always use full path since services expect /api/v1/ prefix
+    const versionEndpoint = '/api/v1/categories/version'
     const response = await categoriesServiceClient.get<{ 
       success: boolean
       version?: number

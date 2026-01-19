@@ -48,9 +48,8 @@ class CategoryService {
    */
   async getCategories(): Promise<Category[]> {
     return categoryCacheService.getCategories(async () => {
-      // VPS mode: URL already contains /api/v1/categories, so use '/'
-      // Local mode: Need full path /api/v1/categories
-      const endpoint = useVpsServices ? '/' : '/api/v1/categories'
+      // Always use full path since services expect /api/v1/ prefix
+      const endpoint = '/api/v1/categories'
       const response = await categoriesServiceClient.get<{ success: boolean; data: Category[] }>(endpoint)
       return response.data || []
     })
@@ -61,7 +60,7 @@ class CategoryService {
    */
   async getCategoryTree(): Promise<CategoryTree[]> {
     try {
-      const endpoint = useVpsServices ? '/tree' : '/api/v1/categories/tree'
+      const endpoint = '/api/v1/categories/tree'
       const response = await categoriesServiceClient.get<{ data: CategoryTree[] }>(endpoint)
       return response.data || []
     } catch (error) {
@@ -75,7 +74,7 @@ class CategoryService {
    */
   async getCategoryById(id: string): Promise<Category | null> {
     try {
-      const endpoint = useVpsServices ? `/${id}` : `/api/v1/categories/${id}`
+      const endpoint = `/api/v1/categories/${id}`
       const response = await categoriesServiceClient.get<{ data: Category }>(endpoint)
       return response.data
     } catch (error) {
@@ -89,7 +88,7 @@ class CategoryService {
    */
   async getCategoryBySlug(slug: string): Promise<Category | null> {
     try {
-      const endpoint = useVpsServices ? `/slug/${slug}` : `/api/v1/categories/slug/${slug}`
+      const endpoint = `/api/v1/categories/slug/${slug}`
       const response = await categoriesServiceClient.get<{ data: Category }>(endpoint)
       return response.data
     } catch (error) {
@@ -126,7 +125,7 @@ class CategoryService {
    */
   async searchCategories(query: string): Promise<Category[]> {
     try {
-      const endpoint = useVpsServices ? '/search' : '/api/v1/categories/search'
+      const endpoint = '/api/v1/categories/search'
       const response = await categoriesServiceClient.get<{ data: Category[] }>(endpoint, {
         params: { q: query },
       })
@@ -142,7 +141,7 @@ class CategoryService {
    */
   async getCategoryChildren(parentId: string): Promise<Category[]> {
     try {
-      const endpoint = useVpsServices ? `/${parentId}/children` : `/api/v1/categories/${parentId}/children`
+      const endpoint = `/api/v1/categories/${parentId}/children`
       const response = await categoriesServiceClient.get<{ data: Category[] }>(endpoint)
       return response.data || []
     } catch (error) {
