@@ -172,7 +172,7 @@ const nextConfig: NextConfig = {
                   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
                   "img-src 'self' data: blob: https: http:",
                   "font-src 'self' data: https://fonts.gstatic.com",
-                  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://images.unsplash.com https://api.unsplash.com https://nominatim.openstreetmap.org data: blob: http://localhost:* ws://localhost:* wss://localhost:* ws://0.0.0.0:*",
+                  "connect-src 'self' https://api.benalsam.com https://*.supabase.co wss://*.supabase.co https://images.unsplash.com https://api.unsplash.com https://nominatim.openstreetmap.org data: blob: http://localhost:* ws://localhost:* wss://localhost:* ws://0.0.0.0:*",
                   "frame-src 'self' https://accounts.google.com",
                   "object-src 'none'",
                   "base-uri 'self'",
@@ -210,6 +210,7 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    qualities: [75, 85],
   },
 };
 
