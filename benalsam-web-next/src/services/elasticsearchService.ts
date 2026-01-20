@@ -5,8 +5,13 @@ import { processFetchedListings } from './listingService/core';
 import { logger } from '@/utils/production-logger';
 
 // Search Service API endpoint'i
-const SEARCH_SERVICE_URL = process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || 'http://localhost:3016';
-const ELASTICSEARCH_PUBLIC_URL = process.env.NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL || 'http://localhost:3016';
+const SEARCH_SERVICE_URL = process.env.NEXT_PUBLIC_USE_CORS_PROXY === 'true'
+  ? `http://127.0.0.1:7242`
+  : (process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || 'http://localhost:3016');
+
+const ELASTICSEARCH_PUBLIC_URL = process.env.NEXT_PUBLIC_USE_CORS_PROXY === 'true'
+  ? `http://127.0.0.1:7242`
+  : (process.env.NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL || 'http://localhost:3016');
 
 // VPS mode flag - when true, service URLs already contain the full path
 const useVpsServices = process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true';
@@ -121,7 +126,7 @@ export const searchListingsWithElasticsearch = async (
     // Call Search Service
     // VPS mode: URL already contains /api/v1/search, so use '/listings'
     // Local mode: Need full path /api/v1/search/listings
-    const searchEndpoint = '/api/v1/search/listings';
+    const searchEndpoint = useVpsServices ? '/listings' : '/api/v1/search/listings';
     const response = await fetch(`${SEARCH_SERVICE_URL}${searchEndpoint}`, {
       method: 'POST',
       headers: {
@@ -180,7 +185,7 @@ export const searchListingsWithElasticsearch = async (
           (l as ListingWithSource).__src = 'E'; 
         } catch (_) {} 
       });
-      incrementSourceCount('E', processedListings.length);
+      incrementSourceCount('elasticsearch');
     }
 
     logger.debug('[ElasticsearchService] Elasticsearch search completed', {
@@ -240,7 +245,7 @@ const searchListingsWithSupabase = async (
           (l as ListingWithSource).__src = 'S'; 
         } catch (_) {} 
       });
-      incrementSourceCount('S', result.listings.length);
+      incrementSourceCount('supabase');
     }
     
     return { data: result.listings };
@@ -257,7 +262,7 @@ export const checkElasticsearchHealth = async (): Promise<boolean> => {
   try {
     // VPS mode: URL already contains /api/v1/search, so use '/health'
     // Local mode: Need /api/v1/health (search service health endpoint)
-    const healthEndpoint = '/api/v1/health';
+    const healthEndpoint = useVpsServices ? '/health' : '/api/v1/health';
     const response = await fetch(`${SEARCH_SERVICE_URL}${healthEndpoint}`);
     const data = await response.json();
     return data.status === 'healthy';
@@ -274,7 +279,7 @@ export const fetchListingByIdFromES = async (listingId: string): Promise<Listing
   try {
     // VPS mode: URL already contains /api/v1/elasticsearch, so use '/listings/{id}'
     // Local mode: Need full path /api/v1/search/listings/{id}
-    const listingEndpoint = `/api/v1/search/listings/${listingId}`;
+    const listingEndpoint = useVpsServices ? `/listings/${listingId}` : `/api/v1/search/listings/${listingId}`;
     const res = await fetch(`${ELASTICSEARCH_PUBLIC_URL}${listingEndpoint}`, {
       // Suppress 404 errors in console (normal for new listings not yet indexed)
       signal: AbortSignal.timeout(5000)
@@ -289,7 +294,7 @@ export const fetchListingByIdFromES = async (listingId: string): Promise<Listing
     if (process.env.NODE_ENV !== 'production') {
       try { 
         (doc as ListingWithSource).__src = 'E'; 
-        incrementSourceCount('E', 1); 
+        incrementSourceCount('elasticsearch'); 
       } catch (_) {}
     }
     return doc;
