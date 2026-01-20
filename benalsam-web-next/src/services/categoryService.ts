@@ -6,7 +6,9 @@ import { logger } from '@/utils/production-logger'
 const useVpsServices = process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true'
 
 // #region agent log
-fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:6',message:'useVpsServices flag check',data:{useVpsServices, envValue: process.env.NEXT_PUBLIC_USE_VPS_SERVICES},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+if (process.env.NODE_ENV !== 'production') {
+  fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:6',message:'useVpsServices flag check',data:{useVpsServices, envValue: process.env.NEXT_PUBLIC_USE_VPS_SERVICES},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+}
 // #endregion
 
 export interface CategoryAttribute {
@@ -52,7 +54,9 @@ class CategoryService {
    */
   async getCategories(): Promise<Category[]> {
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:49',message:'getCategories called',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+    if (process.env.NODE_ENV !== 'production') {
+      fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:49',message:'getCategories called',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+    }
     // #endregion
 
     return categoryCacheService.getCategories(async () => {
@@ -61,24 +65,32 @@ class CategoryService {
       const endpoint = useVpsServices ? '/' : '/api/v1/categories'
 
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:52',message:'endpoint construction',data:{endpoint, useVpsServices},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+      if (process.env.NODE_ENV !== 'production') {
+        fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:52',message:'endpoint construction',data:{endpoint, useVpsServices},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+      }
       // #endregion
 
       try {
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:55',message:'API call starting',data:{endpoint},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+        if (process.env.NODE_ENV !== 'production') {
+          fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:55',message:'API call starting',data:{endpoint},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+        }
         // #endregion
 
         const response = await categoriesServiceClient.get<{ success: boolean; data: Category[] }>(endpoint)
 
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:58',message:'API call success',data:{responseStatus: response?.status, hasData: !!response?.data, dataLength: response?.data?.length},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+        if (process.env.NODE_ENV !== 'production') {
+          fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:58',message:'API call success',data:{responseStatus: response?.status, hasData: !!response?.data, dataLength: response?.data?.length},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+        }
         // #endregion
 
         return response.data || []
       } catch (error) {
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:63',message:'API call failed',data:{error: error?.message, endpoint},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+        if (process.env.NODE_ENV !== 'production') {
+          fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:63',message:'API call failed',data:{error: error?.message, endpoint},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+        }
         // #endregion
         throw error
       }
