@@ -16,7 +16,7 @@ export interface SecurityConfig {
         legacyHeaders: boolean;
     };
     cors: {
-        origin: string | string[];
+        origin: string | string[] | boolean;
         credentials: boolean;
         methods: string[];
         allowedHeaders: string[];

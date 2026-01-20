@@ -20,7 +20,7 @@ export interface SecurityConfig {
     legacyHeaders: boolean;
   };
   cors: {
-    origin: string | string[];
+    origin: string | string[] | boolean;
     credentials: boolean;
     methods: string[];
     allowedHeaders: string[];
@@ -44,9 +44,9 @@ export const DEFAULT_SECURITY_CONFIG: SecurityConfig = {
     legacyHeaders: false
   },
   cors: {
-    origin: process.env['NODE_ENV'] === 'production' 
-      ? ['https://admin.benalsam.com', 'https://benalsam.com']
-      : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'],
+    origin: process.env['NODE_ENV'] === 'production'
+      ? ['https://admin.benalsam.com', 'https://benalsam.com', 'https://www.benalsam.com', 'http://localhost:3000']
+      : true, // Allow all origins in development
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key', 'x-user-id']
@@ -342,19 +342,17 @@ export const SECURITY_CONFIGS = {
       standardHeaders: true,
       legacyHeaders: false
     },
-    cors: {
-      origin: [
-        'https://admin.benalsam.com',
-        'https://benalsam.com',
-        'https://www.benalsam.com',
-        // Local development with VPS services
-        'http://localhost:3000',
-        // Vercel preview deployments
-        /^https:\/\/.*\.vercel\.app$/
-      ],
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key', 'x-user-id']
-    }
+  cors: {
+    origin: [
+      'https://admin.benalsam.com',
+      'https://benalsam.com',
+      'https://www.benalsam.com',
+      // Vercel preview deployments
+      /^https:\/\/.*\.vercel\.app$/
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key', 'x-user-id']
+  }
   }
 };
