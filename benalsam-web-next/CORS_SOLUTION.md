@@ -7,7 +7,7 @@ When developing locally with the Next.js frontend deployed on Vercel while backe
 - Browser security policies block cross-origin requests
 
 ## Solution
-Implemented a local CORS proxy server to handle API requests during development.
+Implemented a local CORS proxy server and proper URL path handling to resolve both CORS and API path duplication issues.
 
 ### Components
 
@@ -23,9 +23,24 @@ Implemented a local CORS proxy server to handle API requests during development.
 - Falls back to direct API calls in production
 
 #### 3. Service Files Updates
-All service files updated to use the proxy URL:
-- `src/services/elasticsearchService.ts`
-- `src/services/categoryService.ts`
+All service files updated with proper URL path handling based on environment:
+
+##### Elasticsearch Service (`src/services/elasticsearchService.ts`)
+- Added `useVpsServices` flag detection
+- Different endpoint paths for VPS vs local modes
+- Local development detection to prevent path duplication
+
+##### Category Service (`src/services/categoryService.ts`)
+- Updated all endpoints with conditional path construction
+- Disabled debug logging in production to prevent CSP violations
+- Proper URL routing for VPS and local modes
+
+##### Cache Version Service (`src/services/cacheVersionService.ts`)
+- Fixed hardcoded path duplication issue
+- Added environment-aware URL construction
+- Prevents `/api/v1/categories/api/v1/categories/version` errors
+
+##### Other Services
 - `src/services/createListingService.ts`
 - `src/services/listingAIService.ts`
 - `src/services/uploadService.ts`
@@ -33,8 +48,34 @@ All service files updated to use the proxy URL:
 ### Environment Configuration
 In `.env.local`:
 ```
+# Enable VPS services (production-like environment)
+NEXT_PUBLIC_USE_VPS_SERVICES=true
+
+# Enable CORS proxy for local development
 NEXT_PUBLIC_USE_CORS_PROXY=true
+
+# API URLs
+NEXT_PUBLIC_SEARCH_SERVICE_URL=https://api.benalsam.com
+NEXT_PUBLIC_CATEGORIES_SERVICE_URL=https://api.benalsam.com
 ```
+
+### Path Duplication Prevention
+To prevent API path duplication issues like `/api/v1/categories/api/v1/categories`:
+
+#### Implementation Logic
+```javascript
+const useVpsServices = process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true'
+const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+
+// VPS mode (production): URL already contains base path, so use relative path
+// Local development: Need full path to reach proxy/VPS correctly
+const endpoint = (useVpsServices && !isLocalDevelopment) ? '/listings' : '/api/v1/search/listings'
+```
+
+#### Environment Scenarios
+1. **Production (Vercel)**: `useVpsServices=true`, `isLocalDevelopment=false` → `/listings`
+2. **Local Development**: `useVpsServices=true`, `isLocalDevelopment=true` → `/api/v1/search/listings`
+3. **True Local Mode**: `useVpsServices=false` → `/api/v1/search/listings`
 
 ### How It Works
 1. Frontend makes request to `http://127.0.0.1:7242/api/v1/categories`
@@ -58,3 +99,18 @@ node local-cors-proxy.js
 ### Verification
 - Health check: `http://127.0.0.1:7242/health`
 - Test endpoint: `http://127.0.0.1:7242/api/v1/categories`
+- Production test: `https://api.benalsam.com/api/v1/categories/version`
+
+### Troubleshooting
+
+#### Common Issues
+1. **404 Errors**: Check if `useVpsServices` flag and path construction logic match your environment
+2. **CSP Violations**: Ensure debug logging is disabled in production environments
+3. **Path Duplication**: Verify that frontend and backend base paths don't overlap
+
+#### Browser Cache Issues
+If changes don't appear immediately:
+- Hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
+- Clear browser cache
+- Restart browser
+- Unregister service workers in Developer Tools
