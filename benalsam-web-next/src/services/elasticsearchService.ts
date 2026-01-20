@@ -124,9 +124,13 @@ export const searchListingsWithElasticsearch = async (
     logger.debug('[ElasticsearchService] Search payload', { payload: servicePayload });
 
     // Call Search Service
-    // VPS mode: URL already contains /api/v1/search, so use '/listings'
-    // Local mode: Need full path /api/v1/search/listings
-    const searchEndpoint = useVpsServices ? '/listings' : '/api/v1/search/listings';
+    // VPS mode (production): URL already contains /api/v1/search, so use '/listings'
+    // Local development with proxy: Still need full path /api/v1/search/listings
+    // True local mode: Need full path /api/v1/search/listings
+    
+    // Local development detection: useVpsServices=true but we're using local proxy
+    const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+    const searchEndpoint = (useVpsServices && !isLocalDevelopment) ? '/listings' : '/api/v1/search/listings';
     const response = await fetch(`${SEARCH_SERVICE_URL}${searchEndpoint}`, {
       method: 'POST',
       headers: {
@@ -260,9 +264,13 @@ const searchListingsWithSupabase = async (
  */
 export const checkElasticsearchHealth = async (): Promise<boolean> => {
   try {
-    // VPS mode: URL already contains /api/v1/search, so use '/health'
-    // Local mode: Need /api/v1/health (search service health endpoint)
-    const healthEndpoint = useVpsServices ? '/health' : '/api/v1/health';
+    // VPS mode (production): URL already contains /api/v1/search, so use '/health'
+    // Local development with proxy: Still need /api/v1/health
+    // True local mode: Need /api/v1/health
+    
+    // Local development detection
+    const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+    const healthEndpoint = (useVpsServices && !isLocalDevelopment) ? '/health' : '/api/v1/health';
     const response = await fetch(`${SEARCH_SERVICE_URL}${healthEndpoint}`);
     const data = await response.json();
     return data.status === 'healthy';
@@ -277,9 +285,13 @@ export const checkElasticsearchHealth = async (): Promise<boolean> => {
  */
 export const fetchListingByIdFromES = async (listingId: string): Promise<Listing | null> => {
   try {
-    // VPS mode: URL already contains /api/v1/elasticsearch, so use '/listings/{id}'
-    // Local mode: Need full path /api/v1/search/listings/{id}
-    const listingEndpoint = useVpsServices ? `/listings/${listingId}` : `/api/v1/search/listings/${listingId}`;
+    // VPS mode (production): URL already contains /api/v1/elasticsearch, so use '/listings/{id}'
+    // Local development with proxy: Still need full path /api/v1/search/listings/{id}
+    // True local mode: Need full path /api/v1/search/listings/{id}
+    
+    // Local development detection
+    const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+    const listingEndpoint = (useVpsServices && !isLocalDevelopment) ? `/listings/${listingId}` : `/api/v1/search/listings/${listingId}`;
     const res = await fetch(`${ELASTICSEARCH_PUBLIC_URL}${listingEndpoint}`, {
       // Suppress 404 errors in console (normal for new listings not yet indexed)
       signal: AbortSignal.timeout(5000)
