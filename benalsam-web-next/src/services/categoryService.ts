@@ -5,6 +5,10 @@ import { logger } from '@/utils/production-logger'
 // VPS mode flag - when true, service URLs already contain the full path
 const useVpsServices = process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true'
 
+// #region agent log
+fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:6',message:'useVpsServices flag check',data:{useVpsServices, envValue: process.env.NEXT_PUBLIC_USE_VPS_SERVICES},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+// #endregion
+
 export interface CategoryAttribute {
   id: number
   key: string
@@ -47,11 +51,37 @@ class CategoryService {
    * Get all categories in a flat list (with cache)
    */
   async getCategories(): Promise<Category[]> {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:49',message:'getCategories called',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+    // #endregion
+
     return categoryCacheService.getCategories(async () => {
-      // Always use full path since services expect /api/v1/ prefix
-      const endpoint = '/api/v1/categories'
-      const response = await categoriesServiceClient.get<{ success: boolean; data: Category[] }>(endpoint)
-      return response.data || []
+      // VPS mode: URL already contains /api/v1/categories, so use '/'
+      // Local mode: Need full path /api/v1/categories
+      const endpoint = useVpsServices ? '/' : '/api/v1/categories'
+
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:52',message:'endpoint construction',data:{endpoint, useVpsServices},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+      // #endregion
+
+      try {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:55',message:'API call starting',data:{endpoint},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+        // #endregion
+
+        const response = await categoriesServiceClient.get<{ success: boolean; data: Category[] }>(endpoint)
+
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:58',message:'API call success',data:{responseStatus: response?.status, hasData: !!response?.data, dataLength: response?.data?.length},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+        // #endregion
+
+        return response.data || []
+      } catch (error) {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:63',message:'API call failed',data:{error: error?.message, endpoint},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
+        // #endregion
+        throw error
+      }
     })
   }
 
@@ -60,7 +90,7 @@ class CategoryService {
    */
   async getCategoryTree(): Promise<CategoryTree[]> {
     try {
-      const endpoint = '/api/v1/categories/tree'
+      const endpoint = useVpsServices ? '/tree' : '/api/v1/categories/tree'
       const response = await categoriesServiceClient.get<{ data: CategoryTree[] }>(endpoint)
       return response.data || []
     } catch (error) {
@@ -74,7 +104,7 @@ class CategoryService {
    */
   async getCategoryById(id: string): Promise<Category | null> {
     try {
-      const endpoint = `/api/v1/categories/${id}`
+      const endpoint = useVpsServices ? `/${id}` : `/api/v1/categories/${id}`
       const response = await categoriesServiceClient.get<{ data: Category }>(endpoint)
       return response.data
     } catch (error) {
@@ -88,7 +118,7 @@ class CategoryService {
    */
   async getCategoryBySlug(slug: string): Promise<Category | null> {
     try {
-      const endpoint = `/api/v1/categories/slug/${slug}`
+      const endpoint = useVpsServices ? `/slug/${slug}` : `/api/v1/categories/slug/${slug}`
       const response = await categoriesServiceClient.get<{ data: Category }>(endpoint)
       return response.data
     } catch (error) {
@@ -125,7 +155,7 @@ class CategoryService {
    */
   async searchCategories(query: string): Promise<Category[]> {
     try {
-      const endpoint = '/api/v1/categories/search'
+      const endpoint = useVpsServices ? '/search' : '/api/v1/categories/search'
       const response = await categoriesServiceClient.get<{ data: Category[] }>(endpoint, {
         params: { q: query },
       })
@@ -141,7 +171,7 @@ class CategoryService {
    */
   async getCategoryChildren(parentId: string): Promise<Category[]> {
     try {
-      const endpoint = `/api/v1/categories/${parentId}/children`
+      const endpoint = useVpsServices ? `/${parentId}/children` : `/api/v1/categories/${parentId}/children`
       const response = await categoriesServiceClient.get<{ data: Category[] }>(endpoint)
       return response.data || []
     } catch (error) {
