@@ -1237,4 +1237,195 @@ Performance metriklerini getirir (admin only).
 
 **Bu kurallar her geliştirici için zorunludur! 🎯**
 
+---
+
+## 🌐 **MICROSERVICE API ENDPOINTS**
+
+Bu bölüm, frontend tarafından kullanılan backend microservice API endpoint'lerini içerir.
+
+### Elasticsearch Service
+
+#### **POST /api/v1/search/listings**
+Elasticsearch üzerinden ilan araması yapar.
+
+**Auth:** Gereksiz (public)
+
+**Request Body:**
+```json
+{
+  "query": "arama terimi",
+  "filters": {
+    "category_id": "kategori_id",
+    "location": "şehir",
+    "minBudget": 1000,
+    "maxBudget": 5000,
+    "urgency": "very_urgent"
+  },
+  "page": 1,
+  "limit": 20,
+  "sort": {
+    "field": "created_at",
+    "order": "desc"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "title": "İlan Başlığı",
+      "description": "İlan Açıklaması",
+      "category": "Kategori Adı",
+      "budget": 2500,
+      "location": "İstanbul",
+      "urgency": "very_urgent",
+      "image_url": "resim_url",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "pageSize": 20,
+    "total": 100,
+    "totalPages": 5
+  }
+}
+```
+
+---
+
+#### **GET /api/v1/search/health**
+Elasticsearch servisinin sağlık durumunu kontrol eder.
+
+**Auth:** Gereksiz (public)
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "service": "search-service",
+  "timestamp": "2025-01-01T00:00:00Z"
+}
+```
+
+---
+
+### Categories Service
+
+#### **GET /api/v1/categories**
+Tüm kategorileri listeler.
+
+**Auth:** Gereksiz (public)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "name": "Kategori Adı",
+      "slug": "kategori_slug",
+      "level": 0,
+      "parent_id": null,
+      "children": [],
+      "category_attributes": []
+    }
+  ]
+}
+```
+
+---
+
+#### **GET /api/v1/categories/tree**
+Kategorileri hiyerarşik yapıda döner.
+
+**Auth:** Gereksiz (public)
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "name": "Kategori Adı",
+      "level": 0,
+      "children": [
+        {
+          "id": "uuid",
+          "name": "Alt Kategori",
+          "level": 1,
+          "children": []
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+#### **GET /api/v1/categories/[categoryId]**
+Belirli bir kategori detayını getirir.
+
+**Auth:** Gereksiz (public)
+
+**Path Parameters:**
+- `categoryId` (string)
+
+**Response:**
+```json
+{
+  "data": {
+    "id": "uuid",
+    "name": "Kategori Adı",
+    "slug": "kategori_slug",
+    "level": 0
+  }
+}
+```
+
+---
+
+#### **GET /api/v1/categories/version**
+Kategori cache versiyonunu döner.
+
+**Auth:** Gereksiz (public)
+
+**Response:**
+```json
+{
+  "success": true,
+  "version": 1768942512071,
+  "timestamp": "2026-01-20T20:55:12.071Z"
+}
+```
+
+---
+
+### Environment-Based URL Construction
+
+Frontend, `NEXT_PUBLIC_USE_VPS_SERVICES` environment variable'ına göre farklı URL paternleri kullanır:
+
+#### Production (Vercel):
+- `NEXT_PUBLIC_USE_VPS_SERVICES=true`
+- `NEXT_PUBLIC_SEARCH_SERVICE_URL=https://api.benalsam.com`
+- İstekler: `/listings` (servis zaten `/api/v1/search` base path'e sahip)
+
+#### Local Development:
+- `NEXT_PUBLIC_USE_VPS_SERVICES=true` (ama localhost proxy kullanılır)
+- `NEXT_PUBLIC_SEARCH_SERVICE_URL=http://127.0.0.1:7242`
+- İstekler: `/api/v1/search/listings` (proxy üzerinden VPS'e yönlendirilir)
+
+#### True Local Mode:
+- `NEXT_PUBLIC_USE_VPS_SERVICES=false`
+- `NEXT_PUBLIC_SEARCH_SERVICE_URL=http://localhost:3016`
+- İstekler: `/api/v1/search/listings` (doğrudan local servise)
+
+Bu yapı sayesinde path duplication sorunları önlenir ve farklı ortamlarda doğru API çağrıları yapılır.
+
 
