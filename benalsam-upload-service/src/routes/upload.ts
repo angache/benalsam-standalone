@@ -5,6 +5,7 @@ import fs from 'fs';
 import { uploadRateLimiter, fileSizeLimiter } from '../middleware/rateLimiter';
 import { asyncHandler } from '../middleware/errorHandler';
 import { uploadController } from '../controllers/uploadController';
+import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
 
@@ -85,6 +86,7 @@ router.post('/profile',
  * @access  Private
  */
 router.get('/quota',
+  authenticateToken,
   asyncHandler(uploadController.getUserQuota)
 );
 

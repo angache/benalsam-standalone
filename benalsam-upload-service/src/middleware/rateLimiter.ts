@@ -13,6 +13,18 @@ export const rateLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req: Request, res: Response) => {
+    // Skip rate limiting for certain conditions that might cause proxy errors
+    if (req.headers['x-forwarded-for']) {
+      // Check if this is a forwarded request that might cause proxy errors
+      const forwardedFor = req.headers['x-forwarded-for'];
+      if (Array.isArray(forwardedFor) ? forwardedFor.some(ip => ip.includes('::1')) : forwardedFor.includes('::1')) {
+        logger.debug('Skipping rate limit for localhost forwarded request');
+        return true;
+      }
+    }
+    return false;
+  },
   handler: (req: Request, res: Response) => {
     logger.warn('Rate limit exceeded', {
       ip: req.ip,
@@ -39,6 +51,18 @@ export const uploadRateLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req: Request, res: Response) => {
+    // Skip rate limiting for certain conditions that might cause proxy errors
+    if (req.headers['x-forwarded-for']) {
+      // Check if this is a forwarded request that might cause proxy errors
+      const forwardedFor = req.headers['x-forwarded-for'];
+      if (Array.isArray(forwardedFor) ? forwardedFor.some(ip => ip.includes('::1')) : forwardedFor.includes('::1')) {
+        logger.debug('Skipping rate limit for localhost forwarded request');
+        return true;
+      }
+    }
+    return false;
+  },
   keyGenerator: (req: Request) => {
     // Use user ID if available, otherwise IP
     const userId = req.headers['x-user-id'] as string;

@@ -13,6 +13,7 @@ import healthRoutes from './routes/health';
 import { uploadEventConsumer } from './services/uploadEventConsumer';
 
 const app = express();
+app.set('trust proxy', true); // Enable trust proxy for reverse proxy support
 const PORT = process.env.PORT || 3007;
 
 const environment = process.env.NODE_ENV || 'development';
@@ -43,6 +44,14 @@ server = app.listen(PORT, async () => {
   logger.info('🚀 Upload Service running on port ' + PORT);
   logger.info('📊 Environment: ' + (process.env.NODE_ENV || 'development'));
   logger.info('🔗 Health check: http://localhost:' + PORT + '/api/v1/health');
+
+  // Setup RabbitMQ queues first
+  try {
+    await rabbitmqConfig.setupQueue();
+    logger.info('✅ RabbitMQ queues configured');
+  } catch (error) {
+    logger.error('❌ Failed to configure RabbitMQ queues:', error);
+  }
 
   // Start upload event consumer
   try {
