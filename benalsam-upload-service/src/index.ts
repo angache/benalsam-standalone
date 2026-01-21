@@ -11,6 +11,7 @@ import { logger } from './config/logger';
 import metricsRoutes from './routes/metrics';
 import healthRoutes from './routes/health';
 import { uploadEventConsumer } from './services/uploadEventConsumer';
+import { rabbitmqConfig } from './config/rabbitmq';
 
 const app = express();
 app.set('trust proxy', true); // Enable trust proxy for reverse proxy support
@@ -22,7 +23,25 @@ const securityMiddleware = createSecurityMiddleware(securityConfig as any);
 
 // Middlewares
 app.use(helmet());
-app.use(cors());
+// Configure CORS for development and production
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3003',
+    'https://benalsam-web-next.vercel.app',
+    'https://www.benalsam.com',
+    'https://benalsam.com',
+    ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [])
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200,
+  preflightContinue: false,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-User-ID', 'X-Forwarded-For'],
+};
+app.use(cors(corsOptions));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
