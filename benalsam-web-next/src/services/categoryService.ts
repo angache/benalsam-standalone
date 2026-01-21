@@ -60,9 +60,13 @@ class CategoryService {
     // #endregion
 
     return categoryCacheService.getCategories(async () => {
-      // VPS mode: URL already contains /api/v1/categories, so use '/'
-      // Local mode: Need full path /api/v1/categories
-      const endpoint = useVpsServices ? '/' : '/api/v1/categories'
+      // VPS mode (production): Service URL already includes base path, so use '/api/v1/categories'
+      // Local development with proxy: Also need full path '/api/v1/categories'
+      // True local mode: Need full path /api/v1/categories
+      
+      // Local development detection
+      const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+      const endpoint = (useVpsServices && !isLocalDevelopment) ? '/api/v1/categories' : '/api/v1/categories'
 
       // #region agent log
       if (process.env.NODE_ENV !== 'production') {
@@ -102,7 +106,9 @@ class CategoryService {
    */
   async getCategoryTree(): Promise<CategoryTree[]> {
     try {
-      const endpoint = useVpsServices ? '/tree' : '/api/v1/categories/tree'
+      // Local development detection
+      const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+      const endpoint = (useVpsServices && !isLocalDevelopment) ? '/api/v1/categories/tree' : '/api/v1/categories/tree'
       const response = await categoriesServiceClient.get<{ data: CategoryTree[] }>(endpoint)
       return response.data || []
     } catch (error) {
@@ -116,7 +122,9 @@ class CategoryService {
    */
   async getCategoryById(id: string): Promise<Category | null> {
     try {
-      const endpoint = useVpsServices ? `/${id}` : `/api/v1/categories/${id}`
+      // Local development detection
+      const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+      const endpoint = (useVpsServices && !isLocalDevelopment) ? `/api/v1/categories/${id}` : `/api/v1/categories/${id}`
       const response = await categoriesServiceClient.get<{ data: Category }>(endpoint)
       return response.data
     } catch (error) {
@@ -130,7 +138,9 @@ class CategoryService {
    */
   async getCategoryBySlug(slug: string): Promise<Category | null> {
     try {
-      const endpoint = useVpsServices ? `/slug/${slug}` : `/api/v1/categories/slug/${slug}`
+      // Local development detection
+      const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+      const endpoint = (useVpsServices && !isLocalDevelopment) ? `/api/v1/categories/slug/${slug}` : `/api/v1/categories/slug/${slug}`
       const response = await categoriesServiceClient.get<{ data: Category }>(endpoint)
       return response.data
     } catch (error) {
@@ -167,7 +177,9 @@ class CategoryService {
    */
   async searchCategories(query: string): Promise<Category[]> {
     try {
-      const endpoint = useVpsServices ? '/search' : '/api/v1/categories/search'
+      // Local development detection
+      const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+      const endpoint = (useVpsServices && !isLocalDevelopment) ? '/api/v1/categories/search' : '/api/v1/categories/search'
       const response = await categoriesServiceClient.get<{ data: Category[] }>(endpoint, {
         params: { q: query },
       })
@@ -183,7 +195,9 @@ class CategoryService {
    */
   async getCategoryChildren(parentId: string): Promise<Category[]> {
     try {
-      const endpoint = useVpsServices ? `/${parentId}/children` : `/api/v1/categories/${parentId}/children`
+      // Local development detection
+      const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+      const endpoint = (useVpsServices && !isLocalDevelopment) ? `/api/v1/categories/${parentId}/children` : `/api/v1/categories/${parentId}/children`
       const response = await categoriesServiceClient.get<{ data: Category[] }>(endpoint)
       return response.data || []
     } catch (error) {
