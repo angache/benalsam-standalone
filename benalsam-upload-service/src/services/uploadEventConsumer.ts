@@ -36,8 +36,33 @@ export class UploadEventConsumer {
     try {
       const channel = await rabbitmqConfig.getChannel();
       
-      // Consume from upload.events queue
-      await channel.consume('upload.events', async (msg: any) => {
+      // Ensure the queue exists before trying to consume from it
+      const queue = process.env.RABBITMQ_QUEUE || 'upload.events';
+      const exchange = process.env.RABBITMQ_EXCHANGE || 'benalsam.jobs';
+      const dlx = process.env.RABBITMQ_DLX || 'benalsam.uploads.dlx';
+
+      // Declare dead letter exchange and queue
+      await channel.assertExchange(dlx, 'topic', { durable: true });
+      await channel.assertQueue(`${queue}.dlq`, { durable: true });
+      await channel.bindQueue(`${queue}.dlq`, dlx, '#');
+
+      // Declare main exchange and queue with dead letter configuration
+      await channel.assertExchange(exchange, 'topic', { durable: true });
+      await channel.assertQueue(queue, {
+        durable: true,
+        arguments: {
+          'x-dead-letter-exchange': dlx,
+          'x-dead-letter-routing-key': 'dead.letter',
+          'x-message-ttl': 1000 * 60 * 60 * 24, // 24 hours
+          'x-max-retries': 3
+        }
+      });
+
+      // Bind queue to exchange
+      await channel.bindQueue(queue, exchange, 'upload.*');
+
+      // Now consume from the queue
+      await channel.consume(queue, async (msg: any) => {
         if (!msg) {
           logger.warn('⚠️ Received null message from upload.events queue');
           return;
