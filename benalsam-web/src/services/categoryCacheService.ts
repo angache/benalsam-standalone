@@ -1,4 +1,5 @@
 import { Category } from 'benalsam-shared-types';
+import { apiClient } from '@/lib/apiClient';
 
 // Cache configuration
 const CACHE_KEY = 'benalsam_categories_v1.2.0';
@@ -68,19 +69,13 @@ class CategoryCacheService {
     try {
       console.log('🌐 Fetching categories from API...');
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/categories`);
+      const response = await apiClient.get('/categories');
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.success) {
+        throw new Error(response.error?.message || 'API returned error');
       }
       
-      const result = await response.json();
-      
-      if (!result.success) {
-        throw new Error(result.message || 'API returned error');
-      }
-      
-      const categories = result.data;
+      const categories = response.data;
       
       // Cache the data
       this.setCachedData(categories);

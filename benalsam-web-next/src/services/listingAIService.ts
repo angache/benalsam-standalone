@@ -6,7 +6,9 @@
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/utils/production-logger';
 
-const LISTING_SERVICE_URL = process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || 'http://localhost:3008/api/v1';
+const LISTING_SERVICE_URL = process.env.NEXT_PUBLIC_USE_CORS_PROXY === 'true'
+  ? `http://127.0.0.1:7242`
+  : (process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || 'http://localhost:3008/api/v1');
 
 export interface TitleSuggestion {
   title: string;

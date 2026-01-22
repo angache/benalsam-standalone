@@ -3,6 +3,8 @@
  * Handles all communication with the admin backend API
  */
 
+import { getApiClientBaseUrl } from '../config/apiConfig';
+
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -26,9 +28,9 @@ export class ApiClient {
   private token: string | null;
 
   constructor() {
-    // Import environment config dynamically to avoid circular dependencies
-    const envConfig = (import.meta as any).env?.VITE_API_URL;
-    this.baseURL = envConfig || 'http://localhost:3002/api/v1';
+    // Use environment-aware base URL with proper proxy handling
+    this.baseURL = getApiClientBaseUrl();
+    console.log('🔧 API Client initialized with baseURL:', this.baseURL);
     this.token = localStorage.getItem('admin_token');
   }
 

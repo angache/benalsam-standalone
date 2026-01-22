@@ -17,9 +17,7 @@ export const DEFAULT_SECURITY_CONFIG = {
         legacyHeaders: false
     },
     cors: {
-        origin: process.env['NODE_ENV'] === 'production'
-            ? ['https://admin.benalsam.com', 'https://benalsam.com', 'https://www.benalsam.com', 'http://localhost:3000']
-            : true, // Allow all origins in development
+        origin: true, // Allow all origins everywhere for now
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key', 'x-user-id']
@@ -290,6 +288,12 @@ export const SECURITY_CONFIGS = {
                 'https://admin.benalsam.com',
                 'https://benalsam.com',
                 'https://www.benalsam.com',
+                // Local development
+                'http://localhost:3000',
+                'http://localhost:3003',
+                'http://localhost:5173',
+                'http://localhost:4173',
+                'http://localhost:8081',
                 // Vercel preview deployments
                 /^https:\/\/.*\.vercel\.app$/
             ],

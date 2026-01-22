@@ -48,7 +48,7 @@ interface CreateListingRequest {
 
 /**
  * Create new listing via Upload Service
- * POST /api/v1/listings/create
+ * POST /api/v1/upload/listings/create
  */
 router.post('/create', uploadRateLimiter, asyncHandler(async (req: Request<{}, {}, CreateListingRequest>, res: Response) => {
   const userId = req.headers['x-user-id'] as string;
@@ -186,7 +186,7 @@ router.post('/create', uploadRateLimiter, asyncHandler(async (req: Request<{}, {
 
 /**
  * Update listing via Upload Service
- * PUT /api/v1/listings/:id
+ * PUT /api/v1/upload/listings/:id
  */
 router.put('/:id', uploadRateLimiter, asyncHandler(async (req: Request, res: Response) => {
   const userId = req.headers['x-user-id'] as string;
@@ -276,7 +276,7 @@ router.put('/:id', uploadRateLimiter, asyncHandler(async (req: Request, res: Res
 
 /**
  * Get job status
- * GET /api/v1/listings/status/:jobId
+ * GET /api/v1/upload/listings/status/:jobId
  */
 router.get('/status/:jobId', uploadRateLimiter, asyncHandler(async (req: Request, res: Response) => {
   const userId = req.headers['x-user-id'] as string;

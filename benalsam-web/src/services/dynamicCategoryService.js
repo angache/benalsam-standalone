@@ -3,6 +3,9 @@
  * Backend'den kategorileri çeker ve cache'ler
  */
 
+// Use apiClient instead of direct fetch
+import { apiClient } from '@/lib/apiClient';
+
 const CATEGORIES_SERVICE_URL = import.meta.env.VITE_CATEGORIES_SERVICE_URL || 'http://localhost:3015';
 
 // Cache keys
@@ -165,25 +168,23 @@ class DynamicCategoryService {
     try {
       console.log(`📥 Fetching categories from backend... (attempt ${retryCount + 1}/${MAX_RETRIES})`);
       
-      const response = await fetch(`${CATEGORIES_SERVICE_URL}/api/v1/categories`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const response = await apiClient.get('/categories');
+            
+      if (!response.success) {
+        throw new Error(response.error?.message || 'API returned error');
       }
-      
-      const result = await response.json();
-      
-      if (!result.success || !result.data) {
+            
+      if (!response.data) {
         throw new Error('Invalid response format');
       }
-
+            
       // Veri kontrolü - boş array veya null ise hata say
-      if (!Array.isArray(result.data) || result.data.length === 0) {
+      if (!Array.isArray(response.data) || response.data.length === 0) {
         throw new Error('Empty categories data received');
       }
-      
-      console.log(`✅ Fetched ${result.data.length} categories from backend`);
-      return result.data;
+            
+      console.log(`✅ Fetched ${response.data.length} categories from backend`);
+      return response.data;
     } catch (error) {
       console.error(`❌ Error fetching categories (attempt ${retryCount + 1}):`, error);
       

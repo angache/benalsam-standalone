@@ -38,6 +38,30 @@ export default defineConfig({
 			'127.0.0.1',
 			'209.227.228.96'
 		], // Domain'leri kabul et
+		// API Proxy for development - routes requests to VPS backend
+		proxy: {
+			'/api': {
+				target: process.env.VITE_API_BASE_URL || 'http://209.227.228.96:3002',
+				changeOrigin: true,
+				secure: false,
+				configure: (proxy, options) => {
+					proxy.on('proxyReq', (proxyReq, req, res) => {
+						// Set proper origin header for CORS
+						proxyReq.setHeader('Origin', 'http://localhost:5173');
+					});
+					proxy.on('proxyRes', (proxyRes, req, res) => {
+						// Ensure CORS headers are set properly
+						proxyRes.headers['access-control-allow-origin'] = 'http://localhost:5173';
+						proxyRes.headers['access-control-allow-credentials'] = 'true';
+					});
+				}
+			},
+			'/websocket': {
+				target: process.env.VITE_WEBSOCKET_URL || 'ws://209.227.228.96:3002',
+				ws: true,
+				changeOrigin: true
+			}
+		},
 		watch: {
 			usePolling: true, // VPS'de dosya değişikliklerini izlemek için polling kullan
 			interval: 1000, // 1 saniye aralıklarla kontrol et

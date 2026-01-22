@@ -245,25 +245,37 @@ class ApiClient {
   }
 }
 
+// CORS Proxy helper - only when explicitly enabled
+const withCorsProxy = (url: string): string => {
+  // Only use CORS proxy when explicitly enabled via environment variable
+  // This ensures production safety
+  if (process.env.NEXT_PUBLIC_USE_CORS_PROXY === 'true') {
+    // Parse URL and create proxy URL with correct path
+    const urlObj = new URL(url);
+    return `http://127.0.0.1:7242${urlObj.pathname}${urlObj.search}`;
+  }
+  return url;
+};
+
 // API Clients
 export const adminBackendClient = new ApiClient({
-  baseURL: process.env.NEXT_PUBLIC_ADMIN_BACKEND_URL || 'http://localhost:3002',
+  baseURL: withCorsProxy(process.env.NEXT_PUBLIC_ADMIN_BACKEND_URL || 'http://localhost:3002/api/v1'),
 })
 
 export const categoriesServiceClient = new ApiClient({
-  baseURL: process.env.NEXT_PUBLIC_CATEGORIES_SERVICE_URL || 'http://localhost:3015',
+  baseURL: withCorsProxy(process.env.NEXT_PUBLIC_CATEGORIES_SERVICE_URL || 'http://localhost:3015/api/v1'),
 })
 
 export const searchServiceClient = new ApiClient({
-  baseURL: process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || 'http://localhost:3016',
+  baseURL: withCorsProxy(process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || 'http://localhost:3016/api/v1'),
 })
 
 export const listingServiceClient = new ApiClient({
-  baseURL: process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || 'http://localhost:3008/api/v1',
+  baseURL: withCorsProxy(process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || 'http://localhost:3008/api/v1'),
 })
 
 export const uploadServiceClient = new ApiClient({
-  baseURL: process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1',
+  baseURL: withCorsProxy(process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1'),
 })
 
 export default ApiClient

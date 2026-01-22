@@ -57,9 +57,9 @@ export const useCategoryCounts = () => {
   // Categories Service üzerinden category counts çek (tercih)
   const fetchCategoryCountsFromElasticsearch = useCallback(async () => {
     try {
-      const CATEGORIES_SERVICE_URL = process.env.NEXT_PUBLIC_CATEGORIES_SERVICE_URL || 'http://localhost:3015';
+      const CATEGORIES_SERVICE_URL = process.env.NEXT_PUBLIC_CATEGORIES_SERVICE_URL || 'http://localhost:3015/api/v1';
       // 1) Try Categories Service
-      let response = await fetch(`${CATEGORIES_SERVICE_URL}/api/v1/categories/counts`);
+      let response = await fetch(`${CATEGORIES_SERVICE_URL}/categories/counts`);
       if (response.ok) {
         const result = await response.json();
         if (result?.counts) return result.counts;
@@ -71,11 +71,11 @@ export const useCategoryCounts = () => {
       }
 
       // 2) Fallback to Search Service / ES Service stats if categories service unavailable
-      const ES_PUBLIC_URL = process.env.NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL || 'http://localhost:3016';
+      const ES_PUBLIC_URL = process.env.NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL || 'http://localhost:3016/api/v1';
       const SEARCH_SERVICE_URL = process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || '';
       const statsUrl = SEARCH_SERVICE_URL
-        ? `${SEARCH_SERVICE_URL}/api/v1/search/stats`
-        : `${ES_PUBLIC_URL}/api/v1/search/stats`;
+        ? `${SEARCH_SERVICE_URL}/search/stats`
+        : `${ES_PUBLIC_URL}/search/stats`;
       response = await fetch(statsUrl);
       
       if (response.ok) {

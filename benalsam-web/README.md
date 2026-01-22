@@ -159,6 +159,31 @@ pnpm run security-audit # Güvenlik audit
 - **Active States**: Visual feedback for current page
 - **Optimized Spacing**: Mobile-optimized padding (py-2)
 
+## 🌐 CORS Configuration
+
+### Automatic Environment Handling
+This project automatically handles CORS across different environments:
+- **Development**: Localhost and network IPs
+- **Staging**: Vercel preview deployments
+- **Production**: Production domains
+
+### Setup
+```bash
+# Copy environment file for local development
+cp .env.local .env
+
+# Start development server (includes API proxy)
+npm run dev
+```
+
+### Key Features
+✅ Automatic origin detection
+✅ Smart API proxy for development
+✅ Environment-specific URLs
+✅ Vercel preview deployment support
+
+For detailed CORS configuration: [📖 CORS Guide](./CORS_GUIDE.md)
+
 ## 🚀 Deployment
 
 ### Production Build

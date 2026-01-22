@@ -38,17 +38,10 @@ export const checkCacheVersion = async (cacheKey: string): Promise<boolean> => {
     }
     
     // Categories Service'den güncel version'ı al
-    // VPS mode (production): URL already contains /api/v1/categories, so use '/version'
-    // Local development with proxy: Still need full path /api/v1/categories/version
-    // True local mode: Need full path /api/v1/categories/version
-    
-    // Local development detection
-    const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-    const versionEndpoint = (useVpsServices && !isLocalDevelopment) ? '/version' : '/api/v1/categories/version'
-
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'cacheVersionService.ts:42',message:'Cache version check - API call',data:{versionEndpoint, cacheKey, localVersion, hasCheckedThisSession},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
-    // #endregion
+    // URL: NEXT_PUBLIC_CATEGORIES_SERVICE_URL=https://api.benalsam.com/api/v1
+    // Endpoint: /categories/version
+    // Sonuç: https://api.benalsam.com/api/v1/categories/version
+    const versionEndpoint = '/categories/version'
 
     const response = await categoriesServiceClient.get<{
       success: boolean

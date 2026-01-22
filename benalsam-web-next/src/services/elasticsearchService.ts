@@ -5,16 +5,10 @@ import { processFetchedListings } from './listingService/core';
 import { logger } from '@/utils/production-logger';
 
 // Search Service API endpoint'i
-const SEARCH_SERVICE_URL = process.env.NEXT_PUBLIC_USE_CORS_PROXY === 'true'
-  ? `http://127.0.0.1:7242`
-  : (process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || 'http://localhost:3016');
-
-const ELASTICSEARCH_PUBLIC_URL = process.env.NEXT_PUBLIC_USE_CORS_PROXY === 'true'
-  ? `http://127.0.0.1:7242`
-  : (process.env.NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL || 'http://localhost:3016');
-
-// VPS mode flag - when true, service URLs already contain the full path
-const useVpsServices = process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true';
+// URL format: https://api.benalsam.com/api/v1 (env'den)
+// Endpoint'ler: /search/listings, /search/health, vb.
+const SEARCH_SERVICE_URL = process.env.NEXT_PUBLIC_SEARCH_SERVICE_URL || 'http://localhost:3016/api/v1';
+const ELASTICSEARCH_PUBLIC_URL = process.env.NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL || 'http://localhost:3016/api/v1';
 
 export interface ElasticsearchSearchParams {
   query?: string;
@@ -124,13 +118,9 @@ export const searchListingsWithElasticsearch = async (
     logger.debug('[ElasticsearchService] Search payload', { payload: servicePayload });
 
     // Call Search Service
-    // VPS mode (production): URL already contains /api/v1/search, so use '/listings'
-    // Local development with proxy: Still need full path /api/v1/search/listings
-    // True local mode: Need full path /api/v1/search/listings
-    
-    // Local development detection: useVpsServices=true but we're using local proxy
-    const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-    const searchEndpoint = (useVpsServices && !isLocalDevelopment) ? '/listings' : '/api/v1/search/listings';
+    // URL: NEXT_PUBLIC_SEARCH_SERVICE_URL=https://api.benalsam.com/api/v1
+    // Endpoint: /search/listings
+    const searchEndpoint = '/search/listings';
     const response = await fetch(`${SEARCH_SERVICE_URL}${searchEndpoint}`, {
       method: 'POST',
       headers: {
@@ -264,13 +254,9 @@ const searchListingsWithSupabase = async (
  */
 export const checkElasticsearchHealth = async (): Promise<boolean> => {
   try {
-    // VPS mode (production): URL already contains /api/v1/search, so use '/health'
-    // Local development with proxy: Still need /api/v1/health
-    // True local mode: Need /api/v1/health
-    
-    // Local development detection
-    const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-    const healthEndpoint = (useVpsServices && !isLocalDevelopment) ? '/health' : '/api/v1/health';
+    // URL: NEXT_PUBLIC_SEARCH_SERVICE_URL=https://api.benalsam.com/api/v1
+    // Endpoint: /search/health
+    const healthEndpoint = '/search/health';
     const response = await fetch(`${SEARCH_SERVICE_URL}${healthEndpoint}`);
     const data = await response.json();
     return data.status === 'healthy';
@@ -285,13 +271,9 @@ export const checkElasticsearchHealth = async (): Promise<boolean> => {
  */
 export const fetchListingByIdFromES = async (listingId: string): Promise<Listing | null> => {
   try {
-    // VPS mode (production): URL already contains /api/v1/elasticsearch, so use '/listings/{id}'
-    // Local development with proxy: Still need full path /api/v1/search/listings/{id}
-    // True local mode: Need full path /api/v1/search/listings/{id}
-    
-    // Local development detection
-    const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-    const listingEndpoint = (useVpsServices && !isLocalDevelopment) ? `/listings/${listingId}` : `/api/v1/search/listings/${listingId}`;
+    // URL: NEXT_PUBLIC_ELASTICSEARCH_PUBLIC_URL=https://api.benalsam.com/api/v1
+    // Endpoint: /search/listings/{id}
+    const listingEndpoint = `/search/listings/${listingId}`;
     const res = await fetch(`${ELASTICSEARCH_PUBLIC_URL}${listingEndpoint}`, {
       // Suppress 404 errors in console (normal for new listings not yet indexed)
       signal: AbortSignal.timeout(5000)

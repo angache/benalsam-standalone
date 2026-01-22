@@ -79,7 +79,7 @@ export const useCategoryCounts = () => {
         success: boolean
         data?: CategoryCounts
         counts?: CategoryCounts
-      }>('/api/v1/categories/counts')
+      }>('/categories/counts')
       
       if (response.counts) return response.counts
       if (response.data) return response.data

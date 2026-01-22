@@ -50,7 +50,8 @@ app.use(express.urlencoded({ extended: true }));
 securityMiddleware.getAllMiddleware().forEach(mw => app.use(mw));
 
 // Routes
-app.use('/api/v1/listings', listingsRouter);
+// Listing creation via Upload Service (uses /api/v1/upload/listings/*)
+app.use('/api/v1/upload/listings', listingsRouter);
 app.use('/api/v1/upload', uploadRouter);
 app.use('/api/v1/metrics', metricsRoutes);
 app.use('/api/v1/health', healthRoutes);

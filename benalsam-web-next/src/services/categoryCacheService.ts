@@ -31,7 +31,7 @@ class CategoryCacheService {
       const versionStart = Date.now()
       const versionChanged = await checkCategoriesVersion()
       const versionTime = Date.now() - versionStart
-      
+
       logger.debug('[CategoryCache] Version check completed', {
         versionTime: `${versionTime}ms`,
         versionChanged

@@ -462,7 +462,9 @@ async function pollListingJobStatus(
   const pollInterval = 5000; // 5 seconds
   
   // Try Listing Service first (new system), fallback to Upload Service (old system)
-  const LISTING_SERVICE_URL = process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || 'http://localhost:3008/api/v1';
+  const LISTING_SERVICE_URL = process.env.NEXT_PUBLIC_USE_CORS_PROXY === 'true'
+    ? `http://127.0.0.1:7242`
+    : (process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || 'http://localhost:3008/api/v1');
   
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {

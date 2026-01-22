@@ -2,14 +2,8 @@ import { categoriesServiceClient } from '@/lib/apiClient'
 import { categoryCacheService } from './categoryCacheService'
 import { logger } from '@/utils/production-logger'
 
-// VPS mode flag - when true, service URLs already contain the full path
-const useVpsServices = process.env.NEXT_PUBLIC_USE_VPS_SERVICES === 'true'
-
-// #region agent log
-if (process.env.NODE_ENV !== 'production') {
-  fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:6',message:'useVpsServices flag check',data:{useVpsServices, envValue: process.env.NEXT_PUBLIC_USE_VPS_SERVICES},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
-}
-// #endregion
+// Base URL: NEXT_PUBLIC_CATEGORIES_SERVICE_URL=https://api.benalsam.com/api/v1
+// Tüm endpoint'ler /categories ile başlamalı
 
 export interface CategoryAttribute {
   id: number
@@ -53,49 +47,12 @@ class CategoryService {
    * Get all categories in a flat list (with cache)
    */
   async getCategories(): Promise<Category[]> {
-    // #region agent log
-    if (process.env.NODE_ENV !== 'production') {
-      fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:49',message:'getCategories called',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
-    }
-    // #endregion
-
     return categoryCacheService.getCategories(async () => {
-      // VPS mode (production): Service URL already includes base path, so use '/api/v1/categories'
-      // Local development with proxy: Also need full path '/api/v1/categories'
-      // True local mode: Need full path /api/v1/categories
-      
-      // Local development detection
-      const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-      const endpoint = (useVpsServices && !isLocalDevelopment) ? '/api/v1/categories' : '/api/v1/categories'
-
-      // #region agent log
-      if (process.env.NODE_ENV !== 'production') {
-        fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:52',message:'endpoint construction',data:{endpoint, useVpsServices},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
-      }
-      // #endregion
-
+      const endpoint = '/categories'
       try {
-        // #region agent log
-        if (process.env.NODE_ENV !== 'production') {
-          fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:55',message:'API call starting',data:{endpoint},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
-        }
-        // #endregion
-
         const response = await categoriesServiceClient.get<{ success: boolean; data: Category[] }>(endpoint)
-
-        // #region agent log
-        if (process.env.NODE_ENV !== 'production') {
-          fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:58',message:'API call success',data:{responseStatus: response?.status, hasData: !!response?.data, dataLength: response?.data?.length},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
-        }
-        // #endregion
-
         return response.data || []
       } catch (error) {
-        // #region agent log
-        if (process.env.NODE_ENV !== 'production') {
-          fetch('http://127.0.0.1:7242/ingest/51cb1d3f-6077-4466-a5e9-831f71f53a28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'categoryService.ts:63',message:'API call failed',data:{error: error?.message, endpoint},timestamp:Date.now(),sessionId:'debug-session',runId:'initial'})}).catch(()=>{});
-        }
-        // #endregion
         throw error
       }
     })
@@ -106,9 +63,7 @@ class CategoryService {
    */
   async getCategoryTree(): Promise<CategoryTree[]> {
     try {
-      // Local development detection
-      const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-      const endpoint = (useVpsServices && !isLocalDevelopment) ? '/api/v1/categories/tree' : '/api/v1/categories/tree'
+      const endpoint = '/categories/tree'
       const response = await categoriesServiceClient.get<{ data: CategoryTree[] }>(endpoint)
       return response.data || []
     } catch (error) {
@@ -122,9 +77,7 @@ class CategoryService {
    */
   async getCategoryById(id: string): Promise<Category | null> {
     try {
-      // Local development detection
-      const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-      const endpoint = (useVpsServices && !isLocalDevelopment) ? `/api/v1/categories/${id}` : `/api/v1/categories/${id}`
+      const endpoint = `/categories/${id}`
       const response = await categoriesServiceClient.get<{ data: Category }>(endpoint)
       return response.data
     } catch (error) {
@@ -138,9 +91,7 @@ class CategoryService {
    */
   async getCategoryBySlug(slug: string): Promise<Category | null> {
     try {
-      // Local development detection
-      const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-      const endpoint = (useVpsServices && !isLocalDevelopment) ? `/api/v1/categories/slug/${slug}` : `/api/v1/categories/slug/${slug}`
+      const endpoint = `/categories/slug/${slug}`
       const response = await categoriesServiceClient.get<{ data: Category }>(endpoint)
       return response.data
     } catch (error) {
@@ -177,9 +128,7 @@ class CategoryService {
    */
   async searchCategories(query: string): Promise<Category[]> {
     try {
-      // Local development detection
-      const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-      const endpoint = (useVpsServices && !isLocalDevelopment) ? '/api/v1/categories/search' : '/api/v1/categories/search'
+      const endpoint = '/categories/search'
       const response = await categoriesServiceClient.get<{ data: Category[] }>(endpoint, {
         params: { q: query },
       })
@@ -195,9 +144,7 @@ class CategoryService {
    */
   async getCategoryChildren(parentId: string): Promise<Category[]> {
     try {
-      // Local development detection
-      const isLocalDevelopment = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-      const endpoint = (useVpsServices && !isLocalDevelopment) ? `/api/v1/categories/${parentId}/children` : `/api/v1/categories/${parentId}/children`
+      const endpoint = `/categories/${parentId}/children`
       const response = await categoriesServiceClient.get<{ data: Category[] }>(endpoint)
       return response.data || []
     } catch (error) {

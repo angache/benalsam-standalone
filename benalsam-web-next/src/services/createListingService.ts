@@ -9,7 +9,8 @@ import type { Category } from './categoryService'
 import type { Listing } from '@/types'
 import type { ImageFile } from '@/types/listing'
 
-const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1'
+// Upload service URL - listing creation endpoints are under /api/v1/upload/listings
+const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1/upload'
 
 // EXACT COPY from old system - getCategoryIds function
 const getCategoryIds = async (categoryString: string): Promise<{ category_id: number | null, category_path: number[] | null }> => {
@@ -266,7 +267,9 @@ async function pollListingJobStatus(
   const pollInterval = 5000 // 5 seconds
   
   // Try Listing Service first (new system), fallback to Upload Service (old system)
-  const LISTING_SERVICE_URL = process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || 'http://localhost:3008/api/v1'
+  const LISTING_SERVICE_URL = process.env.NEXT_PUBLIC_USE_CORS_PROXY === 'true'
+    ? `http://127.0.0.1:7242`
+    : (process.env.NEXT_PUBLIC_LISTING_SERVICE_URL || 'http://localhost:3008/api/v1')
   
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
