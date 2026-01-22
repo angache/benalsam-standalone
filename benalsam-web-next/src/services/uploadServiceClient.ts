@@ -6,7 +6,7 @@ class UploadServiceClient {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1';
+    this.baseUrl = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1/upload';
     logger.debug('[UploadServiceClient] Upload Service URL', { baseUrl: this.baseUrl });
   }
 

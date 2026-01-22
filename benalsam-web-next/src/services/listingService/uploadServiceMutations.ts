@@ -17,7 +17,7 @@ import dynamicCategoryService from '../dynamicCategoryService';
 import { logger } from '@/utils/production-logger';
 import type { Category } from '../categoryService';
 
-const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1';
+const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1/upload';
 
 // Kategori path'ini ID'lere çevir
 const getCategoryIds = async (categoryString: string): Promise<{ category_id: number | null, category_path: number[] | null }> => {

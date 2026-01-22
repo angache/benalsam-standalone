@@ -5,7 +5,7 @@
 
 import { logger } from '@/utils/production-logger';
 
-const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1'
+const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1/upload'
 
 interface UploadedImage {
   id: string

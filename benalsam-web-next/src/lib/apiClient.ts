@@ -275,7 +275,7 @@ export const listingServiceClient = new ApiClient({
 })
 
 export const uploadServiceClient = new ApiClient({
-  baseURL: withCorsProxy(process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1'),
+  baseURL: withCorsProxy(process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1/upload'),
 })
 
 export default ApiClient

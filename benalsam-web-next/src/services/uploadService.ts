@@ -46,7 +46,7 @@ interface FileLike {
 
 const UPLOAD_SERVICE_URL = process.env.NEXT_PUBLIC_USE_CORS_PROXY === 'true'
   ? `http://127.0.0.1:7242`
-  : (process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1');
+  : (process.env.NEXT_PUBLIC_UPLOAD_SERVICE_URL || 'http://localhost:3007/api/v1/upload');
 
 export class UploadService {
   private static instance: UploadService;
