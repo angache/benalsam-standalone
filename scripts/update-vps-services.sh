@@ -1,22 +1,23 @@
 #!/bin/bash
 
 # VPS Services Update Script
-# Updates all services to use benalsam-shared-types@1.1.6
+# Updates all services to use benalsam-shared-types@1.1.8
 
 SERVICES=(
-    "benalsam-search-service"
+    "benalsam-admin-backend"
     "benalsam-categories-service"
+    "benalsam-search-service"
     "benalsam-upload-service"
     "benalsam-listing-service"
-    "benalsam-elasticsearch-service"
     "benalsam-cache-service"
     "benalsam-backup-service"
-    "benalsam-admin-backend"
+    "benalsam-elasticsearch-service"
+    "benalsam-realtime-service"
 )
 
 echo "================================="
 echo "VPS SERVICES UPDATE SCRIPT"
-echo "benalsam-shared-types@1.1.6"
+echo "benalsam-shared-types@1.1.8"
 echo "================================="
 
 for service in "${SERVICES[@]}"; do
@@ -36,8 +37,8 @@ for service in "${SERVICES[@]}"; do
     }
 
     # Update shared types
-    echo "📦 Installing benalsam-shared-types@1.1.6..."
-    if npm install benalsam-shared-types@^1.1.6; then
+    echo "📦 Installing benalsam-shared-types@1.1.8..."
+    if npm install benalsam-shared-types@^1.1.8; then
         echo "✅ $service updated successfully"
 
         # Check if service is running with PM2
